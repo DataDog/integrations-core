@@ -5,7 +5,7 @@ import re
 
 import click
 
-from ...utils import get_valid_checks, read_setup_file
+from ...utils import get_valid_checks, read_setup_file, normalize_package_name
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
@@ -32,14 +32,14 @@ def package():
             match = re.search("name=['\"](.*)['\"]", line)
             if match:
                 group = match.group(1)
-                # Its ok if the check name uses either underscores or dashes, so lets only validate one
-                group = group.replace("_", "-")
-                check_name = check_name.replace("_", "-")
-
-                if group != f"datadog-{check_name}":
+                # Following PEP 503, lets normalize the groups and validate those
+                # https://www.python.org/dev/peps/pep-0503/#normalized-names
+                group = normalize_package_name(group)
+                normalized_package_name = normalize_package_name(f"datadog-{check_name}")
+                if group != normalized_package_name:
                     file_failed = True
                     display_queue.append(
-                        (echo_failure, f"    The name in setup.py: {group} must be: `datadog-{check_name}`")
+                        (echo_failure, f"    The name in setup.py: {group} must be: `{normalized_package_name}`")
                     )
 
         if file_failed:
