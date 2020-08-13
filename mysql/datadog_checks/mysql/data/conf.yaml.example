@@ -25,14 +25,14 @@ init_config:
 #
 instances:
 
-    ## @param host - string - optional - default: 
+    ## @param host - string - optional
     ## MySQL host to connect to.
     ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
     ## provide a value for the sock key (below).
     #
   - host: localhost
 
-    ## @param user - string - optional - default: 
+    ## @param user - string - optional
     ## Username used to connect to MySQL.
     #
     user: datadog

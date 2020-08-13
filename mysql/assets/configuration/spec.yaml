@@ -33,7 +33,7 @@ files:
             value:
               type: string
               example: localhost
-              default: ''
+              default: null
 
           - name: user
             description: |
@@ -42,7 +42,7 @@ files:
             value:
               type: string
               example: datadog
-              default: ''
+              default: null
 
           - name: pass
             description: |
