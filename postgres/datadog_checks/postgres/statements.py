@@ -200,7 +200,11 @@ class PgStatementsMixin(object):
             for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
                 if column not in row:
                     continue
-                self.log.debug("AgentCheck.count(%s, %s, tags=%s)", metric_name, row[column], tags)
+                value = row[column]
+                if column == 'total_time':
+                    # convert milliseconds to nanoseconds
+                    value = value * 1000000
+                self.log.debug("AgentCheck.count(%s, %s, tags=%s)", metric_name, value, tags)
                 self.count(metric_name, row[column], tags=tags)
 
     def _get_new_pg_stat_activity(self, instance_tags=None):
