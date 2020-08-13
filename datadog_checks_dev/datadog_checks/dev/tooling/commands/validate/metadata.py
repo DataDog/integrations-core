@@ -19,6 +19,29 @@ VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}
 
+EXCLUDE_INTEGRATIONS = [
+    'disk',
+    'go-expvar',  # This has a special case externally
+    'go-metro',
+    'hdfs_datanode',
+    'hdfs_namenode',
+    'http',
+    'kafka_consumer',
+    'kubelet',
+    'kubernetes',
+    'kubernetes_api_server_metrics',
+    'kubernetes_state',
+    'mesos_master',
+    'mesos_slave',
+    'network',
+    'ntp',
+    'process',
+    'riak_cs',
+    'system_core',
+    'system_swap',
+    'tcp',
+]
+
 # To easily derive these again in future, copy the contents of `integration/system/units_catalog.csv` then run:
 #
 # pyperclip.copy('\n'.join("    '{}',".format(line.split(',')[2]) for line in pyperclip.paste().splitlines()))
@@ -231,6 +254,8 @@ def metadata(check, check_duplicates, show_warnings):
         except KeyError:
             metric_prefix = None
 
+        display_name = manifest['display_name']
+
         metadata_file = get_metadata_file(current_check)
 
         # To make logging less verbose, common errors are counted for current check
@@ -307,6 +332,15 @@ def metadata(check, check_duplicates, show_warnings):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
 
+            # integration header
+            integration = row['integration'].lower()
+            normalized_integration = normalize_display_name(display_name)
+            if integration != normalized_integration and normalized_integration not in EXCLUDE_INTEGRATIONS:
+                errors = True
+                echo_failure(
+                    f"{current_check}:{line} integration: `{row['integration']}` should be: {normalized_integration}"
+                )
+
             # orientation header
             if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
                 errors = True
@@ -361,3 +395,10 @@ def metadata(check, check_duplicates, show_warnings):
         abort()
 
     echo_success('Validated!')
+
+
+def normalize_display_name(display_name):
+    normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+    normalized_integration = re.sub("_+", "_", normalized_integration)
+    normalized_integration = normalized_integration.strip("_")
+    return normalized_integration.lower()
