@@ -46,7 +46,7 @@ MOCKED_E2E_HOSTS = ('namenode', 'datanode', 'resourcemanager', 'nodemanager', 'h
 
 def setup_mapreduce():
     # Run a job in order to get metrics from the environment
-    outputdir = f'output{random.randrange(1, 1000000)}'
+    outputdir = 'output{}'.format(random.randrange(1, 1000000))
     command = (
         r'bash -c "hadoop fs -mkdir -p input ; '
         'hdfs dfs -put -f $(find /etc/hadoop/ -type f) input && '
