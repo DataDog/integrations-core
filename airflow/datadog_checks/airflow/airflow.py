@@ -8,6 +8,8 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 AIRFLOW_STATUS_OK = "OK"
 
 
+
+
 class AirflowCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AirflowCheck, self).__init__(
