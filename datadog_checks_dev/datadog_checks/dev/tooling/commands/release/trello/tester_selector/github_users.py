@@ -27,16 +27,17 @@ class GithubUsers:
     Store a collection of Github users
     """
 
-    def __init__(self, github: Github, app_dir: str, cache_expiration: datetime):
+    def __init__(self, github: Github, app_dir: str, cache_expiration: datetime, teams: List[str]):
         self.__github = github
         # Use a cache to avoid API Rate Limits
         self.__user_cache = Cache(app_dir, 'github_user', cache_expiration)
+        self.__teams = teams
 
-    def get_users(self, teams: List[str]) -> List[GithubUser]:
+    def get_users(self) -> List[GithubUser]:
         github_users = cast(Dict[str, Dict[str, object]], self.__user_cache.get_value())
         if not github_users:
             github_users = {}
-        for team in teams:
+        for team in self.__teams:
             echo_info(f'Get team members for {team}')
             for member in self.__github.get_team_members(team):
                 login = member['login']

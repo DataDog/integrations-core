@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
+from datetime import datetime, timedelta
 from typing import List, Optional, Sequence, Set, Tuple
 
 import click
@@ -11,11 +12,13 @@ from .....subprocess import SubprocessError, run_command
 from .....utils import basepath, chdir, get_next
 from ....config import APP_DIR
 from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
-from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
+from ....github import Github, get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ....trello import TrelloClient
 from ....utils import format_commit_id
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from .prs_included_in_agent_rcs import PRsIncludedInAgentRc
 from .rc_build_cards_updater import RCBuildCardsUpdater
+from .tester_selector.github_users import GithubUsers
 from .tester_selector.tester_selector import TesterSelector, TrelloUser, create_tester_selector
 
 
@@ -31,6 +34,7 @@ def create_trello_card(
     dry_run: bool,
     pr_author: str,
     config: dict,
+    prs_included_in_agent_rc: PRsIncludedInAgentRc,
 ) -> None:
     labels = ', '.join(f'`{label}`' for label in sorted(pr_labels))
     body = f'''\
@@ -77,6 +81,7 @@ Labels: {labels}
                 echo_success(f'Created card for team {team}: ', nl=False)
                 echo_info(response.json().get('url'))
                 break
+    prs_included_in_agent_rc.add(pr_author, pr_url)
 
 
 def _select_trello_tester(
@@ -277,7 +282,13 @@ def testable(
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
     github_teams = trello.label_github_team_map.values()
-    testerSelector = create_tester_selector(trello, github_teams, user_config, APP_DIR)
+    now = datetime.utcnow()
+    user_cache_expiration = now + timedelta(days=-7)
+    github = Github(user_config, 5, 'datadog-agent', 'DataDog')
+    github_users = GithubUsers(github, APP_DIR, user_cache_expiration, github_teams)
+    testerSelector = create_tester_selector(trello, github_users, github, APP_DIR, user_cache_expiration)
+    prs_included_in_agent_rc = PRsIncludedInAgentRc(github_users, base_ref)
+
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:
@@ -373,6 +384,7 @@ def testable(
                 dry_run,
                 pr_author,
                 user_config,
+                prs_included_in_agent_rc,
             )
             continue
 
@@ -444,6 +456,7 @@ def testable(
                     dry_run,
                     pr_author,
                     user_config,
+                    prs_included_in_agent_rc,
                 )
 
             finished = True
@@ -452,6 +465,8 @@ def testable(
 
     if dry_run:
         show_card_assigments(testerSelector)
+    prs_included_in_agent_rc.dump_prs_list('prs_included_in_agent_rc.txt')
+    prs_included_in_agent_rc.dump_slack_message('prs_included_in_agent_rc_slack.txt')
 
 
 def show_card_assigments(testerSelector: TesterSelector):

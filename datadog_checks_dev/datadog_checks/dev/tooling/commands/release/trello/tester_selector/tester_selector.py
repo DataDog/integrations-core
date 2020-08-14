@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from .....github import Github
 from .....trello import TrelloClient
@@ -14,16 +14,14 @@ from .tester_selector_team import TesterSelectorTeam
 from .trello_users import TrelloUser, TrelloUsers
 
 
-def create_tester_selector(trello: TrelloClient, github_teams: List[str], user_config, app_dir: str):
-    github = Github(user_config, 5, 'datadog-agent', 'DataDog')
-    now = datetime.utcnow()
-    user_cache_expiration = now + timedelta(days=-7)
+def create_tester_selector(
+    trello: TrelloClient, github_users: GithubUsers, github: Github, app_dir: str, user_cache_expiration: datetime
+):
     trello_users = TrelloUsers(trello, app_dir, user_cache_expiration)
-    github_users = GithubUsers(github, app_dir, user_cache_expiration)
     userMatcher = GithubTrelloUserMatcher(trello_users)
-
+    now = datetime.utcnow()
     inactivity_date = now + timedelta(days=-(6 * 7))  # Duration of the release
-    return TesterSelector(github_teams, github_users, userMatcher, github, inactivity_date)
+    return TesterSelector(github_users, userMatcher, github, inactivity_date)
 
 
 class TesterSelector:
@@ -35,18 +33,13 @@ class TesterSelector:
     """
 
     def __init__(
-        self,
-        team_names: List[str],
-        github_users: GithubUsers,
-        matcher: GithubTrelloUserMatcher,
-        github: Github,
-        inactivity_date: datetime,
+        self, github_users: GithubUsers, matcher: GithubTrelloUserMatcher, github: Github, inactivity_date: datetime,
     ):
 
         self.__teams: Dict[str, TesterSelectorTeam] = {}
         self.__trello_user_from_github_login: Dict[str, TrelloUser] = {}
 
-        for user in github_users.get_users(team_names):
+        for user in github_users.get_users():
             last_activity_date = self.__get_last_user_activity(user)
             login = user.login
             if last_activity_date and last_activity_date > inactivity_date:
