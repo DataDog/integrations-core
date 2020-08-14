@@ -1,11 +1,7 @@
 name: Changelog label check
 
 on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - .in-toto/*.link
+  - pull_request
 
 jobs:
   build:
