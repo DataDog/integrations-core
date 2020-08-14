@@ -7,10 +7,10 @@ try:
     event_file = open(os.environ['GITHUB_EVENT_PATH'])
     event = json.load(event_file)
 
-    pr_labels = event['pull_requests']['labels']
+    pr_labels = event['pull_request']['labels']
 
     changelog_labels = list(filter(lambda label: label['name'].startswith(r'changelog/'), pr_labels))
-    print("Current changelog labels: {}".format(changelog_labels))
+    print("Current changelog label(s): {}".format(changelog_labels))
 
     if len(changelog_labels) == 0:
         raise Exception('There is no changelog label.')
