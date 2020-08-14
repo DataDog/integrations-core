@@ -461,5 +461,5 @@ def show_card_assigments(testerSelector: TesterSelector):
     for team, v in stat.items():
         echo_info(team)
         for user, prs in v.items():
-            prs_str = ".".join([str(pr) for pr in prs])
+            prs_str = ", ".join([str(pr) for pr in prs])
             echo_info(f"\t- {user}: {prs_str}")
