@@ -14,6 +14,9 @@ The CoreDNS check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
@@ -38,6 +41,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "coredns", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
