@@ -19,4 +19,4 @@ jobs:
         python-version: '3.8'
       
     - name: Check changelog label
-      run: python .github/workflows/changelog-label-check.py
+      run: python .github/workflows/release-hash-check.py
