@@ -1,15 +1,24 @@
-from github import Github
+import json
 import os
 import re
 
 
-repo = Github(os.environ.get('GITHUB_TOKEN')).get_repo(os.environ.get('GITHUB_REPOSITORY'))
-pr_number = int(re.search('refs/pull/([0-9]+)/merge', os.environ.get('GITHUB_REF')).group(1))
-pr_labels = repo.get_pull(pr_number).get_labels()
+try:
+    event_file = open(os.environ['GITHUB_EVENT_PATH'])
+    event = json.load(event_file)
 
-changelog_labels = list(filter(lambda label: label.name.startswith('changelog'), pr_labels))
+    pr_labels = event['pull_requests']['labels']
 
-if len(changelog_labels) == 0:
-    raise Exception('There is no changelog label.')
-if len(changelog_labels) > 1:
-    raise Exception('There is more than one changelog label.')
+    changelog_labels = list(filter(lambda label: label['name'].startswith(r'changelog/'), pr_labels))
+    print("Current changelog labels: {}".format(changelog_labels))
+
+    if len(changelog_labels) == 0:
+        raise Exception('There is no changelog label.')
+    if len(changelog_labels) > 1:
+        raise Exception('There is more than one changelog label.')
+
+    print("Success! There is exactly one changelog label.")
+
+except Exception as e:
+    print("Exception when checking the labels")
+    raise e
