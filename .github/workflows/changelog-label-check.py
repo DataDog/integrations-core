@@ -3,8 +3,7 @@ import os
 import re
 
 
-try:
-    event_file = open(os.environ['GITHUB_EVENT_PATH'])
+with open(os.environ['GITHUB_EVENT_PATH']) as event_file:
     event = json.load(event_file)
 
     pr_labels = event['pull_request']['labels']
@@ -17,8 +16,4 @@ try:
     if len(changelog_labels) > 1:
         raise Exception('There is more than one changelog label.')
 
-    print("Success! There is exactly one changelog label.")
-
-except Exception as e:
-    print("Exception when checking the labels")
-    raise e
+    print("Success! There is exactly one changelog label: {}".format(changelog_labels[0]['name']))
