@@ -8,8 +8,27 @@ jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
-    - uses: DataDog/labeler@glob-all
+    - name: Add labels
+      uses: DataDog/labeler@glob-all
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         configuration-path: .github/workflows/config/labeler.yml
 
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+      
+    - name: Check changelog label
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      run: |
+        python -m pip install PyGithub
+        python .github/workflows/changelog-label-check.py
