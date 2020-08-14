@@ -12,11 +12,11 @@ While most integrations are either Python, JMX, or implemented in the Agent in G
 Here's an overview of what this integration entails:
 
 * A [Python check](https://github.com/DataDog/datadog-agent/blob/master/snmp), responsible for:
-    * Collecting metrics from a specific device IP.
+    * Collecting metrics from a specific device IP. Metrics typically come from [profiles](../../tutorials/snmp/profiles.md), but they can also be [specified explicitly](https://github.com/DataDog/integrations-core/blob/fd6df90135de14d06662e49d7696a42c08476a82/snmp/datadog_checks/snmp/data/conf.yaml.example#L344-L354).
     * Auto-discovering devices over a network. (Pending deprecation in favor of Agent auto-discovery.)
 * An [Agent service listener](https://github.com/DataDog/datadog-agent/blob/master/pkg/autodiscovery/listeners/snmp.go), responsible for auto-discovering devices over a network and forwarding discovered instances to the existing Agent check scheduling pipeline. Also known as "Agent SNMP auto-discovery".
 
-As a diagram:
+The diagram below shows how these components interact for a typical VM-based setup (single Agent on a host). For Datadog Cluster Agent (DCA) deployments, see [Cluster Agent Integration](#cluster-agent-integration).
 
 ![](/assets/images/snmp-architecture.png)
 
@@ -50,7 +50,13 @@ instances:
     # <Options...>
 ```
 
-Auto-discovery runs a loop in a separate thread that polls each IP in the `network_address` CIDR range for the device `sysObjectID`. If the `sysObjectID` matches one of the registered profiles, the device is added to a set of discovered instances, and will be checked in the next check run. On each check run, a check is run for each discovered device. This is performed in parallel using a thread pool.
+The main tasks performed by device auto-discovery are:
+
+* **Find new devices**: For each IP in the `network_address` CIDR range, the check queries the device `sysObjectID`. If the query succeeds and the `sysObjectID` matches one of the registered profiles, the device is added as a discovered instance. This logic is run at regular intervals in a separate thread.
+* **Cache devices**: To improve performance, discovered instances are cached on disk based on a hash of the instance. Since options from the `network_address` instance are copied into discovered instances, the cache is invalidated if the `network_address` changes.
+* **Check devices**: On each check run, the check runs a check on all discovered instances. This is done in parallel using a threadpool. The check waits for all sub-checks to finish.
+* **Handle failures**: Discovered instances that fail after a configured number of times are dropped. They may be rediscovered later.
+* **Submit discovery-related metrics**: the check submits the total number of discovered devices for a given `network_address` instance.
 
 #### Caveats
 
@@ -72,7 +78,7 @@ Agent auto-discovery uses [GoSNMP](https://github.com/soniah/gosnmp) to get the 
 
 Agent auto-discovery implements the same logic than the Python auto-discovery, but as a service listener in the Agent Go package.
 
-This approach leverages the existing scheduling logic, and makes it possible to use device auto-discovery in containerized environments.
+This approach leverages the existing Agent scheduling logic, and makes it possible to scale device auto-discovery using the Datadog Cluster Agent (see [Cluster Agent Integration](#cluster-agent-integration)).
 
 Pending official documentation, here is an example configuration:
 
@@ -95,8 +101,8 @@ snmp_listener:
         - 10.0.1.1
 ```
 
-### Cluster Agent Integration
+### Cluster Agent Support
 
 For Kubernetes environments, the [Cluster Agent](https://docs.datadoghq.com/agent/cluster_agent/) can be configured to use the Agent auto-discovery logic as a source of [Cluster checks](https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/).
 
-> TODO: example setup, affected files and repos, local testing tools, etc.
+> TODO: architecture diagram, example setup, affected files and repos, local testing tools, etc.
