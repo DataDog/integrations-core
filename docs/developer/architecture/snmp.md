@@ -62,7 +62,7 @@ The main tasks performed by device auto-discovery are:
 
 The approach described above is not ideal for several reasons:
 
-* The check code is harder to understand since the two distinct paths ("single device" vs "entire network") live in a single check.
+* The check code is harder to understand since the two distinct paths ("single device" vs "entire network") live in a single integration.
 * Each network instance manages several long-running threads that span well beyond the lifespan of a single check run.
 * Each network check pseudo-schedules other instances, which is normally the responsibility of the Agent.
 
