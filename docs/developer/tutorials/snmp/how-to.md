@@ -175,7 +175,11 @@ $ snmpwalk -v 2c -c public -ObentU 127.0.0.1:1161 1.3.6.1.2.1.1
 .1.3.6.1.2.1.1.9.1.4.10 = 9
 ```
 
-As you can see, all OIDs that the device has available in the `.1.3.6.1.2.1.1.*` sub-tree are returned. In particular, one can recognize `sysObjectID` (line 2), `sysUpTime` (line 3), and `sysName` (line 5).
+As you can see, all OIDs that the device has available in the `.1.3.6.1.2.1.1.*` sub-tree are returned. In particular, one can recognize:
+
+- `sysObjectID` (`.1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.8072.3.2.10`)
+- `sysUpTime` (`.1.3.6.1.2.1.1.3.0 = 4226041`)
+- `sysName` (`.1.3.6.1.2.1.1.5.0 = STRING: 41ba948911b9`).
 
 Here is another example that queries the entire contents of `ifTable` (the table in `IF-MIB` that contains information about network interfaces):
 
@@ -249,7 +253,7 @@ mib2dev.py --mib-module=<MIB> --start-oid=1.3.6.1.4.1.674.10892.1.400.20 --stop-
 
 As an alternative to [`.snmprec` files](./sim-format.md), it is possible to [use a walk as simulation data](http://snmplabs.com/snmpsim/documentation/building-simulation-data.html#using-snmpwalk-reporting). This is especially useful when debugging live devices, since you can export the device walk and use this real data locally.
 
-To do so, paste the output of a [walk query](#walk-query) into into a `.snmpwalk` file, and add this file to the test data directory. Then, pass the name of the walk file as the `community_string`. For more information, see [Test SNMP profiles locally](#test-snmp-profiles-locally).
+To do so, paste the output of a [walk query](#walk-query) into a `.snmpwalk` file, and add this file to the test data directory. Then, pass the name of the walk file as the `community_string`. For more information, see [Test SNMP profiles locally](#test-snmp-profiles-locally).
 
 ## Find where MIBs are installed on your machine
 
