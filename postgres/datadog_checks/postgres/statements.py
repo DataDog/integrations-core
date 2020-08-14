@@ -192,8 +192,8 @@ class PgStatementsMixin(object):
                 value = row[column]
                 if column == 'query':
                     # truncate to metrics tag limit
-                    obfuscated_query = obfuscated_query[:200]
-                    if self.config.escape_query_commas_hack and column == 'query':
+                    value = obfuscated_query[:200]
+                    if self.config.escape_query_commas_hack:
                         value = value.replace(', ', '，').replace(',', '，')
                 tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
 
