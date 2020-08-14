@@ -89,8 +89,11 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
         return rows
 
     limited = dict()
+    available_cols = set(rows[0].keys())
 
     for metric, (top_k, bottom_k) in metric_limits.items():
+        if metric not in available_cols:
+            continue
         # sort_key uses a secondary sort dimension so that if there are a lot of
         # the same values (like 0), then there will be more overlap in selected rows
         # over time
