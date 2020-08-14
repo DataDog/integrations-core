@@ -18,4 +18,5 @@ jobs:
       with:
         python-version: '3.8'
       
-    - run: python .github/workflows/changelog-label-check.py
+    - name: Check changelog label
+      run: python .github/workflows/changelog-label-check.py
