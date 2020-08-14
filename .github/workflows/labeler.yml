@@ -13,10 +13,3 @@ jobs:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         configuration-path: .github/workflows/config/labeler.yml
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-      
-    - name: Check changelog label
-      run: python .github/workflows/release-hash-check.py
