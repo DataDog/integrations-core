@@ -6,7 +6,14 @@ from collections import defaultdict
 
 import click
 
-from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
+from ...utils import (
+    complete_valid_checks,
+    get_metadata_file,
+    get_metric_sources,
+    load_manifest,
+    normalize_display_name,
+    read_metadata_rows,
+)
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
@@ -395,10 +402,3 @@ def metadata(check, check_duplicates, show_warnings):
         abort()
 
     echo_success('Validated!')
-
-
-def normalize_display_name(display_name):
-    normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
-    normalized_integration = re.sub("_+", "_", normalized_integration)
-    normalized_integration = normalized_integration.strip("_")
-    return normalized_integration.lower()
