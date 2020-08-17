@@ -24,7 +24,6 @@ VM_METRICS = {
     'datastore.totalWriteLatency.average' : "*",
     'datastore.maxTotalLatency.latest' : None,
     'disk.usage.average' : None,
-    'disk.capacity.latest' : None,
     'disk.provisioned.latest' : None,
     'disk.used.latest' : None,
 #     'disk.numberReadAveraged.average' : "*",
