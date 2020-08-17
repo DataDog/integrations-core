@@ -120,6 +120,13 @@ def normalize_package_name(package_name):
     return re.sub(r'[-_. ]+', '_', package_name).lower()
 
 
+def normalize_display_name(display_name):
+    normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+    normalized_integration = re.sub("_+", "_", normalized_integration)
+    normalized_integration = normalized_integration.strip("_")
+    return normalized_integration.lower()
+
+
 def string_to_toml_type(s):
     if s.isdigit():
         s = int(s)

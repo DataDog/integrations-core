@@ -18,5 +18,5 @@ nginx_ingress.controller.requests,count,,request,,The total number of client req
 nginx_ingress.controller.cpu.time,count,,second,,Cpu usage in seconds,0,nginx-ingress-controller,cpu
 nginx_ingress.controller.mem.resident,gauge,,byte,,Resident memory size in bytes,0,nginx-ingress-controller,mem rss
 nginx_ingress.controller.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,nginx-ingress-controller,mem virt
-nginx_ingress.controller.request.duration.count,count,,,,The count of request processing time,0,nginx_ingress-controller,request duration count
-nginx_ingress.controller.request.duration.sum,gauge,,millisecond,,The sum of request processing time,0,nginx_ingress-controller,request duration sum
+nginx_ingress.controller.request.duration.count,count,,,,The count of request processing time,0,nginx-ingress-controller,request duration count
+nginx_ingress.controller.request.duration.sum,gauge,,millisecond,,The sum of request processing time,0,nginx-ingress-controller,request duration sum
