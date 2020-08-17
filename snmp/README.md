@@ -36,12 +36,12 @@ The easiest way to get started with the SNMP integration is to point it at the I
 
 For SNMPv2 devices:
 
-1. Configure an instance specifying i) the IP address of the device, ii) the `community` string of the device:
+1. Configure an instance specifying i) the IP address of the device, ii) the _community string_ of the device:
 
     ```yaml
     instances:
       - ip_address: "<IP_ADDRESS>"
-        community: "<COMMUNITY>"
+        community_string: "<COMMUNITY_STRING>"
     ```
 
 2. [Restart the Agent][31].
