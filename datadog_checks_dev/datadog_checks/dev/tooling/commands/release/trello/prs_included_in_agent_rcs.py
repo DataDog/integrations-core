@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from typing import Callable, Dict, List, Tuple
 
 from ...console import echo_info
@@ -24,20 +25,19 @@ class PRsIncludedInAgentRc:
         self.__author_url_collection.append((pr_author, pr_url))
 
     def dump_prs_list(self, filename):
-        self.__dump_to_file(
-            filename, None, lambda author, url, team: f'=SPLIT("{url}, {team}, {self.__base_ref}", ",")'
-        )
+        path = self.__dump_to_file(filename, None, lambda author, url, team: f'"{url}, {team}, {self.__base_ref}"')
         echo_info(
             f'\nThe list of PRs for `PRs included in Agent RCs`: {prs_included_in_agent_rcs_link}'
-            + f' are written to `{filename}`.'
+            + f' are written to `{path}`.'
         )
 
     def dump_slack_message(self, filename: str):
         title = f'Please update "PRs included in Agent RCs": {prs_included_in_agent_rcs_link}\n'
-        self.__dump_to_file(filename, title, lambda author, url, team: f' - {url}: {author} ({team})')
-        echo_info(f'\nThe Slack message for `PRs included in Agent RCs` is written to `{filename}`')
+        path = self.__dump_to_file(filename, title, lambda author, url, team: f' - {url}: {author} ({team})')
+        echo_info(f'\nThe Slack message for `PRs included in Agent RCs` is written to `{path}`')
 
-    def __dump_to_file(self, filename: str, title: str, callback: Callable[[str, str, str], str]):
+    def __dump_to_file(self, filename: str, title: str, callback: Callable[[str, str, str], str]) -> str:
+        path = os.path.abspath(filename)
         with open(filename, 'w') as f:
             if title:
                 f.write(f'{title}\n')
@@ -48,3 +48,4 @@ class PRsIncludedInAgentRc:
                     team = self.__team_by_user[author]
                 line = callback(author, url, team)
                 f.write(f'{line}\n')
+        return path
