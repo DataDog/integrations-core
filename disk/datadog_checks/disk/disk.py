@@ -20,12 +20,41 @@ if platform.system() == 'Windows':
     # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
     IGNORE_CASE = re.I
 
+    KNOWN_SPECIAL_FILE_SYSTEMS = set()
+
     def _base_device_name(device):
         return device.strip('\\').lower()
 
 
+elif platform.system() == "Linux":
+    IGNORE_CASE = 0
+
+    # Remember to update the configuration specification
+    # if modifying the list of special file systems.
+    KNOWN_SPECIAL_FILE_SYSTEMS = set(
+        [
+            'binfmt_msc',
+            'configfs',
+            'debugfs',
+            'devtmpfs',
+            'overlay',
+            'proc',
+            'rootfs',
+            'securityfs',
+            'sysfs',
+            'tmpfs',
+            'tracefs',
+        ]
+    )
+
+    def _base_device_name(device):
+        return os.path.basename(device)
+
+
 else:
     IGNORE_CASE = 0
+
+    KNOWN_SPECIAL_FILE_SYSTEMS = set()
 
     def _base_device_name(device):
         return os.path.basename(device)
@@ -47,6 +76,8 @@ class Disk(AgentCheck):
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
         self._file_system_whitelist = instance.get('file_system_whitelist', [])
         self._file_system_blacklist = instance.get('file_system_blacklist', [])
+        # FIXME (8.X): Exclude special file systems by default
+        self._exclude_special_file_systems = instance.get('exclude_special_file_systems', False)
         self._device_whitelist = instance.get('device_whitelist', [])
         self._device_blacklist = instance.get('device_blacklist', [])
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
@@ -88,7 +119,21 @@ class Disk(AgentCheck):
                 )
                 continue
             except Exception as e:
-                self.log.warning('Unable to get disk metrics for %s: %s', part.mountpoint, e)
+                if not self._exclude_special_file_systems and part.fstype in KNOWN_SPECIAL_FILE_SYSTEMS:
+                    self.log.warning(
+                        u'Unable to get disk metrics for %s with special file system %s: %s. '
+                        u'Enable `exclude_special_file_systems` to ignore common special file systems.',
+                        part.mountpoint,
+                        part.fstype,
+                        e,
+                    )
+                else:
+                    self.log.warning(
+                        u'Unable to get disk metrics for %s: %s. '
+                        u'You can exclude this mountpoint in the settings if it is invalid.',
+                        part.mountpoint,
+                        e,
+                    )
                 continue
 
             # Exclude disks with size less than min_disk_size
@@ -147,7 +192,6 @@ class Disk(AgentCheck):
         """
         Return True for disks we don't want or that match regex in the config file
         """
-        self.log.debug('_exclude_disk: %s, %s, %s', device, file_system, mount_point)
 
         if not device or device == 'none':
             device = None
@@ -189,6 +233,14 @@ class Disk(AgentCheck):
     def _file_system_blacklisted(self, file_system):
         if self._file_system_blacklist is None:
             return False
+
+        # Check if it is a known special file system
+        if (
+            self._exclude_special_file_systems
+            and file_system in KNOWN_SPECIAL_FILE_SYSTEMS
+            and not self._file_system_whitelisted(file_system)
+        ):
+            return True
 
         return not not self._file_system_blacklist.match(file_system)
 
@@ -245,7 +297,12 @@ class Disk(AgentCheck):
             )
             return metrics
         except Exception as e:
-            self.log.warning('Unable to get disk metrics for %s: %s', mountpoint, e)
+            self.log.warning(
+                u'Unable to get disk metrics for %s: %s. '
+                u'You can exclude this mountpoint in the settings if it is invalid.',
+                mountpoint,
+                e,
+            )
             return metrics
 
         if inodes.f_files != 0:

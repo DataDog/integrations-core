@@ -44,12 +44,37 @@ instances:
     ## start matching from the beginning and therefore to match anywhere you
     ## must prepend `.*`. For exact matches append `$`.
     ##
+    ## Some common Linux special file systems can be excluded by enabling the
+    ## `exclude_special_file_systems` option.
+    ##
     ## When conflicts arise, this will override `file_system_whitelist`.
     #
     # file_system_blacklist:
     #   - tmpfs$
     #   - rootfs$
     #   - autofs$
+
+    ## @param exclude_special_file_systems - boolean - optional - default: False
+    ## Instruct the check to not collect from some common special file systems.
+    ## Works on Linux only.
+    ##
+    ## The special file systems excluded with this option are:
+    ##   - binfmt_misc
+    ##   - configfs
+    ##   - debugfs
+    ##   - devtmpfs
+    ##   - overlay
+    ##   - proc
+    ##   - rootfs
+    ##   - securityfs
+    ##   - sysfs
+    ##   - tmpfs
+    ##   - tracefs
+    ##
+    ## You may cease to ignore a specific special file system by adding it to
+    ## the `file_system_whitelist`.
+    #
+    # exclude_special_file_systems: true
 
     ## @param device_whitelist - list of strings - optional
     ## Instruct the check to only collect from matching devices.
