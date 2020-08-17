@@ -1,7 +1,7 @@
 {
 	"name": "[process_check] Process {{ process.name }} is down on Host: {{ host.name }}",
 	"type": "service check",
-	"query": "\"process.up\".over(\"\").last(4).count_by_status()",
+	"query": "\"process.up\".over(\"*\").by(\"host\",\"process\").last(4).count_by_status()",
 	"message": "Process {{ process.name }} is down on Host: {{ host.name }}\n\nFollow these steps to troubleshoot:",
 	"tags": [
 		"integration:process_check"
