@@ -39,7 +39,7 @@ git clone https://github.com/DataDog/integrations-extras.git
 The [Developer Toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```bash
-pip install "datadog-checks-dev[cli]"
+pip3 install "datadog-checks-dev[cli]"
 ```
 
 If you chose to clone this repository to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file:

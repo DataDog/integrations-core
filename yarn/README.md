@@ -22,9 +22,12 @@ The YARN check is included in the [Datadog Agent][3] package, so you don't need 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
 
@@ -54,6 +57,9 @@ Follow the instructions below to configure this check for an Agent running on a 
     See the [example check configuration][5] for a comprehensive list and description of all check options.
 
 2. [Restart the Agent][6] to start sending YARN metrics to Datadog.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -92,6 +98,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
