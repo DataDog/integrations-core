@@ -440,8 +440,10 @@ def test_build_dd_event(_, __, ___, instance):
         "actor_type_name:actor_name",
         "actor_type_guid:actor_guid",
         "space_guid:space_guid",
+        "space_id:space_guid",
         "space_name:space_name",
         "org_guid:org_guid",
+        "org_id:org_guid",
         "org_name:org_name",
         "foo:bar",
     ]
@@ -478,8 +480,10 @@ def test_build_dd_event(_, __, ___, instance):
         "actor_type_name:actor_name",
         "actor_type_guid:actor_guid",
         "space_guid:none",
+        "space_id:none",
         "space_name:none",
         "org_guid:none",
+        "org_id:none",
         "org_name:none",
         "foo:bar",
     ]

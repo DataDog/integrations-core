@@ -405,15 +405,22 @@ class CloudFoundryApiCheck(AgentCheck):
         org_guid,
     ):
         # type: (str, str, int, str, str, str, str, str, str, str, str) -> Event
+        space_id = space_guid if space_guid else "none"
+        org_id = org_guid if org_guid else "none"
+        # we include both space_guid+space_id and org_guid+org_id; the *_guid are kept for
+        # backwards compatibility, the *_id are added to maintain consistency with
+        # https://github.com/DataDog/datadog-firehose-nozzle
         tags = [
             "event_type:{}".format(event_type),
             "{}_name:{}".format(target_type, target_name),
             "{}_guid:{}".format(target_type, target_guid),
             "{}_name:{}".format(actor_type, actor_name),
             "{}_guid:{}".format(actor_type, actor_guid),
-            "space_guid:{}".format(space_guid if space_guid else "none"),
+            "space_guid:{}".format(space_id),
+            "space_id:{}".format(space_id),
             "space_name:{}".format(self.get_space_name(space_guid) if space_guid else "none"),
-            "org_guid:{}".format(org_guid if org_guid else "none"),
+            "org_guid:{}".format(org_id),
+            "org_id:{}".format(org_id),
             "org_name:{}".format(self.get_org_name(org_guid) if org_guid else "none"),
         ] + self._tags
         dd_event = {
