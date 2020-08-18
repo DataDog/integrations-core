@@ -33,7 +33,7 @@ elif platform.system() == "Linux":
     # if modifying the list of special file systems.
     KNOWN_SPECIAL_FILE_SYSTEMS = set(
         [
-            'binfmt_msc',
+            'binfmt_misc',
             'configfs',
             'debugfs',
             'devtmpfs',
