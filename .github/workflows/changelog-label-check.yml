@@ -2,6 +2,8 @@ name: Changelog label check
 on:
   pull_request:
     types: [opened, labeled, unlabeled, synchronize]
+  repository_dispatch:
+    types: [labeled]
 
 jobs:
   check:
