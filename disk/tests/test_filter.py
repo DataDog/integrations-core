@@ -106,13 +106,12 @@ def test_file_system_whitelist_blacklist():
 
 @requires_linux
 def test_exclude_special_file_system():
-    instance = {'file_system_whitelist': ['ext[2-4]', 'tracefs$'], 'exclude_special_file_systems': True}
+    instance = {'exclude_special_file_systems': True}
     c = Disk('disk', {}, [instance])
 
     assert c.exclude_disk(MockPart(fstype='debugfs')) is True
     assert c.exclude_disk(MockPart(fstype='tempfs')) is True
     assert c.exclude_disk(MockPart(fstype='ext4')) is False
-    assert c.exclude_disk(MockPart(fstype='tracefs')) is False
 
 
 def test_device_whitelist():

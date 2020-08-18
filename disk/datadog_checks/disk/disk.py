@@ -234,15 +234,9 @@ class Disk(AgentCheck):
         if self._file_system_blacklist is None:
             return False
 
-        # Check if it is a known special file system
-        if (
-            self._exclude_special_file_systems
-            and file_system in KNOWN_SPECIAL_FILE_SYSTEMS
-            and not self._file_system_whitelisted(file_system)
-        ):
-            return True
-
-        return not not self._file_system_blacklist.match(file_system)
+        return (self._exclude_special_file_systems and file_system in KNOWN_SPECIAL_FILE_SYSTEMS) or bool(
+            self._file_system_blacklist.match(file_system)
+        )
 
     def _device_whitelisted(self, device):
         if not device or self._device_whitelist is None:

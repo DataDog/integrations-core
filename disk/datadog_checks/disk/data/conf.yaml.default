@@ -71,8 +71,9 @@ instances:
     ##   - tmpfs
     ##   - tracefs
     ##
-    ## You may cease to ignore a specific special file system by adding it to
-    ## the `file_system_whitelist`.
+    ## These are added to the `file_system_blacklist`.
+    ##
+    ## For more fine-grained control, use `file_system_blacklist` and `file_system_whitelist`.
     #
     # exclude_special_file_systems: true
 
