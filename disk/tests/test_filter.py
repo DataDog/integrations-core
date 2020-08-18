@@ -110,7 +110,7 @@ def test_exclude_special_file_system():
     c = Disk('disk', {}, [instance])
 
     assert c.exclude_disk(MockPart(fstype='debugfs')) is True
-    assert c.exclude_disk(MockPart(fstype='tempfs')) is True
+    assert c.exclude_disk(MockPart(fstype='tmpfs')) is True
     assert c.exclude_disk(MockPart(fstype='ext4')) is False
 
 
