@@ -3,13 +3,13 @@
 init_config:
 
     ## @param nodetool - string - required
-    ## command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
-    ## can be overwritten on an instance
+    ## The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
+    ## can be overwritten on an instance.
     ## Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
     ## access to the nodetool installation directory for the check to work.
-    ## The nodetool installation also sets some environment variables (e.g. `CASSANDRA_HOME` and `DSCINSTALLDIR`),
-    ## but sets them as variables only for the user doing the nodetool installation. Those environment variables should
-    ## be set as system-wide variables.
+    ## The nodetool installation also sets some environment variables (for example, `CASSANDRA_HOME`
+    ## and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
+    ## You should set those environment variables as system-wide variables.
     #
     nodetool: nodetool
 
@@ -36,26 +36,26 @@ instances:
     # host: localhost
 
     ## @param port - integer - optional - default: 7199
-    ## The port JMX is listening to for connections.
+    ## The port JMX listens to for connections.
     #
     # port: 7199
 
     ## @param username - string - optional
     ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
-    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra nodetool
+    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
     ## check can execute the `status` command
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
+    ## Password from the credentials needed to connect to the host. These are the credentials for the JMX server.
     ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
     ## check can execute the `status` command
     #
     # password: <PASSWORD>
 
     ## @param ssl - boolean - optional - default: false
-    ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to the JMX server.
+    ## Whether to use the --ssl parameter with nodetool to initiate a connection over SSL to the JMX server.
     #
     # ssl: false
 
