@@ -17,7 +17,12 @@ The ActiveMQ XML check is included in the [Datadog Agent][111] package, so you d
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit `activemq_xml.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][112] with your stats `url`. See the [sample activemq_xml.d/conf.yaml][113] for all available configuration options.
 
@@ -25,9 +30,15 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][117].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery with JMX][118] guide.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

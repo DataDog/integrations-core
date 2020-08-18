@@ -29,9 +29,12 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric Collection
 
@@ -78,6 +81,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
@@ -116,7 +122,7 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
     }
     ```
 
-1. Update the [Datadog Agent main configuration file][16] `datadog.yaml` by adding the following configs to ensure metrics are tagged correctly:
+2. Update the [Datadog Agent main configuration file][16] `datadog.yaml` by adding the following configs to ensure metrics are tagged correctly:
 
    ```yaml
    # dogstatsd_mapper_cache_size: 1000  # default to 1000
@@ -148,6 +154,9 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
    ```
 
 3. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

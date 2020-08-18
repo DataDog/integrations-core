@@ -80,9 +80,12 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 
@@ -152,6 +155,9 @@ instances:
     only_custom_queries: true
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
@@ -161,6 +167,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "user":"datadog", "password":"<PASSWORD>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
