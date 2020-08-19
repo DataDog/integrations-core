@@ -10,7 +10,7 @@ This check monitors [Kube_apiserver_metrics][1].
 
 The Kube_apiserver_metrics check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
 
-**Note**: A tile is not included in the Datadog application for the integration. Follow the configuration steps below to configure this integration.
+**Note**: A tile is not included in the Datadog application for this integration. Follow the configuration steps below to configure this integration.
 
 ### Configuration
 
