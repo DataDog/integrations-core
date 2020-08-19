@@ -42,9 +42,9 @@ files:
               start matching from the beginning and therefore to match anywhere you
               must prepend `.*`. For exact matches append `$`.
 
-              Some common Linux special file systems can be excluded by enabling the
-              `exclude_special_file_systems` option.
-              
+              Devices from pseudo or memory-based file systems can be excluded by disabling the
+              `include_all_devices` option.
+
               When conflicts arise, this will override `file_system_whitelist`.
             value:
               example:
@@ -54,31 +54,6 @@ files:
               type: array
               items:
                 type: string
-          - name: exclude_special_file_systems
-            description: |
-              Instruct the check to not collect from some common special file systems.
-              Works on Linux only.
-
-              The special file systems excluded with this option are:
-                - binfmt_misc
-                - configfs
-                - debugfs
-                - devtmpfs
-                - overlay
-                - proc
-                - rootfs
-                - securityfs
-                - sysfs
-                - tmpfs
-                - tracefs
-
-              These are added to the `file_system_blacklist`.
-
-              For more fine-grained control, use `file_system_blacklist` and `file_system_whitelist`.
-            value:
-              example: true
-              type: boolean
-              default: false
           - name: device_whitelist
             description: |
                 Instruct the check to only collect from matching devices.
@@ -138,6 +113,16 @@ files:
               type: array
               items:
                 type: string
+          - name: include_all_devices
+            description: |
+              Instruct the check to collect from all devices, including non-physical devices.
+              Set this to false to exclude pseudo, memory, duplicate or inaccessible file systems.
+
+              For more fine-grained control, use the inclusion and exclusion options.
+            value:
+              example: false
+              type: boolean
+              default: true
           - name: service_check_rw
             description: |
               Instruct the check to notify based on partition state.

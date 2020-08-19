@@ -20,41 +20,12 @@ if platform.system() == 'Windows':
     # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
     IGNORE_CASE = re.I
 
-    KNOWN_SPECIAL_FILE_SYSTEMS = set()
-
     def _base_device_name(device):
         return device.strip('\\').lower()
 
 
-elif platform.system() == "Linux":
-    IGNORE_CASE = 0
-
-    # Remember to update the configuration specification
-    # if modifying the list of special file systems.
-    KNOWN_SPECIAL_FILE_SYSTEMS = set(
-        [
-            'binfmt_misc',
-            'configfs',
-            'debugfs',
-            'devtmpfs',
-            'overlay',
-            'proc',
-            'rootfs',
-            'securityfs',
-            'sysfs',
-            'tmpfs',
-            'tracefs',
-        ]
-    )
-
-    def _base_device_name(device):
-        return os.path.basename(device)
-
-
 else:
     IGNORE_CASE = 0
-
-    KNOWN_SPECIAL_FILE_SYSTEMS = set()
 
     def _base_device_name(device):
         return os.path.basename(device)
@@ -77,7 +48,7 @@ class Disk(AgentCheck):
         self._file_system_whitelist = instance.get('file_system_whitelist', [])
         self._file_system_blacklist = instance.get('file_system_blacklist', [])
         # FIXME (8.X): Exclude special file systems by default
-        self._exclude_special_file_systems = instance.get('exclude_special_file_systems', False)
+        self._include_all_devices = is_affirmative(instance.get('include_all_devices', True))
         self._device_whitelist = instance.get('device_whitelist', [])
         self._device_blacklist = instance.get('device_blacklist', [])
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
@@ -102,7 +73,7 @@ class Disk(AgentCheck):
             self.devices_label = self._get_devices_label()
 
         self._valid_disks = {}
-        for part in psutil.disk_partitions(all=True):
+        for part in psutil.disk_partitions(all=self._include_all_devices):
             # we check all exclude conditions
             if self.exclude_disk(part):
                 continue
@@ -119,21 +90,12 @@ class Disk(AgentCheck):
                 )
                 continue
             except Exception as e:
-                if not self._exclude_special_file_systems and part.fstype in KNOWN_SPECIAL_FILE_SYSTEMS:
-                    self.log.warning(
-                        u'Unable to get disk metrics for %s with special file system %s: %s. '
-                        u'Enable `exclude_special_file_systems` to ignore common special file systems.',
-                        part.mountpoint,
-                        part.fstype,
-                        e,
-                    )
-                else:
-                    self.log.warning(
-                        u'Unable to get disk metrics for %s: %s. '
-                        u'You can exclude this mountpoint in the settings if it is invalid.',
-                        part.mountpoint,
-                        e,
-                    )
+                self.log.warning(
+                    u'Unable to get disk metrics for %s: %s. '
+                    u'You can exclude this mountpoint in the settings if it is invalid.',
+                    part.mountpoint,
+                    e,
+                )
                 continue
 
             # Exclude disks with size less than min_disk_size
@@ -234,9 +196,7 @@ class Disk(AgentCheck):
         if self._file_system_blacklist is None:
             return False
 
-        return (self._exclude_special_file_systems and file_system in KNOWN_SPECIAL_FILE_SYSTEMS) or bool(
-            self._file_system_blacklist.match(file_system)
-        )
+        return not not self._file_system_blacklist.match(file_system)
 
     def _device_whitelisted(self, device):
         if not device or self._device_whitelist is None:

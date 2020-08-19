@@ -7,7 +7,7 @@ from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.disk.disk import IGNORE_CASE, Disk
 
 from .mocks import MockPart
-from .utils import assert_regex_equal, requires_linux, requires_windows
+from .utils import assert_regex_equal, requires_windows
 
 
 def test_default_casing():
@@ -102,16 +102,6 @@ def test_file_system_whitelist_blacklist():
     assert c.exclude_disk(MockPart(fstype='ext3')) is False
     assert c.exclude_disk(MockPart(fstype='ext4')) is False
     assert c.exclude_disk(MockPart(fstype='NTFS')) is True
-
-
-@requires_linux
-def test_exclude_special_file_system():
-    instance = {'exclude_special_file_systems': True}
-    c = Disk('disk', {}, [instance])
-
-    assert c.exclude_disk(MockPart(fstype='debugfs')) is True
-    assert c.exclude_disk(MockPart(fstype='tmpfs')) is True
-    assert c.exclude_disk(MockPart(fstype='ext4')) is False
 
 
 def test_device_whitelist():
