@@ -48,7 +48,7 @@
       "id": 1,
       "definition": {
         "type": "image",
-        "url": "/static/images/saas_logos/bot/scylla@2x.svg",
+        "url": "/static/images/saas_logos/bot/scylla@2x.png",
         "sizing": "fit"
       },
       "layout": {
