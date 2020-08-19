@@ -7,7 +7,6 @@ with open(os.environ['GITHUB_EVENT_PATH']) as event_file:
     event = json.load(event_file)
 
     pr_labels = event['pull_request']['labels']
-
     changelog_labels = list(filter(lambda label: label['name'].startswith(r'changelog/'), pr_labels))
 
     labels_string = ', '.join([label['name'] for label in changelog_labels])
