@@ -8,6 +8,10 @@ jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: paul/test-checker
+
     - name: Add labels
       uses: DataDog/labeler@glob-all
       with:
