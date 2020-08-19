@@ -419,6 +419,7 @@ def test_network_latency_checks(aggregator):
         (
             "new config",
             {
+                'url': '',
                 'tls_cert': 'certfile',
                 'tls_private_key': 'keyfile',
                 'tls_ca_cert': 'file/path',
@@ -431,10 +432,15 @@ def test_network_latency_checks(aggregator):
                 'headers': {'X-Consul-Token': 'token', 'X-foo': 'bar'},
             },
         ),
-        ("default config", {}, {'cert': None, 'verify': True, 'headers': {'User-Agent': 'Datadog Agent/0.0.0'}}),
+        (
+            "default config",
+            {'url': ''},
+            {'cert': None, 'verify': True, 'headers': {'User-Agent': 'Datadog Agent/0.0.0'}},
+        ),
         (
             "legacy config",
             {
+                'url': '',
                 'client_cert_file': 'certfile',
                 'private_key_file': 'keyfile',
                 'ca_bundle_file': 'file/path',
