@@ -25,6 +25,7 @@ from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .metrics import ALLOWED_METRICS_FOR_MOR
+from .metrics import VM_STORAGE_METRICS
 
 from datadog import initialize,statsd
 
@@ -1230,10 +1231,16 @@ class VSphereCheck(AgentCheck):
             # - Double-quotes ("") to specify aggregated statistics
             # - fetch the instance from metadata to create the query accordingly
             metric_ids = []
+            vm_disk_metric_ids = []
             for counter_key , counter_val in counters.items():
                 counter_instance = counter_val.get('instance',[])
-                for instance_value in counter_instance:
-                    metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance_value))
+                counter_name = counter_key.get('name','')
+                if resource_type == vim.VirtualMachine and counter_name in VM_STORAGE_METRICS:
+                    for instance_value in counter_instance:
+                        vm_disk_metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance_value))
+                else:
+                    for instance_value in counter_instance:
+                        metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance_value))
 
             for batch in self.make_batch(mors, metric_ids, max_batch_size):
                 query_specs = []
@@ -1265,6 +1272,21 @@ class VSphereCheck(AgentCheck):
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
+                #create batch of queries for vm disk metrics
+                if resource_type == vim.VirtualMachine and vm_disk_metric_ids:
+                for batch in self.make_batch(mors, vm_disk_metric_ids, max_batch_size):
+                    vmdisk_query_specs = []
+                    for mor, metrics in batch.items():
+                        vmdisk_query_spec = vim.PerformanceManager.QuerySpec()
+                        vmdisk_query_spec.entity = mor
+                        vmdisk_query_spec.metricId = metrics
+                        vmdisk_query_spec.format = "normal"
+                        server_time = server_instance.CurrentTime()
+                        vmdisk_query_spec.startTime = server_time - timedelta(seconds=DATASTORE_TIME_INTERVAL)
+                        vmdisk_query_spec.endTime = server_time
+                        vmdisk_query_specs.append(vmdisk_query_spec)
+                    if vmdisk_query_specs:
+                        yield vmdisk_query_specs
 
     def collect_metrics(self, instance):
         """ Calls asynchronously _collect_metrics_atomic on all MORs, as the
