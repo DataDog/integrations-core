@@ -4,6 +4,7 @@
 
 import os
 from time import sleep
+from copy import deepcopy
 
 import pytest
 import requests
@@ -20,6 +21,8 @@ from .common import (
     HERE,
 )
 
+# Needed to mount volume for logging
+E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
 
 @pytest.fixture(scope="session")
 def dd_environment():
@@ -44,4 +47,4 @@ def dd_environment():
             requests.get(GITLAB_RUNNER_URL)
         sleep(2)
 
-        yield CONFIG
+        yield CONFIG, E2E_METADATA
