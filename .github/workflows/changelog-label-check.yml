@@ -1,7 +1,7 @@
 name: Changelog label check
 on:
   pull_request:
-    types: [opened, labeled, unlabeled, synchronize]
+    types: [labeled, unlabeled]
   repository_dispatch:
     types: [labeled]
 
