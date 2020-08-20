@@ -1,4 +1,5 @@
 cx-oracle==7.2.0
 jaydebeapi==1.2.3
-jpype1==0.7.1 ; python_version <= '2.7'  # 0.7.5 it's not py2 compatible but this specific version breaks in py3
+# 0.7.5 it's not py2 compatible but 0.7.1 version breaks in py3
+jpype1==0.7.1 ; python_version <= '2.7'
 jpype1==0.7.5 ; python_version > '3'
