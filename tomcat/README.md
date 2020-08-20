@@ -20,9 +20,12 @@ This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5] to collect Tomcat metrics and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][6] for all available configuration options.
 
@@ -190,9 +193,15 @@ _Available for Agent versions >6.0_
 
 5. [Restart the Agent][7].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery with JMX][2] guide.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

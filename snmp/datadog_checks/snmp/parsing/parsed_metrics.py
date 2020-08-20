@@ -5,11 +5,15 @@
 Containers from parsed metrics data.
 """
 
-from typing import Any, Dict, Iterator, List, Pattern, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Pattern, Union
+
+if TYPE_CHECKING:
+    # needed to avoid circular import
+    from .metrics import ColumnTag, IndexTag
 
 
 class ParsedSymbolMetric(object):
-    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar')
+    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar', 'options')
 
     def __init__(
         self,
@@ -17,41 +21,44 @@ class ParsedSymbolMetric(object):
         tags=None,  # type: List[str]
         forced_type=None,  # type: str
         enforce_scalar=True,  # type: bool
+        options=None,  # type: dict
     ):
         # type: (...) -> None
         self.name = name
         self.tags = tags or []
         self.forced_type = forced_type
         self.enforce_scalar = enforce_scalar
+        self.options = options or {}
 
 
 class ParsedTableMetric(object):
-    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type')
+    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type', 'options')
 
     def __init__(
         self,
         name,  # type: str
-        index_tags,  # type: List[Tuple[str, int]]
-        column_tags,  # type: List[Tuple[str, str]]
+        index_tags,  # type: List[IndexTag]
+        column_tags,  # type: List[ColumnTag]
         forced_type=None,  # type: str
+        options=None,  # type: dict
     ):
         # type: (...) -> None
         self.name = name
         self.index_tags = index_tags
         self.column_tags = column_tags
         self.forced_type = forced_type
+        self.options = options or {}
 
 
 ParsedMetric = Union[ParsedSymbolMetric, ParsedTableMetric]
 
 
 class ParsedSimpleMetricTag(object):
-    __slots__ = ('name', 'symbol')
+    __slots__ = ('name',)
 
-    def __init__(self, name, symbol):
-        # type: (str, str) -> None
+    def __init__(self, name):
+        # type: (str) -> None
         self.name = name
-        self.symbol = symbol
 
     def matched_tags(self, value):
         # type: (Any) -> Iterator[str]
@@ -61,10 +68,9 @@ class ParsedSimpleMetricTag(object):
 class ParsedMatchMetricTag(object):
     __slots__ = ('tags', 'symbol', 'pattern')
 
-    def __init__(self, tags, symbol, pattern):
-        # type: (Dict[str, str], str, Pattern) -> None
+    def __init__(self, tags, pattern):
+        # type: (Dict[str, str], Pattern) -> None
         self.tags = tags
-        self.symbol = symbol
         self.pattern = pattern
 
     def matched_tags(self, value):

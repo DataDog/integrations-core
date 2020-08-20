@@ -10,7 +10,7 @@ couchbase.ram.quota_total,gauge,,byte,,RAM quota,0,couchbase,ram quota
 couchbase.ram.used_by_data,gauge,,byte,,RAM used for data,0,couchbase,ram data used
 couchbase.by_bucket.avg_bg_wait_time,gauge,,microsecond,,Average background wait time,-1,couchbase,avg bg wait
 couchbase.by_bucket.avg_disk_commit_time,gauge,,second,,Average disk commit time,-1,couchbase,avg commit time
-couchbase.by_bucket.avg_disk_update_time,gauge,,microsecond,,Average disk update time ,-1,couch base,avg update time
+couchbase.by_bucket.avg_disk_update_time,gauge,,microsecond,,Average disk update time ,-1,couchbase,avg update time
 couchbase.by_bucket.bg_wait_total,gauge,,byte,,Bytes read,0,couchbase,read
 couchbase.by_bucket.bytes_read,gauge,,byte,,Bytes read,0,couchbase,read
 couchbase.by_bucket.bytes_written,gauge,,byte,,Bytes written,0,couchbase,written

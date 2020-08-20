@@ -17,6 +17,7 @@ BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance):
     """
@@ -28,8 +29,20 @@ def test_check_kafka(aggregator, kafka_instance):
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_kafka_metrics_limit(aggregator, kafka_instance):
+    """
+    Testing Kafka_consumer check.
+    """
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 1}, [kafka_instance])
+    kafka_consumer_check.check(kafka_instance)
+
+    assert len(aggregator._metrics) == 1
+
+
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, kafka_instance):
+def test_e2e(dd_agent_check, mock_hosts_e2e, kafka_instance):
     aggregator = dd_agent_check(kafka_instance)
 
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
@@ -48,6 +61,7 @@ def assert_check_kafka(aggregator, consumer_groups):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_consumer_config_error(caplog):
     instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'kafka_consumer_offsets': True, 'tags': ['optional:tag1']}
@@ -60,6 +74,7 @@ def test_consumer_config_error(caplog):
     assert 'monitor_unlisted_consumer_groups is False' in caplog.text
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_no_topics(aggregator, kafka_instance):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
@@ -72,6 +87,7 @@ def test_no_topics(aggregator, kafka_instance):
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_no_partitions(aggregator, kafka_instance):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}

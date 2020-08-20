@@ -29,6 +29,7 @@
     "dashboards": {
       "vsphere-overview": "assets/dashboards/vsphere_overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }

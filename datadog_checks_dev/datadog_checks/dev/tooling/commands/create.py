@@ -91,7 +91,11 @@ def display_path_tree(path_tree):
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
 def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
-    """Create scaffolding for a new integration."""
+    """
+        Create scaffolding for a new integration.
+
+        NAME: The display name of the integration that will appear in documentation.
+    """
 
     if name.islower():
         echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')

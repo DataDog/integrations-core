@@ -1,5 +1,14 @@
 # CHANGELOG - Squid
 
+## 1.7.1 / 2020-08-10
+
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 1.7.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix formatting of a log line. See [#6990](https://github.com/DataDog/integrations-core/pull/6990).
+
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

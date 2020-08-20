@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.7.0 / 2020-06-29
+
+* [Added] Refactor and remove legacy hack for Agent 5's build system. See [#6682](https://github.com/DataDog/integrations-core/pull/6682).
+
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

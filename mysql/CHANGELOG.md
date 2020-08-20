@@ -1,5 +1,24 @@
 # CHANGELOG - mysql
 
+## 2.0.1 / 2020-08-14
+
+* [Fixed] Update config spec default values. See [#7340](https://github.com/DataDog/integrations-core/pull/7340).
+
+## 2.0.0 / 2020-08-10
+
+* [Added] Send more useful metrics for wsrep flow control. See [#7316](https://github.com/DataDog/integrations-core/pull/7316). Thanks [sayap](https://github.com/sayap).
+* [Added] Add ability to specify which charset to use when connecting to mysql. See [#7216](https://github.com/DataDog/integrations-core/pull/7216).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Refactor connection, improve documentation. See [#7204](https://github.com/DataDog/integrations-core/pull/7204).
+* [Fixed] Extract version utils. See [#7198](https://github.com/DataDog/integrations-core/pull/7198).
+* [Fixed] Split config out. See [#7195](https://github.com/DataDog/integrations-core/pull/7195).
+* [Changed] Fix mysql metric for innodb row lock time. See [#7289](https://github.com/DataDog/integrations-core/pull/7289). Thanks [sayap](https://github.com/sayap).
+
+## 1.15.0 / 2020-06-29
+
+* [Added] Catch unicode error. See [#6947](https://github.com/DataDog/integrations-core/pull/6947).
+* [Fixed] Add config spec. See [#6908](https://github.com/DataDog/integrations-core/pull/6908).
+
 ## 1.14.0 / 2020-06-03
 
 * [Added] Add custom queries. See [#6776](https://github.com/DataDog/integrations-core/pull/6776).

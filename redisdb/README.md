@@ -12,9 +12,12 @@ The Redis check is included in the [Datadog Agent][2] package, so you don't need
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -29,9 +32,21 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## @param port - integer - required
        ## Enter the port of the host to connect to.
        port: 6379
+
+       ## @param username - string - optional
+       ## The username to use for the connection. Redis 6+ only.
+       #
+       # username: <USERNAME>
+
+       ## @param password - string - optional
+       ## The password to use for the connection.
+       #
+       # password: <PASSWORD>
    ```
 
-2. [Restart the Agent][5].
+2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, and `Cluster Viewer` permissions if operating in a cluster environment.  For more details, see the [documentation][16].
+
+3. [Restart the Agent][5].
 
 ##### Log collection
 
@@ -64,6 +79,9 @@ Datadog APM integrates with Redis to see the traces across your distributed syst
 1. [Enable trace collection in Datadog][6].
 2. [Instrument your application that makes requests to Redis][7].
 
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -103,6 +121,8 @@ See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] 
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -173,3 +193,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[16]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles

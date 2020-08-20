@@ -167,7 +167,10 @@ class ProcessCheck(AgentCheck):
                                 if re.search(string, ' '.join(cmdline)):
                                     found = True
                     except psutil.NoSuchProcess:
-                        self.log.warning('Process disappeared while scanning')
+                        # As the process list isn't necessarily scanned right after it's created
+                        # (since we're using a shared cache), there can be cases where processes
+                        # in the list are dead when an instance of the check tries to scan them.
+                        self.log.debug('Process disappeared while scanning')
                     except psutil.AccessDenied as e:
                         ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
                         ad_error_logger('Error: {}'.format(e))

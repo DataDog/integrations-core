@@ -27,6 +27,12 @@ def config():
     pass
 
 
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Edit the config file with your default EDITOR')
+def edit():
+    """Edit the config file with your default EDITOR."""
+    click.edit(filename=CONFIG_FILE)
+
+
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Open the config location in your file manager')
 def explore():
     """Open the config location in your file manager."""

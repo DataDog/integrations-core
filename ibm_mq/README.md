@@ -28,6 +28,7 @@ export C_INCLUDE_PATH=/opt/mqm/inc
 - Upstart (Linux): `/etc/init/datadog-agent.conf`
 - Systemd (Linux): `/lib/systemd/system/datadog-agent.service`
 - Launchd (MacOS): `~/Library/LaunchAgents/com.datadoghq.agent.plist`
+  - This only works if MacOS SIP is disabled (might not be recommended depending on your security policy). This is due to [SIP purging `LD_LIBRARY_PATH` environ variable][12].
 
 Example of the configuration for `systemd`:
 
@@ -155,9 +156,12 @@ All valid MQSC commands were processed.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -207,6 +211,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
@@ -228,6 +235,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "ibm_mq", "service": "<SERVICE_NAME>", "log_processing_rules": {"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{2}/\d{2}/\d{4}"}}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -281,3 +291,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
+[12]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1

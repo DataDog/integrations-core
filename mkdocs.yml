@@ -59,7 +59,8 @@ nav:
     - Config specs: meta/config-specs.md
     - Status: meta/status.md
   - Tutorials:
-    - JMX: tutorials/jmx.md
+    - JMX:
+      - tutorials/jmx/tools.md
     - SNMP:
       - tutorials/snmp/introduction.md
       - tutorials/snmp/profiles.md
@@ -70,6 +71,7 @@ nav:
   - Architecture:
     - SNMP: architecture/snmp.md
     - vSphere: architecture/vsphere.md
+    - Windows Event Log: architecture/win32_event_log.md
   - Process:
     - Integration release: process/integration-release.md
     - Agent release:

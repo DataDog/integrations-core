@@ -1,5 +1,20 @@
 # CHANGELOG - datadog_checks_base
 
+## 12.0.0 / 2020-08-10
+
+* [Added] Support "*" wildcard in type_overrides configuration. See [#7071](https://github.com/DataDog/integrations-core/pull/7071).
+* [Added] Add `get_check_logger`. See [#7126](https://github.com/DataDog/integrations-core/pull/7126).
+* [Added] Collect metrics from Statistics Messages. See [#6945](https://github.com/DataDog/integrations-core/pull/6945).
+* [Fixed] Ignore empty label_to_hostname label value. See [#7232](https://github.com/DataDog/integrations-core/pull/7232).
+* [Fixed] Add open file debug log for tailer. See [#7205](https://github.com/DataDog/integrations-core/pull/7205).
+* [Changed] Use requests wrapper and remove httplib2 dependency. See [#7247](https://github.com/DataDog/integrations-core/pull/7247).
+* [Removed] Remove get_instance_proxy method from base class. See [#7036](https://github.com/DataDog/integrations-core/pull/7036).
+
+## 11.12.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).
+
 ## 11.11.1 / 2020-06-17
 
 * [Fixed] Gracefully skip quantile-less summary metrics. See [#6909](https://github.com/DataDog/integrations-core/pull/6909).
@@ -17,7 +32,7 @@
 
 ## 11.9.0 / 2020-05-20
 
-* [Added] Upgrade httplib2 to 0.18.0. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
 * [Fixed] Fix time utilities. See [#6692](https://github.com/DataDog/integrations-core/pull/6692).
 
 ## 11.8.0 / 2020-05-17

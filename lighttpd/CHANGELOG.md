@@ -1,5 +1,15 @@
 # CHANGELOG - lighttpd
 
+## 1.11.0 / 2020-08-10
+
+* [Added] Add config specs. See [#7057](https://github.com/DataDog/integrations-core/pull/7057).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 1.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
 ## 1.9.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
