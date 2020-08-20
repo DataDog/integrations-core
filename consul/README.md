@@ -155,6 +155,34 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
 
 3. [Restart the Agent][6].
 
+#### OpenMetrics
+
+Instead of using DogStatsD, you can enable the `use_prometheus_endpoint` configuration option to get the same metrics from the Prometheus endpoint. 
+
+
+**Note**: Use either the DogStatsD method or the Prometheus method, do not enable both for the same instance.
+
+1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
+
+    ```conf
+    {
+      ...
+      "telemetry": {
+        "prometheus_retention_time": "360h"
+      },
+      ...
+    }
+    ```
+
+2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the prometheus endpoint.
+    ```yaml
+    instances:
+        - url: <EXAMPLE>
+          use_prometheus_endpoint: true
+    ```
+
+3. [Restart the Agent][6].
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -231,3 +259,4 @@ Need help? Contact [Datadog support][13].
 [14]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [15]: https://engineering.datadoghq.com/consul-at-datadog
 [16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
+[17]: https://www.consul.io/docs/agent/options#telemetry-prometheus_retention_time

@@ -392,6 +392,7 @@ def test_parse_event(build_dd_event_mock, _, __, ___, ____, event_v2, event_v3, 
         "target_guid",
         "space_guid",
         "org_guid",
+        {"some": "metadata"},
     )
 
     # v3
@@ -412,6 +413,7 @@ def test_parse_event(build_dd_event_mock, _, __, ___, ____, event_v2, event_v3, 
         "target_guid",
         "space_guid",
         "org_guid",
+        {"some": "metadata"},
     )
 
 
@@ -432,6 +434,7 @@ def test_build_dd_event(_, __, ___, instance):
         "target_guid",
         "space_guid",
         "org_guid",
+        {"some": "metadata"},
     )
     tags = [
         "event_type:event_type",
@@ -440,8 +443,10 @@ def test_build_dd_event(_, __, ___, instance):
         "actor_type_name:actor_name",
         "actor_type_guid:actor_guid",
         "space_guid:space_guid",
+        "space_id:space_guid",
         "space_name:space_name",
         "org_guid:org_guid",
+        "org_id:org_guid",
         "org_name:org_name",
         "foo:bar",
     ]
@@ -450,14 +455,15 @@ def test_build_dd_event(_, __, ___, instance):
         "event_type": "event_type",
         "timestamp": 1234,
         "msg_title": "Event event_type happened for target_type target_name",
-        "msg_text": "Triggered by actor_type actor_name",
+        "msg_text": "%%% \n Triggered by actor_type actor_name\n\n"
+        + "Metadata:\n```\n{\n  \"some\": \"metadata\"\n}\n``` \n %%%",
         "priority": "normal",
         "tags": tags,
         "aggregation_key": "event_guid",
     }
     assert event == expected_event
 
-    # With no space and org
+    # With no space and org and metadata
     event = check.build_dd_event(
         "event_type",
         "event_guid",
@@ -470,6 +476,7 @@ def test_build_dd_event(_, __, ___, instance):
         "target_guid",
         "",
         "",
+        {},
     )
     tags = [
         "event_type:event_type",
@@ -478,8 +485,10 @@ def test_build_dd_event(_, __, ___, instance):
         "actor_type_name:actor_name",
         "actor_type_guid:actor_guid",
         "space_guid:none",
+        "space_id:none",
         "space_name:none",
         "org_guid:none",
+        "org_id:none",
         "org_name:none",
         "foo:bar",
     ]
@@ -488,7 +497,7 @@ def test_build_dd_event(_, __, ___, instance):
         "event_type": "event_type",
         "timestamp": 1234,
         "msg_title": "Event event_type happened for target_type target_name",
-        "msg_text": "Triggered by actor_type actor_name",
+        "msg_text": "%%% \n Triggered by actor_type actor_name\n\nMetadata:\n```\n{}\n``` \n %%%",
         "priority": "normal",
         "tags": tags,
         "aggregation_key": "event_guid",
