@@ -120,9 +120,8 @@ files:
 
               For more fine-grained control, use the inclusion and exclusion options.
             value:
-              example: false
+              example: true
               type: boolean
-              default: true
           - name: service_check_rw
             description: |
               Instruct the check to notify based on partition state.

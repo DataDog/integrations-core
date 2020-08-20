@@ -101,13 +101,13 @@ instances:
     #   - /dev/sde
     #   - '[FJ]:'
 
-    ## @param include_all_devices - boolean - optional - default: True
+    ## @param include_all_devices - boolean - optional - default: true
     ## Instruct the check to collect from all devices, including non-physical devices.
     ## Set this to false to exclude pseudo, memory, duplicate or inaccessible file systems.
     ##
     ## For more fine-grained control, use the inclusion and exclusion options.
     #
-    # include_all_devices: false
+    # include_all_devices: true
 
     ## @param service_check_rw - boolean - optional - default: false
     ## Instruct the check to notify based on partition state.
