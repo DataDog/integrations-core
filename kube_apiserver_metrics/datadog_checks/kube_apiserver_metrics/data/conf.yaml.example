@@ -131,7 +131,7 @@ instances:
     # exclude_labels:
     #   - timestamp
 
-    ## @param bearer_token_auth - boolean - optional - default: True
+    ## @param bearer_token_auth - boolean - optional - default: true
     ## If set to true, adds a bearer token authentication header.
     ## Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
     #
