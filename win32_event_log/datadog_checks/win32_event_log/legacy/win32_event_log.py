@@ -11,7 +11,12 @@ from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base.utils.timeout import TimeoutException
 
-from ..constants import EVENT_TYPE, INTEGER_PROPERTIES, SOURCE_TYPE_NAME
+EVENT_TYPE = 'win32_log_event'
+SOURCE_TYPE_NAME = 'event viewer'
+
+# Integer properties to normalize.
+# Source: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/eventlogprov/win32-ntlogevent
+INTEGER_PROPERTIES = ['EventCode', 'EventIdentifier', 'EventType', 'RecordNumber']
 
 
 class Win32EventLogWMI(WinWMICheck):
@@ -30,6 +35,13 @@ class Win32EventLogWMI(WinWMICheck):
 
         # State
         self.last_ts = {}
+
+        self.check_initializations.append(
+            lambda: self.warning(
+                'This version of the check is deprecated and will be removed in a future release. '
+                'Set `legacy_mode` to `false` and read about the latest options, such as `query`.'
+            )
+        )
 
     def check(self, instance):
         # Connect to the WMI provider

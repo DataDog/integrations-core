@@ -16,7 +16,12 @@ The PHP-FPM check is included in the [Datadog Agent][2] package, so you don't ne
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample php_fpm.d/conf.yaml][4] for all available configuration options:
 
@@ -59,6 +64,9 @@ Follow the instructions below to configure this check for an Agent running on a 
    ```
 
 2. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -110,6 +118,9 @@ If your PHP-FPM installation uses unix sockets, you have to use the below syntax
 | `use_fastcgi` | `true`                            |
 
 **Note**: With Autodiscovery, if the Agent runs in a separate container/task/pod, it doesn't have access to the Unix sockets file of your FPM pool. It order to address this, run the Agent as a sidecar.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

@@ -1,5 +1,11 @@
 # CHANGELOG - gunicorn
 
+## 1.12.0 / 2020-08-10
+
+* [Added] Add config specs. See [#7258](https://github.com/DataDog/integrations-core/pull/7258).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Debug logs for failing to retrieve metadata, also add ability to disa…. See [#7255](https://github.com/DataDog/integrations-core/pull/7255).
+
 ## 1.11.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

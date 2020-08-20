@@ -16,9 +16,12 @@ The Gearman check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Gearman performance data. See the [sample gearmand.d/conf.yaml][4] for all available configuration options.
 
@@ -32,6 +35,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5]
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -41,6 +47,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `gearmand`                             |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"server":"%%host%%", "port":"4730"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

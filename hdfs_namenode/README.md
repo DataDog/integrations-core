@@ -33,9 +33,12 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 
 #### Connect the Agent
 
-##### Host
+#<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+#### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample hdfs_namenode.d/conf.yaml][115] for all available configuration options:
 
@@ -56,6 +59,9 @@ Follow the instructions below to configure this check for an Agent running on a 
    ```
 
 2. [Restart the Agent][116].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -90,6 +96,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
     Change the `path` and `service` parameter values and configure them for your environment.
 
 3. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

@@ -19,7 +19,7 @@
   description: |
     This overrides the `proxy` setting in `init_config`.
 
-    Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     to specify hosts that must bypass proxies.
 
     The SOCKS protocol is also supported, for example:
@@ -69,8 +69,8 @@
         |__ aws_host
         |__ aws_service
 
-    The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.  /noqa
-    Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials   /noqa
+    The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. /noqa
+    Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials /noqa
 
 - name: username
   value:

@@ -1774,6 +1774,7 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
     )
+    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 

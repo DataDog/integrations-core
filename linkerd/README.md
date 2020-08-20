@@ -12,13 +12,19 @@ The Linkerd check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See [sample linkerd.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -39,6 +45,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INTEGRATION_NAME>` | `linkerd`                                                             |
 | `<INIT_CONFIG>`      | blank or `{}`                                                         |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:4191/metrics"}`                  |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

@@ -16,7 +16,12 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 #### Metric Collection
 
-##### Host
+#<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `mcache.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample mcache.d/conf.yaml][4] for all available configuration options:
 
@@ -39,7 +44,10 @@ Datadog APM integrates with Memcache to see the traces across your distributed s
 1. [Enable trace collection in Datadog][6].
 2. [Instrument your application that makes requests to Memchache][7].
 
-##### Containerized
+#<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
@@ -82,6 +90,9 @@ _Available for Agent versions >6.0_
     Change the `path` and `service` parameter values and configure them for your environment.
 
 2. [Restart the Agent][5] to validate these changes.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
