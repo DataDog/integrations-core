@@ -16,7 +16,8 @@ def rds_parse_tags_from_endpoint(endpoint):
     Examples:
 
     >>> rds_parse_tags_from_endpoint('customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com')
-    ['dbinstanceidentifier:customers-04', 'hostname:customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com', 'region:us-west-2']
+    ['dbinstanceidentifier:customers-04', 'hostname:customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com',
+     'region:us-west-2']
 
     >>> rds_parse_tags_from_endpoint('dd-metrics.cluster-ro-cfxdfe8cpixl.ap-east-1.rds.amazonaws.com')
     ['dbclusteridentifier:dd-metrics', 'region:ap-east-1']
