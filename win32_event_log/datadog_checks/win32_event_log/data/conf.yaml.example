@@ -243,7 +243,8 @@ instances:
     ## By default, the local machine's event logs are captured. To capture a remote
     ## machine's event logs, specify the machine name (DCOM has to be enabled on
     ## the remote machine).
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # host: <REMOTE_HOSNAME>
 
@@ -255,7 +256,8 @@ instances:
     ## The `log_file` filter instructs the check to only capture events
     ## that belong to one of the specified LogFiles (Application, System, Setup, Security,
     ## or application-specific LogFile).
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # log_file:
     #   - <LOG_FILE>
@@ -263,7 +265,8 @@ instances:
     ## @param source_name - list of strings - optional
     ## The `source_name` filter instructs the check to only capture events
     ## that come from one of the specified SourceNames.
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # source_name:
     #   - <SOURCE_NAME>
@@ -272,7 +275,8 @@ instances:
     ## The `type` filter instructs the check to only capture events
     ## that have one of the specified Types.
     ## Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # type:
     #   - information
@@ -282,7 +286,8 @@ instances:
     ## that have one of the specified EventCodes.
     ## The event ID can be found through http://www.eventid.net/ and viewed in the
     ## Windows Event Viewer.
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # event_id:
     #   - <EVENT_ID>
@@ -295,7 +300,8 @@ instances:
     ##
     ## NOTE: Any filter that starts with "-" is NOT a query, e.g.: '-%success%'
     ## searches for events without 'success' in the message.
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # message_filters:
     #   - <MESSAGE_FILTER>
@@ -305,7 +311,8 @@ instances:
     ## Datadog's event bodies with the specified list of event properties.
     ## If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
     ## Available values are: Logfile, SourceName, EventCode, Message, InsertionStrings, TimeGenerated, Type
-    ## Note: This ins only used when legacy_mode is set
+    ##
+    ## Note: This is only used when `legacy_mode` is set to `true`.
     #
     # event_format:
     #   - Message
