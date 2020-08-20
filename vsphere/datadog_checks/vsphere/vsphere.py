@@ -1274,19 +1274,19 @@ class VSphereCheck(AgentCheck):
                     yield query_specs
                 #create batch of queries for vm disk metrics
                 if resource_type == vim.VirtualMachine and vm_disk_metric_ids:
-                for batch in self.make_batch(mors, vm_disk_metric_ids, max_batch_size):
-                    vmdisk_query_specs = []
-                    for mor, metrics in batch.items():
-                        vmdisk_query_spec = vim.PerformanceManager.QuerySpec()
-                        vmdisk_query_spec.entity = mor
-                        vmdisk_query_spec.metricId = metrics
-                        vmdisk_query_spec.format = "normal"
-                        server_time = server_instance.CurrentTime()
-                        vmdisk_query_spec.startTime = server_time - timedelta(seconds=DATASTORE_TIME_INTERVAL)
-                        vmdisk_query_spec.endTime = server_time
-                        vmdisk_query_specs.append(vmdisk_query_spec)
-                    if vmdisk_query_specs:
-                        yield vmdisk_query_specs
+                    for batch in self.make_batch(mors, vm_disk_metric_ids, max_batch_size):
+                        vmdisk_query_specs = []
+                        for mor, metrics in batch.items():
+                            vmdisk_query_spec = vim.PerformanceManager.QuerySpec()
+                            vmdisk_query_spec.entity = mor
+                            vmdisk_query_spec.metricId = metrics
+                            vmdisk_query_spec.format = "normal"
+                            server_time = server_instance.CurrentTime()
+                            vmdisk_query_spec.startTime = server_time - timedelta(seconds=DATASTORE_TIME_INTERVAL)
+                            vmdisk_query_spec.endTime = server_time
+                            vmdisk_query_specs.append(vmdisk_query_spec)
+                        if vmdisk_query_specs:
+                            yield vmdisk_query_specs
 
     def collect_metrics(self, instance):
         """ Calls asynchronously _collect_metrics_atomic on all MORs, as the
