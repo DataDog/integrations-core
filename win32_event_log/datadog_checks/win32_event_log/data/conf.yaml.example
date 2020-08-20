@@ -228,28 +228,34 @@ instances:
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
-    # legacy_mode: true
+    legacy_mode: false
+
+    ## @param tags - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote
     ## machine's event logs, specify the machine name (DCOM has to be enabled on
     ## the remote machine).
+    ## Note: This ins only used when legacy_mode is set
     #
     # host: <REMOTE_HOSNAME>
 
-    ## @param username - string - optional
-    ## If authentication is needed, specify a `username` here.
-    #
-    # username: <USERNAME>
-
     ## FILTERS
-    ## At least one filter is required:
+    ## When running legacy_mode least one filter is required:
     ## `log_file`, `source_name`, `type`, `event_id`, `message_filters`
 
     ## @param log_file - list of strings - optional
     ## The `log_file` filter instructs the check to only capture events
     ## that belong to one of the specified LogFiles (Application, System, Setup, Security,
     ## or application-specific LogFile).
+    ## Note: This ins only used when legacy_mode is set
     #
     # log_file:
     #   - <LOG_FILE>
@@ -257,6 +263,7 @@ instances:
     ## @param source_name - list of strings - optional
     ## The `source_name` filter instructs the check to only capture events
     ## that come from one of the specified SourceNames.
+    ## Note: This ins only used when legacy_mode is set
     #
     # source_name:
     #   - <SOURCE_NAME>
@@ -265,6 +272,7 @@ instances:
     ## The `type` filter instructs the check to only capture events
     ## that have one of the specified Types.
     ## Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
+    ## Note: This ins only used when legacy_mode is set
     #
     # type:
     #   - information
@@ -274,6 +282,7 @@ instances:
     ## that have one of the specified EventCodes.
     ## The event ID can be found through http://www.eventid.net/ and viewed in the
     ## Windows Event Viewer.
+    ## Note: This ins only used when legacy_mode is set
     #
     # event_id:
     #   - <EVENT_ID>
@@ -286,6 +295,7 @@ instances:
     ##
     ## NOTE: Any filter that starts with "-" is NOT a query, e.g.: '-%success%'
     ## searches for events without 'success' in the message.
+    ## Note: This ins only used when legacy_mode is set
     #
     # message_filters:
     #   - <MESSAGE_FILTER>
@@ -295,18 +305,10 @@ instances:
     ## Datadog's event bodies with the specified list of event properties.
     ## If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
     ## Available values are: Logfile, SourceName, EventCode, Message, InsertionStrings, TimeGenerated, Type
+    ## Note: This ins only used when legacy_mode is set
     #
     # event_format:
     #   - Message
-
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
