@@ -1234,7 +1234,7 @@ class VSphereCheck(AgentCheck):
             vm_disk_metric_ids = []
             for counter_key , counter_val in counters.items():
                 counter_instance = counter_val.get('instance',[])
-                counter_name = counter_key.get('name','')
+                counter_name = counter_val.get('name','')
                 if resource_type == vim.VirtualMachine and counter_name in VM_STORAGE_METRICS:
                     for instance_value in counter_instance:
                         vm_disk_metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance_value))
