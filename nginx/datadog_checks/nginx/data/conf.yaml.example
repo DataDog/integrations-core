@@ -68,7 +68,7 @@ instances:
     #
     # use_plus_api: false
 
-    ## @param use_plus_api_stream - boolean - optional - default: True
+    ## @param use_plus_api_stream - boolean - optional - default: true
     ## If you are using the commercial version of NGINX, for releases R13 and above,
     ## there is an API that replaces the extended status API.
     ## See https://www.nginx.com/blog/nginx-plus-r13-released/
