@@ -73,7 +73,7 @@ instances:
     ## there is an API that replaces the extended status API.
     ## See https://www.nginx.com/blog/nginx-plus-r13-released/
     ## When no Stream servers used we can disable this part to remove errors in Nginx Plus API calls.
-    ## To use it set `use_plus_api_stream` to true
+    ## To use it set `use_plus_api_stream` to `true`.
     #
     # use_plus_api_stream: false
 
