@@ -1,11 +1,11 @@
 version: '3'
 
 services:
-  ibmmq:
-    container_name: ibm_mq
+  ibm_mq1:
+    container_name: ibm_mq1
     image: datadog/docker-library:ibm_mq_v8
     environment:
-      - MQ_QMGR_NAME=datadog
+      - MQ_QMGR_NAME=QM1
       - LICENSE=accept
     ports:
       - "11414:1414"

@@ -23,8 +23,12 @@
   "type": "check",
   "integration_id": "mapreduce",
   "assets": {
-    "monitors": {},
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "monitors": {}
   }
 }

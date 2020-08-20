@@ -23,7 +23,9 @@ All three steps below are needed for the Airflow integration to work properly. B
 
 Configure the Airflow check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
-Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
+(Optional) Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
+
+**Note**: If you are using containers, see [Autodiscovery Container Identifiers][12] for details.
 
 #### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
 
@@ -38,8 +40,8 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    ```conf
    [scheduler]
    statsd_on = True
-   statsd_host = localhost
-   statsd_port = 8125
+   statsd_host = localhost  # Hostname or IP of server running the Datadog Agent
+   statsd_port = 8125       # DogStatsD port configured in the Datadog Agent
    statsd_prefix = airflow
    ```
 
@@ -86,6 +88,14 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.pool.open_slots"
            tags:
              pool_name: "$1"
+         - match: "pool.queued_slots.*"
+           name: "airflow.pool.queued_slots"
+           tags:
+             pool_name: "$1"
+         - match: "pool.running_slots.*"
+           name: "airflow.pool.running_slots"
+           tags:
+             pool_name: "$1"
          - match: "airflow.pool.used_slots.*"
            name: "airflow.pool.used_slots"
            tags:
@@ -125,6 +135,12 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
+         - match: 'scheduler.tasks.running'
+           name: "airflow.scheduler.tasks.running"
+         - match: 'scheduler.tasks.starving'
+           name: "airflow.scheduler.tasks.starving"
+         - match: sla_email_notification_failure
+           name: 'airflow.sla_email_notification_failure'
          - match: 'airflow\.task_removed_from_dag\.(.*)'
            match_type: "regex"
            name: "airflow.dag.task_removed"
@@ -139,6 +155,17 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
+         - match: "ti.start.*.*"
+           name: "airflow.ti.start"
+           tags:
+             dagid: "$1"
+             taskid: "$2"
+         - match: "ti.finish.*.*.*"
+           name: "airflow.ti.finish"
+           tags:
+             dagid: "$1"
+             taskid: "$2"
+             state: "$3"
    ```
 
 #### Step 3: Restart Datadog Agent and Airflow
@@ -231,12 +258,10 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**airflow.can_connect**:
-
+**airflow.can_connect**:<br>
 Returns `CRITICAL` if unable to connect to Airflow. Returns `OK` otherwise.
 
-**airflow.healthy**:
-
+**airflow.healthy**:<br>
 Returns `CRITICAL` if Airflow is not healthy. Returns `OK` otherwise.
 
 ### Events
@@ -268,3 +293,4 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
+[12]: https://docs.datadoghq.com/agent/guide/ad_identifiers/

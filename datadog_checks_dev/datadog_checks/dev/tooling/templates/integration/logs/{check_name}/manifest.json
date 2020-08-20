@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-{integration_name} Integration",
+  "public_title": "{integration_name}",
   "categories": [
     "log collection"
   ],
@@ -28,6 +28,7 @@
     "dashboards": {{}},
     "saved_views": {{}},
     "monitors": {{}},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {{}}
   }}
 }}

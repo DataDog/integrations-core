@@ -1,738 +1,538 @@
 {
-  "board_title": "Scylla",
-  "read_only": false,
-  "author_info": {
-    "author_name": "Datadog"
-  },
+  "title": "Scylla",
   "description": "This dashboard provides a high-level overview of your Scylla cluster to help you monitor its performance and resource usage. \n\nClone this template dashboard to make changes and add your own graphs and widgets.\n\n",
-  "created": "2020-02-07T21:22:26.961963+00:00",
-  "created_by": {
-    "access_role": "adm",
-    "disabled": false,
-    "email": "support@datadoghq.com",
-    "handle": "support@datadoghq.com",
-    "is_admin": true,
-    "name": "Datadog",
-    "role": null,
-    "verified": true
-  },
-  "new_id": "xie-6ja-hxz",
-  "modified": "2020-02-18T23:24:50.944728+00:00",
-  "originalHeight": 80,
-  "template_variables": [
-    {
-      "default": "*",
-      "prefix": "host",
-      "name": "host"
-    }
-  ],
-  "isIntegration": false,
-  "disableEditing": false,
-  "originalWidth": "calc(100% - 32px)",
   "widgets": [
     {
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_text": "Node status",
-      "height": 37,
-      "tile_def": {
-        "viz": "query_table",
+      "id": 0,
+      "definition": {
+        "type": "query_table",
         "requests": [
           {
+            "q": "avg:scylla.node.operation_mode{*} by {server}",
             "aggregator": "last",
+            "limit": 50,
+            "order": "desc",
+            "alias": "Operation Mode",
             "conditional_formats": [
               {
-                "palette": "white_on_gray",
                 "comparator": "<=",
-                "value": 0
+                "value": 0,
+                "palette": "white_on_gray"
               },
               {
-                "palette": "white_on_green",
                 "comparator": "<=",
-                "value": 3
+                "value": 3,
+                "palette": "white_on_green"
               },
               {
-                "palette": "white_on_red",
                 "comparator": ">",
-                "value": 3
+                "value": 3,
+                "palette": "white_on_red"
               }
-            ],
-            "q": "avg:scylla.node.operation_mode{*} by {server}",
-            "alias": "Operation Mode",
-            "limit": 50,
-            "order": "desc"
+            ]
           }
-        ]
+        ],
+        "custom_links": [],
+        "title": "Node status",
+        "title_size": "16",
+        "title_align": "left"
       },
-      "viz": "query_table",
-      "sharedGlobalTime": {
-        "live_span": "1h"
-      },
-      "error": null,
-      "y": 14,
-      "x": 1,
-      "isShared": false,
-      "type": "query_table",
-      "width": 30,
-      "add_timeframe": true
+      "layout": {
+        "x": 1,
+        "y": 14,
+        "width": 30,
+        "height": 39
+      }
     },
     {
-      "sizing": "fit",
-      "title": false,
-      "url": "/static/images/saas_logos/bot/scylla@2x.svg",
-      "type": "image",
-      "height": 12,
-      "width": 30,
-      "y": 1,
-      "x": 1,
-      "add_timeframe": true,
-      "margin": "",
-      "isShared": false
+      "id": 1,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/saas_logos/bot/scylla@2x.png",
+        "sizing": "fit"
+      },
+      "layout": {
+        "x": 1,
+        "y": 1,
+        "width": 30,
+        "height": 12
+      }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "max": "100",
-        "min": "0"
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "avg:scylla.reactor.utilization{$host} by {server,shard}",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "dog_classic",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
-          "max": "100",
-          "min": "0"
-        }
+          "min": "0",
+          "max": "100"
+        },
+        "title": "CPU utilization (%)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false
       },
-      "width": 38,
-      "title_text": "CPU utilization (%)",
-      "error": null,
-      "y": 8,
-      "x": 72,
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 72,
+        "y": 8,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 3,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "sum:scylla.transport.requests_served{$host} by {server,shard}.as_count()",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "dog_classic",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Requests served",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false
       },
-      "width": 38,
-      "title_text": "Requests served",
-      "error": null,
-      "y": 8,
-      "x": 33,
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 33,
+        "y": 8,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "tick_pos": "50%",
-      "show_tick": true,
-      "title": false,
-      "refresh_every": 30000,
-      "type": "note",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "content": "Read Performance",
-      "bgcolor": "gray",
-      "html": "Read Performance",
-      "y": 28,
-      "x": 33,
-      "font_size": "18",
-      "tick": true,
-      "background_color": "gray",
-      "width": 38,
-      "auto_refresh": false,
-      "add_timeframe": true
+      "id": 4,
+      "definition": {
+        "type": "note",
+        "content": "Read Performance",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 33,
+        "y": 28,
+        "width": 38,
+        "height": 5
+      }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "sum:scylla.storage.proxy.coordinator_write_latency.sum{$host} by {server}/sum:scylla.storage.proxy.coordinator_write_latency.count{$host,upper_bound:none} by {server}",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "purple",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Average write latency",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Average write latency",
-      "error": null,
-      "y": 54,
-      "x": 72,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 72,
+        "y": 54,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "sum:scylla.storage.proxy.coordinator_read_latency.sum{$host} by {server}/sum:scylla.storage.proxy.coordinator_read_latency.count{$host,upper_bound:none} by {server}",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "green",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Average read latency",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Average read latency",
-      "error": null,
-      "y": 54,
-      "x": 33,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 33,
+        "y": 54,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "avg:scylla.cache.row_hits{$host} by {server}.as_count()",
+            "display_type": "bars",
             "style": {
-              "width": "normal",
               "palette": "cool",
-              "type": "solid"
-            },
-            "type": "bars"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Cache hits",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false
       },
-      "width": 38,
-      "title_text": "Cache hits",
-      "error": null,
-      "y": 8,
-      "x": 112,
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 112,
+        "y": 8,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "avg:scylla.cache.row_misses{$host} by {server}.as_count()",
+            "display_type": "bars",
             "style": {
-              "width": "normal",
               "palette": "warm",
-              "type": "solid"
-            },
-            "type": "bars"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Cache misses",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Cache misses",
-      "error": null,
-      "y": 27,
-      "x": 112,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 112,
+        "y": 27,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 9,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "avg:scylla.storage.proxy.coordinator_read_timeouts{$host} by {server}.as_count()",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "green",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Read timeouts",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Read timeouts",
-      "error": null,
-      "y": 73,
-      "x": 33,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 33,
+        "y": 73,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 10,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "avg:scylla.storage.proxy.coordinator_write_timeouts{$host} by {server}.as_count()",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "purple",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Write timeouts",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Write timeouts",
-      "error": null,
-      "y": 73,
-      "x": 72,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 72,
+        "y": 73,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 11,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "sum:scylla.storage.proxy.coordinator_total_write_attempts_local_node{$host} by {server,shard}.as_count()",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "purple",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Write requests",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false
       },
-      "width": 38,
-      "title_text": "Write requests",
-      "error": null,
-      "y": 35,
-      "x": 72,
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 72,
+        "y": 35,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
-      },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "id": 12,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "sum:scylla.storage.proxy.coordinator_reads_local_node{$host} by {server,shard}.as_count()",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "green",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Read requests",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Read requests",
-      "error": null,
-      "y": 35,
-      "x": 33,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 33,
+        "y": 35,
+        "width": 38,
+        "height": 18
       }
     },
     {
-      "isShared": false,
-      "tick_pos": "50%",
-      "show_tick": true,
-      "title": false,
-      "refresh_every": 30000,
-      "type": "note",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "content": "Write Performance",
-      "bgcolor": "gray",
-      "html": "Write Performance",
-      "y": 28,
-      "x": 72,
-      "font_size": "18",
-      "tick": true,
-      "background_color": "gray",
-      "width": 38,
-      "auto_refresh": false,
-      "add_timeframe": true
-    },
-    {
-      "isShared": false,
-      "tick_pos": "50%",
-      "show_tick": true,
-      "title": false,
-      "refresh_every": 30000,
-      "type": "note",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "content": "Resource Utilization",
-      "bgcolor": "gray",
-      "html": "Resource Utilization",
-      "scaleFactor": 1,
-      "y": 1,
-      "x": 33,
-      "font_size": "18",
-      "tick": true,
-      "background_color": "gray",
-      "width": 77,
-      "auto_refresh": false,
-      "add_timeframe": true
-    },
-    {
-      "isShared": false,
-      "tick_pos": "50%",
-      "show_tick": true,
-      "title": false,
-      "refresh_every": 30000,
-      "type": "note",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "content": "Cache",
-      "bgcolor": "gray",
-      "html": "Cache",
-      "y": 1,
-      "x": 112,
-      "font_size": "18",
-      "tick": true,
-      "background_color": "gray",
-      "width": 38,
-      "auto_refresh": false,
-      "add_timeframe": true
-    },
-    {
-      "isShared": false,
-      "title_align": "left",
-      "title_size": "16",
-      "time": {},
-      "title": true,
-      "yaxis": {
-        "min": "auto",
-        "max": "auto",
-        "scale": "linear",
-        "label": "",
-        "includeZero": true
+      "id": 13,
+      "definition": {
+        "type": "note",
+        "content": "Write Performance",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
       },
-      "markers": [],
-      "height": 16,
-      "tile_def": {
-        "viz": "timeseries",
+      "layout": {
+        "x": 72,
+        "y": 28,
+        "width": 38,
+        "height": 5
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "type": "note",
+        "content": "Resource Utilization",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 33,
+        "y": 1,
+        "width": 77,
+        "height": 5
+      }
+    },
+    {
+      "id": 15,
+      "definition": {
+        "type": "note",
+        "content": "Cache",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 112,
+        "y": 1,
+        "width": 38,
+        "height": 5
+      }
+    },
+    {
+      "id": 16,
+      "definition": {
+        "type": "timeseries",
         "requests": [
           {
             "q": "sum:scylla.cache.bytes_used{$host} by {server}, sum:scylla.cache.bytes_used{$host} by {server}/1000000",
+            "display_type": "line",
             "style": {
-              "width": "normal",
               "palette": "warm",
-              "type": "solid"
-            },
-            "type": "line"
+              "line_type": "solid",
+              "line_width": "normal"
+            }
           }
         ],
-        "markers": [],
+        "custom_links": [],
         "yaxis": {
+          "label": "",
+          "scale": "linear",
           "min": "auto",
           "max": "auto",
-          "scale": "linear",
-          "label": "",
-          "includeZero": true
-        }
+          "include_zero": true
+        },
+        "title": "Cache MB used",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
       },
-      "width": 38,
-      "title_text": "Cache MB used",
-      "error": null,
-      "y": 46,
-      "x": 112,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "type": "timeseries",
-      "legend": false,
-      "viz": "timeseries",
-      "sharedGlobalTime": {
-        "live_span": "1h"
+      "layout": {
+        "x": 112,
+        "y": 46,
+        "width": 38,
+        "height": 18
       }
     }
   ],
-  "disableCog": false,
-  "id": 973385,
-  "isShared": false
+  "template_variables": [
+    {
+      "name": "host",
+      "default": "*",
+      "prefix": "host"
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 30313
 }

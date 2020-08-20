@@ -1,5 +1,13 @@
 # CHANGELOG - Airflow
 
+## 1.5.0 / 2020-08-10
+
+* [Added] airflow new metrics. See [#7112](https://github.com/DataDog/integrations-core/pull/7112).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+* [Fixed] DOCS-983 Airflow integration. See [#6971](https://github.com/DataDog/integrations-core/pull/6971).
+
 ## 1.4.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).

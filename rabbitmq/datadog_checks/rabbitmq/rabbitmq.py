@@ -371,7 +371,7 @@ class RabbitMQ(AgentCheck):
         for t in tag_list:
             tag = data.get(t)
             if tag:
-                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
+                # FIXME 8.x: remove this suffix or unify (sc doesn't have it)
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 

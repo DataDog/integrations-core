@@ -23,11 +23,12 @@
   "is_public": true,
   "integration_id": "hyper-v",
   "assets": {
-     "configuration": {
+    "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }

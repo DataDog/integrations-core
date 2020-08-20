@@ -48,12 +48,30 @@ class MockedAPI(object):
         if subtree.get('runtime.powerState') == 'on':
             self.infrastructure_data[current_mor]['runtime.powerState'] = vim.VirtualMachinePowerState.poweredOn
         if 'runtime.host' in subtree:
-            self.infrastructure_data[current_mor]['runtime.host'] = subtree['runtime.host']
+            # Temporary setting 'runtime.host_moId' to the host _moId
+            # This will be used later to make 'runtime.host' a pointer to the runtime.host mor instance.
+            self.infrastructure_data[current_mor]['runtime.host_moid'] = subtree['runtime.host']
         if 'guest.hostName' in subtree:
             self.infrastructure_data[current_mor]['guest.hostName'] = subtree['guest.hostName']
+        if self.config.should_collect_attributes and 'customValue' in subtree:
+            mor_attr = []
+            for key_name, value in iteritems(subtree['customValue']):
+                mor_attr.append('{}{}:{}'.format(self.config.attr_prefix, key_name, value))
+            self.infrastructure_data[current_mor]['attributes'] = mor_attr
 
         for c in children:
             self.recursive_parse_topology(c, parent=current_mor)
+
+        if parent is not None:
+            return
+
+        # Resolve the runtime.host_moId into pointers to the mocked mors.
+        for _, props in iteritems(self.infrastructure_data):
+            if 'runtime.host_moid' in props:
+                hosts = [m for m, p in iteritems(self.infrastructure_data) if p['name'] == props['runtime.host_moid']]
+                assert len(hosts) == 1
+                props['runtime.host'] = hosts[0]
+                del props['runtime.host_moid']
 
     def smart_connect(self):
         pass
@@ -68,12 +86,6 @@ class MockedAPI(object):
             with open(os.path.join(HERE, 'fixtures', 'topology.json')) as f:
                 file_data = json.load(f)
                 self.recursive_parse_topology(file_data)
-
-            for _, props in iteritems(self.infrastructure_data):
-                if 'runtime.host' in props:
-                    hosts = [m for m, p in iteritems(self.infrastructure_data) if p['name'] == props['runtime.host']]
-                    assert len(hosts) == 1
-                    props['runtime.host'] = hosts[0]
 
         return self.infrastructure_data
 

@@ -10,7 +10,7 @@ files:
     options:
     - name: url
       required: true
-      description: URL used to connect to the Airflow instance.
+      description: The URL used to connect to the Airflow instance (use the Airflow web server REST API endpoint).
       value:
         type: string
     - template: instances/http

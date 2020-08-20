@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.18.1 / 2020-08-10
+
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
 ## 1.18.0 / 2020-06-29
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

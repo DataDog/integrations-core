@@ -26,8 +26,8 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
-WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
+ALLOWED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
+ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
@@ -577,7 +577,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.gauge(metric_name, count, tags=list(tags))
 
     def _submit_metric_kube_pod_container_status_reason(
-        self, metric, metric_suffix, whitelisted_status_reasons, scraper_config
+        self, metric, metric_suffix, allowed_status_reasons, scraper_config
     ):
         metric_name = scraper_config['namespace'] + metric_suffix
 
@@ -587,7 +587,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             reason = sample[self.SAMPLE_LABELS].get('reason')
             if reason:
                 # Filtering according to the reason here is paramount to limit cardinality
-                if reason.lower() in whitelisted_status_reasons:
+                if reason.lower() in allowed_status_reasons:
                     tags += self._build_tags('reason', reason, scraper_config)
                 else:
                     continue
@@ -610,12 +610,12 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_pod_container_status_waiting_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(
-            metric, '.container.status_report.count.waiting', WHITELISTED_WAITING_REASONS, scraper_config
+            metric, '.container.status_report.count.waiting', ALLOWED_WAITING_REASONS, scraper_config
         )
 
     def kube_pod_container_status_terminated_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(
-            metric, '.container.status_report.count.terminated', WHITELISTED_TERMINATED_REASONS, scraper_config
+            metric, '.container.status_report.count.terminated', ALLOWED_TERMINATED_REASONS, scraper_config
         )
 
     def kube_cronjob_next_schedule_time(self, metric, scraper_config):
@@ -854,7 +854,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def count_objects_by_tags(self, metric, scraper_config):
-        """ Count objects by whitelisted tags and submit counts as gauges. """
+        """ Count objects by allowed tags and submit counts as gauges. """
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()

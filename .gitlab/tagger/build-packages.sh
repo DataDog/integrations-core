@@ -3,9 +3,9 @@
 set -euxo pipefail
 IFS=$'\n\t'
 
-if [[ -n "$DD_TEST_CMD" ]]; then
-    echo "Triggering build pipeline..."
-    eval "$DD_TEST_CMD"
-else
-    echo "Skipping, DD_TEST_CMD is not set"
-fi
+curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master \
+  --form variables[ORIG_CI_BUILD_REF]=$CI_BUILD_REF \
+  --form variables[ROOT_LAYOUT_TYPE]=core \
+  --form variables[REPO_NAME]=integrations-core \
+  https://gitlab.ddbuild.io/api/v4/projects/138/trigger/pipeline
+
