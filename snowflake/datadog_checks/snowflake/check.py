@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from contextlib import closing
-import snowflake.connector as sf
 import time
+from contextlib import closing
+
+import snowflake.connector as sf
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
@@ -43,7 +44,7 @@ class SnowflakeCheck(AgentCheck):
                 queries.StorageUsageMetrics,
                 queries.DatabaseStorageMetrics,
                 queries.CreditUsage,
-                # queries.WarehouseCreditUsage,
+                queries.WarehouseCreditUsage,
             ],
             tags=self._tags,
         )
@@ -51,41 +52,37 @@ class SnowflakeCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
-        self.connect(self.config)
-
-        if self._last_ts is None:
-            self._last_ts = get_timestamp()
-            raise Exception(time.gmtime(self._last_ts))
-            #TIMESTAMP_FROM_PARTS(2020,7,15,21,3,41);
-
-
-        # q = "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-07-15 08:00:00.000 -0700');"
+        self.connect()
+        # q = "select WAREHOUSE_NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from WAREHOUSE_METERING_HISTORY where start_time >= TIMESTAMP_FROM_PARTS('2020', '8', '17', '21', '3', '41');"
         # cur = self._conn.cursor()
         # cur.execute(q)
         # raise Exception(cur.fetchall())
-        self._update_queries()
+
+        if self._last_ts is None:
+            self._last_ts = get_timestamp()
+            # raise Exception(time.gmtime(self._last_ts))
+
+        self._query_manager.execute()
 
         self._collect_version()
         self._last_ts = get_timestamp()
 
-    def _update_queries(self):
-        """
-        Update queries with last timestamp
-        """
-        self._query_manager.execute()
-
-        # TODO: Update with latest timestamp
-        self._last_ts = None
-
     def execute_query_raw(self, query):
+        """
+        Executes query with timestamp from parts if comparing start_time field.
+        """
         with closing(self._conn.cursor()) as cursor:
-            cursor.execute(query)
+            if 'start_time' in query:
+                # TODO: replace tuple with last_ts parts
+                cursor.execute(query, ('2020', '8', '5', '21', '3', '41'))
+            else:
+                cursor.execute(query)
             if cursor.rowcount is None or cursor.rowcount < 1:
-                self.log.debug("Failed to fetch records from query: `%s`.", query)
+                self.log.error("Failed to fetch records from query: `%s`.", query)
                 return []
             return cursor.fetchall()
 
-    def connect(self, config):
+    def connect(self):
         if self._conn is not None:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return
@@ -117,7 +114,7 @@ class SnowflakeCheck(AgentCheck):
             raw_version = self.execute_query_raw("select current_version();")
             version = raw_version[0][0]
         except Exception as e:
-            self.log.debug("Error collecting version for Snowflake: %s", e)
+            self.log.error("Error collecting version for Snowflake: %s", e)
 
         if version:
             self.set_metadata('version', version)
