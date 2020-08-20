@@ -41,7 +41,7 @@ instances:
     #
     # dbname: <DBNAME>
 
-    ## @param ssl - string - optional - default: False
+    ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
