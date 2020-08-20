@@ -39,7 +39,7 @@ files:
        If you are using the commercial version of NGINX, for releases R13 and above,
        there is an API that replaces the extended status API.
        See https://www.nginx.com/blog/nginx-plus-r13-released/
-       When no Stream servers used we can disable this part to remove errors in Nginx Plus API calls.
+       If you're not using Stream servers, you can disable this part to remove errors in NGINX Plus API calls.
        To use it set `use_plus_api_stream` to true
       value:
         type: boolean
