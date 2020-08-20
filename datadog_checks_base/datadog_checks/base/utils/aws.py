@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 def rds_parse_tags_from_endpoint(endpoint):
     """
     Given the URI for an AWS RDS / Aurora endpoint, parse supplemental tags
@@ -31,7 +32,7 @@ def rds_parse_tags_from_endpoint(endpoint):
         return tags
     if parts[3] != 'rds.amazonaws.com':
         return tags
-    
+
     identifier, cluster, region, _ = parts
     if cluster.startswith('cluster-'):
         tags.append('dbclusteridentifier:' + identifier)
