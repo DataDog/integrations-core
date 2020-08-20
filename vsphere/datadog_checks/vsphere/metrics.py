@@ -5,7 +5,7 @@ from pyVmomi import vim
 #also supports comma separated specific instance values
 
 # All metrics that can be collected from VirtualMachines.
-VM_METRICS = {
+VM_REALTIME_METRICS = {
     'cpu.ready.summation' : None,
     'cpu.usage.average' : None,
     'mem.usage.average' : None,
@@ -40,6 +40,12 @@ VM_METRICS = {
     'net.bytesTx.average' : None,
     'net.droppedRx.summation' : None,
     'net.droppedTx.summation' : None,
+}
+
+# Storage/Disk metrics of VMs
+VM_STORAGE_METRICS = {
+    'disk.used.latest' : "DISKFILE",
+    'disk.provisioned.latest' : None,
 }
 
 # All metrics that can be collected from ESXi Hosts.
@@ -98,7 +104,10 @@ CLUSTER_METRICS = {
     'vmop.numSuspend.latest' : None,
     'vmop.numUnregister.latest' : None,
     'vmop.numVMotion.latest' : None,
-    }
+}
+
+VM_METRICS = dict(VM_REALTIME_METRICS)
+VM_METRICS.update(VM_STORAGE_METRICS)
 
 ALLOWED_METRICS_FOR_MOR = {
     vim.VirtualMachine: VM_METRICS,
