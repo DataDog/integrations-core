@@ -5,6 +5,7 @@
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
@@ -93,6 +94,13 @@ class PostgresConfig:
 
         # preset tags to the database name
         tags.extend(["db:%s" % self.dbname])
+
+        rds_tags = rds_parse_tags_from_endpoint(self.host)
+        if rds_tags:
+            tags.extend(rds_tags)
+            # For RDS/off-host installations, override the `host` tag to be the server
+            # being monitored, not the agent host
+            tags.append('host:{}'.format(self.host))
         return tags
 
     def _get_service_check_tags(self):
