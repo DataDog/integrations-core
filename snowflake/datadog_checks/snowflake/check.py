@@ -45,6 +45,7 @@ class SnowflakeCheck(AgentCheck):
                 queries.DatabaseStorageMetrics,
                 queries.CreditUsage,
                 queries.WarehouseCreditUsage,
+                queries.LoginMetrics,
             ],
             tags=self._tags,
         )
@@ -53,7 +54,7 @@ class SnowflakeCheck(AgentCheck):
 
     def check(self, _):
         self.connect()
-        # q = "select WAREHOUSE_NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from WAREHOUSE_METERING_HISTORY where start_time >= TIMESTAMP_FROM_PARTS('2020', '8', '17', '21', '3', '41');"
+        # q = "select reported_client_type, sum(iff(is_success = 'NO', 1, 0)), sum(iff(is_success = 'YES', 1, 0)), count(*) from login_history group by reported_client_type;"
         # cur = self._conn.cursor()
         # cur.execute(q)
         # raise Exception(cur.fetchall())

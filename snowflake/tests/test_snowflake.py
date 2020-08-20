@@ -11,7 +11,7 @@ from datadog_checks.snowflake import SnowflakeCheck, queries
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
 
-
+#
 # def test_check(dd_run_check, instance):
 #     check = SnowflakeCheck('snowflake', {}, [instance])
 #     dd_run_check(check)
@@ -87,3 +87,23 @@ def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric('snowflake.billing.warehouse.cloud_service', count=2, tags=expected_tags)
     aggregator.assert_metric('snowflake.billing.warehouse.total', count=2, tags=expected_tags)
     aggregator.assert_metric('snowflake.billing.warehouse.virtual_warehouse', count=2, tags=expected_tags)
+
+
+def test_login_metrics(dd_run_check, aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+
+    expected_login_metrics =  [('SNOWFLAKE_UI', 2, 6, 8), ('PYTHON_DRIVER', 0, 148, 148)]
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_login_metrics):
+        check = SnowflakeCheck('snowflake', {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = [queries.LoginMetrics]
+        dd_run_check(check)
+    snowflake_tags = EXPECTED_TAGS + ['client_type:SNOWFLAKE_UI']
+    aggregator.assert_metric('snowflake.logins.fail.count', value=2, tags=snowflake_tags)
+    aggregator.assert_metric('snowflake.logins.success.count', value=6, tags=snowflake_tags)
+    aggregator.assert_metric('snowflake.logins.total', value=8, tags=snowflake_tags)
+
+    python_tags = EXPECTED_TAGS + ['client_type:PYTHON_DRIVER']
+    aggregator.assert_metric('snowflake.logins.fail.count', value=0, tags=python_tags)
+    aggregator.assert_metric('snowflake.logins.success.count', value=148, tags=python_tags)
+    aggregator.assert_metric('snowflake.logins.total', value=148, tags=python_tags)

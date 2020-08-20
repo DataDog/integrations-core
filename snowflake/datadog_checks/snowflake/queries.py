@@ -62,3 +62,17 @@ WarehouseCreditUsage = Query(
         ],
     }
 )
+
+LoginMetrics = Query(
+    {
+        'name': 'login.metrics',
+        'query': "select reported_client_type, sum(iff(is_success = 'NO', 1, 0)), sum(iff(is_success = 'YES', 1, 0)),"
+        "count(*) from login_history group by reported_client_type;",
+        'columns': [
+            {'name': 'client_type', 'type': 'tag'},
+            {'name': 'logins.fail.count', 'type': 'monotonic_count'},
+            {'name': 'logins.success.count', 'type': 'monotonic_count'},
+            {'name': 'logins.total', 'type': 'monotonic_count'},
+        ],
+    }
+)
