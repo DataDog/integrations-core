@@ -199,7 +199,6 @@ class Redis(AgentCheck):
                 tags.append("redis_role:{}".format(info["role"]))
             else:
                 self.log.debug("Redis role was not found")
-            tags = sorted(tags)
 
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
             try:
