@@ -46,6 +46,7 @@ class SnowflakeCheck(AgentCheck):
                 queries.CreditUsage,
                 queries.WarehouseCreditUsage,
                 queries.LoginMetrics,
+                queries.WarehouseLoad,
             ],
             tags=self._tags,
         )
@@ -54,7 +55,7 @@ class SnowflakeCheck(AgentCheck):
 
     def check(self, _):
         self.connect()
-        # q = "select reported_client_type, sum(iff(is_success = 'NO', 1, 0)), sum(iff(is_success = 'YES', 1, 0)), count(*) from login_history group by reported_client_type;"
+        # q = "select WAREHOUSE_NAME, AVG_RUNNING, AVG_QUEUED_LOAD, AVG_QUEUED_PROVISIONING, AVG_BLOCKED from warehouse_load_history where start_time >= TIMESTAMP_FROM_PARTS('2020', '8', '5', '21', '3', '41');"
         # cur = self._conn.cursor()
         # cur.execute(q)
         # raise Exception(cur.fetchall())
@@ -78,8 +79,9 @@ class SnowflakeCheck(AgentCheck):
                 cursor.execute(query, ('2020', '8', '5', '21', '3', '41'))
             else:
                 cursor.execute(query)
+
             if cursor.rowcount is None or cursor.rowcount < 1:
-                self.log.error("Failed to fetch records from query: `%s`.", query)
+                self.log.debug("Failed to fetch records from query: `%s`.", query)
                 return []
             return cursor.fetchall()
 

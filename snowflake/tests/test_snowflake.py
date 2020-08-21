@@ -11,10 +11,10 @@ from datadog_checks.snowflake import SnowflakeCheck, queries
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
 
-#
-# def test_check(dd_run_check, instance):
-#     check = SnowflakeCheck('snowflake', {}, [instance])
-#     dd_run_check(check)
+
+def test_check(dd_run_check, instance):
+    check = SnowflakeCheck('snowflake', {}, [instance])
+    dd_run_check(check)
 
 
 def test_storage_metrics(dd_run_check, aggregator, instance):
@@ -92,7 +92,7 @@ def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
 def test_login_metrics(dd_run_check, aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
 
-    expected_login_metrics =  [('SNOWFLAKE_UI', 2, 6, 8), ('PYTHON_DRIVER', 0, 148, 148)]
+    expected_login_metrics = [('SNOWFLAKE_UI', 2, 6, 8), ('PYTHON_DRIVER', 0, 148, 148)]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_login_metrics):
         check = SnowflakeCheck('snowflake', {}, [instance])
         check._conn = mock.MagicMock()
@@ -107,3 +107,23 @@ def test_login_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric('snowflake.logins.fail.count', value=0, tags=python_tags)
     aggregator.assert_metric('snowflake.logins.success.count', value=148, tags=python_tags)
     aggregator.assert_metric('snowflake.logins.total', value=148, tags=python_tags)
+
+
+def test_warehouse_load(dd_run_check, aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+
+    expected_wl_metrics = [
+        ('COMPUTE_WH', Decimal('0.000446667'), Decimal('0E-9'), Decimal('0E-9'), Decimal('0E-9')),
+        ('COMPUTE_WH', Decimal('0.002356667'), Decimal('0E-9'), Decimal('0E-9'), Decimal('0E-9')),
+    ]
+    expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH']
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_wl_metrics):
+        check = SnowflakeCheck('snowflake', {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = [queries.WarehouseLoad]
+        dd_run_check(check)
+    aggregator.assert_metric('snowflake.query.executed.avg', value=0.000446667, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.executed.avg', value=0.002356667, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.queued_overload.avg', value=0, count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.queued_provision.avg', value=0, count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.blocked.avg', value=0, count=2, tags=expected_tags)

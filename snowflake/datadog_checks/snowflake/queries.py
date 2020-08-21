@@ -66,13 +66,28 @@ WarehouseCreditUsage = Query(
 LoginMetrics = Query(
     {
         'name': 'login.metrics',
-        'query': "select reported_client_type, sum(iff(is_success = 'NO', 1, 0)), sum(iff(is_success = 'YES', 1, 0)),"
-        "count(*) from login_history group by reported_client_type;",
+        'query': "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)),"
+        "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
         'columns': [
             {'name': 'client_type', 'type': 'tag'},
             {'name': 'logins.fail.count', 'type': 'monotonic_count'},
             {'name': 'logins.success.count', 'type': 'monotonic_count'},
             {'name': 'logins.total', 'type': 'monotonic_count'},
+        ],
+    }
+)
+
+WarehouseLoad = Query(
+    {
+        'name': 'warehouse_load.metrics',
+        'query': 'select WAREHOUSE_NAME, AVG_RUNNING, AVG_QUEUED_LOAD, AVG_QUEUED_PROVISIONING, AVG_BLOCKED from '
+        'WAREHOUSE_LOAD_HISTORY where start_time >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);',
+        'columns': [
+            {'name': 'warehouse', 'type': 'tag'},
+            {'name': 'query.executed.avg', 'type': 'gauge'},
+            {'name': 'query.queued_overload.avg', 'type': 'gauge'},
+            {'name': 'query.queued_provision.avg', 'type': 'gauge'},
+            {'name': 'query.blocked.avg', 'type': 'gauge'},
         ],
     }
 )
