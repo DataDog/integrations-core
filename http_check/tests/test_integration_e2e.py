@@ -21,7 +21,7 @@ def test_check_coverage_integration(aggregator, http_check):
 
 
 @pytest.mark.e2e
-def test_check_coverage_e2e(dd_agent_check, mock_http_e2e_hosts):
+def test_check_coverage_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG_E2E)
 
     assert_check_coverage(aggregator)
