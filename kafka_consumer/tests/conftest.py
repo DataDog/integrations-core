@@ -5,7 +5,7 @@ import os
 import time
 
 import pytest
-from datadog_test_libs.utils.mock_dns import mock_e2e_agent, mock_local
+from datadog_test_libs.utils.mock_dns import mock_local
 from kafka import KafkaConsumer
 
 from datadog_checks.dev import WaitFor, docker_run
@@ -35,13 +35,6 @@ def initialize_topics():
 
 
 @pytest.fixture(scope='session')
-def mock_kafka_dns_e2e():
-    """Only for e2e testing"""
-    with mock_e2e_agent('kafka_consumer', ('kafka1', 'kafka2')):
-        yield
-
-
-@pytest.fixture(scope='session')
 def mock_local_kafka_hosts_dns():
     mapping = {'kafka1': ('127.0.0.1', 9092), 'kafka2': ('127.0.0.1', 9093)}
     with mock_local(mapping):
@@ -63,7 +56,7 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
             'KAFKA_HOST': HOST_IP
         },
     ):
-        yield e2e_instance
+        yield e2e_instance, {'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')]}
 
 
 @pytest.fixture(scope='session')

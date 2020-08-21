@@ -5,7 +5,7 @@ import os
 import sys
 
 import pytest
-from datadog_test_libs.utils.mock_dns import mock_e2e_agent, mock_local
+from datadog_test_libs.utils.mock_dns import mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run
@@ -20,18 +20,14 @@ MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock
 @pytest.fixture(scope='session')
 def dd_environment(mock_local_http_dns):
     cacert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
-    e2e_metadata = {'docker_volumes': ['{}:/opt/cacert.pem'.format(cacert_path)]}
+    e2e_metadata = {
+        'docker_volumes': ['{}:/opt/cacert.pem'.format(cacert_path)],
+        'custom_hosts': [(host, '127.0.0.1') for host in MOCKED_HOSTS],
+    }
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, log_patterns=["starting server on port"]
     ):
         yield CONFIG_E2E, e2e_metadata
-
-
-@pytest.fixture(scope='session')
-def mock_http_e2e_hosts():
-    """Only for e2e testing"""
-    with mock_e2e_agent('http_check', MOCKED_HOSTS):
-        yield
 
 
 @pytest.fixture(scope='session')

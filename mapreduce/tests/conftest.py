@@ -6,6 +6,8 @@ import os
 from copy import deepcopy
 
 import pytest
+import requests
+from datadog_test_libs.utils.mock_dns import mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run
@@ -27,9 +29,11 @@ from .common import (
     setup_mapreduce,
 )
 
+MOCKED_HOSTS = ('namenode', 'datanode', 'resourcemanager', 'nodemanager', 'historyserver')
+
 
 @pytest.fixture(scope="session")
-def dd_environment():
+def dd_environment(mock_local_mapreduce_dns):
     env = {'HOSTNAME': HOST}
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
@@ -59,6 +63,18 @@ def mocked_request():
 @pytest.fixture
 def mocked_auth_request():
     with patch("requests.get", new=requests_auth_mock):
+        yield
+
+
+def get_custom_hosts():
+    # creat a mapping of mapreduce hostnames to localhost for DNS resolution
+    custom_hosts = [(host, '127.0.0.1') for host in MOCKED_E2E_HOSTS]
+    return custom_hosts
+
+@pytest.fixture(scope='session')
+def mock_local_mapreduce_dns():
+    mapping = {x: ('127.0.0.1', 443) for x in MOCKED_HOSTS}
+    with mock_local(mapping):
         yield
 
 
