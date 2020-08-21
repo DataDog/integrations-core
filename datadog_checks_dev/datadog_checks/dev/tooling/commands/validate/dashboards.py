@@ -7,7 +7,7 @@ import click
 
 from ....utils import read_file
 from ...utils import get_assets_from_manifest, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
 DASHBOARD_ONLY_FIELDS = {"layout_type", "title", "created_at"}
@@ -32,13 +32,11 @@ def dashboards():
     """Validate all Dashboard definition files."""
     echo_info("Validating all Dashboard definition files...")
     failed_checks = 0
-    old_payloads = 0
     ok_checks = 0
 
     for check_name in sorted(get_valid_integrations()):
         display_queue = []
         file_failed = False
-        file_old_format = False
 
         dashboard_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'dashboards')
         for invalid in invalid_files:
@@ -67,9 +65,9 @@ def dashboards():
 
             # Confirm the dashboard payload comes from the old API for now
             if not _is_dashboard_format(decoded):
-                file_old_format = True
+                file_failed = True
                 display_queue.append(
-                    (echo_warning, f'    {dashboard_file} is not using the new /dashboard payload format.'),
+                    (echo_failure, f'    {dashboard_file} is not using the new /dashboard payload format.'),
                 )
 
             if file_failed:
@@ -83,19 +81,8 @@ def dashboards():
             else:
                 ok_checks += 1
 
-            if file_old_format:
-                old_payloads += 1
-                # Display detailed info if file is using the old screen/time payloads
-                echo_info(f'{check_name}... ', nl=False)
-                echo_warning(' WARNING')
-                for display_func, message in display_queue:
-                    display_func(message)
-                display_queue = []
-
     if ok_checks:
         echo_success(f"{ok_checks} valid files")
-    if old_payloads:
-        echo_warning(f"{old_payloads} using the old screen/time payloads and should be migrated")
     if failed_checks:
         echo_failure(f"{failed_checks} invalid files")
         abort()
