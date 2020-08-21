@@ -8,7 +8,6 @@ from contextlib import closing
 import pymysql
 from datadog import statsd
 
-from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, is_dbm_enabled
 
@@ -53,8 +52,10 @@ class MySQLStatementMetrics(object):
         if not (is_dbm_enabled() and self.is_enabled):
             return []
 
+        def keyfunc(row):
+            return (row['schema'], row['digest'])
+
         rows = self._query_summary_per_statement(db)
-        keyfunc = lambda row: (row['schema'], row['digest'])
         rows = self._state.compute_derivative_rows(rows, METRICS.keys(), key=keyfunc)
         rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=keyfunc)
 
@@ -81,8 +82,9 @@ class MySQLStatementMetrics(object):
                 self.log.debug("AgentCheck.count(%s, %s, tags=%s)", name, value, tags)
                 instance.count(name, value, tags=tags)
 
-        statsd.timing("dd.mysql.collect_per_statement_metrics.time", (time.time() - start_time) * 1000,
-                      tags=instance_tags)
+        statsd.timing(
+            "dd.mysql.collect_per_statement_metrics.time", (time.time() - start_time) * 1000, tags=instance_tags
+        )
 
     def _query_summary_per_statement(self, db):
         """
@@ -92,7 +94,7 @@ class MySQLStatementMetrics(object):
         several fields must be further processed from the delta values.
         """
 
-        sql_statement_summary ="""\
+        sql_statement_summary = """\
             SELECT `schema_name` as `schema`,
                 `digest` as `digest`,
                 `digest_text` as `query`,
@@ -118,7 +120,7 @@ class MySQLStatementMetrics(object):
 
                 rows = cursor.fetchall()
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Statement summary metrics are unavailable at this time: %s", e)
+            self.warn("Statement summary metrics are unavailable at this time: %s", e)
             return []
 
         return rows

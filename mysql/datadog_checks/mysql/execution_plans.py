@@ -4,25 +4,19 @@ from contextlib import closing
 
 import pymysql
 from datadog import statsd
+
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
+from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature, submit_exec_plan_events
+from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter, ExpiringCache
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
 
-from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, ExpiringCache
 
-VALID_EXPLAIN_STATEMENTS = frozenset({
-    'select',
-    'table',
-    'delete',
-    'insert',
-    'replace',
-    'update',
-})
+VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
 # default sampling settings for events_statements_* tables
 # rate limit is in samples/second
@@ -79,7 +73,9 @@ class ExecutionPlansMixin(object):
           GROUP BY digest
           ORDER BY timer_wait DESC
               LIMIT %s
-            """.format(events_statements_table)
+            """.format(
+            events_statements_table
+        )
 
         with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
             params = ('statement/%', 'EXPLAIN %', self._checkpoint, row_limit)
@@ -136,46 +132,48 @@ class ExecutionPlansMixin(object):
                 statement_plan_sig = (query_signature, plan_signature)
                 if statement_plan_sig not in seen_statement_plan_sigs:
                     seen_statement_plan_sigs.add(statement_plan_sig)
-                    events.append({
-                        'duration': duration_ns,
-                        'db': {
-                            'instance': schema,
-                            'statement': obfuscated_statement,
-                            'query_signature': compute_sql_signature(obfuscated_statement),
-                            'plan': plan,
-                            'plan_cost': self._parse_execution_plan_cost(plan),
-                            'plan_signature': plan_signature,
-                            'debug': {
-                                'normalized_plan': normalized_plan,
-                                'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
-                                'digest_text': digest_text,
+                    events.append(
+                        {
+                            'duration': duration_ns,
+                            'db': {
+                                'instance': schema,
+                                'statement': obfuscated_statement,
+                                'query_signature': compute_sql_signature(obfuscated_statement),
+                                'plan': plan,
+                                'plan_cost': self._parse_execution_plan_cost(plan),
+                                'plan_signature': plan_signature,
+                                'debug': {
+                                    'normalized_plan': normalized_plan,
+                                    'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
+                                    'digest_text': digest_text,
+                                },
+                                'mysql': {
+                                    'lock_time': row['lock_time_ns'],
+                                    'rows_affected': row['rows_affected'],
+                                    'rows_sent': row['rows_sent'],
+                                    'rows_examined': row['rows_examined'],
+                                    'select_full_join': row['select_full_join'],
+                                    'select_full_range_join': row['select_full_range_join'],
+                                    'select_range': row['select_range'],
+                                    'select_range_check': row['select_range_check'],
+                                    'select_scan': row['select_scan'],
+                                    'sort_merge_passes': row['sort_merge_passes'],
+                                    'sort_range': row['sort_range'],
+                                    'sort_rows': row['sort_rows'],
+                                    'sort_scan': row['sort_scan'],
+                                    'no_index_used': row['no_index_used'],
+                                    'no_good_index_used': row['no_good_index_used'],
+                                },
                             },
-                            'mysql': {
-                                'lock_time': row['lock_time_ns'],
-                                'rows_affected': row['rows_affected'],
-                                'rows_sent': row['rows_sent'],
-                                'rows_examined': row['rows_examined'],
-                                'select_full_join': row['select_full_join'],
-                                'select_full_range_join': row['select_full_range_join'],
-                                'select_range': row['select_range'],
-                                'select_range_check': row['select_range_check'],
-                                'select_scan': row['select_scan'],
-                                'sort_merge_passes': row['sort_merge_passes'],
-                                'sort_range': row['sort_range'],
-                                'sort_rows': row['sort_rows'],
-                                'sort_scan': row['sort_scan'],
-                                'no_index_used': row['no_index_used'],
-                                'no_good_index_used': row['no_good_index_used'],
-                            }
                         }
-                    })
+                    )
 
         if num_truncated > 0:
             self.log.warning(
                 'Unable to collect %d/%d execution plans due to truncated SQL text. Consider raising '
                 '`performance_schema_max_sql_text_length` to capture these queries.',
                 num_truncated,
-                num_truncated + len(events)
+                num_truncated + len(events),
             )
 
         return events
@@ -222,8 +220,11 @@ class ExecutionPlansMixin(object):
         preferred_tables = ['events_statements_history_long', 'events_statements_history', 'events_statements_current']
         events_statements_table = options.get('events_statements_table', None)
         if events_statements_table and events_statements_table not in DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS:
-            self.log.warning("invalid events_statements_table: %s. must be one of %s", events_statements_table,
-                             ', '.join(DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS.keys()))
+            self.log.warning(
+                "invalid events_statements_table: %s. must be one of %s",
+                events_statements_table,
+                ', '.join(DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS.keys()),
+            )
             events_statements_table = None
         if events_statements_table:
             preferred_tables = [events_statements_table]
@@ -258,23 +259,25 @@ class ExecutionPlansMixin(object):
             chosen_table = table
             break
 
-        strategy = (
-            chosen_table,
-            collect_exec_plans_time_limit,
-            collect_exec_plans_rate_limit
-        )
+        strategy = (chosen_table, collect_exec_plans_time_limit, collect_exec_plans_rate_limit)
 
         if chosen_table:
             # cache only successful strategies
             # should be short enough that we'll reflect updates "relatively quickly"
             # i.e., an aurora replica becomes a master (or vice versa).
-            self.log.debug("found plan collection strategy. chosen_table=%s, time_limit=%s, rate_limit=%s",
-                           chosen_table, collect_exec_plans_time_limit, collect_exec_plans_rate_limit)
-            self._expiring_cache.set("plan_collection_strategy", strategy,
-                                     options.get('plan_collection_strategy_cache_time', 10 * 60))
+            self.log.debug(
+                "found plan collection strategy. chosen_table=%s, time_limit=%s, rate_limit=%s",
+                chosen_table,
+                collect_exec_plans_time_limit,
+                collect_exec_plans_rate_limit,
+            )
+            self._expiring_cache.set(
+                "plan_collection_strategy", strategy, options.get('plan_collection_strategy_cache_time', 10 * 60)
+            )
         else:
             self.log.warning(
-                "no valid performance_schema.events_statements table found. cannot collect execution plans.")
+                "no valid performance_schema.events_statements table found. cannot collect execution plans."
+            )
 
         return strategy
 
@@ -285,7 +288,7 @@ class ExecutionPlansMixin(object):
         (
             events_statements_table,
             collect_exec_plans_time_limit,
-            collect_exec_plans_rate_limit
+            collect_exec_plans_rate_limit,
         ) = self._get_plan_collection_strategy(db, options, min_collection_interval)
 
         if not events_statements_table:
@@ -300,17 +303,22 @@ class ExecutionPlansMixin(object):
         seen_statement_plan_sigs = set()
         while time.time() - start_time < collect_exec_plans_time_limit:
             rate_limiter.sleep()
-            rows = self._get_events_statements_by_digest(db, events_statements_table,
-                                                         options.get('events_statements_row_limit', 5000))
+            rows = self._get_events_statements_by_digest(
+                db, events_statements_table, options.get('events_statements_row_limit', 5000)
+            )
             events = self._collect_plans_for_statements(db, rows, seen_statement_plan_sigs, instance_tags)
             if events:
                 submit_exec_plan_events(events, instance_tags, "mysql")
 
-        statsd.gauge("dd.mysql.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
-                     tags=instance_tags)
+        statsd.gauge(
+            "dd.mysql.collect_execution_plans.total.time", (time.time() - start_time) * 1000, tags=instance_tags
+        )
         statsd.gauge("dd.mysql.collect_execution_plans.seen_statements", len(seen_digests), tags=instance_tags)
-        statsd.gauge("dd.mysql.collect_execution_plans.seen_statement_plan_sigs", len(seen_statement_plan_sigs),
-                     tags=instance_tags)
+        statsd.gauge(
+            "dd.mysql.collect_execution_plans.seen_statement_plan_sigs",
+            len(seen_statement_plan_sigs),
+            tags=instance_tags,
+        )
 
     def _attempt_explain(self, cursor, statement, schema):
         """
@@ -343,13 +351,15 @@ class ExecutionPlansMixin(object):
             return None
 
         exceptions = (pymysql.err.InternalError, pymysql.err.ProgrammingError)
-        non_retryable_errors = frozenset({
-            1044,  # access denied on database
-            1046,  # no permission on statement
-            1049,  # unknown database
-            1305,  # procedure does not exist
-            1370,  # no execute on procedure
-        })
+        non_retryable_errors = frozenset(
+            {
+                1044,  # access denied on database
+                1046,  # no permission on statement
+                1049,  # unknown database
+                1305,  # procedure does not exist
+                1370,  # no execute on procedure
+            }
+        )
 
         try:
             # Switch to the right schema; this is necessary when the statement uses non-fully qualified tables
@@ -360,10 +370,12 @@ class ExecutionPlansMixin(object):
                 raise
             if e.args[0] in non_retryable_errors:
                 self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
-            self.log.warning('Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s',
-                             schema,
-                             e.args,
-                             obfuscated_statement)
+            self.log.warning(
+                'Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s',
+                schema,
+                e.args,
+                obfuscated_statement,
+            )
             return None
 
         # Use a cached strategy for the schema, if any, or try each strategy to collect plans
@@ -383,10 +395,12 @@ class ExecutionPlansMixin(object):
                     raise
                 if e.args[0] in non_retryable_errors:
                     self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
-                self.log.debug('Failed to collect statement with strategy %s, error: %s, statement: %s',
-                               strategy,
-                               e.args,
-                               obfuscated_statement)
+                self.log.debug(
+                    'Failed to collect statement with strategy %s, error: %s, statement: %s',
+                    strategy,
+                    e.args,
+                    obfuscated_statement,
+                )
                 continue
 
             if plan:
@@ -395,8 +409,10 @@ class ExecutionPlansMixin(object):
                 break
 
         if not plan:
-            self.log.warning('Cannot collect execution plan for statement (enable debug logs to log attempts): %s',
-                             obfuscated_statement)
+            self.log.warning(
+                'Cannot collect execution plan for statement (enable debug logs to log attempts): %s',
+                obfuscated_statement,
+            )
 
         return plan
 
@@ -433,5 +449,5 @@ class ExecutionPlansMixin(object):
         """
         Parses the total cost from the execution plan, if set. If not set, returns cost of 0.
         """
-        cost = json.loads(execution_plan).get('query_block', {}).get('cost_info', {}).get('query_cost', 0.)
-        return float(cost or 0.)
+        cost = json.loads(execution_plan).get('query_block', {}).get('cost_info', {}).get('query_cost', 0.0)
+        return float(cost or 0.0)

@@ -4,10 +4,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import re
-import json
-import socket
 import decimal
+import json
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
@@ -18,9 +16,6 @@ from six import PY3, iteritems, itervalues
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
-from .statements import MySQLStatementMetrics
-from .execution_plans import ExecutionPlansMixin
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
 from .const import (
@@ -41,6 +36,7 @@ from .const import (
     SYNTHETIC_VARS,
     VARIABLES_VARS,
 )
+from .execution_plans import ExecutionPlansMixin
 from .innodb_metrics import InnoDBMetrics
 from .queries import (
     SQL_95TH_PERCENTILE,
@@ -50,6 +46,7 @@ from .queries import (
     SQL_QUERY_SCHEMA_SIZE,
     SQL_WORKER_THREADS,
 )
+from .statements import MySQLStatementMetrics
 from .version_utils import get_version
 
 try:
@@ -58,11 +55,6 @@ try:
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
 
 
 if PY3:
@@ -129,7 +121,9 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 )
                 self._collect_system_metrics(self.config.host, db, self.config.tags)
                 self._collect_statement_metrics(db, self.config.tags)
-                self._collect_execution_plans(db, self.config.tags, self.config.options, self.config.min_collection_interval)
+                self._collect_execution_plans(
+                    db, self.config.tags, self.config.options, self.config.min_collection_interval
+                )
 
                 # keeping track of these:
                 self._put_qcache_stats()
