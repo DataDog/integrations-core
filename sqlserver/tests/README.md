@@ -2,7 +2,7 @@
 
 ## Windows
 
-To run the tests on Windows, an instance of MSSQL is expected to run on the host. The name of the database instance and the credentials reflect what we have on the CI environment, so that might not work out of the box on a local development environment.
+To run the tests on Windows, an instance of MSSQL is expected to run on the host. The name of the database instance and the credentials reflect the CI environment, so that might not work out of the box on a local development environment.
 
 ## Linux
 
