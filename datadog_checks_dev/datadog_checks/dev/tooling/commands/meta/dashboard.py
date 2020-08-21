@@ -75,8 +75,7 @@ def export(ctx, url, integration, author):
 
     payload = response.json()
     new_payload = {field: payload[field] for field in REQUIRED_FIELDS}
-    new_payload.setdefault('author_info', {})
-    new_payload['author_info']['author_name'] = author
+    new_payload['author_name'] = author
 
     output = json.dumps(new_payload, indent=4, sort_keys=True)
 
