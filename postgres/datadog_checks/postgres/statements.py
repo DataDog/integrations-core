@@ -178,7 +178,11 @@ class PgStatementsMixin(object):
                 self.log.warn("failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
-            tags = ['query_signature:' + compute_sql_signature(obfuscated_query)] + instance_tags
+            # The APM resource hash will use the same query signature because the grouped query is close
+            # enough to the raw query that they will intersect frequently.
+            query_signature = compute_sql_signature(obfuscated_query)
+            apm_resource_hash = query_signature
+            tags = ['query_signature:' + query_signature, 'resource_hash:' + apm_resource_hash] + instance_tags
             for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
                 if column not in row:
                     continue
@@ -277,12 +281,19 @@ class PgStatementsMixin(object):
                 continue
             seen_statements.add(original_statement)
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(original_statement)
-                query_signature = compute_sql_signature(obfuscated_statement)
                 plan_dict = self._run_explain(original_statement, instance_tags)
                 if not plan_dict:
                     continue
                 plan = json.dumps(plan_dict)
+
+                # Plans have several important signatures to tag events with. Note that for postgres, the
+                # query_signature and resource_hash will be the same value.
+                # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
+                # - `resource_hash` - hash computed off the raw sql text to match apm resources
+                # - `query_signature` - hash computed from the raw sql text to match query metrics
+                obfuscated_statement = datadog_agent.obfuscate_sql(original_statement)
+                query_signature = compute_sql_signature(obfuscated_statement)
+                apm_resource_hash = query_signature
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
                 plan_signature = compute_exec_plan_signature(normalized_plan)
                 statement_plan_sig = (query_signature, plan_signature)
@@ -294,6 +305,7 @@ class PgStatementsMixin(object):
                                 'instance': row['datname'],
                                 'statement': obfuscated_statement,
                                 'query_signature': query_signature,
+                                'resource_hash': apm_resource_hash,
                                 'plan': plan,
                                 'plan_cost': (plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0),
                                 'plan_signature': plan_signature,
