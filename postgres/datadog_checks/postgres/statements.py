@@ -2,14 +2,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import itertools
 import json
+import time
 
 import psycopg2
 import psycopg2.extras
-import time
 from datadog import statsd
-from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
+
+from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature, submit_exec_plan_events
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter
 
@@ -24,7 +24,7 @@ except ImportError:
 # but not when it is run every 100ms for instance. Full queries can be quite large.
 STATEMENTS_QUERY = """
 SELECT {cols}
-  FROM {pg_stat_statements_function} as pg_stat_statements 
+  FROM {pg_stat_statements_function} as pg_stat_statements
   LEFT JOIN pg_roles
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
@@ -36,16 +36,9 @@ ORDER BY (pg_stat_statements.total_time / NULLIF(pg_stat_statements.calls, 0)) D
 
 
 # Required columns for the check to run
-PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({
-    'calls',
-    'query',
-    'total_time',
-    'rows',
-})
+PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'total_time', 'rows'})
 
-PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({
-    'queryid',
-})
+PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({'queryid'})
 
 # Monotonically increasing count columns to be converted to metrics
 PG_STAT_STATEMENTS_METRIC_COLUMNS = {
@@ -73,14 +66,7 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
     'query': 'query',
 }
 
-VALID_EXPLAIN_STATEMENTS = frozenset({
-    'select',
-    'table',
-    'delete',
-    'insert',
-    'replace',
-    'update',
-})
+VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
 # keys from pg_stat_activity to include along with each (sample & execution plan)
 pg_stat_activity_sample_keys = [
@@ -147,8 +133,7 @@ class PgStatementsMixin(object):
             return self.__pg_stat_statements_query_columns
         all_columns = list(PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()) + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
         self.__pg_stat_statements_query_columns = sorted(
-            list(set(all_columns) & self._pg_stat_statements_columns) +
-            list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
+            list(set(all_columns) & self._pg_stat_statements_columns) + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         )
         return self.__pg_stat_statements_query_columns
 
@@ -156,16 +141,23 @@ class PgStatementsMixin(object):
         # Sanity checks
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - self._pg_stat_statements_columns
         if len(missing_columns) > 0:
-            self.log.warning('Unable to collect statement metrics because required fields are unavailable: {}'.format(
-                ', '.join(list(missing_columns))))
+            self.log.warning(
+                'Unable to collect statement metrics because required fields are unavailable: {}'.format(
+                    ', '.join(list(missing_columns))
+                )
+            )
             return
 
         cursor = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        rows = self._execute_query(cursor, STATEMENTS_QUERY.format(
-            cols=', '.join(self._pg_stat_statements_query_columns),
-            pg_stat_statements_function=self.config.pg_stat_statements_function
-        ), params=(self.config.dbname,))
+        rows = self._execute_query(
+            cursor,
+            STATEMENTS_QUERY.format(
+                cols=', '.join(self._pg_stat_statements_query_columns),
+                pg_stat_statements_function=self.config.pg_stat_statements_function,
+            ),
+            params=(self.config.dbname,),
+        )
         statsd.gauge("dd.postgres.collect_statement_metrics.rows", len(rows), tags=instance_tags)
         if not rows:
             return
@@ -211,10 +203,12 @@ class PgStatementsMixin(object):
     def _get_new_pg_stat_activity(self, instance_tags=None):
         start_time = time.time()
         query = """
-        SELECT * FROM {pg_stat_activity_function} 
+        SELECT * FROM {pg_stat_activity_function}
         WHERE datname = %s
         AND coalesce(TRIM(query), '') != ''
-        """.format(pg_stat_activity_function=self.config.pg_stat_activity_function)
+        """.format(
+            pg_stat_activity_function=self.config.pg_stat_activity_function
+        )
         self.db.rollback()
         with self.db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             if self._activity_last_query_start:
@@ -229,8 +223,9 @@ class PgStatementsMixin(object):
             self._activity_last_query_start = max_query_start
 
         # TODO: once stable, either remove these development metrics or make them configurable in a debug mode
-        statsd.histogram("dd.postgres.get_new_pg_stat_activity.time", (time.time() - start_time) * 1000,
-                         tags=instance_tags)
+        statsd.histogram(
+            "dd.postgres.get_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=instance_tags
+        )
         statsd.histogram("dd.postgres.get_new_pg_stat_activity.rows", len(rows), tags=instance_tags)
         statsd.increment("dd.postgres.get_new_pg_stat_activity.total_rows", len(rows), tags=instance_tags)
         return rows
@@ -238,7 +233,7 @@ class PgStatementsMixin(object):
     def can_explain_statement(self, statement):
         # TODO: cleaner query cleaning to strip comments, etc.
         if statement == '<insufficient privilege>':
-            self.log.warn("insufficient privilege. cannot collect query. review the setup instructions at (TODO: add documentation link).")
+            self.log.warn("Insufficient privilege to collect statement.")
             return False
         if statement.strip().split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
             return False
@@ -252,14 +247,18 @@ class PgStatementsMixin(object):
         with self.db.cursor() as cursor:
             try:
                 start_time = time.time()
-                cursor.execute("""SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                    explain_function=self.config.collect_exec_plan_function,
-                    statement=statement
-                ))
+                cursor.execute(
+                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                        explain_function=self.config.collect_exec_plan_function, statement=statement
+                    )
+                )
                 result = cursor.fetchone()
                 statsd.histogram("dd.postgres.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
             except psycopg2.errors.UndefinedFunction:
-                self.log.warn("failed to collect execution plan due to undefined explain_function: %s. refer to setup documentation (TODO link)", self.config.collect_exec_plan_function)
+                self.log.warn(
+                    "Failed to collect execution plan due to undefined explain_function: %s.",
+                    self.config.collect_exec_plan_function,
+                )
                 return None
             except Exception as e:
                 statsd.increment("dd.postgres.run_explain.error", tags=instance_tags)
@@ -269,8 +268,7 @@ class PgStatementsMixin(object):
             return None
         return result[0][0]
 
-    def _explain_new_pg_stat_activity(self, samples, seen_statements, seen_statement_plan_sigs,
-                                      instance_tags):
+    def _explain_new_pg_stat_activity(self, samples, seen_statements, seen_statement_plan_sigs, instance_tags):
         start_time = time.time()
         events = []
         for row in samples:
@@ -290,27 +288,30 @@ class PgStatementsMixin(object):
                 statement_plan_sig = (query_signature, plan_signature)
                 if statement_plan_sig not in seen_statement_plan_sigs:
                     seen_statement_plan_sigs.add(statement_plan_sig)
-                    events.append({
-                        'db': {
-                            'instance': row['datname'],
-                            'statement': obfuscated_statement,
-                            'query_signature': query_signature,
-                            'plan': plan,
-                            'plan_cost': (plan_dict.get('Plan', {}).get('Total Cost', 0.) or 0.),
-                            'plan_signature': plan_signature,
-                            'debug': {
-                                'normalized_plan': normalized_plan,
-                                'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
-                                'original_statement': original_statement,
-                            },
-                            'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
+                    events.append(
+                        {
+                            'db': {
+                                'instance': row['datname'],
+                                'statement': obfuscated_statement,
+                                'query_signature': query_signature,
+                                'plan': plan,
+                                'plan_cost': (plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0),
+                                'plan_signature': plan_signature,
+                                'debug': {
+                                    'normalized_plan': normalized_plan,
+                                    'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
+                                    'original_statement': original_statement,
+                                },
+                                'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
+                            }
                         }
-                    })
+                    )
             except Exception:
                 statsd.increment("dd.postgres.explain_new_pg_stat_activity.error")
                 self.log.exception("failed to explain & process query '%s'", original_statement)
-        statsd.histogram("dd.postgres.explain_new_pg_stat_activity.time", (time.time() - start_time) * 1000,
-                         tags=instance_tags)
+        statsd.histogram(
+            "dd.postgres.explain_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=instance_tags
+        )
         return events
 
     def _collect_execution_plans(self, instance_tags):
@@ -327,13 +328,18 @@ class PgStatementsMixin(object):
                 break
             self._activity_sample_rate_limiter.sleep()
             samples = self._get_new_pg_stat_activity(instance_tags=instance_tags)
-            events = self._explain_new_pg_stat_activity(samples, seen_statements, seen_statement_plan_sigs,
-                                                        instance_tags)
+            events = self._explain_new_pg_stat_activity(
+                samples, seen_statements, seen_statement_plan_sigs, instance_tags
+            )
             if events:
                 submit_exec_plan_events(events, instance_tags, "postgres")
 
-        statsd.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
-                     tags=instance_tags)
+        statsd.gauge(
+            "dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000, tags=instance_tags
+        )
         statsd.gauge("dd.postgres.collect_execution_plans.seen_statements", len(seen_statements), tags=instance_tags)
-        statsd.gauge("dd.postgres.collect_execution_plans.seen_statement_plan_sigs", len(seen_statement_plan_sigs),
-                     tags=instance_tags)
+        statsd.gauge(
+            "dd.postgres.collect_execution_plans.seen_statement_plan_sigs",
+            len(seen_statement_plan_sigs),
+            tags=instance_tags,
+        )

@@ -13,11 +13,6 @@ from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
 from .config import PostgresConfig
 from .statements import PgStatementsMixin
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
-
 from .util import (
     ALL_SCHEMAS,
     CONNECTION_METRICS,
@@ -57,7 +52,7 @@ class PostgreSql(PgStatementsMixin, AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
-    
+
         self.config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self.config)
         self.statement_cache = {}
@@ -248,9 +243,7 @@ class PostgreSql(PgStatementsMixin, AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self, instance_tags
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
