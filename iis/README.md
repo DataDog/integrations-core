@@ -12,6 +12,9 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, [install the Agent][2] on your IIS servers.
 
+<!-- xxx tabs xxx -->	
+<!-- xxx tab "Host" xxx -->	
+
 #### Host
 
 To configure this check for an Agent running on a host:
