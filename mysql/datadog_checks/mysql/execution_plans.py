@@ -125,10 +125,19 @@ class ExecutionPlansMixin(object):
                     self.log.exception("failed to run explain on query %s", sql_text)
                     continue
 
+                # Plans have several important signatures to tag events with:
+                # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
+                # - `resource_hash` - hash computed off the raw sql text to match apm resources
+                # - `query_signature` - hash computed from the digest text to match query metrics
+
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
-                obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
-                query_signature = compute_sql_signature(obfuscated_statement)
                 plan_signature = compute_exec_plan_signature(normalized_plan)
+
+                obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
+                apm_resource_hash = compute_sql_signature(obfuscated_statement)
+
+                query_signature = compute_sql_signature(datadog_agent.obfuscate_sql(digest_text))
+
                 statement_plan_sig = (query_signature, plan_signature)
                 if statement_plan_sig not in seen_statement_plan_sigs:
                     seen_statement_plan_sigs.add(statement_plan_sig)
@@ -138,7 +147,8 @@ class ExecutionPlansMixin(object):
                             'db': {
                                 'instance': schema,
                                 'statement': obfuscated_statement,
-                                'query_signature': compute_sql_signature(obfuscated_statement),
+                                'query_signature': query_signature,
+                                'resource_hash': apm_resource_hash,
                                 'plan': plan,
                                 'plan_cost': self._parse_execution_plan_cost(plan),
                                 'plan_signature': plan_signature,
