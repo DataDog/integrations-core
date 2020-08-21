@@ -193,7 +193,12 @@ class Redis(AgentCheck):
         try:
             info = conn.info()
             latency_ms = round_value((time.time() - start) * 1000, 2)
-            tags = sorted(self.tags + ["redis_role:%s" % info["role"]])
+
+            tags = self.tags
+            if info.get("role"):
+                tags += ["redis_role:{}".format(info["role"])]
+            tags = sorted(tags)
+
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
             try:
                 config = conn.config_get("maxclients")

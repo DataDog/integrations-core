@@ -34,7 +34,7 @@ def test_slowlog(aggregator, redis_instance):
     redis_check = Redis('redisdb', {}, [redis_instance])
     redis_check.check(redis_instance)
 
-    expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH']
+    expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH', 'redis_role:master']
     aggregator.assert_metric('redis.slowlog.micros', tags=expected_tags)
 
 
