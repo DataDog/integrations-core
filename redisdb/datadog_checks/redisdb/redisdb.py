@@ -194,7 +194,7 @@ class Redis(AgentCheck):
             info = conn.info()
             latency_ms = round_value((time.time() - start) * 1000, 2)
 
-            tags = self.tags
+            tags = list(self.tags)
             if info.get("role"):
                 tags.append("redis_role:{}".format(info["role"]))
             else:

@@ -14,7 +14,7 @@ from .common import HOST, PASSWORD, PORT
 
 TEST_KEY = "testkey"
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("redis_auth")]
 
 
 def test_slowlog(aggregator, redis_instance):
@@ -34,7 +34,7 @@ def test_slowlog(aggregator, redis_instance):
     redis_check = Redis('redisdb', {}, [redis_instance])
     redis_check.check(redis_instance)
 
-    expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH', 'redis_role:master']
+    expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH']
     aggregator.assert_metric('redis.slowlog.micros', tags=expected_tags)
 
 
