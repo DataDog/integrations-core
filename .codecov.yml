@@ -423,6 +423,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      Snowflake:
+        target: 75
+        flags:
+        - snowflake
       Spark:
         target: 75
         flags:
@@ -1032,6 +1036,11 @@ flags:
     paths:
     - snmp/datadog_checks/snmp
     - snmp/tests
+  snowflake:
+    carryforward: true
+    paths:
+    - snowflake/datadog_checks/snowflake
+    - snowflake/tests
   spark:
     carryforward: true
     paths:
