@@ -7,7 +7,7 @@
 * [Added] Update dependency tooling to support multiple version/marker combinations. See [#7391](https://github.com/DataDog/integrations-core/pull/7391).
 * [Fixed] Add security team. See [#7357](https://github.com/DataDog/integrations-core/pull/7357).
 * [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
-* [Fixed] [datadog_checks_dev] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
 
 ## 3.21.0 / 2020-08-18
 
