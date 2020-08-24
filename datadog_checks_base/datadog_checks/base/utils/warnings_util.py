@@ -27,12 +27,20 @@ else:
     simplefilter = warnings.simplefilter
 
 
+def disable_warnings(action):
+    simplefilter('ignore', action)
+
+
+def reset_warnings(action):
+    simplefilter('default', action)
+
+
 @contextmanager
 def disable_warnings_ctx(action, disable=True):
     if disable:
-        simplefilter('ignore', action)
+        disable_warnings(action)
         yield
-        simplefilter('default', action)
+        reset_warnings(action)
     else:
         # do nothing
         yield
