@@ -25,8 +25,34 @@ The Etcd check is included in the [Datadog Agent][2] package, so you don't need 
 
 To configure this check for an Agent running on a host:
 
+##### Metric collection
+
 1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Etcd performance data. See the [sample etcd.d/conf.yaml][4] for all available configuration options.
 2. [Restart the Agent][5]
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `etcd.d/conf.yaml` file to start collecting your etcd logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: "<LOG_FILE_PATH>"
+        source: etcd
+        service: "<SERVICE_NAME>"
+    ```
+
+    Change the `path` and `service` parameter values based on your environment. See the [sample etcd.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -35,11 +61,23 @@ To configure this check for an Agent running on a host:
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
+##### Metric collection
+
 | Parameter            | Value                                                |
 | -------------------- | ---------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `etcd`                                               |
 | `<INIT_CONFIG>`      | blank or `{}`                                        |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:2379/metrics"}` |
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][11].
+
+| Parameter      | Value                                             |
+| -------------- | ------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "etcd", "service": "<SERVICE_NAME>"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -88,3 +126,4 @@ To get a better idea of how (or why) to integrate Etcd with Datadog, check out o
 [8]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-etcd-performance
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/
