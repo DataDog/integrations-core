@@ -103,7 +103,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `activemq.d/conf.yaml` file to start collecting your Riak logs:
+2. Add this configuration block to your `activemq.d/conf.yaml` file to start collecting your ActiveMQ logs:
 
    ```yaml
    logs:
