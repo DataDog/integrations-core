@@ -22,12 +22,12 @@ class RCBuildCardsUpdater:
                 f'A valid version is for example `7.21.0-rc.3`. '
                 f'You can disable the update of cards in RC builds column by removing --update-rc-builds-cards'
             )
+        else:
+            groups = match.groups()
+            if len(groups) != 6:
+                raise Exception('Regex in RCBuildCardsUpdater is not correct')
 
-        groups = match.groups()
-        if len(groups) != 6:
-            raise Exception('Regex in RCBuildCardsUpdater is not correct')
-
-        (_, self.__minor, self.__patch, _, _, self.__rc) = groups
+            (_, self.__minor, self.__patch, _, _, self.__rc) = groups
 
     def update_cards(self):
         rc_build_cards = [

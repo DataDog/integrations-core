@@ -12,6 +12,8 @@ class TrelloClient:
     LISTS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/lists'
     LABELS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/labels'
     CARDS_ENDPOINT = API_URL + '/1/cards'
+    MEMBERSHIP_ENDPOINT = API_URL + '/1/boards/ICjijxr4/memberships'
+    MEMBER_ENPOINT = API_URL + '/1/members'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -41,6 +43,21 @@ class TrelloClient:
             'team/intg-tools-libs': 'Tools and Libraries',
             'team/agent-security': 'Runtime-Security',
         }
+
+        self.label_github_team_map = {
+            'team/agent-apm': 'agent-apm',
+            'team/agent-core': 'agent-core',
+            'team/agent-platform': 'agent-platform',
+            'team/networks': 'networks',
+            'team/processes': 'processes',
+            'team/containers': 'container-integrations',
+            'team/container-app': 'container-app',
+            'team/integrations': 'agent-integrations',
+            'team/logs': 'logs-intake',
+            'team/intg-tools-libs': 'integrations-tools-and-libraries',
+            'team/agent-security': 'agent-security',
+        }
+
         self.label_map = {
             'Containers': '5e7910856f8e4363e3b51708',
             'Container App': '5e8b36f72f642272e75edd34',
@@ -150,3 +167,26 @@ class TrelloClient:
         response = requests.put(f'{self.CARDS_ENDPOINT}/{card_id}', headers=headers, data=data, params=self.auth)
         response.raise_for_status()
         return response.json()
+
+    def get_membership(self):
+        """
+        Get the members.
+        """
+        membership = requests.get(self.MEMBERSHIP_ENDPOINT, params=self.auth)
+        membership.raise_for_status()
+        return membership.json()
+
+    def get_member(self, id_member):
+        """
+        Get the member.
+        """
+        try:
+            membership = requests.get(f'{self.MEMBER_ENPOINT}/{id_member}', params=self.auth)
+            membership.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                raise Exception('Timeout, please try in 900 secondes') from e
+            else:
+                raise e
+
+        return membership.json()
