@@ -47,6 +47,7 @@ class SnowflakeCheck(AgentCheck):
                 queries.WarehouseCreditUsage,
                 queries.LoginMetrics,
                 queries.WarehouseLoad,
+                queries.QueryHistory,
             ],
             tags=self._tags,
         )
@@ -55,9 +56,9 @@ class SnowflakeCheck(AgentCheck):
 
     def check(self, _):
         self.connect()
-        # q = "select WAREHOUSE_NAME, AVG_RUNNING, AVG_QUEUED_LOAD, AVG_QUEUED_PROVISIONING, AVG_BLOCKED from warehouse_load_history where start_time >= TIMESTAMP_FROM_PARTS('2020', '8', '5', '21', '3', '41');"
+        # q = queries.QueryHistory.query
         # cur = self._conn.cursor()
-        # cur.execute(q)
+        # cur.execute(q, ('2020', '8', '5', '21', '3', '41'))
         # raise Exception(cur.fetchall())
 
         if self._last_ts is None:

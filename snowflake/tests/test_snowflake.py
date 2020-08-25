@@ -122,8 +122,30 @@ def test_warehouse_load(dd_run_check, aggregator, instance):
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.WarehouseLoad]
         dd_run_check(check)
-    aggregator.assert_metric('snowflake.query.executed.avg', value=0.000446667, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.executed.avg', value=0.002356667, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.queued_overload.avg', value=0, count=2, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.queued_provision.avg', value=0, count=2, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.blocked.avg', value=0, count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.executed', value=0.000446667, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.executed', value=0.002356667, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.queued_overload', value=0, count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.queued_provision', value=0, count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.blocked', value=0, count=2, tags=expected_tags)
+
+
+def test_query_metrics(dd_run_check, aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+
+    expected_query_metrics = [
+        ('USE', 'COMPUTE_WH', 'SNOWFLAKE', None, Decimal('4.333333'), Decimal('24.555556'),
+         Decimal('0.000000'), Decimal('0.000000'), Decimal('0.000000')),
+        ]
+
+    expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH', 'database:SNOWFLAKE', 'schema:None', 'query_type:USE']
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_query_metrics):
+        check = SnowflakeCheck('snowflake', {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = [queries.QueryHistory]
+        dd_run_check(check)
+
+    aggregator.assert_metric('snowflake.query.execution_time', value=4.333333, tags= expected_tags)
+    aggregator.assert_metric('snowflake.query.compilation_time', value=24.555556, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.bytes_scanned', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.bytes_written', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.bytes_deleted', value=0, count=1, tags=expected_tags)
