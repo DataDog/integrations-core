@@ -25,11 +25,25 @@ class Win32EventLogWMI(WinWMICheck):
     EXTRA_EVENT_PROPERTIES = ["InsertionStrings", "Message", "Logfile"]
     NAMESPACE = "root\\CIMV2"
     EVENT_CLASS = "Win32_NTLogEvent"
+    NEW_PARAMS = (
+        'tag_sid',
+        'interpret_messages',
+        'path',
+        'start',
+        'query',
+        'filters',
+        'included_messages',
+        'excluded_messages',
+        'domain',
+        'timeout',
+        'payload_size',
+        'bookmark_frequency',
+    )
 
     def __init__(self, name, init_config, instances):
         super(Win32EventLogWMI, self).__init__(name, init_config, instances)
         # Settings
-        self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
+        self._tag_event_id = is_affirmative(self.instance.get('tag_event_id', init_config.get('tag_event_id')))
         self._verbose = init_config.get('verbose', True)
         self._default_event_priority = init_config.get('default_event_priority', 'normal')
 
@@ -42,11 +56,14 @@ class Win32EventLogWMI(WinWMICheck):
                 'Set `legacy_mode` to `false` and read about the latest options, such as `query`.'
             )
         )
+        for new_param in self.NEW_PARAMS:
+            if new_param in self.instance:
+                self.log.warning("%s config option is ignored when running legacy mode. Please remove it", new_param)
 
     def check(self, instance):
         # Connect to the WMI provider
         host = instance.get('host', "localhost")
-        username = instance.get('username', "")
+        username = self.instance.get('user', self.instance.get('username', ''))
         password = instance.get('password', "")
         instance_tags = instance.get('tags', [])
         notify = instance.get('notify', [])

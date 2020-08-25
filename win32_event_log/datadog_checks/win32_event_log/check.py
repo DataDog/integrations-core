@@ -36,6 +36,16 @@ class Win32EventLogCheck(AgentCheck):
         'ntlm': win32evtlog.EvtRpcLoginAuthNTLM,
     }
 
+    LEGACY_PARAMS = (
+        'host',
+        'log_file',
+        'source_name',
+        'type',
+        'event_id',
+        'message_filters',
+        'event_format',
+    )
+
     # https://docs.microsoft.com/en-us/windows/win32/wes/eventmanifestschema-leveltype-complextype#remarks
     #
     # From
@@ -114,6 +124,12 @@ class Win32EventLogCheck(AgentCheck):
 
         if is_affirmative(self.instance.get('tag_sid', self.init_config.get('tag_sid', False))):
             self._collectors.append(self.collect_sid)
+
+        for legacy_param in self.LEGACY_PARAMS:
+            if legacy_param in self.instance:
+                self.log.warning(
+                    "%s config option is ignored unless running legacy mode. Please remove it", legacy_param
+                )
 
     def check(self, _):
         for event in self.consume_events():
@@ -400,7 +416,7 @@ class Win32EventLogCheck(AgentCheck):
         if auth_type not in self.LOGIN_FLAGS:
             raise ConfigurationError('Invalid `auth_type`, must be one of: {}'.format(', '.join(self.LOGIN_FLAGS)))
 
-        user = self.instance.get('user')
+        user = self.instance.get('user', self.instance.get('username'))
         domain = self.instance.get('domain')
         password = self.instance.get('password')
 
