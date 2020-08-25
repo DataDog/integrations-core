@@ -17,7 +17,7 @@ from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
-from .warnings_util import disable_warnings
+from .warnings_util import disable_warnings_ctx
 
 try:
     from contextlib import ExitStack
@@ -269,12 +269,11 @@ class RequestsWrapper(object):
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
-        if self.ignore_tls_warning:
-            # Disable globally for consistency between check runs
-            disable_warnings(InsecureRequestWarning)
-
         # Context managers that should wrap all requests
         self.request_hooks = []
+        if self.ignore_tls_warning:
+            self.request_hooks.append(self.handle_tls_warning)
+
         if config['kerberos_keytab']:
             self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
         if config['kerberos_cache']:
@@ -335,6 +334,11 @@ class RequestsWrapper(object):
             options.setdefault(option, value)
 
         return options
+
+    @contextmanager
+    def handle_tls_warning(self):
+        with disable_warnings_ctx(InsecureRequestWarning, disable=True):
+            yield
 
     @property
     def session(self):

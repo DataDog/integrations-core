@@ -13,7 +13,7 @@ from six import PY3, iteritems, itervalues, string_types
 from urllib3.exceptions import InsecureRequestWarning
 
 from ...utils.prometheus import metrics_pb2
-from ...utils.warnings_util import disable_warnings
+from ...utils.warnings_util import disable_warnings_ctx
 from .. import AgentCheck
 from ..libs.prometheus import text_fd_to_metric_families
 
@@ -514,7 +514,7 @@ class PrometheusScraperMixin(object):
             headers['accept-encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
             headers['accept'] = (
-                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
+                'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
             )
         headers.update(self.extra_headers)
         cert = None
@@ -523,16 +523,17 @@ class PrometheusScraperMixin(object):
             if isinstance(self.ssl_private_key, string_types):
                 cert = (self.ssl_cert, self.ssl_private_key)
         verify = True
+        disable_insecure_warnings = False
         if isinstance(self.ssl_ca_cert, string_types):
             verify = self.ssl_ca_cert
         elif self.ssl_ca_cert is False:
-            # Disable globally for consistency between check runs
-            disable_warnings(InsecureRequestWarning)
+            disable_insecure_warnings = True
             verify = False
         try:
-            response = requests.get(
-                endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
-            )
+            with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
+                response = requests.get(
+                    endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
+                )
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
