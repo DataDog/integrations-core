@@ -12,11 +12,6 @@ from datadog_checks.snowflake import SnowflakeCheck, queries
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
 
 
-def test_check(dd_run_check, instance):
-    check = SnowflakeCheck('snowflake', {}, [instance])
-    dd_run_check(check)
-
-
 def test_storage_metrics(dd_run_check, aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
 
@@ -133,9 +128,18 @@ def test_query_metrics(dd_run_check, aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
 
     expected_query_metrics = [
-        ('USE', 'COMPUTE_WH', 'SNOWFLAKE', None, Decimal('4.333333'), Decimal('24.555556'),
-         Decimal('0.000000'), Decimal('0.000000'), Decimal('0.000000')),
-        ]
+        (
+            'USE',
+            'COMPUTE_WH',
+            'SNOWFLAKE',
+            None,
+            Decimal('4.333333'),
+            Decimal('24.555556'),
+            Decimal('0.000000'),
+            Decimal('0.000000'),
+            Decimal('0.000000'),
+        ),
+    ]
 
     expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH', 'database:SNOWFLAKE', 'schema:None', 'query_type:USE']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_query_metrics):
@@ -144,7 +148,7 @@ def test_query_metrics(dd_run_check, aggregator, instance):
         check._query_manager.queries = [queries.QueryHistory]
         dd_run_check(check)
 
-    aggregator.assert_metric('snowflake.query.execution_time', value=4.333333, tags= expected_tags)
+    aggregator.assert_metric('snowflake.query.execution_time', value=4.333333, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.compilation_time', value=24.555556, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.bytes_scanned', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.bytes_written', value=0, count=1, tags=expected_tags)

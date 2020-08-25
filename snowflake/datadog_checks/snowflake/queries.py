@@ -89,7 +89,7 @@ WarehouseLoad = Query(
             {'name': 'query.executed', 'type': 'gauge'},
             {'name': 'query.queued_overload', 'type': 'gauge'},
             {'name': 'query.queued_provision', 'type': 'gauge'},
-            {'name': 'query.blocked.avg', 'type': 'gauge'},
+            {'name': 'query.blocked', 'type': 'gauge'},
         ],
     }
 )
@@ -99,8 +99,8 @@ QueryHistory = Query(
     {
         'name': 'warehouse_load.metrics',
         'query': 'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
-                 'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
-                 'from QUERY_HISTORY where start_time >=TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2, 3, 4;',
+        'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
+        'from QUERY_HISTORY where start_time >=TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2, 3, 4;',
         'columns': [
             {'name': 'query_type', 'type': 'tag'},
             {'name': 'warehouse', 'type': 'tag'},
