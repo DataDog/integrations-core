@@ -1,15 +1,15 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-snowflake.storage.storage_bytes.total,gauge,,byte,,Number of bytes of table storage used including bytes for data currently in Time Travel.,0,snowflake,storage bytes total
-snowflake.storage.stage_bytes.total,gauge,,byte,,Number of bytes of stage storage used by files in all internal stages.,0,snowflake,stage bytes total
-snowflake.storage.failsafe_bytes.total,gauge,,byte,,Number of bytes of data in Fail-safe.,0,snowflake,failsafe bytes total
+snowflake.storage.storage_bytes.total,gauge,,byte,,The average number of bytes of table storage used including bytes for data currently in Time Travel.,0,snowflake,storage bytes total
+snowflake.storage.stage_bytes.total,gauge,,byte,,The average number of bytes of stage storage used by files in all internal stages.,0,snowflake,stage bytes total
+snowflake.storage.failsafe_bytes.total,gauge,,byte,,The average number of bytes of data in Fail-safe.,0,snowflake,failsafe bytes total
 snowflake.storage.database.storage_bytes,gauge,,byte,,The average number of bytes of database storage used.,0,snowflake,db storage bytes avg
 snowflake.storage.database.failsafe_bytes,gauge,,byte,,The average number of bytes of Fail-safe storage used.,0,snowflake,db failsafe bytes avg
-snowflake.billing.virtual_warehouse,gauge,,unit,,Number of credits billed for virtual warehouses.,0,snowflake,credits virtual warehouse
-snowflake.billing.cloud_service,gauge,,unit,,Number of credits billed for cloud services.,0,snowflake,credits cloud services
-snowflake.billing.total,gauge,,unit,,Total number of credits used for the account. This is the sum of snowflake.billing.cloud_service and snowflake.billing.virtual_warehouses.,0,snowflake,total credits
-snowflake.billing.warehouse.cloud_service,gauge,,unit,,Number of credits used for cloud services by warehouse.,0,snowflake,warehouse cloud service credit
-snowflake.billing.warehouse.virtual_warehouse,gauge,,unit,,Number of credits used by warehouse.,0,snowflake,warehouse virtual warehouse credits
-snowflake.billing.warehouse.total,gauge,,unit,,Total number of credits used for the warehouse. NOTE: This value does not take into account adjustments which may be higher than your actual credit consumption.,0,snowflake,warehouse total credits
+snowflake.billing.virtual_warehouse,gauge,,unit,,The average overall credits billed for virtual warehouses.,0,snowflake,credits virtual warehouse
+snowflake.billing.cloud_service,gauge,,unit,,The average overall credits billed for cloud services.,0,snowflake,credits cloud services
+snowflake.billing.total,gauge,,unit,,The average overall of credits used for the account. This is the sum of snowflake.billing.cloud_service and snowflake.billing.virtual_warehouses.,0,snowflake,total credits
+snowflake.billing.warehouse.cloud_service,gauge,,unit,,The average credits used for cloud services by warehouse.,0,snowflake,warehouse cloud service credit
+snowflake.billing.warehouse.virtual_warehouse,gauge,,unit,,The average credits used by warehouse.,0,snowflake,warehouse virtual warehouse credits
+snowflake.billing.warehouse.total,gauge,,unit,,The average total number of credits used for the warehouse. NOTE: This value does not take into account adjustments which may be higher than your actual credit consumption.,0,snowflake,warehouse total credits
 snowflake.logins.fail.count,count,,error,,Total failed login attempts.,0,snowflake,fail logins
 snowflake.logins.success.count,count,,success,,Total successful login attempts.,0,snowflake,successful logins
 snowflake.logins.total,count,,attempt,,Total number of login attempts.,0,snowflake,total logins

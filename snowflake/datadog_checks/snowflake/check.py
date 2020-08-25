@@ -59,6 +59,7 @@ class SnowflakeCheck(AgentCheck):
 
         # On initial run, set timestamp to last min_collection_interval
         if self._last_ts is None:
+            # Latency 3 hours
             self._last_ts = get_timestamp() - self.config.min_collection
 
         # Execute queries
