@@ -37,8 +37,8 @@ CreditUsage = Query(
     {
         'name': 'billing.metrics',
         'query': "select SERVICE_TYPE, NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES),"
-                 "AVG(CREDITS_USED) from METERING_HISTORY where convert_timezone('UTC', start_time) >= "
-                 "TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2;",
+        "AVG(CREDITS_USED) from METERING_HISTORY where convert_timezone('UTC', start_time) >= "
+        "TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2;",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
