@@ -7,7 +7,8 @@ from contextlib import contextmanager
 from six import PY2
 
 try:
-    import datadog_agent
+    import datadog_agent  # noqa: F401
+
     dev_mode = False
 except ImportError:
     dev_mode = True
