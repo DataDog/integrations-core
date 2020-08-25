@@ -20,7 +20,10 @@ def get_version(db):
         # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
         # https://mariadb.com/kb/en/library/version/
         # and https://mariadb.com/kb/en/library/server-system-variables/#version
-        parts = result[0].split('-')
+        raw_version = result[0]
+        if isinstance(raw_version, bytes):
+            raw_version = raw_version.decode()
+        parts = raw_version.split('-')
         version, flavor, build = [parts[0], '', '']
 
         for data in parts:
