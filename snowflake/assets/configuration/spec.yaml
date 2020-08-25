@@ -89,3 +89,5 @@ files:
 
             NOTE: The Snowflake ACCOUNT_USAGE schema views do not update in frequently.
           min_collection_interval.default: 1800
+          min_collection_interval.value.example: 1800
+
