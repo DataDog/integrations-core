@@ -17,3 +17,8 @@ snowflake.query.executed,gauge,,query,,The average number of queries executed.,0
 snowflake.query.queued_overload,gauge,,query,,Average number of queries queued because the warehouse was overloaded.,0,snowflake,queries overload
 snowflake.query.queued_provision,gauge,,query,,Average number of queries queued because the warehouse was being provisioned.,0,snowflake,queries provision
 snowflake.query.blocked,gauge,,query,,Average number of queries blocked by a transaction lock.,0,snowflake,blocked queries
+snowflake.query.execution_time,gauge,,millisecond,,Average query execution time.,0,snowflake,exec time query
+snowflake.query.compilation_time,gauge,,millisecond,,Average query compilation time.,0,snowflake,comp time query
+snowflake.query.bytes_scanned,gauge,,byte,,Average query bytes scanned.,0,snowflake,query bytes scanned
+snowflake.query.bytes_written,gauge,,bytes,,Average query bytes written.,0,snowflake,query bytes written
+snowflake.query.bytes_deleted,gauge,,bytes,,Average query bytes deleted.,0,snowflake,query bytes deleted
