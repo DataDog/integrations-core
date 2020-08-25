@@ -63,21 +63,24 @@ class SnowflakeCheck(AgentCheck):
 
         if self._last_ts is None:
             self._last_ts = get_timestamp()
-            # raise Exception(time.gmtime(self._last_ts))
 
+        # Execute queries
         self._query_manager.execute()
 
         self._collect_version()
+
+        # Set new timestamp
         self._last_ts = get_timestamp()
 
     def execute_query_raw(self, query):
         """
         Executes query with timestamp from parts if comparing start_time field.
         """
+
         with closing(self._conn.cursor()) as cursor:
-            if 'start_time' in query:
-                # TODO: replace tuple with last_ts parts
-                cursor.execute(query, ('2020', '8', '5', '21', '3', '41'))
+            if 'start_time' in query.lower():
+                ts = time.gmtime(self._last_ts)
+                cursor.execute(query, (ts.tm_year, ts.tm_mon, ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec))
             else:
                 cursor.execute(query)
 
