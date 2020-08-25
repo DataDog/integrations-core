@@ -36,8 +36,9 @@ DatabaseStorageMetrics = Query(
 CreditUsage = Query(
     {
         'name': 'billing.metrics',
-        'query': "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from"
-        " METERING_HISTORY where start_time >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);",
+        'query': "select SERVICE_TYPE, NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES),"
+                 "AVG(CREDITS_USED) from METERING_HISTORY where convert_timezone('UTC', start_time) >= "
+                 "TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2;",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
@@ -52,8 +53,9 @@ CreditUsage = Query(
 WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
-        'query': "select WAREHOUSE_NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, "
-        "CREDITS_USED from WAREHOUSE_METERING_HISTORY where start_time >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);",
+        'query': "select WAREHOUSE_NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES), AVG(CREDITS_USED)"
+        " from WAREHOUSE_METERING_HISTORY where convert_timezone('UTC', start_time) >="
+        " TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.warehouse.virtual_warehouse', 'type': 'gauge'},
@@ -82,8 +84,9 @@ LoginMetrics = Query(
 WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': 'select WAREHOUSE_NAME, AVG_RUNNING, AVG_QUEUED_LOAD, AVG_QUEUED_PROVISIONING, AVG_BLOCKED from '
-        'WAREHOUSE_LOAD_HISTORY where start_time >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);',
+        'query': 'select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING),'
+        ' AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY where convert_timezone("UTC", start_time) >='
+        ' TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);',
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'query.executed', 'type': 'gauge'},
@@ -100,7 +103,8 @@ QueryHistory = Query(
         'name': 'warehouse_load.metrics',
         'query': 'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
         'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
-        'from QUERY_HISTORY where start_time >=TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2, 3, 4;',
+        'from QUERY_HISTORY where convert_timezone("UTC", start_time) >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s)'
+        ' group by 1, 2, 3, 4;',
         'columns': [
             {'name': 'query_type', 'type': 'tag'},
             {'name': 'warehouse', 'type': 'tag'},

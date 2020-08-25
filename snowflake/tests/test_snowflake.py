@@ -48,10 +48,6 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
 
     expected_credit_usage = [
         ('WAREHOUSE_METERING', 'COMPUTE_WH', Decimal('0.218333333'), Decimal('0.000566111'), Decimal('0.218899444')),
-        ('WAREHOUSE_METERING', 'COMPUTE_WH', Decimal('0.166666667'), Decimal('0.000270556'), Decimal('0.166937223')),
-        ('WAREHOUSE_METERING', 'COMPUTE_WH', Decimal('0E-9'), Decimal('0.000014722'), Decimal('0.000014722')),
-        ('WAREHOUSE_METERING', 'COMPUTE_WH', Decimal('0.183611111'), Decimal('0.000303333'), Decimal('0.183914444')),
-        ('WAREHOUSE_METERING', 'COMPUTE_WH', Decimal('0.016666667'), Decimal('0E-9'), Decimal('0.016666667')),
     ]
     expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage):
@@ -60,9 +56,9 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
         check._query_manager.queries = [queries.CreditUsage]
         dd_run_check(check)
 
-    aggregator.assert_metric('snowflake.billing.cloud_service', count=5, tags=expected_tags)
-    aggregator.assert_metric('snowflake.billing.total', count=5)
-    aggregator.assert_metric('snowflake.billing.virtual_warehouse', count=5)
+    aggregator.assert_metric('snowflake.billing.cloud_service', count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.billing.total', count=1)
+    aggregator.assert_metric('snowflake.billing.virtual_warehouse', count=1)
 
 
 def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
@@ -70,7 +66,6 @@ def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
 
     expected_wh_usage = [
         ('COMPUTE_WH', Decimal('0.286111111'), Decimal('0.002308056'), Decimal('0.288419167')),
-        ('COMPUTE_WH', Decimal('0.459166667'), Decimal('0.001471667'), Decimal('0.460638333')),
     ]
     expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_wh_usage):
@@ -79,9 +74,9 @@ def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
         check._query_manager.queries = [queries.WarehouseCreditUsage]
         dd_run_check(check)
 
-    aggregator.assert_metric('snowflake.billing.warehouse.cloud_service', count=2, tags=expected_tags)
-    aggregator.assert_metric('snowflake.billing.warehouse.total', count=2, tags=expected_tags)
-    aggregator.assert_metric('snowflake.billing.warehouse.virtual_warehouse', count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.billing.warehouse.cloud_service', count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.billing.warehouse.total', count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.billing.warehouse.virtual_warehouse', count=1, tags=expected_tags)
 
 
 def test_login_metrics(dd_run_check, aggregator, instance):
@@ -109,7 +104,6 @@ def test_warehouse_load(dd_run_check, aggregator, instance):
 
     expected_wl_metrics = [
         ('COMPUTE_WH', Decimal('0.000446667'), Decimal('0E-9'), Decimal('0E-9'), Decimal('0E-9')),
-        ('COMPUTE_WH', Decimal('0.002356667'), Decimal('0E-9'), Decimal('0E-9'), Decimal('0E-9')),
     ]
     expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_wl_metrics):
@@ -118,10 +112,9 @@ def test_warehouse_load(dd_run_check, aggregator, instance):
         check._query_manager.queries = [queries.WarehouseLoad]
         dd_run_check(check)
     aggregator.assert_metric('snowflake.query.executed', value=0.000446667, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.executed', value=0.002356667, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.queued_overload', value=0, count=2, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.queued_provision', value=0, count=2, tags=expected_tags)
-    aggregator.assert_metric('snowflake.query.blocked', value=0, count=2, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.queued_overload', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.queued_provision', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.blocked', value=0, count=1, tags=expected_tags)
 
 
 def test_query_metrics(dd_run_check, aggregator, instance):
