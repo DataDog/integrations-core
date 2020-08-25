@@ -63,6 +63,7 @@ WarehouseCreditUsage = Query(
     }
 )
 
+# https://docs.snowflake.com/en/sql-reference/account-usage/login_history.html
 LoginMetrics = Query(
     {
         'name': 'login.metrics',
@@ -77,6 +78,7 @@ LoginMetrics = Query(
     }
 )
 
+# https://docs.snowflake.com/en/sql-reference/account-usage/warehouse_load_history.html
 WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
@@ -84,10 +86,31 @@ WarehouseLoad = Query(
         'WAREHOUSE_LOAD_HISTORY where start_time >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);',
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
-            {'name': 'query.executed.avg', 'type': 'gauge'},
-            {'name': 'query.queued_overload.avg', 'type': 'gauge'},
-            {'name': 'query.queued_provision.avg', 'type': 'gauge'},
+            {'name': 'query.executed', 'type': 'gauge'},
+            {'name': 'query.queued_overload', 'type': 'gauge'},
+            {'name': 'query.queued_provision', 'type': 'gauge'},
             {'name': 'query.blocked.avg', 'type': 'gauge'},
+        ],
+    }
+)
+
+# https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
+QueryHistory = Query(
+    {
+        'name': 'warehouse_load.metrics',
+        'query': 'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
+                 'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
+                 'from QUERY_HISTORY where start_time >=TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2, 3, 4;',
+        'columns': [
+            {'name': 'query_type', 'type': 'tag'},
+            {'name': 'warehouse', 'type': 'tag'},
+            {'name': 'database', 'type': 'tag'},
+            {'name': 'schema', 'type': 'tag'},
+            {'name': 'query.execution_time', 'type': 'gauge'},
+            {'name': 'query.compilation_time', 'type': 'gauge'},
+            {'name': 'query.bytes_scanned', 'type': 'gauge'},
+            {'name': 'query.bytes_written', 'type': 'gauge'},
+            {'name': 'query.bytes_deleted', 'type': 'gauge'},
         ],
     }
 )
