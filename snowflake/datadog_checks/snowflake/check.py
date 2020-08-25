@@ -56,13 +56,10 @@ class SnowflakeCheck(AgentCheck):
 
     def check(self, _):
         self.connect()
-        # q = queries.QueryHistory.query
-        # cur = self._conn.cursor()
-        # cur.execute(q, ('2020', '8', '5', '21', '3', '41'))
-        # raise Exception(cur.fetchall())
 
+        # On initial run, set timestamp to last min_collection_interval
         if self._last_ts is None:
-            self._last_ts = get_timestamp()
+            self._last_ts = get_timestamp() - self.config.min_collection
 
         # Execute queries
         self._query_manager.execute()
