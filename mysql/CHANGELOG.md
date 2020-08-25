@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 2.0.2 / 2020-08-25
+
+* [Fixed] Parse byte string versions. See [#7425](https://github.com/DataDog/integrations-core/pull/7425).
+
 ## 2.0.1 / 2020-08-14
 
 * [Fixed] Update config spec default values. See [#7340](https://github.com/DataDog/integrations-core/pull/7340).
