@@ -57,10 +57,11 @@ class SnowflakeCheck(AgentCheck):
     def check(self, _):
         self.connect()
 
-        # On initial run, set timestamp to last min_collection_interval
+        # On initial run, set timestamp to 3 hours (latency)
+        # TODO: Make latency configurable
         if self._last_ts is None:
             # Latency 3 hours
-            self._last_ts = get_timestamp() - self.config.min_collection
+            self._last_ts = get_timestamp() - 10800
 
         # Execute queries
         self._query_manager.execute()
