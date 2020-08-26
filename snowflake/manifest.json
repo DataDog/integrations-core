@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "snowflake",
   "metric_prefix": "snowflake.",
-  "metric_to_check": "",
+  "metric_to_check": "snowflake.storage.storage_bytes.total",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor key metrics for credit usage, storage, query, user history and more.",
   "guid": "4813a514-e9a4-4f28-9b83-b4221b51b18b",
   "support": "core",
   "supported_os": [
@@ -16,7 +16,9 @@
   ],
   "public_title": "Datadog-Snowflake Integration",
   "categories": [
-    ""
+    "cloud",
+    "data store",
+    "cost management"
   ],
   "type": "check",
   "is_public": false,
