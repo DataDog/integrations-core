@@ -2,7 +2,9 @@
 
 ## Overview
 
-This check monitors [Snowflake][1] through the Datadog Agent.
+This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a Saas analytic data warehouse. 
+Snowflake runs completely on cloud infrastructure. This integration monitors credit, billing, and storage usage, 
+query history, and more.
 
 ## Setup
 
@@ -16,6 +18,9 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
+
+    **Note**: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
+    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8]
 
 2. [Restart the Agent][4].
 
@@ -42,10 +47,11 @@ Snowflake does not include any events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.snowflake.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
