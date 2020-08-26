@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
 from contextlib import closing
 
 import snowflake.connector as sf
@@ -57,12 +56,6 @@ class SnowflakeCheck(AgentCheck):
     def check(self, _):
         self.connect()
 
-        # On initial run, set timestamp to 3 hours (latency)
-        # TODO: Make latency configurable
-        if self._last_ts is None:
-            # Latency 3 hours
-            self._last_ts = get_timestamp() - 10800
-
         # Execute queries
         self._query_manager.execute()
 
@@ -75,16 +68,11 @@ class SnowflakeCheck(AgentCheck):
         """
         Executes query with timestamp from parts if comparing start_time field.
         """
-
         with closing(self._conn.cursor()) as cursor:
-            if 'start_time' in query.lower():
-                ts = time.gmtime(self._last_ts)
-                cursor.execute(query, (ts.tm_year, ts.tm_mon, ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec))
-            else:
-                cursor.execute(query)
+            cursor.execute(query)
 
             if cursor.rowcount is None or cursor.rowcount < 1:
-                self.log.debug("Failed to fetch records from query: `%s`.", query)
+                self.log.debug("Failed to fetch records from query: `%s`", query)
                 return []
             return cursor.fetchall()
 
