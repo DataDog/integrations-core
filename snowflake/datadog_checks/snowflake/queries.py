@@ -8,8 +8,7 @@ from datadog_checks.base.utils.db import Query
 StorageUsageMetrics = Query(
     {
         'name': 'storage.metrics',
-        'query': 'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE '
-        'ORDER BY USAGE_DATE DESC LIMIT 1;',
+        'query': 'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE ORDER BY USAGE_DATE DESC LIMIT 1;',
         'columns': [
             {'name': 'storage.storage_bytes.total', 'type': 'gauge'},
             {'name': 'storage.stage_bytes.total', 'type': 'gauge'},
@@ -38,7 +37,7 @@ CreditUsage = Query(
         'name': 'billing.metrics',
         'query': "select SERVICE_TYPE, NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES),"
         "AVG(CREDITS_USED) from METERING_HISTORY where convert_timezone('UTC', start_time) >= "
-        "TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1, 2;",
+        "date_trunc(day, current_date) group by 1, 2;",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
@@ -54,8 +53,8 @@ WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
         'query': "select WAREHOUSE_NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES), AVG(CREDITS_USED)"
-        " from WAREHOUSE_METERING_HISTORY where convert_timezone('UTC', start_time) >="
-        " TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s) group by 1;",
+        " from WAREHOUSE_METERING_HISTORY"
+        " where convert_timezone('UTC', start_time) >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.warehouse.virtual_warehouse', 'type': 'gauge'},
@@ -69,8 +68,8 @@ WarehouseCreditUsage = Query(
 LoginMetrics = Query(
     {
         'name': 'login.metrics',
-        'query': "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)),"
-        "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
+        'query': "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)), "
+                 "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
         'columns': [
             {'name': 'client_type', 'type': 'tag'},
             {'name': 'logins.fail.count', 'type': 'monotonic_count'},
@@ -84,9 +83,9 @@ LoginMetrics = Query(
 WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': 'select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING),'
-        ' AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY where convert_timezone("UTC", start_time) >='
-        ' TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s);',
+        'query': "select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING),"
+                 " AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY"
+                 " where convert_timezone('Etc/UTC', start_time) >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'query.executed', 'type': 'gauge'},
@@ -101,10 +100,10 @@ WarehouseLoad = Query(
 QueryHistory = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': 'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
-        'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
-        'from QUERY_HISTORY where convert_timezone("UTC", start_time) >= TIMESTAMP_FROM_PARTS(%s,%s,%s,%s,%s,%s)'
-        ' group by 1, 2, 3, 4;',
+        'query': "select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), "
+        "AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) "
+        "from QUERY_HISTORY where convert_timezone('UTC', start_time) >= date_trunc(day, current_date)"
+        " group by 1, 2, 3, 4;",
         'columns': [
             {'name': 'query_type', 'type': 'tag'},
             {'name': 'warehouse', 'type': 'tag'},
