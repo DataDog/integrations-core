@@ -1,0 +1,147 @@
+name: ClickHouse
+files:
+- name: clickhouse.yaml
+  options:
+  - template: init_config
+    options:
+    - name: global_custom_queries
+      description: |
+        See `custom_queries` defined below.
+
+        Global custom queries can be applied to all instances using the
+        `use_global_custom_queries` setting at the instance level.
+      value:
+        type: array
+        items:
+          type: object
+        default: null
+        example:
+          - metric_prefix: clickhouse
+            query: <QUERY>
+            columns: <COLUMNS>
+            tags: <TAGS>
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: server
+      required: true
+      description: The hostname used to connect to the system.
+      value:
+        type: string
+    - name: port
+      description: The port used to connect to the system.
+      value:
+        type: integer
+        example: 9000
+    - name: user
+      description: The database user to authenticate as.
+      value:
+          type: string
+          example: default
+    - name: password
+      description: The password of `username`.
+      value:
+        type: string
+    - name: db
+      description: The database to connect to.
+      value:
+        type: string
+        default: default
+    - name: connect_timeout
+      description: The timeout for connecting to the `server`.
+      value:
+        type: integer
+        example: 10
+    - name: read_timeout
+      description: The timeout for reading from the `server`.
+      value:
+        type: integer
+        example: 10
+    - name: compression
+      description: |
+        The compression algorithm to use. The default is no compression.
+
+        Valid values are:
+
+          - lz4
+          - lz4hc
+      value:
+        type: string
+    - name: tls_verify
+      description: Whether or not to connect securely using TLS. The server must also support this.
+      value:
+        type: boolean
+        example: False
+    - name: use_global_custom_queries
+      description: |
+        How `global_custom_queries` should be used for this instance. There are 3 options:
+
+        1. true - `global_custom_queries` override `custom_queries`.
+        2. false - `custom_queries` override `global_custom_queries`.
+        2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+      value:
+        type: string
+        example: "true"
+    - name: custom_queries
+      description: |
+        Each query must have 2 fields:
+
+        1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+                   Use the pipe `|` if you require a multi-line script.
+        2. columns - The list representing each column, ordered sequentially from left to right.
+                     The number of columns must equal the number of columns returned in the query.
+                     There are 2 required pieces of data:
+                       a. name - The suffix to append to `clickhouse.` to form
+                                 the full metric name. If `type` is `tag`, this column is
+                                 considered a tag and applied to every
+                                 metric collected by this particular query.
+                       b. type - The submission method (gauge, monotonic_count, etc.).
+                                 This can also be set to `tag` to tag each metric in the row
+                                 with the name and value of the item in this column. You can
+                                 use the `count` type to perform aggregation for queries that
+                                 return multiple rows with the same or no tags.
+                     Columns without a name are ignored, use this for any column you wish to skip:
+                       - {}
+        3. tags (optional) - A list of tags to apply to each metric.
+      enabled: false
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: query
+              type: string
+            - name: columns
+              type: array
+              items:
+                type: object
+            - name: tags
+              type: array
+              items:
+                type: string
+        example:
+          - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:clickhouse
+    - template: instances/default
+  - template: logs
+    example:
+    - source: clickhouse
+      type: file
+      path:  /var/log/clickhouse-server/clickhouse-server.log
+      log_processing_rules:
+        - type: multi_line
+          name: log_start_with_date
+          pattern: \d{4}\.\d{2}\.\d{2}
+    - source: clickhouse
+      type: file
+      path: /var/log/clickhouse-server/clickhouse-server.err.log
+      log_processing_rules:
+        - type: multi_line
+          name: log_start_with_date
+          pattern: \d{4}\.\d{2}\.\d{2}
