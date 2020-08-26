@@ -46,6 +46,16 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INIT_CONFIG>`      | blank or `{}`                                                         |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:4191/metrics"}`                  |
 
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][12].
+
+| Parameter      | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "linkerd", "service": "<SERVICE_NAME>"}` |
+
+To increase the verbosity of the data plane logs, see [the official Linkerd documentation][13].
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -95,3 +105,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://twitter.github.io/finagle/guide/Metrics.html
 [10]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
 [11]: https://docs.datadoghq.com/help/
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[13]: https://linkerd.io/2/tasks/modifying-proxy-log-level/
