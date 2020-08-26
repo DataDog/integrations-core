@@ -69,8 +69,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][11].
 
 | Parameter      | Value                                             |
