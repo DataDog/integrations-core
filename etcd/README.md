@@ -38,7 +38,7 @@ To configure this check for an Agent running on a host:
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `etcd.d/conf.yaml` file to start collecting your etcd logs:
+2. Uncomment and edit this configuration block at the bottom of your `etcd.d/conf.yaml`:
 
     ```yaml
     logs:
