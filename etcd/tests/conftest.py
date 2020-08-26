@@ -15,6 +15,7 @@ from .common import COMPOSE_FILE, LEGACY_INSTANCE, URL, V3_PREVIEW
 # Needed to mount volume for logging
 E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
 
+
 def add_key():
     if not V3_PREVIEW:
         requests.post('{}/v2/keys/message'.format(URL), data={'value': 'Hello world'})
