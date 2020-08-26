@@ -1088,7 +1088,11 @@ def run_ssl_server():
             id='standalone',
         ),
         pytest.param(
-            INSTANCE_DRIVER, 'spark.driver.can_connect', 'SparkDriver', 'http://{}:4040'.format(HOST), id='driver',
+            INSTANCE_DRIVER,
+            'spark.driver.can_connect',
+            'SparkDriver',
+            'http://{}:4040'.format(HOST),
+            id='driver',
         ),
     ],
 )
@@ -1137,5 +1141,7 @@ def test_integration(aggregator, instance, service_check, cluster_name, spark_ur
     #     aggregator.assert_metric(metric)
 
     aggregator.assert_service_check(
-        service_check, status=SparkCheck.OK, tags=['cluster_name:{}'.format(cluster_name), 'url:{}'.format(spark_url)],
+        service_check,
+        status=SparkCheck.OK,
+        tags=['cluster_name:{}'.format(cluster_name), 'url:{}'.format(spark_url)],
     )
