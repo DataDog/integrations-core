@@ -36,7 +36,7 @@ CreditUsage = Query(
     {
         'name': 'billing.metrics',
         'query': "select SERVICE_TYPE, NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES),"
-        "AVG(CREDITS_USED) from METERING_HISTORY where convert_timezone('UTC', start_time) >= "
+        "AVG(CREDITS_USED) from METERING_HISTORY where start_time >= "
         "date_trunc(day, current_date) group by 1, 2;",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
@@ -54,7 +54,7 @@ WarehouseCreditUsage = Query(
         'name': 'billings.warehouse.metrics',
         'query': "select WAREHOUSE_NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES), AVG(CREDITS_USED)"
         " from WAREHOUSE_METERING_HISTORY"
-        " where convert_timezone('UTC', start_time) >= date_trunc(day, current_date) group by 1;",
+        " where start_time >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.warehouse.virtual_warehouse', 'type': 'gauge'},
@@ -83,9 +83,9 @@ LoginMetrics = Query(
 WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': "select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING),"
-                 " AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY"
-                 " where convert_timezone('Etc/UTC', start_time) >= date_trunc(day, current_date) group by 1;",
+        'query': "select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), "
+                 "AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY "
+                 "where start_time >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'query.executed', 'type': 'gauge'},
@@ -102,7 +102,7 @@ QueryHistory = Query(
         'name': 'warehouse_load.metrics',
         'query': "select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), "
         "AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) "
-        "from QUERY_HISTORY where convert_timezone('UTC', start_time) >= date_trunc(day, current_date)"
+        "from QUERY_HISTORY where start_time >= date_trunc(day, current_date)"
         " group by 1, 2, 3, 4;",
         'columns': [
             {'name': 'query_type', 'type': 'tag'},

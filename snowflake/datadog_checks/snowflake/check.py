@@ -27,9 +27,6 @@ class SnowflakeCheck(AgentCheck):
         self.config = Config(self.instance)
         self._conn = None
 
-        # Ensure we're only collecting metrics from last run
-        self._last_ts = None
-
         # Add default tags like account to all metrics
         self._tags = self.config.tags + ['account:{}'.format(self.config.account)]
 
@@ -50,7 +47,6 @@ class SnowflakeCheck(AgentCheck):
             ],
             tags=self._tags,
         )
-
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
