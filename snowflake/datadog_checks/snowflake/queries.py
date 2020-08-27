@@ -8,7 +8,8 @@ from datadog_checks.base.utils.db import Query
 StorageUsageMetrics = Query(
     {
         'name': 'storage.metrics',
-        'query': 'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE ORDER BY USAGE_DATE DESC LIMIT 1;',
+        'query': 'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE'
+        ' ORDER BY USAGE_DATE DESC LIMIT 1;',
         'columns': [
             {'name': 'storage.storage_bytes.total', 'type': 'gauge'},
             {'name': 'storage.stage_bytes.total', 'type': 'gauge'},
