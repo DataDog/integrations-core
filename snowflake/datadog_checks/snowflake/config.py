@@ -12,6 +12,13 @@ class Config(object):
     Encapsulates the validation of an `instance` dictionary and authentication options.
     """
 
+    DEFAULT_METRIC_GROUP = [
+        'snowflake.query',
+        'snowflake.billing',
+        'snowflake.storage',
+        'snowflake.logins',
+    ]
+
     def __init__(self, instance=None):
         if instance is None:
             instance = {}
@@ -30,6 +37,8 @@ class Config(object):
 
         # min_collection_interval defaults to 30 minutes
         min_collection = instance.get('min_collection_interval', 1800)
+
+        metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
 
         if account is None:
             raise ConfigurationError('Must specify an account')
@@ -55,3 +64,4 @@ class Config(object):
         self.ocsp_response_cache_filename = ocsp_response_cache_filename  # type: Optional[str]
         self.tags = tags  # type: List[str]
         self.min_collection = min_collection
+        self.metric_groups = metric_groups

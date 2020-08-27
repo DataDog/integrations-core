@@ -67,6 +67,19 @@ instances:
     #
     # ocsp_response_cache_filename: <OCSP_RESPONSE_CACHE_FILENAME>
 
+    ## @param metric_groups - list of strings - required
+    ## List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+    ## - snowflake.query
+    ## - snowflake.billing
+    ## - snowflake.storage
+    ## - snowflake.logins
+    #
+    metric_groups:
+      - snowflake.query
+      - snowflake.billing
+      - snowflake.storage
+      - snowflake.logins
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
