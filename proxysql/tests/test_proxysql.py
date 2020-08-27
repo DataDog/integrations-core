@@ -107,12 +107,16 @@ def test_server_down(aggregator, instance_basic, dd_run_check):
 @pytest.mark.parametrize(
     ('additional_metrics', 'expected_metrics', 'tag_prefixes'),
     (
-        ([], GLOBAL_METRICS, [],),
+        ([], GLOBAL_METRICS, []),
         (['command_counters_metrics'], COMMANDS_COUNTERS_METRICS, ['sql_command']),
         (['connection_pool_metrics'], CONNECTION_POOL_METRICS, ['hostgroup', 'srv_host', 'srv_port']),
         (['users_metrics'], USER_TAGS_METRICS, ['username']),
         (['memory_metrics'], MEMORY_METRICS, []),
-        (['query_rules_metrics'], QUERY_RULES_TAGS_METRICS, ['rule_id'],),
+        (
+            ['query_rules_metrics'],
+            QUERY_RULES_TAGS_METRICS,
+            ['rule_id'],
+        ),
     ),
     ids=('global', 'command_counters', 'connection_pool', 'users', 'memory', 'query_rules'),
 )

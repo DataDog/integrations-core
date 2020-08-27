@@ -304,7 +304,7 @@ def test_cull_services_list():
     # Num. services < MAX_SERVICES should be no-op in absence of whitelist
     num_services = MAX_SERVICES - 1
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    assert len(consul_check._cull_services_list(services,)) == num_services
+    assert len(consul_check._cull_services_list(services)) == num_services
 
     # Num. services < MAX_SERVICES should spit out only the whitelist when one is defined
     consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']

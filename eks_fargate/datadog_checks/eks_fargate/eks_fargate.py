@@ -12,9 +12,7 @@ class EksFargateCheck(AgentCheck):
     """
 
     def __init__(self, name, init_config, instances):
-        super(EksFargateCheck, self).__init__(
-            name, init_config, instances,
-        )
+        super(EksFargateCheck, self).__init__(name, init_config, instances)
         pod_name = os.getenv("HOSTNAME")
         virtual_node = os.getenv("DD_KUBERNETES_KUBELET_NODENAME", "")
 
