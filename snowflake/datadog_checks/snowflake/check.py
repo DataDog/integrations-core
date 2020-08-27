@@ -40,21 +40,20 @@ class SnowflakeCheck(AgentCheck):
         if self.config.password:
             self.register_secret(self.config.password)
 
-        metric_queries = []
-        errors = []
+        self.metric_queries = []
+        self.errors = []
         for mgroup in self.config.metric_groups:
             try:
-                metric_queries.append(METRIC_GROUPS[mgroup])
+                self.metric_queries.extend(METRIC_GROUPS[mgroup])
             except KeyError:
-                errors.append(mgroup)
+                self.errors.append(mgroup)
 
-        if errors:
-            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: {}'.format(', '.join(errors)))
-
-        if not metric_queries:
+        if self.errors:
+            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: {}'.format(', '.join(self.errors)))
+        if not self.metric_queries:
             raise ConfigurationError('No valid metric_groups configured, please list at least one.')
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=metric_queries, tags=self._tags,)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags,)
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):

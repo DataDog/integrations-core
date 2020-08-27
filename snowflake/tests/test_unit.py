@@ -5,7 +5,7 @@ import copy
 import mock
 import pytest
 
-from datadog_checks.snowflake import SnowflakeCheck
+from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .conftest import CHECK_NAME
 
@@ -33,6 +33,22 @@ def test_default_metric_groups(instance):
         'snowflake.storage',
         'snowflake.logins',
     ]
+
+    assert check.metric_queries == [
+        queries.WarehouseLoad,
+        queries.QueryHistory,
+        queries.CreditUsage,
+        queries.WarehouseCreditUsage,
+        queries.StorageUsageMetrics,
+        queries.DatabaseStorageMetrics,
+        queries.LoginMetrics,
+    ]
+
+    instance = copy.deepcopy(instance)
+    instance['metric_groups'] = ['fake.metric.group', 'snowflake.logins']
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check.metric_queries == [queries.LoginMetrics]
+
 
 def test_metric_group_exceptions(instance):
     instance = copy.deepcopy(instance)
