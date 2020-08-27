@@ -3,8 +3,8 @@
     "orchestration",
     "containers",
     "configuration & deployment",
-    "orchestration",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "etcd",
