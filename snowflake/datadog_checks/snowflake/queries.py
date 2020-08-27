@@ -37,9 +37,9 @@ CreditUsage = Query(
     {
         'name': 'billing.metrics',
         'query': "select SERVICE_TYPE, NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
-                 "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
-                 "sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY"
-                 " where start_time >= date_trunc(day, current_date) group by 1, 2;",
+        "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
+        "sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY"
+        " where start_time >= date_trunc(day, current_date) group by 1, 2;",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
@@ -58,9 +58,9 @@ WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
         'query': "select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
-                 "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
-                 "sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY "
-                 "where start_time >= date_trunc(day, current_date) group by 1;",
+        "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
+        "sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY "
+        "where start_time >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
