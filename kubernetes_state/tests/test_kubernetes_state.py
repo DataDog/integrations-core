@@ -257,9 +257,7 @@ def check_with_join_kube_labels(instance):
 
 
 @pytest.fixture
-def check_with_join_standard_tag_labels(
-    instance,
-):
+def check_with_join_standard_tag_labels(instance):
     instance['join_standard_tags'] = True
     return _check(instance=instance, mock_file="ksm-standard-tags-gke.txt")
 

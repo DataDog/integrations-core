@@ -336,8 +336,7 @@ class WMISampler(object):
             calculator = get_calculator(counter_type)
         except UndefinedCalculator:
             self.logger.warning(
-                u"Undefined WMI calculator for counter_type %s. Values are reported as RAW.",
-                counter_type,
+                u"Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type
             )
 
         return calculator
@@ -566,9 +565,7 @@ class WMISampler(object):
                         )
                     else:
                         self.logger.debug(
-                            u"CounterType qualifier not found for %s.%s",
-                            self.class_name,
-                            wmi_property.Name,
+                            u"CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name
                         )
 
                 try:

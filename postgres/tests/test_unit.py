@@ -91,9 +91,7 @@ def test_malformed_get_custom_queries(check):
     check.config.custom_queries = [{}]
 
     # Make sure 'metric_prefix' is defined
-    check._collect_custom_queries(
-        [],
-    )
+    check._collect_custom_queries([])
     check.log.error.assert_called_once_with("custom query field `metric_prefix` is required")
     check.log.reset_mock()
 

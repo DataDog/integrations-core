@@ -100,8 +100,7 @@ class TestVault:
 
         with mock.patch('requests.get', return_value=MockResponse('', status_code=500)):
             with pytest.raises(
-                Exception,
-                match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url'])),
+                Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
             ):
                 run_check(c, extract_message=True)
 

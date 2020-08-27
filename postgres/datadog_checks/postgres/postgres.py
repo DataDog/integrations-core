@@ -228,10 +228,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self,
-        instance_tags,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.

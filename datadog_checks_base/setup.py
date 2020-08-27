@@ -66,8 +66,7 @@ setup(
             exclude=['kubernetes', 'orjson', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
         'http': get_requirements(
-            'requirements.in',
-            only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
+            'requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']
         ),
         'json': get_requirements('requirements.in', only=['orjson']),
         'kube': get_requirements('requirements.in', only=['kubernetes']),
