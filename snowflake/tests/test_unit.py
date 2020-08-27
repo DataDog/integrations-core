@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+
 import mock
 import pytest
 
@@ -56,8 +57,6 @@ def test_metric_group_exceptions(instance):
     with pytest.raises(Exception, match='No valid metric_groups configured, please list at least one.'):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.log = mock.MagicMock()
-        check.log.warning.assert_called_once_with("Invalid metric_groups found in snowflake conf.yaml: fake.metric.group")
-
-
-
-
+        check.log.warning.assert_called_once_with(
+            "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
+        )

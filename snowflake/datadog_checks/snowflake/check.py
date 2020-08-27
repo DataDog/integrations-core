@@ -7,7 +7,6 @@ import snowflake.connector as sf
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.time import get_timestamp
 
 from . import queries
 from .config import Config
@@ -63,9 +62,6 @@ class SnowflakeCheck(AgentCheck):
         self._query_manager.execute()
 
         self._collect_version()
-
-        # Set new timestamp
-        self._last_ts = get_timestamp()
 
     def execute_query_raw(self, query):
         """
