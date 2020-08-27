@@ -69,7 +69,7 @@ LoginMetrics = Query(
     {
         'name': 'login.metrics',
         'query': "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)), "
-                 "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
+        "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
         'columns': [
             {'name': 'client_type', 'type': 'tag'},
             {'name': 'logins.fail.count', 'type': 'monotonic_count'},
@@ -84,8 +84,8 @@ WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
         'query': "select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), "
-                 "AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY "
-                 "where start_time >= date_trunc(day, current_date) group by 1;",
+        "AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY "
+        "where start_time >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'query.executed', 'type': 'gauge'},
