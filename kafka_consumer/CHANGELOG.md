@@ -1,8 +1,5 @@
 # CHANGELOG - kafka_consumer
 
-## 2.7.0-beta.1 / 2020-08-26
-
-
 ## 2.6.0 / 2020-07-27
 
 * [Added] Smaller batches when fetching highwater offsets. See [#7093](https://github.com/DataDog/integrations-core/pull/7093).
