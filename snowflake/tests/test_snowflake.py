@@ -8,6 +8,7 @@ import mock
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.snowflake import SnowflakeCheck, queries
+from .conftest import CHECK_NAME
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
 
@@ -17,7 +18,7 @@ def test_storage_metrics(dd_run_check, aggregator, instance):
 
     expected_storage = [(Decimal('0.000000'), Decimal('1206.000000'), Decimal('19.200000'))]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_storage):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.StorageUsageMetrics]
         dd_run_check(check)
@@ -35,7 +36,7 @@ def test_db_storage_metrics(dd_run_check, aggregator, instance):
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_db_storage_usage
     ):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.DatabaseStorageMetrics]
         dd_run_check(check)
@@ -51,7 +52,7 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
     ]
     expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.CreditUsage]
         dd_run_check(check)
@@ -69,7 +70,7 @@ def test_warehouse_usage_metrics(dd_run_check, aggregator, instance):
     ]
     expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_wh_usage):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.WarehouseCreditUsage]
         dd_run_check(check)
@@ -84,7 +85,7 @@ def test_login_metrics(dd_run_check, aggregator, instance):
 
     expected_login_metrics = [('SNOWFLAKE_UI', 2, 6, 8), ('PYTHON_DRIVER', 0, 148, 148)]
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_login_metrics):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.LoginMetrics]
         dd_run_check(check)
@@ -107,7 +108,7 @@ def test_warehouse_load(dd_run_check, aggregator, instance):
     ]
     expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_wl_metrics):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.WarehouseLoad]
         dd_run_check(check)
@@ -136,7 +137,7 @@ def test_query_metrics(dd_run_check, aggregator, instance):
 
     expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH', 'database:SNOWFLAKE', 'schema:None', 'query_type:USE']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_query_metrics):
-        check = SnowflakeCheck('snowflake', {}, [instance])
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
         check._query_manager.queries = [queries.QueryHistory]
         dd_run_check(check)
