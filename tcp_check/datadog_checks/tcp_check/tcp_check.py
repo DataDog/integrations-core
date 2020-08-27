@@ -95,7 +95,9 @@ class TCPCheck(AgentCheck):
             self.report_as_service_check(AgentCheck.OK, 'UP')
             if self.collect_response_time:
                 self.gauge(
-                    'network.tcp.response_time', response_time, tags=self.tags,
+                    'network.tcp.response_time',
+                    response_time,
+                    tags=self.tags,
                 )
         except Exception as e:
             length = int((time_func() - start) * 1000)

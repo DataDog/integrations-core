@@ -544,7 +544,11 @@ def test_submit_summary(
 
     if sum_monotonic_gauge:
         aggregator.assert_metric(
-            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT,
+            'prometheus.custom.summary.sum.total',
+            120512.0,
+            tags=[],
+            count=1,
+            metric_type=aggregator.MONOTONIC_COUNT,
         )
 
     aggregator.assert_all_metrics_covered()
@@ -558,16 +562,32 @@ def assert_histogram_counts(aggregator, count_type, suffix=False):
         metric_name += '.total'
 
     aggregator.assert_metric(
-        metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
+        metric_name,
+        4,
+        tags=['upper_bound:none'],
+        count=1,
+        metric_type=count_type,
     )
     aggregator.assert_metric(
-        metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
+        metric_name,
+        1,
+        tags=['upper_bound:1.0'],
+        count=1,
+        metric_type=count_type,
     )
     aggregator.assert_metric(
-        metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
+        metric_name,
+        2,
+        tags=['upper_bound:31104000.0'],
+        count=1,
+        metric_type=count_type,
     )
     aggregator.assert_metric(
-        metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
+        metric_name,
+        3,
+        tags=['upper_bound:432400000.0'],
+        count=1,
+        metric_type=count_type,
     )
 
 

@@ -57,7 +57,12 @@ class Oracle(AgentCheck):
 
         self._fix_custom_queries()
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self._tags,)
+        self._query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=manager_queries,
+            tags=self._tags,
+        )
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def _fix_custom_queries(self):

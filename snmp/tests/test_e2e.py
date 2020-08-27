@@ -141,7 +141,10 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     ]
     for metric in ups_basic_state_output_state_metrics:
         aggregator.assert_metric(
-            metric, metric_type=aggregator.GAUGE, count=2, tags=common_tags,
+            metric,
+            metric_type=aggregator.GAUGE,
+            count=2,
+            tags=common_tags,
         )
 
     # ==== test snmp v3 ===

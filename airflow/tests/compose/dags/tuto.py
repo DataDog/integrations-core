@@ -38,7 +38,10 @@ templated_command = """
 """
 
 t3 = BashOperator(
-    task_id="templated", bash_command=templated_command, params={"my_param": "Parameter I passed in"}, dag=dag,
+    task_id="templated",
+    bash_command=templated_command,
+    params={"my_param": "Parameter I passed in"},
+    dag=dag,
 )
 
 t2.set_upstream(t1)

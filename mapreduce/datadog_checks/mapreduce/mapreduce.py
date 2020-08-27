@@ -443,7 +443,10 @@ class MapReduceCheck(AgentCheck):
     def _critical_service(self, service_name, tags, message):
         if service_name:
             self.service_check(
-                service_name, AgentCheck.CRITICAL, tags=tags, message=message,
+                service_name,
+                AgentCheck.CRITICAL,
+                tags=tags,
+                message=message,
             )
 
     def _join_url_dir(self, url, *args):

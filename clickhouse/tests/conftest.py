@@ -22,7 +22,9 @@ def dd_environment():
             )
         )
     with docker_run(
-        common.COMPOSE_FILE, conditions=conditions, sleep=10,
+        common.COMPOSE_FILE,
+        conditions=conditions,
+        sleep=10,
     ):
         yield common.CONFIG
 

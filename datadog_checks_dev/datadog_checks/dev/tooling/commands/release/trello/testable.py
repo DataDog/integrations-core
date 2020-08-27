@@ -178,7 +178,9 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.option(
-    '--update-rc-builds-cards', is_flag=True, help='Update cards in RC builds column with `target_ref` version',
+    '--update-rc-builds-cards',
+    is_flag=True,
+    help='Update cards in RC builds column with `target_ref` version',
 )
 @click.pass_context
 def testable(
@@ -227,8 +229,7 @@ def testable(
     See trello subcommand for details on how to setup access:
 
     `ddev release trello -h`.
-
-"""
+    """
     root = get_root()
     repo = basepath(root)
     if repo not in ('integrations-core', 'datadog-agent'):

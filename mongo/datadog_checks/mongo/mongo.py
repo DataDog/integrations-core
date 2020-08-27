@@ -212,7 +212,7 @@ class MongoDb(AgentCheck):
 
     def create_event(self, last_state, state, replset_name):
         """Create an event with a message describing the replication
-            state of a mongo node"""
+        state of a mongo node"""
 
         status = self.get_state_description(state)
         short_status = self.get_state_name(state)

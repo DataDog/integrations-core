@@ -182,9 +182,9 @@ class Win32EventLogWMI(WinWMICheck):
             self.last_ts[instance_key] = datetime.utcnow()
 
     def _dt_to_wmi(self, dt):
-        ''' A wrapper around wmi.from_time to get a WMI-formatted time from a
-            time struct.
-        '''
+        """A wrapper around wmi.from_time to get a WMI-formatted time from a
+        time struct.
+        """
         return from_time(
             year=dt.year,
             month=dt.month,
@@ -297,8 +297,7 @@ class LogEvent(object):
         return False
 
     def _wmi_to_ts(self, wmi_ts):
-        ''' Convert a wmi formatted timestamp into an epoch.
-        '''
+        """Convert a wmi formatted timestamp into an epoch."""
         year, month, day, hour, minute, second, microsecond, tz = to_time(wmi_ts)
         tz_delta = timedelta(minutes=int(tz))
         if '+' in wmi_ts:
@@ -311,8 +310,7 @@ class LogEvent(object):
         return int(calendar.timegm(dt.timetuple()))
 
     def _tags(self, tags, event_code):
-        ''' Inject additional tags into the list already supplied to LogEvent.
-        '''
+        """Inject additional tags into the list already supplied to LogEvent."""
         tags_list = []
         if tags is not None:
             tags_list += list(tags)

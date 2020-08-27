@@ -11,7 +11,9 @@ AIRFLOW_STATUS_OK = "OK"
 class AirflowCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AirflowCheck, self).__init__(
-            name, init_config, instances,
+            name,
+            init_config,
+            instances,
         )
 
         self._url = self.instance.get('url', '')

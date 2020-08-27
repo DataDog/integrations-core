@@ -71,7 +71,9 @@ def autodiscovery_ready():
 
 def _autodiscovery_ready():
     result = run_command(
-        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True,
+        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'configcheck'],
+        capture=True,
+        check=True,
     )
 
     autodiscovery_checks = []
