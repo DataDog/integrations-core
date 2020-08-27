@@ -79,6 +79,24 @@ files:
         value:
           type: string
           example: <OCSP_RESPONSE_CACHE_FILENAME>
+      - name: metric_groups
+        required: true
+        description: |
+          List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+          - snowflake.query
+          - snowflake.billing
+          - snowflake.storage
+          - snowflake.logins
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - snowflake.query
+            - snowflake.billing
+            - snowflake.storage
+            - snowflake.logins
+
       - template: instances/tags
       - template: instances/service
       - template: instances/global
