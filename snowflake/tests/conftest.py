@@ -12,6 +12,8 @@ INSTANCE = {
     'role': "ACCOUNTADMIN",
 }
 
+CHECK_NAME = 'snowflake'
+
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
