@@ -478,8 +478,7 @@ class Redis(AgentCheck):
         self.last_timestamp_seen = max_ts
 
     def _check_command_stats(self, conn, tags):
-        """Get command-specific statistics from redis' INFO COMMANDSTATS command
-        """
+        """Get command-specific statistics from redis' INFO COMMANDSTATS command"""
         try:
             command_stats = conn.info("commandstats")
         except Exception:
