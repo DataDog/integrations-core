@@ -36,15 +36,19 @@ DatabaseStorageMetrics = Query(
 CreditUsage = Query(
     {
         'name': 'billing.metrics',
-        'query': "select SERVICE_TYPE, NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES),"
-        "AVG(CREDITS_USED) from METERING_HISTORY where start_time >= "
-        "date_trunc(day, current_date) group by 1, 2;",
+        'query': "select SERVICE_TYPE, NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
+                 "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
+                 "sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY"
+                 " where start_time >= date_trunc(day, current_date) group by 1, 2;",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
-            {'name': 'billing.virtual_warehouse', 'type': 'gauge'},
-            {'name': 'billing.cloud_service', 'type': 'gauge'},
-            {'name': 'billing.total', 'type': 'gauge'},
+            {'name': 'billing.virtual_warehouse.sum', 'type': 'gauge'},
+            {'name': 'billing.virtual_warehouse.avg', 'type': 'gauge'},
+            {'name': 'billing.cloud_service.sum', 'type': 'gauge'},
+            {'name': 'billing.cloud_service.avg', 'type': 'gauge'},
+            {'name': 'billing.total_credit.sum', 'type': 'gauge'},
+            {'name': 'billing.total_credit.avg', 'type': 'gauge'},
         ],
     }
 )
@@ -53,14 +57,18 @@ CreditUsage = Query(
 WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
-        'query': "select WAREHOUSE_NAME, AVG(CREDITS_USED_COMPUTE), AVG(CREDITS_USED_CLOUD_SERVICES), AVG(CREDITS_USED)"
-        " from WAREHOUSE_METERING_HISTORY"
-        " where start_time >= date_trunc(day, current_date) group by 1;",
+        'query': "select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
+                 "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
+                 "sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY "
+                 "where start_time >= date_trunc(day, current_date) group by 1;",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
-            {'name': 'billing.warehouse.virtual_warehouse', 'type': 'gauge'},
-            {'name': 'billing.warehouse.cloud_service', 'type': 'gauge'},
-            {'name': 'billing.warehouse.total', 'type': 'gauge'},
+            {'name': 'billing.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
+            {'name': 'billing.warehouse.virtual_warehouse.avg', 'type': 'gauge'},
+            {'name': 'billing.warehouse.cloud_service.sum', 'type': 'gauge'},
+            {'name': 'billing.warehouse.cloud_service.avg', 'type': 'gauge'},
+            {'name': 'billing.warehouse.total_credit.sum', 'type': 'gauge'},
+            {'name': 'billing.warehouse.total_credit.avg', 'type': 'gauge'},
         ],
     }
 )
