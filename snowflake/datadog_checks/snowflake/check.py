@@ -5,12 +5,19 @@ from contextlib import closing
 
 import snowflake.connector as sf
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.time import get_timestamp
 
 from . import queries
 from .config import Config
+
+METRIC_GROUPS = {
+    'snowflake.query': [queries.WarehouseLoad, queries.QueryHistory],
+    'snowflake.billing': [queries.CreditUsage, queries.WarehouseCreditUsage],
+    'snowflake.storage': [queries.StorageUsageMetrics, queries.DatabaseStorageMetrics],
+    'snowflake.logins': [queries.LoginMetrics],
+}
 
 
 class SnowflakeCheck(AgentCheck):
@@ -33,20 +40,21 @@ class SnowflakeCheck(AgentCheck):
         if self.config.password:
             self.register_secret(self.config.password)
 
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query_raw,
-            queries=[
-                queries.StorageUsageMetrics,
-                queries.DatabaseStorageMetrics,
-                queries.CreditUsage,
-                queries.WarehouseCreditUsage,
-                queries.LoginMetrics,
-                queries.WarehouseLoad,
-                queries.QueryHistory,
-            ],
-            tags=self._tags,
-        )
+        metric_queries = []
+        errors = []
+        for mgroup in self.config.metric_groups:
+            try:
+                metric_queries.append(METRIC_GROUPS[mgroup])
+            except KeyError:
+                errors.append(mgroup)
+
+        if errors:
+            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: {}'.format(', '.join(errors)))
+
+        if not metric_queries:
+            raise ConfigurationError('No valid metric_groups configured, please list at least one.')
+
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=metric_queries, tags=self._tags,)
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):

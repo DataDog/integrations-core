@@ -8,6 +8,7 @@ import mock
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.snowflake import SnowflakeCheck, queries
+
 from .conftest import CHECK_NAME
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
