@@ -11,8 +11,8 @@ from . import common
 
 
 def test_service_checks_cannot_connect(aggregator):
-    check = AirflowCheck('airflow', {}, [common.INSTANCE_WONG_URL])
-    check.check(common.INSTANCE_WONG_URL)
+    check = AirflowCheck('airflow', {}, [common.INSTANCE_WRONG_URL])
+    check.check(common.INSTANCE_WRONG_URL)
 
     tags = ['key:my-tag', 'url:http://localhost:5555']
 

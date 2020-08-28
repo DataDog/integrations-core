@@ -358,8 +358,8 @@ class HAProxy(AgentCheck):
         active_tag=None,
         enable_service_check=False,
     ):
-        ''' Main data-processing loop. For each piece of useful data, we'll
-        either save a metric, save an event or both. '''
+        """Main data-processing loop. For each piece of useful data, we'll
+        either save a metric, save an event or both."""
 
         # Split the first line into an index of fields
         # The line looks like (broken up onto multiple lines)
@@ -550,8 +550,7 @@ class HAProxy(AgentCheck):
             hosts_statuses[key] += 1
 
     def _should_process(self, data_dict, collect_aggregates_only):
-        """if collect_aggregates_only, we process only the aggregates
-        """
+        """if collect_aggregates_only, we process only the aggregates"""
         if is_affirmative(collect_aggregates_only):
             return self._is_aggregate(data_dict)
         elif str(collect_aggregates_only).lower() == 'both':
@@ -782,11 +781,11 @@ class HAProxy(AgentCheck):
             self.gauge("haproxy.sticktable.used", float(table.used), tags=tags)
 
     def _process_event(self, data, url, services_incl_filter=None, services_excl_filter=None, custom_tags=None):
-        '''
+        """
         Main event processing loop. An event will be created for a service
         status change.
         Service checks on the server side can be used to provide the same functionality
-        '''
+        """
         hostname = data['svname']
         service_name = data['pxname']
         key = "%s:%s" % (hostname, service_name)
@@ -849,9 +848,9 @@ class HAProxy(AgentCheck):
     def _process_service_check(
         self, data, url, tag_by_host=False, services_incl_filter=None, services_excl_filter=None, custom_tags=None
     ):
-        ''' Report a service check, tagged by the service and the backend.
-            Statuses are defined in `STATUS_TO_SERVICE_CHECK` mapping.
-        '''
+        """Report a service check, tagged by the service and the backend.
+        Statuses are defined in `STATUS_TO_SERVICE_CHECK` mapping.
+        """
         custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']

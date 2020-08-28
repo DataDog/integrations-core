@@ -1,5 +1,14 @@
 # CHANGELOG - http_check
 
+## 4.10.0 / 2020-08-10
+
+* [Added] Add config specs to http check. See [#7245](https://github.com/DataDog/integrations-core/pull/7245).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 4.9.1 / 2020-07-09
+
+* [Fixed] Raise http service check message limit. See [#7008](https://github.com/DataDog/integrations-core/pull/7008).
+
 ## 4.9.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).

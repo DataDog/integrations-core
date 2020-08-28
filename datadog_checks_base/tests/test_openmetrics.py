@@ -42,8 +42,11 @@ class MockResponse:
         pass
 
 
+FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
+
+
 PROMETHEUS_CHECK_INSTANCE = {
-    'prometheus_url': 'http://fake.endpoint:10055/metrics',
+    'prometheus_url': FAKE_ENDPOINT,
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'prometheus',
     # Defaults for checks that were based on PrometheusCheck
@@ -264,6 +267,29 @@ def test_submit_gauge_with_labels_and_hostname_override(
         54927360.0,
         tags=['my_1st_label:my_1st_label_value', 'node:foo'],
         hostname="foo-cluster-blue",
+        count=1,
+    )
+
+
+def test_submit_gauge_with_labels_and_hostname_override_empty_label(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    """ submitting metrics that contain empty label_to_hostname """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
+    )
+    ref_gauge.add_metric(['my_1st_label_value', ''], 54927360.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['label_to_hostname_suffix'] = '-cluster-name'
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=['my_1st_label:my_1st_label_value', 'node:'],
+        hostname="",
         count=1,
     )
 
@@ -518,7 +544,7 @@ def test_submit_summary(
 
     if sum_monotonic_gauge:
         aggregator.assert_metric(
-            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT,
+            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
         )
 
     aggregator.assert_all_metrics_covered()
@@ -531,18 +557,10 @@ def assert_histogram_counts(aggregator, count_type, suffix=False):
     if suffix:
         metric_name += '.total'
 
-    aggregator.assert_metric(
-        metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
-    )
+    aggregator.assert_metric(metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type)
 
 
 @pytest.mark.parametrize(
@@ -2534,3 +2552,51 @@ def test_http_handler(mocked_openmetrics_check_factory):
 
     assert http_handler.options['headers']['accept-encoding'] == 'gzip'
     assert http_handler.options['headers']['accept'] == 'text/plain'
+
+
+def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
+    """
+    Test that metric type is overridden correctly.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['type_overrides'] = {"process_virtual_memory_bytes": "counter"}
+
+    # Make sure we don't send counters as gauges
+    instance['send_monotonic_counter'] = True
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.process(config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
+    assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 0
+    assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 1
+
+
+def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data):
+    """
+    Test that metric type is overridden correctly with wildcard.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['type_overrides'] = {"*_virtual_memory_*": "counter"}
+
+    # Make sure we don't send counters as gauges
+    instance['send_monotonic_counter'] = True
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.process(config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
+    # assert the pattern was stored correctly
+    assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 1
+    assert list(check.config_map[FAKE_ENDPOINT]['_type_override_patterns'].values())[0] == 'counter'
+    assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 0

@@ -16,4 +16,4 @@ FULL_CONFIG = {
 }
 
 
-INSTANCE_WONG_URL = {'url': 'http://localhost:5555', 'tags': ['key:my-tag']}
+INSTANCE_WRONG_URL = {'url': 'http://localhost:5555', 'tags': ['key:my-tag']}

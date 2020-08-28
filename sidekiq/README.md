@@ -45,7 +45,7 @@ No additional installation is needed on your server.
           end
    ```
 
-    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][7] documentation for further configuration options.
+    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Dogstatsd Ruby][4] documentation for further configuration options.
 
 3. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 

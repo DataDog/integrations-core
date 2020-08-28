@@ -292,7 +292,7 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
             'poll',
             mock.Mock(
                 side_effect=mocked_poll(
-                    cadvisor_response='cadvisor_metrics_pre_1_16.txt', kubelet_response='kubelet_metrics_1_14.txt',
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt', kubelet_response='kubelet_metrics_1_14.txt'
                 )
             ),
         )
@@ -938,7 +938,7 @@ def test_process_stats_summary_not_source_windows(monkeypatch, aggregator, tagge
     # As we did not activate `use_stats_summary_as_source`, we only have ephemeral storage metrics
     # Kubelet stats not present as they are not returned on Windows
     aggregator.assert_metric(
-        'kubernetes.ephemeral_storage.usage', 919980.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+        'kubernetes.ephemeral_storage.usage', 919980.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl']
     )
 
 
@@ -979,13 +979,13 @@ def test_process_stats_summary_as_source(monkeypatch, aggregator, tagger):
     check.process_stats_summary(pod_list_utils, stats, tags, True)
 
     aggregator.assert_metric(
-        'kubernetes.ephemeral_storage.usage', 919980.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+        'kubernetes.ephemeral_storage.usage', 919980.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl']
     )
     aggregator.assert_metric(
-        'kubernetes.network.tx_bytes', 163670.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+        'kubernetes.network.tx_bytes', 163670.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl']
     )
     aggregator.assert_metric(
-        'kubernetes.network.rx_bytes', 694636.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+        'kubernetes.network.rx_bytes', 694636.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl']
     )
     aggregator.assert_metric(
         'kubernetes.network.tx_bytes',

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import sys
 from typing import Callable
 
 from six import PY2, text_type
@@ -16,6 +17,11 @@ except ImportError:
 
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
+
+LOGGER_FRAME_SEARCH_MAX_DEPTH = 50
+
+
+DEFAULT_FALLBACK_LOGGER = logging.getLogger(__name__)
 
 
 class AgentLogger(logging.getLoggerClass()):
@@ -154,3 +160,23 @@ def init_logging():
     urllib_logger = logging.getLogger("requests.packages.urllib3")
     urllib_logger.setLevel(logging.WARN)
     urllib_logger.propagate = True
+
+
+def get_check_logger(default_logger=None):
+    """
+    Search the current AgentCheck log starting from closest stack frame.
+    """
+    from datadog_checks.base import AgentCheck
+
+    for i in range(LOGGER_FRAME_SEARCH_MAX_DEPTH):
+        try:
+            frame = sys._getframe(i)
+        except ValueError:
+            break
+        if 'self' in frame.f_locals:
+            check = frame.f_locals['self']
+            if isinstance(check, AgentCheck):
+                return check.log
+    if default_logger is not None:
+        return default_logger
+    return DEFAULT_FALLBACK_LOGGER

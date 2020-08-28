@@ -44,7 +44,6 @@ class ProxysqlCheck(AgentCheck):
         if not all((self.host, self.port, self.user, self.password)):
             raise ConfigurationError("ProxySQL host, port, username and password are needed")
 
-        self.database_name = self.instance.get("database_name", "stats")
         self.tls_verify = self.instance.get("tls_verify", False)
         self.validate_hostname = self.instance.get("validate_hostname", True)
         self.tls_ca_cert = self.instance.get("tls_ca_cert")
@@ -65,7 +64,10 @@ class ProxysqlCheck(AgentCheck):
             if additional_group not in ADDITIONAL_METRICS_MAPPING:
                 raise ConfigurationError(
                     "There is no additional metric group called '{}' for the ProxySQL integration, it should be one "
-                    "of ({})".format(additional_group, ", ".join(ADDITIONAL_METRICS_MAPPING),)
+                    "of ({})".format(
+                        additional_group,
+                        ", ".join(ADDITIONAL_METRICS_MAPPING),
+                    )
                 )
             manager_queries.append(ADDITIONAL_METRICS_MAPPING[additional_group])
         self._connection = None
@@ -103,7 +105,6 @@ class ProxysqlCheck(AgentCheck):
                 user=self.user,
                 port=self.port,
                 passwd=self.password,
-                database=self.database_name,
                 connect_timeout=self.connect_timeout,
                 read_timeout=self.read_timeout,
                 ssl=ssl_context,

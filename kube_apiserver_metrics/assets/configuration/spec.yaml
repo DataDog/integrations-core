@@ -19,6 +19,8 @@ files:
       overrides:
         prometheus_url.value.example: https://localhost:443/metrics
         prometheus_url.display_priority: 1
+        bearer_token_auth.value.default: true
+        bearer_token_auth.value.example: true
 
 - name: auto_conf.yaml
   options:

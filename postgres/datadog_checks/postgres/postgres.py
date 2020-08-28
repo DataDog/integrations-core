@@ -25,7 +25,7 @@ from .util import (
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, get_raw_version, parse_version, transform_version
+from .version_utils import V9, get_raw_version, is_aurora, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -41,6 +41,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
+        self.is_aurora = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -68,11 +69,11 @@ class PostgreSql(AgentCheck):
             raw_version = get_raw_version(self.db)
             self._version = parse_version(raw_version)
             self.set_metadata('version', raw_version)
+            self.is_aurora = is_aurora(self.db)
         return self._version
 
     def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility
-        """
+        """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
 
         for element in yamlconfig:
@@ -227,9 +228,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self, instance_tags,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -252,8 +251,8 @@ class PostgreSql(AgentCheck):
             metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(self.config.relations)
 
-        replication_metrics = self.metrics_cache.get_replication_metrics(self.version)
-        if replication_metrics is not None:
+        replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
+        if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)

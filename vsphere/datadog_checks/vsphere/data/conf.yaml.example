@@ -120,6 +120,10 @@ instances:
     ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
     ##    - tag to filter only the resources with a given tag. Datadog has stricter rules (i.e no space), but the filter
     ##          is applied on the value coming from vCenter directly.
+    ##          The value to match is the one composed by <TAG_PREFIX><TAG_CATEGORY>:<TAG_VALUE>
+    ##    - attribute to filter only the resources with a given attribute. Datadog has stricter rules (i.e no space),
+    ##          but the filter is applied on the value coming from vCenter directly.
+    ##          The value to match is the one composed by <ATTR_PREFIX><ATTR_KEY>:<ATTR_VALUE>
     ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
     ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
     ##      if VMware tools are installed)
@@ -202,7 +206,7 @@ instances:
     ## If true, the vSphere Tags will be collected.
     ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
     ## vSphere tag name as value:
-    ##    <TAG_CATEGORY>:<TAG_NAME>
+    ##    <TAG_PREFIX><TAG_CATEGORY>:<TAG_NAME>
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
@@ -212,7 +216,8 @@ instances:
     ## @param tags_prefix - boolean - optional - default: ''
     ## Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:
-    ##   - You have vSphere tags that might conflict with tags added by this integration or the Datadog Agent
+    ##   - You have vSphere tags that might conflict with vSphere attributes or tags added by this integration or the
+    ##     Datadog Agent
     ##   - You want a prefix to better recognise tags coming from vSphere
     ## Examples with using `vtag_` prefix:
     ## - vtag_os_type:windows            # where `os_type` is the category name and `windows` the tag name
@@ -221,6 +226,32 @@ instances:
     ## e.g. vsphere_host, vsphere_type, etc.
     #
     # tags_prefix: ''
+
+    ## @param collect_attributes - boolean - optional - default: false
+    ## If true, the vSphere attributes will be collected and submitted as Datadog tags.
+    ## The final tag sent to Datadog is composed of 'attribute_prefix' + vSphere attribute category as key and
+    ## the vSphere attribute value as value:
+    ##    <ATTR_PREFIX><ATTR_CATEGORY>:<ATTR_VAL>
+    ## Examples:
+    ## - os_type:windows
+    ## - application_name:my_app
+    #
+    # collect_attributes: false
+
+    ## @param attributes_prefix - boolean - optional - default: ''
+    ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
+    ## Example use cases:
+    ##   - You have vSphere attributes that might conflict with vSphere tags or tags added by this integration or the
+    ##     Datadog Agent
+    ##   - You want a prefix to better recognise attributes coming from vSphere
+    ## Examples with using `vattr_` prefix:
+    ## - vattr_os_type:windows            # where `os_type` is the attribute key and `windows` the attribute value
+    ## - vattr_application_name:my_app    # where `application_name` is the attribute key and `my_app` the attribute
+    ##                                    # value
+    ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integration
+    ## e.g. vsphere_host, vsphere_type, etc.
+    #
+    # attributes_prefix: ''
 
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name

@@ -101,10 +101,11 @@ class Twemproxy(AgentCheck):
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
-        if version is None:
-            self.log.warning('Error collecting Twemproxy version')
-        else:
-            self.set_metadata('version', version)
+        if self.is_metadata_collection_enabled():
+            if version is None:
+                self.log.warning('Error collecting Twemproxy version')
+            else:
+                self.set_metadata('version', version)
 
     def _get_data(self, instance):
         host = instance.get('host')

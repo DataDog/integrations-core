@@ -1,0 +1,58 @@
+{
+   "pagination": {
+      "total_results": 6,
+      "total_pages": 1,
+      "first": {
+         "href": "https://domain.com/v3/spaces?page=1&per_page=50"
+      },
+      "last": {
+         "href": "https://domain.com/v3/spaces?page=1&per_page=50"
+      },
+      "next": null,
+      "previous": null
+   },
+   "resources": [
+      {
+         "guid": "d5d005a4-0320-4daa-ac0a-81f8dcd00fe0",
+         "created_at": "2019-05-17T15:07:43Z",
+         "updated_at": "2019-05-17T15:07:43Z",
+         "name": "space_3",
+         "relationships": {
+            "organization": {
+               "data": {
+                  "guid": "671557cf-edcd-49df-9863-ee14513d13c7"
+               }
+            }
+         },
+         "links": {
+            "self": {
+               "href": "https://domain.com/v3/spaces/d5d005a4-0320-4daa-ac0a-81f8dcd00fe0"
+            },
+            "organization": {
+               "href": "https://domain.com/v3/organizations/671557cf-edcd-49df-9863-ee14513d13c7"
+            }
+         }
+      },
+      {
+         "guid": "8c7e64bb-0bf8-4a7a-92e1-2fe06e7ec793",
+         "created_at": "2019-05-17T15:12:19Z",
+         "updated_at": "2019-05-17T15:12:19Z",
+         "name": "space_4",
+         "relationships": {
+            "organization": {
+               "data": {
+                  "guid": "671557cf-edcd-49df-9863-ee14513d13c7"
+               }
+            }
+         },
+         "links": {
+            "self": {
+               "href": "https://domain.com/v3/spaces/8c7e64bb-0bf8-4a7a-92e1-2fe06e7ec793"
+            },
+            "organization": {
+               "href": "https://domain.com/v3/organizations/671557cf-edcd-49df-9863-ee14513d13c7"
+            }
+         }
+      }
+   ]
+}

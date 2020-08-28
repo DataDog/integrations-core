@@ -1,5 +1,11 @@
 # CHANGELOG - ECS Fargate
 
+## 2.10.0 / 2020-08-10
+
+* [Added] Support include/exclude containers in ECS Fargate. See [#7165](https://github.com/DataDog/integrations-core/pull/7165).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
 ## 2.9.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
