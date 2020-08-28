@@ -124,12 +124,9 @@ if sys.version_info[:2] == (2, 6):
 else:
     import json
 
-from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
-
 from datadog_checks.tokumx.vendor import bson
 from datadog_checks.tokumx.vendor.bson import EPOCH_AWARE, EPOCH_NAIVE, RE_TYPE, SON
-from datadog_checks.tokumx.vendor.bson.binary import (Binary, JAVA_LEGACY, CSHARP_LEGACY, OLD_UUID_SUBTYPE,
-                         UUID_SUBTYPE)
+from datadog_checks.tokumx.vendor.bson.binary import CSHARP_LEGACY, JAVA_LEGACY, OLD_UUID_SUBTYPE, UUID_SUBTYPE, Binary
 from datadog_checks.tokumx.vendor.bson.code import Code
 from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions
 from datadog_checks.tokumx.vendor.bson.dbref import DBRef
@@ -138,12 +135,11 @@ from datadog_checks.tokumx.vendor.bson.int64 import Int64
 from datadog_checks.tokumx.vendor.bson.max_key import MaxKey
 from datadog_checks.tokumx.vendor.bson.min_key import MinKey
 from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
-from datadog_checks.tokumx.vendor.bson.py3compat import (PY3, iteritems, integer_types, string_type,
-                            text_type)
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, integer_types, iteritems, string_type, text_type
 from datadog_checks.tokumx.vendor.bson.regex import Regex
 from datadog_checks.tokumx.vendor.bson.timestamp import Timestamp
 from datadog_checks.tokumx.vendor.bson.tz_util import utc
-
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
 
 _RE_OPT_TABLE = {
     "i": re.I,

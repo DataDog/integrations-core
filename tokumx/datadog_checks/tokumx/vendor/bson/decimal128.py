@@ -23,9 +23,8 @@ import decimal
 import struct
 import sys
 
-from datadog_checks.tokumx.vendor.bson.py3compat import (PY3 as _PY3,
-                            string_type as _string_type)
-
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3 as _PY3
+from datadog_checks.tokumx.vendor.bson.py3compat import string_type as _string_type
 
 if _PY3:
     _from_bytes = int.from_bytes  # pylint: disable=no-member, invalid-name

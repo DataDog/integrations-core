@@ -19,31 +19,28 @@ import datetime
 import warnings
 
 from datadog_checks.tokumx.vendor.bson.code import Code
-from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
-from datadog_checks.tokumx.vendor.bson.py3compat import (_unicode,
-                            integer_types,
-                            string_type)
-from datadog_checks.tokumx.vendor.bson.raw_bson import RawBSONDocument
 from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions
+from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
+from datadog_checks.tokumx.vendor.bson.py3compat import _unicode, integer_types, string_type
+from datadog_checks.tokumx.vendor.bson.raw_bson import RawBSONDocument
 from datadog_checks.tokumx.vendor.bson.son import SON
-from datadog_checks.tokumx.vendor.pymongo import (common,
-                     helpers,
-                     message)
+from datadog_checks.tokumx.vendor.pymongo import common, helpers, message
 from datadog_checks.tokumx.vendor.pymongo.bulk import BulkOperationBuilder, _Bulk
-from datadog_checks.tokumx.vendor.pymongo.command_cursor import CommandCursor
 from datadog_checks.tokumx.vendor.pymongo.collation import validate_collation_or_none
+from datadog_checks.tokumx.vendor.pymongo.command_cursor import CommandCursor
 from datadog_checks.tokumx.vendor.pymongo.cursor import Cursor
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, InvalidName, OperationFailure
-from datadog_checks.tokumx.vendor.pymongo.helpers import _check_write_command_response
-from datadog_checks.tokumx.vendor.pymongo.helpers import _UNICODE_REPLACE_CODEC_OPTIONS
+from datadog_checks.tokumx.vendor.pymongo.helpers import _UNICODE_REPLACE_CODEC_OPTIONS, _check_write_command_response
 from datadog_checks.tokumx.vendor.pymongo.operations import IndexModel
 from datadog_checks.tokumx.vendor.pymongo.read_concern import DEFAULT_READ_CONCERN
 from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
-from datadog_checks.tokumx.vendor.pymongo.results import (BulkWriteResult,
-                             DeleteResult,
-                             InsertOneResult,
-                             InsertManyResult,
-                             UpdateResult)
+from datadog_checks.tokumx.vendor.pymongo.results import (
+    BulkWriteResult,
+    DeleteResult,
+    InsertManyResult,
+    InsertOneResult,
+    UpdateResult,
+)
 from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
 try:

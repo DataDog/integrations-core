@@ -23,12 +23,8 @@ The :mod:`gridfs` package is an implementation of GridFS on top of
 from collections import Mapping
 
 from datadog_checks.tokumx.vendor.gridfs.errors import NoFile
-from datadog_checks.tokumx.vendor.gridfs.grid_file import (GridIn,
-                              GridOut,
-                              GridOutCursor,
-                              DEFAULT_CHUNK_SIZE)
-from datadog_checks.tokumx.vendor.pymongo import (ASCENDING,
-                     DESCENDING)
+from datadog_checks.tokumx.vendor.gridfs.grid_file import DEFAULT_CHUNK_SIZE, GridIn, GridOut, GridOutCursor
+from datadog_checks.tokumx.vendor.pymongo import ASCENDING, DESCENDING
 from datadog_checks.tokumx.vendor.pymongo.common import UNAUTHORIZED_CODES, validate_string
 from datadog_checks.tokumx.vendor.pymongo.database import Database
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, OperationFailure

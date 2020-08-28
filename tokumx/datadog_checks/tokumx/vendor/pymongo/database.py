@@ -17,18 +17,20 @@
 import warnings
 
 from datadog_checks.tokumx.vendor.bson.code import Code
-from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions, DEFAULT_CODEC_OPTIONS
+from datadog_checks.tokumx.vendor.bson.codec_options import DEFAULT_CODEC_OPTIONS, CodecOptions
 from datadog_checks.tokumx.vendor.bson.dbref import DBRef
 from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
-from datadog_checks.tokumx.vendor.bson.py3compat import iteritems, string_type, _unicode
+from datadog_checks.tokumx.vendor.bson.py3compat import _unicode, iteritems, string_type
 from datadog_checks.tokumx.vendor.bson.son import SON
 from datadog_checks.tokumx.vendor.pymongo import auth, common, helpers
 from datadog_checks.tokumx.vendor.pymongo.collection import Collection
 from datadog_checks.tokumx.vendor.pymongo.command_cursor import CommandCursor
-from datadog_checks.tokumx.vendor.pymongo.errors import (CollectionInvalid,
-                            ConfigurationError,
-                            InvalidName,
-                            OperationFailure)
+from datadog_checks.tokumx.vendor.pymongo.errors import (
+    CollectionInvalid,
+    ConfigurationError,
+    InvalidName,
+    OperationFailure,
+)
 from datadog_checks.tokumx.vendor.pymongo.helpers import _first_batch
 from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 from datadog_checks.tokumx.vendor.pymongo.son_manipulator import SONManipulator

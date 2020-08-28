@@ -15,12 +15,11 @@
 """Communicate with one MongoDB server in a topology."""
 
 import contextlib
-
 from datetime import datetime
 
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
-from datadog_checks.tokumx.vendor.pymongo.message import _Query, _convert_exception
-from datadog_checks.tokumx.vendor.pymongo.response import Response, ExhaustResponse
+from datadog_checks.tokumx.vendor.pymongo.message import _convert_exception, _Query
+from datadog_checks.tokumx.vendor.pymongo.response import ExhaustResponse, Response
 from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 

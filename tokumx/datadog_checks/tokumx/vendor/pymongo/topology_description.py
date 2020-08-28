@@ -23,7 +23,6 @@ from datadog_checks.tokumx.vendor.pymongo.server_description import ServerDescri
 from datadog_checks.tokumx.vendor.pymongo.server_selectors import Selection
 from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
-
 TOPOLOGY_TYPE = namedtuple('TopologyType', ['Single', 'ReplicaSetNoPrimary',
                                             'ReplicaSetWithPrimary', 'Sharded',
                                             'Unknown'])(*range(5))

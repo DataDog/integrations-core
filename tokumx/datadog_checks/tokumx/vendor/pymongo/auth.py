@@ -40,10 +40,9 @@ from hashlib import md5, sha1
 from random import SystemRandom
 
 from datadog_checks.tokumx.vendor.bson.binary import Binary
-from datadog_checks.tokumx.vendor.bson.py3compat import b, string_type, _unicode, PY3
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, _unicode, b, string_type
 from datadog_checks.tokumx.vendor.bson.son import SON
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, OperationFailure
-
 
 MECHANISMS = frozenset(
     ['GSSAPI', 'MONGODB-CR', 'MONGODB-X509', 'PLAIN', 'SCRAM-SHA-1', 'DEFAULT'])
@@ -96,8 +95,8 @@ if PY3:
     _from_bytes = int.from_bytes
     _to_bytes = int.to_bytes
 else:
-    from binascii import (hexlify as _hexlify,
-                          unhexlify as _unhexlify)
+    from binascii import hexlify as _hexlify
+    from binascii import unhexlify as _unhexlify
 
 
     def _xor(fir, sec):

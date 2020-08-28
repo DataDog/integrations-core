@@ -30,27 +30,28 @@ except ImportError:
 
 
 from datadog_checks.tokumx.vendor.bson import DEFAULT_CODEC_OPTIONS
-from datadog_checks.tokumx.vendor.bson.py3compat import imap, itervalues, _unicode, integer_types
+from datadog_checks.tokumx.vendor.bson.py3compat import _unicode, imap, integer_types, itervalues
 from datadog_checks.tokumx.vendor.bson.son import SON
-from datadog_checks.tokumx.vendor.pymongo import auth, helpers, thread_util, __version__
+from datadog_checks.tokumx.vendor.pymongo import __version__, auth, helpers, thread_util
 from datadog_checks.tokumx.vendor.pymongo.common import MAX_MESSAGE_SIZE
-from datadog_checks.tokumx.vendor.pymongo.errors import (AutoReconnect,
-                            ConnectionFailure,
-                            ConfigurationError,
-                            DocumentTooLarge,
-                            NetworkTimeout,
-                            NotMasterError,
-                            OperationFailure)
+from datadog_checks.tokumx.vendor.pymongo.errors import (
+    AutoReconnect,
+    ConfigurationError,
+    ConnectionFailure,
+    DocumentTooLarge,
+    NetworkTimeout,
+    NotMasterError,
+    OperationFailure,
+)
 from datadog_checks.tokumx.vendor.pymongo.ismaster import IsMaster
 from datadog_checks.tokumx.vendor.pymongo.monotonic import time as _time
-from datadog_checks.tokumx.vendor.pymongo.network import (command,
-                             receive_message,
-                             SocketChecker)
+from datadog_checks.tokumx.vendor.pymongo.network import SocketChecker, command, receive_message
 from datadog_checks.tokumx.vendor.pymongo.read_concern import DEFAULT_READ_CONCERN
 from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
+
 # Always use our backport so we always have support for IP address matching
-from datadog_checks.tokumx.vendor.pymongo.ssl_match_hostname import match_hostname, CertificateError
+from datadog_checks.tokumx.vendor.pymongo.ssl_match_hostname import CertificateError, match_hostname
 
 # For SNI support. According to RFC6066, section 3, IPv4 and IPv6 literals are
 # not permitted for SNI hostname.
@@ -98,7 +99,7 @@ except ImportError:
                 return False
 
 try:
-    from fcntl import fcntl, F_GETFD, F_SETFD, FD_CLOEXEC
+    from fcntl import F_GETFD, F_SETFD, FD_CLOEXEC, fcntl
     def _set_non_inheritable_non_atomic(fd):
         """Set the close-on-exec flag on the given file descriptor."""
         flags = fcntl(fd, F_GETFD)

@@ -20,26 +20,30 @@ import threading
 import warnings
 import weakref
 
-from datadog_checks.tokumx.vendor.bson.py3compat import itervalues, PY3
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, itervalues
+
 if PY3:
     import queue as Queue
 else:
     import Queue
 
-from datadog_checks.tokumx.vendor.pymongo import common
-from datadog_checks.tokumx.vendor.pymongo import periodic_executor
-from datadog_checks.tokumx.vendor.pymongo.pool import PoolOptions
-from datadog_checks.tokumx.vendor.pymongo.topology_description import (updated_topology_description,
-                                          TOPOLOGY_TYPE,
-                                          TopologyDescription)
+from datadog_checks.tokumx.vendor.pymongo import common, periodic_executor
 from datadog_checks.tokumx.vendor.pymongo.errors import ServerSelectionTimeoutError
 from datadog_checks.tokumx.vendor.pymongo.monotonic import time as _time
+from datadog_checks.tokumx.vendor.pymongo.pool import PoolOptions
 from datadog_checks.tokumx.vendor.pymongo.server import Server
-from datadog_checks.tokumx.vendor.pymongo.server_selectors import (any_server_selector,
-                                      arbiter_server_selector,
-                                      secondary_server_selector,
-                                      writable_server_selector,
-                                      Selection)
+from datadog_checks.tokumx.vendor.pymongo.server_selectors import (
+    Selection,
+    any_server_selector,
+    arbiter_server_selector,
+    secondary_server_selector,
+    writable_server_selector,
+)
+from datadog_checks.tokumx.vendor.pymongo.topology_description import (
+    TOPOLOGY_TYPE,
+    TopologyDescription,
+    updated_topology_description,
+)
 
 
 def process_events_queue(queue_ref):

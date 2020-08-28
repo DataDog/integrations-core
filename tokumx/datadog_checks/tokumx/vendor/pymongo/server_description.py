@@ -15,9 +15,9 @@
 """Represent one server the driver is connected to."""
 
 from datadog_checks.tokumx.vendor.bson import EPOCH_NAIVE
-from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 from datadog_checks.tokumx.vendor.pymongo.ismaster import IsMaster
 from datadog_checks.tokumx.vendor.pymongo.monotonic import time as _time
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 
 def _total_seconds(delta):

@@ -16,7 +16,7 @@
 """
 import collections
 
-from datadog_checks.tokumx.vendor.bson.py3compat import string_type, PY3, text_type
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, string_type, text_type
 
 
 class Code(str):

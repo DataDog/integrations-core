@@ -20,22 +20,29 @@
 from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
 from datadog_checks.tokumx.vendor.bson.raw_bson import RawBSONDocument
 from datadog_checks.tokumx.vendor.bson.son import SON
-from datadog_checks.tokumx.vendor.pymongo.common import (validate_is_mapping,
-                            validate_is_document_type,
-                            validate_ok_for_replace,
-                            validate_ok_for_update)
 from datadog_checks.tokumx.vendor.pymongo.collation import validate_collation_or_none
-from datadog_checks.tokumx.vendor.pymongo.errors import (BulkWriteError,
-                            ConfigurationError,
-                            DocumentTooLarge,
-                            InvalidOperation,
-                            OperationFailure)
-from datadog_checks.tokumx.vendor.pymongo.message import (_INSERT, _UPDATE, _DELETE,
-                             _do_batched_write_command,
-                             _randint,
-                             _BulkWriteContext)
+from datadog_checks.tokumx.vendor.pymongo.common import (
+    validate_is_document_type,
+    validate_is_mapping,
+    validate_ok_for_replace,
+    validate_ok_for_update,
+)
+from datadog_checks.tokumx.vendor.pymongo.errors import (
+    BulkWriteError,
+    ConfigurationError,
+    DocumentTooLarge,
+    InvalidOperation,
+    OperationFailure,
+)
+from datadog_checks.tokumx.vendor.pymongo.message import (
+    _DELETE,
+    _INSERT,
+    _UPDATE,
+    _BulkWriteContext,
+    _do_batched_write_command,
+    _randint,
+)
 from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
-
 
 _DELETE_ALL = 0
 _DELETE_ONE = 1

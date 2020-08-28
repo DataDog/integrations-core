@@ -16,20 +16,17 @@
 import datetime
 import math
 import os
-
 from hashlib import md5
 
-from datadog_checks.tokumx.vendor.bson.son import SON
 from datadog_checks.tokumx.vendor.bson.binary import Binary
 from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
-from datadog_checks.tokumx.vendor.bson.py3compat import text_type, StringIO
+from datadog_checks.tokumx.vendor.bson.py3compat import StringIO, text_type
+from datadog_checks.tokumx.vendor.bson.son import SON
 from datadog_checks.tokumx.vendor.gridfs.errors import CorruptGridFile, FileExists, NoFile
 from datadog_checks.tokumx.vendor.pymongo import ASCENDING
 from datadog_checks.tokumx.vendor.pymongo.collection import Collection
 from datadog_checks.tokumx.vendor.pymongo.cursor import Cursor
-from datadog_checks.tokumx.vendor.pymongo.errors import (ConfigurationError,
-                            DuplicateKeyError,
-                            OperationFailure)
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, DuplicateKeyError, OperationFailure
 from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 
 try:

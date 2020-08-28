@@ -19,8 +19,8 @@ import sys
 PY3 = sys.version_info[0] == 3
 
 if PY3:
-    import codecs
     import _thread as thread
+    import codecs
     from io import BytesIO as StringIO
     MAXSIZE = sys.maxsize
 
@@ -53,9 +53,9 @@ if PY3:
     string_type = str
     integer_types = int
 else:
-    import thread
-
     from itertools import imap
+
+    import thread
     try:
         from cStringIO import StringIO
     except ImportError:

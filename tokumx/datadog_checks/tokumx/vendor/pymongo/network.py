@@ -36,10 +36,7 @@ except ImportError:
 
 from datadog_checks.tokumx.vendor.pymongo import helpers, message
 from datadog_checks.tokumx.vendor.pymongo.common import MAX_MESSAGE_SIZE
-from datadog_checks.tokumx.vendor.pymongo.errors import (AutoReconnect,
-                            NotMasterError,
-                            OperationFailure,
-                            ProtocolError)
+from datadog_checks.tokumx.vendor.pymongo.errors import AutoReconnect, NotMasterError, OperationFailure, ProtocolError
 from datadog_checks.tokumx.vendor.pymongo.read_concern import DEFAULT_READ_CONCERN
 
 _UNPACK_INT = struct.Struct("<i").unpack

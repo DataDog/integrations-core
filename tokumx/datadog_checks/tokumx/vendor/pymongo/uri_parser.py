@@ -27,7 +27,6 @@ else:
 from datadog_checks.tokumx.vendor.pymongo.common import get_validated_options
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, InvalidURI
 
-
 SCHEME = 'mongodb://'
 SCHEME_LEN = len(SCHEME)
 DEFAULT_PORT = 27017

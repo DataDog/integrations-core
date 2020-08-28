@@ -136,8 +136,8 @@ will not add that listener to existing client instances.
 
 import sys
 import traceback
+from collections import Sequence, namedtuple
 
-from collections import namedtuple, Sequence
 from datadog_checks.tokumx.vendor.pymongo.helpers import _handle_exception
 
 _Listeners = namedtuple('Listeners',

@@ -23,36 +23,24 @@ import re
 import struct
 import sys
 import uuid
+from codecs import utf_8_decode as _utf_8_decode
+from codecs import utf_8_encode as _utf_8_encode
 
-from codecs import (utf_8_decode as _utf_8_decode,
-                    utf_8_encode as _utf_8_encode)
-
-from datadog_checks.tokumx.vendor.bson.binary import (Binary, OLD_UUID_SUBTYPE,
-                         JAVA_LEGACY, CSHARP_LEGACY,
-                         UUIDLegacy)
+from datadog_checks.tokumx.vendor.bson.binary import CSHARP_LEGACY, JAVA_LEGACY, OLD_UUID_SUBTYPE, Binary, UUIDLegacy
 from datadog_checks.tokumx.vendor.bson.code import Code
-from datadog_checks.tokumx.vendor.bson.codec_options import (
-    CodecOptions, DEFAULT_CODEC_OPTIONS, _raw_document_class)
+from datadog_checks.tokumx.vendor.bson.codec_options import DEFAULT_CODEC_OPTIONS, CodecOptions, _raw_document_class
 from datadog_checks.tokumx.vendor.bson.dbref import DBRef
 from datadog_checks.tokumx.vendor.bson.decimal128 import Decimal128
-from datadog_checks.tokumx.vendor.bson.errors import (InvalidBSON,
-                         InvalidDocument,
-                         InvalidStringData)
+from datadog_checks.tokumx.vendor.bson.errors import InvalidBSON, InvalidDocument, InvalidStringData
 from datadog_checks.tokumx.vendor.bson.int64 import Int64
 from datadog_checks.tokumx.vendor.bson.max_key import MaxKey
 from datadog_checks.tokumx.vendor.bson.min_key import MinKey
 from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
-from datadog_checks.tokumx.vendor.bson.py3compat import (b,
-                            PY3,
-                            iteritems,
-                            text_type,
-                            string_type,
-                            reraise)
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, b, iteritems, reraise, string_type, text_type
 from datadog_checks.tokumx.vendor.bson.regex import Regex
-from datadog_checks.tokumx.vendor.bson.son import SON, RE_TYPE
+from datadog_checks.tokumx.vendor.bson.son import RE_TYPE, SON
 from datadog_checks.tokumx.vendor.bson.timestamp import Timestamp
 from datadog_checks.tokumx.vendor.bson.tz_util import utc
-
 
 try:
     from datadog_checks.tokumx.vendor.bson import _cbson

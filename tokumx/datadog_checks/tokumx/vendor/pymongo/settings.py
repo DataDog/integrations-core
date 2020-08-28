@@ -20,9 +20,9 @@ from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
 from datadog_checks.tokumx.vendor.pymongo import common, monitor, pool
 from datadog_checks.tokumx.vendor.pymongo.common import LOCAL_THRESHOLD_MS, SERVER_SELECTION_TIMEOUT
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
-from datadog_checks.tokumx.vendor.pymongo.topology_description import TOPOLOGY_TYPE
 from datadog_checks.tokumx.vendor.pymongo.pool import PoolOptions
 from datadog_checks.tokumx.vendor.pymongo.server_description import ServerDescription
+from datadog_checks.tokumx.vendor.pymongo.topology_description import TOPOLOGY_TYPE
 
 
 class TopologySettings(object):

@@ -17,24 +17,23 @@
 import copy
 import datetime
 import warnings
-
 from collections import deque
 
 from datadog_checks.tokumx.vendor.bson import RE_TYPE
 from datadog_checks.tokumx.vendor.bson.code import Code
-from datadog_checks.tokumx.vendor.bson.py3compat import (iteritems,
-                            integer_types,
-                            string_type)
+from datadog_checks.tokumx.vendor.bson.py3compat import integer_types, iteritems, string_type
 from datadog_checks.tokumx.vendor.bson.son import SON
 from datadog_checks.tokumx.vendor.pymongo import helpers
-from datadog_checks.tokumx.vendor.pymongo.common import validate_boolean, validate_is_mapping
 from datadog_checks.tokumx.vendor.pymongo.collation import validate_collation_or_none
-from datadog_checks.tokumx.vendor.pymongo.errors import (AutoReconnect,
-                            ConnectionFailure,
-                            InvalidOperation,
-                            NotMasterError,
-                            OperationFailure)
-from datadog_checks.tokumx.vendor.pymongo.message import _CursorAddress, _GetMore, _Query, _convert_exception
+from datadog_checks.tokumx.vendor.pymongo.common import validate_boolean, validate_is_mapping
+from datadog_checks.tokumx.vendor.pymongo.errors import (
+    AutoReconnect,
+    ConnectionFailure,
+    InvalidOperation,
+    NotMasterError,
+    OperationFailure,
+)
+from datadog_checks.tokumx.vendor.pymongo.message import _convert_exception, _CursorAddress, _GetMore, _Query
 from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 
 _QUERY_OPTIONS = {

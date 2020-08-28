@@ -81,20 +81,22 @@ __version__ = version = get_version_string()
 """Current version of PyMongo."""
 
 from datadog_checks.tokumx.vendor.pymongo.collection import ReturnDocument
-from datadog_checks.tokumx.vendor.pymongo.common import (MIN_SUPPORTED_WIRE_VERSION,
-                            MAX_SUPPORTED_WIRE_VERSION)
+from datadog_checks.tokumx.vendor.pymongo.common import MAX_SUPPORTED_WIRE_VERSION, MIN_SUPPORTED_WIRE_VERSION
 from datadog_checks.tokumx.vendor.pymongo.cursor import CursorType
 from datadog_checks.tokumx.vendor.pymongo.mongo_client import MongoClient
 from datadog_checks.tokumx.vendor.pymongo.mongo_replica_set_client import MongoReplicaSetClient
-from datadog_checks.tokumx.vendor.pymongo.operations import (IndexModel,
-                                InsertOne,
-                                DeleteOne,
-                                DeleteMany,
-                                UpdateOne,
-                                UpdateMany,
-                                ReplaceOne)
+from datadog_checks.tokumx.vendor.pymongo.operations import (
+    DeleteMany,
+    DeleteOne,
+    IndexModel,
+    InsertOne,
+    ReplaceOne,
+    UpdateMany,
+    UpdateOne,
+)
 from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
+
 
 def has_c():
     """Is the C extension installed?"""

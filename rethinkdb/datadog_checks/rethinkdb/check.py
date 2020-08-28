@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from typing import Any, Callable, Iterator, Sequence, cast
 
 import rethinkdb
-
 from datadog_checks.base import AgentCheck
 
 from . import operations, queries

@@ -19,10 +19,9 @@ import collections
 import datetime
 import warnings
 
-from datadog_checks.tokumx.vendor.bson.binary import (STANDARD, PYTHON_LEGACY,
-                         JAVA_LEGACY, CSHARP_LEGACY)
+from datadog_checks.tokumx.vendor.bson.binary import CSHARP_LEGACY, JAVA_LEGACY, PYTHON_LEGACY, STANDARD
 from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions
-from datadog_checks.tokumx.vendor.bson.py3compat import string_type, integer_types, iteritems
+from datadog_checks.tokumx.vendor.bson.py3compat import integer_types, iteritems, string_type
 from datadog_checks.tokumx.vendor.bson.raw_bson import RawBSONDocument
 from datadog_checks.tokumx.vendor.pymongo.auth import MECHANISMS
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError

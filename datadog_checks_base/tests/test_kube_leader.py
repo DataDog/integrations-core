@@ -7,11 +7,11 @@ from datetime import datetime, timedelta
 
 import mock
 import pytest
-from kubernetes.config.dateutil import format_rfc3339
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecord
+from kubernetes.config.dateutil import format_rfc3339
 
 # Trigger lazy imports
 try:

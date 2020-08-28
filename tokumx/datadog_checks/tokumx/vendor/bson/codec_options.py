@@ -15,13 +15,10 @@
 """Tools for specifying BSON codec options."""
 
 import datetime
-
 from collections import MutableMapping, namedtuple
 
+from datadog_checks.tokumx.vendor.bson.binary import ALL_UUID_REPRESENTATIONS, PYTHON_LEGACY, UUID_REPRESENTATION_NAMES
 from datadog_checks.tokumx.vendor.bson.py3compat import string_type
-from datadog_checks.tokumx.vendor.bson.binary import (ALL_UUID_REPRESENTATIONS,
-                         PYTHON_LEGACY,
-                         UUID_REPRESENTATION_NAMES)
 
 _RAW_BSON_DOCUMENT_MARKER = 101
 

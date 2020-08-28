@@ -15,15 +15,14 @@
 """Tools to parse mongo client options."""
 
 from datadog_checks.tokumx.vendor.bson.codec_options import _parse_codec_options
+from datadog_checks.tokumx.vendor.pymongo import common
 from datadog_checks.tokumx.vendor.pymongo.auth import _build_credentials_tuple
 from datadog_checks.tokumx.vendor.pymongo.common import validate_boolean
-from datadog_checks.tokumx.vendor.pymongo import common
 from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
 from datadog_checks.tokumx.vendor.pymongo.monitoring import _EventListeners
 from datadog_checks.tokumx.vendor.pymongo.pool import PoolOptions
 from datadog_checks.tokumx.vendor.pymongo.read_concern import ReadConcern
-from datadog_checks.tokumx.vendor.pymongo.read_preferences import (make_read_preference,
-                                      read_pref_mode_from_name)
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import make_read_preference, read_pref_mode_from_name
 from datadog_checks.tokumx.vendor.pymongo.ssl_support import get_ssl_context
 from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
