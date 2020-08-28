@@ -26,6 +26,9 @@
   "type": "check",
   "integration_id": "nginx",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
@@ -36,6 +39,9 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "nginx"
+    }
   }
 }

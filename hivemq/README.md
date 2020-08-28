@@ -14,9 +14,12 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -55,6 +58,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 ##### Metric collection
@@ -86,6 +92,9 @@ JMXFetch
       service_check_count : 0
       status : OK
 ```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ## Data Collected
 

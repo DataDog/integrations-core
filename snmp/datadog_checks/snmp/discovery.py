@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import copy
 import json
 import time
 import weakref
@@ -33,11 +32,8 @@ def discover_instances(config, interval, check_ref):
             check = check_ref()
             if check is None or not check._running:
                 return
-            instance = copy.deepcopy(config.instance)
-            instance.pop('network_address')
-            instance['ip_address'] = host
 
-            host_config = check._build_config(instance)
+            host_config = check._build_autodiscovery_config(config.instance, host)
 
             try:
                 sys_object_oid = check.fetch_sysobject_oid(host_config)
@@ -49,7 +45,7 @@ def discover_instances(config, interval, check_ref):
             try:
                 profile = check._profile_for_sysobject_oid(sys_object_oid)
             except ConfigurationError:
-                if not (host_config.all_oids or host_config.bulk_oids):
+                if not host_config.oid_config.has_oids():
                     check.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                     del check
                     continue

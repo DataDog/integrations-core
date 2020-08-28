@@ -17,7 +17,6 @@ from datadog_checks.directory import DirectoryCheck
 from . import common
 
 temp_dir = None
-dir_check = DirectoryCheck('directory', {}, {})
 
 
 def setup_module(module):
@@ -80,6 +79,7 @@ def test_exclude_dirs(aggregator):
         for ed in exclude:
             create_file(os.path.join(td, ed, 'file'))
 
+        dir_check = DirectoryCheck('directory', {}, [instance])
         dir_check.check(instance)
 
     assert len(aggregator.metric_names) == 1
@@ -98,6 +98,7 @@ def test_directory_metrics(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/main")
@@ -134,6 +135,7 @@ def test_directory_metrics_many(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/many")
@@ -168,6 +170,7 @@ def test_file_metrics(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/main")
@@ -213,6 +216,7 @@ def test_file_metrics_many(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/many")
@@ -276,13 +280,20 @@ def test_non_existent_directory():
     """
     Missing or inaccessible directory coverage.
     """
+    config = {'directory': '/non-existent/directory'}
     with pytest.raises(ConfigurationError):
-        dir_check.check({'directory': '/non-existent/directory'})
+        dir_check = DirectoryCheck('directory', {}, [config])
+        dir_check.check(config)
+
+
+def test_missing_directory_config():
+    with pytest.raises(ConfigurationError):
+        DirectoryCheck('directory', {}, [{}])
 
 
 def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory', 'ignore_missing': True}
-    check = DirectoryCheck('directory', {}, {})
+    check = DirectoryCheck('directory', {}, [config])
     check._get_stats = mock.MagicMock()
     check.check(config)
     check._get_stats.assert_called_once()
@@ -325,3 +336,55 @@ def test_no_recursive_symlink_loop(aggregator):
             aggregator.assert_metric(metric, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    'stat_follow_symlinks, expected_dir_size, expected_file_sizes',
+    [
+        pytest.param(True, 250, [('file50', 50), ('file100', 100), ('file100sym', 100)], id='follow_sym'),
+        # file100sym = 8 + len(dir): that's the length of the symlink file
+        pytest.param(
+            False,
+            lambda tdir: 150 + 8 + len(tdir),
+            [('file50', 50), ('file100', 100), ('file100sym', lambda tdir: 8 + len(tdir))],
+            id='not_follow_sym',
+        ),
+    ],
+)
+def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_size, expected_file_sizes):
+    def flatten_value(value):
+        if callable(value):
+            return value(tdir)
+        return value
+
+    with temp_directory() as tdir:
+
+        # Setup dir and files
+        file50 = os.path.join(tdir, 'file50')
+        file100 = os.path.join(tdir, 'file100')
+        file100sym = os.path.join(tdir, 'file100sym')
+
+        with open(file50, 'w') as f:
+            f.write('0' * 50)
+        with open(file100, 'w') as f:
+            f.write('0' * 100)
+
+        os.symlink(file100, file100sym)
+
+        # Run Check
+        instance = {
+            'directory': tdir,
+            'recursive': True,
+            'filegauges': True,
+            'stat_follow_symlinks': stat_follow_symlinks,
+        }
+        check = DirectoryCheck('directory', {}, [instance])
+        check.check(instance)
+
+        common_tags = ['name:{}'.format(tdir)]
+        aggregator.assert_metric(
+            'system.disk.directory.bytes', value=flatten_value(expected_dir_size), tags=common_tags
+        )
+        for filename, size in expected_file_sizes:
+            tags = common_tags + ['filename:{}'.format(os.path.join(tdir, filename))]
+            aggregator.assert_metric('system.disk.directory.file.bytes', value=flatten_value(size), tags=tags)

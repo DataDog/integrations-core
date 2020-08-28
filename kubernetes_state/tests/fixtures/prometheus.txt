@@ -286,10 +286,16 @@ kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="B
 kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Failed"} 0
 kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Pending"} 0
 kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Released"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Available"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Bound"} 1
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Failed"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Pending"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Released"} 0
 # HELP kube_persistentvolume_info Information about persistentvolume.
 # TYPE kube_persistentvolume_info gauge
 kube_persistentvolume_info{persistentvolume="local-pv-103fef5d",storageclass="local-data"} 1
 kube_persistentvolume_info{persistentvolume="local-pv-15d0a3a3",storageclass="local-data"} 1
+kube_persistentvolume_info{persistentvolume="local-pv-16d0a3a3",storageclass=""} 1
 # HELP kube_persistentvolumeclaim_info Information about persistent volume claim.
 # TYPE kube_persistentvolumeclaim_info gauge
 kube_persistentvolumeclaim_info{namespace="default",persistentvolumeclaim="task-pv-claim",storageclass="manual"} 1

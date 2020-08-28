@@ -90,7 +90,7 @@ class Twemproxy(AgentCheck):
             self.log.warning("No response received from twemproxy.")
             return
 
-        metrics = Twemproxy.parse_json(response, tags)
+        metrics, version = Twemproxy.parse_json(response, tags)
         for row in metrics:
             try:
                 name, value, tags = row
@@ -100,6 +100,12 @@ class Twemproxy(AgentCheck):
                     self.rate(name, value, tags)
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
+
+        if self.is_metadata_collection_enabled():
+            if version is None:
+                self.log.warning('Error collecting Twemproxy version')
+            else:
+                self.set_metadata('version', version)
 
     def _get_data(self, instance):
         host = instance.get('host')
@@ -150,6 +156,8 @@ class Twemproxy(AgentCheck):
         metric_base = 'twemproxy'
         output = []
 
+        version = parsed.get('version', None)
+
         for key, val in iteritems(parsed):
             if isinstance(val, dict):
                 # server pool
@@ -170,4 +178,4 @@ class Twemproxy(AgentCheck):
                 metric_name = '%s.%s' % (metric_base, key)
                 output.append((metric_name, val, tags))
 
-        return output
+        return output, version

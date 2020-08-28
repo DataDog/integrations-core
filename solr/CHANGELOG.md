@@ -1,5 +1,18 @@
 # CHANGELOG - solr
 
+## 1.5.0 / 2020-08-10
+
+* [Added] Convert jmx to in-app types for replay_check_run. See [#7275](https://github.com/DataDog/integrations-core/pull/7275).
+* [Added] Add documentation for solr logs. See [#7162](https://github.com/DataDog/integrations-core/pull/7162).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Add domain to metrics.yaml. See [#7164](https://github.com/DataDog/integrations-core/pull/7164).
+* [Fixed] Add new_gc_metrics to all jmx integrations. See [#7073](https://github.com/DataDog/integrations-core/pull/7073).
+
+## 1.4.1 / 2020-06-29
+
+* [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).
+* [Fixed] Adjust jmxfetch config. See [#6864](https://github.com/DataDog/integrations-core/pull/6864).
+
 ## 1.4.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

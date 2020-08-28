@@ -33,7 +33,6 @@ from ..utils.common import ensure_bytes, to_native_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
-from ..utils.proxy import config_proxy_skip
 from ..utils.secrets import SecretsSanitizer
 
 try:
@@ -220,7 +219,7 @@ class AgentCheck(object):
                 False,
                 (
                     'DEPRECATION NOTICE: The `no_proxy` config option has been renamed '
-                    'to `skip_proxy` and will be removed in Agent version 6.13.'
+                    'to `skip_proxy` and will be removed in a future release.'
                 ),
             ),
             'service_tag': (
@@ -363,19 +362,6 @@ class AgentCheck(object):
             return text
         else:
             return sanitizer.sanitize(text)
-
-    def get_instance_proxy(self, instance, uri, proxies=None):
-        # type: (InstanceType, str, ProxySettings) -> ProxySettings
-        # TODO: Remove with Agent 5
-        proxies = proxies if proxies is not None else self.proxies.copy()
-
-        deprecated_skip = instance.get('no_proxy', None)
-        skip = is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or is_affirmative(deprecated_skip)
-
-        if deprecated_skip is not None:
-            self._log_deprecation('no_proxy')
-
-        return config_proxy_skip(proxies, uri, skip)
 
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         # type: (int, str, Sequence[str], str) -> str
@@ -641,9 +627,16 @@ class AgentCheck(object):
     def metadata_entrypoint(cls, method):
         # type: (Callable[..., None]) -> Callable[..., None]
         """
-        Mark a method as a metadata entrypoint.
+        Skip execution of the decorated method if metadata collection is disabled on the Agent.
 
-        This decorator provides automatic no-op behavior in case metadata collection is disabled on the Agent.
+        Usage:
+
+        ```python
+        class MyCheck(AgentCheck):
+            @AgentCheck.metadata_entrypoint
+            def collect_metadata(self):
+                ...
+        ```
         """
 
         @functools.wraps(method)
@@ -656,6 +649,18 @@ class AgentCheck(object):
             method(self, *args, **kwargs)
 
         return entrypoint
+
+    def _persistent_cache_id(self, key):
+        # type: (str) -> str
+        return '{}_{}'.format(self.check_id, key)
+
+    def read_persistent_cache(self, key):
+        # type: (str) -> str
+        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+
+    def write_persistent_cache(self, key, value):
+        # type: (str, str) -> None
+        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None

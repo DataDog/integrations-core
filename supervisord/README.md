@@ -51,9 +51,12 @@ If Supervisor is running as root, make sure `chmod` or `chown` is set so that no
 
 Reload `supervisord`.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample supervisord.d/conf.yaml][4] for all available configuration options:
 
@@ -76,15 +79,21 @@ See the [example check configuration][4] for comprehensive descriptions of other
 
 [Restart the Agent][5] to start sending Supervisor metrics to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                                          |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `supervisord`                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                  |
-| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
+| Parameter            | Value                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `<INTEGRATION_NAME>` | `supervisord`                                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                      |
+| `<INSTANCE_CONFIG>`  | `{"name":"<SUPERVISORD_SERVER_NAME>", "host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

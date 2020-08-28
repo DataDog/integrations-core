@@ -1,5 +1,15 @@
 # CHANGELOG - yarn
 
+## 1.15.0 / 2020-08-10
+
+* [Added] Add config specs for YARN integration. See [#7167](https://github.com/DataDog/integrations-core/pull/7167).
+* [Added] Add ability to split YARN application tags into Datadog tags. See [#7101](https://github.com/DataDog/integrations-core/pull/7101). Thanks [nicodv](https://github.com/nicodv).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 1.14.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
 ## 1.13.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

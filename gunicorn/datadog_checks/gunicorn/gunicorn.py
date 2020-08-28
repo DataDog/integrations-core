@@ -149,6 +149,7 @@ class GUnicornCheck(AgentCheck):
         # web      22985 26.4  6.1 795288 449596 ?       Sl   19:30   2:32 gunicorn: worker [web1]
         return "gunicorn: master [%s]" % name
 
+    @AgentCheck.metadata_entrypoint
     def _collect_metadata(self):
         raw_version = self._get_version()
         self.log.debug('gunicorn version: %s', raw_version)
@@ -162,7 +163,7 @@ class GUnicornCheck(AgentCheck):
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
         except OSError:
-            self.log.warning("Error collecting gunicorn version.")
+            self.log.debug("Error collecting gunicorn version.")
             return None
 
         match = re.match(self.VERSION_PATTERN, pc_out)
@@ -172,7 +173,7 @@ class GUnicornCheck(AgentCheck):
         if match:
             return match.groups()[0]
         else:
-            self.log.warning("Version not found in stdout `%s` and stderr `%s`", pc_out, pc_err)
+            self.log.debug("Version not found in stdout `%s` and stderr `%s`", pc_out, pc_err)
         return None
 
 

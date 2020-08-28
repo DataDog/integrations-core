@@ -1,8 +1,14 @@
 # CHANGELOG - riak
 
+## 2.0.0 / 2020-08-10
+
+* [Added] Add config specs. See [#7068](https://github.com/DataDog/integrations-core/pull/7068).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Changed] Use requests wrapper and remove httplib2 dependency. See [#7247](https://github.com/DataDog/integrations-core/pull/7247).
+
 ## 1.9.0 / 2020-05-20
 
-* [Added] Upgrade httplib2 to 0.18.0. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
 
 ## 1.8.0 / 2020-05-17
 

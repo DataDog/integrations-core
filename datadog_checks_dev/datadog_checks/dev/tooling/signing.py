@@ -12,7 +12,7 @@ securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
 from securesystemslib.gpg.constants import GPG_COMMAND
 
-from in_toto import runlib
+from in_toto import runlib, util
 
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git
@@ -66,14 +66,12 @@ def get_key_id(gpg_exe):
         raise YubikeyException('Could not find private signing key on Yubikey!')
 
 
-def run_in_toto(key_id, products):
+def run_in_toto(products, **kwargs):
     exclude_patterns = read_gitignore_patterns()
 
     runlib.in_toto_run(
         # Do not record files matching these patterns.
         exclude_patterns=exclude_patterns,
-        # Use this GPG key.
-        gpg_keyid=key_id,
         # Do not execute any other command.
         link_cmd_args=[],
         # Do not record anything as input.
@@ -84,12 +82,12 @@ def run_in_toto(key_id, products):
         product_list=products,
         # Keep file size down
         compact_json=True,
-        # Cross-platform support
-        normalize_line_endings=True,
+        # Extra options
+        **kwargs,
     )
 
 
-def update_link_metadata(checks):
+def update_link_metadata(checks, core_workflow=True):
     root = get_root()
     ensure_dir_exists(path_join(root, LINK_DIR))
 
@@ -99,19 +97,35 @@ def update_link_metadata(checks):
         products.append(path_join(check, 'datadog_checks'))
         products.append(path_join(check, 'setup.py'))
 
-    key_id = get_key_id(GPG_COMMAND)
+    if core_workflow:
+        key_id = get_key_id(GPG_COMMAND)
 
-    # Find this latest signed link metadata file on disk.
-    # NOTE: in-toto currently uses the first 8 characters of the signing keyId.
-    key_id_prefix = key_id[:8].lower()
-    tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
+        # Find this latest signed link metadata file on disk.
+        # NOTE: in-toto currently uses the first 8 characters of the signing keyId.
+        key_id_prefix = key_id[:8].lower()
+
+        tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
+        # Normalize line endings, particularly on Windows, to deal with git.
+        options = {'gpg_keyid': key_id, 'normalize_line_endings': True}
+    else:
+        signing_key_path = os.getenv('IN_TOTO_SIGNING_KEY_PATH', '')
+        signing_key = util.import_rsa_key_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
+
+        # NOTE: in-toto currently uses the first 8 characters of the signing keyID,
+        # the latter of which we assume is the key filename.
+        key_id_prefix = signing_key['keyid'][:8].lower()
+
+        tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
+        # Do not allow machine to normalize line endings, because it is not on Windows,
+        # for which git might rewrite line endings in files.
+        options = {'signing_key': signing_key, 'normalize_line_endings': False}
 
     # Final location of metadata file.
     metadata_file = path_join(LINK_DIR, tag_link)
 
     with chdir(root):
         # We should ignore products untracked and ignored by git.
-        run_in_toto(key_id, products)
+        run_in_toto(products, **options)
 
         # Check whether each signed product is being tracked AND ignored by git.
         # NOTE: We have to check now *AFTER* signing the tag link file, so that

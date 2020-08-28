@@ -21,7 +21,10 @@
   "integration_id": "exchange-server",
   "assets": {
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "Exchange Server Overview": "assets/dashboards/overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }

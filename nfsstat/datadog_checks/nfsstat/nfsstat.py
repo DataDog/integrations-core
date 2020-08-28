@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
@@ -30,6 +30,7 @@ class NfsStatCheck(AgentCheck):
                     'nfsstat check requires nfsiostat be installed, please install it '
                     '(through nfs-utils) or set the path to the installed version'
                 )
+        self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
@@ -39,7 +40,10 @@ class NfsStatCheck(AgentCheck):
         stats = stat_out.splitlines()
 
         if 'No NFS mount point' in stats[0]:
-            self.warning("No NFS mount points were found")
+            if not self.autofs_enabled:
+                self.warning("No NFS mount points were found.")
+            else:
+                self.log.debug("AutoFS enabled: no mount points currently.")
             return
 
         for l in stats:

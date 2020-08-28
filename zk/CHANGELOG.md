@@ -1,5 +1,14 @@
 # CHANGELOG - zk
 
+## 2.7.0 / 2020-08-10
+
+* [Added] Use config specs. See [#6950](https://github.com/DataDog/integrations-core/pull/6950).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 2.6.1 / 2020-06-29
+
+* [Fixed] Use Agent6 style init. See [#6949](https://github.com/DataDog/integrations-core/pull/6949).
+
 ## 2.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

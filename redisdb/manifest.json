@@ -30,6 +30,9 @@
   "type": "check",
   "integration_id": "redis",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -37,6 +40,9 @@
       "pid_overview": "assets/saved_views/pid_overview.json",
       "redis_pattern": "assets/saved_views/redis_pattern.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "redis"
+    }
   }
 }

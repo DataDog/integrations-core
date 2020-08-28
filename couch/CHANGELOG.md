@@ -1,5 +1,17 @@
 # CHANGELOG - couch
 
+## 3.11.0 / 2020-08-10
+
+* [Added] couch config specs. See [#7160](https://github.com/DataDog/integrations-core/pull/7160).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+* [Fixed] Use inclusive wording. See [#7159](https://github.com/DataDog/integrations-core/pull/7159).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 3.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
 ## 3.9.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

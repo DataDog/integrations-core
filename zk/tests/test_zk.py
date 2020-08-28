@@ -31,7 +31,7 @@ def test_check(aggregator, dd_environment, get_instance, caplog):
     Collect ZooKeeper metrics.
     """
     caplog.set_level(logging.DEBUG)
-    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, {})
+    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_instance])
     zk_check.check(get_instance)
     zk_check.check(get_instance)
 
@@ -53,7 +53,7 @@ def test_wrong_expected_mode(aggregator, dd_environment, get_invalid_mode_instan
     """
     Raise a 'critical' service check when ZooKeeper is not in the expected mode.
     """
-    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, {})
+    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_invalid_mode_instance])
     zk_check.check(get_invalid_mode_instance)
 
     # Test service checks
@@ -65,7 +65,7 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     Raise a 'critical' service check when ZooKeeper is in an error state.
     Report status as down.
     """
-    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, {})
+    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_conn_failure_config])
     with pytest.raises(Exception):
         zk_check.check(get_conn_failure_config)
 

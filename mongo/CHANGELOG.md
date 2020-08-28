@@ -1,5 +1,18 @@
 # CHANGELOG - mongo
 
+## 1.16.4 / 2020-08-19
+
+* [Fixed] Avoid depleting collection_metric_names. See [#7393](https://github.com/DataDog/integrations-core/pull/7393).
+
+## 1.16.3 / 2020-08-10
+
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 1.16.2 / 2020-06-29
+
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Raise an error if only one of `username` or `password` is set. See [#6688](https://github.com/DataDog/integrations-core/pull/6688).
+
 ## 1.16.1 / 2020-05-19
 
 * [Fixed] Fix encoding and parsing issues when processing connection configuration. See [#6686](https://github.com/DataDog/integrations-core/pull/6686).

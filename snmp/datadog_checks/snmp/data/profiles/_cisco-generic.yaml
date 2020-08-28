@@ -1,12 +1,12 @@
 # Metrics mixin for Cisco devices.
 
 extends:
-  - _generic-router-if.yaml
-  - _generic-router-tcp.yaml
-  - _generic-router-udp.yaml
-  - _generic-router-ospf.yaml
-  - _generic-router-bgp4.yaml
-  - _generic-router-ip.yaml
+  - _generic-if.yaml
+  - _generic-tcp.yaml
+  - _generic-udp.yaml
+  - _generic-ospf.yaml
+  - _generic-bgp4.yaml
+  - _generic-ip.yaml
 
 metrics:
   - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
@@ -178,10 +178,12 @@ metrics:
       - OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.3
         name: cfwHardwareStatusValue
     metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.1
-          name: cfwHardwareType
+      - index: 1
         tag: hardware_type
+      - column:
+          OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.2
+          name: cfwHardwareInformation
+        tag: hardware_desc
 
   - MIB: CISCO-VIRTUAL-SWITCH-MIB
     table:
@@ -195,3 +197,47 @@ metrics:
           OID: 1.3.6.1.4.1.9.9.388.1.2.2.1.1
           name: cvsChassisSwitchID
         tag: chassis_switch_id
+
+  # RTT info
+  - MIB: CISCO-RTTMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.42.1.2.10
+      name: rttMonLatestRttOperTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.42.1.2.10.1.1
+        name: rttMonLatestRttOperCompletionTime
+      - OID: 1.3.6.1.4.1.9.9.42.1.2.10.1.2
+        name: rttMonLatestRttOperSense
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.10
+          name: rttMonCtrlOperState
+        table: rttMonCtrlOperTable
+        tag: rtt_state
+      - column:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
+          name: rttMonCtrlAdminRttType
+        table: rttMonCtrlAdminTable
+        tag: rtt_type
+      - index: 1
+        tag: rtt_index
+
+  - MIB: CISCO-RTTMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.42.1.2.9
+      name: rttMonCtrlOperTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.6
+        name: rttMonCtrlOperTimeoutOccurred
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.10
+          name: rttMonCtrlOperState
+        tag: rtt_state
+      - column:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
+          name: rttMonCtrlAdminRttType
+        table: rttMonCtrlAdminTable
+        tag: rtt_type
+      - index: 1
+        tag: rtt_index

@@ -50,6 +50,7 @@ QUEUE_ATTRIBUTES = [
     ('active_consumers', 'active_consumers', float),
     ('consumers', 'consumers', float),
     ('consumer_utilisation', 'consumer_utilisation', float),
+    ('head_message_timestamp', 'head_message_timestamp', int),
     ('memory', 'memory', float),
     ('messages', 'messages', float),
     ('messages_details/rate', 'messages.rate', float),
@@ -370,110 +371,110 @@ class RabbitMQ(AgentCheck):
         for t in tag_list:
             tag = data.get(t)
             if tag:
-                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
+                # FIXME 8.x: remove this suffix or unify (sc doesn't have it)
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
     def _get_object_data(self, instance, base_url, object_type, limit_vhosts):
-        """ data is a list of nodes or queues:
-                data = [
-                    {
-                        'status': 'running',
-                        'node': 'rabbit@host',
-                        'name': 'queue1',
-                        'consumers': 0,
-                        'vhost': '/',
-                        'backing_queue_status': {
-                            'q1': 0,
-                            'q3': 0,
-                            'q2': 0,
-                            'q4': 0,
-                            'avg_ack_egress_rate': 0.0,
-                            'ram_msg_count': 0,
-                            'ram_ack_count': 0,
-                            'len': 0,
-                            'persistent_count': 0,
-                            'target_ram_count': 'infinity',
-                            'next_seq_id': 0,
-                            'delta': ['delta', 'undefined', 0, 'undefined'],
-                            'pending_acks': 0,
-                            'avg_ack_ingress_rate': 0.0,
-                            'avg_egress_rate': 0.0,
-                            'avg_ingress_rate': 0.0
-                        },
-                        'durable': True,
-                        'idle_since': '2013-10-03 13:38:18',
-                        'exclusive_consumer_tag': '',
-                        'arguments': {},
-                        'memory': 10956,
-                        'policy': '',
-                        'auto_delete': False
-                    },
-                    {
-                        'status': 'running',
-                        'node': 'rabbit@host,
-                        'name': 'queue10',
-                        'consumers': 0,
-                        'vhost': '/',
-                        'backing_queue_status': {
-                            'q1': 0,
-                            'q3': 0,
-                            'q2': 0,
-                            'q4': 0,
-                            'avg_ack_egress_rate': 0.0,
-                            'ram_msg_count': 0,
-                            'ram_ack_count': 0,
-                            'len': 0,
-                            'persistent_count': 0,
-                            'target_ram_count': 'infinity',
-                            'next_seq_id': 0,
-                            'delta': ['delta', 'undefined', 0, 'undefined'],
-                            'pending_acks': 0,
-                            'avg_ack_ingress_rate': 0.0,
-                            'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
-                        },
-                        'durable': True,
-                        'idle_since': '2013-10-03 13:38:18',
-                        'exclusive_consumer_tag': '',
-                        'arguments': {},
-                        'memory': 10956,
-                        'policy': '',
-                        'auto_delete': False
-                    },
-                    {
-                        'status': 'running',
-                        'node': 'rabbit@host',
-                        'name': 'queue11',
-                        'consumers': 0,
-                        'vhost': '/',
-                        'backing_queue_status': {
-                            'q1': 0,
-                            'q3': 0,
-                            'q2': 0,
-                            'q4': 0,
-                            'avg_ack_egress_rate': 0.0,
-                            'ram_msg_count': 0,
-                            'ram_ack_count': 0,
-                            'len': 0,
-                            'persistent_count': 0,
-                            'target_ram_count': 'infinity',
-                            'next_seq_id': 0,
-                            'delta': ['delta', 'undefined', 0, 'undefined'],
-                            'pending_acks': 0,
-                            'avg_ack_ingress_rate': 0.0,
-                            'avg_egress_rate': 0.0,
-                            'avg_ingress_rate': 0.0
-                        },
-                        'durable': True,
-                        'idle_since': '2013-10-03 13:38:18',
-                        'exclusive_consumer_tag': '',
-                        'arguments': {},
-                        'memory': 10956,
-                        'policy': '',
-                        'auto_delete': False
-                    },
-                    ...
-                ]
+        """data is a list of nodes or queues:
+        data = [
+            {
+                'status': 'running',
+                'node': 'rabbit@host',
+                'name': 'queue1',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0,
+                    'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            {
+                'status': 'running',
+                'node': 'rabbit@host,
+                'name': 'queue10',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            {
+                'status': 'running',
+                'node': 'rabbit@host',
+                'name': 'queue11',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0,
+                    'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            ...
+        ]
         """
         data = []
 
@@ -673,7 +674,12 @@ class RabbitMQ(AgentCheck):
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
-            aliveness_response = self._get_data(aliveness_url)
+            aliveness_response = {}
+            try:
+                aliveness_response = self._get_data(aliveness_url)
+            except Exception as e:
+                self.log.debug("Couldn't get aliveness status from vhost, %s: %s", vhost, e)
+
             message = u"Response from aliveness API: {}".format(aliveness_response)
 
             if aliveness_response.get('status') == 'ok':

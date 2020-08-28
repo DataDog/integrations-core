@@ -5,7 +5,21 @@ import socket
 import time
 from contextlib import closing
 
+from six import PY3
+
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.platform import Platform
+
+if PY3:
+    # use higher precision clock available in Python3
+    time_func = time.perf_counter
+elif Platform.is_win32():
+    # for tiny time deltas, time.time on Windows reports the same value
+    # of the clock more than once, causing the computation of response_time
+    # to be often 0; let's use time.clock that is more precise.
+    time_func = time.clock
+else:
+    time_func = time.time
 
 
 class TCPCheck(AgentCheck):
@@ -67,13 +81,13 @@ class TCPCheck(AgentCheck):
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
             sock.settimeout(self.timeout)
-            start = time.time()
+            start = time_func()
             sock.connect((self.addr, self.port))
-            response_time = time.time() - start
+            response_time = time_func() - start
             return response_time
 
     def check(self, instance):
-        start = time.time()  # Avoid initialisation warning
+        start = time_func()  # Avoid initialisation warning
         self.log.debug("Connecting to %s %d", self.addr, self.port)
         try:
             response_time = self.connect()
@@ -81,10 +95,12 @@ class TCPCheck(AgentCheck):
             self.report_as_service_check(AgentCheck.OK, 'UP')
             if self.collect_response_time:
                 self.gauge(
-                    'network.tcp.response_time', response_time, tags=self.tags,
+                    'network.tcp.response_time',
+                    response_time,
+                    tags=self.tags,
                 )
         except Exception as e:
-            length = int((time.time() - start) * 1000)
+            length = int((time_func() - start) * 1000)
             if isinstance(e, socket.error) and "timed out" in str(e):
                 # The connection timed out because it took more time than the system tcp stack allows
                 self.log.warning(

@@ -39,7 +39,6 @@ class ClickhouseCheck(AgentCheck):
 
         # We'll connect on the first check run
         self._client = None
-        self.check_initializations.append(self.create_connection)
 
         self._query_manager = QueryManager(
             self,
@@ -58,6 +57,7 @@ class ClickhouseCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
+        self.connect()
         self._query_manager.execute()
         self.collect_version()
 
@@ -76,7 +76,24 @@ class ClickhouseCheck(AgentCheck):
         if not self._server:
             raise ConfigurationError('the `server` setting is required')
 
-    def create_connection(self):
+    def ping_clickhouse(self):
+        return self._client.connection.ping()
+
+    def connect(self):
+        if self._client is not None:
+            self.log.debug('Clickhouse client already exists. Pinging Clickhouse Server.')
+            try:
+                if self.ping_clickhouse():
+                    self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                    return
+                else:
+                    self.log.debug('Clickhouse connection ping failed. Attempting to reconnect')
+                    self._client = None
+            except Exception as e:
+                self.log.debug('Unexpected ping response from Clickhouse', exc_info=e)
+                self.log.debug('Attempting to reconnect')
+                self._client = None
+
         try:
             client = clickhouse_driver.Client(
                 host=self._server,

@@ -1,5 +1,73 @@
 # CHANGELOG - snmp
 
+## 3.7.1 / 2020-08-12
+
+* [Fixed] Fix apc ups profile. See [#7351](https://github.com/DataDog/integrations-core/pull/7351).
+* [Fixed] Revert Fix wrong indentation of `table` key in column metric tags #7024. See [#7349](https://github.com/DataDog/integrations-core/pull/7349).
+
+## 3.7.0 / 2020-08-03
+
+* [Added] Add OID caching. See [#7231](https://github.com/DataDog/integrations-core/pull/7231).
+* [Fixed] Refactor how OIDs are managed. See [#7230](https://github.com/DataDog/integrations-core/pull/7230).
+* [Fixed] Sanitize OctetString. See [#7221](https://github.com/DataDog/integrations-core/pull/7221).
+* [Fixed] Rename all_oids to scalar_oids. See [#7229](https://github.com/DataDog/integrations-core/pull/7229).
+* [Fixed] Better logging for submit_metric. See [#7188](https://github.com/DataDog/integrations-core/pull/7188).
+
+## 3.6.0 / 2020-07-24
+
+* [Added] Check tag for table metric. See [#6933](https://github.com/DataDog/integrations-core/pull/6933).
+* [Added] Add new `flag_stream` type. See [#7072](https://github.com/DataDog/integrations-core/pull/7072).
+* [Added] Add cisco catalyst profile. See [#6925](https://github.com/DataDog/integrations-core/pull/6925).
+* [Added] Allow list of sysoids in profiles. See [#6936](https://github.com/DataDog/integrations-core/pull/6936).
+* [Fixed] Sanitize forced types values and cast to float. See [#7133](https://github.com/DataDog/integrations-core/pull/7133).
+* [Fixed] Add `.0` to scalar oids. See [#7105](https://github.com/DataDog/integrations-core/pull/7105).
+* [Fixed] Use OID instead of MIB for sysName. See [#7104](https://github.com/DataDog/integrations-core/pull/7104).
+* [Fixed] Submit additional rate metrics in fortigate profile. See [#7058](https://github.com/DataDog/integrations-core/pull/7058).
+
+## 3.5.3 / 2020-07-01
+
+* [Fixed] Fix autodiscovery_subnet var in auto_conf.yaml. See [#7029](https://github.com/DataDog/integrations-core/pull/7029).
+
+## 3.5.2 / 2020-06-30
+
+* [Fixed] Fix tag names for cisco asa profile. See [#7027](https://github.com/DataDog/integrations-core/pull/7027).
+
+## 3.5.1 / 2020-06-30
+
+* [Fixed] Fix wrong indentation of `table` key in column metric tags. See [#7024](https://github.com/DataDog/integrations-core/pull/7024).
+
+## 3.5.0 / 2020-06-29
+
+* [Added] Add regex match support for Tables. See [#6951](https://github.com/DataDog/integrations-core/pull/6951).
+* [Added] Add snmp.devices_monitored metric. See [#6941](https://github.com/DataDog/integrations-core/pull/6941).
+* [Added] Add IF-MIB metrics to the Meraki profile. See [#6905](https://github.com/DataDog/integrations-core/pull/6905).
+* [Added] Add RTT metrics. See [#6872](https://github.com/DataDog/integrations-core/pull/6872).
+* [Fixed] Clean up of unused extends in meraki cloud profile. See [#6981](https://github.com/DataDog/integrations-core/pull/6981).
+* [Fixed] [Refactor] Add device abstraction. See [#6953](https://github.com/DataDog/integrations-core/pull/6953).
+* [Fixed] [Refactor] Clean up batching implementation. See [#6952](https://github.com/DataDog/integrations-core/pull/6952).
+* [Fixed] Add index tagging to cfwConnectionStatValue. See [#6897](https://github.com/DataDog/integrations-core/pull/6897).
+
+## 3.4.0 / 2020-06-11
+
+* [Added] Add NetApp profile. See [#6841](https://github.com/DataDog/integrations-core/pull/6841).
+* [Fixed] Fix `instance_number` tag on Cisco voice router metrics. See [#6867](https://github.com/DataDog/integrations-core/pull/6867).
+
+## 3.3.0 / 2020-06-10
+
+* [Added] Add Fortinet FortiGate profile. See [#6504](https://github.com/DataDog/integrations-core/pull/6504). Thanks [lindseyferretti](https://github.com/lindseyferretti).
+* [Added] Reuse MIB builder objects per SNMP engine. See [#6716](https://github.com/DataDog/integrations-core/pull/6716).
+* [Added] Add HP health profile mixin. See [#6757](https://github.com/DataDog/integrations-core/pull/6757).
+* [Added] Add routing metrics to additional profiles. See [#6764](https://github.com/DataDog/integrations-core/pull/6764).
+* [Added] Add router metrics to cisco voice base profile. See [#6737](https://github.com/DataDog/integrations-core/pull/6737).
+* [Fixed] Fix gauge metrics wrongly submitted as rates in CISCO voice profile. See [#6794](https://github.com/DataDog/integrations-core/pull/6794).
+* [Fixed] Push received metrics on partial failure. See [#6814](https://github.com/DataDog/integrations-core/pull/6814).
+* [Fixed] Flatten Cisco profiles hierarchy. See [#6792](https://github.com/DataDog/integrations-core/pull/6792).
+* [Fixed] Add missing tags to profiles tables. See [#6765](https://github.com/DataDog/integrations-core/pull/6765).
+* [Fixed] Fix name KeyError. See [#6788](https://github.com/DataDog/integrations-core/pull/6788).
+* [Fixed] Properly handle potential embedded null characters. See [#6640](https://github.com/DataDog/integrations-core/pull/6640).
+* [Fixed] Remove iDRAC/poweredge profile inheritance. See [#6754](https://github.com/DataDog/integrations-core/pull/6754).
+* [Fixed] Make profiles compatible with previous parsing. See [#6750](https://github.com/DataDog/integrations-core/pull/6750).
+
 ## 3.2.2 / 2020-05-21
 
 * [Fixed] Fix error handling in getnext. See [#6701](https://github.com/DataDog/integrations-core/pull/6701).

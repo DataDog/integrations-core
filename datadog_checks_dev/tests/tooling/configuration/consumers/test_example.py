@@ -318,10 +318,10 @@ def test_section_example_indent():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs
-        ## service - required - The name of the service that generates the log.
+        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## tags - optional - Add tags to the collected logs
+        ## tags - optional - Add tags to the collected logs.
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
         #
@@ -380,10 +380,10 @@ def test_section_example_indent_required():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs
-        ## service - required - The name of the service that generates the log.
+        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## tags - optional - Add tags to the collected logs
+        ## tags - optional - Add tags to the collected logs.
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
         #
@@ -838,6 +838,40 @@ def test_option_description_length_limit():
     files = consumer.render()
     _, errors = files['test.yaml.example']
     assert 'Description line length of option `foo` was over the limit by 3 characters' in errors
+
+
+def test_option_description_length_limit_with_noqa():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: {}
+            value:
+              type: string
+              example: something
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa'
+        )
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: something
+        ## {}
+        #
+        # foo: something
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
+        )
+    )
 
 
 @pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')

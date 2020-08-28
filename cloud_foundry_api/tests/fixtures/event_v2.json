@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "guid": "event_guid",
+    "url": "",
+    "created_at": "2020-06-08T00:00:02Z",
+    "updated_at": "2020-06-08T00:00:02Z"
+  },
+  "entity": {
+    "type": "event_type",
+    "actor": "actor_guid",
+    "actor_type": "actor_type",
+    "actor_name": "actor_name",
+    "actor_username": "admin",
+    "actee": "target_guid",
+    "actee_type": "target_type",
+    "actee_name": "target_name",
+    "timestamp": "2020-06-08T00:00:02Z",
+    "metadata": {
+        "some": "metadata"
+    },
+    "space_guid": "space_guid",
+    "organization_guid": "org_guid"
+  }
+}

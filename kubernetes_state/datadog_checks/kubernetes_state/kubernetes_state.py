@@ -26,8 +26,8 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
-WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
+ALLOWED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
+ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
@@ -70,7 +70,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         # We do not support more than one instance of kube-state-metrics
         instance = instances[0]
         kubernetes_state_instance = self._create_kubernetes_state_prometheus_instance(instance)
@@ -81,7 +81,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.keep_ksm_labels = is_affirmative(kubernetes_state_instance.get('keep_ksm_labels', True))
 
         generic_instances = [kubernetes_state_instance]
-        super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
         self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
 
@@ -550,8 +550,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if ts.isdigit():
             return int(ts)
         else:
-            msg = 'Cannot extract ts from job name {}'
-            self.log.debug(msg, name)
+            self.log.debug("Cannot extract ts from job name %s", name)
             return None
 
     # Labels attached: namespace, pod
@@ -578,7 +577,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.gauge(metric_name, count, tags=list(tags))
 
     def _submit_metric_kube_pod_container_status_reason(
-        self, metric, metric_suffix, whitelisted_status_reasons, scraper_config
+        self, metric, metric_suffix, allowed_status_reasons, scraper_config
     ):
         metric_name = scraper_config['namespace'] + metric_suffix
 
@@ -588,7 +587,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             reason = sample[self.SAMPLE_LABELS].get('reason')
             if reason:
                 # Filtering according to the reason here is paramount to limit cardinality
-                if reason.lower() in whitelisted_status_reasons:
+                if reason.lower() in allowed_status_reasons:
                     tags += self._build_tags('reason', reason, scraper_config)
                 else:
                     continue
@@ -611,12 +610,12 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_pod_container_status_waiting_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(
-            metric, '.container.status_report.count.waiting', WHITELISTED_WAITING_REASONS, scraper_config
+            metric, '.container.status_report.count.waiting', ALLOWED_WAITING_REASONS, scraper_config
         )
 
     def kube_pod_container_status_terminated_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(
-            metric, '.container.status_report.count.terminated', WHITELISTED_TERMINATED_REASONS, scraper_config
+            metric, '.container.status_report.count.terminated', ALLOWED_TERMINATED_REASONS, scraper_config
         )
 
     def kube_cronjob_next_schedule_time(self, metric, scraper_config):
@@ -855,15 +854,19 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def count_objects_by_tags(self, metric, scraper_config):
-        """ Count objects by whitelisted tags and submit counts as gauges. """
+        """ Count objects by allowed tags and submit counts as gauges. """
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = [
-                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
-            ] + scraper_config['custom_tags']
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+            tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):

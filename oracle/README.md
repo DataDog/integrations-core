@@ -14,12 +14,11 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
-**Note**: JPype, one of the libraries used by the Agent, depends specifically on the [Microsoft Visual C++ Runtime 2015][13]. Make sure this runtime is installed on your system.
+**Note**: The following runtimes are required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver:
 
-##### JDBC Driver
+- Java 8 or higher 
+- [Microsoft Visual C++ Runtime 2015][13]
 
-- [Download the JDBC Driver][2] jar file.
-- Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
 
 ##### Oracle Instant Client
 
@@ -47,6 +46,11 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
+
+##### JDBC Driver
+
+- [Download the JDBC Driver][2] jar file.
+- Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
 
 #### Datadog User creation
 
@@ -76,9 +80,12 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 
@@ -148,6 +155,9 @@ instances:
     only_custom_queries: true
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
@@ -157,6 +167,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "user":"datadog", "password":"<PASSWORD>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

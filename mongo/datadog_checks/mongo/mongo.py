@@ -88,7 +88,7 @@ class MongoDb(AgentCheck):
         # Members' last replica set states
         self._last_state_by_server = {}
 
-        self.collection_metrics_names = (key.split('.')[1] for key in metrics.COLLECTION_METRICS)
+        self.collection_metrics_names = tuple(key.split('.')[1] for key in metrics.COLLECTION_METRICS)
 
         # x.509 authentication
         ssl_params = {
@@ -212,7 +212,7 @@ class MongoDb(AgentCheck):
 
     def create_event(self, last_state, state, replset_name):
         """Create an event with a message describing the replication
-            state of a mongo node"""
+        state of a mongo node"""
 
         status = self.get_state_description(state)
         short_status = self.get_state_name(state)
@@ -723,7 +723,7 @@ class MongoDb(AgentCheck):
 
                 # Submit the metric
                 metrics_tags = tags + [
-                    u"cluster:db:{0}".format(st),  # FIXME 6.0 - keep for backward compatibility
+                    u"cluster:db:{0}".format(st),  # FIXME: 8.x, was kept for backward compatibility
                     u"db:{0}".format(st),
                 ]
 

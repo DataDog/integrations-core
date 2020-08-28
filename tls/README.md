@@ -4,7 +4,10 @@
 
 This check monitors [TLS][1] protocol versions, certificate expiration and validity, etc.
 
-**Note**: Only TCP is supported.
+**Notes**:
+
+1. Only TCP is supported.
+2. Only leaf / end user certificates are verified (not intermediate and root certificates).
 
 ## Setup
 
@@ -15,13 +18,19 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `tls.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your TLS data. See the [sample tls.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -32,6 +41,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INTEGRATION_NAME>` | `tls`                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port":"443"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

@@ -4,55 +4,40 @@
 
 import pytest
 
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
+
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     instance = {}
     aggregator = dd_agent_check(instance)
     metrics = [
-        'jvm.non_heap_memory_max',
-        'jboss.jdbc_preparedstatementcache.size',
-        'jvm.heap_memory_committed',
-        'jvm.gc.eden_size',
-        'jboss.jdbc_xarecover.count',
-        'jboss.transactions.aborted',
-        'jvm.heap_memory',
-        'jboss.transactions.resource_rollbacks',
-        'jboss.jdbc_xacommit.count',
-        'jvm.loaded_classes',
-        'jvm.gc.parnew.time',
-        'jboss.transactions.timed_out',
-        'jboss.transactions.heuristics',
-        'jboss.transactions.nested',
-        'jboss.undertow_listener.request_count',
-        'jboss.undertow_listener.error_count',
-        'jboss.jdbc_connections.count',
-        'jvm.cpu_load.system',
-        'jvm.non_heap_memory_init',
-        'jboss.transactions.inflight',
-        'jvm.thread_count',
-        'jvm.os.open_file_descriptors',
-        'jboss.jdbc_preparedstatementcache.hit',
-        'jvm.non_heap_memory',
-        'jboss.transactions.system_rollbacks',
-        'jboss.undertow_listener.bytes_received',
-        'jboss.jdbc_connections.idle',
-        'jboss.undertow_listener.processing_time',
-        'jboss.transactions.application_rollbacks',
-        'jvm.cpu_load.process',
-        'jboss.undertow_listener.bytes_sent',
-        'jboss.jdbc_xarollback.count',
-        'jboss.transactions.committed',
-        'jvm.gc.survivor_size',
-        'jvm.non_heap_memory_committed',
-        'jboss.jdbc_preparedstatementcache.miss',
         'jboss.jdbc_connections.active',
-        'jboss.transactions.count',
-        'jvm.heap_memory_init',
-        'jvm.heap_memory_max',
+        'jboss.jdbc_connections.count',
+        'jboss.jdbc_connections.idle',
         'jboss.jdbc_connections.request_wait',
-        'jvm.gc.cms.count',
-    ]
+        'jboss.jdbc_preparedstatementcache.hit',
+        'jboss.jdbc_preparedstatementcache.miss',
+        'jboss.jdbc_preparedstatementcache.size',
+        'jboss.jdbc_xacommit.count',
+        'jboss.jdbc_xarecover.count',
+        'jboss.jdbc_xarollback.count',
+        'jboss.transactions.aborted',
+        'jboss.transactions.application_rollbacks',
+        'jboss.transactions.committed',
+        'jboss.transactions.count',
+        'jboss.transactions.heuristics',
+        'jboss.transactions.inflight',
+        'jboss.transactions.nested',
+        'jboss.transactions.resource_rollbacks',
+        'jboss.transactions.system_rollbacks',
+        'jboss.transactions.timed_out',
+        'jboss.undertow_listener.bytes_received',
+        'jboss.undertow_listener.bytes_sent',
+        'jboss.undertow_listener.error_count',
+        'jboss.undertow_listener.processing_time',
+        'jboss.undertow_listener.request_count',
+    ] + JVM_E2E_METRICS
     for metric in metrics:
         aggregator.assert_metric(metric)
 

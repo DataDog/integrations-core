@@ -89,7 +89,7 @@ If not:
 
 ## Trello
 
-To participate as an [Agent release manager](../process/agent-release.md), you need to set `trello.key`/`trello.token` in your config file.
+To participate as an [Agent release manager](../process/agent-release/pre-release.md), you need to set `trello.key`/`trello.token` in your config file.
 
 Run `ddev config show` to see if your Trello key and token is set.
 
@@ -104,6 +104,6 @@ If not:
 
 ### Card Assignment
 
-To automatically assign [QA cards](../process/agent-release.md#create-items), add a `trello_users_$team` table, with keys being
+To automatically assign [QA cards](../process/agent-release/pre-release.md#create-items), add a `trello_users_$team` table, with keys being
 GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member
 information in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).

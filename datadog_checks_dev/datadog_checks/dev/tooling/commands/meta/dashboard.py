@@ -11,10 +11,11 @@ import requests
 from ....utils import ensure_dir_exists, path_join, write_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, write_manifest
-from ..console import CONTEXT_SETTINGS, abort
+from ..console import CONTEXT_SETTINGS, abort, echo_success
 
-BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.+'
-SCREEN_API = 'https://api.{site}/api/v1/screen/{board_id}'
+BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.*'
+DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'
+REQUIRED_FIELDS = ["layout_type", "title", "description", "template_variables", "widgets"]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
@@ -24,9 +25,16 @@ def dash():
 
 @dash.command(context_settings=CONTEXT_SETTINGS, short_help='Export a Dashboard as JSON')
 @click.argument('url')
-@click.argument('integration', required=False)
+@click.argument('integration', required=True)
+@click.option(
+    '--author',
+    '-a',
+    required=False,
+    default='Datadog',
+    help="The owner of this integration's dashboard. Default is 'Datadog'",
+)
 @click.pass_context
-def export(ctx, url, integration):
+def export(ctx, url, integration, author):
     if integration and integration not in get_valid_integrations():
         abort(f'Unknown integration `{integration}`')
 
@@ -59,23 +67,19 @@ def export(ctx, url, integration):
 
     try:
         response = requests.get(
-            SCREEN_API.format(site=site, board_id=board_id), params={'api_key': api_key, 'application_key': app_key}
+            DASHBOARD_API.format(site=site, board_id=board_id), params={'api_key': api_key, 'application_key': app_key}
         )
         response.raise_for_status()
     except Exception as e:
         abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
     payload = response.json()
-    payload.setdefault('author_info', {})
-    payload['author_info']['author_name'] = 'Datadog'
-    payload.setdefault('created_by', {})
-    payload['created_by']['email'] = 'support@datadoghq.com'
-    payload['created_by']['handle'] = 'support@datadoghq.com'
-    payload['created_by']['name'] = 'Datadog'
-    payload['created_by'].pop('icon', None)
-    output = json.dumps(payload, indent=4, sort_keys=True)
+    new_payload = {field: payload[field] for field in REQUIRED_FIELDS}
+    new_payload['author_name'] = author
 
-    file_name = payload['board_title'].strip().lower()
+    output = json.dumps(new_payload, indent=4, sort_keys=True)
+
+    file_name = new_payload['title'].strip().lower()
     if integration:
         manifest = load_manifest(integration)
 
@@ -96,7 +100,7 @@ def export(ctx, url, integration):
         location = path_join(get_root(), integration, 'assets', 'dashboards')
         ensure_dir_exists(location)
 
-        manifest['assets']['dashboards'][payload['board_title']] = f'assets/dashboards/{file_name}'
+        manifest['assets']['dashboards'][new_payload['title']] = f'assets/dashboards/{file_name}'
         write_manifest(manifest, integration)
     else:
         file_name = f"{file_name.replace(' ', '_')}.json"
@@ -104,3 +108,4 @@ def export(ctx, url, integration):
 
     file_path = path_join(location, file_name)
     write_file(file_path, output)
+    echo_success(f"Successfully wrote dashboard: `{file_name}` for integration: `{integration}`")

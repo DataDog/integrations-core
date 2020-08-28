@@ -72,7 +72,7 @@ sysobjectid: 1.3.6.1.4.1.232.9.4.10
 metrics:
   - MIB: CPQHLTH-MIB
     symbol:
-      OID: 1.3.6.1.4.1.232.6.2.8.1
+      OID: 1.3.6.1.4.1.232.6.2.8.1.0
       name: cpqHeSysUtilLifeTime
 ```
 
@@ -122,10 +122,11 @@ Add a `.snmprec` file named after the `community_string`, which is the value we 
 $ touch snmp/tests/compose/data/hp_ilo4.snmprec
 ```
 
-Then add a line there for the OID listed in the profile:
+Add lines to the `.snmprec` file to specify the `sysobjectid` and the OID listed in the profile:
 
 ```console
-1.3.6.1.4.1.232.6.2.8.1|2|1051200
+1.3.6.1.2.1.1.2.0|6|1.3.6.1.4.1.232.9.4.10
+1.3.6.1.4.1.232.6.2.8.1.0|2|1051200
 ```
 
 Run the test again, and make sure it passes this time:

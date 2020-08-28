@@ -1,5 +1,16 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param host - string - required
@@ -14,11 +25,13 @@ instances:
 
     ## @param password - string - optional
     ## Password to use for the SSH connection.
+    ## If an encrypted SSH private key is specified in `private_key_file`, 
+    ##   the given password will be used to decrypt the key.
     #
     # password: <PASSWORD>
 
     ## @param port - integer - optional - default: 22
-    ## Port to connect to.
+    ## Port used for SSH connection.
     #
     # port: 22
 
@@ -28,25 +41,47 @@ instances:
     # sftp_check: true
 
     ## @param private_key_file - string - optional
-    ## File path to SSH private key
+    ## File path to a SSH private key.
+    ## If the SSH private key is encrypted, `password` will be used to decrypt the key.
+    ## See: http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey.from_private_key_file
     #
-    # private_key_file: <PRIVATE_KEY_SSH>
+    # private_key_file: <PRIVATE_KEY_FILE>
 
     ## @param private_key_type - string - optional - default: rsa
-    ## Private key type to choose between `rsa` or `ecdsa`
+    ## Private key type to choose between `rsa` or `ecdsa`.
     #
     # private_key_type: rsa
 
     ## @param add_missing_keys - boolean - optional - default: false
-    ## Automatically add host key to known hosts when it is missing
+    ## Automatically add host key to known hosts when it is missing.
     #
     # add_missing_keys: false
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

@@ -1,14 +1,28 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 import os
-from typing import Any, Dict, Iterator, Mapping, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
 import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
-from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .pysnmp_types import (
+    ContextData,
+    ObjectIdentity,
+    ObjectName,
+    ObjectType,
+    SnmpEngine,
+    UdpTransportTarget,
+    endOfMibView,
+    lcd,
+    noSuchInstance,
+)
+from .types import T
+
+logger = logging.getLogger(__name__)
 
 
 def get_profile_definition(profile):
@@ -129,7 +143,11 @@ def _load_default_profiles():
             continue
 
         definition = _read_profile_definition(path)
-        recursively_expand_base_profiles(definition)
+        try:
+            recursively_expand_base_profiles(definition)
+        except Exception:
+            logger.error("Could not expand base profile %s", path)
+            raise
         profiles[name] = {'definition': definition}
 
     return profiles
@@ -315,3 +333,33 @@ class OIDPrinter(object):
             return '{{{}}}'.format(', '.join(self.oid_str_value(oid) for oid in self.oids))
         else:
             return '({})'.format(', '.join("'{}'".format(self.oid_str(oid)) for oid in self.oids))
+
+
+def register_device_target(ip, port, timeout, retries, engine, auth_data, context_data):
+    # type: (str, int, float, int, SnmpEngine, Any, ContextData) -> str
+    """
+    Register a device by IP and port, and return an opaque string that can be used later to execute PySNMP commands.
+    """
+    transport = UdpTransportTarget((ip, port), timeout=timeout, retries=retries)
+    target, _ = lcd.configure(engine, auth_data, transport, context_data.contextName)
+    return target
+
+
+def batches(lst, size):
+    # type: (List[T], int) -> Iterator[List[T]]
+    """
+    Iterate through `lst` and yield batches of at most `size` items.
+
+    Example:
+
+    ```python
+    >>> xs = [1, 2, 3, 4, 5]
+    >>> list(batches(xs, size=2))
+    [[1, 2], [3, 4], [5]]
+    ```
+    """
+    if size <= 0:
+        raise ValueError('Batch size must be > 0')
+
+    for index in range(0, len(lst), size):
+        yield lst[index : index + size]

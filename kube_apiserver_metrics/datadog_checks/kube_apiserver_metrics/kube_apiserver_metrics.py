@@ -40,7 +40,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     DEFAULT_SSL_VERIFY = False
     DEFAULT_BEARER_TOKEN_AUTH = True
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
         # Set up metrics_transformers
         self.metric_transformers = {
             'apiserver_audit_event_total': self.apiserver_audit_event_total,
@@ -57,7 +57,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         super(KubeAPIServerMetricsCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances=instances,
             default_instances={"kube_apiserver": {'namespace': 'kube_apiserver', 'metrics': [METRICS]}},
             default_namespace="kube_apiserver",
