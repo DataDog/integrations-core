@@ -172,7 +172,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "top(avg:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm}, 25, 'mean', 'desc')",
+            "q": "top(avg:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm} by {host}, 25, 'mean', 'desc')",
             "display_type": "line",
             "style": {
               "palette": "dog_classic",
