@@ -48,7 +48,7 @@ class SnowflakeCheck(AgentCheck):
                 self.errors.append(mgroup)
 
         if self.errors:
-            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: {}'.format(', '.join(self.errors)))
+            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: %s', (', '.join(self.errors)))
         if not self.metric_queries:
             raise ConfigurationError('No valid metric_groups configured, please list at least one.')
 
