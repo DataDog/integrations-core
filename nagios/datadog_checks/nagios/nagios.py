@@ -202,9 +202,20 @@ class NagiosTailer(object):
         self.log = logger
         self._line_parsed = 0
 
-        tail = TailFile(self.log, self.log_path, self._parse_line_with_counter)
-        self.gen = tail.tail(line_by_line=False, move_end=True)
+        self._tailer = TailFile(self.log, self.log_path, self._parse_line_with_counter)
+        self._gen = None
         next(self.gen)
+
+    def _reset(self):
+        self._tailer.close()
+        self._tailer = TailFile(self.log, self.log_path, self._parse_line_with_counter)
+        self._gen = None
+
+    @property
+    def gen(self):
+        if self._gen is None:
+            self._gen = self._tailer.tail(line_by_line=False, move_end=True)
+        return self._gen
 
     def parse_line(self, line):
         raise NotImplementedError()
@@ -220,9 +231,12 @@ class NagiosTailer(object):
             self.log.debug("Start nagios check for file %s", self.log_path)
             next(self.gen)
             self.log.debug("Done nagios check for file %s (parsed %s line(s))", self.log_path, self._line_parsed)
-        except StopIteration as e:
+        except (RuntimeError, StopIteration) as e:
             self.log.exception(e)
-            self.log.warning("Can't tail %s file", self.log_path)
+            self.log.warning(
+                "Can't tail %s file, will retry from the end of file on the next check run.", self.log_path
+            )
+            self._reset()
 
 
 class NagiosEventLogTailer(NagiosTailer):
