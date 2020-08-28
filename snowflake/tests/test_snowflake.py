@@ -171,3 +171,22 @@ def test_query_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric('snowflake.query.bytes_scanned', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.bytes_written', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.bytes_deleted', value=0, count=1, tags=expected_tags)
+
+
+def test_version_metadata(dd_run_check, instance, datadog_agent):
+    expected_version = [('4.30.2',)]
+    version_metadata = {
+        'version.major': '4',
+        'version.minor': '30',
+        'version.patch': '2',
+        'version.raw': '4.30.2',
+        'version.scheme': 'semver',
+    }
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_version):
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+        check.check_id = 'test:123'
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = []
+        dd_run_check(check)
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
