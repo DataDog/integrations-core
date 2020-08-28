@@ -45,10 +45,30 @@ def test_default_metric_groups(instance):
         queries.LoginMetrics,
     ]
 
+
+def test_mixed_metric_group(instance):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['fake.metric.group', 'snowflake.logins']
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
     assert check.metric_queries == [queries.LoginMetrics]
+
+
+def test_additional_metric_groups(instance):
+    instance = copy.deepcopy(instance)
+    instance['metric_groups'] = ['snowflake.logins', 'snowflake.data_transfer']
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check.config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
+
+    assert check.metric_queries == [
+        queries.WarehouseLoad,
+        queries.QueryHistory,
+        queries.CreditUsage,
+        queries.WarehouseCreditUsage,
+        queries.StorageUsageMetrics,
+        queries.DatabaseStorageMetrics,
+        queries.LoginMetrics,
+        queries.DataTransferHistory,
+    ]
 
 
 def test_metric_group_exceptions(instance):

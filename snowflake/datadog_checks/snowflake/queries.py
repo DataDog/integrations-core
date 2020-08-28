@@ -142,7 +142,28 @@ DataTransferHistory = Query(
             {'name': 'transfer_type', 'type': 'tag'},
             {'name': 'data_transfer.bytes.avg', 'type': 'gauge'},
             {'name': 'data_transfer.bytes.sum', 'type': 'gauge'},
+        ],
+    }
+)
 
-        ]
+# https://docs.snowflake.com/en/sql-reference/account-usage/automatic_clustering_history.html
+AutoReclusterHistory = Query(
+    {
+        'name': 'auto_recluster.metrics',
+        'query': 'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
+        'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
+        'avg(num_rows_reclustered), sum(num_rows_reclustered) '
+        'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;',
+        'columns': [
+            {'name': 'table', 'type': 'tag'},
+            {'name': 'database', 'type': 'tag'},
+            {'name': 'schema', 'type': 'tag'},
+            {'name': 'auto_recluster.credits_used.avg', 'type': 'gauge'},
+            {'name': 'auto_recluster.credits_used.sum', 'type': 'gauge'},
+            {'name': 'auto_recluster.bytes_reclustered.avg', 'type': 'gauge'},
+            {'name': 'auto_recluster.bytes_reclustered.sum', 'type': 'gauge'},
+            {'name': 'auto_recluster.rows_reclustered.avg', 'type': 'gauge'},
+            {'name': 'auto_recluster.rows_reclustered.sum', 'type': 'gauge'},
+        ],
     }
 )

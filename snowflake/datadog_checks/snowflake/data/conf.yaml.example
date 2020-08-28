@@ -74,6 +74,7 @@ instances:
     ## - snowflake.storage
     ## - snowflake.logins
     ## - snowflake.data_transfer
+    ## - snowflake.auto_recluster
     #
     metric_groups:
       - snowflake.query
