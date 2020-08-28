@@ -30,7 +30,7 @@ instances:
     # label_joins:
     #  kube_deployment_labels:
     #    labels_to_match:
-    #    - deployment
+    #      - deployment
     #    labels_to_get:
     #      - label_addonmanager_kubernetes_io_mode
 
