@@ -1,0 +1,10 @@
+name: Azure IoT Edge
+files:
+- name: azure_iot_edge.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
