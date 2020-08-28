@@ -1,8 +1,17 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - coredns
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param prometheus_url - string - required
@@ -10,7 +19,7 @@ instances:
     ## and enable the plugin within coredns
     ## See: https://coredns.io/plugins/metrics/
     #
-  - prometheus_url: "http://%%host%%:9153/metrics"
+  - prometheus_url: http://%%host%%:9153/metrics
 
     ## @param tags - list of strings - required
     ## List of tags to attach to every metric and service check emitted by this integration.
@@ -18,18 +27,18 @@ instances:
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     tags:
-      - "dns-pod:%%host%%"
+      - dns-pod:%%host%%
 
     ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket.
     #
-    #  send_histograms_buckets: true
+    # send_histograms_buckets: true
 
     ## @param send_monotonic_counter - boolean - optional - default: true
     ## To send counters as monotonic counter
     ## see: https://github.com/DataDog/integrations-core/issues/1303
     #
-    #  send_monotonic_counter: true
+    # send_monotonic_counter: true
 
     ## @param metrics - list of strings - optional
     ## Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
@@ -37,7 +46,7 @@ instances:
     ## plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
     ## As an example, the 'template' plugin's metrics are below
     #
-    #  metrics:
-    #    - coredns_template_matches_total: template_matches_count
-    #    - coredns_template_template_failures_total: template_templating_failures_count
-    #    - coredns_template_rr_failures_total: template_resource_record_failures_count
+    # metrics:
+    #   - coredns_template_matches_total: template_matches_count
+    #   - coredns_template_template_failures_total: template_templating_failures_count
+    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
