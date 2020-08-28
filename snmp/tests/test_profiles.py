@@ -8,7 +8,13 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.utils import get_profile_definition, recursively_expand_base_profiles
+from datadog_checks.snmp.utils import (
+    _get_profile_name,
+    _is_abstract_profile,
+    _iter_default_profile_file_paths,
+    get_profile_definition,
+    recursively_expand_base_profiles,
+)
 
 from . import common
 from .metrics import (
@@ -63,6 +69,35 @@ def test_load_profiles(caplog):
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
         assert "table doesn't have a 'metric_tags' section" not in caplog.text
         caplog.clear()
+
+
+def test_profile_hierarchy():
+    """
+    * Only concrete profiles MUST inherit from '_base.yaml'.
+    * Only concrete profiles MUST define a `sysobjectid` field.
+    """
+    errors = []
+    compat_base_profiles = ['_base_cisco', '_base_cisco_voice']
+
+    for path in _iter_default_profile_file_paths():
+        name = _get_profile_name(path)
+        definition = get_profile_definition({'definition_file': path})
+        extends = definition.get('extends', [])
+        sysobjectid = definition.get('sysobjectid')
+
+        if _is_abstract_profile(name):
+            if '_base.yaml' in extends and name not in compat_base_profiles:
+                errors.append("'{}': mixin wrongly extends '_base.yaml'".format(name))
+            if sysobjectid is not None:
+                errors.append("'{}': mixin wrongly defines a `sysobjectid`".format(name))
+        else:
+            if '_base.yaml' not in extends:
+                errors.append("'{}': concrete profile must directly extend '_base.yaml'".format(name))
+            if sysobjectid is None:
+                errors.append("'{}': concrete profile must define a `sysobjectid`".format(name))
+
+    if errors:
+        pytest.fail('\n'.join(sorted(errors)))
 
 
 def run_profile_check(recording_name, profile_name=None):
