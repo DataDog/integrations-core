@@ -28,3 +28,5 @@ snowflake.query.compilation_time,gauge,,millisecond,,Average query compilation t
 snowflake.query.bytes_scanned,gauge,,byte,,Average query bytes scanned.,0,snowflake,query bytes scanned
 snowflake.query.bytes_written,gauge,,byte,,Average query bytes written.,0,snowflake,query bytes written
 snowflake.query.bytes_deleted,gauge,,byte,,Average query bytes deleted.,0,snowflake,query bytes deleted
+snowflake.data_transfer.bytes.avg,gauge,,Average bytes transferred.,0,snowflake,data transfer bytes
+snowflake.data_transfer.bytes.sum,gauge,,Total bytes transferred.,0,snowflake,data transfer bytes

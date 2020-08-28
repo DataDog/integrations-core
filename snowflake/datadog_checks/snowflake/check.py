@@ -16,6 +16,7 @@ METRIC_GROUPS = {
     'snowflake.billing': [queries.CreditUsage, queries.WarehouseCreditUsage],
     'snowflake.storage': [queries.StorageUsageMetrics, queries.DatabaseStorageMetrics],
     'snowflake.logins': [queries.LoginMetrics],
+    'snowflake.data_transfer': [queries.DataTransferHistory],
 }
 
 
