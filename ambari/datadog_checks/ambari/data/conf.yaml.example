@@ -95,6 +95,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -149,6 +150,11 @@ instances:
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify
