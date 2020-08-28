@@ -88,6 +88,7 @@ files:
           - snowflake.storage
           - snowflake.logins
           - snowflake.data_transfer
+          - snowflake.auto_recluster
         value:
           type: array
           items:

@@ -17,6 +17,7 @@ METRIC_GROUPS = {
     'snowflake.storage': [queries.StorageUsageMetrics, queries.DatabaseStorageMetrics],
     'snowflake.logins': [queries.LoginMetrics],
     'snowflake.data_transfer': [queries.DataTransferHistory],
+    'snowflake.auto_recluster': [queries.AutoReclusterHistory],
 }
 
 
