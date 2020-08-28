@@ -52,7 +52,7 @@ class SnowflakeCheck(AgentCheck):
         if not self.metric_queries:
             raise ConfigurationError('No valid metric_groups configured, please list at least one.')
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags,)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
@@ -108,6 +108,6 @@ class SnowflakeCheck(AgentCheck):
             version = raw_version[0][0]
         except Exception as e:
             self.log.error("Error collecting version for Snowflake: %s", e)
-
-        if version:
-            self.set_metadata('version', version)
+        else:
+            if version:
+                self.set_metadata('version', version)
