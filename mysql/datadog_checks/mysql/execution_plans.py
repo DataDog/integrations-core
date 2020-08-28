@@ -113,70 +113,74 @@ class ExecutionPlansMixin(object):
                 num_truncated += 1
                 continue
 
+            plan = None
             with closing(db.cursor()) as cursor:
                 # TODO: run these asynchronously / do some benchmarking to optimize
                 try:
                     start_time = time.time()
                     plan = self._attempt_explain(cursor, sql_text, schema)
-                    if not plan:
-                        continue
                     statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
                 except Exception:
                     self.log.exception("failed to run explain on query %s", sql_text)
-                    continue
 
-                # Plans have several important signatures to tag events with:
-                # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
-                # - `resource_hash` - hash computed off the raw sql text to match apm resources
-                # - `query_signature` - hash computed from the digest text to match query metrics
-
+            # Plans have several important signatures to tag events with:
+            # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
+            # - `resource_hash` - hash computed off the raw sql text to match apm resources
+            # - `query_signature` - hash computed from the digest text to match query metrics
+            if plan:
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
+                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
                 plan_signature = compute_exec_plan_signature(normalized_plan)
+                plan_cost = self._parse_execution_plan_cost(plan)
+            else:
+                normalized_plan = None
+                obfuscated_plan = None
+                plan_signature = None
+                plan_cost = None
 
-                obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
-                apm_resource_hash = compute_sql_signature(obfuscated_statement)
+            obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
+            query_signature = compute_sql_signature(datadog_agent.obfuscate_sql(digest_text))
+            apm_resource_hash = compute_sql_signature(obfuscated_statement)
+            statement_plan_sig = (query_signature, plan_signature)
 
-                query_signature = compute_sql_signature(datadog_agent.obfuscate_sql(digest_text))
-
-                statement_plan_sig = (query_signature, plan_signature)
-                if statement_plan_sig not in seen_statement_plan_sigs:
-                    seen_statement_plan_sigs.add(statement_plan_sig)
-                    events.append(
-                        {
-                            'duration': duration_ns,
-                            'db': {
-                                'instance': schema,
-                                'statement': obfuscated_statement,
-                                'query_signature': query_signature,
-                                'resource_hash': apm_resource_hash,
-                                'plan': plan,
-                                'plan_cost': self._parse_execution_plan_cost(plan),
-                                'plan_signature': plan_signature,
-                                'debug': {
-                                    'normalized_plan': normalized_plan,
-                                    'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
-                                    'digest_text': digest_text,
-                                },
-                                'mysql': {
-                                    'lock_time': row['lock_time_ns'],
-                                    'rows_affected': row['rows_affected'],
-                                    'rows_sent': row['rows_sent'],
-                                    'rows_examined': row['rows_examined'],
-                                    'select_full_join': row['select_full_join'],
-                                    'select_full_range_join': row['select_full_range_join'],
-                                    'select_range': row['select_range'],
-                                    'select_range_check': row['select_range_check'],
-                                    'select_scan': row['select_scan'],
-                                    'sort_merge_passes': row['sort_merge_passes'],
-                                    'sort_range': row['sort_range'],
-                                    'sort_rows': row['sort_rows'],
-                                    'sort_scan': row['sort_scan'],
-                                    'no_index_used': row['no_index_used'],
-                                    'no_good_index_used': row['no_good_index_used'],
-                                },
+            if statement_plan_sig not in seen_statement_plan_sigs:
+                seen_statement_plan_sigs.add(statement_plan_sig)
+                events.append(
+                    {
+                        'duration': duration_ns,
+                        'db': {
+                            'instance': schema,
+                            'statement': obfuscated_statement,
+                            'query_signature': query_signature,
+                            'resource_hash': apm_resource_hash,
+                            'plan': plan,
+                            'plan_cost': plan_cost,
+                            'plan_signature': plan_signature,
+                            'debug': {
+                                'normalized_plan': normalized_plan,
+                                'obfuscated_plan': obfuscated_plan,
+                                'digest_text': digest_text,
                             },
-                        }
-                    )
+                            'mysql': {
+                                'lock_time': row['lock_time_ns'],
+                                'rows_affected': row['rows_affected'],
+                                'rows_sent': row['rows_sent'],
+                                'rows_examined': row['rows_examined'],
+                                'select_full_join': row['select_full_join'],
+                                'select_full_range_join': row['select_full_range_join'],
+                                'select_range': row['select_range'],
+                                'select_range_check': row['select_range_check'],
+                                'select_scan': row['select_scan'],
+                                'sort_merge_passes': row['sort_merge_passes'],
+                                'sort_range': row['sort_range'],
+                                'sort_rows': row['sort_rows'],
+                                'sort_scan': row['sort_scan'],
+                                'no_index_used': row['no_index_used'],
+                                'no_good_index_used': row['no_good_index_used'],
+                            },
+                        },
+                    }
+                )
 
         if num_truncated > 0:
             self.log.warning(

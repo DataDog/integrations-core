@@ -280,47 +280,58 @@ class PgStatementsMixin(object):
             if original_statement in seen_statements:
                 continue
             seen_statements.add(original_statement)
+
+            plan_dict = None
             try:
                 plan_dict = self._run_explain(original_statement, instance_tags)
-                if not plan_dict:
-                    continue
-                plan = json.dumps(plan_dict)
-
-                # Plans have several important signatures to tag events with. Note that for postgres, the
-                # query_signature and resource_hash will be the same value.
-                # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
-                # - `resource_hash` - hash computed off the raw sql text to match apm resources
-                # - `query_signature` - hash computed from the raw sql text to match query metrics
-                obfuscated_statement = datadog_agent.obfuscate_sql(original_statement)
-                query_signature = compute_sql_signature(obfuscated_statement)
-                apm_resource_hash = query_signature
-                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
-                plan_signature = compute_exec_plan_signature(normalized_plan)
-                statement_plan_sig = (query_signature, plan_signature)
-                if statement_plan_sig not in seen_statement_plan_sigs:
-                    seen_statement_plan_sigs.add(statement_plan_sig)
-                    events.append(
-                        {
-                            'db': {
-                                'instance': row['datname'],
-                                'statement': obfuscated_statement,
-                                'query_signature': query_signature,
-                                'resource_hash': apm_resource_hash,
-                                'plan': plan,
-                                'plan_cost': (plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0),
-                                'plan_signature': plan_signature,
-                                'debug': {
-                                    'normalized_plan': normalized_plan,
-                                    'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
-                                    'original_statement': original_statement,
-                                },
-                                'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
-                            }
-                        }
-                    )
             except Exception:
                 statsd.increment("dd.postgres.explain_new_pg_stat_activity.error")
                 self.log.exception("failed to explain & process query '%s'", original_statement)
+
+            # Plans have several important signatures to tag events with. Note that for postgres, the
+            # query_signature and resource_hash will be the same value.
+            # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
+            # - `resource_hash` - hash computed off the raw sql text to match apm resources
+            # - `query_signature` - hash computed from the raw sql text to match query metrics
+            if plan_dict:
+                plan = json.dumps(plan_dict)
+                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
+                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+                plan_signature = compute_exec_plan_signature(normalized_plan)
+                plan_cost = (plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0)
+            else:
+                plan = None
+                normalized_plan = None
+                obfuscated_plan = None
+                plan_signature = None
+                plan_cost = None
+
+            obfuscated_statement = datadog_agent.obfuscate_sql(original_statement)
+            query_signature = compute_sql_signature(obfuscated_statement)
+            apm_resource_hash = query_signature
+            statement_plan_sig = (query_signature, plan_signature)
+
+            if statement_plan_sig not in seen_statement_plan_sigs:
+                seen_statement_plan_sigs.add(statement_plan_sig)
+                events.append(
+                    {
+                        'db': {
+                            'instance': row['datname'],
+                            'statement': obfuscated_statement,
+                            'query_signature': query_signature,
+                            'resource_hash': apm_resource_hash,
+                            'plan': plan,
+                            'plan_cost': plan_cost,
+                            'plan_signature': plan_signature,
+                            'debug': {
+                                'normalized_plan': normalized_plan,
+                                'obfuscated_plan': obfuscated_plan,
+                                'original_statement': original_statement,
+                            },
+                            'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
+                        }
+                    }
+                )
         statsd.histogram(
             "dd.postgres.explain_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=instance_tags
         )
