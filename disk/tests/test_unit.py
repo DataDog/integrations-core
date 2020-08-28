@@ -271,3 +271,20 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
         aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_include_all_devices(aggregator, gauge_metrics, rate_metrics):
+    c = Disk('disk', {}, [{}])
+
+    with mock.patch('psutil.disk_partitions', return_value=[]) as m:
+        c.check({})
+        # By default, we include all devices
+        m.assert_called_with(all=True)
+
+    instance = {'include_all_devices': False}
+    c = Disk('disk', {}, [instance])
+
+    with mock.patch('psutil.disk_partitions', return_value=[]) as m:
+        c.check({})
+        m.assert_called_with(all=False)

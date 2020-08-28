@@ -1,5 +1,9 @@
 # CHANGELOG - Tenable
 
+## 1.2.2 / 2020-08-10
+
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
 ## 1.2.1 / 2020-06-29
 
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).

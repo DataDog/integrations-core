@@ -7,18 +7,23 @@ from ..console import CONTEXT_SETTINGS
 from .agent_reqs import agent_reqs
 from .agent_signature import legacy_signature
 from .ci import ci
+from .codeowners import codeowners
 from .config import config
 from .dashboards import dashboards
 from .dep import dep
 from .imports import imports
 from .manifest import manifest
 from .metadata import metadata
+from .package import package
+from .readmes import readmes
+from .recommended_monitors import recommended_monitors
 from .saved_views import saved_views
 from .service_checks import service_checks
 
 ALL_COMMANDS = (
     agent_reqs,
     ci,
+    codeowners,
     config,
     dashboards,
     dep,
@@ -26,6 +31,9 @@ ALL_COMMANDS = (
     imports,
     manifest,
     metadata,
+    package,
+    readmes,
+    recommended_monitors,
     saved_views,
     service_checks,
 )

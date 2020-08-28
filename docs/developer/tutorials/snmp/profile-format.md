@@ -61,7 +61,7 @@ Example:
 ```yaml
 extends:
   - _base.yaml
-  - _generic-router-if.yaml  # Include basic metrics from IF-MIB.
+  - _generic-if.yaml  # Include basic metrics from IF-MIB.
 ```
 
 ### `metrics`
@@ -374,7 +374,7 @@ metric_tags:
     symbol: sysName
     tag: snmp_host
   - # From an OID:
-    OID: 1.3.6.1.2.1.1.5
+    OID: 1.3.6.1.2.1.1.5.0
     symbol: sysName
     tag: snmp_host
   - # With regular expression matching

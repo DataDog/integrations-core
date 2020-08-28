@@ -284,8 +284,7 @@ class NagiosEventLogTailer(object):
             return False
 
     def create_event(self, timestamp, event_type, hostname, fields, tags=None):
-        """Factory method called by the parsers
-        """
+        """Factory method called by the parsers"""
         # Agent6 expects a specific set of fields, so we need to place all
         # extra fields in the msg_title and let the Datadog backend separate them
         # Any remaining fields that aren't a part of the datadog-agent payload
@@ -372,7 +371,7 @@ class NagiosPerfDataTailer(object):
             perf_data = data.get(self._perfdata_field)
             if not perf_data:
                 self.log.warning(
-                    'Could not find field {} in {}, check your perfdata_format', self._perfdata_field, line
+                    'Could not find field %s in %s, check your perfdata_format', self._perfdata_field, line
                 )
                 return
             for pair in perf_data.split():

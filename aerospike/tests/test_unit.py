@@ -103,3 +103,12 @@ def test_collect_latency_invalid_data(aggregator):
     )
 
     aggregator.assert_all_metrics_covered()  # no metric
+
+
+def test_collect_empty_data(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+
+    check._client = mock.MagicMock()
+    check._client.info_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
+    check.log = mock.MagicMock()
+    assert [] == check.get_info('sets/test/ci')

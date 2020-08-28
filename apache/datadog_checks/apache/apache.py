@@ -128,8 +128,8 @@ class Apache(AgentCheck):
 
     def _submit_metadata(self, value):
         """Possible formats:
-            Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>) | Apache/X.Y.Z (<OS>) <not specified>
-            https://httpd.apache.org/docs/2.4/mod/core.html#servertokens
+        Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>) | Apache/X.Y.Z (<OS>) <not specified>
+        https://httpd.apache.org/docs/2.4/mod/core.html#servertokens
         """
         match = self.VERSION_REGEX.match(value)
 

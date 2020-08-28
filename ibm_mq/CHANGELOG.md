@@ -1,5 +1,15 @@
 # CHANGELOG - IBM MQ
 
+## 3.8.1 / 2020-08-10
+
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 3.8.0 / 2020-07-23
+
+* [Added] IBM MQ metadata. See [#6979](https://github.com/DataDog/integrations-core/pull/6979).
+* [Added] Collect metrics from Statistics Messages. See [#6945](https://github.com/DataDog/integrations-core/pull/6945).
+* [Fixed] Avoid shadowing depth_percent function. See [#7132](https://github.com/DataDog/integrations-core/pull/7132).
+
 ## 3.7.0 / 2020-06-29
 
 * [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).

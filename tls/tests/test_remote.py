@@ -206,7 +206,7 @@ def test_self_signed_ok(aggregator, instance_remote_self_signed_ok):
     aggregator.assert_all_metrics_covered()
 
 
-def test_cert_expired(aggregator, mock_dns, instance_remote_cert_expired):
+def test_cert_expired(aggregator, instance_remote_cert_expired):
     c = TLSCheck('tls', {}, [instance_remote_cert_expired])
     c.check(None)
 

@@ -102,6 +102,7 @@ tmp
 # Common IDEs & editors
 .idea/
 .vscode/
+*.iml
 
 # wheels
 wheelhouse/
@@ -116,3 +117,6 @@ wheelhouse/
 
 # isort (python imports sorting tool) temporary files
 *.isorted
+
+# Benchmark histograms
+benchmark_*.svg

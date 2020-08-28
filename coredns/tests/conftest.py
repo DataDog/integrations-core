@@ -8,16 +8,10 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')
-HOST = get_docker_hostname()
-ATHOST = "@{}".format(HOST)
-PORT = '9153'
-URL = "http://{}:{}/metrics".format(HOST, PORT)
+from .common import ATHOST, CONFIG_FILE, HERE, URL
 
 # One lookup each for the forward and proxy plugins
 DIG_ARGS = ["dig", "google.com", ATHOST, "example.com", ATHOST, "-p", "54"]
@@ -34,7 +28,7 @@ def init_coredns():
 @pytest.fixture(scope="session")
 def dd_environment(instance):
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
-    env = {'COREDNS_CONFIG_FOLDER': CONFIG_FOLDER}
+    env = {'COREDNS_CONFIG_FILE': CONFIG_FILE}
 
     with docker_run(compose_file, conditions=[WaitFor(init_coredns)], env_vars=env):
         yield instance

@@ -47,6 +47,8 @@ class Disk(AgentCheck):
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
         self._file_system_whitelist = instance.get('file_system_whitelist', [])
         self._file_system_blacklist = instance.get('file_system_blacklist', [])
+        # FIXME (8.X): Exclude special file systems by default
+        self._include_all_devices = is_affirmative(instance.get('include_all_devices', True))
         self._device_whitelist = instance.get('device_whitelist', [])
         self._device_blacklist = instance.get('device_blacklist', [])
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
@@ -71,7 +73,7 @@ class Disk(AgentCheck):
             self.devices_label = self._get_devices_label()
 
         self._valid_disks = {}
-        for part in psutil.disk_partitions(all=True):
+        for part in psutil.disk_partitions(all=self._include_all_devices):
             # we check all exclude conditions
             if self.exclude_disk(part):
                 continue
@@ -88,7 +90,12 @@ class Disk(AgentCheck):
                 )
                 continue
             except Exception as e:
-                self.log.warning('Unable to get disk metrics for %s: %s', part.mountpoint, e)
+                self.log.warning(
+                    u'Unable to get disk metrics for %s: %s. '
+                    u'You can exclude this mountpoint in the settings if it is invalid.',
+                    part.mountpoint,
+                    e,
+                )
                 continue
 
             # Exclude disks with size less than min_disk_size
@@ -147,7 +154,6 @@ class Disk(AgentCheck):
         """
         Return True for disks we don't want or that match regex in the config file
         """
-        self.log.debug('_exclude_disk: %s, %s, %s', device, file_system, mount_point)
 
         if not device or device == 'none':
             device = None
@@ -223,7 +229,7 @@ class Disk(AgentCheck):
             # For legacy reasons,  the standard unit it kB
             metrics[self.METRIC_DISK.format(name)] = getattr(usage, name) / 1024
 
-        # FIXME: 6.x, use percent, a lot more logical than in_use
+        # FIXME: 8.x, use percent, a lot more logical than in_use
         metrics[self.METRIC_DISK.format('in_use')] = usage.percent / 100
 
         if Platform.is_unix():
@@ -245,7 +251,12 @@ class Disk(AgentCheck):
             )
             return metrics
         except Exception as e:
-            self.log.warning('Unable to get disk metrics for %s: %s', mountpoint, e)
+            self.log.warning(
+                u'Unable to get disk metrics for %s: %s. '
+                u'You can exclude this mountpoint in the settings if it is invalid.',
+                mountpoint,
+                e,
+            )
             return metrics
 
         if inodes.f_files != 0:
@@ -255,7 +266,7 @@ class Disk(AgentCheck):
             metrics[self.METRIC_INODE.format('total')] = total
             metrics[self.METRIC_INODE.format('free')] = free
             metrics[self.METRIC_INODE.format('used')] = total - free
-            # FIXME: 6.x, use percent, a lot more logical than in_use
+            # FIXME: 8.x, use percent, a lot more logical than in_use
             metrics[self.METRIC_INODE.format('in_use')] = (total - free) / total
 
         return metrics
@@ -286,7 +297,7 @@ class Disk(AgentCheck):
         device_blacklist_extras = []
         mount_point_blacklist_extras = []
 
-        deprecation_message = '`%s` is deprecated and will be removed in 6.9. Please use `%s` instead.'
+        deprecation_message = '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.'
 
         if 'excluded_filesystems' in instance:
             file_system_blacklist_extras.extend(

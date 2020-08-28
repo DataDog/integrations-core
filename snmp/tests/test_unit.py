@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import logging
 import os
 import time
 import weakref
@@ -30,11 +31,11 @@ from datadog_checks.snmp.utils import (
 from . import common
 from .utils import mock_profiles_confd_root
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, common.python_autodiscovery_only]
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
-def test_parse_metrics(lcd_mock):
+def test_parse_metrics(lcd_mock, caplog):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
 
@@ -75,7 +76,8 @@ def test_parse_metrics(lcd_mock):
     with pytest.raises(Exception):
         config.parse_metrics(metrics)
 
-    # MIB with table and symbols
+    # MIB with table and symbols but no metric_tags
+    caplog.at_level(logging.WARNING)
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
     _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(next_oids) == 2
@@ -85,6 +87,9 @@ def test_parse_metrics(lcd_mock):
     assert foo.name == 'foo'
     assert isinstance(foo, ParsedTableMetric)
     assert bar.name == 'bar'
+    assert (
+        "foo_table table doesn't have a 'metric_tags' section, all its metrics will use the same tags." in caplog.text
+    )
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
@@ -97,13 +102,23 @@ def test_parse_metrics(lcd_mock):
         config.parse_metrics(metrics)
 
     # Table with manual OID
-    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
+    metrics = [
+        {
+            "MIB": "foo_mib",
+            "table": "foo_table",
+            "symbols": [{"OID": "1.2.3", "name": "foo"}],
+            "metric_tags": [{"tag": "test", "index": "1"}],
+        }
+    ]
     _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(next_oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
+    index_tag = foo.index_tags[0]
+    assert index_tag.index == '1'
+    assert index_tag.parsed_metric_tag.name == 'test'
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
@@ -290,21 +305,23 @@ def test_removing_host():
     check.check(instance)
 
     assert len(warnings) == 1
-    warning = warnings[0]
-    msg = 'Failed to collect some metrics: No SNMP response received before timeout'
-    assert msg in warning
+    msg = 'No SNMP response received before timeout'
+    assert all(msg in warning for warning in warnings)
 
     check.check(instance)
-    assert warnings == [warning, warning]
+    assert len(warnings) == 2
+    assert all(msg in warning for warning in warnings)
 
     check.check(instance)
-    assert warnings == [warning, warning, warning]
+    assert len(warnings) == 3
+    assert all(msg in warning for warning in warnings)
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [warning, warning, warning]
+    assert len(warnings) == 3
+    assert all(msg in warning for warning in warnings)
 
 
 def test_invalid_discovery_interval():
