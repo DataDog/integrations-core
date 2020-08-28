@@ -87,6 +87,7 @@ files:
           - snowflake.billing
           - snowflake.storage
           - snowflake.logins
+          - snowflake.data_transfer
         value:
           type: array
           items:

@@ -126,3 +126,23 @@ QueryHistory = Query(
         ],
     }
 )
+
+# https://docs.snowflake.com/en/sql-reference/account-usage/data_transfer_history.html
+DataTransferHistory = Query(
+    {
+        'name': 'data_transfer.metrics',
+        'query': 'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
+        'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
+        'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;',
+        'columns': [
+            {'name': 'source_cloud', 'type': 'tag'},
+            {'name': 'source_region', 'type': 'tag'},
+            {'name': 'target_cloud', 'type': 'tag'},
+            {'name': 'target_region', 'type': 'tag'},
+            {'name': 'transfer_type', 'type': 'tag'},
+            {'name': 'data_transfer.bytes.avg', 'type': 'gauge'},
+            {'name': 'data_transfer.bytes.sum', 'type': 'gauge'},
+
+        ]
+    }
+)

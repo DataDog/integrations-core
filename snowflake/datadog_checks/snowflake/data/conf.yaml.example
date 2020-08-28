@@ -73,6 +73,7 @@ instances:
     ## - snowflake.billing
     ## - snowflake.storage
     ## - snowflake.logins
+    ## - snowflake.data_transfer
     #
     metric_groups:
       - snowflake.query
