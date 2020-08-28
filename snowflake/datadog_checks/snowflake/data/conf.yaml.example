@@ -72,6 +72,8 @@ instances:
     ## - snowflake.query
     ## - snowflake.billing
     ## - snowflake.storage
+    ## - snowflake.storage.database
+    ## - snowflake.storage.table
     ## - snowflake.logins
     ## - snowflake.data_transfer
     ## - snowflake.auto_recluster

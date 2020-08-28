@@ -41,7 +41,6 @@ def test_default_metric_groups(instance):
         queries.CreditUsage,
         queries.WarehouseCreditUsage,
         queries.StorageUsageMetrics,
-        queries.DatabaseStorageMetrics,
         queries.LoginMetrics,
     ]
 
@@ -60,12 +59,6 @@ def test_additional_metric_groups(instance):
     assert check.config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
 
     assert check.metric_queries == [
-        queries.WarehouseLoad,
-        queries.QueryHistory,
-        queries.CreditUsage,
-        queries.WarehouseCreditUsage,
-        queries.StorageUsageMetrics,
-        queries.DatabaseStorageMetrics,
         queries.LoginMetrics,
         queries.DataTransferHistory,
     ]
