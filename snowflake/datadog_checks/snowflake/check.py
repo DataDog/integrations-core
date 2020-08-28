@@ -14,7 +14,9 @@ from .config import Config
 METRIC_GROUPS = {
     'snowflake.query': [queries.WarehouseLoad, queries.QueryHistory],
     'snowflake.billing': [queries.CreditUsage, queries.WarehouseCreditUsage],
-    'snowflake.storage': [queries.StorageUsageMetrics, queries.DatabaseStorageMetrics],
+    'snowflake.storage': [queries.StorageUsageMetrics],
+    'snowflake.storage.database': [queries.DatabaseStorageMetrics],
+    'snowflake.storage.table': [queries.TableStorage],
     'snowflake.logins': [queries.LoginMetrics],
     'snowflake.data_transfer': [queries.DataTransferHistory],
     'snowflake.auto_recluster': [queries.AutoReclusterHistory],
