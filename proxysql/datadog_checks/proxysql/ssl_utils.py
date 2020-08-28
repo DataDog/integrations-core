@@ -19,7 +19,7 @@ def make_insecure_ssl_client_context():
 
 
 def make_secure_ssl_client_context(
-    ca_cert=None, client_cert=None, client_key=None, check_hostname=True, protocol=ssl.PROTOCOL_TLS,
+    ca_cert=None, client_cert=None, client_key=None, check_hostname=True, protocol=ssl.PROTOCOL_TLS
 ):
     """Creates a secure ssl context for integration that requires one.
     :param str ca_cert:     Path to a file of concatenated CA certificates in PEM format or to a directory containing

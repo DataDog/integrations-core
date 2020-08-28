@@ -98,7 +98,7 @@ instances:
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
     ## The SOCKS protocol is also supported, for example:

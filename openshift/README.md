@@ -47,7 +47,7 @@ The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Dat
 
 The Agent suports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
 
-#### Host network SCC operations
+#### Host
 
 Add the `allowHostPorts` permission to the pod (either via the standard `hostnetwork` or `hostaccess` SCC, or by creating your own). In this case, you can add the relevant port bindings in your pod specs:
 

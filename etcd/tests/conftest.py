@@ -12,6 +12,9 @@ from datadog_checks.etcd.metrics import METRIC_MAP
 
 from .common import COMPOSE_FILE, LEGACY_INSTANCE, URL, V3_PREVIEW
 
+# Needed to mount volume for logging
+E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
+
 
 def add_key():
     if not V3_PREVIEW:
@@ -27,7 +30,7 @@ def dd_environment(instance):
 
     # Sleep a bit so all metrics are available
     with docker_run(COMPOSE_FILE, conditions=[CheckEndpoints(endpoints), add_key], sleep=3):
-        yield instance
+        yield instance, E2E_METADATA
 
 
 @pytest.fixture(scope='session')

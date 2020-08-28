@@ -42,6 +42,9 @@ files:
               start matching from the beginning and therefore to match anywhere you
               must prepend `.*`. For exact matches append `$`.
 
+              Devices from pseudo or memory-based file systems can be excluded by disabling the
+              `include_all_devices` option.
+
               When conflicts arise, this will override `file_system_whitelist`.
             value:
               example:
@@ -110,6 +113,15 @@ files:
               type: array
               items:
                 type: string
+          - name: include_all_devices
+            description: |
+              Instruct the check to collect from all devices, including non-physical devices.
+              Set this to false to exclude pseudo, memory, duplicate or inaccessible file systems.
+
+              For more fine-grained control, use the inclusion and exclusion options.
+            value:
+              example: true
+              type: boolean
           - name: service_check_rw
             description: |
               Instruct the check to notify based on partition state.

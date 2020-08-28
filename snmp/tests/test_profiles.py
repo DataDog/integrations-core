@@ -267,7 +267,7 @@ def test_f5(aggregator):
         interface_tags = ['interface:{}'.format(interface)] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
             )
         for metric in IF_RATES:
             aggregator.assert_metric(
@@ -295,17 +295,13 @@ def test_f5(aggregator):
     for server in servers:
         server_tags = tags + ['server:{}'.format(server)]
         for metric in LTM_VIRTUAL_SERVER_GAUGES:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1)
         for metric in LTM_VIRTUAL_SERVER_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1
             )
         for metric in LTM_VIRTUAL_SERVER_RATES:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1)
 
     nodes = ['node1', 'node2', 'node3']
     for node in nodes:
@@ -495,9 +491,7 @@ def test_cisco_3850(aggregator):
             'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
-    )
+    aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
 
@@ -738,15 +732,13 @@ def test_cisco_nexus(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags
     )
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
-        )
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -1288,15 +1280,13 @@ def test_cisco_asa_5525(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags
     )
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
-        )
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -1774,6 +1764,7 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
     )
+    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 

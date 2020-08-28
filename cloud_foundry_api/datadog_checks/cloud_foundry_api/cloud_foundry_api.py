@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import time
 from typing import Any, Dict, Generator, Tuple
 
@@ -366,6 +367,7 @@ class CloudFoundryApiCheck(AgentCheck):
                 event_entity["actee"],
                 event_entity.get("space_guid"),  # Some events might not have a space associated
                 event_entity.get("organization_guid"),  # Some events might not have an org associated
+                event_entity.get("metadata", {}),
             )
         elif self._api_version == "v3":
             # Parse a v3 event
@@ -387,6 +389,7 @@ class CloudFoundryApiCheck(AgentCheck):
                 target["guid"],
                 cf_event.get("space", {}).get("guid", ""),  # Some events might not have a space associated
                 cf_event.get("organization", {}).get("guid", ""),  # Some events might not have an org associated
+                cf_event.get("data", {}),
             )
         return dd_event, event_guid, event_ts
 
@@ -403,25 +406,36 @@ class CloudFoundryApiCheck(AgentCheck):
         target_guid,
         space_guid,
         org_guid,
+        metadata,
     ):
-        # type: (str, str, int, str, str, str, str, str, str, str, str) -> Event
+        # type: (str, str, int, str, str, str, str, str, str, str, str, dict) -> Event
+        space_id = space_guid if space_guid else "none"
+        org_id = org_guid if org_guid else "none"
+        # we include both space_guid+space_id and org_guid+org_id; the *_guid are kept for
+        # backwards compatibility, the *_id are added to maintain consistency with
+        # https://github.com/DataDog/datadog-firehose-nozzle
         tags = [
             "event_type:{}".format(event_type),
             "{}_name:{}".format(target_type, target_name),
             "{}_guid:{}".format(target_type, target_guid),
             "{}_name:{}".format(actor_type, actor_name),
             "{}_guid:{}".format(actor_type, actor_guid),
-            "space_guid:{}".format(space_guid if space_guid else "none"),
+            "space_guid:{}".format(space_id),
+            "space_id:{}".format(space_id),
             "space_name:{}".format(self.get_space_name(space_guid) if space_guid else "none"),
-            "org_guid:{}".format(org_guid if org_guid else "none"),
+            "org_guid:{}".format(org_id),
+            "org_id:{}".format(org_id),
             "org_name:{}".format(self.get_org_name(org_guid) if org_guid else "none"),
         ] + self._tags
+        metadata_json = "```\n{}\n```".format(json.dumps(metadata, sort_keys=True, indent=2))
         dd_event = {
             "source_type_name": SOURCE_TYPE_NAME,
             "event_type": event_type,
             "timestamp": event_ts,
             "msg_title": "Event {} happened for {} {}".format(event_type, target_type, target_name),
-            "msg_text": "Triggered by {} {}".format(actor_type, actor_name),
+            "msg_text": "%%% \n Triggered by {} {}\n\nMetadata:\n{} \n %%%".format(
+                actor_type, actor_name, metadata_json
+            ),
             "priority": "normal",
             "tags": tags,
             "aggregation_key": event_guid,

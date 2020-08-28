@@ -261,7 +261,7 @@ class Varnish(AgentCheck):
                     self.rate(metric_name, float(gauge_val), tags=tags)
 
     def _parse_varnishadm(self, output, tags):
-        """ Parse out service checks from varnishadm.
+        """Parse out service checks from varnishadm.
 
         Example output:
 

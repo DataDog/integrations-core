@@ -32,7 +32,12 @@ Create a read-only login to connect to your server:
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `sqlserver.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
    See the [sample sqlserver.d/conf.yaml][5] for all available configuration options:
@@ -93,6 +98,9 @@ _Available for Agent versions >6.0_
 See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][22] for guidance on applying the parameters below.
@@ -116,6 +124,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "sqlserver", "service": "sqlserver"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

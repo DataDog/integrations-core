@@ -166,7 +166,10 @@ def mock_http_rest_api(method, url, *args, **kwargs):
     elif method == 'post':
         assert kwargs['headers']['Content-Type'] == 'application/json'
         if re.match(r'.*/session$', url):
-            return MockResponse({"value": "dummy-token"}, 200,)
+            return MockResponse(
+                {"value": "dummy-token"},
+                200,
+            )
         elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
             return MockResponse(
                 {

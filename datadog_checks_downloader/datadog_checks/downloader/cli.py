@@ -17,9 +17,9 @@ from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 
 def __is_canonical(version):
-    '''
+    """
     https://www.python.org/dev/peps/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions
-    '''
+    """
 
     P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
     return re.match(P, version) is not None

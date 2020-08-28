@@ -13,7 +13,7 @@ sidekiq.jobs.worker.failure,count,,job,,Count of failed Sidekiq jobs,-1,sidekiq,
 sidekiq.processed,count,,job,,Number of job executions completed (success or failure) (Enterprise only),0,sidekiq,job execution processed
 sidekiq.failed,count,,job,,Number of job executions which raised an error (Enterprise only),-1,sidekiq,jobs execution failures
 sidekiq.enqueued,count,,job,,Total size of all known queues (Enterprise only),0,sidekiq,jobs enqueued
-sidekiq.retries,count,,job,,Total retries size,0,sidekiq (Enterprise only),job retries
+sidekiq.retries,count,,job,,Total retries size (Enterprise only),0,sidekiq,job retries
 sidekiq.dead,count,,job,,Total Dead Size (Enterprise only),0,sidekiq,jobs dead
 sidekiq.scheduled,count,,job,,Total Scheduled Size (Enterprise only),0,sidekiq,jobs scheduled
 sidekiq.busy,count,,job,,Total Busy Size (Enterprise only),0,sidekiq,jobs busy

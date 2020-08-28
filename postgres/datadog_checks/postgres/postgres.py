@@ -73,8 +73,7 @@ class PostgreSql(AgentCheck):
         return self._version
 
     def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility
-        """
+        """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
 
         for element in yamlconfig:
@@ -229,9 +228,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self, instance_tags,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.

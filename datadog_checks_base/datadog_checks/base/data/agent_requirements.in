@@ -20,8 +20,10 @@ futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 in-toto==0.4.2
 ipaddress==1.0.22; python_version < '3.0'
-jaydebeapi==1.1.1
-jpype1==0.7.0
+jaydebeapi==1.2.3
+jpype1==0.7.1 ; python_version <= '2.7'
+# 0.7.1 version breaks in py3 but is the latest py2 compatible version
+jpype1==1.0.2 ; python_version > '3'
 kafka-python==2.0.0
 kazoo==2.6.1; sys_platform != 'win32'
 kubernetes==8.0.1
@@ -35,7 +37,7 @@ paramiko==2.6.0
 ply==3.10
 prometheus-client==0.7.1
 protobuf==3.7.0
-psutil==5.7.0
+psutil==5.7.2
 psycopg2-binary==2.8.4
 pyasn1==0.4.6
 pycryptodomex==3.9.4
