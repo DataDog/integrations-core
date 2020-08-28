@@ -42,7 +42,7 @@ class TestEventLogTailer:
         counters = {}
 
         for line in open(NAGIOS_TEST_LOG).readlines():
-            parsed = nagios_tailer._parse_line(line)
+            parsed = nagios_tailer.parse_line(line)
             if parsed:
                 event = aggregator.events[-1]
                 t = event["event_type"]
