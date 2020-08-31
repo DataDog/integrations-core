@@ -12,7 +12,7 @@ While most integrations are either Python, JMX, or implemented in the Agent in G
 Here's an overview of what this integration involves:
 
 * A [Python check](https://github.com/DataDog/datadog-agent/blob/master/snmp), responsible for:
-    * Collecting metrics from a specific device IP. Metrics typically come from [profiles](../../tutorials/snmp/profiles.md), but they can also be [specified explicitly](https://github.com/DataDog/integrations-core/blob/fd6df90135de14d06662e49d7696a42c08476a82/snmp/datadog_checks/snmp/data/conf.yaml.example#L344-L354).
+    * Collecting metrics from a specific device IP. Metrics typically come from [profiles](../../tutorials/snmp/profile-format/), but they can also be [specified explicitly](https://github.com/DataDog/integrations-core/blob/fd6df90135de14d06662e49d7696a42c08476a82/snmp/datadog_checks/snmp/data/conf.yaml.example#L344-L354).
     * Auto-discovering devices over a network. (Pending deprecation in favor of Agent auto-discovery.)
 * An [Agent service listener](https://github.com/DataDog/datadog-agent/blob/master/pkg/autodiscovery/listeners/snmp.go), responsible for auto-discovering devices over a network and forwarding discovered instances to the existing Agent check scheduling pipeline. Also known as "Agent SNMP auto-discovery".
 
