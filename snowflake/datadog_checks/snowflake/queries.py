@@ -200,10 +200,9 @@ PipeHistory = Query(
             {'name': 'pipe.bytes_inserted.sum', 'type': 'gauge'},
             {'name': 'pipe.files_inserted.avg', 'type': 'gauge'},
             {'name': 'pipe.files_inserted.sum', 'type': 'gauge'},
-        ]
+        ],
     }
 )
-
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/replication_usage_history.html
 ReplicationUsage = Query(
@@ -218,6 +217,6 @@ ReplicationUsage = Query(
             {'name': 'replication.credits_used.sum', 'type': 'gauge'},
             {'name': 'replication.bytes_transferred.avg', 'type': 'gauge'},
             {'name': 'replication.bytes_transferred.sum', 'type': 'gauge'},
-        ]
+        ],
     }
 )
