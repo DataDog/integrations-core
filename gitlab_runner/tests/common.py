@@ -53,7 +53,7 @@ CONFIG = {
             "type": "docker",
             "source": "gitlab-runner",
         }
-    ]
+    ],
 }
 
 BAD_CONFIG = {
