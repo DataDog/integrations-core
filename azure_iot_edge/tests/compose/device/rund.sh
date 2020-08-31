@@ -16,9 +16,11 @@ provisioning:
 agent:
   name: "edgeAgent"
   type: "docker"
-  env: {}
+  env:
+    ExperimentalFeatures__Enabled: "true"
+    ExperimentalFeatures__EnableMetrics: "true"
   config:
-    image: "mcr.microsoft.com/azureiotedge-agent:1.0"
+    image: "mcr.microsoft.com/azureiotedge-agent:1.0.10-rc2"
     auth: {}
 hostname: "edgehub"
 connect:

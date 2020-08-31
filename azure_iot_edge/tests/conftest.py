@@ -23,7 +23,6 @@ def dd_environment(instance):
 
     env_vars = {
         "IOT_DEVICE_CONNSTR": common.IOT_DEVICE_CONNECTION_STRING,
-        "IOT_PROMETHEUS_PORT": str(common.IOT_PROMETHEUS_PORT),
     }
 
     with docker_run(compose_file, conditions=conditions, env_vars=env_vars):
