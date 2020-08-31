@@ -184,3 +184,23 @@ TableStorage = Query(
         ],
     }
 )
+
+# https://docs.snowflake.com/en/sql-reference/account-usage/pipe_usage_history.html
+PipeHistory = Query(
+    {
+        'name': 'pipe.metrics',
+        'query': 'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
+        'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
+        'where start_time >= date_trunc(day, current_date) group by 1;',
+        'columns': [
+            {'name': 'pipe', 'type': 'tag'},
+            {'name': 'pipe.credits_used.avg', 'type': 'gauge'},
+            {'name': 'pipe.credits_used.sum', 'type': 'gauge'},
+            {'name': 'pipe.bytes_inserted.avg', 'type': 'gauge'},
+            {'name': 'pipe.bytes_inserted.sum', 'type': 'gauge'},
+            {'name': 'pipe.files_inserted.avg', 'type': 'gauge'},
+            {'name': 'pipe.files_inserted.sum', 'type': 'gauge'},
+        ]
+    }
+)
+
