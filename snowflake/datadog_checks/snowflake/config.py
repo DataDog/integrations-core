@@ -36,7 +36,7 @@ class Config(object):
         tags = instance.get('tags', [])
 
         # min_collection_interval defaults to 30 minutes
-        min_collection = instance.get('min_collection_interval', 1800)
+        min_collection = instance.get('min_collection_interval', 3600)
 
         metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
 

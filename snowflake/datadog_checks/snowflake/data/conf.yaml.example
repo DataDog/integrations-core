@@ -2,6 +2,17 @@
 #
 init_config:
 
+    ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - metric_prefix: snowflake
+    #     query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -27,6 +38,16 @@ instances:
     ## Password for the user
     #
     password: <PASSWORD>
+
+    ## @param database - string - optional - default: SNOWFLAKE
+    ## Name of the default database to use.
+    #
+    # database: SNOWFLAKE
+
+    ## @param schema - string - optional - default: ACCOUNT_USAGE
+    ## Name of the default schema to use for the database.
+    #
+    # schema: ACCOUNT_USAGE
 
     ## @param role - string - optional - default: ACCOUNTADMIN
     ## Name of the default role to use.
@@ -86,6 +107,36 @@ instances:
       - snowflake.storage
       - snowflake.logins
 
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields:
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `clickhouse.` to form
+    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column. You can
+    ##                          use the `count` type to perform aggregation for queries that
+    ##                          return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored, use this for any column you wish to skip:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:snowflake
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -102,13 +153,13 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 1800
+    ## @param min_collection_interval - number - optional - default: 3600
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     ##
     ## NOTE: The Snowflake ACCOUNT_USAGE schema views do not update in frequently.
     #
-    # min_collection_interval: 1800
+    # min_collection_interval: 3600
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.
