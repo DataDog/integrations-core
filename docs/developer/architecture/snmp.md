@@ -18,7 +18,7 @@ Here's an overview of what this integration involves:
 
 The diagram below shows how these components interact for a typical VM-based setup (single Agent on a host). For Datadog Cluster Agent (DCA) deployments, see [Cluster Agent Integration](#cluster-agent-integration).
 
-![](/assets/images/snmp-architecture.png)
+![](../../assets/images/snmp-architecture.png)
 
 ## Python Check
 
