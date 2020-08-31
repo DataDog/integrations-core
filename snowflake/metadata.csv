@@ -42,7 +42,11 @@ snowflake.storage.table.failsafe_bytes.avg,gauge,,byte,,Average bytes owned by (
 snowflake.storage.table.retained_bytes.avg,gauge,,byte,,Average bytes owned by (and billed to) this table that are retained after deletion because they are referenced by one or more clones of this table.,0,snowflake,table retained bytes
 snowflake.pipe.credits_used.avg,gauge,,unit,,Average number of credits billed for Snowpipe data loads.,0,snowflake,pipe credits avg
 snowflake.pipe.credits_used.sum,gauge,,unit,,Total number of credits billed for Snowpipe data loads.,0,snowflake,pipe credits sum
-snowflake.pipe.bytes_inserted.avg,gauge,,unit,,Average number of bytes loaded from Snowpipe.,0,snowflake,pipe bytes inserted avg
-snowflake.pipe.bytes_inserted.sum,gauge,,unit,,Total number of bytes loaded from Snowpipe.,0,snowflake,pipe bytes inserted sum
-snowflake.pipe.files_inserted.avg,gauge,,unit,,Average number of files loaded from Snowpipe.,0,snowflake,pipe files inserted avg
-snowflake.pipe.files_inserted.sum,gauge,,unit,,Total number of files loaded from Snowpipe.,0,snowflake,pipe files inserted sum
+snowflake.pipe.bytes_inserted.avg,gauge,,byte,,Average number of bytes loaded from Snowpipe.,0,snowflake,pipe bytes inserted avg
+snowflake.pipe.bytes_inserted.sum,gauge,,byte,,Total number of bytes loaded from Snowpipe.,0,snowflake,pipe bytes inserted sum
+snowflake.pipe.files_inserted.avg,gauge,,file,,Average number of files loaded from Snowpipe.,0,snowflake,pipe files inserted avg
+snowflake.pipe.files_inserted.sum,gauge,,file,,Total number of files loaded from Snowpipe.,0,snowflake,pipe files inserted sum
+snowflake.replication.credits_used.avg,gauge,,unit,,Average number of credits used for database replication.,0,snowflake,replication credits avg
+snowflake.replication.credits_used.sum,gauge,,unit,,Total number of credits used for database replication.,0,snowflake,replication credits sum
+snowflake.replication.bytes_transferred.avg,gauge,,byte,,Average number of bytes transferred for database replication.,0,snowflake,replication bytes avg
+snowflake.replication.bytes_transferred.sum,gauge,,byte,,Total number of bytes transferred for database replication.,0,snowflake,replication bytes sum

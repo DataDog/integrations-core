@@ -78,6 +78,7 @@ instances:
     ## - snowflake.data_transfer
     ## - snowflake.auto_recluster
     ## - snowflake.pipe
+    ## - snowflake.replication
     #
     metric_groups:
       - snowflake.query
