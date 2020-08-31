@@ -92,6 +92,7 @@ files:
           - snowflake.data_transfer
           - snowflake.auto_recluster
           - snowflake.pipe
+          - snowflake.replication
         value:
           type: array
           items:
