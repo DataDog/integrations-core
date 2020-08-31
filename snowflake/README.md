@@ -2,9 +2,8 @@
 
 ## Overview
 
-This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a Saas analytic data warehouse. 
-Snowflake runs completely on cloud infrastructure. This integration monitors credit, billing, and storage usage, 
-query history, and more.
+This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
+This integration monitors credit, billing, and storage usage, query history, and more.
 
 ## Setup
 
@@ -20,7 +19,7 @@ No additional installation is needed on your server.
 1. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
 
     **Note**: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
-    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8]
+    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
 
 2. [Restart the Agent][4].
 
@@ -34,8 +33,10 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
+**NOTE**: Metrics are collected via queries to Snowflake. Queries from the integration are billable by Snowflake.
 
+
+### Service Checks
 
 `snowflake.can_connect`: Returns `CRITICAL` if the Agent cannot authenticate and connect to Snowflake, `OK` otherwise.
 
