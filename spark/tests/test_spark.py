@@ -506,7 +506,14 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
     'spark.job.num_failed_stages': 100,
 }
 
-SPARK_JOB_RUNNING_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:running']
+SPARK_JOB_RUNNING_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:running',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+]
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -521,7 +528,14 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.num_failed_stages': 9000,
 }
 
-SPARK_JOB_SUCCEEDED_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:succeeded']
+SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:succeeded',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+]
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -541,7 +555,12 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 16 * 3,
 }
 
-SPARK_STAGE_RUNNING_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:running']
+SPARK_STAGE_RUNNING_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:running',
+    'stage_id:1',
+]
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -561,7 +580,12 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 113 * 2,
 }
 
-SPARK_STAGE_COMPLETE_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:complete']
+SPARK_STAGE_COMPLETE_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:complete',
+    'stage_id:0',
+]
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,

@@ -503,6 +503,13 @@ class SparkCheck(AgentCheck):
                 tags.extend(addl_tags)
                 tags.append('status:%s' % str(status).lower())
 
+                job_id = job.get('jobId')
+                if job_id is not None:
+                    tags.append('job_id:{}'.format(job_id))
+
+                for stage_id in job.get('stageIds', []):
+                    tags.append('stage_id:{}'.format(stage_id))
+
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)
 
@@ -524,6 +531,10 @@ class SparkCheck(AgentCheck):
                 tags = ['app_name:%s' % str(app_name)]
                 tags.extend(addl_tags)
                 tags.append('status:%s' % str(status).lower())
+
+                stage_id = stage.get('stageId')
+                if stage_id is not None:
+                    tags.append('stage_id:{}'.format(stage_id))
 
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', COUNT, 1, tags)
