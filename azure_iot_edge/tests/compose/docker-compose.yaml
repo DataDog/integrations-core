@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  iot-edge-device:
+    build: ./device
+    container_name: iot-edge-device
+    hostname: edgehub
+    ports:
+      - ${IOT_PROMETHEUS_PORT}:9600
+      - "15580:15580"  # Required for IoT Edge inter-container communications.
+      - "15581:15581"  # Required for IoT Edge inter-container communications.
+    environment:
+      - IOT_DEVICE_CONNSTR=${IOT_DEVICE_CONNSTR}
+    volumes:
+      - /var/run/docker.sock:/run/docker.sock
+    networks:
+      - iot-edge-network
+
+networks:
+  iot-edge-network: {}  # Must be in sync with the network listed in `rund.sh`.
