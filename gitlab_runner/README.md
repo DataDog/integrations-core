@@ -38,7 +38,6 @@ See [metadata.csv][117] for a list of metrics provided by this integration.
 
 ### Log collection
 
-_Available for Agent versions >6.0_
 
 1. In your `gitlab_runner` [configuration file][119], change the log format to `json` (_Available for Gitlab Runner versions >=11.4.0_ ):
    ```toml
