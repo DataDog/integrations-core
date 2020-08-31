@@ -20,6 +20,7 @@ METRIC_GROUPS = {
     'snowflake.logins': [queries.LoginMetrics],
     'snowflake.data_transfer': [queries.DataTransferHistory],
     'snowflake.auto_recluster': [queries.AutoReclusterHistory],
+    'snowflake.pipe': [queries.PipeHistory],
 }
 
 

@@ -91,6 +91,7 @@ files:
           - snowflake.logins
           - snowflake.data_transfer
           - snowflake.auto_recluster
+          - snowflake.pipe
         value:
           type: array
           items:
