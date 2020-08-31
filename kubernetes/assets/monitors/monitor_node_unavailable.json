@@ -1,0 +1,30 @@
+{
+	"name": "[kubernetes] Monitor Unavailable Kubernetes Nodes",
+	"type": "query alert",
+	"query": "max(last_15m):sum:kubernetes_state.node.status{status:schedulable} by {kubernetes_cluster} * 100 / sum:kubernetes_state.node.status{*} by {kubernetes_cluster} < 80",
+	"message": "Nodes are unavailable on ({{kubernetes_cluster.name}} cluster)",
+	"tags": [
+		"integration:kubernetes"
+	],
+	"options": {
+		"notify_audit": true,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"no_data_timeframe": 5,
+		"require_full_window": true,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 80,
+			"warning": 90,
+			"warning_recovery": 100,
+			"critical_recovery": 90
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when nodes are unavailable for your Kubernetes integration."
+	}
+}

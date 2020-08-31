@@ -70,17 +70,14 @@ class ReportSerializer:
         return {'SHA': commit.sha, 'Title': title, 'URL': url, 'Teams': ' & '.join(teams), 'Next tag': next_tag}
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS, short_help="Writes the CSV report about a specific release",
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help="Writes the CSV report about a specific release")
 @click.option('--from-ref', '-f', help="Reference to start stats on", required=True)
 @click.option('--to-ref', '-t', help="Reference to end stats at", required=True)
 @click.option('--release-version', '-r', help="Release version to analyze", required=True)
 @click.option('--output-folder', '-o', help="Path to output folder")
 @click.pass_context
 def csv_report(ctx, from_ref, to_ref, release_version, output_folder=None):
-    """Computes the release report and writes it to a specific directory
-    """
+    """Computes the release report and writes it to a specific directory"""
     if output_folder is None:
         output_folder = release_version
 

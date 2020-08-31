@@ -1,6 +1,7 @@
 # Default metrics collected by this check. You should not have to modify this.
 jmx_metrics:
   - include:
+      domain: org.apache.activemq
       destinationType: Queue
       attribute:
         AverageEnqueueTime:
@@ -41,6 +42,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: org.apache.activemq
       type: Broker
       attribute:
         StorePercentUsage:

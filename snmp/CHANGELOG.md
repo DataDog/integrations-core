@@ -1,5 +1,29 @@
 # CHANGELOG - snmp
 
+## 3.7.1 / 2020-08-12
+
+* [Fixed] Fix apc ups profile. See [#7351](https://github.com/DataDog/integrations-core/pull/7351).
+* [Fixed] Revert Fix wrong indentation of `table` key in column metric tags #7024. See [#7349](https://github.com/DataDog/integrations-core/pull/7349).
+
+## 3.7.0 / 2020-08-03
+
+* [Added] Add OID caching. See [#7231](https://github.com/DataDog/integrations-core/pull/7231).
+* [Fixed] Refactor how OIDs are managed. See [#7230](https://github.com/DataDog/integrations-core/pull/7230).
+* [Fixed] Sanitize OctetString. See [#7221](https://github.com/DataDog/integrations-core/pull/7221).
+* [Fixed] Rename all_oids to scalar_oids. See [#7229](https://github.com/DataDog/integrations-core/pull/7229).
+* [Fixed] Better logging for submit_metric. See [#7188](https://github.com/DataDog/integrations-core/pull/7188).
+
+## 3.6.0 / 2020-07-24
+
+* [Added] Check tag for table metric. See [#6933](https://github.com/DataDog/integrations-core/pull/6933).
+* [Added] Add new `flag_stream` type. See [#7072](https://github.com/DataDog/integrations-core/pull/7072).
+* [Added] Add cisco catalyst profile. See [#6925](https://github.com/DataDog/integrations-core/pull/6925).
+* [Added] Allow list of sysoids in profiles. See [#6936](https://github.com/DataDog/integrations-core/pull/6936).
+* [Fixed] Sanitize forced types values and cast to float. See [#7133](https://github.com/DataDog/integrations-core/pull/7133).
+* [Fixed] Add `.0` to scalar oids. See [#7105](https://github.com/DataDog/integrations-core/pull/7105).
+* [Fixed] Use OID instead of MIB for sysName. See [#7104](https://github.com/DataDog/integrations-core/pull/7104).
+* [Fixed] Submit additional rate metrics in fortigate profile. See [#7058](https://github.com/DataDog/integrations-core/pull/7058).
+
 ## 3.5.3 / 2020-07-01
 
 * [Fixed] Fix autodiscovery_subnet var in auto_conf.yaml. See [#7029](https://github.com/DataDog/integrations-core/pull/7029).

@@ -18,9 +18,12 @@ The Teamcity check is included in the [Datadog Agent][2] package, so you don't n
 
 Follow [Teamcity's documentation][3] to enable Guest Login.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample teamcity.d/conf.yaml][5] for all available configuration options:
 
@@ -39,6 +42,9 @@ Add an item like the above to `instances` for each build configuration you want 
 
 [Restart the Agent][6] to start collecting and sending Teamcity events to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -48,6 +54,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `teamcity`                                                                                        |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
 | `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"%%host%%", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

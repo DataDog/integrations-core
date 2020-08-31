@@ -129,6 +129,6 @@ def dd_environment():
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq1', log_pattern)], sleep=10,
+        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq1', log_pattern)], sleep=10
     ):
         yield common.INSTANCE, common.E2E_METADATA

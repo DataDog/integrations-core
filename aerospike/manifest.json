@@ -22,13 +22,14 @@
   "is_public": true,
   "integration_id": "aerospike",
   "assets": {
-     "configuration": {
+    "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
     "dashboards": {
       "Aerospike Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }

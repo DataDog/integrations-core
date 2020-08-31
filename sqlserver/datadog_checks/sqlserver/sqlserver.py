@@ -289,13 +289,13 @@ class SQLServer(AgentCheck):
         self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"] = clerk_metrics
 
     def typed_metric(self, instance, cfg_inst, table, base_name, user_type, sql_type, column):
-        '''
+        """
         Create the appropriate SqlServerMetric object, each implementing its method to
         fetch the metrics properly.
         If a `type` was specified in the config, it is used to report the value
         directly fetched from SQLServer. Otherwise, it is decided based on the
         sql_type, according to microsoft's documentation.
-        '''
+        """
         if table == DEFAULT_PERFORMANCE_TABLE:
             metric_type_mapping = {
                 PERF_COUNTER_BULK_COUNT: (self.rate, SqlSimpleMetric),
@@ -342,8 +342,7 @@ class SQLServer(AgentCheck):
         return provider
 
     def _get_access_info(self, instance, db_key, db_name=None):
-        ''' Convenience method to extract info from instance
-        '''
+        """Convenience method to extract info from instance"""
         dsn = instance.get('dsn')
         host = instance.get('host')
         username = instance.get('username')
@@ -360,14 +359,12 @@ class SQLServer(AgentCheck):
         return dsn, host, username, password, database, driver
 
     def _conn_key(self, instance, db_key, db_name=None):
-        ''' Return a key to use for the connection cache
-        '''
+        """Return a key to use for the connection cache"""
         dsn, host, username, password, database, driver = self._get_access_info(instance, db_key, db_name)
         return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
 
     def _conn_string_odbc(self, db_key, instance=None, conn_key=None, db_name=None):
-        ''' Return a connection string to use with odbc
-        '''
+        """Return a connection string to use with odbc"""
         if instance:
             dsn, host, username, password, database, driver = self._get_access_info(instance, db_key, db_name)
         elif conn_key:
@@ -392,8 +389,7 @@ class SQLServer(AgentCheck):
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, instance=None, conn_key=None, db_name=None):
-        ''' Return a connection string to use with adodbapi
-        '''
+        """Return a connection string to use with adodbapi"""
         if instance:
             _, host, username, password, database, _ = self._get_access_info(instance, db_key, db_name)
         elif conn_key:
@@ -418,10 +414,10 @@ class SQLServer(AgentCheck):
         self.close_cursor(cursor)
 
     def get_cursor(self, instance, db_key, db_name=None):
-        '''
+        """
         Return a cursor to execute query against the db
         Cursor are cached in the self.connections dict
-        '''
+        """
         conn_key = self._conn_key(instance, db_key, db_name)
         try:
             conn = self.connections[conn_key]['conn']
@@ -433,12 +429,12 @@ class SQLServer(AgentCheck):
         return conn.cursor()
 
     def get_sql_type(self, instance, counter_name):
-        '''
+        """
         Return the type of the performance counter so that we can report it to
         Datadog correctly
         If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
-        '''
+        """
         with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
             (sql_type,) = cursor.fetchone()
@@ -674,8 +670,7 @@ class SQLServer(AgentCheck):
 
 
 class SqlServerMetric(object):
-    '''General class for common methods, should never be instantiated directly
-    '''
+    """General class for common methods, should never be instantiated directly"""
 
     def __init__(self, connector, cfg_instance, base_name, report_function, column, logger):
         self.connector = connector
@@ -764,12 +759,12 @@ class SqlFractionMetric(SqlServerMetric):
             self.instances = [self.instance]
 
     def fetch_metric(self, cursor, results, tags):
-        '''
+        """
         Because we need to query the metrics by matching pairs, we can't query
         all of them together without having to perform some matching based on
         the name afterwards so instead we query instance by instance.
         We cache the list of instance so that we don't have to look it up every time
-        '''
+        """
         if self.sql_name not in results:
             self.log.warning("Couldn't find %s in results", self.sql_name)
             return

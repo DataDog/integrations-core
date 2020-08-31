@@ -2718,6 +2718,7 @@ def test_template_array():
         'proxy',
         'skip_proxy',
         'auth_type',
+        'use_legacy_auth_encoding',
         'username',
         'password',
         'ntlm_domain',

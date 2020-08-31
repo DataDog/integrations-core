@@ -35,6 +35,7 @@ class ServiceInstanceContent:
     perfManager: PerformanceManager
     eventManager: EventManager
     about: AboutInfo
+    customFieldsManager: CustomFieldsManager
 
 class ServiceInstance:
     """
@@ -92,6 +93,13 @@ class AboutInfo:
     version: str
     build: str
     fullName: str
+
+class CustomFieldsManager:
+    field: List[FieldDef]
+
+    class FieldDef:
+        key: int
+        name: str
 
 class VirtualMachine(ManagedEntity): ...
 class HostSystem(ManagedEntity): ...

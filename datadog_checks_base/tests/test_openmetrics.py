@@ -271,6 +271,29 @@ def test_submit_gauge_with_labels_and_hostname_override(
     )
 
 
+def test_submit_gauge_with_labels_and_hostname_override_empty_label(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    """ submitting metrics that contain empty label_to_hostname """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
+    )
+    ref_gauge.add_metric(['my_1st_label_value', ''], 54927360.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['label_to_hostname_suffix'] = '-cluster-name'
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=['my_1st_label:my_1st_label_value', 'node:'],
+        hostname="",
+        count=1,
+    )
+
+
 def test_submit_gauge_with_labels_and_hostname_already_overridden(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
@@ -521,7 +544,7 @@ def test_submit_summary(
 
     if sum_monotonic_gauge:
         aggregator.assert_metric(
-            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT,
+            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
         )
 
     aggregator.assert_all_metrics_covered()
@@ -534,18 +557,10 @@ def assert_histogram_counts(aggregator, count_type, suffix=False):
     if suffix:
         metric_name += '.total'
 
-    aggregator.assert_metric(
-        metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
-    )
+    aggregator.assert_metric(metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type)
 
 
 @pytest.mark.parametrize(

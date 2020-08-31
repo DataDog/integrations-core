@@ -78,6 +78,16 @@ ddev validate agent-reqs
 
 This validates that each integration version is in sync with the [`requirements-agent-release.txt`](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt) file. It is uncommon for this to fail because the release process is automated.
 
+### Codeowners
+
+```
+ddev validate codeowners
+```
+
+This validates that every integration has a [codeowner entry](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners). If you fail this validation, add an entry in the [codewners file](https://github.com/DataDog/integrations-extras/blob/master/.github/CODEOWNERS) corresponding to any newly added integration. 
+
+Note: This validation command is only run when contributing to [integrations-extras](https://github.com/DataDog/integrations-extras)
+
 ### Default configuration files
 
 ```
@@ -128,6 +138,14 @@ ddev validate metadata
 ```
 
 This checks that every `metadata.csv` file is formatted correctly. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file) for more detailed constraints. 
+
+### README files
+
+```
+ddev validate readmes
+```
+
+This ensures that every integration's README.md file is formatted correctly. The main purpose of this validation is to ensure that any image linked in the readme exists and that all images are located in an integration's `/image` directory.
 
 ### Saved views data
 

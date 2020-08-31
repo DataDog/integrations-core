@@ -1,0 +1,9 @@
+{
+	"acl_agent_token": "token",
+	"acl_datacenter": "dc1",
+	"acl_default_policy": "deny",
+	"acl_master_token": "token",
+	"telemetry": {
+        "prometheus_retention_time": "12h"
+    }
+}
