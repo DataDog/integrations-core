@@ -23,24 +23,17 @@ class MarkLogicApi(object):
         resp.raise_for_status()
         return resp.json()
 
-    def get_status_data(self, resource=None, name=None, group=None):
-        # type: (str, str, str) -> Dict[str, Any]
+    def get_status_data(self, resource=None):
+        # type: (str) -> Dict[str, Any]
         """
         Example url:
             - http://localhost:8002/manage/v2/hosts?view=status
-            - http://localhost:8002/manage/v2/hosts?view=status&format=json (cluster level)
-            - http://localhost:8002/manage/v2/forests/Security?view=status&format=json
-            - http://localhost:8002/manage/v2/databases/Extensions?view=status&format=json
-            - http://localhost:8002/manage/v2/hosts/2871b05b4bdc?view=status&format=json
+            - http://localhost:8002/manage/v2/forests?view=status&format=json
         """
         params = {'view': 'status'}
         route = ""
         if resource:
             route = "/" + resource
-        if name:
-            route += "/" + name
-        if group:
-            params['group-id'] = group
 
         return self.http_get(route, params)
 

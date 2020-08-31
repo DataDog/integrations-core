@@ -21,19 +21,19 @@ Using the API or the Admin interface, create a user for the Datadog Agent with a
 
 1. Create the Datadog user with a request like:
     ```shell
-    curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-admin"}}' http://localhost:8002/manage/v2/users
+    curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-admin"}}' http://<HOSTNAME>:8002/manage/v2/users
     ```
     Use the correct `<ADMIN_USER>` and `<ADMIN_PASSWORD>`, and replace `<USER>` and `<PASSWORD>` with what the Datadog Agent will use.
     Full documentation about the endpoint [here][4].
 
 2. Confirm the user was created with enough permissions with a request like:
     ```shell
-    curl -X GET --anyauth --user <USER>:<PASSWORD> -i http://localhost:8002/manage/v2
+    curl -X GET --anyauth --user <USER>:<PASSWORD> -i http://<HOSTNAME>:8002/manage/v2
     ```
 
 ##### Using the Admin interface
 
-1. Go to the QConsole with an admin account. By default it's at http://localhost:8000/qconsole.
+1. Go to the QConsole with an admin account. By default it's at http://<HOSTNAME>:8000/qconsole.
 
 2. Select `Security` as Database and `XQuery` as query type.
 
@@ -54,7 +54,7 @@ Using the API or the Admin interface, create a user for the Datadog Agent with a
     ```
     Full documentation about the query [here][5]
 
-4. Confirm the user was created with enough permissions using `<USER>` and `<PASSWORD>` to authenticate at http://localhost:8002 (default port).
+4. Confirm the user was created with enough permissions using `<USER>` and `<PASSWORD>` to authenticate at http://<HOSTNAME>:8002 (default port).
 
 ### Configuration
 

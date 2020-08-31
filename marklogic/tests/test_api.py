@@ -41,9 +41,9 @@ def test_get_status_data():
     assert http.url == 'http://localhost:8000/manage/v2/servers'
     assert http.params == {'view': 'status', 'format': 'json'}
 
-    assert api.get_status_data(resource='forests', name='myname', group='mygroup') == {'foo': 'bar'}
-    assert http.url == 'http://localhost:8000/manage/v2/forests/myname'
-    assert http.params == {'view': 'status', 'format': 'json', 'group-id': 'mygroup'}
+    assert api.get_status_data() == {'foo': 'bar'}
+    assert http.url == 'http://localhost:8000/manage/v2'
+    assert http.params == {'view': 'status', 'format': 'json'}
 
 
 def test_get_requests_data():
