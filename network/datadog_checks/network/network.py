@@ -274,8 +274,9 @@ class Network(AgentCheck):
             try:
                 get_subprocess_output("ss --help", env={"PROC_ROOT": proc_location})
                 return True
-            except OSError:
-                self.warning("Cannot collect connection state: currently with a custom /proc path: %s", proc_location)
+            except OSError as e:
+                self.warning("Cannot collect connection state: `ss` invocation failed: %s. "
+                             "Currently with a custom /proc path: %s", str(e), proc_location)
             return False
 
         return True
@@ -303,7 +304,8 @@ class Network(AgentCheck):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env={"PROC_ROOT": proc_location})
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log,
+                                                         env={"PROC_ROOT": net_proc_base_location})
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -315,15 +317,16 @@ class Network(AgentCheck):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env={"PROC_ROOT": proc_location})
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log,
+                                                         env={"PROC_ROOT": net_proc_base_location})
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
-            except OSError:
-                self.log.info("`ss` not found: using `netstat` as a fallback")
+            except OSError as e:
+                self.log.info("`ss` invocation failed: %s. Using `netstat` as a fallback", str(e))
                 output, _, _ = get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
                 lines = output.splitlines()
                 # Active Internet connections (w/o servers)
