@@ -116,3 +116,9 @@ class TailFile(object):
             # log but survive
             self._log.exception(e)
             raise StopIteration(e)
+
+        def close(self):
+            if self._f:
+                self._f.close()
+                self._f = None
+
