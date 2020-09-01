@@ -39,7 +39,7 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
 ## Best Practices
 
-![Mongo dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/ignite_dash.jpeg)
+![Ignite dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/ignite_dash.jpeg)
 
 1. When creating a new dashboard, select the Screenboard type.
 
