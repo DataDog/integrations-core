@@ -7,8 +7,24 @@ import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.docker import ComposeFileDown
+from datadog_checks.dev.structures import LazyFunction
+from datadog_checks.dev.subprocess import run_command
 
 from . import common
+
+
+class IoTEdgeDown(LazyFunction):
+    def __init__(self, compose_file):
+        self._compose_file_down = ComposeFileDown(compose_file)
+
+    def __call__(self):
+        # type: () -> int
+        result = self._compose_down()
+        # The device container spawns these containers by interacting with the Docker runtime,
+        # and they're not removed by the usual ComposeDown since they were not spawned via Docker Compose.
+        result |= run_command(['docker', 'stop', 'edgeHub', 'SimulatedTemperatureSensor'])
+        return result
 
 
 @pytest.fixture(scope='session')
@@ -19,13 +35,20 @@ def dd_environment(instance):
         CheckDockerLogs(compose_file, 'Starting Azure IoT Edge Security Daemon', wait=5),
         CheckDockerLogs(compose_file, 'Successfully started module edgeAgent', wait=5),
         CheckDockerLogs(compose_file, r'[mgmt] .* 200 OK', wait=5),  # Verify any connectivity issues.
+        CheckDockerLogs(compose_file, 'Successfully started module edgeHub', wait=5),
+        CheckDockerLogs(compose_file, 'Successfully started module SimulatedTemperatureSensor', wait=5),
     ]
 
     env_vars = {
-        "IOT_DEVICE_CONNSTR": common.IOT_DEVICE_CONNECTION_STRING,
+        "IOT_EDGE_LIBIOTHSM_STD_URL": common.IOT_EDGE_LIBIOTHSM_STD_URL,
+        "IOT_EDGE_IOTEDGE_URL": common.IOT_EDGE_IOTEDGE_URL,
+        "IOT_EDGE_AGENT_IMAGE": common.IOT_EDGE_AGENT_IMAGE,
+        "IOT_EDGE_DEVICE_CONNECTION_STRING": common.IOT_EDGE_DEVICE_CONNECTION_STRING,
     }
 
-    with docker_run(compose_file, conditions=conditions, env_vars=env_vars):
+    down = IoTEdgeDown(compose_file)
+
+    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, down=down):
         yield instance
 
 

@@ -2,19 +2,24 @@ version: "3"
 
 services:
   iot-edge-device:
-    build: ./device
+    build:
+      context: ./device
+      args:
+        - IOT_EDGE_LIBIOTHSM_STD_URL=${IOT_EDGE_LIBIOTHSM_STD_URL}
+        - IOT_EDGE_IOTEDGE_URL=${IOT_EDGE_IOTEDGE_URL}
     container_name: iot-edge-device
     hostname: edgehub
     ports:
-      - "9600:9600" # Prometheus endpoint.
       - "15580:15580" # Required for IoT Edge inter-container communications.
       - "15581:15581" # Required for IoT Edge inter-container communications.
     environment:
-      - IOT_DEVICE_CONNSTR=${IOT_DEVICE_CONNSTR}
+      - IOT_EDGE_AGENT_IMAGE=${IOT_EDGE_AGENT_IMAGE}
+      - IOT_EDGE_DEVICE_CONNECTION_STRING=${IOT_EDGE_DEVICE_CONNECTION_STRING}
+      - IOT_EDGE_NETWORK=compose_iot-edge-network  # Fully resolved network name.
     volumes:
-      - /var/run/docker.sock:/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - iot-edge-network
 
 networks:
-  iot-edge-network: {} # Must be in sync with the network listed in `rund.sh`.
+  iot-edge-network: {}

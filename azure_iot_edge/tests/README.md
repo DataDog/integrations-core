@@ -24,7 +24,6 @@ For example, to list the active IoT Edge modules:
 docker exec iot-edge-device iotedge -H "http://$(docker inspect iot-edge-device -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'):15580" list
 ```
 
-
 ## Simulated temperature sensor
 
 The `SimulatedTemperatureSensor` is enabled in the environment.
