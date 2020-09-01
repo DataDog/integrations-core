@@ -1,9 +1,9 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...utils import get_valid_integrations, get_eula_from_manifest
+from ...utils import get_eula_from_manifest, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
