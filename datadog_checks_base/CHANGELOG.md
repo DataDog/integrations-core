@@ -2,6 +2,7 @@
 
 ## 13.0.0 / 2020-09-01
 
+* [Fixed] Fix indentation of new "close" method in tailer. See [#7463](https://github.com/DataDog/integrations-core/pull/7463).
 * [Added] Add close method to tailer. See [#7461](https://github.com/DataDog/integrations-core/pull/7461).
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
 * [Added] Add function to parse RDS tags from the endpoint. See [#7353](https://github.com/DataDog/integrations-core/pull/7353).
