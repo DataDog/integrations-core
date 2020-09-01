@@ -35,7 +35,7 @@ class Config(object):
         ocsp_response_cache_filename = instance.get('ocsp_response_cache_filename')
         tags = instance.get('tags', [])
 
-        # min_collection_interval defaults to 30 minutes
+        # min_collection_interval defaults to 60 minutes
         min_collection = instance.get('min_collection_interval', 3600)
 
         metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)

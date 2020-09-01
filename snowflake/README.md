@@ -5,9 +5,11 @@
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
 This integration monitors credit, billing, and storage usage, query history, and more.
 
+**NOTE**: Metrics are collected via queries to Snowflake. Queries from the integration are billable by Snowflake.
+
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host.
 
 ### Installation
 
@@ -32,9 +34,6 @@ No additional installation is needed on your server.
 ### Metrics
 
 See [metadata.csv][6] for a list of metrics provided by this check.
-
-**NOTE**: Metrics are collected via queries to Snowflake. Queries from the integration are billable by Snowflake.
-
 
 ### Service Checks
 
