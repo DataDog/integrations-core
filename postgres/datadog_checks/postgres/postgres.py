@@ -69,7 +69,6 @@ class PostgreSql(AgentCheck):
             raw_version = get_raw_version(self.db)
             self._version = parse_version(raw_version)
             self.set_metadata('version', raw_version)
-            self.is_aurora = is_aurora(self.db)
         return self._version
 
     def _build_relations_config(self, yamlconfig):
@@ -415,6 +414,10 @@ class PostgreSql(AgentCheck):
             if self.config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
             self.log.debug("Running check against version %s", str(self.version))
+
+            if self.is_aurora is None:
+                self.is_aurora = is_aurora(self.db)
+
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
         except Exception as e:
