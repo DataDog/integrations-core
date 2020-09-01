@@ -48,12 +48,12 @@ files:
     - name: user
       description: The username to use if `server` or `query_monitoring_url` is behind basic auth.
       value:
-        default:
+        default: null
         example: Administrator
         type: string
     - name: password
       description: The password to use if `server` or `query_monitoring_url` is behind basic auth.
       value:
-        default:
+        default: null
         example: password
         type: string
