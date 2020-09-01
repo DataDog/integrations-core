@@ -11,8 +11,8 @@
 conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-core
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
-manifest.json         @DataDog/documentation @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
-assets/               @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+manifest.json         @DataDog/documentation @DataDog/agent-integrations
+assets/               @DataDog/agent-integrations
 
 
 # Container monitoring
