@@ -18,6 +18,7 @@ files:
         #tags.display_priority: 2
         #tags.value.example:
         #  - "dns-pod:%%host%%"
+        metrics.hidden: false
         metrics.value.example:
           - coredns_template_matches_total: template_matches_count
           - coredns_template_template_failures_total: template_templating_failures_count
