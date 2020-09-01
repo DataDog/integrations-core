@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict
 
+from datadog_checks.azure_iot_edge import AzureIotEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.azure_iot_edge import AzureIotEdgeCheck
 
 
 def test_check(aggregator, instance):

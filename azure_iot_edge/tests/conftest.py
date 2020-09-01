@@ -16,15 +16,17 @@ from . import common
 
 class IoTEdgeDown(LazyFunction):
     def __init__(self, compose_file):
+        # type: (str) -> None
         self._compose_file_down = ComposeFileDown(compose_file)
 
     def __call__(self):
-        # type: () -> int
-        result = self._compose_down()
+        # type: () -> None
         # The device container spawns these containers by interacting with the Docker runtime,
         # and they're not removed by the usual ComposeDown since they were not spawned via Docker Compose.
-        result |= run_command(['docker', 'stop', 'edgeHub', 'SimulatedTemperatureSensor'])
-        return result
+        # Stop them first so that networks are freed up and `docker-compose down` can remove them.
+        run_command(['docker', 'stop', 'edgeHub', 'SimulatedTemperatureSensor'], check=True)
+
+        self._compose_file_down()
 
 
 @pytest.fixture(scope='session')
@@ -54,4 +56,12 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return {}
+    return {
+        'edge_hub': {
+            'prometheus_url': 'http://localhost:9601/metrics',
+        },
+        'edge_agent': {
+            'prometheus_url': 'http://localhost:9602/metrics',
+        },
+        'tags': ['env:testing'],
+    }
