@@ -121,4 +121,3 @@ class TailFile(object):
             if self._f:
                 self._f.close()
                 self._f = None
-
