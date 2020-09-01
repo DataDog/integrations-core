@@ -18,13 +18,3 @@ instances:
     ## The server's url.
     #
   - server: http://%%host%%:8091
-
-    ## @param user - string - optional
-    ## The username to use if `server` or `query_monitoring_url` is behind basic auth.
-    #
-    # user: Administrator
-
-    ## @param password - string - optional
-    ## The password to use if `server` or `query_monitoring_url` is behind basic auth.
-    #
-    # password: password
