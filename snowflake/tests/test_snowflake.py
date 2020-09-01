@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from decimal import Decimal
 from typing import Any, Dict
 
@@ -190,3 +191,22 @@ def test_version_metadata(dd_run_check, instance, datadog_agent):
         dd_run_check(check)
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+def test_custom_queries(dd_run_check, aggregator, instance):
+    instance = copy.deepcopy(instance)
+    instance['custom_queries'] = [
+        {
+            'tags': ['test:snowflake'],
+            'query': 'SELECT COUNT(*) FROM query_history;',
+            'columns': [{'name': 'queries.total', 'type': 'gauge'}],
+        }
+    ]
+    expected_tags = EXPECTED_TAGS + ['warehouse:COMPUTE_WH', 'test:snowflake']
+
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=[(Decimal('4.333333')),]):
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = []
+        dd_run_check(check)
+    aggregator.assert_metric('snowflake.query.total', value=0, count=1, tags=expected_tags)
