@@ -96,7 +96,11 @@ An example subcategory is grouping reads and writes metrics.
 #### Notes
 Labels can also be used as memos to describe a section or metric.
 
-- Notes have the background color of gray.
+!!! important
+    The most top-left note should have the background color white and provide an overview of the integration and dashboard with links to relevant blog posts and documentation.
+    
+
+- Other notes for metric sections should have the background color of gray.
 - Text must be 14px, left alignment, and not bold.
 - Notes should have pointers enabled and directing which section the information is referring to.
 - Notes should provide explanations for certain behaviors that may be observed from the widgets.
