@@ -71,7 +71,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
 
     # Stored Procedure Create Statement
     # Note: the INSERT statement uses single quotes (') intentionally
-    # this caused the odd error: "Invalid column name 'sql.sp.testa'."
+    # Double-quotes caused the odd error: "Invalid column name 'sql.sp.testa'."
     # https://dba.stackexchange.com/a/219875
     sqlCreateSP = """\
     CREATE PROCEDURE {0} AS
