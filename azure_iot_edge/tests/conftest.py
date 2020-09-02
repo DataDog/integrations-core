@@ -40,7 +40,7 @@ class IoTEdgeDown(LazyFunction):
 
     def __call__(self):
         # type: () -> Any
-        run_command(['docker', 'stop', *self._stop_extra_containers], check=True)
+        run_command(['docker', 'stop'] + self._stop_extra_containers, check=True)
         return self._compose_file_down()
 
 
@@ -52,6 +52,7 @@ def edge_hub_endpoint_ready():
     except requests.HTTPError:
         return False
 
+    # Not all metrics are available right away, wait for one known such metric to be returned.
     return response.status_code == 200 and "edgehub_queue_length{" in response.text
 
 
@@ -63,6 +64,7 @@ def edge_agent_endpoint_ready():
     except requests.HTTPError:
         return False
 
+    # Not all metrics are available right away, wait for one known such metric to be returned.
     return response.status_code == 200 and "total_network_out_bytes{" in response.text
 
 

@@ -7,7 +7,6 @@ import pytest
 
 from datadog_checks.azure_iot_edge import AzureIotEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -39,9 +38,11 @@ def test_check(aggregator, instance):
         count=1,
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.EDGE_AGENT_PROMETHEUS_URL)],
     )
-    aggregator.assert_service_check(
-        'azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
-    )
+    # TODO
+    # aggregator.assert_service_check(
+    #     'azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
+    # )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    # TODO
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())

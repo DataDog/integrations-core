@@ -6,8 +6,8 @@ from typing import List
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.types import InstanceType
 
+from .metrics import EDGE_AGENT_METRICS, EDGE_HUB_METRICS
 from .types import Instance
-from .metrics import EDGE_HUB_METRICS, EDGE_AGENT_METRICS
 
 
 class Config(object):
