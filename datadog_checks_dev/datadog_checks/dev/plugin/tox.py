@@ -16,7 +16,7 @@ MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
-# == style/lint deps ==
+# Style deps:
 # We pin deps in order to make CI more stable/reliable.
 # We should upgrade style/lint deps manually on regularly basis.
 ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
