@@ -5,12 +5,14 @@ from typing import Any, Dict
 
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .constants import BASE_ENDPOINT
+
 
 class MarkLogicApi(object):
     def __init__(self, http, api_url):
         # type: (RequestsWrapper, str) -> None
         self._http = http
-        self._base_url = api_url + '/manage/v2'
+        self._base_url = api_url + BASE_ENDPOINT
 
     def http_get(self, route="", params=None):
         # type: (str, Dict[str, str]) -> Dict[str, Any]

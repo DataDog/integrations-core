@@ -1,15 +1,25 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Tuple
 
 from six import iteritems
 
 from .common import build_metric_to_submit, is_metric
 
 
-def parse_summary_storage_base_metrics(data, tags, get_location_forest=False):
-    #  type: (Dict[str, Any], List[str], Optional[bool]) -> Generator[Tuple, None, None]
+def parse_summary_storage_base_metrics(data, tags, get_location_forest=True):
+    # type: (Dict[str, Any], List[str], bool) -> Generator[Tuple, None, None]
+    return _parse_storage_metrics(data, tags, get_location_forest)
+
+
+def parse_per_resource_storage_metrics(data, tags, get_location_forest=False):
+    # type: (Dict[str, Any], List[str], bool) -> Generator[Tuple, None, None]
+    return _parse_storage_metrics(data, tags, get_location_forest)
+
+
+def _parse_storage_metrics(data, tags, get_location_forest):
+    # type: (Dict[str, Any], List[str], bool) -> Generator[Tuple, None, None]
     """
     Collect Base Storage Metrics
     """

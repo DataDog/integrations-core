@@ -7,16 +7,17 @@ from datadog_checks.base import AgentCheck
 
 from .api import MarkLogicApi
 from .config import Config
-from .constants import RESOURCE_METRICS_AVAILABLE, RESOURCE_TYPES
+from .constants import RESOURCE_METRICS_AVAILABLE, RESOURCE_TYPES, SERVICE_CHECK_RESOURCES
 from .parsers.health import parse_summary_health
-from .parsers.request import parse_summary_request_resource_metrics
+from .parsers.request import parse_per_resource_request_metrics
 from .parsers.resources import parse_resources
 from .parsers.status import (
     parse_per_resource_status_metrics,
     parse_summary_status_base_metrics,
     parse_summary_status_resource_metrics,
 )
-from .parsers.storage import parse_summary_storage_base_metrics
+from .parsers.storage import parse_per_resource_storage_metrics, parse_summary_storage_base_metrics
+from .utils import is_resource_included
 
 
 class MarklogicCheck(AgentCheck):
@@ -96,7 +97,7 @@ class MarklogicCheck(AgentCheck):
         Collect Base Storage Metrics
         """
         data = self.api.get_storage_data()
-        metrics = parse_summary_storage_base_metrics(data, self.config.tags, True)
+        metrics = parse_summary_storage_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
 
     def get_resources_to_monitor(self):
@@ -109,7 +110,7 @@ class MarklogicCheck(AgentCheck):
         }  # type: Dict[str, List[Any]]
 
         for res in self.resources:
-            if self._is_resource_included(res):
+            if is_resource_included(res, self.config):
                 filtered_resources[res['type']].append(res)
 
         self.log.debug('Filtered resources to monitor: %s', filtered_resources)
@@ -147,14 +148,14 @@ class MarklogicCheck(AgentCheck):
         # type: (str, str, str, List[str]) -> None
         """ Collect storage metrics of a specific resource """
         data = self.api.get_storage_data(resource=resource_type, name=name, group=group)
-        metrics = parse_summary_storage_base_metrics(data, tags)
+        metrics = parse_per_resource_storage_metrics(data, tags)
         self.submit_metrics(metrics)
 
     def _collect_resource_request_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
         """ Collect request metrics of a specific resource """
         data = self.api.get_requests_data(resource=resource_type, name=name, group=group)
-        metrics = parse_summary_request_resource_metrics(data, tags)
+        metrics = parse_per_resource_request_metrics(data, tags)
         self.submit_metrics(metrics)
 
     def submit_metrics(self, metrics):
@@ -188,7 +189,7 @@ class MarklogicCheck(AgentCheck):
 
             # If a resource doesn't appear in the health endpoint it means no problem was detected
             for res in self.resources:
-                if res['type'] == 'database' or res['type'] == 'forest':
+                if res['type'] in SERVICE_CHECK_RESOURCES:
                     service_check_name = '{}.health'.format(res['type'])
                     res_tags = self.config.tags + ['{}_name:{}'.format(res['type'], res['name'])]
                     res_detailed = health_report[res['type']].get(res['name'])
@@ -203,21 +204,9 @@ class MarklogicCheck(AgentCheck):
         except Exception as e:
             # Not enough permissions
             if data.get('code') == 'HEALTH-CLUSTER-ERROR':
-                self.log.error("The user needs `manage-admin` permission to monitor databases health.")
+                self.log.exception("The user needs `manage-admin` permission to monitor databases health.")
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.UNKNOWN, self.config.tags)
             # Couldn't access the health endpoint
             else:
-                self.log.error("Failed to monitor databases health: %s.", e)
+                self.log.exception("Failed to monitor databases health: %s.", e)
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
-
-    def _is_resource_included(self, resource):
-        # type: (Dict[str, str]) -> bool
-        # If the resource is in an include filter and not in an exclude filter, return True, otherwise return False.
-        for include_filter in self.config.resource_filters['included']:
-            if include_filter.match(resource['type'], resource['name'], resource['id'], resource.get('group')):
-                for exclude_filter in self.config.resource_filters['excluded']:
-                    if exclude_filter.match(resource['type'], resource['name'], resource['id'], resource.get('group')):
-                        return False
-                return True
-
-        return False

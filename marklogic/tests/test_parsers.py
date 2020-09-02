@@ -8,13 +8,13 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.marklogic.parsers.common import MarkLogicParserException, build_metric_to_submit
 from datadog_checks.marklogic.parsers.health import parse_summary_health
-from datadog_checks.marklogic.parsers.request import parse_summary_request_resource_metrics
+from datadog_checks.marklogic.parsers.request import _parse_request_metrics
 from datadog_checks.marklogic.parsers.resources import parse_resources
 from datadog_checks.marklogic.parsers.status import (
     parse_summary_status_base_metrics,
     parse_summary_status_resource_metrics,
 )
-from datadog_checks.marklogic.parsers.storage import parse_summary_storage_base_metrics
+from datadog_checks.marklogic.parsers.storage import _parse_storage_metrics
 
 from .common import read_fixture_file
 
@@ -39,7 +39,7 @@ def test_build_metric_to_submit():
         build_metric_to_submit('forests.stuff', {'unknown': 3})
 
 
-def test_parse_summary_storage_base_metrics():
+def test__parse_storage_metrics():
     # type: () -> None
     forests_storage_data = read_fixture_file('forests_storage.yaml')
 
@@ -212,7 +212,7 @@ def test_parse_summary_storage_base_metrics():
         ),
     ]
 
-    result = list(parse_summary_storage_base_metrics(forests_storage_data, ['foo:bar'], True))
+    result = list(_parse_storage_metrics(forests_storage_data, ['foo:bar'], True))
 
     assert sorted(result) == sorted(EXPECTED_RESULT)
 
@@ -384,7 +384,7 @@ def test_parse_summary_status_resource_metrics():
     assert sorted(result) == sorted(EXPECTED_RESULT)
 
 
-def test_parse_summary_request_resource_metrics():
+def test__parse_request_metrics():
     # type: () -> None
     summary_request_data = read_fixture_file('server_Admin_requests.yaml')
 
@@ -394,7 +394,7 @@ def test_parse_summary_request_resource_metrics():
         ('gauge', 'requests.update-count', 0, ['foo:bar']),
     ]
 
-    result = list(parse_summary_request_resource_metrics(summary_request_data, ['foo:bar']))
+    result = list(_parse_request_metrics(summary_request_data, ['foo:bar']))
 
     assert sorted(result) == sorted(EXPECTED_RESULT)
 

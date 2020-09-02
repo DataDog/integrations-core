@@ -25,18 +25,6 @@ def dd_environment():
     ):
         yield CHECK_CONFIG
 
-    # Cluster (works locally but not on CI)
-    # compose_file = os.path.join(HERE, 'compose', 'cluster/docker-compose.yml')
-    # with docker_run(
-    #     compose_file=compose_file,
-    #     conditions=[
-    #         CheckDockerLogs(compose_file, r'Detected quorum'),
-    #         WaitFor(setup_admin_user),
-    #         WaitFor(setup_datadog_user),
-    #     ],
-    # ):
-    #     yield CHECK_CONFIG
-
 
 def setup_admin_user():
     # type: () -> None

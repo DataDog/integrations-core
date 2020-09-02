@@ -17,7 +17,7 @@ def parse_summary_health(data):
     }  # type: Dict[str, Dict]
 
     for resource in raw_health_report:
-        # This integration sends service checks for databases and forests only
+        # This integration sends service checks for databases and forests only.
         res_type = resource['resource-type']
         res_name = resource['resource-name']
         if res_type == 'database' or res_type == 'forest':
@@ -26,7 +26,9 @@ def parse_summary_health(data):
                 resource['code'], resource.get('state', 'unknown'), resource.get('message', 'No message.')
             )
 
-            # A resource can have multiple health reports
+            # A resource can have multiple health reports.
+            # If a resource has 2 health report with different severity (e.g. one at 0 OK and the other at 1 WARNING)
+            # we keep the higher severity.
             if health_report[res_type].get(res_name):
                 health_report[res_type][res_name]['code'] = max(health_report[res_type][res_name]['code'], status_code)
                 health_report[res_type][res_name]['message'] += ' ' + message

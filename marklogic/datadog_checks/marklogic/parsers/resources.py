@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List
 
-from ..constants import RESOURCE_TYPES
+from ..constants import BASE_ENDPOINT, RESOURCE_TYPES
 
 
 def parse_resources(data):
@@ -17,7 +17,7 @@ def parse_resources(data):
                 'id': rel['idref'],
                 'type': RESOURCE_TYPES[resource_type]['singular'],
                 'name': rel['nameref'],
-                'uri': rel['uriref'][len('/manage/v2') :],
+                'uri': rel['uriref'][len(BASE_ENDPOINT) :],
             }
 
             if rel.get('qualifiers'):

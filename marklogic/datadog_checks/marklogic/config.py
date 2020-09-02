@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Pattern
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 
-from .constants import RESOURCE_TYPES
+from .constants import ALLOWED_RESOURCES_FOR_FILTERS
 
 
 class Config:
@@ -28,7 +28,7 @@ class Config:
 
             if f.get('pattern') is None or f.get('resource_type') is None:
                 raise ConfigurationError('A resource filter requires at least a pattern and a resource_type')
-            if f['resource_type'] not in ['database', 'forest', 'host', 'server']:
+            if f['resource_type'] not in ALLOWED_RESOURCES_FOR_FILTERS:
                 raise ConfigurationError('Unknown resource_type: {}'.format(f['resource_type']))
 
             regex = re.compile(f['pattern'])
@@ -45,13 +45,13 @@ class ResourceFilter:
 
     def __init__(self, resource_type, regex, is_included=True, group=None):
         # type: (str, Pattern, bool, Optional[str]) -> None
-        self.resource_type = RESOURCE_TYPES[resource_type]['singular']
+        self.resource_type = resource_type
         self.regex = regex
         self.is_included = is_included
         self.group = group
 
-    def match(self, resource_type, name, id, group=None):
-        # type: (str, str, str, Optional[str]) -> bool
+    def match(self, resource_type, name, group=None):
+        # type: (str, str, Optional[str]) -> bool
         if self.resource_type == resource_type and self.regex.match(name) and self.group == group:
             return True
         return False

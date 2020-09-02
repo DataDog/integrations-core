@@ -5,6 +5,10 @@ from typing import Dict
 
 from datadog_checks.base import AgentCheck
 
+ALLOWED_RESOURCES_FOR_FILTERS = ['database', 'forest', 'host', 'server']
+
+BASE_ENDPOINT = '/manage/v2'
+
 RESOURCE_TYPES = {
     'cluster': {'plural': None, 'singular': 'cluster'},
     'forest': {'plural': 'forests', 'singular': 'forest'},
@@ -48,3 +52,5 @@ STATE_HEALTH_MAPPER = {
     "maintenance": AgentCheck.WARNING,
     "critical": AgentCheck.CRITICAL,
 }
+
+SERVICE_CHECK_RESOURCES = ['database', 'forest']
