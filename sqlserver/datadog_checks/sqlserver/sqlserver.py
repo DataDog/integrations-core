@@ -250,7 +250,11 @@ class SQLServer(AgentCheck):
             row['table'] = table
             row['column'] = column
 
-            metrics_to_collect.append(self.typed_metric(instance, row, table, base_name, None, sql_type, column))
+            metrics_to_collect.append(
+                self.typed_metric(
+                    cfg_inst=row, table=table, base_name=None, user_type=None, sql_type=None, column=column
+                )
+            )
 
         # Load any custom metrics from conf.d/sqlserver.yaml
 
