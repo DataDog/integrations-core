@@ -21,8 +21,13 @@ class AzureIotEdgeCheck(AgentCheck):
 
     def check(self, _):
         # type: (dict) -> None
+        # Sync Agent-assigned check ID so that metrics of these sub-checks are reported as coming from this check.
+        self._edge_hub_check.check_id = self.check_id
+        self._edge_agent_check.check_id = self.check_id
+
         self._edge_hub_check.check(self._config.edge_hub_instance)
         self._edge_agent_check.check(self._config.edge_agent_instance)
+
         self._check_daemon_health()
 
     def _check_daemon_health(self):

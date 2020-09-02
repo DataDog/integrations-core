@@ -19,23 +19,28 @@ def test_check(aggregator, instance):
     check = AzureIotEdgeCheck('azure_iot_edge', {}, [instance])
     check.check(instance)
 
-    for metric, metric_type in common.METRICS:
+    for metric, metric_type in common.HUB_METRICS:
         aggregator.assert_metric(metric, metric_type=metric_type, count=1, tags=common.TAGS)
+
+    for metric, metric_type in common.MODULE_METRICS:
+        for module_name in common.MODULES:
+            tags = common.TAGS + ['module_name:{}'.format(module_name)]
+            aggregator.assert_metric(metric, metric_type=metric_type, count=1, tags=tags)
 
     aggregator.assert_service_check(
         'azure_iot_edge.edge_hub.prometheus.health',
         AzureIotEdgeCheck.OK,
         count=1,
-        tags=common.TAGS + ['endpoint:{}'.format(common.EDGE_HUB_PROMETHEUS_ENDPOINT)],
+        tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.EDGE_HUB_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
         'azure_iot_edge.edge_agent.prometheus.health',
         AzureIotEdgeCheck.OK,
         count=1,
-        tags=common.TAGS + ['endpoint:{}'.format(common.EDGE_AGENT_PROMETHEUS_ENDPOINT)],
+        tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.EDGE_AGENT_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
-        'azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK, count=1, tags=common.TAGS
+        'azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
     )
 
     aggregator.assert_all_metrics_covered()

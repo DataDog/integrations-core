@@ -5,9 +5,10 @@ import os
 from typing import Any
 
 import pytest
+import requests
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.docker import ComposeFileDown, ComposeFileUp
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.dev.subprocess import run_command
@@ -43,17 +44,39 @@ class IoTEdgeDown(LazyFunction):
         return self._compose_file_down()
 
 
+def edge_hub_endpoint_ready():
+    # type: () -> bool
+    try:
+        response = requests.get(common.EDGE_HUB_PROMETHEUS_URL)
+        response.raise_for_status()
+    except requests.HTTPError:
+        return False
+
+    return response.status_code == 200 and "edgehub_queue_length{" in response.text
+
+
+def edge_agent_endpoint_ready():
+    # type: () -> bool
+    try:
+        response = requests.get(common.EDGE_AGENT_PROMETHEUS_URL)
+        response.raise_for_status()
+    except requests.HTTPError:
+        return False
+
+    return response.status_code == 200 and "total_network_out_bytes{" in response.text
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
 
     conditions = [
-        CheckDockerLogs(compose_file, 'Starting Azure IoT Edge Security Daemon', wait=5),
-        CheckDockerLogs(compose_file, 'Successfully started module edgeAgent', wait=5),
         CheckDockerLogs(compose_file, r'[mgmt] .* 200 OK', wait=5),  # Verify any connectivity issues.
+        CheckDockerLogs(compose_file, 'Successfully started module edgeAgent', wait=5),
         CheckDockerLogs(compose_file, 'Successfully started module edgeHub', wait=5),
         CheckDockerLogs(compose_file, 'Successfully started module SimulatedTemperatureSensor', wait=5),
-        CheckEndpoints(['http://localhost:9601/metrics', 'http://localhost:9602/metrics']),
+        WaitFor(edge_hub_endpoint_ready),
+        WaitFor(edge_agent_endpoint_ready),
     ]
 
     env_vars = {
@@ -74,10 +97,10 @@ def dd_environment(instance):
 def instance():
     return {
         'edge_hub': {
-            'prometheus_url': common.EDGE_HUB_PROMETHEUS_ENDPOINT,
+            'prometheus_url': common.EDGE_HUB_PROMETHEUS_URL,
         },
         'edge_agent': {
-            'prometheus_url': common.EDGE_AGENT_PROMETHEUS_ENDPOINT,
+            'prometheus_url': common.EDGE_AGENT_PROMETHEUS_URL,
         },
-        'tags': common.TAGS,
+        'tags': common.CUSTOM_TAGS,
     }
