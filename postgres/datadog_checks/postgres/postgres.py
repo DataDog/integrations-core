@@ -41,7 +41,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
-        self.is_aurora = None
+        self._is_aurora = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -54,6 +54,7 @@ class PostgreSql(AgentCheck):
 
     def _clean_state(self):
         self._version = None
+        self._is_aurora = None
         self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
@@ -69,8 +70,13 @@ class PostgreSql(AgentCheck):
             raw_version = get_raw_version(self.db)
             self._version = parse_version(raw_version)
             self.set_metadata('version', raw_version)
-            self.is_aurora = is_aurora(self.db)
         return self._version
+
+    @property
+    def is_aurora(self):
+        if self._is_aurora is None:
+            self._is_aurora = is_aurora(self.db)
+        return self._is_aurora
 
     def _build_relations_config(self, yamlconfig):
         """Builds a dictionary from relations configuration while maintaining compatibility"""
