@@ -499,8 +499,16 @@ class SnmpCheck(AgentCheck):
 
         for column_tag in column_tags:
             raw_column_value = column_tag.column
+
             try:
-                column_value = results[raw_column_value][index]
+                new_index = ()
+                if column_tag.index_transform:
+                    for transform in column_tag.index_transform:
+                        start, end = transform
+                        new_index += index[start: end]
+                else:
+                    new_index = index
+                column_value = results[raw_column_value][new_index]
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
