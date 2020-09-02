@@ -14,6 +14,8 @@ from collections import defaultdict
 import psutil
 from six import PY3, iteritems, itervalues
 
+import distutils.spawn
+
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
@@ -271,13 +273,12 @@ class Network(AgentCheck):
 
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
-            try:
-                get_subprocess_output("ss --help", env={"PROC_ROOT": proc_location})
+            if distutils.spawn.find_executable("ss") is None:
+                self.warning("Cannot collect connection state: `ss` cannot be found and "
+                             "currently with a custom /proc path: %s", proc_location)
+                return False
+            else:
                 return True
-            except OSError as e:
-                self.warning("Cannot collect connection state: `ss` invocation failed: %s. "
-                             "Currently with a custom /proc path: %s", str(e), proc_location)
-            return False
 
         return True
 
@@ -296,6 +297,8 @@ class Network(AgentCheck):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
+                ss_env = {"PROC_ROOT": net_proc_base_location}
+
                 metrics = self._get_metrics()
                 for ip_version in ['4', '6']:
                     # Call `ss` for each IP version because there's no built-in way of distinguishing
@@ -305,7 +308,7 @@ class Network(AgentCheck):
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
                     output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log,
-                                                         env={"PROC_ROOT": net_proc_base_location})
+                                                         env=ss_env)
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -318,7 +321,7 @@ class Network(AgentCheck):
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
                     output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log,
-                                                         env={"PROC_ROOT": net_proc_base_location})
+                                                         env=ss_env)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
