@@ -87,8 +87,7 @@ class SQLConnectionError(Exception):
 class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
-    # FIXME: 6.x, set default to 5s (like every check)
-    DEFAULT_COMMAND_TIMEOUT = 30
+    DEFAULT_COMMAND_TIMEOUT = 5
     DEFAULT_DATABASE = 'master'
     DEFAULT_DRIVER = 'SQL Server'
     DEFAULT_DB_KEY = 'database'
@@ -167,8 +166,8 @@ class SQLServer(AgentCheck):
                     # yes we do. Keep trying
                     self.log.error("Database %s does not exist. Fix issue and restart agent", context)
 
-        except SQLConnectionError:
-            self.log.exception("Skipping SQL Server instance")
+        except SQLConnectionError as e:
+            self.log.exception("Error connecting to database: %s", e)
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
 
@@ -179,7 +178,7 @@ class SQLServer(AgentCheck):
         This allows the same config to be installed on many servers but fail gracefully
         """
 
-        dsn, host, username, password, database, driver = self._get_access_info(self.instance, self.DEFAULT_DB_KEY)
+        dsn, host, username, password, database, driver = self._get_access_info(self.DEFAULT_DB_KEY)
         context = "{} - {}".format(host, database)
         if self.existing_databases is None:
             cursor = self.get_cursor(None, self.DEFAULT_DATABASE)
