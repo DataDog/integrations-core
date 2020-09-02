@@ -71,10 +71,10 @@ instances:
     #
     # connection_string: <CONNECTION_STRING>
 
-    ## @param command_timeout - integer - optional - default: 30
+    ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 30
+    # command_timeout: 5
 
     ## @param stored_procedure - string - optional
     ## Get metrics from custom proc in MyDB but only if the database is writable

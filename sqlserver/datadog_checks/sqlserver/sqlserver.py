@@ -13,7 +13,7 @@ from contextlib import contextmanager
 
 from six import raise_from
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 
 from .utils import set_default_driver_conf
@@ -164,7 +164,10 @@ class SQLServer(AgentCheck):
                     self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
                 else:
                     # yes we do. Keep trying
-                    self.log.error("Database %s does not exist. Fix issue and restart agent", context)
+                    msg = "Database %s does not exist. Please resolve invalid database and restart agent".format(
+                        context
+                    )
+                    raise ConfigurationError(msg)
 
         except SQLConnectionError as e:
             self.log.exception("Error connecting to database: %s", e)
