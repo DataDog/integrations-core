@@ -39,7 +39,7 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
 ## Best Practices
 
-![Mongo dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/mongo_dashboard.png)
+![Ignite dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/ignite_dash.jpeg)
 
 1. When creating a new dashboard, select the Screenboard type.
 
@@ -57,7 +57,8 @@ Important metrics that are key to the performance and overview of the integratio
 1. Ensure good design by keeping labels and widgets aligned with consistent spacing and reasonable size. 
 
 !!! tip
-    Use [`TV Mode`](https://docs.datadoghq.com/dashboards/screenboards/#tv-mode) to ensure that the whole dashboard fit on your horizontal screen.
+    Use [`TV Mode`](https://docs.datadoghq.com/dashboards/screenboards/#tv-mode) to ensure that the whole dashboard fits your screen.
+    As more content is added, the recommended view of preset dashboards is vertical.
 
 ### Logos
 
@@ -72,16 +73,14 @@ Labels are created from the [Notes & Links](https://docs.datadoghq.com/dashboard
 #### Metric Categories
 Labels are used to divide the screenboard in visually comprehensive sections. 
 
-- Category labels have gray backgrounds to contrast with the board and widgets.
-- Text is 18px and horizontally centered. 
+- Category labels have `vivid blue` backgrounds to contrast with the board and widgets.
+- Text size is heading level 1 `#` and horizontally centered. 
 
     !!! important
         Do not use bold or all capitalized letters because it can make the dashboard harder to read.
+         _See the labels `Job Summary` and `Page Summary` in the Ignite dashboard example._
 
 - Horizontal labels should be kept above the graphs and their width should be the length of the entire section. 
-
-- For vertical labels, keep the label to the left of the section and its length should be the height the graphs. 
-Enable a pointer to properly convey the direction of the section. 
 
 - If there is a corresponding Datadog blog post, category names should be linked to the relevant section of the article.
 
@@ -90,14 +89,21 @@ With large sections of metric widgets, use subcategory labels to provide additio
 An example subcategory is grouping reads and writes metrics.
 
 - Subcategory labels have blue backgrounds.
-- Text is 16px and horizontally centered.
+- Text size is heading level 1 and horizontally centered.
+- A brief description of the subcategory should have the font size 18px. _See labels `Memory` or `Cache` in the Ignite dashboard example above._
 - Subcategory labels have the same rules as [metric category labels](./dashboards.md#metric-categories).
 
 #### Notes
 Labels can also be used as memos to describe a section or metric.
 
-- Notes have the background color of yellow.
+!!! important
+    The most top-left note should have the background color white and provide an overview of the integration and dashboard with links to relevant blog posts and documentation.
+    
+
+- Other notes for metric sections should have the background color of gray.
 - Text must be 14px, left alignment, and not bold.
+- Notes should have pointers enabled and directing which section the information is referring to.
+- Notes should provide explanations for certain behaviors that may be observed from the widgets.
 
 #### Other technologies
 Some integrations are closely related to other technologies. 
