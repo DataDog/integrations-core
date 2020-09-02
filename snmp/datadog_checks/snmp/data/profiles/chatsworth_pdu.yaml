@@ -575,7 +575,6 @@ metrics:
           name: cpiPduName
         table: cpiPduTable
         index_transform: "1:8"
-        MIB: CPI-UNITY-MIB
         tag: pdu_name
 
   - # Redefine the table to force the type on cpiPduBranchEnergy
@@ -598,7 +597,6 @@ metrics:
           name: cpiPduName
         table: cpiPduTable
         index_transform: "1:8"
-        MIB: CPI-UNITY-MIB
         tag: pdu_name
 
   ### Outlet
