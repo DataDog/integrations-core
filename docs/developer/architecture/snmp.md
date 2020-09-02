@@ -189,7 +189,7 @@ helm install datadog-monitoring --set datadog.apiKey=<YOUR_API_KEY> -f cluster-a
                url: http://example.net
              - name: 'Check Example Site3'
                url: http://example.net
-         # Autodiscovery template needed for snmp_listener to work
+         # Autodiscovery template needed for `snmp_listener` to create instance configs
          snmp.yaml: |-
           cluster_check: true
           ad_identifiers:
