@@ -132,10 +132,10 @@ class PostgreSql(AgentCheck):
 
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
-            # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignore it.
+            # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
+            self._is_aurora = None
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
