@@ -186,7 +186,6 @@ class MarklogicCheck(AgentCheck):
                 'version',
                 version,
                 scheme='regex',
-                final_scheme='semver',
                 pattern=r'(?P<major>\d+)\.(?P<minor>\d+)\-(?P<patch>\d+)',
             )
         except Exception as e:

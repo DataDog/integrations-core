@@ -97,7 +97,7 @@ def test_metadata_integration(aggregator, datadog_agent):
 
     parsed_version = version.parse(MARKLOGIC_VERSION)
     version_metadata = {
-        'version.scheme': 'semver',
+        'version.scheme': 'marklogic',
         'version.major': str(parsed_version.major),
         'version.minor': str(parsed_version.minor),
         'version.patch': str(parsed_version.post),
