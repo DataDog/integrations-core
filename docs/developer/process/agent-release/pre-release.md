@@ -21,7 +21,7 @@ Ensure that you have configured the following:
 
 ## Before Freeze
 
-1. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (if possible) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
+1. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
 
 ## Freeze
 
