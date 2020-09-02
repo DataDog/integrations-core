@@ -106,7 +106,7 @@ snmp_listener:
 
 ### Cluster Agent Support
 
-For Kubernetes environments, the [Cluster Agent](https://docs.datadoghq.com/agent/cluster_agent/) can be configured to use the SNMP Agent auto-discovery (aka snmp listener) logic as a source of [Cluster checks](https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/).
+For Kubernetes environments, the [Cluster Agent](https://docs.datadoghq.com/agent/cluster_agent/) can be configured to use the SNMP Agent auto-discovery (uses snmp listener) logic as a source of [Cluster checks](https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/).
 
 ![](../../assets/images/snmp-architecture-cluster-agent.png)
 
