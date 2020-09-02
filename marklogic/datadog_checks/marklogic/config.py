@@ -17,6 +17,7 @@ class Config:
         if self.url == '':
             raise ConfigurationError("url is a required configuration.")
         self.tags = instance.get('tags', [])
+        self.enable_health_service_checks = _is_affirmative(instance.get('enable_health_service_checks', False))
         self.resource_filters = self.build_resource_filters(instance.get('resource_filters', []))
 
     @staticmethod

@@ -12,7 +12,7 @@
             "host"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is enabled to reach the health endpoint and `UNKNOWN` if the Datadog Agent user does not have enough permissions. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is enabled to reach the query endpoint. Returns `OK` otherwise."
     },
     {
         "agent_version": "7.23.0",

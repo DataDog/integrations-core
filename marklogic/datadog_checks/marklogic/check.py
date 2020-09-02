@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple
 
+from requests.exceptions import ConnectionError, HTTPError
+
 from datadog_checks.base import AgentCheck
 
 from .api import MarkLogicApi
@@ -49,7 +51,16 @@ class MarklogicCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        raw_resources = self.api.get_resources()
+        try:
+            raw_resources = self.api.get_resources()
+        except (HTTPError, ConnectionError) as e:
+            self.warning(
+                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
+                self.config.url,
+                e,
+            )
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
+
         self.resources = parse_resources(raw_resources)
         self.resources_to_monitor = self.get_resources_to_monitor()
 
@@ -59,7 +70,9 @@ class MarklogicCheck(AgentCheck):
             except Exception:
                 self.log.exception("Collector %s failed while collecting metrics", collector.__name__)
 
-        self.submit_service_checks()
+        if self.config.enable_health_service_checks:
+            self.submit_health_service_checks()
+        self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
 
     def collect_summary_status_resource_metrics(self):
         # type: () -> None
@@ -179,7 +192,7 @@ class MarklogicCheck(AgentCheck):
         except Exception as e:
             self.log.warning('Error collecting MarkLogic version: %s', str(e))
 
-    def submit_service_checks(self):
+    def submit_health_service_checks(self):
         # type: () -> None
         data = {}
         try:
@@ -200,13 +213,10 @@ class MarklogicCheck(AgentCheck):
                     else:
                         self.service_check(service_check_name, self.OK, res_tags)
 
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
         except Exception as e:
             # Not enough permissions
             if data.get('code') == 'HEALTH-CLUSTER-ERROR':
-                self.log.exception("The user needs `manage-admin` permission to monitor databases health.")
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.UNKNOWN, self.config.tags)
+                self.log.warning("The user needs `manage-admin` permission to monitor databases health.")
             # Couldn't access the health endpoint
             else:
                 self.log.exception("Failed to monitor databases health: %s.", e)
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)

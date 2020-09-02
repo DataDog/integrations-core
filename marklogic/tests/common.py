@@ -22,6 +22,7 @@ INSTANCE = {
     'url': API_URL,
     'username': USERNAME,
     'password': PASSWORD,
+    'enable_health_service_checks': True,
     'auth_type': 'digest',
     'tags': ['foo:bar'],
 }
@@ -31,6 +32,7 @@ INSTANCE_FILTERS = {
     'username': USERNAME,
     'password': PASSWORD,
     'auth_type': 'digest',
+    'enable_health_service_checks': True,
     'resource_filters': [
         {'resource_type': 'forest', 'pattern': '^S[a-z]*'},  # Match Security and Schemas
         {'resource_type': 'forest', 'pattern': '^Sch*', 'include': False},  # Unmatch Schemas

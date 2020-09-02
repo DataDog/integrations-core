@@ -18,6 +18,13 @@ instances:
     #
   - url: http://localhost:8002/
 
+    ## @param enable_health_service_checks - boolean - optional - default: false
+    ## If `true`, the integration query the `/manage/v2?view=health` and submit the databases and forests health as 
+    ## `marklogic.database.health` and `marklogic.forests.health` service checks.
+    ## In order to send the service checks successfuly, the MarkLogic user should have `manage-admin` permission.
+    #
+    # enable_health_service_checks: false
+
     ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of two to four parameters.
     ## 'resource_type' is one of forest/database/host/server on which to apply the filter (required)

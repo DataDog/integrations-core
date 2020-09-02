@@ -133,7 +133,7 @@ def test_e2e(dd_agent_check):
     aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=20)
 
 
-def test_submit_service_checks(aggregator, caplog):
+def test_submit_health_service_checks(aggregator, caplog):
     # type: (AggregatorStub, Any) -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE])
 
@@ -159,7 +159,7 @@ def test_submit_service_checks(aggregator, caplog):
 
     # If there is no error
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value=health_mocked_data):
-        check.submit_service_checks()
+        check.submit_health_service_checks()
 
         aggregator.assert_service_check(
             'marklogic.database.health',
@@ -185,7 +185,6 @@ def test_submit_service_checks(aggregator, caplog):
             message=None,
             count=1,
         )
-        aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
 
     aggregator.reset()
     caplog.clear()
@@ -194,9 +193,8 @@ def test_submit_service_checks(aggregator, caplog):
     with mock.patch(
         'datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value={'code': 'HEALTH-CLUSTER-ERROR'}
     ):
-        check.submit_service_checks()
+        check.submit_health_service_checks()
 
-        aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.UNKNOWN, count=1)
         assert "The user needs `manage-admin` permission to monitor databases health." in caplog.text
 
     aggregator.reset()
@@ -204,7 +202,6 @@ def test_submit_service_checks(aggregator, caplog):
 
     # If MarkLogic can't be reached
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', side_effect=Exception("exception")):
-        check.submit_service_checks()
+        check.submit_health_service_checks()
 
-        aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, count=1)
         assert "Failed to monitor databases health" in caplog.text
