@@ -15,11 +15,12 @@ services:
     environment:
       - IOT_EDGE_AGENT_IMAGE=${IOT_EDGE_AGENT_IMAGE}
       - IOT_EDGE_DEVICE_CONNECTION_STRING=${IOT_EDGE_DEVICE_CONNECTION_STRING}
-      - IOT_EDGE_NETWORK=compose_iot-edge-network  # Fully resolved network name.
+      - IOT_EDGE_NETWORK=iot-edge-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - iot-edge-network
 
 networks:
-  iot-edge-network: {}
+  iot-edge-network:
+    external: true
