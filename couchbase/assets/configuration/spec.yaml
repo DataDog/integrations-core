@@ -1,0 +1,47 @@
+name: Couchbase
+files:
+- name: couchbase.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
+  - template: instances
+    options:
+    - name: server
+      description: The server's url.
+      required: true
+      value:
+        example: http://localhost:8091
+        type: string
+    - name: query_monitoring_url
+      description: |
+        Url to get query monitoring stats, available since couchbase 4.5.
+        See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
+      value:
+        example: http://localhost:8093
+        type: string
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /opt/couchbase/var/lib/couchbase/logs/*.log
+      source: couchbase
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+        - couchbase
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: server
+      description: The server's url.
+      required: true
+      value:
+        example: http://%%host%%:8091
+        type: string
