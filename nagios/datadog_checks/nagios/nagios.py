@@ -189,7 +189,14 @@ class NagiosCheck(AgentCheck):
         if not instance_key or instance_key not in self.nagios_tails:
             raise Exception('No Nagios configuration file specified')
         for tailer in self.nagios_tails[instance_key]:
-            tailer.check()
+            try:
+                tailer.check()
+            except (RuntimeError, StopIteration) as e:
+                self.log.exception(e)
+                self.warning(
+                    "Can't tail %s file, will retry from the end of file on the next check run.", tailer.log_path
+                )
+                tailer.reset()
 
 
 class NagiosTailer(object):
@@ -206,7 +213,7 @@ class NagiosTailer(object):
         self._gen = None
         next(self.gen)
 
-    def _reset(self):
+    def reset(self):
         self._tailer.close()
         self._tailer = TailFile(self.log, self.log_path, self._parse_line_with_counter)
         self._gen = None
@@ -227,16 +234,9 @@ class NagiosTailer(object):
     def check(self):
         self._line_parsed = 0
         # read until the end of file
-        try:
-            self.log.debug("Start nagios check for file %s", self.log_path)
-            next(self.gen)
-            self.log.debug("Done nagios check for file %s (parsed %s line(s))", self.log_path, self._line_parsed)
-        except (RuntimeError, StopIteration) as e:
-            self.log.exception(e)
-            self.log.warning(
-                "Can't tail %s file, will retry from the end of file on the next check run.", self.log_path
-            )
-            self._reset()
+        self.log.debug("Start nagios check for file %s", self.log_path)
+        next(self.gen)
+        self.log.debug("Done nagios check for file %s (parsed %s line(s))", self.log_path, self._line_parsed)
 
 
 class NagiosEventLogTailer(NagiosTailer):
