@@ -74,7 +74,7 @@ For this reason, auto-discovery was eventually implemented in the Agent as a pro
 
 Agent auto-discovery uses [GoSNMP](https://github.com/soniah/gosnmp) to get the `sysObjectID` of devices in the network.
 
-### Approach
+### Standalone Agent
 
 Agent auto-discovery implements the same logic than the Python auto-discovery, but as a service listener in the Agent Go package.
 
@@ -108,13 +108,24 @@ snmp_listener:
 
 For Kubernetes environments, the [Cluster Agent](https://docs.datadoghq.com/agent/cluster_agent/) can be configured to use the SNMP Agent auto-discovery (aka snmp listener) logic as a source of [Cluster checks](https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/).
 
+![](../../assets/images/snmp-architecture-cluster-agent.png)
+
+The Datadog Cluster Agent (DCA) uses the `snmp_listener` config (Agent auto-discovery) to listen for IP ranges, then schedule snmp check instances to be run by one or more normal Datadog Agents.
+
+Agent auto-discovery combined with Cluster Agent is very scalable, it can be used to monitor a large number of snmp devices.
+
 #### Example Cluster Agent setup with SNMP Agent auto-discovery using Datadog helm-chart
+
+First you need to [add Datadog Helm repository](https://github.com/DataDog/helm-charts).
+
+Then run:
 
 ```bash
 helm install datadog-monitoring --set datadog.apiKey=<YOUR_API_KEY> -f cluster-agent-values.yaml datadog/datadog
 ```
 
-??? Example cluster-agent-values.yaml
+??? example "Example cluster-agent-values.yaml"
+
     ```yaml
     datadog:
       ## @param apiKey - string - required
