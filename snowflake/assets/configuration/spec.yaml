@@ -26,6 +26,8 @@ files:
         required: true
         description: |
           Name of your account (provided by Snowflake), including the platform and region if applicable.
+          For more information on Snowflake account names,
+          see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
         value:
           type: string
           example: <ACCOUNT>
@@ -61,17 +63,6 @@ files:
         value:
           type: string
           example: <WAREHOUSE>
-      - name: passcode_in_password
-        description: |
-          Enable if the Multi-Factor Authentication passcode is embedded in the login password.
-        value:
-          type: boolean
-          example: false
-      - name: passcode
-        description: The passcode provided by Duo when using MFA for login.
-        value:
-          type: string
-          example: <PASSCODE>
       - name: client_prefetch_threads
         description: |
           The number of threads used to download the results sets. Increasing the value improves fetch
@@ -87,7 +78,7 @@ files:
           example: 60
       - name: ocsp_response_cache_filename
         description: |
-          URI for the OCSP response cache file. By default, the OCSP response cache file is created in the cache directory:
+          Path for the OCSP response cache file. By default, the file is created in the cache directory:
             Linux   - ~/.cache/snowflake/ocsp_response_cache
             macOS   - ~/Library/Caches/Snowflake/ocsp_response_cache
             Windows - %USERPROFILE%\AppData\Local\Snowflake\Caches\ocsp_response_cache
@@ -162,15 +153,14 @@ files:
                   type: gauge
               tags:
                 - test:snowflake
-      - template: instances/tags
-      - template: instances/service
-      - template: instances/global
+      - template: instances/default
         overrides:
           min_collection_interval.description: |
             This changes the collection interval of the check. For more information, see:
             https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
 
-            NOTE: The Snowflake ACCOUNT_USAGE schema views do not update in frequently.
+            NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
+            so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
           min_collection_interval.default: 3600
           min_collection_interval.value.example: 3600
 
