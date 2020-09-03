@@ -447,8 +447,14 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     index_transform = []
     raw_index_transform = metric_tag.get('index_transform')
     if raw_index_transform:
-        start, end = raw_index_transform.split(':')
-        index_transform.append((int(start), int(end)))
+        transform_rules = raw_index_transform.split(',')
+        for rule in transform_rules:
+            start, end = rule.split(':')
+            try:
+                start, end = int(start), int(end)
+            except ValueError as e:
+                raise ConfigurationError('Invalid transform rule `{}`: {}'.format(raw_index_transform, e))
+            index_transform.append((start, end))
 
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
