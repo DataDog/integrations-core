@@ -81,7 +81,7 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 30
+        example: 5
     - name: stored_procedure
       description: |
         Get metrics from custom proc in MyDB but only if the database is writable

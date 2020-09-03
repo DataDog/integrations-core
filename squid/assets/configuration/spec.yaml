@@ -1,0 +1,36 @@
+name: Squid
+
+files:
+  - name: squid.yaml
+    options:
+    - template: init_config
+      options:
+        - template: init_config/http
+        - template: init_config/default
+    - template: instances
+      options:
+        - name: name
+          required: true
+          description: Name of your squid instance.
+          value:
+            type: string
+        - name: host
+          description: The hostname or ip address of the squid server.
+          value:
+            example: localhost
+            type: string
+        - name: port
+          description: The port where the squid server is listening.
+          value:
+            example: 3128
+            type: integer
+        - template: instances/default
+        - template: instances/http
+    - template: logs
+      example:
+      - type: file
+        path: /var/log/squid/cache.log
+        source: squid
+      - type: file
+        path: /var/log/squid/access.log
+        source: squid

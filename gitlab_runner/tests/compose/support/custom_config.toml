@@ -1,0 +1,7 @@
+concurrent = 1
+check_interval = 0
+log_format="json"
+
+
+[session_server]
+  session_timeout = 1800
