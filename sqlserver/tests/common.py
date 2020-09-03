@@ -1,4 +1,5 @@
 # (C) Datadog, Inc. 2018-present
+
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -29,7 +30,9 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
-EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
+EXPECTED_METRICS = (
+    [m[0] for m in SQLServer.PERF_METRICS] + [m[0] for m in SQLServer.TASK_SCHEDULER_METRICS] + CUSTOM_METRICS
+)
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -38,6 +41,7 @@ INSTANCE_DOCKER = {
     'username': 'sa',
     'password': 'Password123',
     'tags': ['optional:tag1'],
+    'include_task_scheduler_metrics': True,
 }
 
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
@@ -49,6 +53,7 @@ INSTANCE_SQL2017 = {
     'password': 'Password12!',
     'connector': 'odbc',
     'driver': '{ODBC Driver 17 for SQL Server}',
+    'include_task_scheduler_metrics': True,
 }
 
 INIT_CONFIG = {
