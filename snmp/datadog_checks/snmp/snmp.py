@@ -508,7 +508,7 @@ class SnmpCheck(AgentCheck):
             try:
                 column_value = results[raw_column_value][new_index]
             except KeyError:
-                self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
+                self.log.warning('Column `%s not present in the table, skipping this tag. index=%s', raw_column_value, new_index)
                 continue
             if reply_invalid(column_value):
                 self.log.warning("Can't deduct tag from column %s", column_tag.column)
