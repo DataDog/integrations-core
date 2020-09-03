@@ -449,9 +449,9 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     if raw_index_transform:
         transform_rules = raw_index_transform.split(',')
         for rule in transform_rules:
-            start, end = rule.split(':')
             try:
-                start, end = int(start), int(end)
+                # ValueError handle issue cast to int and too many values to unpack
+                start, end = [int(i) for i in rule.split(':')]
             except ValueError as e:
                 raise ConfigurationError('Invalid transform rule `{}`: {}'.format(raw_index_transform, e))
             index_transform.append((start, end))
