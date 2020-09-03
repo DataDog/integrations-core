@@ -502,13 +502,7 @@ class SnmpCheck(AgentCheck):
             raw_column_value = column_tag.column
 
             if column_tag.index_transform:
-                try:
-                    new_index = transform_index(index, column_tag.index_transform)
-                except KeyError:
-                    self.log.warning(
-                        'Cannot transform %s with following index_transform rules', index, column_tag.index_transform
-                    )
-                    continue
+                new_index = transform_index(index, column_tag.index_transform)
             else:
                 new_index = index
             try:
