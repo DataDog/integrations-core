@@ -501,8 +501,8 @@ class SnmpCheck(AgentCheck):
         for column_tag in column_tags:
             raw_column_value = column_tag.column
 
-            if column_tag.index_transform:
-                new_index = transform_index(index, column_tag.index_transform)
+            if column_tag.index_transform_rules:
+                new_index = transform_index(index, column_tag.index_transform_rules)
             else:
                 new_index = index
             try:

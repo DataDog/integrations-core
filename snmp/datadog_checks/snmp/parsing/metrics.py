@@ -345,7 +345,8 @@ def merge_table_batches(target, source):
 
 IndexTag = NamedTuple('IndexTag', [('parsed_metric_tag', ParsedMetricTag), ('index', int)])
 ColumnTag = NamedTuple(
-    'ColumnTag', [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_transform', List[Tuple[int, int]])]
+    'ColumnTag',
+    [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_transform_rules', List[Tuple[int, int]])],
 )
 
 ParsedColumnMetricTag = NamedTuple(
@@ -444,7 +445,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
 
     batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
 
-    index_transform = []
+    index_transform_rules = []
     raw_index_transform = metric_tag.get('index_transform')
     if raw_index_transform:
         transform_rules = raw_index_transform.split(',')
@@ -454,7 +455,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
                 start, end = [int(i) for i in rule.split(':')]
             except ValueError as e:
                 raise ConfigurationError('Invalid transform rule `{}`: {}'.format(raw_index_transform, e))
-            index_transform.append((start, end))
+            index_transform_rules.append((start, end))
 
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
@@ -462,7 +463,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
             ColumnTag(
                 parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)),
                 column=parsed_column.name,
-                index_transform=index_transform,
+                index_transform_rules=index_transform_rules,
             )
         ],
         table_batches=batches,
