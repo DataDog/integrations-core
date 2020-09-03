@@ -95,7 +95,7 @@ class SQLServer(AgentCheck):
     DEFAULT_DB_KEY = 'database'
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
-    METRICS = [
+    PERF_METRICS = [
         ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
         ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
         ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
@@ -108,7 +108,7 @@ class SQLServer(AgentCheck):
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
     ]
 
-    ADDITIONAL = [
+    TASK_SCHEDULER_METRICS = [
         ('sqlserver.scheduler.current_tasks_count', DM_OS_SCHEDULERS, 'current_tasks_count'),
         ('sqlserver.scheduler.current_workers_count', DM_OS_SCHEDULERS, 'current_workers_count'),
         ('sqlserver.scheduler.active_workers_count', DM_OS_SCHEDULERS, 'active_workers_count'),
@@ -225,7 +225,7 @@ class SQLServer(AgentCheck):
 
         metrics_to_collect = []
 
-        for name, counter_name, instance_name in self.METRICS:
+        for name, counter_name, instance_name in self.PERF_METRICS:
             try:
                 sql_type, base_name = self.get_sql_type(counter_name)
                 cfg = {}
@@ -242,22 +242,21 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
-        # Load metrics from scheduler and task tables
+        # Load metrics from scheduler and task tables, if enabled
+        if self.instance.get('include_task_scheduler_metrics', False):
+            for name, table, column in self.TASK_SCHEDULER_METRICS:
+                row = {}
+                row['name'] = name
+                row['table'] = table
+                row['column'] = column
 
-        for name, table, column in self.ADDITIONAL:
-            row = {}
-            row['name'] = name
-            row['table'] = table
-            row['column'] = column
-
-            metrics_to_collect.append(
-                self.typed_metric(
-                    cfg_inst=row, table=table, base_name=None, user_type=None, sql_type=None, column=column
+                metrics_to_collect.append(
+                    self.typed_metric(
+                        cfg_inst=row, table=table, base_name=None, user_type=None, sql_type=None, column=column
+                    )
                 )
-            )
 
         # Load any custom metrics from conf.d/sqlserver.yaml
-
         for row in custom_metrics:
             db_table = row.get('table', DEFAULT_PERFORMANCE_TABLE)
             if db_table not in self.valid_tables:
