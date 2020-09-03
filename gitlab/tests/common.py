@@ -4,10 +4,8 @@
 
 import os
 
-from gitlab.datadog_checks.gitlab import GitlabCheck
-
 from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.gitlab import GitlabCheck
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
