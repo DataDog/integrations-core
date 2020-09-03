@@ -43,7 +43,7 @@ def test_parse_index_transform_ok_cases(index_transform, expected_rules):
     )
 
     results = parse_metrics(yaml.load(metrics), resolver=mock.MagicMock(), logger=logger, bulk_threshold=10)
-    actual_transform_rules = results['parsed_metrics'][0].column_tags[0].index_transform
+    actual_transform_rules = results['parsed_metrics'][0].column_tags[0].index_transform_rules
     assert actual_transform_rules == expected_rules
 
 
