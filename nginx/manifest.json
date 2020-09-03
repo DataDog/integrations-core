@@ -29,7 +29,11 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
+      "[NGINX] 4xx Errors": "assets/monitors/4xx.json",
+      "[NGINX] 5xx Errors": "assets/monitors/5xx.json"
+    },
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
     },
