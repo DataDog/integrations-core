@@ -9,13 +9,11 @@ http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-value
 from __future__ import division
 
 from collections import defaultdict
-from contextlib import contextmanager
-
-from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 
+from .connection import Connection, SQLConnectionError
 from .utils import set_default_driver_conf
 
 try:
@@ -67,7 +65,6 @@ VALUE_AND_BASE_QUERY = """select counter_name, cntr_type, cntr_value, instance_n
                           where counter_name in (%s)
                           order by cntr_type;"""
 
-DATABASE_EXISTS_QUERY = 'select name from sys.databases;'
 
 # Performance tables
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
@@ -78,22 +75,9 @@ DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
 DM_OS_TASKS = "sys.dm_os_tasks"
 
 
-class SQLConnectionError(Exception):
-    """
-    Exception raised for SQL instance connection issues
-    """
-
-    pass
-
-
 class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
-    DEFAULT_COMMAND_TIMEOUT = 5
-    DEFAULT_DATABASE = 'master'
-    DEFAULT_DRIVER = 'SQL Server'
-    DEFAULT_DB_KEY = 'database'
-    PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
     PERF_METRICS = [
         ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
@@ -120,13 +104,6 @@ class SQLServer(AgentCheck):
         ('sqlserver.task.pending_io_byte_average', DM_OS_TASKS, 'pending_io_byte_average'),
     ]
 
-    valid_connectors = []
-    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
-    default_adoprovider = 'SQLOLEDB'
-    if adodbapi is not None:
-        valid_connectors.append('adodbapi')
-    if pyodbc is not None:
-        valid_connectors.append('odbc')
     valid_tables = [
         DEFAULT_PERFORMANCE_TABLE,
         DM_OS_WAIT_STATS_TABLE,
@@ -139,38 +116,23 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
-        # Cache connections
-        self.connections = {}
         self.failed_connections = {}
         self.instance_metrics = []
         self.instance_per_type_metrics = {}
-        self.existing_databases = None
         self.do_check = True
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
-        self.adoprovider = self.default_adoprovider
 
-        self.connector = init_config.get('connector', 'adodbapi')
-        if self.connector.lower() not in self.valid_connectors:
-            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.connector)
-            self.connector = 'adodbapi'
-
-        self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
-        if self.adoprovider.upper() not in self.valid_adoproviders:
-            self.log.error(
-                "Invalid ADODB provider string %s, defaulting to %s", self.adoprovider, self.default_adoprovider
-            )
-            self.adoprovider = self.default_adoprovider
+        self.connection = Connection(init_config, self)
 
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
         try:
             # check to see if the database exists before we try any connections to it
-            with self.open_managed_db_connections(None, db_name=self.DEFAULT_DATABASE):
-                db_exists, context = self._check_db_exists()
+            db_exists, context = self.connection.check_database()
 
             if db_exists:
                 if self.instance.get('stored_procedure') is None:
-                    with self.open_managed_db_connections(self.DEFAULT_DB_KEY):
+                    with self.connection.open_managed_default_connection():
                         self._make_metric_list_to_collect(self.custom_metrics)
             else:
                 # How much do we care that the DB doesn't exist?
@@ -190,32 +152,6 @@ class SQLServer(AgentCheck):
             self.log.exception("Error connecting to database: %s", e)
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
-
-    def _check_db_exists(self):
-        """
-        Check if the database we're targeting actually exists
-        If not then we won't do any checks
-        This allows the same config to be installed on many servers but fail gracefully
-        """
-
-        dsn, host, username, password, database, driver = self._get_access_info(self.DEFAULT_DB_KEY)
-        context = "{} - {}".format(host, database)
-        if self.existing_databases is None:
-            cursor = self.get_cursor(None, self.DEFAULT_DATABASE)
-
-            try:
-                self.existing_databases = {}
-                cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor:
-                    self.existing_databases[row.name] = True
-
-            except Exception as e:
-                self.log.error("Failed to check if database %s exists: %s", database, e)
-                return False, context
-            finally:
-                self.close_cursor(cursor)
-
-        return database in self.existing_databases, context
 
     def _make_metric_list_to_collect(self, custom_metrics):
         """
@@ -324,6 +260,38 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics["SqlOsSchedulers"] = scheduler_metrics
         self.instance_per_type_metrics["SqlOsTasks"] = task_metrics
 
+    def get_sql_type(self, counter_name):
+        """
+        Return the type of the performance counter so that we can report it to
+        Datadog correctly
+        If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
+        PERF_AVERAGE_BULK), the name of the base counter will also be returned
+        """
+        with self.connection.get_managed_cursor() as cursor:
+            cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
+            (sql_type,) = cursor.fetchone()
+            if sql_type == PERF_LARGE_RAW_BASE:
+                self.log.warning("Metric %s is of type Base and shouldn't be reported this way", counter_name)
+            base_name = None
+            if sql_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
+                # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
+                # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
+                # a base metrics to get the ratio. There is no unique schema so we generate
+                # the possible candidates and we look at which ones exist in the db.
+                candidates = (
+                    counter_name + " base",
+                    counter_name.replace("(ms)", "base"),
+                    counter_name.replace("Avg ", "") + " base",
+                )
+                try:
+                    cursor.execute(BASE_NAME_QUERY, candidates)
+                    base_name = cursor.fetchone().counter_name.strip()
+                    self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
+                except Exception as e:
+                    self.log.warning("Could not get counter_name of base for metric: %s", e)
+
+        return sql_type, base_name
+
     def typed_metric(self, cfg_inst, table, base_name, user_type, sql_type, column):
         """
         Create the appropriate SqlServerMetric object, each implementing its method to
@@ -357,146 +325,7 @@ class SQLServer(AgentCheck):
             }
             metric_type, cls = table_type_mapping[table]
 
-        return cls(self._get_connector(), cfg_inst, base_name, metric_type, column, self.log)
-
-    def _get_connector(self):
-        connector = self.instance.get('connector', self.connector)
-        if connector != self.connector:
-            if connector.lower() not in self.valid_connectors:
-                self.log.warning("Invalid database connector %s using default %s", connector, self.connector)
-                connector = self.connector
-            else:
-                self.log.debug("Overriding default connector for %s with %s", self.instance['host'], connector)
-        return connector
-
-    def _get_adoprovider(self):
-        provider = self.instance.get('adoprovider', self.default_adoprovider)
-        if provider != self.adoprovider:
-            if provider.upper() not in self.valid_adoproviders:
-                self.log.warning("Invalid ADO provider %s using default %s", provider, self.adoprovider)
-                provider = self.adoprovider
-            else:
-                self.log.debug("Overriding default ADO provider for %s with %s", self.instance['host'], provider)
-        return provider
-
-    def _get_access_info(self, db_key, db_name=None):
-        """Convenience method to extract info from instance"""
-        dsn = self.instance.get('dsn')
-        host = self.instance.get('host')
-        username = self.instance.get('username')
-        password = self.instance.get('password')
-        database = self.instance.get(db_key) if db_name is None else db_name
-        driver = self.instance.get('driver')
-        if not dsn:
-            if not host:
-                host = '127.0.0.1,1433'
-            if not database:
-                database = self.DEFAULT_DATABASE
-            if not driver:
-                driver = self.DEFAULT_DRIVER
-        return dsn, host, username, password, database, driver
-
-    def _conn_key(self, db_key, db_name=None):
-        """Return a key to use for the connection cache"""
-        dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-        return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
-
-    def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
-        """Return a connection string to use with odbc"""
-        if conn_key:
-            dsn, host, username, password, database, driver = conn_key.split(":")
-        else:
-            dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-
-        conn_str = ''
-        if dsn:
-            conn_str = 'DSN={};'.format(dsn)
-
-        if driver:
-            conn_str += 'DRIVER={};'.format(driver)
-        if host:
-            conn_str += 'Server={};'.format(host)
-        if database:
-            conn_str += 'Database={};'.format(database)
-
-        if username:
-            conn_str += 'UID={};'.format(username)
-        self.log.debug("Connection string (before password) %s", conn_str)
-        if password:
-            conn_str += 'PWD={};'.format(password)
-        return conn_str
-
-    def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
-        """Return a connection string to use with adodbapi"""
-        if conn_key:
-            _, host, username, password, database, _ = conn_key.split(":")
-        else:
-            _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
-
-        provider = self._get_adoprovider()
-        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
-
-        if username:
-            conn_str += 'User ID={};'.format(username)
-        if password:
-            conn_str += 'Password={};'.format(password)
-        if not username and not password:
-            conn_str += 'Integrated Security=SSPI;'
-        return conn_str
-
-    @contextmanager
-    def get_managed_cursor(self, db_key, db_name=None):
-        cursor = self.get_cursor(db_key, db_name)
-        yield cursor
-
-        self.close_cursor(cursor)
-
-    def get_cursor(self, db_key, db_name=None):
-        """
-        Return a cursor to execute query against the db
-        Cursor are cached in the self.connections dict
-        """
-        conn_key = self._conn_key(db_key, db_name)
-        try:
-            conn = self.connections[conn_key]['conn']
-        except KeyError:
-            # We catch KeyError to avoid leaking the auth info used to compose the key
-            # FIXME: we should find a better way to compute unique keys to map opened connections other than
-            # using auth info in clear text!
-            raise SQLConnectionError("Cannot find an opened connection for host: {}".format(self.instance.get('host')))
-        return conn.cursor()
-
-    def get_sql_type(self, counter_name):
-        """
-        Return the type of the performance counter so that we can report it to
-        Datadog correctly
-        If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
-        PERF_AVERAGE_BULK), the name of the base counter will also be returned
-        """
-        with self.get_managed_cursor(self.DEFAULT_DB_KEY) as cursor:
-            cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
-            (sql_type,) = cursor.fetchone()
-            if sql_type == PERF_LARGE_RAW_BASE:
-                self.log.warning("Metric %s is of type Base and shouldn't be reported this way", counter_name)
-            base_name = None
-            if sql_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
-                # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
-                # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
-                # a base metrics to get the ratio. There is no unique schema so we generate
-                # the possible candidates and we look at which ones exist in the db.
-                candidates = (
-                    counter_name + " base",
-                    counter_name.replace("(ms)", "base"),
-                    counter_name.replace("Avg ", "") + " base",
-                )
-                try:
-                    cursor.execute(BASE_NAME_QUERY, candidates)
-                    base_name = cursor.fetchone().counter_name.strip()
-                    self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
-                except Exception as e:
-                    self.log.warning("Could not get counter_name of base for metric: %s", e)
-
-        return sql_type, base_name
+        return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
         if self.do_check:
@@ -515,13 +344,13 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get('tags', [])
         if custom_tags is None:
             custom_tags = []
-        with self.open_managed_db_connections(self.DEFAULT_DB_KEY):
+        with self.connection.open_managed_default_connection():
             # if the server was down at check __init__ key could be missing.
             if not self.instance_metrics:
                 self._make_metric_list_to_collect(self.custom_metrics)
             metrics_to_collect = self.instance_metrics
 
-            with self.get_managed_cursor(self.DEFAULT_DB_KEY) as cursor:
+            with self.connection.get_managed_cursor() as cursor:
                 simple_rows = SqlSimpleMetric.fetch_all_values(
                     cursor, self.instance_per_type_metrics["SqlSimpleMetric"], self.log
                 )
@@ -573,12 +402,12 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
-            self.open_db_connections(self.DEFAULT_DB_KEY)
-            cursor = self.get_cursor(self.DEFAULT_DB_KEY)
+            self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
+            cursor = self.connection.get_cursor(self.connection.DEFAULT_DB_KEY)
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self._get_connector() == 'adodbapi':
+                if self.connection._get_connector() == 'adodbapi':
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.
@@ -604,8 +433,8 @@ class SQLServer(AgentCheck):
                 self.log.warning("Could not call procedure %s: %s", proc, e)
                 raise e
 
-            self.close_cursor(cursor)
-            self.close_db_connections(self.DEFAULT_DB_KEY)
+            self.connection.close_cursor(cursor)
+            self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
 
@@ -614,8 +443,8 @@ class SQLServer(AgentCheck):
         check to see if the guard SQL returns a single column containing 0 or 1
         We return true if 1, else False
         """
-        self.open_db_connections(self.PROC_GUARD_DB_KEY)
-        cursor = self.get_cursor(self.PROC_GUARD_DB_KEY)
+        self.connection.open_db_connections(self.connection.PROC_GUARD_DB_KEY)
+        cursor = self.connection.get_cursor(self.connection.PROC_GUARD_DB_KEY)
 
         should_run = False
         try:
@@ -625,104 +454,15 @@ class SQLServer(AgentCheck):
         except Exception as e:
             self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
 
-        self.close_cursor(cursor)
-        self.close_db_connections(self.PROC_GUARD_DB_KEY)
+        self.connection.close_cursor(cursor)
+        self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
         return should_run
-
-    def close_cursor(self, cursor):
-        """
-        We close the cursor explicitly b/c we had proven memory leaks
-        We handle any exception from closing, although according to the doc:
-        "in adodbapi, it is NOT an error to re-close a closed cursor"
-        """
-        try:
-            cursor.close()
-        except Exception as e:
-            self.log.warning("Could not close adodbapi cursor\n%s", e)
-
-    def close_db_connections(self, db_key, db_name=None):
-        """
-        We close the db connections explicitly b/c when we don't they keep
-        locks on the db. This presents as issues such as the SQL Server Agent
-        being unable to stop.
-        """
-        conn_key = self._conn_key(db_key, db_name)
-        if conn_key not in self.connections:
-            return
-
-        try:
-            self.connections[conn_key]['conn'].close()
-            del self.connections[conn_key]
-        except Exception as e:
-            self.log.warning("Could not close adodbapi db connection\n%s", e)
-
-    @contextmanager
-    def open_managed_db_connections(self, db_key, db_name=None):
-        self.open_db_connections(db_key, db_name)
-        yield
-
-        self.close_db_connections(db_key, db_name)
-
-    def open_db_connections(self, db_key, db_name=None):
-        """
-        We open the db connections explicitly, so we can ensure they are open
-        before we use them, and are closable, once we are finished. Open db
-        connections keep locks on the db, presenting issues such as the SQL
-        Server Agent being unable to stop.
-        """
-
-        conn_key = self._conn_key(db_key, db_name)
-        timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
-
-        dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-        custom_tags = self.instance.get("tags", [])
-        if custom_tags is None:
-            custom_tags = []
-        service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
-        service_check_tags.extend(custom_tags)
-        service_check_tags = list(set(service_check_tags))
-
-        cs = self.instance.get('connection_string', '')
-        cs += ';' if cs != '' else ''
-
-        try:
-            if self._get_connector() == 'adodbapi':
-                cs += self._conn_string_adodbapi(db_key, db_name=db_name)
-                # autocommit: true disables implicit transaction
-                rawconn = adodbapi.connect(cs, {'timeout': timeout, 'autocommit': True})
-            else:
-                cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=timeout)
-
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
-            if conn_key not in self.connections:
-                self.connections[conn_key] = {'conn': rawconn, 'timeout': timeout}
-            else:
-                try:
-                    # explicitly trying to avoid leaks...
-                    self.connections[conn_key]['conn'].close()
-                except Exception as e:
-                    self.log.info("Could not close adodbapi db connection\n%s", e)
-
-                self.connections[conn_key]['conn'] = rawconn
-        except Exception as e:
-            cx = "{} - {}".format(host, database)
-            message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
-
-            password = self.instance.get('password')
-            if password is not None:
-                message = message.replace(password, "*" * 6)
-
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
-
-            raise_from(SQLConnectionError(message), None)
 
 
 class SqlServerMetric(object):
     """General class for common methods, should never be instantiated directly"""
 
-    def __init__(self, connector, cfg_instance, base_name, report_function, column, logger):
-        self.connector = connector
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
         self.cfg_instance = cfg_instance
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
@@ -931,8 +671,8 @@ class SqlIoVirtualFileStat(SqlServerMetric):
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
-    def __init__(self, connector, cfg_instance, base_name, report_function, column, logger):
-        super(SqlIoVirtualFileStat, self).__init__(connector, cfg_instance, base_name, report_function, column, logger)
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+        super(SqlIoVirtualFileStat, self).__init__(cfg_instance, base_name, report_function, column, logger)
         self.dbid = self.cfg_instance.get('database_id', None)
         self.fid = self.cfg_instance.get('file_id', None)
         self.pvs_vals = defaultdict(lambda: None)

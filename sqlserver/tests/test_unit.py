@@ -23,7 +23,7 @@ def test_get_cursor(instance_sql2017):
     """
     check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
     with pytest.raises(SQLConnectionError):
-        check.get_cursor('foo')
+        check.connection.get_cursor('foo')
 
 
 def test_set_default_driver_conf():
