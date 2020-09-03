@@ -35,6 +35,7 @@ from .utils import (
     get_profile_definition,
     oid_pattern_specificity,
     recursively_expand_base_profiles,
+    transform_index,
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
@@ -501,11 +502,8 @@ class SnmpCheck(AgentCheck):
             raw_column_value = column_tag.column
 
             try:
-                new_index = ()
                 if column_tag.index_transform:
-                    for transform in column_tag.index_transform:
-                        start, end = transform
-                        new_index += index[start: end]
+                    new_index = transform_index(index, column_tag.index_transform)
                 else:
                     new_index = index
                 column_value = results[raw_column_value][new_index]

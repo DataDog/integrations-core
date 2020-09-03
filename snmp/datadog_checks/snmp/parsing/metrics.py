@@ -5,7 +5,7 @@
 Helpers for parsing the `metrics` section of a config file.
 """
 from logging import Logger
-from typing import Dict, List, NamedTuple, Optional, Sequence, TypedDict, Union, cast, Tuple
+from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple, TypedDict, Union, cast
 
 from datadog_checks.base import ConfigurationError
 
@@ -344,7 +344,9 @@ def merge_table_batches(target, source):
 
 
 IndexTag = NamedTuple('IndexTag', [('parsed_metric_tag', ParsedMetricTag), ('index', int)])
-ColumnTag = NamedTuple('ColumnTag', [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_transform', List[Tuple[int, int]])])
+ColumnTag = NamedTuple(
+    'ColumnTag', [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_transform', List[Tuple[int, int]])]
+)
 
 ParsedColumnMetricTag = NamedTuple(
     'ParsedColumnMetricTag',
@@ -451,8 +453,11 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
         column_tags=[
-            ColumnTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), column=parsed_column.name,
-                      index_transform=index_transform)
+            ColumnTag(
+                parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)),
+                column=parsed_column.name,
+                index_transform=index_transform,
+            )
         ],
         table_batches=batches,
     )
