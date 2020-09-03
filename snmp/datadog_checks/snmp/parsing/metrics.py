@@ -450,7 +450,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
         transform_rules = raw_index_transform.split(',')
         for rule in transform_rules:
             try:
-                # ValueError handle issue cast to int and too many values to unpack
+                # Might raise ValueError for casting to int and too many values to unpack
                 start, end = [int(i) for i in rule.split(':')]
             except ValueError as e:
                 raise ConfigurationError('Invalid transform rule `{}`: {}'.format(raw_index_transform, e))
