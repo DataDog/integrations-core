@@ -373,8 +373,8 @@ def transform_index(src_index, index_transform_rules):
     A transform rule is a tuple of (start, end) and is used to extract a subset of the source index.
 
     ```python
-    >>> transform_index(('a', 'b', 'c', 'd'), [(2, 3), (0, 2)])
-    ('c', 'a', 'b')
+    >>> transform_index(('10', '11', '12', '13'), [(2, 3), (0, 2)])
+    ('12', '10', '11')
     ```
     """
     dst_index = []  # type: List[str]
