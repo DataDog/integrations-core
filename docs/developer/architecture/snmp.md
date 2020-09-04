@@ -106,11 +106,11 @@ snmp_listener:
 
 ### Cluster Agent Support
 
-For Kubernetes environments, the [Cluster Agent](https://docs.datadoghq.com/agent/cluster_agent/) can be configured to use the SNMP Agent auto-discovery (uses snmp listener) logic as a source of [Cluster checks](https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/).
+For Kubernetes environments, the [Cluster Agent](https://docs.datadoghq.com/agent/cluster_agent/) can be configured to use the SNMP Agent auto-discovery (via snmp listener) logic as a source of [Cluster checks](https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/).
 
 ![](../../assets/images/snmp-architecture-cluster-agent.png)
 
-The Datadog Cluster Agent (DCA) uses the `snmp_listener` config (Agent auto-discovery) to listen for IP ranges, then schedule snmp check instances to be run by one or more normal Datadog Agents.
+The Datadog Cluster Agent (DCA) uses the `snmp_listener` config (Agent auto-discovery) to listen for IP ranges, then schedules snmp check instances to be run by one or more normal Datadog Agents.
 
 Agent auto-discovery combined with Cluster Agent is very scalable, it can be used to monitor a large number of snmp devices.
 
