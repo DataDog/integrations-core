@@ -115,7 +115,7 @@ def write_option(option, writer, indent='', start_list=False):
             if 'default' in value:
                 default = value['default']
                 default_type = type(default)
-                if default is not None:
+                if default is not None and str(default).lower() != 'none':
                     if default_type is str:
                         writer.write(' - default: ', default)
                     elif default_type is bool:

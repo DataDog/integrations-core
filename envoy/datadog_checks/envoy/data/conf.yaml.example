@@ -71,7 +71,7 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param included_metrics - list of strings - optional - default: None
+    ## @param included_metrics - list of strings - optional
     ## Includes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
@@ -87,7 +87,7 @@ instances:
     # included_metrics:
     #   - cluster\.(in|out)\..*
 
-    ## @param excluded_metrics - list of strings - optional - default: None
+    ## @param excluded_metrics - list of strings - optional
     ## Excludes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
