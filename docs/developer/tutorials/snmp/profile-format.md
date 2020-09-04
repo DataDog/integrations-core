@@ -256,21 +256,24 @@ metrics:
 
 In case the external table have a different indexes we can use `index_transform` to select a subset of the full index we want to use. `index_transform` is a list of `start`/`end` ranges to extract from the current table index to match the external table index. `start` and `end` are inclusive.
 
-In the example above, the index of `cpiPduBranchTable` looks like `1.6.0.36.155.53.3.246`, the first digit is the `cpiPduBranchId` index and the rest is `cpiPduBranchMac` index. The index of `cpiPduTable` looks like `6.0.36.155.53.3.246` and represent `cpiPduMac` (equivalent to `cpiPduBranchMac`).
+External table indexes must be a subset of the indexes of the current table, or same indexes in a different order.
 
-By using the `index_transform` with start 1 and end 7, we extract `6.0.36.155.53.3.246` from `1.6.0.36.155.53.3.246` (`cpiPduBranchTable` full index), and then use it to match `6.0.36.155.53.3.246` (`cpiPduTable` full index).
+!!! example
 
-`index_transform` can be more complex, the following definition will extract `2.3.5.6.7` from `1.2.3.4.5.6.7`.
+    In the example above, the index of `cpiPduBranchTable` looks like `1.6.0.36.155.53.3.246`, the first digit is the `cpiPduBranchId` index and the rest is `cpiPduBranchMac` index. The index of `cpiPduTable` looks like `6.0.36.155.53.3.246` and represent `cpiPduMac` (equivalent to `cpiPduBranchMac`).
 
-```yaml
-        index_transform:
-          - start: 1
-            end: 2
-          - start: 4
-            end: 6
-```
+    By using the `index_transform` with start 1 and end 7, we extract `6.0.36.155.53.3.246` from `1.6.0.36.155.53.3.246` (`cpiPduBranchTable` full index), and then use it to match `6.0.36.155.53.3.246` (`cpiPduTable` full index).
 
-Note: External table indexes must be a subset of the indexes of the current table, or same indexes in a different order. 
+    `index_transform` can be more complex, the following definition will extract `2.3.5.6.7` from `1.2.3.4.5.6.7`.
+
+    ```yaml
+            index_transform:
+              - start: 1
+                end: 2
+              - start: 4
+                end: 6
+    ```
+
 
 ##### Using an "index", i.e. one of the values in the `INDEX` field of the table MIB definition:
 
