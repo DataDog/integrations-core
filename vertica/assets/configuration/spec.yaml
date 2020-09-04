@@ -195,4 +195,3 @@ files:
                 type: file
                 path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
                 service: vertica
-
