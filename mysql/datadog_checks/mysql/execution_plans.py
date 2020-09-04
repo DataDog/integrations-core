@@ -296,6 +296,12 @@ class ExecutionPlansMixin(object):
         return strategy
 
     def _collect_execution_plans(self, db, tags, options, min_collection_interval):
+        try:
+            _collect_execution_plans(db, tags, options, min_collection_interval)
+        except:
+            self.log.exception('Unable to collect execution plans due to an error')
+
+    def __collect_execution_plans(self, db, tags, options, min_collection_interval):
         if not (is_dbm_enabled() and is_affirmative(options.get('collect_execution_plans', True))):
             self.log.debug("skipping execution plan collection. not enabled.")
             return

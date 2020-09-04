@@ -48,6 +48,12 @@ class MySQLStatementMetrics(object):
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', True)
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
+        try:
+            _collect_per_statement_metrics(instance, db, instance_tags)
+        except:
+            self.log.exception('Unable to collect statement metrics due to an error')
+
+    def _collect_per_statement_metrics(self, instance, db, instance_tags):
         start_time = time.time()
         if not (is_dbm_enabled() and self.is_enabled):
             return []

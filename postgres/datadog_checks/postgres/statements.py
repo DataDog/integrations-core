@@ -138,6 +138,12 @@ class PgStatementsMixin(object):
         return self.__pg_stat_statements_query_columns
 
     def _collect_statement_metrics(self, instance_tags):
+        try:
+            self.__collect_statement_metrics(instance_tags)
+        except:
+            self.log.exception('Unable to collect statement metrics due to an error')
+
+    def __collect_statement_metrics(self, instance_tags):
         # Sanity checks
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - self._pg_stat_statements_columns
         if len(missing_columns) > 0:
@@ -338,6 +344,12 @@ class PgStatementsMixin(object):
         return events
 
     def _collect_execution_plans(self, instance_tags):
+        try:
+            self.__collect_execution_plans(instance_tags)
+        except:
+            self.log.exception('Unable to collect execution plans due to an error')
+
+    def __collect_execution_plans(self, instance_tags):
         if not self._activity_sample_rate_limiter:
             self._activity_sample_rate_limiter = ConstantRateLimiter(self.config.collect_exec_plans_rate_limit)
 
