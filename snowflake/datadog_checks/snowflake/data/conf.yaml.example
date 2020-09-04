@@ -99,6 +99,14 @@ instances:
       - snowflake.storage
       - snowflake.logins
 
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
     ## @param custom_queries - list of mappings - optional
     ## Each query must have 2 fields:
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.

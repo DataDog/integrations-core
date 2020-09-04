@@ -108,6 +108,15 @@ files:
             - snowflake.billing
             - snowflake.storage
             - snowflake.logins
+      - name: use_global_custom_queries
+        description: |
+          How `global_custom_queries` should be used for this instance. There are 3 options:
+          1. true - `global_custom_queries` override `custom_queries`.
+          2. false - `custom_queries` override `global_custom_queries`.
+          2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+        value:
+          type: string
+          example: "true"
       - name: custom_queries
         description: |
           Each query must have 2 fields:
