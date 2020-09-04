@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 @pytest.mark.parametrize(
     'index_transform, expected_rules',
     [
-        (pytest.param("1:8", [(1, 8)], id="one_rule")),
-        (pytest.param("1:8,10:20", [(1, 8), (10, 20)], id="multi_rules")),
+        (pytest.param("[{'start': 1, 'end': 8}]", [(1, 8)], id="one_rule")),
+        (pytest.param("[{'start': 1, 'end': 8}, {'start': 10, 'end': 20}, ]", [(1, 8), (10, 20)], id="multi_rules")),
+        (pytest.param("[{'start': 1, 'end': 1}]", [(1, 1)], id="one_value_index")),
     ],
 )
 def test_parse_index_transform_ok_cases(index_transform, expected_rules):
@@ -36,7 +37,7 @@ def test_parse_index_transform_ok_cases(index_transform, expected_rules):
         OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
         name: cpiPduName
       table: cpiPduTable
-      index_transform: "{}"
+      index_transform: {}
       tag: pdu_name
 """.format(
         index_transform
@@ -51,12 +52,25 @@ def test_parse_index_transform_ok_cases(index_transform, expected_rules):
 @pytest.mark.parametrize(
     'index_transform, error_msg',
     [
-        (pytest.param("1:", "Invalid transform rule", id="one_rule")),
-        (pytest.param("1:8:20", "Invalid transform rule", id="too_many_values")),
-        (pytest.param("1", "Invalid transform rule", id="not_enough_values")),
-        (pytest.param("1:2,3:8:20", "Invalid transform rule", id="multi_too_many_values")),
-        (pytest.param("1:2,", "Invalid transform rule", id="empty_element")),
-        (pytest.param("a:2", "Invalid transform rule", id="not_integer")),
+        (pytest.param("[{'start': 1}]", "Transform rule must contain start and end", id="missing_end")),
+        (pytest.param("[{'end': 1}]", "Transform rule must contain start and end", id="missing_start")),
+        (pytest.param("[{'abc': 1}]", "Transform rule must contain start and end", id="invalid_keys")),
+        (
+            pytest.param(
+                "[{'start': 1, 'end': 'abc'}]", "Transform rule start and end must be integers", id="invalid_end"
+            )
+        ),
+        (
+            pytest.param(
+                "[{'start': 'abc', 'end': 2}]", "Transform rule start and end must be integers", id="invalid_start"
+            )
+        ),
+        (
+            pytest.param(
+                "[{'start': 2, 'end': 1}]", "Transform rule end should be greater than start", id="end_must_be_greater"
+            )
+        ),
+        (pytest.param("[{'start': -1, 'end': 1}]", "Transform rule start must be greater than 0", id="negative_value")),
     ],
 )
 def test_parse_index_transform_config_error(index_transform, error_msg):
@@ -73,7 +87,7 @@ def test_parse_index_transform_config_error(index_transform, error_msg):
         OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
         name: cpiPduName
       table: cpiPduTable
-      index_transform: "{}"
+      index_transform: {}
       tag: pdu_name
 """.format(
         index_transform

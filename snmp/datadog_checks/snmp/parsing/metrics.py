@@ -7,6 +7,8 @@ Helpers for parsing the `metrics` section of a config file.
 from logging import Logger
 from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple, TypedDict, Union, cast
 
+import six
+
 from datadog_checks.base import ConfigurationError
 
 from ..models import OID
@@ -445,16 +447,22 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
 
     batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
 
-    index_transform_rules = []
+    index_transform_rules = []  # type: List[Tuple[int, int]]
     raw_index_transform = metric_tag.get('index_transform')
     if raw_index_transform:
-        transform_rules = raw_index_transform.split(',')
-        for rule in transform_rules:
-            try:
-                # Might raise ValueError for casting to int and too many values to unpack
-                start, end = [int(i) for i in rule.split(':')]
-            except ValueError as e:
-                raise ConfigurationError('Invalid transform rule `{}`: {}'.format(raw_index_transform, e))
+        for rule in raw_index_transform:
+            if not isinstance(rule, dict) or sorted(rule.keys()) != ['end', 'start']:
+                raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
+            start, end = rule['start'], rule['end']
+            if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
+                raise ConfigurationError('Transform rule start and end must be integers. Invalid rule: {}'.format(rule))
+            if start > end:
+                raise ConfigurationError(
+                    'Transform rule end should be greater than start. Invalid rule: {}'.format(rule)
+                )
+            if start < 0:
+                raise ConfigurationError('Transform rule start must be greater than 0. Invalid rule: {}'.format(rule))
+
             index_transform_rules.append((start, end))
 
     return ParsedColumnMetricTag(
