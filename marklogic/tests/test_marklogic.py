@@ -10,7 +10,14 @@ from packaging import version
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import COMMON_TAGS, INSTANCE, INSTANCE_FILTERS, MARKLOGIC_VERSION, SERVICE_CHECKS_HEALTH_TAG
+from .common import (
+    COMMON_TAGS,
+    INSTANCE,
+    INSTANCE_FILTERS,
+    INSTANCE_SIMPLE_USER,
+    MARKLOGIC_VERSION,
+    SERVICE_CHECKS_HEALTH_TAG,
+)
 from .metrics import GLOBAL_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
 
 
@@ -62,6 +69,26 @@ def test_check(aggregator):
 
     # Service checks
     _assert_service_checks(aggregator, COMMON_TAGS)
+
+    aggregator.assert_no_duplicate_all()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_check_simple_user(aggregator):
+    # type: (AggregatorStub) -> None
+    check = MarklogicCheck('marklogic', {}, [INSTANCE_SIMPLE_USER])
+
+    check.check(INSTANCE_SIMPLE_USER)
+
+    _assert_metrics(aggregator, COMMON_TAGS)
+
+    aggregator.assert_all_metrics_covered()
+
+    # Service checks
+    _assert_service_checks(aggregator, COMMON_TAGS, include_health_checks=False)
+
+    len(aggregator._service_checks) == 1  # can_connect service check only
 
     aggregator.assert_no_duplicate_all()
 

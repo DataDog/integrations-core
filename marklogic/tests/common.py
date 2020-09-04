@@ -15,23 +15,32 @@ MARKLOGIC_VERSION = os.environ.get('MARKLOGIC_VERSION')
 API_URL = "http://{}:{}".format(HOST, PORT)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'admin'
-USERNAME = 'datadog'
+MANAGE_ADMIN_USERNAME = 'datadog_admin'
+MANAGE_USER_USERNAME = 'datadog_user'
 PASSWORD = 'datadog'
 
 COMMON_TAGS = ['foo:bar']
 
 INSTANCE = {
     'url': API_URL,
-    'username': USERNAME,
+    'username': MANAGE_ADMIN_USERNAME,
     'password': PASSWORD,
     'enable_health_service_checks': True,
     'auth_type': 'digest',
     'tags': COMMON_TAGS,
 }
 
+INSTANCE_SIMPLE_USER = {
+    'url': API_URL,
+    'username': MANAGE_USER_USERNAME,
+    'password': PASSWORD,
+    'auth_type': 'digest',
+    'tags': COMMON_TAGS,
+}
+
 INSTANCE_FILTERS = {
     'url': API_URL,
-    'username': USERNAME,
+    'username': MANAGE_ADMIN_USERNAME,
     'password': PASSWORD,
     'auth_type': 'digest',
     'enable_health_service_checks': True,
