@@ -118,7 +118,7 @@ class SQLServer(AgentCheck):
 
         self.failed_connections = {}
         self.instance_metrics = []
-        self.instance_per_type_metrics = {}
+        self.instance_per_type_metrics = defaultdict(list)
         self.do_check = True
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
 
@@ -184,7 +184,9 @@ class SQLServer(AgentCheck):
                 cfg['instance_name'] = instance_name
 
                 metrics_to_collect.append(
-                    self.typed_metric(cfg, DEFAULT_PERFORMANCE_TABLE, base_name, None, sql_type, None)
+                    self.typed_metric(
+                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                    )
                 )
             except SQLConnectionError:
                 raise
@@ -195,84 +197,58 @@ class SQLServer(AgentCheck):
         # Load metrics from scheduler and task tables, if enabled
         if self.instance.get('include_task_scheduler_metrics', False):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
-                row = {}
-                row['name'] = name
-                row['table'] = table
-                row['column'] = column
+                cfg = {}
+                cfg['name'] = name
+                cfg['table'] = table
+                cfg['column'] = column
 
-                metrics_to_collect.append(
-                    self.typed_metric(
-                        cfg_inst=row, table=table, base_name=None, user_type=None, sql_type=None, column=column
-                    )
-                )
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
-        for row in custom_metrics:
-            db_table = row.get('table', DEFAULT_PERFORMANCE_TABLE)
+        for cfg in custom_metrics:
+            sql_type = None
+            base_name = None
+
+            db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
             if db_table not in self.valid_tables:
-                self.log.error('%s has an invalid table name: %s', row['name'], db_table)
+                self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
                 continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
-                user_type = row.get('type')
+                user_type = cfg.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('%s has an invalid metric type: %s', row['name'], user_type)
+                    self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
                 sql_type = None
                 try:
                     if user_type is None:
-                        sql_type, base_name = self.get_sql_type(row['counter_name'])
+                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
                 except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
+                    self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
                     continue
 
-                metrics_to_collect.append(self.typed_metric(row, db_table, base_name, user_type, sql_type, None))
+                metrics_to_collect.append(
+                    self.typed_metric(
+                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+                    )
+                )
 
             else:
-                for column in row['columns']:
-                    metrics_to_collect.append(self.typed_metric(row, db_table, base_name, None, sql_type, column))
+                for column in cfg['columns']:
+                    metrics_to_collect.append(
+                        self.typed_metric(
+                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+                        )
+                    )
 
         self.instance_metrics = metrics_to_collect
-        simple_metrics = []
-        fraction_metrics = []
-        wait_stat_metrics = []
-        vfs_metrics = []
-        clerk_metrics = []
-        scheduler_metrics = []
-        task_metrics = []
-
         self.log.debug("metrics to collect %s", metrics_to_collect)
 
+        # create an organized grouping of metric names to their metric classes
         for m in metrics_to_collect:
-            if type(m) is SqlSimpleMetric:
-                self.log.debug("Adding simple metric %s", m.sql_name)
-                simple_metrics.append(m.sql_name)
-            elif type(m) is SqlFractionMetric or type(m) is SqlIncrFractionMetric:
-                self.log.debug("Adding fraction metric %s", m.sql_name)
-                fraction_metrics.append(m.sql_name)
-                fraction_metrics.append(m.base_name)
-            elif type(m) is SqlOsWaitStat:
-                self.log.debug("Adding SqlOsWaitStat metric %s", m.sql_name)
-                wait_stat_metrics.append(m.sql_name)
-            elif type(m) is SqlIoVirtualFileStat:
-                self.log.debug("Adding SqlIoVirtualFileStat metric %s", m.sql_name)
-                vfs_metrics.append(m.sql_name)
-            elif type(m) is SqlOsMemoryClerksStat:
-                self.log.debug("Adding SqlOsMemoryClerksStat metric %s", m.sql_name)
-                clerk_metrics.append(m.sql_name)
-            elif type(m) is SqlOsSchedulers:
-                self.log.debug("Adding SqlOsSchedulers metric %s", m.datadog_name)
-                scheduler_metrics.append(m.datadog_name)
-            elif type(m) is SqlOsTasks:
-                self.log.debug("Adding SqlOsTasks metric %s", m.datadog_name)
-                task_metrics.append(m.datadog_name)
-
-        self.instance_per_type_metrics["SqlSimpleMetric"] = simple_metrics
-        self.instance_per_type_metrics["SqlFractionMetric"] = fraction_metrics
-        self.instance_per_type_metrics["SqlOsWaitStat"] = wait_stat_metrics
-        self.instance_per_type_metrics["SqlIoVirtualFileStat"] = vfs_metrics
-        self.instance_per_type_metrics["SqlOsMemoryClerksStat"] = clerk_metrics
-        self.instance_per_type_metrics["SqlOsSchedulers"] = scheduler_metrics
-        self.instance_per_type_metrics["SqlOsTasks"] = task_metrics
+            self.log.debug("Adding metric class %s named %s", m.__class__.__name__, m.sql_name or m.datadog_name)
+            self.instance_per_type_metrics[m.__class__.__name__].append(m.sql_name or m.datadog_name)
+            if m.base_name:
+                self.instance_per_type_metrics[m.__class__.__name__].append(m.base_name)
 
     def get_sql_type(self, counter_name):
         """
@@ -306,7 +282,7 @@ class SQLServer(AgentCheck):
 
         return sql_type, base_name
 
-    def typed_metric(self, cfg_inst, table, base_name, user_type, sql_type, column):
+    def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_type=None, column=None):
         """
         Create the appropriate SqlServerMetric object, each implementing its method to
         fetch the metrics properly.
@@ -490,6 +466,11 @@ class SqlServerMetric(object):
         self.instances = None
         self.past_values = {}
         self.log = logger
+
+    def __repr__(self):
+        return '<{} datadog_name={!r}, sql_name={!r}, base_name={!r} column={!r}>'.format(
+            self.__class__.__name__, self.datadog_name, self.sql_name, self.base_name, self.column
+        )
 
     def fetch_metrics(self, cursor, tags):
         raise NotImplementedError
