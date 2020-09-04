@@ -485,6 +485,29 @@ def _parse_index_metric_tag(metric_tag):
 
 def _parse_index_slices(metric_tag):
     # type: (ColumnTableMetricTag) -> List[slice]
+    """
+    Transform index_transform into list of index slices.
+
+    `index_transform` is needed to support tagging using another table with different indexes.
+
+    Example: TableB have two indexes indexX (1 digit) and indexY (3 digits).
+        We want to tag by an external TableA that have indexY (3 digits).
+
+        For example TableB has a row with full index `1.2.3.4`, indexX is `1` and indexY is `2.3.4`.
+        TableA has a row with full index `2.3.4`, indexY is `2.3.4` (matches indexY of TableB).
+
+        SNMP integration doesn't know how to compare the full indexes from TableB and TableA.
+        We need to extract a subset of the full index of TableB to match with TableA full index.
+
+        Using the below `index_transform` we provide enough info to extract a subset of index that
+        will be used to match TableA's full index.
+
+        ```yaml
+        index_transform:
+          - start: 1
+          - end: 3
+        ```
+    """
     raw_index_slices = metric_tag.get('index_transform')
     index_slices = []  # type: List[slice]
 
