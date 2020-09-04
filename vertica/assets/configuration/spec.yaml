@@ -1,0 +1,197 @@
+name: Vertica
+
+files:
+  - name: vertica.yaml
+    options:
+      - template: init_config
+        options:
+          - name: global_custom_queries
+            description: |
+              See `custom_queries` defined below.
+
+              Global custom queries can be applied to all instances using the
+              `use_global_custom_queries` setting at the instance level.
+            value:
+              type: array
+              items:
+                type: object
+              default: null
+              example:
+                - query: <QUERY>
+                  columns: <COLUMNS>
+                  tags: <TAGS>
+      - template: instances
+        options:
+          - name: db
+            required: true
+            description: The name of the database to establish a connection with.
+            value:
+              type: string
+              example: <DATABASE_NAME>
+          - name: server
+            required: true
+            description: The hostname used to connect to the database.
+            value:
+              type: string
+              example: <SERVER>
+          - name: port
+            required: true
+            description: The port used to connect to the database.
+            value:
+              type: integer
+              example: 5433
+              default: 5433
+          - name: username
+            required: true
+            description: The database user to authenticate as.
+            value:
+              type: string
+              example: <USERNAME>
+          - name: password
+            description: The password of `username`.
+            value:
+              type: string
+              example: <PASSWORD>
+          - name: backup_servers
+            description: |
+              A list of backup servers to try if the primary `server` is unreachable.
+              If no port is specified, `port` will be used.
+            value:
+              type: array
+              items:
+                type: object
+              default: null
+              example:
+                - server: <SERVER_1>
+                  port: <PORT_1>
+                - server: <SERVER_2>
+                  port: <PORT_2>
+          - name: connection_load_balance
+            description: |
+              Whether or not to enable connection load balancing. This helps automatically spread
+              the overhead caused by client connections across clusters by having hosts redirect
+              client connections to other hosts. If the server disables connection load balancing,
+              load balancing requests is ignored.
+
+              Setting this to `true` will force the creation of a new connection at every check run.
+            value:
+              type: boolean
+              example: false
+              default: false
+          - name: timeout
+            description: The timeout for connecting to `server` or `backup_servers`.
+            value:
+              type: integer
+              example: 10
+              default: 10
+          - name: tls_verify
+            description: Whether or not to connect securely using TLS. The server must also support this.
+            value:
+              type: boolean
+              example: false
+              default: false
+          - name: validate_hostname
+            description: Whether or not to verify the TLS certificate was issued for `server` if `tls_verify` is true.
+            value:
+              type: boolean
+              example: true
+              default: true
+          - name: cert
+            description: |
+              The path to a single file in PEM format containing a certificate as well as any
+              number of CA certificates needed to establish the certificate’s authenticity for
+              use when connecting to `server`. It may also contain an unencrypted private key to use.
+
+              Setting this implicitly sets `tls_verify` to true.
+            value:
+              type: string
+              example: <CERT_PATH>
+          - name: private_key
+            description: |
+              The unencrypted private key to use for `cert` when connecting to `server`. This is
+              required if `cert` is set and it does not already contain a private key.
+            value:
+              type: string
+              example: <PRIVATE_KEY_PATH>
+          - name: ca_cert
+            description: |
+              The path to a file of concatenated CA certificates in PEM format or a directory
+              containing several CA certificates in PEM format. If a directory, the directory
+              must have been processed using the c_rehash utility supplied with OpenSSL. See:
+              https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+
+              Setting this implicitly sets `tls_verify` to true.
+            value:
+              type: string
+              example: <CA_CERT_PATH>
+          - template: instances/tags
+          - name: use_global_custom_queries
+            description: |
+              How `global_custom_queries` should be used for this instance. There are 3 options:
+
+              1. true - `global_custom_queries` overrides `custom_queries`
+              2. false - `custom_queries` overrides `global_custom_queries`
+              2. extend - `global_custom_queries` is used in addition to any `custom_queries`
+            value:
+              type: string
+              example: "true"
+              default: "true"
+          - name: custom_queries
+            description: |
+              Each query must have 2 fields:
+
+              1. query - This is the SQL to execute. It can be a simple statement or a multi-line script.
+              2. columns - This is a list representing each column, ordered sequentially from left to right.
+                           The number of columns must equal the number of columns returned in the query.
+                           There are 2 required pieces of data:
+                             a. name - This is the suffix to append to `vertica.` in order to form
+                                       the full metric name. If `type` is `tag`, this column will
+                                       instead be considered a tag and will be applied to every
+                                       metric collected by this particular query.
+                             b. type - This is the submission method (gauge, monotonic_count, etc.).
+                                       This can also be set to `tag` to tag each metric in the row
+                                       with the name and value of the item in this column. You can
+                                       use the `count` type to perform aggregation for queries that
+                                       return multiple rows with the same or no tags.
+              3. tags (optional) - A list of tags to apply to each metric.
+            value:
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: query
+                    type: string
+                  - name: columns
+                    type: array
+                    items:
+                      type: object
+                  - name: tags
+                    type: array
+                    items:
+                      type: string
+              example:
+                - query: SELECT force_outer, table_name FROM v_catalog.tables
+                  columns:
+                    - name: table.force_outer
+                      type: gauge
+                    - name: table_name
+                      type: tag
+                  tags:
+                    - test: vertica
+          - name: client_lib_log_level
+            description: |
+              Vertica library log level.
+              This option exists because vertica-python logging is disabled by default
+              and must be enabled explicitly.
+              When this option is not set, library logging is disabled, or set to DEBUG
+              when the Agent log level is DEBUG or lower (TRACE).
+              Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
+            value:
+              type: string
+              example: <CLIENT_LIB_LOG_LEVEL>
+          - template: logs
+            example:
+              - source: vertica
+                type: file
+                path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
+                service: vertica
