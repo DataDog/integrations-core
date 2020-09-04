@@ -9,27 +9,9 @@ from datadog_checks.dev import get_here
 
 HERE = get_here()
 
-IOT_EDGE_LIBIOTHSM_STD_URL = os.environ["IOT_EDGE_LIBIOTHSM_STD_URL"]
-IOT_EDGE_IOTEDGE_URL = os.environ["IOT_EDGE_IOTEDGE_URL"]
-IOT_EDGE_AGENT_IMAGE = os.environ["IOT_EDGE_AGENT_IMAGE"]
-
-# Must be passed explicitly when starting the environment.
-# Obtained from: `az iot hub device-identity connection-string show --device-id <DEVICE_ID> --hub-name <HUB_NAME>`
-IOT_EDGE_DEVICE_CONNECTION_STRING = os.getenv('IOT_EDGE_DEVICE_CONNECTION_STRING')
-if not IOT_EDGE_DEVICE_CONNECTION_STRING:
-    raise RuntimeError(
-        'IOT_EDGE_DEVICE_CONNECTION_STRING is not set or it is empty. '
-        'You must pass it explicitly, for example: `IOT_EDGE_DEVICE_CONNECTION_STRING ddev test ...`'
-    )
-
-IOT_EDGE_NETWORK = 'iot-edge-network'
-EDGE_HUB_PROMETHEUS_URL = 'http://localhost:9601/metrics'
-EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:9602/metrics'
-EDGE_AGENT_SPAWNED_CONTAINERS = [
-    # Spawned by the Edge Agent after device has started.
-    'edgeHub',
-    'SimulatedTemperatureSensor',
-]
+MOCK_SERVER_PORT = 9678
+MOCK_EDGE_HUB_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_hub.txt'.format(MOCK_SERVER_PORT)
+MOCK_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_agent.txt'.format(MOCK_SERVER_PORT)
 
 CUSTOM_TAGS = ['env:testing']
 
@@ -51,4 +33,31 @@ MODULES = [
     'edgeHub',
     'edgeAgent',
     'SimulatedTemperatureSensor',
+]
+
+E2E_LIBIOTHSM_STD_URL = os.environ['IOT_EDGE_E2E_LIBIOTHSM_STD_URL']
+E2E_IOTEDGE_URL = os.environ['IOT_EDGE_E2E_IOTEDGE_URL']
+E2E_IMAGE = os.environ['IOT_EDGE_E2E_IMAGE']
+
+# Obtained from: `az iot hub device-identity connection-string show --device-id <DEVICE_ID> --hub-name <HUB_NAME>`
+E2E_IOT_EDGE_CONNSTR = os.environ.get('IOT_EDGE_CONNSTR', '')
+
+E2E_NETWORK = 'iot-edge-network'
+E2E_EDGE_HUB_PROMETHEUS_URL = 'http://localhost:9601/metrics'
+E2E_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:9602/metrics'
+E2E_EXTRA_SPAWNED_CONTAINERS = [
+    # Spawned by the Edge Agent after device has started.
+    'edgeHub',
+    'SimulatedTemperatureSensor',
+]
+
+E2E_METRICS = [
+    'azure_iot_edge.edge_hub.queue.length',
+    'azure_iot_edge.edge_agent.total_network_out_bytes',
+]
+
+E2E_TAGS = [
+    *CUSTOM_TAGS,
+    'edge_device:testEdgeDevice',
+    'iothub:iot-edge-dev-hub.azure-devices.net',
 ]

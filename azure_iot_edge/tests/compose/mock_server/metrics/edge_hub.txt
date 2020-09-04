@@ -1,0 +1,101 @@
+# HELP edgehub_message_size_bytes Size of messages received by EdgeHub
+# TYPE edgehub_message_size_bytes summary
+edgehub_message_size_bytes_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor"} 10498
+edgehub_message_size_bytes_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor"} 25
+edgehub_message_size_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.5"} 420
+edgehub_message_size_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.9"} 421
+edgehub_message_size_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.95"} 421
+edgehub_message_size_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.99"} 421
+edgehub_message_size_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.999"} 421
+edgehub_message_size_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.9999"} 421
+# HELP edgehub_reported_properties_total Reported properties update calls
+# TYPE edgehub_reported_properties_total counter
+edgehub_reported_properties_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",ms_telemetry="True"} 2
+# HELP edgehub_messages_sent_total Messages sent from edge hub
+# TYPE edgehub_messages_sent_total counter
+edgehub_messages_sent_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",priority="2000000000",ms_telemetry="True"} 25
+# HELP edgehub_direct_methods_total Direct methods routed through EdgeHub
+# TYPE edgehub_direct_methods_total counter
+# HELP edgehub_queue_length Number of messages pending to be processed for the endpoint
+# TYPE edgehub_queue_length gauge
+edgehub_queue_length{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",endpoint="iothub",priority="2000000000",ms_telemetry="True"} 0
+# HELP edgehub_messages_received_total Number of messages received from client
+# TYPE edgehub_messages_received_total counter
+edgehub_messages_received_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/SimulatedTemperatureSensor",route_output="temperatureOutput",ms_telemetry="True"} 25
+# HELP edgehub_reported_properties_update_duration_seconds Time taken to update reported properties
+# TYPE edgehub_reported_properties_update_duration_seconds summary
+edgehub_reported_properties_update_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub"} 0.5469847
+edgehub_reported_properties_update_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub"} 2
+edgehub_reported_properties_update_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",quantile="0.5"} 0.2044147
+edgehub_reported_properties_update_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",quantile="0.9"} 0.2044147
+edgehub_reported_properties_update_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",quantile="0.95"} 0.2044147
+edgehub_reported_properties_update_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",quantile="0.99"} 0.2044147
+edgehub_reported_properties_update_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",quantile="0.999"} 0.2044147
+edgehub_reported_properties_update_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",target="upstream",id="testEdgeDevice/$edgeHub",quantile="0.9999"} 0.2044147
+# HELP edgehub_gettwin_duration_seconds Time taken to get twin
+# TYPE edgehub_gettwin_duration_seconds summary
+edgehub_gettwin_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor"} 0.1959954
+edgehub_gettwin_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor"} 1
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.5"} 0.1959954
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.9"} 0.1959954
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.95"} 0.1959954
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.99"} 0.1959954
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.999"} 0.1959954
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.9999"} 0.1959954
+edgehub_gettwin_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor"} 0.2954246
+edgehub_gettwin_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor"} 1
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.5"} 0.2954246
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.9"} 0.2954246
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.95"} 0.2954246
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.99"} 0.2954246
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.999"} 0.2954246
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",quantile="0.9999"} 0.2954246
+edgehub_gettwin_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub"} 0.2357509
+edgehub_gettwin_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub"} 1
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",quantile="0.5"} 0.2357509
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",quantile="0.9"} 0.2357509
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",quantile="0.95"} 0.2357509
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",quantile="0.99"} 0.2357509
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",quantile="0.999"} 0.2357509
+edgehub_gettwin_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",quantile="0.9999"} 0.2357509
+# HELP edgehub_message_process_duration_seconds Time taken to process message in EdgeHub
+# TYPE edgehub_message_process_duration_seconds summary
+edgehub_message_process_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True"} 1.0579599999999998
+edgehub_message_process_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True"} 25
+edgehub_message_process_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True",quantile="0.5"} 0.01056
+edgehub_message_process_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True",quantile="0.9"} 0.02155
+edgehub_message_process_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True",quantile="0.95"} 0.02206
+edgehub_message_process_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True",quantile="0.99"} 0.37066
+edgehub_message_process_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True",quantile="0.999"} 0.37066
+edgehub_message_process_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",priority="2000000000",ms_telemetry="True",quantile="0.9999"} 0.37066
+# HELP edgehub_messages_dropped_total Messages cleaned up because of TTL expired
+# TYPE edgehub_messages_dropped_total counter
+# HELP edgehub_message_send_duration_seconds Time taken to send a message
+# TYPE edgehub_message_send_duration_seconds summary
+edgehub_message_send_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input=""} 2.7219812
+edgehub_message_send_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input=""} 25
+edgehub_message_send_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",quantile="0.5"} 0.1032705
+edgehub_message_send_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",quantile="0.9"} 0.1104392
+edgehub_message_send_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",quantile="0.95"} 0.1130208
+edgehub_message_send_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",quantile="0.99"} 0.154805
+edgehub_message_send_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",quantile="0.999"} 0.154805
+edgehub_message_send_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",from="testEdgeDevice/SimulatedTemperatureSensor",to="upstream",from_route_output="temperatureOutput",to_route_input="",quantile="0.9999"} 0.154805
+# HELP edgehub_offline_count_total EdgeHub offline count
+# TYPE edgehub_offline_count_total counter
+# HELP edgehub_direct_method_duration_seconds Time taken to call direct method
+# TYPE edgehub_direct_method_duration_seconds summary
+# HELP edgehub_gettwin_total Get twin calls
+# TYPE edgehub_gettwin_total counter
+edgehub_gettwin_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="edge_hub",id="testEdgeDevice/SimulatedTemperatureSensor",ms_telemetry="True"} 1
+edgehub_gettwin_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/$edgeHub",ms_telemetry="True"} 1
+edgehub_gettwin_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",source="upstream",id="testEdgeDevice/SimulatedTemperatureSensor",ms_telemetry="True"} 1
+# HELP edgehub_offline_duration_seconds EdgeHub offline time
+# TYPE edgehub_offline_duration_seconds summary
+edgehub_offline_duration_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True"} 1.157
+edgehub_offline_duration_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True"} 1
+edgehub_offline_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True",quantile="0.5"} 1.157
+edgehub_offline_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True",quantile="0.9"} 1.157
+edgehub_offline_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True",quantile="0.95"} 1.157
+edgehub_offline_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True",quantile="0.99"} 1.157
+edgehub_offline_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True",quantile="0.999"} 1.157
+edgehub_offline_duration_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="92d783be-e1df-4e8a-a9a5-439385a2a2f7",id="testEdgeDevice/$edgeHub",ms_telemetry="True",quantile="0.9999"} 1.157

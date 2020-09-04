@@ -5,16 +5,16 @@ services:
     build:
       context: ./device
       args:
-        - IOT_EDGE_LIBIOTHSM_STD_URL=${IOT_EDGE_LIBIOTHSM_STD_URL}
-        - IOT_EDGE_IOTEDGE_URL=${IOT_EDGE_IOTEDGE_URL}
+        - LIBIOTHSM_STD_URL=${E2E_LIBIOTHSM_STD_URL}
+        - IOTEDGE_URL=${E2E_IOTEDGE_URL}
     container_name: iot-edge-device
     hostname: edgehub
     ports:
       - "15580:15580" # Required for IoT Edge inter-container communications.
       - "15581:15581" # Required for IoT Edge inter-container communications.
     environment:
-      - IOT_EDGE_AGENT_IMAGE=${IOT_EDGE_AGENT_IMAGE}
-      - IOT_EDGE_DEVICE_CONNECTION_STRING=${IOT_EDGE_DEVICE_CONNECTION_STRING}
+      - IOT_EDGE_AGENT_IMAGE=${E2E_IMAGE}
+      - IOT_EDGE_DEVICE_CONNECTION_STRING=${E2E_IOT_EDGE_CONNSTR}
       - IOT_EDGE_NETWORK=iot-edge-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
