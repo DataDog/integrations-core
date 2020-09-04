@@ -484,8 +484,10 @@ def _parse_index_metric_tag(metric_tag):
 
 
 def _parse_index_slices(metric_tag):
-    index_slices = []  # type: List[slice]
+    # type: (ColumnTableMetricTag) -> List[slice]
     raw_index_slices = metric_tag.get('index_transform')
+    index_slices = []  # type: List[slice]
+
     if raw_index_slices:
         for rule in raw_index_slices:
             if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
@@ -499,7 +501,8 @@ def _parse_index_slices(metric_tag):
                 )
             if start < 0:
                 raise ConfigurationError('Transform rule start must be greater than 0. Invalid rule: {}'.format(rule))
-
+            # For a better user experience, the `end` in metrics definition is inclusive.
+            # We +1 to `end` since the `end` in python slices is exclusive.
             index_slices.append(slice(start, end + 1))
-    return index_slices
 
+    return index_slices
