@@ -373,7 +373,7 @@ def transform_index(src_index, index_slices):
     A transform rule is slice and is used to extract a subset of the source index.
 
     ```python
-    >>> transform_index(('10', '11', '12', '13'), [(2, 2), (0, 1)])
+    >>> transform_index(('10', '11', '12', '13'), [slice(2, 3), slice(0, 2)])
     ('12', '10', '11')
     ```
     """
