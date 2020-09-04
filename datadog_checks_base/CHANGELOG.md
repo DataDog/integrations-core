@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 13.1.0 / 2020-09-04
+
+* [Added] Add the new env parameter to get_subprocess_output. See [#7479](https://github.com/DataDog/integrations-core/pull/7479).
+
 ## 13.0.0 / 2020-09-01
 
 * [Fixed] Fix indentation of new "close" method in tailer. See [#7463](https://github.com/DataDog/integrations-core/pull/7463).
