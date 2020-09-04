@@ -447,31 +447,13 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
 
     batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
 
-    index_slices = []  # type: List[slice]
-    raw_index_transform = metric_tag.get('index_transform')
-    if raw_index_transform:
-        for rule in raw_index_transform:
-            if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
-                raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
-            start, end = rule['start'], rule['end']
-            if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
-                raise ConfigurationError('Transform rule start and end must be integers. Invalid rule: {}'.format(rule))
-            if start > end:
-                raise ConfigurationError(
-                    'Transform rule end should be greater than start. Invalid rule: {}'.format(rule)
-                )
-            if start < 0:
-                raise ConfigurationError('Transform rule start must be greater than 0. Invalid rule: {}'.format(rule))
-
-            index_slices.append(slice(start, end + 1))
-
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
         column_tags=[
             ColumnTag(
                 parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)),
                 column=parsed_column.name,
-                index_slices=index_slices,
+                index_slices=_parse_index_slices(metric_tag),
             )
         ],
         table_batches=batches,
@@ -499,3 +481,25 @@ def _parse_index_metric_tag(metric_tag):
     index_mappings = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else {}
 
     return ParsedIndexMetricTag(index_tags=index_tags, index_mappings=index_mappings)
+
+
+def _parse_index_slices(metric_tag):
+    index_slices = []  # type: List[slice]
+    raw_index_slices = metric_tag.get('index_transform')
+    if raw_index_slices:
+        for rule in raw_index_slices:
+            if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
+                raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
+            start, end = rule['start'], rule['end']
+            if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
+                raise ConfigurationError('Transform rule start and end must be integers. Invalid rule: {}'.format(rule))
+            if start > end:
+                raise ConfigurationError(
+                    'Transform rule end should be greater than start. Invalid rule: {}'.format(rule)
+                )
+            if start < 0:
+                raise ConfigurationError('Transform rule start must be greater than 0. Invalid rule: {}'.format(rule))
+
+            index_slices.append(slice(start, end + 1))
+    return index_slices
+
