@@ -1,5 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.23.0 / 2020-09-04
+
+* [Added] Add initial validations for EULA files. See [#7473](https://github.com/DataDog/integrations-core/pull/7473).
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Added] Change old_payload warning to failure. See [#7419](https://github.com/DataDog/integrations-core/pull/7419).
+* [Added] Support service checks in recommended monitors. See [#7423](https://github.com/DataDog/integrations-core/pull/7423).
+* [Fixed] Apply overrides recursively to config specs. See [#7497](https://github.com/DataDog/integrations-core/pull/7497).
+* [Fixed] Pin style deps. See [#7485](https://github.com/DataDog/integrations-core/pull/7485).
+* [Fixed] Fix ddev create for jmx. See [#7346](https://github.com/DataDog/integrations-core/pull/7346).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 3.22.0 / 2020-08-24
 
 * [Added] Auto assign card. See [#7347](https://github.com/DataDog/integrations-core/pull/7347).
