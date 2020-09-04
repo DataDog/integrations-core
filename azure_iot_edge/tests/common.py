@@ -25,15 +25,270 @@ HUB_METRICS = [
     ('azure_iot_edge.edge_hub.queue.length', AggregatorStub.GAUGE),
 ]  # type: List[Tuple[str, int]]
 
-MODULE_METRICS = [
-    ('azure_iot_edge.edge_agent.total_network_out_bytes', AggregatorStub.GAUGE),
-]  # type: List[Tuple[str, int]]
+AGENT_METRICS = [
+    (
+        'azure_iot_edge.edge_agent.iotedged_uptime_seconds',
+        AggregatorStub.GAUGE,
+        [],
+    ),
+    (
+        'azure_iot_edge.edge_agent.unsuccessful_iothub_syncs_total',
+        AggregatorStub.MONOTONIC_COUNT,
+        [],
+    ),
+    (
+        'azure_iot_edge.edge_agent.iothub_syncs_total',
+        AggregatorStub.MONOTONIC_COUNT,
+        [],
+    ),
+    (
+        'azure_iot_edge.edge_agent.host_uptime_seconds',
+        AggregatorStub.GAUGE,
+        [],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.sum',
+        AggregatorStub.GAUGE,
+        [],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.count',
+        AggregatorStub.GAUGE,
+        [],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['quantile:0.5'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['quantile:0.9'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['quantile:0.95'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['quantile:0.99'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['quantile:0.999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.deployment_time_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['quantile:0.9999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.sum',
+        AggregatorStub.GAUGE,
+        ['module_name:host'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.count',
+        AggregatorStub.GAUGE,
+        ['module_name:host'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.quantile',
+        AggregatorStub.GAUGE,
+        ['module_name:host', 'quantile:0.5'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.quantile',
+        AggregatorStub.GAUGE,
+        ['module_name:host', 'quantile:0.9'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.quantile',
+        AggregatorStub.GAUGE,
+        ['module_name:host', 'quantile:0.95'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.quantile',
+        AggregatorStub.GAUGE,
+        ['module_name:host', 'quantile:0.99'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.quantile',
+        AggregatorStub.GAUGE,
+        ['module_name:host', 'quantile:0.999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.used_cpu_percent.quantile',
+        AggregatorStub.GAUGE,
+        ['module_name:host', 'quantile:0.9999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.sum',
+        AggregatorStub.GAUGE,
+        ['command:wrap'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.count',
+        AggregatorStub.GAUGE,
+        ['command:wrap'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:wrap', 'quantile:0.5'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:wrap', 'quantile:0.9'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:wrap', 'quantile:0.95'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:wrap', 'quantile:0.99'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:wrap', 'quantile:0.999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:wrap', 'quantile:0.9999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.sum',
+        AggregatorStub.GAUGE,
+        ['command:create'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.count',
+        AggregatorStub.GAUGE,
+        ['command:create'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:create', 'quantile:0.5'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:create', 'quantile:0.9'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:create', 'quantile:0.95'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:create', 'quantile:0.99'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:create', 'quantile:0.999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:create', 'quantile:0.9999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.sum',
+        AggregatorStub.GAUGE,
+        ['command:start'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.count',
+        AggregatorStub.GAUGE,
+        ['command:start'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:start', 'quantile:0.5'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:start', 'quantile:0.9'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:start', 'quantile:0.95'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:start', 'quantile:0.99'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:start', 'quantile:0.999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.command_latency_seconds.quantile',
+        AggregatorStub.GAUGE,
+        ['command:start', 'quantile:0.9999'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.module_start_total',
+        AggregatorStub.MONOTONIC_COUNT,
+        ['module_name:edgeHub', 'module_version:'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.module_start_total',
+        AggregatorStub.MONOTONIC_COUNT,
+        ['module_name:SimulatedTemperatureSensor', 'module_version:1.0'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.module_stop_total',
+        AggregatorStub.MONOTONIC_COUNT,
+        ['module_name:edgeHub', 'module_version:'],
+    ),
+    (
+        'azure_iot_edge.edge_agent.module_stop_total',
+        AggregatorStub.MONOTONIC_COUNT,
+        ['module_name:SimulatedTemperatureSensor', 'module_version:1.0'],
+    ),
+]  # type: List[Tuple[str, int, List[str]]]
 
 MODULES = [
     'edgeHub',
     'edgeAgent',
     'SimulatedTemperatureSensor',
 ]
+
+MODULE_METRICS = [
+    (
+        'azure_iot_edge.edge_agent.total_network_in_bytes',
+        AggregatorStub.GAUGE,
+    ),
+    ('azure_iot_edge.edge_agent.total_network_out_bytes', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.total_disk_read_bytes', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.total_disk_write_bytes', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.total_disk_space_bytes', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.created_pids_total', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.total_time_expected_running_seconds', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.total_time_running_correctly_seconds', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.used_memory_bytes', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_agent.total_memory_bytes', AggregatorStub.GAUGE),
+]  # type: List[Tuple[str, int]]
 
 E2E_LIBIOTHSM_STD_URL = os.environ['IOT_EDGE_E2E_LIBIOTHSM_STD_URL']
 E2E_IOTEDGE_URL = os.environ['IOT_EDGE_E2E_IOTEDGE_URL']
@@ -51,10 +306,20 @@ E2E_EXTRA_SPAWNED_CONTAINERS = [
     'SimulatedTemperatureSensor',
 ]
 
-E2E_METRICS = [
-    'azure_iot_edge.edge_hub.queue.length',
-    'azure_iot_edge.edge_agent.total_network_out_bytes',
-]
+E2E_METRICS = (
+    # All metrics...
+    {name for name, _ in MODULE_METRICS}
+    .union(name for name, _, _ in AGENT_METRICS)
+    .union(name for name, _ in HUB_METRICS)
+    # ... Except a few that don't get emitted by default.
+    .difference(
+        {
+            'azure_iot_edge.edge_agent.module_stop_total',
+            'azure_iot_edge.edge_agent.unsuccessful_iothub_syncs_total',
+            'azure_iot_edge.edge_agent.total_disk_space_bytes',
+        }
+    )
+)
 
 E2E_TAGS = [
     *CUSTOM_TAGS,

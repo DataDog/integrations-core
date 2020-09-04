@@ -18,6 +18,10 @@ def test_check(aggregator, mock_instance):
     for metric, metric_type in common.HUB_METRICS:
         aggregator.assert_metric(metric, metric_type=metric_type, count=1, tags=common.TAGS)
 
+    for metric, metric_type, metric_tags in common.AGENT_METRICS:
+        tags = common.TAGS + metric_tags
+        aggregator.assert_metric(metric, metric_type=metric_type, count=1, tags=tags)
+
     for metric, metric_type in common.MODULE_METRICS:
         for module_name in common.MODULES:
             tags = common.TAGS + ['module_name:{}'.format(module_name)]

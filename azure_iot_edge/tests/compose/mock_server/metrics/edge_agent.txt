@@ -29,6 +29,9 @@ edgeAgent_total_disk_read_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge
 edgeAgent_total_disk_read_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 0
 # HELP edgeAgent_total_disk_space_bytes Size of the disk
 # TYPE edgeAgent_total_disk_space_bytes gauge
+edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="edgeAgent",ms_telemetry="True"} 1073741824
+edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="edgeHub",ms_telemetry="True"} 1073741824
+edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 1073741824
 # HELP edgeAgent_created_pids_total The number of processes or threads the container has created
 # TYPE edgeAgent_created_pids_total gauge
 edgeAgent_created_pids_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="edgeAgent",ms_telemetry="True"} 19
@@ -41,6 +44,7 @@ edgeAgent_total_time_expected_running_seconds{iothub="iot-edge-dev-hub.azure-dev
 edgeAgent_total_time_expected_running_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="edgeHub",ms_telemetry="True"} 121.1710063
 # HELP edgeAgent_unsuccessful_iothub_syncs_total The amount of times edgeAgent failed to sync with iotHub
 # TYPE edgeAgent_unsuccessful_iothub_syncs_total counter
+edgeAgent_unsuccessful_iothub_syncs_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",ms_telemetry="True"} 0
 # HELP edgeAgent_total_time_running_correctly_seconds The amount of time the module was specified in the deployment and was in the running state
 # TYPE edgeAgent_total_time_running_correctly_seconds gauge
 edgeAgent_total_time_running_correctly_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="edgeAgent",ms_telemetry="True"} 128.385844
@@ -115,3 +119,5 @@ edgeAgent_module_start_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_de
 edgeAgent_metadata{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",edge_agent_version="1.0.10-rc2.34217022 (029016ef1bf82dec749161d95c6b73aa5ee9baf1)",experimental_features="{\"Enabled\":true,\"DisableCloudSubscriptions\":false}",host_information="{\"OperatingSystemType\":\"linux\",\"Architecture\":\"x86_64\",\"Version\":\"1.0.10~rc2\",\"ServerVersion\":\"19.03.12\",\"KernelVersion\":\"4.19.76-linuxkit\",\"OperatingSystem\":\"Docker Desktop\",\"NumCpus\":4}",ms_telemetry="True"} 0
 # HELP edgeAgent_module_stop_total Command sent to module
 # TYPE edgeAgent_module_stop_total counter
+edgeAgent_module_stop_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="SimulatedTemperatureSensor",module_version="1.0",ms_telemetry="True"} 0
+edgeAgent_module_stop_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="03968cdc-21a7-4106-a3cd-a3c7d097ae01",module_name="edgeHub",module_version="",ms_telemetry="True"} 0
