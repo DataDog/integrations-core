@@ -23,6 +23,11 @@ instances:
     #
     port: 8126
 
+    ## @param timeout - integer - optional - default: 10
+    ## Custom timeout for your check request.
+    #
+    # timeout: 10
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

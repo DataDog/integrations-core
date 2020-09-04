@@ -20,4 +20,9 @@ files:
             value:
               example: 8126
               type: integer
+          - name: timeout
+            description: Custom timeout for your check request.
+            value:
+              type: integer
+              example: 10
           - template: instances/default
