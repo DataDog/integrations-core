@@ -118,6 +118,12 @@ Agent auto-discovery combined with Cluster Agent is very scalable, it can be use
 
 First you need to [add Datadog Helm repository](https://github.com/DataDog/helm-charts).
 
+    ```
+    $ helm repo add datadog https://helm.datadoghq.com
+    $ helm repo update
+    ```
+
+
 Then run:
 
 ```bash
