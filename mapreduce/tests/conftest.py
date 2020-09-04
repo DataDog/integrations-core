@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-import subprocess
 from copy import deepcopy
 
 import pytest
-import requests
+from datadog_test_libs.utils.mock_dns import mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run
@@ -16,28 +15,32 @@ from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
     CLUSTER_INFO_URL,
-    CONTAINER_NAME,
     HERE,
     HOST,
     INSTANCE_INTEGRATION,
+    MOCKED_E2E_HOSTS,
     MR_JOB_COUNTERS_URL,
     MR_JOBS_URL,
     MR_TASKS_URL,
     TEST_PASSWORD,
     TEST_USERNAME,
     YARN_APPS_URL_BASE,
+    setup_mapreduce,
 )
+
+MOCKED_HOSTS = ('namenode', 'datanode', 'resourcemanager', 'nodemanager', 'historyserver')
 
 
 @pytest.fixture(scope="session")
-def dd_environment():
+def dd_environment(mock_local_mapreduce_dns):
     env = {'HOSTNAME': HOST}
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        conditions=[WaitFor(setup_mapreduce, attempts=240, wait=5)],
+        conditions=[WaitFor(setup_mapreduce, attempts=5, wait=5)],
         env_vars=env,
     ):
-        yield INSTANCE_INTEGRATION
+        # 'custom_hosts' in metadata provides native /etc/hosts mappings in the agent's docker container
+        yield INSTANCE_INTEGRATION, {'custom_hosts': get_custom_hosts()}
 
 
 @pytest.fixture
@@ -62,28 +65,17 @@ def mocked_auth_request():
         yield
 
 
-def setup_mapreduce():
-    # Run a job in order to get metrics from the environment
-    subprocess.Popen(
-        [
-            'docker',
-            'exec',
-            CONTAINER_NAME,
-            '/usr/local/hadoop/bin/yarn',
-            'jar',
-            '/usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar',
-            'grep',
-            'input',
-            'output',
-            '\'dfs[a-z.]+\'',
-        ],
-        close_fds=True,
-    )
+@pytest.fixture(scope='session')
+def mock_local_mapreduce_dns():
+    mapping = {x: ('127.0.0.1', 443) for x in MOCKED_HOSTS}
+    with mock_local(mapping):
+        yield
 
-    # Called in WaitFor which catches exceptions
-    r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
 
-    return r.json().get("apps", None) is not None
+def get_custom_hosts():
+    # creat a mapping of mapreduce hostnames to localhost for DNS resolution
+    custom_hosts = [(host, '127.0.0.1') for host in MOCKED_E2E_HOSTS]
+    return custom_hosts
 
 
 def requests_get_mock(*args, **kwargs):

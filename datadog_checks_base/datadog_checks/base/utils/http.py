@@ -15,7 +15,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
-from .common import ensure_unicode
+from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .warnings_util import disable_warnings_ctx
 
@@ -70,6 +70,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_verify': True,
     'timeout': DEFAULT_TIMEOUT,
+    'use_legacy_auth_encoding': True,
     'username': None,
 }
 # For any known legacy fields that may be widespread
@@ -428,7 +429,10 @@ def should_bypass_proxy(url, no_proxy_uris):
 def create_basic_auth(config):
     # Since this is the default case, only activate when all fields are explicitly set
     if config['username'] and config['password']:
-        return (config['username'], config['password'])
+        if config['use_legacy_auth_encoding']:
+            return config['username'], config['password']
+        else:
+            return ensure_bytes(config['username']), ensure_bytes(config['password'])
 
 
 def create_digest_auth(config):

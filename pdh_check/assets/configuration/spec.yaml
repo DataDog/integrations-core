@@ -1,0 +1,60 @@
+name: PDH
+files:
+- name: pdh_check.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: admin_share
+      description: |
+        The administrative share to connect to. Can be a drive or the `ipc$` share if available.
+        Note that to be able to connect to remote hosts the administrative share needs to be enabled and the
+        user needs network administrator permissions
+        If the remote machine doesn't expose any, set this to the empty string `""` to connect without an admin share.
+      value:
+        example: c$
+        type: string
+    - name: countersetname
+      required: true
+      description: |
+        The name of the performance counter set.
+
+          The following example fetches the number of processes and users:
+          # - countersetname: Processor
+          #   metrics:
+          #     - ['% Processor Time', pdh.processor.time, gauge]
+          #     - ['% User Time', pdh.processor.user.time, gauge]
+
+      value:
+        example: <COUNTER_SET_NAME>
+        type: string
+    - name: metrics
+      required: true
+      description: |
+        A list of metrics you want to capture, with each item in the
+        list being a set of [<COUNTER_NAME>, <METRIC_NAME>, <METRIC_TYPE>]:
+          * <COUNTER_NAME> is something like `NumberOfUsers` or `ThreadCount`.
+                           The standard properties are also available on the MSDN docs for each
+                           class. It's recommend to wrap the property in quotes to avoid YAML parsing
+                           issues.
+          * <METRIC_NAME> is the metric name you want to show up in Datadog.
+          * <METRIC_TYPE> is from the standard choices for all agent checks, such
+                          as gauge, rate, histogram or counter.
+      value:
+        example:
+          - [<COUNTER_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
+        type: array
+        compact_example: true
+        items:
+          type: array
+          items:
+            type: string
+    - template: instances/pdh
+      overrides:
+        additional_metrics.hidden: true
+        host.display_priority: 1
+        username.display_priority: 1
+        password.display_priority: 1
+    - template: instances/default

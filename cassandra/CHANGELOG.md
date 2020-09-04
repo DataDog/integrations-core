@@ -1,5 +1,9 @@
 # CHANGELOG - cassandra
 
+## 1.7.0 / 2020-08-10
+
+* [Added] Add config specs. See [#7308](https://github.com/DataDog/integrations-core/pull/7308).
+
 ## 1.6.1 / 2020-06-29
 
 * [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).

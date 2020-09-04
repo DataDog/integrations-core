@@ -81,7 +81,7 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 30
+        example: 5
     - name: stored_procedure
       description: |
         Get metrics from custom proc in MyDB but only if the database is writable
@@ -102,6 +102,11 @@ files:
         example: master
     - name: ignore_missing_database
       description: If the DB specified doesn't exist on the server then don't do the check
+      value:
+        type: boolean
+        example: false
+    - name: include_task_scheduler_metrics
+      description: Include additional Task and Scheduler metrics
       value:
         type: boolean
         example: false

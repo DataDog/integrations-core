@@ -71,10 +71,10 @@ instances:
     #
     # connection_string: <CONNECTION_STRING>
 
-    ## @param command_timeout - integer - optional - default: 30
+    ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 30
+    # command_timeout: 5
 
     ## @param stored_procedure - string - optional
     ## Get metrics from custom proc in MyDB but only if the database is writable
@@ -98,6 +98,11 @@ instances:
     #
     # ignore_missing_database: false
 
+    ## @param include_task_scheduler_metrics - boolean - optional - default: false
+    ## Include additional Task and Scheduler metrics
+    #
+    # include_task_scheduler_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -114,7 +119,7 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

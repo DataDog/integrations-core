@@ -20,6 +20,7 @@ except ImportError:
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_invalid_password(aggregator, init_config, instance_docker):
+
     instance_docker['password'] = 'FOO'
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -70,28 +71,37 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     cursor.execute(sqlDropSP)
 
     # Stored Procedure Create Statement
-    sqlCreateSP = 'CREATE PROCEDURE {0} AS \
-                BEGIN \
-                    CREATE TABLE #Datadog \
-                    ( \
-                      [metric] varchar(255) not null, \
-                      [type] varchar(50) not null, \
-                      [value] float not null, \
-                      [tags] varchar(255) \
-                    ) \
-                    SET NOCOUNT ON; \
-                    INSERT INTO #Datadog (metric, type, value, tags) VALUES \
-                        ("sql.sp.testa", "gauge", 100, "{1}"), \
-                        ("sql.sp.testb", "gauge", 1, "{1}"), \
-                        ("sql.sp.testb", "gauge", 2, "{1}"); \
-                    SELECT * FROM #Datadog; \
-                END;'.format(
+    # Note: the INSERT statement uses single quotes (') intentionally
+    # Double-quotes caused the odd error: "Invalid column name 'sql.sp.testa'."
+    # https://dba.stackexchange.com/a/219875
+    sqlCreateSP = """\
+    CREATE PROCEDURE {0} AS
+        BEGIN
+            CREATE TABLE #Datadog
+            (
+              [metric] varchar(255) not null,
+              [type] varchar(50) not null,
+              [value] float not null,
+              [tags] varchar(255)
+            )
+            SET NOCOUNT ON;
+            INSERT INTO #Datadog (metric, type, value, tags) VALUES
+                ('sql.sp.testa', 'gauge', 100, '{1}'),
+                ('sql.sp.testb', 'gauge', 1, '{1}'),
+                ('sql.sp.testb', 'gauge', 2, '{1}');
+            SELECT * FROM #Datadog;
+        END;
+        """.format(
         proc, sp_tags
     )
     cursor.execute(sqlCreateSP)
 
-    # For debugging. Calls the stored procedure and prints the results.
-    # cursor.execute(proc)
+    # # For debugging. Calls the stored procedure and prints the results.
+    # # use call_proc for macOS
+    # call_proc = '{{CALL {}}}'.format(proc)
+    # cursor.execute(call_proc)
+    # # otherwise just execute proc directly
+    # # cursor.execute(proc)
     # rows = cursor.fetchall()
     # while rows:
     #     print(rows)
@@ -162,6 +172,6 @@ def _assert_metrics(aggregator, expected_tags):
     """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
     for mname in EXPECTED_METRICS:
-        aggregator.assert_metric(mname, count=1)
+        aggregator.assert_metric(mname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()

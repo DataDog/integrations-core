@@ -25,7 +25,7 @@ from .util import (
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, get_raw_version, parse_version, transform_version
+from .version_utils import V9, get_raw_version, is_aurora, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -41,6 +41,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
+        self._is_aurora = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -53,6 +54,7 @@ class PostgreSql(AgentCheck):
 
     def _clean_state(self):
         self._version = None
+        self._is_aurora = None
         self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
@@ -70,9 +72,14 @@ class PostgreSql(AgentCheck):
             self.set_metadata('version', raw_version)
         return self._version
 
+    @property
+    def is_aurora(self):
+        if self._is_aurora is None:
+            self._is_aurora = is_aurora(self.db)
+        return self._is_aurora
+
     def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility
-        """
+        """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
 
         for element in yamlconfig:
@@ -125,10 +132,10 @@ class PostgreSql(AgentCheck):
 
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
-            # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignore it.
+            # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
+            self._is_aurora = None
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -227,9 +234,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self, instance_tags,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -252,8 +257,8 @@ class PostgreSql(AgentCheck):
             metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(self.config.relations)
 
-        replication_metrics = self.metrics_cache.get_replication_metrics(self.version)
-        if replication_metrics is not None:
+        replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
+        if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)

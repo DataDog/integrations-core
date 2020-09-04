@@ -27,7 +27,7 @@ For the list of supported types, see the [`snmpsim` simulation data file format]
 For [symbol metrics](./profile-format.md#symbol-metrics), add a single line corresponding to the symbol OID. For example:
 
 ```console
-1.3.6.1.4.1.232.6.2.8.1|2|1051200
+1.3.6.1.4.1.232.6.2.8.1.0|2|1051200
 ```
 
 ## Tables

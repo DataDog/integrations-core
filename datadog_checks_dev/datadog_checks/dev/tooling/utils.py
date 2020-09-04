@@ -7,11 +7,12 @@ import json
 import os
 import re
 from ast import literal_eval
+from json.decoder import JSONDecodeError
 
 import requests
 import semver
 
-from ..utils import dir_exists, file_exists, read_file, write_file
+from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
@@ -119,6 +120,13 @@ def normalize_package_name(package_name):
     return re.sub(r'[-_. ]+', '_', package_name).lower()
 
 
+def normalize_display_name(display_name):
+    normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+    normalized_integration = re.sub("_+", "_", normalized_integration)
+    normalized_integration = normalized_integration.strip("_")
+    return normalized_integration.lower()
+
+
 def string_to_toml_type(s):
     if s.isdigit():
         s = int(s)
@@ -138,6 +146,10 @@ def get_check_file(check_name):
 
 def get_readme_file(check_name):
     return os.path.join(get_root(), check_name, 'README.md')
+
+
+def get_setup_file(check_name):
+    return os.path.join(get_root(), check_name, 'setup.py')
 
 
 def check_root():
@@ -239,13 +251,25 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
 
-def get_saved_views(check_name):
-    paths = load_manifest(check_name).get('assets', {}).get('saved_views', {})
-    views = []
+def get_eula_from_manifest(check_name):
+    path = load_manifest(check_name).get('terms', {}).get('eula')
+    path = os.path.join(get_root(), check_name, *path.split('/'))
+    return path, file_exists(path)
+
+
+def get_assets_from_manifest(check_name, asset_type):
+    paths = load_manifest(check_name).get('assets', {}).get(asset_type, {})
+    assets = []
+    nonexistent_assets = []
     for path in paths.values():
-        view = os.path.join(get_root(), check_name, *path.split('/'))
-        views.append(view)
-    return sorted(views)
+        asset = os.path.join(get_root(), check_name, *path.split('/'))
+
+        if not file_exists(asset):
+            nonexistent_assets.append(path)
+            continue
+        else:
+            assets.append(asset)
+    return sorted(assets), nonexistent_assets
 
 
 def get_config_file(check_name):
@@ -281,6 +305,12 @@ def get_check_directory(check_name):
 
 def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
+
+
+def get_codeowners():
+    codeowners_file = os.path.join(get_root(), '.github', 'CODEOWNERS')
+    contents = read_file_lines(codeowners_file)
+    return contents
 
 
 def get_config_files(check_name):
@@ -366,6 +396,16 @@ def read_metadata_rows(metadata_file):
             yield line_no, row
 
 
+def read_readme_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
+        yield line_no, line
+
+
+def read_setup_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_setup_file(check_name))):
+        yield line_no, line
+
+
 def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
@@ -396,7 +436,7 @@ def load_manifest(check_name):
 
 def load_saved_views(path):
     """
-    Load the manifest file into a dictionary
+    Load the saved view file into a dictionary
     """
     if file_exists(path):
         return json.loads(read_file(path).strip())
@@ -458,6 +498,16 @@ def has_e2e(check):
                     if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
+
+
+def has_process_signature(check):
+    manifest_file = get_manifest_file(check)
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+    return len(manifest.get('process_signatures', [])) > 0
 
 
 def is_tile_only(check):

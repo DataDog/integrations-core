@@ -1,5 +1,10 @@
 # CHANGELOG - kafka
 
+## 2.2.0 / 2020-08-10
+
+* [Added] Add config specs. See [#7271](https://github.com/DataDog/integrations-core/pull/7271).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
 ## 2.1.1 / 2020-06-29
 
 * [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).

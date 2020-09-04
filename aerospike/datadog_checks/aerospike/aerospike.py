@@ -218,12 +218,21 @@ class AerospikeCheck(AgentCheck):
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         data = self._client.info_node(command, self._host, self._info_policies)
+        self.log.debug(
+            "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
+            command,
+            self._host,
+            self._info_policies,
+            data,
+        )
 
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
         if not separator:
             return data
+        if not data:
+            return []
 
         return data.split(separator)
 

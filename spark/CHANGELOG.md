@@ -1,5 +1,18 @@
 # CHANGELOG - spark
 
+## 1.15.0 / 2020-09-03
+
+* [Added] Add Stage and Job ID tags. See [#7459](https://github.com/DataDog/integrations-core/pull/7459).
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
+## 1.14.0 / 2020-08-10
+
+* [Added] Add documentation for spark logs. See [#7109](https://github.com/DataDog/integrations-core/pull/7109).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
 ## 1.13.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).

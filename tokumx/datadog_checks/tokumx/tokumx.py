@@ -209,7 +209,7 @@ class TokuMX(AgentCheck):
 
     def create_event(self, state, server):
         """Create an event with a message describing the replication
-            state of a mongo node"""
+        state of a mongo node"""
 
         def get_state_description(state):
             if state == 0:

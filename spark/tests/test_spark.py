@@ -506,7 +506,14 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
     'spark.job.num_failed_stages': 100,
 }
 
-SPARK_JOB_RUNNING_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:running']
+SPARK_JOB_RUNNING_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:running',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+]
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -521,7 +528,14 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.num_failed_stages': 9000,
 }
 
-SPARK_JOB_SUCCEEDED_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:succeeded']
+SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:succeeded',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+]
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -541,7 +555,12 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 16 * 3,
 }
 
-SPARK_STAGE_RUNNING_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:running']
+SPARK_STAGE_RUNNING_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:running',
+    'stage_id:1',
+]
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -561,7 +580,12 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 113 * 2,
 }
 
-SPARK_STAGE_COMPLETE_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'status:complete']
+SPARK_STAGE_COMPLETE_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'status:complete',
+    'stage_id:0',
+]
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
@@ -1088,7 +1112,11 @@ def run_ssl_server():
             id='standalone',
         ),
         pytest.param(
-            INSTANCE_DRIVER, 'spark.driver.can_connect', 'SparkDriver', 'http://{}:4040'.format(HOST), id='driver',
+            INSTANCE_DRIVER,
+            'spark.driver.can_connect',
+            'SparkDriver',
+            'http://{}:4040'.format(HOST),
+            id='driver',
         ),
     ],
 )
@@ -1137,5 +1165,7 @@ def test_integration(aggregator, instance, service_check, cluster_name, spark_ur
     #     aggregator.assert_metric(metric)
 
     aggregator.assert_service_check(
-        service_check, status=SparkCheck.OK, tags=['cluster_name:{}'.format(cluster_name), 'url:{}'.format(spark_url)],
+        service_check,
+        status=SparkCheck.OK,
+        tags=['cluster_name:{}'.format(cluster_name), 'url:{}'.format(spark_url)],
     )

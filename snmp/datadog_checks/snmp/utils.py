@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 import os
 from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
@@ -20,6 +21,8 @@ from .pysnmp_types import (
     noSuchInstance,
 )
 from .types import T
+
+logger = logging.getLogger(__name__)
 
 
 def get_profile_definition(profile):
@@ -102,10 +105,8 @@ def recursively_expand_base_profiles(definition):
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
-def _load_default_profiles():
-    # type: () -> Dict[str, Any]
-    """Load all the profiles installed on the system."""
-    profiles = {}
+def _iter_default_profile_file_paths():
+    # type: () -> Iterator[str]
     paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
 
     for path in paths:
@@ -116,14 +117,38 @@ def _load_default_profiles():
             base, ext = os.path.splitext(filename)
             if ext != '.yaml':
                 continue
+            yield os.path.join(path, filename)
 
-            is_abstract = base.startswith('_')
-            if is_abstract:
-                continue
 
-            definition = _read_profile_definition(os.path.join(path, filename))
+def _get_profile_name(path):
+    # type: (str) -> str
+    base, _ = os.path.splitext(os.path.basename(path))
+    return base
+
+
+def _is_abstract_profile(name):
+    # type: (str) -> bool
+    return name.startswith('_')
+
+
+def _load_default_profiles():
+    # type: () -> Dict[str, Any]
+    """Load all the profiles installed on the system."""
+    profiles = {}
+
+    for path in _iter_default_profile_file_paths():
+        name = _get_profile_name(path)
+
+        if _is_abstract_profile(name):
+            continue
+
+        definition = _read_profile_definition(path)
+        try:
             recursively_expand_base_profiles(definition)
-            profiles[base] = {'definition': definition}
+        except Exception:
+            logger.error("Could not expand base profile %s", path)
+            raise
+        profiles[name] = {'definition': definition}
 
     return profiles
 

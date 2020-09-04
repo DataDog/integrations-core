@@ -15,6 +15,7 @@ from .common import ENVOY_VERSION, HOST, INSTANCES, response
 CHECK_NAME = 'envoy'
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_success(aggregator):
     instance = INSTANCES['main']
@@ -28,6 +29,7 @@ def test_success(aggregator):
     assert metrics_collected >= 250
 
 
+@pytest.mark.unit
 def test_success_fixture(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
@@ -44,8 +46,21 @@ def test_success_fixture(aggregator):
     assert 4412 <= metrics_collected == num_metrics
 
 
-def test_success_fixture_whitelist(aggregator):
-    instance = INSTANCES['whitelist']
+@pytest.mark.unit
+def test_retrocompatible_config():
+    instance = deepcopy(INSTANCES['main'])
+    instance['metric_whitelist'] = deepcopy(INSTANCES['included_excluded_metrics']['included_metrics'])
+    instance['metric_blacklist'] = deepcopy(INSTANCES['included_excluded_metrics']['excluded_metrics'])
+
+    c1 = Envoy(CHECK_NAME, {}, [instance])
+    c2 = Envoy(CHECK_NAME, {}, [INSTANCES['included_excluded_metrics']])
+    assert c1.config_included_metrics == c2.config_included_metrics
+    assert c1.config_excluded_metrics == c2.config_excluded_metrics
+
+
+@pytest.mark.unit
+def test_success_fixture_included_metrics(aggregator):
+    instance = INSTANCES['included_metrics']
     c = Envoy(CHECK_NAME, {}, [instance])
 
     with mock.patch('requests.get', return_value=response('multiple_services')):
@@ -55,8 +70,9 @@ def test_success_fixture_whitelist(aggregator):
         assert metric.startswith('envoy.cluster.')
 
 
-def test_success_fixture_blacklist(aggregator):
-    instance = INSTANCES['blacklist']
+@pytest.mark.unit
+def test_success_fixture_excluded_metrics(aggregator):
+    instance = INSTANCES['excluded_metrics']
     c = Envoy(CHECK_NAME, {}, [instance])
 
     with mock.patch('requests.get', return_value=response('multiple_services')):
@@ -66,8 +82,9 @@ def test_success_fixture_blacklist(aggregator):
         assert not metric.startswith('envoy.cluster.')
 
 
-def test_success_fixture_whitelist_blacklist(aggregator):
-    instance = INSTANCES['whitelist_blacklist']
+@pytest.mark.unit
+def test_success_fixture_inclued_and_excluded_metrics(aggregator):
+    instance = INSTANCES['included_excluded_metrics']
     c = Envoy(CHECK_NAME, {}, [instance])
 
     with mock.patch('requests.get', return_value=response('multiple_services')):
@@ -77,6 +94,7 @@ def test_success_fixture_whitelist_blacklist(aggregator):
         assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out.")
 
 
+@pytest.mark.unit
 def test_service_check(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
@@ -87,6 +105,7 @@ def test_service_check(aggregator):
     assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
 
 
+@pytest.mark.unit
 def test_unknown():
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
@@ -97,6 +116,7 @@ def test_unknown():
     assert sum(c.unknown_metrics.values()) == 5
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'test_case, extra_config, expected_http_kwargs',
     [
@@ -123,7 +143,8 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
 
 
-def test_metadata_unit(datadog_agent):
+@pytest.mark.unit
+def test_metadata(datadog_agent):
     instance = INSTANCES['main']
     check = Envoy(CHECK_NAME, {}, [instance])
     check.check_id = 'test:123'
@@ -196,6 +217,7 @@ def test_metadata_unit(datadog_agent):
         check.log.debug.assert_called_with('Version not matched.')
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata_integration(aggregator, datadog_agent):
     instance = INSTANCES['main']
