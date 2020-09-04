@@ -20,6 +20,8 @@ REPO_OPTIONS_MAP = {
     '-e': 'extras',
     '--agent': 'agent',
     '-a': 'agent',
+    '--marketplace': 'marketplace',
+    '-m': 'marketplace',
     '--here': 'here',
     '-x': 'here',
 }
@@ -29,6 +31,7 @@ REPO_CHOICES = {
     'extras': 'integrations-extras',
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
+    'marketplace': 'marketplace',
 }
 
 VERSION_BUMP = {

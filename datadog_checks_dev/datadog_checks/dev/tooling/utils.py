@@ -165,25 +165,42 @@ def check_root():
     return False
 
 
-def initialize_root(config, agent=False, core=False, extras=False, here=False):
+def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False):
     """Initialize root directory based on config and options"""
     if check_root():
         return
 
-    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
+    repo_choice = (
+        'core'
+        if core
+        else 'extras'
+        if extras
+        else 'agent'
+        if agent
+        else 'marketplace'
+        if marketplace
+        else config.get('repo', 'core')
+    )
     config['repo_choice'] = repo_choice
     config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
-
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
     root = os.path.expanduser(legacy_option or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
-            repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
+            repo = (
+                'datadog-agent'
+                if repo_choice == 'agent'
+                else 'marketplace'
+                if repo_choice == 'marketplace'
+                else f'integrations-{repo_choice}'
+            )
             message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
 
         root = os.getcwd()
+        if here:
+            config['repo_choice'] = os.path.basename(root)
 
     set_root(root)
     return message
