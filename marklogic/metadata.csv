@@ -7,9 +7,9 @@ marklogic.forests.backup_write_rate,gauge,,mebibyte,second,"The moving average t
 marklogic.forests.compressed_tree_cache_hit_rate,gauge,,hit,second,"The average number of hits on the compressed cache.",0,marklogic,forest tree cache hit
 marklogic.forests.compressed_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the compressed cache.",0,marklogic,forest tree cache miss
 marklogic.forests.compressed_tree_cache_ratio,gauge,,percent,,"The compressed cache ratio",0,marklogic,forest tree cache ratio
-marklogic.forests.current_foreign_master_cluster,gauge,,unit,,"A cluster ID.",0,marklogic,forest foreign master cluster
-marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"Foreign master fsn",0,marklogic,forest foreign master fsn
-marklogic.forests.current_master_fsn,gauge,,unit,,"Current master fsn",0,marklogic,forest master fsn
+marklogic.forests.current_foreign_master_cluster,gauge,,unit,,"The cluster ID coupled with the local cluster.",0,marklogic,forest foreign master cluster
+marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"The ID of the last journal frame received from the foreign master",0,marklogic,forest foreign master fsn
+marklogic.forests.current_master_fsn,gauge,,unit,,"The journal frame ID of the local master",0,marklogic,forest master fsn
 marklogic.forests.database_replication_receive_load,gauge,,second,second,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication recv load
 marklogic.forests.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,forest db replication recv rate
 marklogic.forests.database_replication_send_load,gauge,,second,second,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication send load
@@ -33,7 +33,7 @@ marklogic.forests.large_write_rate,gauge,,mebibyte,second,"The moving average th
 marklogic.forests.list_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest l cache hit
 marklogic.forests.list_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest l cache miss
 marklogic.forests.list_cache_ratio,gauge,,percent,,"The list cache ratio",0,marklogic,forest l cache ratio
-marklogic.forests.max_query_timestamp,gauge,,time,,"The largest timestamp a query has run at.",0,marklogic,forest max query ts
+marklogic.forests.max_query_timestamp,gauge,,millisecond,,"The largest timestamp a query has run at.",0,marklogic,forest max query ts
 marklogic.forests.max_stands_per_forest,gauge,,unit,,"The maximum number of stands for a forest.",0,marklogic,forest max stands
 marklogic.forests.merge_count,gauge,,unit,,"The maximum number of forests that are merging.",0,marklogic,forest merge count
 marklogic.forests.merge_read_load,gauge,,second,second,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,forest merge r load
@@ -41,7 +41,7 @@ marklogic.forests.merge_read_rate,gauge,,mebibyte,second,"The moving average thr
 marklogic.forests.merge_write_load,gauge,,second,second,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,forest merge w load
 marklogic.forests.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,forest merge w rate
 marklogic.forests.min_capacity,gauge,,percent,,"The least capacity for a forest as a percentage.",0,marklogic,forest min cap
-marklogic.forests.nonblocking_timestamp,gauge,,time,,"The most current timestamp for which a query will execute without waiting for transactions to settle.",0,marklogic,forest nonblocking ts
+marklogic.forests.nonblocking_timestamp,gauge,,millisecond,,"The most current timestamp for which a query will execute without waiting for transactions to settle.",0,marklogic,forest nonblocking ts
 marklogic.forests.orphaned_binaries,gauge,,item,,"The count of orphaned large binaries.",0,marklogic,forest orphaned bin
 marklogic.forests.query_read_load,gauge,,second,second,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,forest query r load
 marklogic.forests.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,forest query r rate

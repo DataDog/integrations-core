@@ -33,7 +33,7 @@ def _assert_metrics(aggregator, tags):
 
 
 def _assert_service_checks(aggregator, tags, count=1, include_health_checks=True):
-    # type: (AggregatorStub, List[str], int) -> None
+    # type: (AggregatorStub, List[str], int, bool) -> None
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=count)
 
     if include_health_checks:
