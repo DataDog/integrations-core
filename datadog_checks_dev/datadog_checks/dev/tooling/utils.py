@@ -120,6 +120,10 @@ def normalize_package_name(package_name):
     return re.sub(r'[-_. ]+', '_', package_name).lower()
 
 
+def kebab_case_name(name):
+    return re.sub('_| ', '-', name.lower())
+
+
 def normalize_display_name(display_name):
     normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
     normalized_integration = re.sub("_+", "_", normalized_integration)
