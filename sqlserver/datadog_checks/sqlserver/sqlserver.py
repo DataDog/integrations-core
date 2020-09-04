@@ -148,8 +148,12 @@ class SQLServer(AgentCheck):
                     )
                     raise ConfigurationError(msg)
 
+        # Historically, the check does not raise exceptions on init failures
+        # We continue that here for backwards compatibility, aside from the new Config exception
         except SQLConnectionError as e:
             self.log.exception("Error connecting to database: %s", e)
+        except ConfigurationError:
+            raise
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
 
@@ -637,6 +641,7 @@ class SqlOsWaitStat(SqlServerMetric):
             """.format(
             placeholders
         )
+        logger.debug("query base: %s", query_base)
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -666,6 +671,7 @@ class SqlIoVirtualFileStat(SqlServerMetric):
             return None, None
 
         query_base = "select * from sys.dm_io_virtual_file_stats(null, null)"
+        logger.debug("query base: %s", query_base)
         cursor.execute(query_base)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -678,6 +684,10 @@ class SqlIoVirtualFileStat(SqlServerMetric):
         self.pvs_vals = defaultdict(lambda: None)
 
     def fetch_metric(self, cursor, rows, columns, tags):
+        # TODO - fix this function
+        #  this function actually processes the change in value between two checks,
+        #  but doesn't account for time differences.  This can work for some columns like `num_of_writes`, but is
+        #  inaccurate for others like `io_stall_write_ms` which are not monotonically increasing.
         tags = tags + self.tags
         dbid_ndx = columns.index("database_id")
         fileid_ndx = columns.index("file_id")
@@ -716,6 +726,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             """.format(
             placeholders
         )
+        logger.debug("query base: %s", query_base)
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -747,6 +758,7 @@ class SqlOsSchedulers(SqlServerMetric):
             return None, None
 
         query_base = "select * from sys.dm_os_schedulers"
+        logger.debug("query base: %s", query_base)
         cursor.execute(query_base)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -776,6 +788,7 @@ class SqlOsTasks(SqlServerMetric):
             return None, None
 
         query_base = "select * from sys.dm_os_tasks"
+        logger.debug("query base: %s", query_base)
         cursor.execute(query_base)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
