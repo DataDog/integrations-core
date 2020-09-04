@@ -144,6 +144,7 @@ def get_manifest_schema():
                             "pricing": {
                                 "description": "Available pricing options",
                                 "type": "array",
+                                "minItems": 1,
                                 "items": {
                                     "description": "Attributes of pricing plans available for this integration",
                                     "type": "object",
@@ -317,7 +318,7 @@ def manifest(ctx, fix, include_extras, repo_url):
             if errors:
                 file_failures += 1
                 for error in errors:
-                    display_queue.append((echo_failure, f'  {error.message}'))
+                    display_queue.append((echo_failure, f'  {"->".join(error.absolute_path)}:{error.message}'))
 
             # guid
             guid = decoded.get('guid')
