@@ -101,18 +101,18 @@ INIT_CONFIG_ALT_TABLES = {
             'name': 'sqlserver.LCK_M_S',
             'table': 'sys.dm_os_wait_stats',
             'counter_name': 'LCK_M_S',
-            'columns': ['max_wait_time_ms', 'signal_wait_time_ms']
+            'columns': ['max_wait_time_ms', 'signal_wait_time_ms'],
         },
         {
             'name': 'sqlserver.io_file_stats',
             'table': 'sys.dm_io_virtual_file_stats',
-            'columns': ['num_of_reads', 'num_of_writes']
+            'columns': ['num_of_reads', 'num_of_writes'],
         },
         {
             'name': 'sqlserver.MEMORYCLERK_BITMAP',
             'table': 'sys.dm_os_memory_clerks',
             'counter_name': 'MEMORYCLERK_BITMAP',
-            'columns': ['virtual_memory_reserved_kb', 'virtual_memory_committed_kb']
+            'columns': ['virtual_memory_reserved_kb', 'virtual_memory_committed_kb'],
         },
     ]
 }

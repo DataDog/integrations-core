@@ -14,8 +14,8 @@ from .common import (
     FULL_E2E_CONFIG,
     HERE,
     INIT_CONFIG,
-    INIT_CONFIG_OBJECT_NAME,
     INIT_CONFIG_ALT_TABLES,
+    INIT_CONFIG_OBJECT_NAME,
     INSTANCE_DOCKER,
     INSTANCE_E2E,
     INSTANCE_SQL2017,
@@ -41,6 +41,7 @@ def init_config_object_name():
 @pytest.fixture
 def init_config_alt_tables():
     return deepcopy(INIT_CONFIG_ALT_TABLES)
+
 
 @pytest.fixture
 def instance_sql2017():

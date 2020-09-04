@@ -144,6 +144,7 @@ def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker
     # apply a proc check that will never fail and assert that the metrics remain unchanged
     assert len(aggregator._metrics) == 0
 
+
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_custom_metrics_object_name(aggregator, init_config_object_name, instance_docker):
@@ -166,15 +167,18 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)
     aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=['optional:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.MEMORYCLERK_BITMAP.virtual_memory_committed_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.MEMORYCLERK_BITMAP.virtual_memory_reserved_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1)
+    aggregator.assert_metric(
+        'sqlserver.MEMORYCLERK_BITMAP.virtual_memory_committed_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1
+    )
+    aggregator.assert_metric(
+        'sqlserver.MEMORYCLERK_BITMAP.virtual_memory_reserved_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1
+    )
 
     # check a second time for io metrics to be processed
     sqlserver_check.check(instance_docker)
 
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads', count=8)
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes', count=8)
-
 
 
 @windows_ci
