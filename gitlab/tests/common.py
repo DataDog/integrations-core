@@ -176,4 +176,3 @@ def assert_check(aggregator, metrics):
 
     for metric in metrics:
         aggregator.assert_metric("gitlab.{}".format(metric))
-    aggregator.assert_all_metrics_covered()

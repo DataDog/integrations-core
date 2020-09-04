@@ -85,3 +85,4 @@ def test_check_integration(aggregator, mock_data):
     gitlab.check(instance)
 
     assert_check(aggregator, METRICS)
+    aggregator.assert_all_metrics_covered()
