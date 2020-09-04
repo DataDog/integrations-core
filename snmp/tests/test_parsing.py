@@ -18,9 +18,13 @@ logger = logging.getLogger(__name__)
 @pytest.mark.parametrize(
     'index_transform, expected_rules',
     [
-        (pytest.param("[{'start': 1, 'end': 8}]", [(1, 8)], id="one_rule")),
-        (pytest.param("[{'start': 1, 'end': 8}, {'start': 10, 'end': 20}, ]", [(1, 8), (10, 20)], id="multi_rules")),
-        (pytest.param("[{'start': 1, 'end': 1}]", [(1, 1)], id="one_value_index")),
+        (pytest.param("[{'start': 1, 'end': 7}]", [slice(1, 8)], id="one_rule")),
+        (
+            pytest.param(
+                "[{'start': 1, 'end': 7}, {'start': 10, 'end': 19}, ]", [slice(1, 8), slice(10, 20)], id="multi_rules"
+            )
+        ),
+        (pytest.param("[{'start': 1, 'end': 1}]", [slice(1, 2)], id="one_value_index")),
     ],
 )
 def test_parse_index_transform_ok_cases(index_transform, expected_rules):
@@ -44,7 +48,7 @@ def test_parse_index_transform_ok_cases(index_transform, expected_rules):
     )
 
     results = parse_metrics(yaml.load(metrics), resolver=mock.MagicMock(), logger=logger, bulk_threshold=10)
-    actual_transform_rules = results['parsed_metrics'][0].column_tags[0].index_transform_rules
+    actual_transform_rules = results['parsed_metrics'][0].column_tags[0].index_slices
     assert actual_transform_rules == expected_rules
 
 

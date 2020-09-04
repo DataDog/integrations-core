@@ -365,13 +365,12 @@ def batches(lst, size):
         yield lst[index : index + size]
 
 
-def transform_index(src_index, index_transform_rules):
-    # type: (Tuple[str, ...], List[Tuple[int, int]]) -> Tuple[str, ...]
+def transform_index(src_index, index_slices):
+    # type: (Tuple[str, ...], List[slice]) -> Tuple[str, ...]
     """
     Transform a source index into a new index using a list of transform rules.
 
-    A transform rule is a tuple of (start, end) and is used to extract a subset of the source index.
-    Indexing is zero based and both start and end are inclusive.
+    A transform rule is slice and is used to extract a subset of the source index.
 
     ```python
     >>> transform_index(('10', '11', '12', '13'), [(2, 2), (0, 1)])
@@ -379,7 +378,6 @@ def transform_index(src_index, index_transform_rules):
     ```
     """
     dst_index = []  # type: List[str]
-    for transform in index_transform_rules:
-        start, end = transform
-        dst_index.extend(src_index[start:end+1])
+    for index_slice in index_slices:
+        dst_index.extend(src_index[index_slice])
     return tuple(dst_index)

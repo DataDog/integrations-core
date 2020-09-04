@@ -154,8 +154,8 @@ def test_as_metric_with_forced_type(input_string, forced_type, expected):
     'src_index, transform_rules, expected_dst_index',
     [
         pytest.param(('10', '11', '12', '13'), [], tuple(), id='no_transform_rules'),
-        pytest.param(('10', '11', '12', '13'), [(2, 3)], ('12', '13'), id='one'),
-        pytest.param(('10', '11', '12', '13'), [(2, 2), (0, 1)], ('12', '10', '11'), id='multi'),
+        pytest.param(('10', '11', '12', '13'), [(2, 4)], ('12', '13'), id='one'),
+        pytest.param(('10', '11', '12', '13'), [(2, 3), (0, 2)], ('12', '10', '11'), id='multi'),
         pytest.param(('10', '11', '12', '13'), [(2, 1000)], ('12', '13'), id='out_of_index_end'),
         pytest.param(('10', '11', '12', '13'), [(1000, 2000)], tuple(), id='out_of_index_start_end'),
     ],

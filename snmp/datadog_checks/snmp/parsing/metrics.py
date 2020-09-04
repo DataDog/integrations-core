@@ -5,7 +5,7 @@
 Helpers for parsing the `metrics` section of a config file.
 """
 from logging import Logger
-from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple, TypedDict, Union, cast
+from typing import Dict, List, NamedTuple, Optional, Sequence, TypedDict, Union, cast
 
 import six
 
@@ -348,7 +348,7 @@ def merge_table_batches(target, source):
 IndexTag = NamedTuple('IndexTag', [('parsed_metric_tag', ParsedMetricTag), ('index', int)])
 ColumnTag = NamedTuple(
     'ColumnTag',
-    [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_transform_rules', List[Tuple[int, int]])],
+    [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_slices', List[slice])],
 )
 
 ParsedColumnMetricTag = NamedTuple(
@@ -447,7 +447,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
 
     batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
 
-    index_transform_rules = []  # type: List[Tuple[int, int]]
+    index_slices = []  # type: List[slice]
     raw_index_transform = metric_tag.get('index_transform')
     if raw_index_transform:
         for rule in raw_index_transform:
@@ -463,7 +463,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
             if start < 0:
                 raise ConfigurationError('Transform rule start must be greater than 0. Invalid rule: {}'.format(rule))
 
-            index_transform_rules.append((start, end))
+            index_slices.append(slice(start, end + 1))
 
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
@@ -471,7 +471,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
             ColumnTag(
                 parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)),
                 column=parsed_column.name,
-                index_transform_rules=index_transform_rules,
+                index_slices=index_slices,
             )
         ],
         table_batches=batches,
