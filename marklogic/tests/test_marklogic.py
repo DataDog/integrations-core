@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from typing import Any, List
 
 import mock
 import pytest
@@ -10,30 +10,12 @@ from packaging import version
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import INSTANCE, INSTANCE_FILTERS, MARKLOGIC_VERSION
-from .metrics import (
-    FOREST_STATUS_SUMMARY_METRICS,
-    GLOBAL_METRICS,
-    HOST_STATUS_METRICS,
-    REQUESTS_STATUS_METRICS,
-    RESOURCE_STORAGE_FOREST_METRICS,
-    SERVER_STATUS_METRICS,
-    STORAGE_FOREST_METRICS,
-    STORAGE_HOST_METRICS,
-    TRANSACTION_STATUS_METRICS,
-)
+from .common import COMMON_TAGS, INSTANCE, INSTANCE_FILTERS, MARKLOGIC_VERSION, SERVICE_CHECKS_HEALTH_TAG
+from .metrics import GLOBAL_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator):
-    # type: (AggregatorStub) -> None
-    check = MarklogicCheck('marklogic', {}, [INSTANCE])
-
-    check.check(INSTANCE)
-
-    tags = ['foo:bar']
-
+def _assert_metrics(aggregator, tags):
+    # type: (AggregatorStub, List[str]) -> None
     for metric in GLOBAL_METRICS:
         aggregator.assert_metric(metric, tags=tags)
 
@@ -49,7 +31,30 @@ def test_check(aggregator):
         for prefix in storage_tag_prefixes + ['forest_id', 'forest_name']:
             aggregator.assert_metric_has_tag_prefix(metric, prefix)
 
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_check(aggregator):
+    # type: (AggregatorStub) -> None
+    check = MarklogicCheck('marklogic', {}, [INSTANCE])
+
+    check.check(INSTANCE)
+
+    _assert_metrics(aggregator, COMMON_TAGS)
+
     aggregator.assert_all_metrics_covered()
+
+    # Service checks
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
+    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
+        aggregator.assert_service_check(
+            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag]
+        )
+
+    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
+        aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag])
+
+    aggregator.assert_no_duplicate_all()
 
 
 @pytest.mark.integration
@@ -60,31 +65,32 @@ def test_check_with_filters(aggregator):
 
     check.check(INSTANCE_FILTERS)
 
-    for metric in HOST_STATUS_METRICS + SERVER_STATUS_METRICS + TRANSACTION_STATUS_METRICS:
-        aggregator.assert_metric(metric, count=1)
-    for metric in FOREST_STATUS_SUMMARY_METRICS + REQUESTS_STATUS_METRICS:
-        aggregator.assert_metric(metric, at_least=1)
-    for metric in STORAGE_HOST_METRICS:
-        aggregator.assert_metric(metric, count=2)
-        aggregator.assert_metric_has_tag(metric, 'forest_name:Security', count=1)
-    for metric in STORAGE_FOREST_METRICS:
-        aggregator.assert_metric(metric, count=10)
+    _assert_metrics(aggregator, COMMON_TAGS)
 
     # Resource filter only
-    for metric in RESOURCE_STORAGE_FOREST_METRICS:
-        aggregator.assert_metric(metric, tags=['forest_name:Security'], count=1)
+    for metric in STORAGE_HOST_METRICS + RESOURCE_STORAGE_FOREST_METRICS:
+        aggregator.assert_metric_has_tag(metric, 'forest_name:Security', count=1)
     for metric in [
         'marklogic.requests.query-count',
         'marklogic.requests.total-requests',
         'marklogic.requests.update-count',
     ]:
-        aggregator.assert_metric(metric, tags=['server_name:Admin', 'group_name:Default'], count=1)
+        aggregator.assert_metric(metric, tags=COMMON_TAGS + ['server_name:Admin', 'group_name:Default'], count=1)
 
     aggregator.assert_all_metrics_covered()
 
     # Service checks
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
-    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
+
+    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
+        aggregator.assert_service_check(
+            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag]
+        )
+
+    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
+        aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag])
+
+    aggregator.assert_no_duplicate_all()
 
 
 @pytest.mark.integration
@@ -109,8 +115,13 @@ def test_metadata_integration(aggregator, datadog_agent):
 
     # Service checks
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
-    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
-    aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=10)
+    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
+        aggregator.assert_service_check(
+            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag]
+        )
+
+    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
+        aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag])
 
 
 @pytest.mark.e2e
@@ -118,19 +129,21 @@ def test_e2e(dd_agent_check):
     # type: (Any) -> None
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
-    for metric in GLOBAL_METRICS:
-        aggregator.assert_metric(metric, count=2)
-    for metric in STORAGE_HOST_METRICS:
-        aggregator.assert_metric(metric, count=2)
-    for metric in STORAGE_FOREST_METRICS:
-        aggregator.assert_metric(metric, count=20)
+    _assert_metrics(aggregator, COMMON_TAGS)
 
     aggregator.assert_all_metrics_covered()
 
     # Service checks
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=2)
-    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=20)
-    aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=20)
+    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
+        aggregator.assert_service_check(
+            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag], count=2
+        )
+
+    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
+        aggregator.assert_service_check(
+            'marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag], count=2
+        )
 
 
 def test_submit_health_service_checks(aggregator, caplog):

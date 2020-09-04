@@ -180,7 +180,7 @@ STORAGE_HOST_METRICS = [
 
 
 STORAGE_FOREST_METRICS = [
-    'marklogic.forests.storage.forest.disk-size',
+    'marklogic.forests.storage.disk-size',
 ]
 
 RESOURCE_STORAGE_FOREST_METRICS = [

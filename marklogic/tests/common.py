@@ -18,13 +18,15 @@ ADMIN_PASSWORD = 'admin'
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
 
+COMMON_TAGS = ['foo:bar']
+
 INSTANCE = {
     'url': API_URL,
     'username': USERNAME,
     'password': PASSWORD,
     'enable_health_service_checks': True,
     'auth_type': 'digest',
-    'tags': ['foo:bar'],
+    'tags': COMMON_TAGS,
 }
 
 INSTANCE_FILTERS = {
@@ -33,6 +35,7 @@ INSTANCE_FILTERS = {
     'password': PASSWORD,
     'auth_type': 'digest',
     'enable_health_service_checks': True,
+    'tags': COMMON_TAGS,
     'resource_filters': [
         {'resource_type': 'forest', 'pattern': '^S[a-z]*'},  # Match Security and Schemas
         {'resource_type': 'forest', 'pattern': '^Sch*', 'include': False},  # Unmatch Schemas
@@ -40,10 +43,36 @@ INSTANCE_FILTERS = {
     ],
 }
 
-
 CHECK_CONFIG = {
     'init_config': {},
     'instances': [INSTANCE],
+}
+
+SERVICE_CHECKS_HEALTH_TAG = {
+    'database': [
+        'database_name:App-Services',
+        'database_name:Documents',
+        'database_name:Extensions',
+        'database_name:Fab',
+        'database_name:Last-Login',
+        'database_name:Meters',
+        'database_name:Modules',
+        'database_name:Schemas',
+        'database_name:Security',
+        'database_name:Triggers',
+    ],
+    'forest': [
+        'forest_name:App-Services',
+        'forest_name:Documents',
+        'forest_name:Extensions',
+        'forest_name:Fab',
+        'forest_name:Last-Login',
+        'forest_name:Meters',
+        'forest_name:Modules',
+        'forest_name:Schemas',
+        'forest_name:Security',
+        'forest_name:Triggers',
+    ],
 }
 
 

@@ -76,7 +76,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             8,
             [
                 'foo:bar',
@@ -89,7 +89,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',
@@ -102,7 +102,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',
@@ -115,7 +115,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',
@@ -128,7 +128,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',
@@ -141,7 +141,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             1,
             [
                 'foo:bar',
@@ -154,7 +154,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',
@@ -167,7 +167,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',
@@ -180,7 +180,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             1,
             [
                 'foo:bar',
@@ -193,7 +193,7 @@ def test__parse_storage_metrics():
         ),
         (
             'gauge',
-            'forests.storage.forest.disk-size',
+            'forests.storage.disk-size',
             0,
             [
                 'foo:bar',

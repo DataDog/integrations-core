@@ -12,7 +12,7 @@ from datadog_checks.marklogic import MarklogicCheck
 from datadog_checks.marklogic.config import Config
 from datadog_checks.marklogic.parsers.resources import parse_resources
 
-from .common import INSTANCE_FILTERS, read_fixture_file
+from .common import COMMON_TAGS, INSTANCE_FILTERS, read_fixture_file
 from .metrics import HOST_STATUS_METRICS_GENERAL
 
 
@@ -130,7 +130,7 @@ def test_collect_host_metrics(mock_requests, mock_status, aggregator):
 
     check.collect_per_resource_metrics()
 
-    expected_tags = ['host_name:ff0fef449486']
+    expected_tags = COMMON_TAGS + ['host_name:ff0fef449486']
     for m in HOST_STATUS_METRICS_GENERAL:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
     for m in ['marklogic.requests.query-count', 'marklogic.requests.total-requests', 'marklogic.requests.update-count']:

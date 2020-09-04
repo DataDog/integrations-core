@@ -8,17 +8,17 @@ from six import iteritems
 from .common import build_metric_to_submit, is_metric
 
 
-def parse_summary_storage_base_metrics(data, tags, get_location_forest=True):
-    # type: (Dict[str, Any], List[str], bool) -> Generator[Tuple, None, None]
-    return _parse_storage_metrics(data, tags, get_location_forest)
+def parse_summary_storage_base_metrics(data, tags):
+    # type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
+    return _parse_storage_metrics(data, tags, include_location_forest=True)
 
 
-def parse_per_resource_storage_metrics(data, tags, get_location_forest=False):
-    # type: (Dict[str, Any], List[str], bool) -> Generator[Tuple, None, None]
-    return _parse_storage_metrics(data, tags, get_location_forest)
+def parse_per_resource_storage_metrics(data, tags):
+    # type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
+    return _parse_storage_metrics(data, tags, include_location_forest=False)
 
 
-def _parse_storage_metrics(data, tags, get_location_forest):
+def _parse_storage_metrics(data, tags, include_location_forest):
     # type: (Dict[str, Any], List[str], bool) -> Generator[Tuple, None, None]
     """
     Collect Base Storage Metrics
@@ -47,11 +47,11 @@ def _parse_storage_metrics(data, tags, get_location_forest):
                             "forest_id:{}".format(forest_data['idref']),
                             "forest_name:{}".format(forest_data['nameref']),
                         ]
-                        if get_location_forest:
+                        if include_location_forest:
                             for forest_key, forest_value in iteritems(forest_data):
                                 if forest_key == 'disk-size':
                                     metric = build_metric_to_submit(
-                                        "forests.storage.forest.{}".format(forest_key), forest_value, tags=forest_tags
+                                        "forests.storage.{}".format(forest_key), forest_value, tags=forest_tags
                                     )
                                     if metric is not None:
                                         yield metric

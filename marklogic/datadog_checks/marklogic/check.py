@@ -60,6 +60,8 @@ class MarklogicCheck(AgentCheck):
                 e,
             )
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
+        else:
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
 
         self.resources = parse_resources(raw_resources)
         self.resources_to_monitor = self.get_resources_to_monitor()
@@ -72,7 +74,6 @@ class MarklogicCheck(AgentCheck):
 
         if self.config.enable_health_service_checks:
             self.submit_health_service_checks()
-        self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
 
     def collect_summary_status_resource_metrics(self):
         # type: () -> None

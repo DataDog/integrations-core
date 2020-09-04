@@ -56,7 +56,7 @@ marklogic.forests.restore_write_rate,gauge,,mebibyte,second,"The moving average 
 marklogic.forests.save_write_load,gauge,,second,second,"The moving average of time threads spent writing to in_memory stands, in proportion to the elapsed time.",0,marklogic,forest save w load
 marklogic.forests.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in_memory stands",0,marklogic,forest save w rate
 marklogic.forests.state_not_open,gauge,,unit,,"The number of forests that aren't open.",0,marklogic,forest state not open
-marklogic.forests.storage.forest.disk_size,gauge,,mebibyte,,"The amount of space the stand takes on disk.",0,marklogic,forest stor disk size
+marklogic.forests.storage.disk_size,gauge,,mebibyte,,"The amount of space the stand takes on disk.",0,marklogic,forest stor disk size
 marklogic.forests.storage.host.capacity,gauge,,percent,,"The percentage of storage space that is free.",0,marklogic,forest stor host capacity
 marklogic.forests.storage.host.device_space,gauge,,mebibyte,,"The amount of space left on forest device.",0,marklogic,forest stor host space
 marklogic.forests.storage.host.forest_reserve,gauge,,mebibyte,,"The amount of space needed for merging.",0,marklogic,forest stor host reserve
