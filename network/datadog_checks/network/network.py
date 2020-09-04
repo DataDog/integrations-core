@@ -6,6 +6,7 @@
 Collects network metrics.
 """
 
+import distutils.spawn
 import os
 import re
 import socket
@@ -13,8 +14,6 @@ from collections import defaultdict
 
 import psutil
 from six import PY3, iteritems, itervalues
-
-import distutils.spawn
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
@@ -274,8 +273,11 @@ class Network(AgentCheck):
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
             if distutils.spawn.find_executable("ss") is None:
-                self.warning("Cannot collect connection state: `ss` cannot be found and "
-                             "currently with a custom /proc path: %s", proc_location)
+                self.warning(
+                    "Cannot collect connection state: `ss` cannot be found and "
+                    "currently with a custom /proc path: %s",
+                    proc_location,
+                )
                 return False
             else:
                 return True
@@ -307,8 +309,7 @@ class Network(AgentCheck):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log,
-                                                         env=ss_env)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -320,8 +321,7 @@ class Network(AgentCheck):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log,
-                                                         env=ss_env)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
