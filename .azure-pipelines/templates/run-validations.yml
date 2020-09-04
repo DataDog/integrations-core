@@ -44,3 +44,7 @@ steps:
 
 - script: ddev validate imports
   displayName: 'Validate imports'
+
+- ${{ if eq(parameters.repo, 'marketplace') }}:
+  - script: ddev validate eula
+    displayName: 'Validate EULA files'
