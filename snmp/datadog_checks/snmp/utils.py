@@ -371,14 +371,15 @@ def transform_index(src_index, index_transform_rules):
     Transform a source index into a new index using a list of transform rules.
 
     A transform rule is a tuple of (start, end) and is used to extract a subset of the source index.
+    Indexing is zero based and both start and end are inclusive.
 
     ```python
-    >>> transform_index(('10', '11', '12', '13'), [(2, 3), (0, 2)])
+    >>> transform_index(('10', '11', '12', '13'), [(2, 2), (0, 1)])
     ('12', '10', '11')
     ```
     """
     dst_index = []  # type: List[str]
     for transform in index_transform_rules:
         start, end = transform
-        dst_index.extend(src_index[start:end])
+        dst_index.extend(src_index[start:end+1])
     return tuple(dst_index)
