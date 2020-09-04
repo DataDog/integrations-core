@@ -346,6 +346,7 @@ def test_invalid_excluded_interfaces(check):
     with pytest.raises(ConfigurationError):
         check.check(instance)
 
+
 @pytest.mark.parametrize(
     "proc_location, ss_found, expected",
     [
@@ -359,6 +360,7 @@ def test_is_collect_cx_state_runnable(aggregator, check, proc_location, ss_found
         check._collect_cx_state = True
         assert check._is_collect_cx_state_runnable(proc_location) == expected
 
+
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
@@ -366,7 +368,8 @@ def test_is_collect_cx_state_runnable(aggregator, check, proc_location, ss_found
 @mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
 def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggregator, check):
     instance = {'collect_connection_state': True}
-    with mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock) as get_subprocess_output:
+    with mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock) \
+         as get_subprocess_output:
         check._get_net_proc_base_location = lambda x: "/something/proc"
         check.check(instance)
         get_subprocess_output.assert_called_with(["sh", "-c", "ss --numeric --udp --all --ipv6 | wc -l"],
