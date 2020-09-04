@@ -451,7 +451,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     raw_index_transform = metric_tag.get('index_transform')
     if raw_index_transform:
         for rule in raw_index_transform:
-            if not isinstance(rule, dict) or sorted(rule.keys()) != ['end', 'start']:
+            if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
                 raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
             start, end = rule['start'], rule['end']
             if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
