@@ -24,7 +24,7 @@ marklogic.forests.journals_size,gauge,,mebibyte,,"The amount of space the journa
 marklogic.forests.large_binary_cache_hit_rate,gauge,,hit,second,The average number of hits on the large binary cache.,0,marklogic,forest b cache hit rate
 marklogic.forests.large_binary_cache_hits,gauge,,hit,,"The number of hits on the large binary cache.",0,marklogic,forest b cache hit
 marklogic.forests.large_binary_cache_miss_rate,gauge,,miss,second,The average number of misses on the large binary cache.,0,marklogic,forest b cache miss rate
-marklogic.forests.large_binary_cache_misses,gauge,,miss,second,"The number of misses on the large binary cache.",0,marklogic,forest b cache miss
+marklogic.forests.large_binary_cache_misses,gauge,,miss,,"The number of misses on the large binary cache.",0,marklogic,forest b cache miss
 marklogic.forests.large_data_size,gauge,,mebibyte,,"The amount of space large objects take up on disk.",0,marklogic,forest large data size
 marklogic.forests.large_read_load,gauge,,second,second,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,forest r load
 marklogic.forests.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,forest r rate
@@ -78,7 +78,7 @@ marklogic.hosts.backup_read_rate,gauge,,mebibyte,second,"The moving average thro
 marklogic.hosts.backup_write_load,gauge,,second,second,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,host backup w load
 marklogic.hosts.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,host backup w rate
 marklogic.hosts.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrances.",0,marklogic,host deadlock rate
-marklogic.hosts.deadlock_wait_load,gauge,,,second,"The total time spent waiting for locks that eventually deadlocked.",0,marklogic,host deadlock wait load
+marklogic.hosts.deadlock_wait_load,gauge,,second,,"The total time spent waiting for locks that eventually deadlocked.",0,marklogic,host deadlock wait load
 marklogic.hosts.external_binary_read_load,gauge,,second,second,"Disk read time threads spent on external binary documents, in proportion to the elapsed time.",0,marklogic,host ext bin r load
 marklogic.hosts.external_binary_read_rate,gauge,,mebibyte,second,"Disk read throughput of external binary documents.",0,marklogic,host ext bin r rate
 marklogic.hosts.foreign_xdqp_client_receive_load,gauge,,second,second,"Time threads spent receiving data for the foreign xdqp client, in proportion to the elapsed time.",0,marklogic,host foreign xdqp clt recv load
@@ -98,7 +98,7 @@ marklogic.hosts.large_write_rate,gauge,,mebibyte,second,"The moving average thro
 marklogic.hosts.memory_process_huge_pages_size,gauge,,mebibyte,,"The size of huge pages for the MarkLogic process. Available on Linux platform. Sum of Sizes after /anon_hugepage in /proc/[MLpid]/smaps.",0,marklogic,host mem proc huge page size
 marklogic.hosts.memory_process_rss,gauge,,mebibyte,,"The size of Process Resident Size (RSS) for the MarkLogic process",0,marklogic,host mem proc swap rss
 marklogic.hosts.memory_process_swap_rate,gauge,,page,second,"The swap rate for the MarkLogic process.",0,marklogic,host mem proc swap rate
-marklogic.hosts.memory_size,gauge,,mebibyte,second,"The amount of space the stand takes in memory.",0,marklogic,host mem size
+marklogic.hosts.memory_size,gauge,,mebibyte,,"The amount of space the stand takes in memory.",0,marklogic,host mem size
 marklogic.hosts.memory_system_free,gauge,,mebibyte,,"The free system memory. MemFree from /proc/meminfo on Linux, ullAvailPhys from GlobalMemoryStatusEx on Windows.",0,marklogic,host mem sys free
 marklogic.hosts.memory_system_pagein_rate,gauge,,page,second,"The page in rate for the system.",0,marklogic,host mem sys pagein rate
 marklogic.hosts.memory_system_pageout_rate,gauge,,page,second,"The page out rate for the system.",0,marklogic,host mem sys pageout rate

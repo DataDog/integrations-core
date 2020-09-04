@@ -32,6 +32,22 @@ def _assert_metrics(aggregator, tags):
             aggregator.assert_metric_has_tag_prefix(metric, prefix)
 
 
+def _assert_service_checks(aggregator, tags, count=1, include_health_checks=True):
+    # type: (AggregatorStub, List[str], int) -> None
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=count)
+
+    if include_health_checks:
+        for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
+            aggregator.assert_service_check(
+                'marklogic.database.health', MarklogicCheck.OK, tags=tags + [database_tag], count=count
+            )
+
+        for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
+            aggregator.assert_service_check(
+                'marklogic.forest.health', MarklogicCheck.OK, tags=tags + [forest_tag], count=count
+            )
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator):
@@ -45,14 +61,7 @@ def test_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
     # Service checks
-    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
-    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
-        aggregator.assert_service_check(
-            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag]
-        )
-
-    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
-        aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag])
+    _assert_service_checks(aggregator, COMMON_TAGS)
 
     aggregator.assert_no_duplicate_all()
 
@@ -80,15 +89,7 @@ def test_check_with_filters(aggregator):
     aggregator.assert_all_metrics_covered()
 
     # Service checks
-    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
-
-    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
-        aggregator.assert_service_check(
-            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag]
-        )
-
-    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
-        aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag])
+    _assert_service_checks(aggregator, COMMON_TAGS)
 
     aggregator.assert_no_duplicate_all()
 
@@ -114,14 +115,7 @@ def test_metadata_integration(aggregator, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata))
 
     # Service checks
-    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
-    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
-        aggregator.assert_service_check(
-            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag]
-        )
-
-    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
-        aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag])
+    _assert_service_checks(aggregator, COMMON_TAGS)
 
 
 @pytest.mark.e2e
@@ -134,16 +128,7 @@ def test_e2e(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
     # Service checks
-    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=2)
-    for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
-        aggregator.assert_service_check(
-            'marklogic.database.health', MarklogicCheck.OK, tags=COMMON_TAGS + [database_tag], count=2
-        )
-
-    for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
-        aggregator.assert_service_check(
-            'marklogic.forest.health', MarklogicCheck.OK, tags=COMMON_TAGS + [forest_tag], count=2
-        )
+    _assert_service_checks(aggregator, COMMON_TAGS, count=2)
 
 
 def test_submit_health_service_checks(aggregator, caplog):
