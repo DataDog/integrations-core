@@ -50,6 +50,7 @@
       - basic
         |__ username
         |__ password
+        |__ use_legacy_auth_encoding
       - digest
         |__ username
         |__ password
@@ -72,6 +73,12 @@
     The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. /noqa
     Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials /noqa
 
+- name: use_legacy_auth_encoding
+  value:
+    example: true
+    type: boolean
+  description: |
+    When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
 - name: username
   value:
     type: string

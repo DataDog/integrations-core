@@ -219,6 +219,13 @@ class TestAuth:
 
         assert http.options['auth'] == ('user', 'pass')
 
+    def test_config_basic_no_legacy_encoding(self):
+        instance = {'username': 'user', 'password': 'pass', 'use_legacy_auth_encoding': False}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['auth'] == (b'user', b'pass')
+
     def test_config_digest_authtype(self):
         instance = {'username': 'user', 'password': 'pass', 'auth_type': 'digest'}
         init_config = {}

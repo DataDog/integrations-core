@@ -71,10 +71,10 @@ instances:
     #
     # connection_string: <CONNECTION_STRING>
 
-    ## @param command_timeout - integer - optional - default: 30
+    ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 30
+    # command_timeout: 5
 
     ## @param stored_procedure - string - optional
     ## Get metrics from custom proc in MyDB but only if the database is writable
@@ -97,6 +97,11 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
+
+    ## @param include_task_scheduler_metrics - boolean - optional - default: false
+    ## Include additional Task and Scheduler metrics
+    #
+    # include_task_scheduler_metrics: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

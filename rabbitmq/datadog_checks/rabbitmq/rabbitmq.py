@@ -145,6 +145,7 @@ class RabbitMQ(AgentCheck):
         'rabbitmq_pass': {'name': 'password'},
         'ssl_verify': {'name': 'tls_verify'},
         'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
+        'use_legacy_auth_encoding': {'name': 'use_legacy_auth_encoding', 'default': False},
     }
 
     def __init__(self, name, init_config, instances=None):

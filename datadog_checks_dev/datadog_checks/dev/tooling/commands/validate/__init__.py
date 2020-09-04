@@ -11,6 +11,7 @@ from .codeowners import codeowners
 from .config import config
 from .dashboards import dashboards
 from .dep import dep
+from .eula import eula
 from .imports import imports
 from .manifest import manifest
 from .metadata import metadata
@@ -27,6 +28,7 @@ ALL_COMMANDS = (
     config,
     dashboards,
     dep,
+    eula,
     legacy_signature,
     imports,
     manifest,

@@ -251,6 +251,12 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
 
+def get_eula_from_manifest(check_name):
+    path = load_manifest(check_name).get('terms', {}).get('eula')
+    path = os.path.join(get_root(), check_name, *path.split('/'))
+    return path, file_exists(path)
+
+
 def get_assets_from_manifest(check_name, asset_type):
     paths = load_manifest(check_name).get('assets', {}).get(asset_type, {})
     assets = []
