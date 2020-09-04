@@ -69,7 +69,7 @@ instances:
     # data:
     #   <KEY>: <VALUE>
 
-    ## @param content_match - string - optional - default: None
+    ## @param content_match - string - optional
     ## The content_match parameter allows the check
     ## to look for a particular string within the response. The check
     ## will report as DOWN if the string is not found.

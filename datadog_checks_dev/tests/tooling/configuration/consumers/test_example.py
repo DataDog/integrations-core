@@ -791,6 +791,68 @@ def test_option_string_type_not_default():
     )
 
 
+def test_option_string_type_not_default_example_default_value_none():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: None
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_string_type_not_default_example_default_value_null():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: null
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
 def test_section_description_length_limit():
     consumer = get_example_consumer(
         """
