@@ -24,17 +24,17 @@ yum install -y kernel-headers-$(uname -r)
 
 ### Configuration
 
-In the `system-probe.yaml` file at the root of your Agent's configuration directory, the following configuration must be set:
+1. In the `system-probe.yaml` file at the root of your Agent's configuration directory, add the following configuration:
 
-```yaml
-system_probe_config:
-    enabled: true
-    enable_oom_kill: true
-```
+    ```yaml
+    system_probe_config:
+        enabled: true
+        enable_oom_kill: true
+    ```
 
-Also ensure that the `oom_kill.d/conf.yaml` file is present in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OOM Kill metrics.
+2. Ensure that the `oom_kill.d/conf.yaml` file is present in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OOM Kill metrics.
 
-Finally, [restart the Agent][2].
+3. [Restart the Agent][2].
 
 ### Configuration with Helm
 
