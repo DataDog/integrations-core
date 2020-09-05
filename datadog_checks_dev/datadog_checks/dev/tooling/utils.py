@@ -200,7 +200,8 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
 
         root = os.getcwd()
         if here:
-            config['repo_choice'] = os.path.basename(root)
+            # Repo choices use the integration repo name without the `integrations-` prefix
+            config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
 
     set_root(root)
     return message
