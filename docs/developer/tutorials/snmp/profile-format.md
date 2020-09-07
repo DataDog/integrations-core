@@ -254,7 +254,7 @@ metrics:
         tag: pdu_name
 ```
 
-In case the external table has different indexes, we can use `index_transform` to select a subset of the full index we want to use. `index_transform` is a list of `start`/`end` ranges to extract from the current table index to match the external table index. `start` and `end` are inclusive.
+In case the external table has different indexes, we can use `index_transform` to select a subset of the full index. `index_transform` is a list of `start`/`end` ranges to extract from the current table index to match the external table index. `start` and `end` are inclusive.
 
 External table indexes must be a subset of the indexes of the current table, or same indexes in a different order.
 
