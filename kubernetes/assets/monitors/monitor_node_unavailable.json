@@ -1,5 +1,5 @@
 {
-	"name": "Monitor Unschedulable Kubernetes Nodes",
+	"name": "[kubernetes] Monitor Unschedulable Kubernetes Nodes",
 	"type": "query alert",
 	"query": "max(last_15m):sum:kubernetes_state.node.status{status:schedulable} by {kubernetes_cluster} * 100 / sum:kubernetes_state.node.status{*} by {kubernetes_cluster} < 80",
 	"message": "More than 20% of nodes are unschedulable on ({{kubernetes_cluster.name}} cluster). \n Keep in mind that this might be expected based on your infrastructre.",
