@@ -5,6 +5,7 @@ import os
 
 import pytest
 
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
@@ -57,7 +58,12 @@ def e2e_instance():
 
 @pytest.fixture(scope='session')
 def mock_server():
-    compose_file = os.path.join(common.HERE, 'compose', 'mock_server', 'docker-compose.yaml')
+    if Platform.is_windows():
+        compose_filename = 'docker-compose-windows.yaml'
+    else:
+        compose_filename = 'docker-compose.yaml'
+
+    compose_file = os.path.join(common.HERE, 'compose', 'mock_server', compose_filename)
     env_vars = {"MOCK_SERVER_PORT": str(common.MOCK_SERVER_PORT)}
 
     with docker_run(compose_file, env_vars=env_vars):
