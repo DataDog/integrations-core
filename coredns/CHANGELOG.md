@@ -22,11 +22,11 @@
 
 * [Added] Adhere to code style. See [#3492](https://github.com/DataDog/integrations-core/pull/3492).
 
-## 1.1.0 / 2018-11-30 / Agent 5.30.0
+## 1.1.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Add panic_count_total metric to CoreDNS integration. See [#2594][1]. Thanks [woopstar][2].
 
-## 1.0.0 / 2018-10-13 / Agent 5.30.0
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] Add CoreDNS integration. See [#2091][3]. Thanks [shraykay][4].
 

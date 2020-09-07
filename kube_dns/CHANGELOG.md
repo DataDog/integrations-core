@@ -20,23 +20,23 @@
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
 
-## 2.1.0 / 2019-02-18 / Agent 6.11.0
+## 2.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Fix growing CPU and memory usage. See [#3066](https://github.com/DataDog/integrations-core/pull/3066).
 * [Added] Support Python 3. See [#2896](https://github.com/DataDog/integrations-core/pull/2896).
 
-## 2.0.1 / 2018-10-12 / Agent 5.28.0
+## 2.0.1 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Submit metrics with instance tags. See [#2299][1].
 
-## 2.0.0 / 2018-09-04 / Agent 5.28.0
+## 2.0.0 / 2018-09-04 / Agent 6.5.0
 
 * [Changed] Update kube_dns to use the new OpenMetricsBaseCheck. See [#1980][2].
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][3].
 * [Added] Make HTTP request timeout configurable in prometheus checks. See [#1790][4].
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 1.4.0 / 2018-06-13 / Agent 5.26.0
+## 1.4.0 / 2018-06-13 / Agent 6.4.0
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][6].
 

@@ -8,11 +8,11 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.15.1 / 2020-04-08 / Agent 7.20.0
+## 1.15.1 / 2020-04-08 / Agent 7.19.0
 
 * [Fixed] Fix error message. See [#6285](https://github.com/DataDog/integrations-core/pull/6285).
 
-## 1.15.0 / 2020-04-04 / Agent 7.19.0
+## 1.15.0 / 2020-04-04
 
 * [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
 * [Fixed] Handle invalid type for excluded_interfaces. See [#5986](https://github.com/DataDog/integrations-core/pull/5986).
@@ -21,19 +21,19 @@
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.13.0 / 2020-01-02 / Agent 7.17.0
+## 1.13.0 / 2020-01-02
 
 * [Added] Gracefully handle /proc errors in network check. See [#5245](https://github.com/DataDog/integrations-core/pull/5245).
 
-## 1.12.2 / 2019-12-13 / Agent 7.17.0
+## 1.12.2 / 2019-12-13 / Agent 7.16.0
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
 
-## 1.12.1 / 2019-12-02 / Agent 7.16.0
+## 1.12.1 / 2019-12-02
 
 * [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
 
-## 1.12.0 / 2019-10-30 / Agent 7.16.0
+## 1.12.0 / 2019-10-30
 
 * [Added] Add use_sudo option for collecting conntrack metrics with containers. See [#4920](https://github.com/DataDog/integrations-core/pull/4920).
 * [Fixed] Fix examples in conf.yaml.default. See [#4887](https://github.com/DataDog/integrations-core/pull/4887). Thanks [q42jaap](https://github.com/q42jaap).
@@ -42,15 +42,15 @@
 
 * [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
 
-## 1.11.4 / 2019-08-30 / Agent 6.15.0
+## 1.11.4 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Fix metric submission for combined connection state. See [#4473](https://github.com/DataDog/integrations-core/pull/4473).
 
-## 1.11.3 / 2019-08-14 / Agent 6.14.0
+## 1.11.3 / 2019-08-14
 
 * [Fixed] Drastically reduce `ss` output. See [#4346](https://github.com/DataDog/integrations-core/pull/4346).
 
-## 1.11.1 / 2019-08-02 / Agent 6.14.0
+## 1.11.1 / 2019-08-02
 
 * [Fixed] Fix proc location for conntrack files. See [#4150](https://github.com/DataDog/integrations-core/pull/4150).
 
@@ -64,7 +64,7 @@
 
 * [Added] Strip white space when reading from proc_conntrack_max_path. See [#3365](https://github.com/DataDog/integrations-core/pull/3365).
 
-## 1.9.0 / 2019-02-18 / Agent 6.11.0
+## 1.9.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add conntrack basic metrics to the network integration.. See [#2981](https://github.com/DataDog/integrations-core/pull/2981). Thanks [aerostitch](https://github.com/aerostitch).
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
@@ -72,21 +72,21 @@
 * [Added] Support Python 3. See [#3005](https://github.com/DataDog/integrations-core/pull/3005).
 * [Fixed] Use `device` tag instead of the deprecated `device_name` parameter. See [#2945](https://github.com/DataDog/integrations-core/pull/2945). Thanks [aerostitch](https://github.com/aerostitch).
 
-## 1.8.0 / 2018-11-30 / Agent 5.30.0
+## 1.8.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Update psutil. See [#2576][1].
 * [Fixed] Use raw string literals when \ is present. See [#2465][2].
 
-## 1.7.0 / 2018-10-12 / Agent 5.28.0
+## 1.7.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Upgrade psutil. See [#2190][3].
 
-## 1.6.1 / 2018-09-04 / Agent 5.28.0
+## 1.6.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Retrieve no_proxy directly from the Datadog Agent's configuration. See [#2004][4].
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 1.6.0 / 2018-06-07 / Agent 5.25.0
+## 1.6.0 / 2018-06-07
 
 * [Added] Add monotonic counts for some metrics. See [#1551][6]. Thanks [jalaziz][7].
 

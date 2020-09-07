@@ -6,11 +6,11 @@
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
 * [Changed] Use requests wrapper and remove httplib2 dependency. See [#7247](https://github.com/DataDog/integrations-core/pull/7247).
 
-## 1.9.0 / 2020-05-20 / Agent 7.21.0
+## 1.9.0 / 2020-05-20 / Agent 7.20.0
 
 * [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
 
-## 1.8.0 / 2020-05-17 / Agent 7.20.0
+## 1.8.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Use Agent 6 signature. See [#6448](https://github.com/DataDog/integrations-core/pull/6448).
@@ -32,15 +32,15 @@
 
 * [Added] Adhere to code style. See [#3563](https://github.com/DataDog/integrations-core/pull/3563).
 
-## 1.4.0 / 2019-01-04 / Agent 5.31.0
+## 1.4.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2774][1].
 
-## 1.3.1 / 2018-09-04 / Agent 5.28.0
+## 1.3.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.3.0 / 2018-06-07 / Agent 5.25.0
+## 1.3.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][3].
 

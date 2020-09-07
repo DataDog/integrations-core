@@ -22,27 +22,27 @@
 
 * [Added] Support old nodetool output format. See [#3253](https://github.com/DataDog/integrations-core/pull/3253). Thanks [hitsumabushi](https://github.com/hitsumabushi).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Finish Python3 Support. See [#2905](https://github.com/DataDog/integrations-core/pull/2905).
 
-## 1.2.0 / 2019-01-04 / Agent 5.31.0
+## 1.2.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2761][1].
 
-## 1.1.0 / 2018-11-21 / Agent 5.30.0
+## 1.1.0 / 2018-11-21 / Agent 6.8.0
 
 * [Added] Add --ssl option to cassandra_nodetool check. See [#2378][2]. Thanks [laurieodgers][3].
 
-## 1.0.0 / 2018-10-13 / Agent 5.30.0
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] Add cassandra_nodetool check. See [#511][4].
 
-## 0.1.3 / 2018-09-04 / Agent 5.28.0
+## 0.1.3 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 0.1.2 / 2018-06-13 / Agent 5.26.0
+## 0.1.2 / 2018-06-13 / Agent 6.4.0
 
 * [Fixed] Convert port to a string before calling get_subprocess_output. See [#1549][6]. Thanks [jalaziz][7].
 

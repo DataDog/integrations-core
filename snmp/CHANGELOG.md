@@ -6,12 +6,12 @@
 * [Fixed] Validate SNMP profile hierarchy. See [#6798](https://github.com/DataDog/integrations-core/pull/6798).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
 
-## 3.7.1 / 2020-08-12
+## 3.7.1 / 2020-08-12 / Agent 7.22.0
 
 * [Fixed] Fix apc ups profile. See [#7351](https://github.com/DataDog/integrations-core/pull/7351).
 * [Fixed] Revert Fix wrong indentation of `table` key in column metric tags #7024. See [#7349](https://github.com/DataDog/integrations-core/pull/7349).
 
-## 3.7.0 / 2020-08-03 / Agent 7.22.0
+## 3.7.0 / 2020-08-03
 
 * [Added] Add OID caching. See [#7231](https://github.com/DataDog/integrations-core/pull/7231).
 * [Fixed] Refactor how OIDs are managed. See [#7230](https://github.com/DataDog/integrations-core/pull/7230).
@@ -19,7 +19,7 @@
 * [Fixed] Rename all_oids to scalar_oids. See [#7229](https://github.com/DataDog/integrations-core/pull/7229).
 * [Fixed] Better logging for submit_metric. See [#7188](https://github.com/DataDog/integrations-core/pull/7188).
 
-## 3.6.0 / 2020-07-24 / Agent 7.22.0
+## 3.6.0 / 2020-07-24
 
 * [Added] Check tag for table metric. See [#6933](https://github.com/DataDog/integrations-core/pull/6933).
 * [Added] Add new `flag_stream` type. See [#7072](https://github.com/DataDog/integrations-core/pull/7072).
@@ -30,19 +30,19 @@
 * [Fixed] Use OID instead of MIB for sysName. See [#7104](https://github.com/DataDog/integrations-core/pull/7104).
 * [Fixed] Submit additional rate metrics in fortigate profile. See [#7058](https://github.com/DataDog/integrations-core/pull/7058).
 
-## 3.5.3 / 2020-07-01 / Agent 7.22.0
+## 3.5.3 / 2020-07-01 / Agent 7.21.0
 
 * [Fixed] Fix autodiscovery_subnet var in auto_conf.yaml. See [#7029](https://github.com/DataDog/integrations-core/pull/7029).
 
-## 3.5.2 / 2020-06-30 / Agent 7.22.0
+## 3.5.2 / 2020-06-30
 
 * [Fixed] Fix tag names for cisco asa profile. See [#7027](https://github.com/DataDog/integrations-core/pull/7027).
 
-## 3.5.1 / 2020-06-30 / Agent 7.22.0
+## 3.5.1 / 2020-06-30
 
 * [Fixed] Fix wrong indentation of `table` key in column metric tags. See [#7024](https://github.com/DataDog/integrations-core/pull/7024).
 
-## 3.5.0 / 2020-06-29 / Agent 7.21.0
+## 3.5.0 / 2020-06-29
 
 * [Added] Add regex match support for Tables. See [#6951](https://github.com/DataDog/integrations-core/pull/6951).
 * [Added] Add snmp.devices_monitored metric. See [#6941](https://github.com/DataDog/integrations-core/pull/6941).
@@ -53,12 +53,12 @@
 * [Fixed] [Refactor] Clean up batching implementation. See [#6952](https://github.com/DataDog/integrations-core/pull/6952).
 * [Fixed] Add index tagging to cfwConnectionStatValue. See [#6897](https://github.com/DataDog/integrations-core/pull/6897).
 
-## 3.4.0 / 2020-06-11 / Agent 7.21.0
+## 3.4.0 / 2020-06-11
 
 * [Added] Add NetApp profile. See [#6841](https://github.com/DataDog/integrations-core/pull/6841).
 * [Fixed] Fix `instance_number` tag on Cisco voice router metrics. See [#6867](https://github.com/DataDog/integrations-core/pull/6867).
 
-## 3.3.0 / 2020-06-10 / Agent 7.21.0
+## 3.3.0 / 2020-06-10
 
 * [Added] Add Fortinet FortiGate profile. See [#6504](https://github.com/DataDog/integrations-core/pull/6504). Thanks [lindseyferretti](https://github.com/lindseyferretti).
 * [Added] Reuse MIB builder objects per SNMP engine. See [#6716](https://github.com/DataDog/integrations-core/pull/6716).
@@ -74,21 +74,21 @@
 * [Fixed] Remove iDRAC/poweredge profile inheritance. See [#6754](https://github.com/DataDog/integrations-core/pull/6754).
 * [Fixed] Make profiles compatible with previous parsing. See [#6750](https://github.com/DataDog/integrations-core/pull/6750).
 
-## 3.2.2 / 2020-05-21 / Agent 7.21.0
+## 3.2.2 / 2020-05-21 / Agent 7.20.0
 
 * [Fixed] Fix error handling in getnext. See [#6701](https://github.com/DataDog/integrations-core/pull/6701).
 
-## 3.2.1 / 2020-05-19 / Agent 7.21.0
+## 3.2.1 / 2020-05-19
 
 * [Fixed] Add missing auto_conf. See [#6687](https://github.com/DataDog/integrations-core/pull/6687).
 
-## 3.2.0 / 2020-05-17 / Agent 7.20.0
+## 3.2.0 / 2020-05-17
 
 * [Added] Add diskStatus tag to Isilon profile. See [#6660](https://github.com/DataDog/integrations-core/pull/6660).
 * [Added] Add BPG metrics to more profiles. See [#6655](https://github.com/DataDog/integrations-core/pull/6655).
 * [Added] Add voice metrics and profiles. See [#6629](https://github.com/DataDog/integrations-core/pull/6629).
 
-## 3.1.0 / 2020-05-14 / Agent 7.20.0
+## 3.1.0 / 2020-05-14
 
 * [Added] Add `chatsworth` legacy metrics. See [#6624](https://github.com/DataDog/integrations-core/pull/6624).
 * [Added] Add ifHighSpeed. See [#6602](https://github.com/DataDog/integrations-core/pull/6602).
@@ -98,7 +98,7 @@
 * [Fixed] Don't use ifDescr for metric tagging. See [#6601](https://github.com/DataDog/integrations-core/pull/6601).
 * [Fixed] Optimize away useless GET calls. See [#6456](https://github.com/DataDog/integrations-core/pull/6456).
 
-## 3.0.0 / 2020-05-04 / Agent 7.20.0
+## 3.0.0 / 2020-05-04
 
 * [Added] Add base BGP4 and Cisco-CSR1000v profiles. See [#6315](https://github.com/DataDog/integrations-core/pull/6315).
 * [Added] Collect OSPF routing metrics. See [#6554](https://github.com/DataDog/integrations-core/pull/6554).
@@ -133,7 +133,7 @@
 * [Fixed] Only load installed profiles once. See [#6231](https://github.com/DataDog/integrations-core/pull/6231).
 * [Fixed] Fix tag matching documentation. See [#6226](https://github.com/DataDog/integrations-core/pull/6226).
 
-## 2.6.0 / 2020-03-24 / Agent 7.19.0
+## 2.6.0 / 2020-03-24
 
 * [Added] Support regular expressions in dynamic tags. See [#6096](https://github.com/DataDog/integrations-core/pull/6096).
 * [Added] Aruba, Arista and PDU profiles. See [#6002](https://github.com/DataDog/integrations-core/pull/6002).
@@ -154,16 +154,16 @@
 * [Fixed] Add OIDs to router profiles. See [#5991](https://github.com/DataDog/integrations-core/pull/5991).
 * [Fixed] Validate and cast `discovery_interval` to a number. See [#5887](https://github.com/DataDog/integrations-core/pull/5887).
 
-## 2.5.0 / 2020-02-27 / Agent 7.19.0
+## 2.5.0 / 2020-02-27 / Agent 7.18.0
 
 * [Added] Query discovered devices in threads. See [#5462](https://github.com/DataDog/integrations-core/pull/5462).
 * [Fixed] Fix issue with tags leaking between discovered instances. See [#5899](https://github.com/DataDog/integrations-core/pull/5899).
 
-## 2.4.1 / 2020-02-25 / Agent 7.19.0
+## 2.4.1 / 2020-02-25
 
 * [Fixed] Handle case when servers report two values for entries in `metric_tags`. See [#5853](https://github.com/DataDog/integrations-core/pull/5853).
 
-## 2.4.0 / 2020-02-22 / Agent 7.18.0
+## 2.4.0 / 2020-02-22
 
 * [Added] Add extension mechanism for SNMP profiles. See [#5821](https://github.com/DataDog/integrations-core/pull/5821).
 * [Fixed] Switch back to most specific profile matching. See [#5813](https://github.com/DataDog/integrations-core/pull/5813).
@@ -178,15 +178,15 @@
 * [Added] Fetch sysUpTimeInstance automatically. See [#5752](https://github.com/DataDog/integrations-core/pull/5752).
 * [Added] Add Dell Poweredge profile. See [#5723](https://github.com/DataDog/integrations-core/pull/5723).
 
-## 2.3.2 / 2020-01-15 / Agent 7.18.0
+## 2.3.2 / 2020-01-15 / Agent 7.17.0
 
 * [Fixed] Tweak behavior related to discovery. See [#5466](https://github.com/DataDog/integrations-core/pull/5466).
 
-## 2.3.1 / 2020-01-13 / Agent 7.17.0
+## 2.3.1 / 2020-01-13
 
 * [Fixed] Fix usage of old OID list attributes on InstanceConfig. See [#5412](https://github.com/DataDog/integrations-core/pull/5412).
 
-## 2.3.0 / 2020-01-07 / Agent 7.17.0
+## 2.3.0 / 2020-01-07
 
 * [Added] Remove MIB requirement in profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).
 * [Added] Implement table browsing with OIDs. See [#5368](https://github.com/DataDog/integrations-core/pull/5368).
@@ -194,7 +194,7 @@
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * [Added] Add a profile for Meraki cloud devices. See [#5215](https://github.com/DataDog/integrations-core/pull/5215).
 
-## 2.2.0 / 2020-01-02 / Agent 7.17.0
+## 2.2.0 / 2020-01-02
 
 * [Added] Add profile for Cisco Nexus switches. See [#5363](https://github.com/DataDog/integrations-core/pull/5363).
 * [Added] Add profile for Intel IDRAC devices. See [#5227](https://github.com/DataDog/integrations-core/pull/5227).
@@ -205,11 +205,11 @@
 * [Fixed] Disable MIB autofetch. See [#5094](https://github.com/DataDog/integrations-core/pull/5094).
 * [Added] Add Cisco 3850 profile. See [#5090](https://github.com/DataDog/integrations-core/pull/5090).
 
-## 2.0.1 / 2019-11-21 / Agent 7.16.0
+## 2.0.1 / 2019-11-21
 
 * [Fixed] Handle total_time_to_temporal_percent missing. See [#5055](https://github.com/DataDog/integrations-core/pull/5055).
 
-## 2.0.0 / 2019-11-15 / Agent 7.16.0
+## 2.0.0 / 2019-11-15
 
 * [Added] Add interface statuses to profiles. See [#5004](https://github.com/DataDog/integrations-core/pull/5004).
 * [Added] Ignore metrics that are not retrieved. See [#5003](https://github.com/DataDog/integrations-core/pull/5003).
@@ -219,23 +219,23 @@
 * [Added] Generic network router profile. See [#4937](https://github.com/DataDog/integrations-core/pull/4937).
 * [Added] Allow tagging through different MIBs. See [#4853](https://github.com/DataDog/integrations-core/pull/4853).
 
-## 1.14.1 / 2019-10-16 / Agent 7.16.0
+## 1.14.1 / 2019-10-16 / Agent 6.15.0
 
 * [Fixed] Fix allowed host failure retry logic. See [#4782](https://github.com/DataDog/integrations-core/pull/4782).
 
-## 1.14.0 / 2019-10-14 / Agent 7.16.0
+## 1.14.0 / 2019-10-14
 
 * [Added] Store discovered hosts. See [#4712](https://github.com/DataDog/integrations-core/pull/4712).
 
-## 1.13.0 / 2019-10-11 / Agent 6.15.0
+## 1.13.0 / 2019-10-11
 
 * [Added] Automatically fetch MIBs that we don't know about. See [#4732](https://github.com/DataDog/integrations-core/pull/4732).
 
-## 1.12.0 / 2019-10-10 / Agent 6.15.0
+## 1.12.0 / 2019-10-10
 
 * [Added] Add profile for F5 BIG-IP devices. See [#4674](https://github.com/DataDog/integrations-core/pull/4674).
 
-## 1.11.0 / 2019-09-19 / Agent 6.15.0
+## 1.11.0 / 2019-09-19
 
 * [Fixed] Handle bytes in network_address. See [#4577](https://github.com/DataDog/integrations-core/pull/4577).
 * [Added] Use bulk call when possible. See [#4530](https://github.com/DataDog/integrations-core/pull/4530).
@@ -253,7 +253,7 @@
 
 * [Added] Add support for string types. See [#4087](https://github.com/DataDog/integrations-core/pull/4087).
 
-## 1.8.0 / 2019-07-04 / Agent 6.13.0
+## 1.8.0 / 2019-07-04
 
 * [Added] Match OIDs with leading dots. See [#3854](https://github.com/DataDog/integrations-core/pull/3854).
 
@@ -265,17 +265,17 @@
 
 * [Added] Add metrics config globally. See [#3230](https://github.com/DataDog/integrations-core/pull/3230).
 
-## 1.5.0 / 2019-02-18 / Agent 6.11.0
+## 1.5.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Improve performance by querying only necessary columns from a table. See [#3059](https://github.com/DataDog/integrations-core/pull/3059).
 * [Fixed] Log the correct information about snmpnext result. See [#3021](https://github.com/DataDog/integrations-core/pull/3021).
 * [Added] Support Python 3. See [#3016](https://github.com/DataDog/integrations-core/pull/3016).
 
-## 1.4.2 / 2018-10-12 / Agent 5.28.0
+## 1.4.2 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Fix `enforce_mib_constraints` parameter having no effect.. See [#2340][1].
 
-## 1.4.1 / 2018-09-04 / Agent 5.28.0
+## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

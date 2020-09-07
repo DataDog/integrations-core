@@ -33,24 +33,24 @@
 
 * [Added] Add log setup and configuration. See [#3960](https://github.com/DataDog/integrations-core/pull/3960).
 
-## 1.5.1 / 2019-06-05 / Agent 6.13.0
+## 1.5.1 / 2019-06-05 / Agent 6.12.0
 
 * [Fixed] Fix version discovery. See [#3874](https://github.com/DataDog/integrations-core/pull/3874).
 
-## 1.5.0 / 2019-05-14 / Agent 6.12.0
+## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3488](https://github.com/DataDog/integrations-core/pull/3488).
 
-## 1.4.0 / 2019-02-18 / Agent 6.11.0
+## 1.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * [Added] Support Python 3. See [#2837](https://github.com/DataDog/integrations-core/pull/2837).
 
-## 1.3.2 / 2018-11-30 / Agent 5.30.0
+## 1.3.2 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Use raw string literals when \ is present. See [#2465][1].
 
-## 1.3.1 / 2018-09-04 / Agent 5.28.0
+## 1.3.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

@@ -32,24 +32,24 @@
 
 * [Added] Add version metadata to RabbitMQ check. See [#4918](https://github.com/DataDog/integrations-core/pull/4918).
 
-## 1.10.1 / 2019-10-18 / Agent 7.16.0
+## 1.10.1 / 2019-10-18 / Agent 6.15.0
 
 * [Fixed] Fix for rabbit 3.1 queue_totals introduced in #4668. See [#4805](https://github.com/DataDog/integrations-core/pull/4805).
 
-## 1.10.0 / 2019-10-11 / Agent 6.15.0
+## 1.10.0 / 2019-10-11
 
 * [Added] verifies if `root` is dict before doing `.get`. See [#4668](https://github.com/DataDog/integrations-core/pull/4668).
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.9.2 / 2019-09-18 / Agent 6.15.0
+## 1.9.2 / 2019-09-18
 
 * [Fixed] Ignore empty data for metrics limit. See [#4544](https://github.com/DataDog/integrations-core/pull/4544).
 
-## 1.9.1 / 2019-08-29 / Agent 6.15.0
+## 1.9.1 / 2019-08-29 / Agent 6.14.0
 
 * [Fixed] Revert "Fix queue, node and echange limit". See [#4467](https://github.com/DataDog/integrations-core/pull/4467).
 
-## 1.9.0 / 2019-08-24 / Agent 6.14.0
+## 1.9.0 / 2019-08-24
 
 * [Added] Add mem_limit to RabbitMQ Checks. See [#4250](https://github.com/DataDog/integrations-core/pull/4250). Thanks [ParthKolekar](https://github.com/ParthKolekar).
 * [Added] Add requests wrapper to RabbitMQ. See [#4257](https://github.com/DataDog/integrations-core/pull/4257).
@@ -60,18 +60,18 @@
 * [Fixed] Fix default log path. See [#3611](https://github.com/DataDog/integrations-core/pull/3611).
 * [Added] Adhere to code style. See [#3561](https://github.com/DataDog/integrations-core/pull/3561).
 
-## 1.7.0 / 2019-01-04 / Agent 5.31.0
+## 1.7.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2791][1].
 * [Fixed] adds ignore_ssl_warning to rabbit file. See [#2706][2].
 
-## 1.6.0 / 2018-11-30 / Agent 5.30.0
+## 1.6.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Option to ignore SSL warnings. See [#2472][3]. Thanks [tebriel][4].
 * [Fixed] Use raw string literals when \ is present. See [#2465][5].
 * [Added] Add cluster wide metrics. See [#2449][6].
 
-## 1.5.2 / 2018-09-04 / Agent 5.28.0
+## 1.5.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][7].
 

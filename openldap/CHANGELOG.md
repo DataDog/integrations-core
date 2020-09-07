@@ -17,17 +17,17 @@
 
 * [Added] Adhere to code style. See [#3548](https://github.com/DataDog/integrations-core/pull/3548).
 
-## 1.2.0 / 2019-01-04 / Agent 5.31.0
+## 1.2.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2760][1].
 * [Fixed] Remove spurious tab from config file. See [#2758][2].
 
-## 1.1.0 / 2018-11-30 / Agent 5.30.0
+## 1.1.0 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Correctly catch LDAP exception when failing to connect to server. See [#2574][3].
 * [Added] Fixed manifests and added validation in ddev. See [#2002][4].
 
-## 1.0.0 / 2018-07-20 / Agent 5.26.0
+## 1.0.0 / 2018-07-20 / Agent 6.5.0
 
 * [Added] Add OpenLDAP integration. See [#1870][5].
 [1]: https://github.com/DataDog/integrations-core/pull/2760

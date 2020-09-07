@@ -17,11 +17,11 @@
 * [Added] Add default template to openmetrics & jmx config. See [#6328](https://github.com/DataDog/integrations-core/pull/6328).
 * [Fixed] Hide openmetrics template options that are typically overridden. See [#6338](https://github.com/DataDog/integrations-core/pull/6338).
 
-## 1.6.1 / 2020-04-07 / Agent 7.20.0
+## 1.6.1 / 2020-04-07 / Agent 7.19.0
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
 
-## 1.6.0 / 2020-04-04 / Agent 7.19.0
+## 1.6.0 / 2020-04-04
 
 * [Added] Add OpenMetrics config spec template. See [#6142](https://github.com/DataDog/integrations-core/pull/6142).
 * [Added] Allow option to submit histogram/summary sum metric as monotonic count. See [#6127](https://github.com/DataDog/integrations-core/pull/6127).
@@ -46,12 +46,12 @@
 
 * [Added] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).
 
-## 1.1.0 / 2019-05-14 / Agent 6.12.0
+## 1.1.0 / 2019-05-14
 
 * [Fixed] Fix type override values in example config. See [#3717](https://github.com/DataDog/integrations-core/pull/3717).
 * [Added] Adhere to code style. See [#3549](https://github.com/DataDog/integrations-core/pull/3549).
 
-## 1.0.0 / 2018-10-13 / Agent 5.30.0
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] Add OpenMetrics integration. See [#2148][1].
 

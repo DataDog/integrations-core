@@ -21,19 +21,19 @@
 
 * [Added] Adhere to code style. See [#3325](https://github.com/DataDog/integrations-core/pull/3325).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Finish Python 3 Support. See [#2901](https://github.com/DataDog/integrations-core/pull/2901).
 
-## 1.2.0 / 2018-11-30 / Agent 5.30.0
+## 1.2.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Support Python3. See [#2622][1].
 
-## 1.1.2 / 2018-09-04 / Agent 5.28.0
+## 1.1.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.1.1 / 2018-06-20
+## 1.1.1 / 2018-06-20 / Agent 6.4.0
 
 * [Fixed] Remove gauge timestamp so the check works with agent 6. See [#1768][3].
 

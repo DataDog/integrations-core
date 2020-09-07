@@ -15,44 +15,44 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.11.1 / 2020-04-07 / Agent 7.20.0
+## 1.11.1 / 2020-04-07 / Agent 7.19.0
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
 
-## 1.11.0 / 2020-04-04 / Agent 7.19.0
+## 1.11.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.10.1 / 2020-02-25 / Agent 7.19.0
+## 1.10.1 / 2020-02-25 / Agent 7.18.0
 
 * [Fixed] Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
 
-## 1.10.0 / 2020-02-22 / Agent 7.18.0
+## 1.10.0 / 2020-02-22
 
 * [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
 
-## 1.9.5 / 2020-01-17 / Agent 7.18.0
+## 1.9.5 / 2020-01-17 / Agent 7.17.0
 
 * [Fixed] Add support for full server version. See [#5484](https://github.com/DataDog/integrations-core/pull/5484).
 
-## 1.9.4 / 2019-12-26 / Agent 7.17.0
+## 1.9.4 / 2019-12-26
 
 * [Fixed] Don't ship incomplete config spec. See [#5338](https://github.com/DataDog/integrations-core/pull/5338).
 
-## 1.9.3 / 2019-12-24 / Agent 7.17.0
+## 1.9.3 / 2019-12-24
 
 * [Fixed] Fix version metadata submitted twice. See [#5325](https://github.com/DataDog/integrations-core/pull/5325).
 
-## 1.9.2 / 2019-12-20 / Agent 7.17.0
+## 1.9.2 / 2019-12-20 / Agent 7.16.1
 
 * [Fixed] Fix version collection again. See [#5252](https://github.com/DataDog/integrations-core/pull/5252).
 
-## 1.9.1 / 2019-12-04 / Agent 7.17.0
+## 1.9.1 / 2019-12-04 / Agent 7.16.0
 
 * [Fixed] Fix version collection. See [#5144](https://github.com/DataDog/integrations-core/pull/5144).
 
-## 1.9.0 / 2019-12-02 / Agent 7.16.0
+## 1.9.0 / 2019-12-02
 
 * [Added] Standardize logging format. See [#4899](https://github.com/DataDog/integrations-core/pull/4899).
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
@@ -62,11 +62,11 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.7.1 / 2019-08-30 / Agent 6.15.0
+## 1.7.1 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
-## 1.7.0 / 2019-08-24 / Agent 6.14.0
+## 1.7.0 / 2019-08-24
 
 * [Added] Add support for proxy options. See [#3362](https://github.com/DataDog/integrations-core/pull/3362).
 
@@ -78,16 +78,16 @@
 
 * [Added] Adhere to code style. See [#3322](https://github.com/DataDog/integrations-core/pull/3322).
 
-## 1.4.0 / 2018-11-30 / Agent 5.30.0
+## 1.4.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Add python3 support. See [#2497][1].
 
-## 1.3.1 / 2018-09-04 / Agent 5.28.0
+## 1.3.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 
-## 1.3.0 / 2018-06-07 / Agent 5.25.0
+## 1.3.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][4].
 

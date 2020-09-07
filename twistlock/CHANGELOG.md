@@ -24,7 +24,7 @@
 * [Added] Add Prisma Cloud compatibility. See [#5360](https://github.com/DataDog/integrations-core/pull/5360).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.4.1 / 2020-01-02 / Agent 7.17.0
+## 1.4.1 / 2020-01-02
 
 * [Fixed] Fix possible TypeError due to NoneType in parser.isoparse. See [#5265](https://github.com/DataDog/integrations-core/pull/5265).
 * [Fixed] Fix possible KeyError in _report_compliance_information. See [#5248](https://github.com/DataDog/integrations-core/pull/5248).
@@ -37,15 +37,15 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.2.2 / 2019-08-30 / Agent 6.15.0
+## 1.2.2 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
-## 1.2.1 / 2019-08-13 / Agent 6.14.0
+## 1.2.1 / 2019-08-13
 
 * [Fixed] Fix date format matching. See [#4304](https://github.com/DataDog/integrations-core/pull/4304).
 
-## 1.2.0 / 2019-08-02 / Agent 6.14.0
+## 1.2.0 / 2019-08-02
 
 * [Added] Add RequestsWrapper to twistlock. See [#4122](https://github.com/DataDog/integrations-core/pull/4122).
 * [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).

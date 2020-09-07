@@ -35,20 +35,20 @@
 
 * [Added] Adhere to code style. See [#3569](https://github.com/DataDog/integrations-core/pull/3569).
 
-## 1.5.0 / 2019-01-04 / Agent 5.31.0
+## 1.5.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2836][1].
 
-## 1.4.0 / 2018-11-30 / Agent 5.30.0
+## 1.4.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Upgrade cryptography. See [#2659][2].
 
-## 1.3.1 / 2018-09-04 / Agent 5.28.0
+## 1.3.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Update cryptography to 2.3. See [#1927][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 
-## 1.3.0 / 2018-06-20 / Agent 5.26.0
+## 1.3.0 / 2018-06-20 / Agent 6.4.0
 
 * [Changed] Bump requests to 2.19.1. See [#1743][5].
 

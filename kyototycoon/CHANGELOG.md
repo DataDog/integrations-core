@@ -32,11 +32,11 @@
 
 * [Added] Adhere to code style. See [#3531](https://github.com/DataDog/integrations-core/pull/3531).
 
-## 1.5.0 / 2019-02-18 / Agent 6.11.0
+## 1.5.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#3013](https://github.com/DataDog/integrations-core/pull/3013).
 
-## 1.4.1 / 2018-09-04 / Agent 5.28.0
+## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].
 

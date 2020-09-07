@@ -21,11 +21,11 @@
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 2.0.1 / 2019-12-04 / Agent 7.17.0
+## 2.0.1 / 2019-12-04 / Agent 7.16.0
 
 * [Fixed] Propagate tags properly to stats metrics. See [#5140](https://github.com/DataDog/integrations-core/pull/5140).
 
-## 2.0.0 / 2019-12-02 / Agent 7.16.0
+## 2.0.0 / 2019-12-02
 
 * [Changed] Refactor code and properly send a service check for each endpoint. See [#4891](https://github.com/DataDog/integrations-core/pull/4891).
 * [Fixed] Fix service check message. See [#4771](https://github.com/DataDog/integrations-core/pull/4771).
@@ -34,11 +34,11 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.5.1 / 2019-08-28 / Agent 6.15.0
+## 1.5.1 / 2019-08-28 / Agent 6.14.0
 
 * [Fixed] Fix mesos_slave service check. See [#4448](https://github.com/DataDog/integrations-core/pull/4448).
 
-## 1.5.0 / 2019-08-24 / Agent 6.14.0
+## 1.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to mesos_slave. See [#4222](https://github.com/DataDog/integrations-core/pull/4222).
 * [Added] Add support for /state endpoint. See [#4054](https://github.com/DataDog/integrations-core/pull/4054).
@@ -47,15 +47,15 @@
 
 * [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).
 
-## 1.4.0 / 2019-05-14 / Agent 6.12.0
+## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3539](https://github.com/DataDog/integrations-core/pull/3539).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2874](https://github.com/DataDog/integrations-core/pull/2874).
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].
 

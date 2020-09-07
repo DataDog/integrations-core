@@ -12,11 +12,11 @@
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 2.5.1 / 2020-02-25 / Agent 7.19.0
+## 2.5.1 / 2020-02-25 / Agent 7.18.0
 
 * [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
 
-## 2.5.0 / 2020-02-22 / Agent 7.18.0
+## 2.5.0 / 2020-02-22
 
 * [Deprecated] Deprecate `service` tag. See [#5545](https://github.com/DataDog/integrations-core/pull/5545).
 
@@ -38,12 +38,12 @@
 * [Fixed] Add debug to compare short names, service names and patterns. See [#3427](https://github.com/DataDog/integrations-core/pull/3427).
 * [Added] Adhere to code style. See [#3583](https://github.com/DataDog/integrations-core/pull/3583).
 
-## 2.0.0 / 2018-10-12 / Agent 5.28.0
+## 2.0.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][1].
 * [Removed] Make windows_service use scm api instead of wmi. See [#2305][2].
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 

@@ -18,11 +18,11 @@
 * [Added] Add go_expvar.memstats.total_alloc.count . See [#6005](https://github.com/DataDog/integrations-core/pull/6005).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.7.2 / 2020-03-05 / Agent 7.19.0
+## 1.7.2 / 2020-03-05 / Agent 7.18.0
 
 * [Fixed] Revert "Submit total_alloc as monotonic count". See [#5972](https://github.com/DataDog/integrations-core/pull/5972).
 
-## 1.7.1 / 2020-02-22 / Agent 7.18.0
+## 1.7.1 / 2020-02-22
 
 * [Fixed] Submit total_alloc as monotonic count. See [#5703](https://github.com/DataDog/integrations-core/pull/5703).
 
@@ -36,11 +36,11 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.5.1 / 2019-09-04 / Agent 6.15.0
+## 1.5.1 / 2019-09-04 / Agent 6.14.0
 
 * [Fixed] Fix error handling. See [#4505](https://github.com/DataDog/integrations-core/pull/4505).
 
-## 1.5.0 / 2019-08-24 / Agent 6.14.0
+## 1.5.0 / 2019-08-24
 
 * [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).
 * [Added] Add proxy settings support. See [#3743](https://github.com/DataDog/integrations-core/pull/3743).
@@ -49,23 +49,23 @@
 
 * [Added] Add monotonic_counter support to go_expvar. See [#3992](https://github.com/DataDog/integrations-core/pull/3992).
 
-## 1.3.0 / 2019-06-20 / Agent 6.13.0
+## 1.3.0 / 2019-06-20 / Agent 6.12.0
 
 * [Added] Do not compile regexes on each run. See [#3949](https://github.com/DataDog/integrations-core/pull/3949).
 
-## 1.2.0 / 2019-05-14 / Agent 6.12.0
+## 1.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3511](https://github.com/DataDog/integrations-core/pull/3511).
 
-## 1.1.0 / 2019-01-04 / Agent 5.31.0
+## 1.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2833][1].
 
-## 1.0.5 / 2018-11-30 / Agent 5.30.0
+## 1.0.5 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Use raw string literals when \ is present. See [#2465][2].
 
-## 1.0.4 / 2018-09-04 / Agent 5.28.0
+## 1.0.4 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Move Goexpvar to pytest. See [#2089][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].

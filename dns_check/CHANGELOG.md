@@ -9,11 +9,11 @@
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Added] Add config spec. See [#6560](https://github.com/DataDog/integrations-core/pull/6560).
 
-## 1.5.2 / 2020-04-24 / Agent 7.20.0
+## 1.5.2 / 2020-04-24 / Agent 7.19.0
 
 * [Fixed] Fix missing `time.clock` attribute in Python 3.8. See [#6478](https://github.com/DataDog/integrations-core/pull/6478).
 
-## 1.5.1 / 2020-04-04 / Agent 7.19.0
+## 1.5.1 / 2020-04-04
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
@@ -33,15 +33,15 @@
 
 * [Added] Support Python 3. See [#3425](https://github.com/DataDog/integrations-core/pull/3425).
 
-## 1.2.0 / 2018-11-30 / Agent 5.30.0
+## 1.2.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] add ability to check A, CNAME and MX results. See [#2615][1]. Thanks [volksman][2].
 
-## 1.1.2 / 2018-09-04 / Agent 5.28.0
+## 1.1.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 
-## 1.1.1 / 2018-06-13 / Agent 5.26.0
+## 1.1.1 / 2018-06-13 / Agent 6.4.0
 
 * [Fixed] Fix parsing of requirements file so that `dnspython` is listed as a req. See [#1603][4].
 

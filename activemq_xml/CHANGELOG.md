@@ -14,11 +14,11 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.6.1 / 2020-04-07 / Agent 7.20.0
+## 1.6.1 / 2020-04-07 / Agent 7.19.0
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
 
-## 1.6.0 / 2020-04-04 / Agent 7.19.0
+## 1.6.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
 * [Added] Add config specs to activemq xml. See [#6116](https://github.com/DataDog/integrations-core/pull/6116).
@@ -40,11 +40,11 @@
 
 * [Added] Adhere to code style. See [#3323](https://github.com/DataDog/integrations-core/pull/3323).
 
-## 1.1.0 / 2018-11-30 / Agent 5.30.0
+## 1.1.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Add Python3 Support. See [#2583][1].
 
-## 1.0.1 / 2018-09-04 / Agent 5.28.0
+## 1.0.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

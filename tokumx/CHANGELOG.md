@@ -20,17 +20,17 @@
 
 * [Added] Adhere to code style. See [#3576](https://github.com/DataDog/integrations-core/pull/3576).
 
-## 2.0.0 / 2019-02-18 / Agent 6.11.0
+## 2.0.0 / 2019-02-18 / Agent 6.10.0
 
 * [Changed] Vendor pymongo into tokumx check. See [#3001](https://github.com/DataDog/integrations-core/pull/3001).
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * [Added] Finish Python 3 Support. See [#2926](https://github.com/DataDog/integrations-core/pull/2926).
 
-## 1.3.0 / 2019-01-04 / Agent 5.31.0
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2832][1].
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Moves Tokumx to pytest. See [#2134][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].

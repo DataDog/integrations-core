@@ -12,7 +12,7 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.7.2 / 2020-04-24 / Agent 7.20.0
+## 1.7.2 / 2020-04-24
 
 * [Fixed] Handle missing role metrics for mesos_master. See [#6422](https://github.com/DataDog/integrations-core/pull/6422).
 
@@ -30,11 +30,11 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.5.1 / 2019-08-28 / Agent 6.15.0
+## 1.5.1 / 2019-08-28 / Agent 6.14.0
 
 * [Fixed] Fix mesos_master service check. See [#4452](https://github.com/DataDog/integrations-core/pull/4452).
 
-## 1.5.0 / 2019-08-24 / Agent 6.14.0
+## 1.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to mesos_master. See [#4221](https://github.com/DataDog/integrations-core/pull/4221).
 * [Added] Add support for /state and /roles endpoints. See [#4053](https://github.com/DataDog/integrations-core/pull/4053).
@@ -43,11 +43,11 @@
 
 * [Added] Adhere to code style. See [#3538](https://github.com/DataDog/integrations-core/pull/3538).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2873](https://github.com/DataDog/integrations-core/pull/2873).
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].
 

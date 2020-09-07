@@ -16,7 +16,7 @@
 * [Fixed] Add wmi integration test and fix filter sampler. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
 * [Fixed] WMI base typing and instance free API. See [#6329](https://github.com/DataDog/integrations-core/pull/6329).
 
-## 2.3.4 / 2020-04-16 / Agent 7.20.0
+## 2.3.4 / 2020-04-16
 
 * [Fixed] Normalize integers. See [#6357](https://github.com/DataDog/integrations-core/pull/6357).
 
@@ -24,11 +24,11 @@
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 2.3.2 / 2020-02-25 / Agent 7.19.0
+## 2.3.2 / 2020-02-25 / Agent 7.18.0
 
 * [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).
 
-## 2.3.1 / 2020-02-22 / Agent 7.18.0
+## 2.3.1 / 2020-02-22
 
 * [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
 
@@ -54,15 +54,15 @@
 * [Changed] Require the use of filters. See [#3652](https://github.com/DataDog/integrations-core/pull/3652).
 * [Added] Adhere to code style. See [#3582](https://github.com/DataDog/integrations-core/pull/3582).
 
-## 1.4.0 / 2019-02-18 / Agent 6.11.0
+## 1.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#3040](https://github.com/DataDog/integrations-core/pull/3040).
 
-## 1.3.0 / 2018-10-12 / Agent 5.28.0
+## 1.3.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][1].
 
-## 1.2.0 / 2018-09-04 / Agent 5.28.0
+## 1.2.0 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Fix syntax. See [#2115][2].
 * [Added] Check events between system boot and DataDog agent start. See [#1929][3]. Thanks [jvanlieshout][4].

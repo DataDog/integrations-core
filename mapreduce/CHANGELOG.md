@@ -37,21 +37,21 @@
 
 * [Added] Adhere to code style. See [#3535](https://github.com/DataDog/integrations-core/pull/3535).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2870](https://github.com/DataDog/integrations-core/pull/2870).
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Fix bug and typo in DEFAULT_CLUSTER_NAME for YARN check. See [#1814][1]. Thanks [eplanet][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 
-## 1.2.0 / 2018-06-06 / Agent 5.25.0
+## 1.2.0 / 2018-06-06
 
 * [Added] Add support for HTTP authentication. See [#1678][4].
 * [Added] Adds skip ssl validation. See [#1470][5].
 
-## 1.1.0 / 2018-03-23 / Agent 5.24.0
+## 1.1.0 / 2018-03-23
 
 * [FEATURE] Adds custom tag support to service check.
 

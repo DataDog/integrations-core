@@ -15,23 +15,23 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.7.1 / 2020-04-07 / Agent 7.20.0
+## 1.7.1 / 2020-04-07 / Agent 7.19.0
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
 
-## 1.7.0 / 2020-04-04 / Agent 7.19.0
+## 1.7.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
 * [Added] Add config specs. See [#6147](https://github.com/DataDog/integrations-core/pull/6147).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.6.0 / 2020-03-18 / Agent 7.19.0
+## 1.6.0 / 2020-03-18
 
 * [Added] Support Fluentd config API endpoint for metadata collection. See [#6062](https://github.com/DataDog/integrations-core/pull/6062).
 * [Added] Allow disabling metadata collection in fluentd. See [#6061](https://github.com/DataDog/integrations-core/pull/6061).
 
-## 1.5.0 / 2019-11-26
+## 1.5.0 / 2019-11-26 / Agent 7.16.0
 
 * [Added] Collect version metadata for Fluentd. See [#5057](https://github.com/DataDog/integrations-core/pull/5057).
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
@@ -54,11 +54,11 @@
 
 * [Fixed] Support fluentd v1's monitor_agent metrics. See [#2965](https://github.com/DataDog/integrations-core/pull/2965). Thanks [repeatedly](https://github.com/repeatedly).
 
-## 1.1.0 / 2019-01-04 / Agent 5.31.0
+## 1.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2735][1].
 
-## 1.0.1 / 2018-09-04 / Agent 5.28.0
+## 1.0.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

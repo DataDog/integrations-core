@@ -7,7 +7,7 @@
 * [Fixed] Simplify walker recursive condition. See [#6965](https://github.com/DataDog/integrations-core/pull/6965).
 * [Fixed] Refactor config. See [#6961](https://github.com/DataDog/integrations-core/pull/6961).
 
-## 1.7.0 / 2020-06-03 / Agent 7.21.0
+## 1.7.0 / 2020-06-03
 
 * [Added] Add `follow_symlinks` config option. See [#6800](https://github.com/DataDog/integrations-core/pull/6800).
 
@@ -33,11 +33,11 @@
 
 * [Added] Adhere to code style. See [#3499](https://github.com/DataDog/integrations-core/pull/3499).
 
-## 1.3.1 / 2018-10-12 / Agent 5.28.0
+## 1.3.1 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Make the error message more clear in case a path is not accessible. See [#2369][1].
 
-## 1.3.0 / 2018-09-04 / Agent 5.28.0
+## 1.3.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Add option to pattern-match full directory path. See [#2026][2].
 * [Added] Upgrade scandir to latest version. See [#2024][3].

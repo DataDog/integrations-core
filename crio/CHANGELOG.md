@@ -20,11 +20,11 @@
 
 * [Added] Adhere to code style. See [#3495](https://github.com/DataDog/integrations-core/pull/3495).
 
-## 1.1.0 / 2019-01-04 / Agent 5.31.0
+## 1.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Add nginx ingress controller integration. See [#2853][1].
 
-## 1.0.0 / 2018-10-13 / Agent 5.30.0
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] Add a CRI-O check. See [#2231][2].
 

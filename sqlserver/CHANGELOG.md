@@ -21,11 +21,11 @@
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.16.2 / 2020-03-10 / Agent 7.19.0
+## 1.16.2 / 2020-03-10 / Agent 7.18.0
 
 * [Fixed] Streamline exception handling. See [#6003](https://github.com/DataDog/integrations-core/pull/6003).
 
-## 1.16.1 / 2020-02-22 / Agent 7.18.0
+## 1.16.1 / 2020-02-22
 
 * [Fixed] Fix small capitalization error in log. See [#5509](https://github.com/DataDog/integrations-core/pull/5509).
 
@@ -46,7 +46,7 @@
 
 * [Added] Allow SQLNCLI11 provider in SQL server. See [#4097](https://github.com/DataDog/integrations-core/pull/4097).
 
-## 1.12.0 / 2019-07-08 / Agent 6.13.0
+## 1.12.0 / 2019-07-08
 
 * [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).
 
@@ -54,34 +54,34 @@
 
 * [Added] Adhere to code style. See [#3567](https://github.com/DataDog/integrations-core/pull/3567).
 
-## 1.10.1 / 2019-04-04 / Agent 6.12.0
+## 1.10.1 / 2019-04-04 / Agent 6.11.0
 
 * [Fixed] Don't ship `pyodbc` on macOS as SQLServer integration is not shipped on macOS. See [#3461](https://github.com/DataDog/integrations-core/pull/3461).
 
-## 1.10.0 / 2019-03-29 / Agent 6.11.0
+## 1.10.0 / 2019-03-29
 
 * [Added] Add custom instance tags to storedproc metrics. See [#3237](https://github.com/DataDog/integrations-core/pull/3237).
 * [Fixed] Use execute instead of callproc if using (py)odbc. See [#3236](https://github.com/DataDog/integrations-core/pull/3236).
 
-## 1.9.0 / 2019-02-18 / Agent 6.11.0
+## 1.9.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#3027](https://github.com/DataDog/integrations-core/pull/3027).
 
-## 1.8.1 / 2019-01-04 / Agent 5.31.0
+## 1.8.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801][1].
 
-## 1.8.0 / 2018-11-30 / Agent 5.30.0
+## 1.8.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Add linux as supported OS. See [#2614][2].
 * [Fixed] Additional debug logging when calling a stored procedure. See [#2151][3].
 * [Fixed] Use raw string literals when \ is present. See [#2465][4].
 
-## 1.7.0 / 2018-10-12 / Agent 5.28.0
+## 1.7.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][5].
 
-## 1.6.0 / 2018-09-04 / Agent 5.28.0
+## 1.6.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Support higher query granularity. See [#2017][6].
 * [Added] Add ability to support (via configuration flag) the newer ADO provider. See [#1673][7].
@@ -90,7 +90,7 @@
 * [Fixed] Fix for case sensitivity in the `proc_type_mapping` dict.. See [#1860][10].
 * [Fixed] Add data files to the wheel package. See [#1727][11].
 
-## 1.5.0 / 2018-06-20 / Agent 5.26.0
+## 1.5.0 / 2018-06-20 / Agent 6.4.0
 
 * [Added] support object_name metric identifiers. See [#1679][12].
 

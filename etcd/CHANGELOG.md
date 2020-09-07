@@ -26,11 +26,11 @@
 * [Added] Add version metadata. See [#4950](https://github.com/DataDog/integrations-core/pull/4950).
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
 
-## 2.0.1 / 2019-10-16 / Agent 7.16.0
+## 2.0.1 / 2019-10-16 / Agent 6.15.0
 
 * [Fixed] Set use_preview to True in init as well. See [#4792](https://github.com/DataDog/integrations-core/pull/4792).
 
-## 2.0.0 / 2019-10-11 / Agent 6.15.0
+## 2.0.0 / 2019-10-11
 
 * [Changed] Etcd uses V3 preview by default. See [#4656](https://github.com/DataDog/integrations-core/pull/4656).
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
@@ -43,25 +43,25 @@
 
 * [Added] Adhere to code style. See [#3505](https://github.com/DataDog/integrations-core/pull/3505).
 
-## 1.7.0 / 2019-02-18 / Agent 6.11.0
+## 1.7.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Use alpha grpc gateway endpoint. See [#3125](https://github.com/DataDog/integrations-core/pull/3125).
 * [Added] Make `is_leader` tag optional. See [#3114](https://github.com/DataDog/integrations-core/pull/3114).
 
-## 1.6.1 / 2019-01-04 / Agent 5.31.0
+## 1.6.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Postpone deprecation warning to 6.10. See [#2844][1].
 * [Fixed] Fix indentation for end of .example file. See [#2843][2].
 
-## 1.6.0 / 2018-11-07 / Agent 5.30.0
+## 1.6.0 / 2018-11-07 / Agent 6.8.0
 
 * [Added] Add support for ETCD v3 API, begin deprecation of ETCD < v3. See [#2506][3].
 
-## 1.5.1 / 2018-09-04 / Agent 5.28.0
+## 1.5.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 
-## 1.5.0 / 2018-06-13 / Agent 5.26.0
+## 1.5.0 / 2018-06-13 / Agent 6.4.0
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][5].
 

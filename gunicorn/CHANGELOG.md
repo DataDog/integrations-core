@@ -20,11 +20,11 @@
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.8.1 / 2019-12-13 / Agent 7.17.0
+## 1.8.1 / 2019-12-13 / Agent 7.16.0
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
 
-## 1.8.0 / 2019-12-02 / Agent 7.16.0
+## 1.8.0 / 2019-12-02
 
 * [Fixed] Remove shlex. See [#5064](https://github.com/DataDog/integrations-core/pull/5064).
 * [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
@@ -34,32 +34,32 @@
 
 * [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
 
-## 1.7.1 / 2019-06-06 / Agent 6.13.0
+## 1.7.1 / 2019-06-06 / Agent 6.12.0
 
 * [Fixed] Fix mac compatibility. See [#3853](https://github.com/DataDog/integrations-core/pull/3853).
 
-## 1.7.0 / 2019-05-14 / Agent 6.12.0
+## 1.7.0 / 2019-05-14
 
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
 * [Added] Adhere to code style. See [#3512](https://github.com/DataDog/integrations-core/pull/3512).
 
-## 1.6.0 / 2019-02-18 / Agent 6.11.0
+## 1.6.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
 
-## 1.5.0 / 2019-01-04 / Agent 5.31.0
+## 1.5.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2752][1].
 
-## 1.4.0 / 2018-11-30 / Agent 5.30.0
+## 1.4.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Update psutil. See [#2576][2].
 
-## 1.3.0 / 2018-10-12 / Agent 5.28.0
+## 1.3.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Upgrade psutil. See [#2190][3].
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Gunicorn intergration - fix problem with multiple master processes. See [#1839][4]. Thanks [mrmm][5].
 * [Fixed] Add data files to the wheel package. See [#1727][6].

@@ -43,16 +43,16 @@
 
 * [Added] Adhere to code style. See [#3536](https://github.com/DataDog/integrations-core/pull/3536).
 
-## 1.6.0 / 2019-02-18 / Agent 6.11.0
+## 1.6.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2871](https://github.com/DataDog/integrations-core/pull/2871).
 
-## 1.5.0 / 2018-10-12 / Agent 5.28.0
+## 1.5.0 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Removed default arguments from process_apps. See [#2337][1].
 * [Added] Add ability to tag metrics based on marathon labels. See [#2165][2]. Thanks [ashirley][3].
 
-## 1.4.1 / 2018-09-04 / Agent 5.28.0
+## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 
@@ -61,7 +61,7 @@
 * [Fixed] Ensure marathon queue count reports 0 for apps not in queue. See [#1548][5].
 * [Changed] [marathon] add task counts metrics for groups. See [#1513][6].
 
-## 1.3.0 / 2018-05-11 / Agent 5.24.0
+## 1.3.0 / 2018-05-11
 
 * [FEATURE] Adds custom tag support for service checks.
 

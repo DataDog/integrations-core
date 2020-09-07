@@ -12,15 +12,15 @@
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 
-## 1.15.2 / 2020-05-26 / Agent 7.21.0
+## 1.15.2 / 2020-05-26 / Agent 7.20.0
 
 * [Fixed] Handle server info for envoy <= 1.8. See [#6740](https://github.com/DataDog/integrations-core/pull/6740).
 
-## 1.15.1 / 2020-05-19 / Agent 7.21.0
+## 1.15.1 / 2020-05-19
 
 * [Fixed] Safer metadata error handling. See [#6685](https://github.com/DataDog/integrations-core/pull/6685).
 
-## 1.15.0 / 2020-05-17 / Agent 7.20.0
+## 1.15.0 / 2020-05-17
 
 * [Added] Collect version metadata. See [#6595](https://github.com/DataDog/integrations-core/pull/6595).
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
@@ -59,11 +59,11 @@
 * [Added] Add cluster.ssl metrics to Envoy integration. See [#3976](https://github.com/DataDog/integrations-core/pull/3976). Thanks [csssuf](https://github.com/csssuf).
 * [Added] Add Envoy upstream_rq_completed cluster metrics. See [#3955](https://github.com/DataDog/integrations-core/pull/3955). Thanks [csssuf](https://github.com/csssuf).
 
-## 1.7.0 / 2019-06-19 / Agent 6.13.0
+## 1.7.0 / 2019-06-19
 
 * [Added] Add more listener metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
 
-## 1.6.0 / 2019-06-18 / Agent 6.13.0
+## 1.6.0 / 2019-06-18
 
 * [Added] Add logs config to envoy. See [#3918](https://github.com/DataDog/integrations-core/pull/3918).
 
@@ -71,20 +71,20 @@
 
 * [Added] Adhere to style. See [#3366](https://github.com/DataDog/integrations-core/pull/3366).
 
-## 1.4.0 / 2018-09-05 / Agent 5.28.0
+## 1.4.0 / 2018-09-05 / Agent 6.5.0
 
 * [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174][1].
 
-## 1.3.0 / 2018-08-06 / Agent 5.27.0
+## 1.3.0 / 2018-08-06
 
 * [Added] Add ability to whitelist/blacklist metrics. See [#1975][2].
 * [Changed] Add data files to the wheel package. See [#1727][3].
 
-## 1.2.1 / 2018-06-14 / Agent 5.26.0
+## 1.2.1 / 2018-06-14 / Agent 6.4.0
 
 * [Fixed] properly send tags for histograms. See [#1741][4].
 
-## 1.2.0 / 2018-06-07 / Agent 5.25.0
+## 1.2.0 / 2018-06-07
 
 * [Added] support histograms, fix count submission. See [#1616][5].
 

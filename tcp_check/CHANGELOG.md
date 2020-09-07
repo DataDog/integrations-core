@@ -16,7 +16,7 @@
 
 * [Fixed] Don't report response time when connection fails. See [#5271](https://github.com/DataDog/integrations-core/pull/5271).
 
-## 2.3.2 / 2019-12-17 / Agent 7.17.0
+## 2.3.2 / 2019-12-17
 
 * [Fixed] Fix service_checks submission. See [#5229](https://github.com/DataDog/integrations-core/pull/5229).
 
@@ -32,19 +32,19 @@
 
 * [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
 
-## 2.2.0 / 2019-02-18 / Agent 6.11.0
+## 2.2.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2964](https://github.com/DataDog/integrations-core/pull/2964).
 
-## 2.1.0 / 2018-11-30 / Agent 5.30.0
+## 2.1.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Send service check as metric. See [#2509][1].
 
-## 2.0.2 / 2018-09-04 / Agent 5.28.0
+## 2.0.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 2.0.1 / 2018-06-20 / Agent 5.26.0
+## 2.0.1 / 2018-06-20 / Agent 6.4.0
 
 * [Fixed] Fix error message when TCP check fails. See [#1745][3]. Thanks [Siecje][4].
 

@@ -29,7 +29,7 @@
 
 * [Fixed] Use RequestsWrapper. See [#5037](https://github.com/DataDog/integrations-core/pull/5037).
 
-## 1.8.0 / 2019-11-20 / Agent 7.16.0
+## 1.8.0 / 2019-11-20
 
 * [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
 * [Fixed] Refresh auth token when it expires. See [#5039](https://github.com/DataDog/integrations-core/pull/5039).
@@ -43,7 +43,7 @@
 
 * [Fixed] Fix event submission call. See [#4044](https://github.com/DataDog/integrations-core/pull/4044).
 
-## 1.7.0 / 2019-07-04 / Agent 6.13.0
+## 1.7.0 / 2019-07-04
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
 
@@ -52,34 +52,34 @@
 * [Added] Improve API logs. See [#3794](https://github.com/DataDog/integrations-core/pull/3794).
 * [Fixed] Sanitize external host tags. See [#3792](https://github.com/DataDog/integrations-core/pull/3792).
 
-## 1.5.0 / 2019-05-14 / Agent 6.12.0
+## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3489](https://github.com/DataDog/integrations-core/pull/3489).
 
-## 1.4.0 / 2019-02-18 / Agent 6.11.0
+## 1.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * [Added] Support Python 3. See [#3029](https://github.com/DataDog/integrations-core/pull/3029).
 
-## 1.3.0 / 2018-11-30 / Agent 5.30.0
+## 1.3.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Upgrade cryptography. See [#2659][1].
 * [Fixed] Use raw string literals when \ is present. See [#2465][2].
 
-## 1.2.1 / 2018-10-12 / Agent 5.28.0
+## 1.2.1 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] fixes cisco for username and password. See [#2267][3].
 
-## 1.2.0 / 2018-09-04 / Agent 5.28.0
+## 1.2.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Use Certs in the Cisco Check as well as Passwords. See [#1986][4].
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 1.1.0 / 2018-06-21 / Agent 5.26.0
+## 1.1.0 / 2018-06-21 / Agent 6.4.0
 
 * [Fixed] Makes the Cisco Check more resilient. See [#1785][6].
 
-## 1.0.0 / 2018-06-07 / Agent 5.25.0
+## 1.0.0 / 2018-06-07
 
 * [FEATURE] adds CiscoACI integration.
 [1]: https://github.com/DataDog/integrations-core/pull/2659

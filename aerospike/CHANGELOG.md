@@ -4,11 +4,11 @@
 
 * [Fixed] Fix empty result case. See [#7192](https://github.com/DataDog/integrations-core/pull/7192).
 
-## 1.8.2 / 2020-07-22 / Agent 7.22.0
+## 1.8.2 / 2020-07-22
 
 * [Fixed] Add debug log for get info calls. See [#7182](https://github.com/DataDog/integrations-core/pull/7182).
 
-## 1.8.1 / 2020-07-10 / Agent 7.22.0
+## 1.8.1 / 2020-07-10
 
 * [Fixed] Parse batch-index read latency metrics. See [#6991](https://github.com/DataDog/integrations-core/pull/6991).
 
@@ -16,7 +16,7 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.7.1 / 2020-04-15 / Agent 7.20.0
+## 1.7.1 / 2020-04-15
 
 * [Fixed] Fix namespace valid chars matching regex. See [#6352](https://github.com/DataDog/integrations-core/pull/6352).
 * [Fixed] Fix namespace tagging for latency metrics. See [#6345](https://github.com/DataDog/integrations-core/pull/6345).
@@ -46,12 +46,12 @@
 
 * [Added] Upgrade aerospike dependency. See [#3235](https://github.com/DataDog/integrations-core/pull/3235).
 
-## 1.1.0 / 2019-02-27 / Agent 6.11.0
+## 1.1.0 / 2019-02-27
 
 * [Added] Add authentication and timeout options. See [#3214](https://github.com/DataDog/integrations-core/pull/3214).
 * [Added] Refactor check to use the official library. See [#3212](https://github.com/DataDog/integrations-core/pull/3212).
 
-## 1.0.0 / 2019-02-18 / Agent 6.11.0
+## 1.0.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Officially support Aerospike. See [#3078](https://github.com/DataDog/integrations-core/pull/3078).
 

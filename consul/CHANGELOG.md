@@ -22,15 +22,15 @@
 * [Added] Add new metric to count services. See [#5992](https://github.com/DataDog/integrations-core/pull/5992).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.12.2 / 2020-02-25 / Agent 7.19.0
+## 1.12.2 / 2020-02-25 / Agent 7.18.0
 
 * [Fixed] Change new added tag. See [#5856](https://github.com/DataDog/integrations-core/pull/5856).
 
-## 1.12.1 / 2020-02-25 / Agent 7.19.0
+## 1.12.1 / 2020-02-25
 
 * [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
 
-## 1.12.0 / 2020-02-22 / Agent 7.18.0
+## 1.12.0 / 2020-02-22
 
 * [Added] Create `consul_service` tag. See [#5519](https://github.com/DataDog/integrations-core/pull/5519). Thanks [nicbono](https://github.com/nicbono).
 * [Deprecated] Deprecate `service` tag. See [#5540](https://github.com/DataDog/integrations-core/pull/5540).
@@ -45,11 +45,11 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.9.1 / 2019-08-30 / Agent 6.15.0
+## 1.9.1 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Fix RequestsWrapper options. See [#4476](https://github.com/DataDog/integrations-core/pull/4476).
 
-## 1.9.0 / 2019-08-24 / Agent 6.14.0
+## 1.9.0 / 2019-08-24
 
 * [Added] Add support for proxy options. See [#3363](https://github.com/DataDog/integrations-core/pull/3363).
 * [Fixed] Fix Consul event timestamp. See [#4173](https://github.com/DataDog/integrations-core/pull/4173).
@@ -58,32 +58,32 @@
 
 * [Added] Adhere to code style. See [#3491](https://github.com/DataDog/integrations-core/pull/3491).
 
-## 1.7.0 / 2019-02-18 / Agent 6.11.0
+## 1.7.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add `consul.can_connect` service check for every HTTP request to consul. See [#3003](https://github.com/DataDog/integrations-core/pull/3003).
 * [Added] Finish supporting Py3. See [#2906](https://github.com/DataDog/integrations-core/pull/2906).
 
-## 1.6.0 / 2018-11-30 / Agent 5.30.0
+## 1.6.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Add option to run the full check on any node. See [#2461][1].
 * [Added] Support Python 3. See [#2446][2].
 
-## 1.5.2 / 2018-10-12 / Agent 5.28.0
+## 1.5.2 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Update consul timestamp to use supported python functions. See [#2199][3]. Thanks [hhansell][4].
 
-## 1.5.1 / 2018-09-04 / Agent 5.28.0
+## 1.5.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Accept more standard boolean values for instance config options. See [#1954][5].
 * [Fixed] Add data files to the wheel package. See [#1727][6].
 
-## 1.5.0 / 2018-06-07 / Agent 5.25.0
+## 1.5.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][7].
 * [Added] Include consul_datacenter tag in service checks. See [#1526][8]. Thanks [TylerLubeck][9].
 * [Added] Add a check to count all nodes in a consul cluster. See [#1479][10]. Thanks [TylerLubeck][9].
 
-## 1.4.0 / 2018-05-11 / Agent 5.24.0
+## 1.4.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8500 port in the Autodiscovery template. See [#1444][11] for more information.
 * [FEATURE] Include consul_datacenter tag in service checks

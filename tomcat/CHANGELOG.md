@@ -23,15 +23,15 @@
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.2.0 / 2018-10-12 / Agent 5.28.0
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].
 
-## 1.1.1 / 2018-09-04 / Agent 5.28.0
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.1.0 / 2018-06-13 / Agent 5.26.0
+## 1.1.0 / 2018-06-13
 
 * [Added] [Update] Update auto_conf.yaml template. See [#1523][3].
 

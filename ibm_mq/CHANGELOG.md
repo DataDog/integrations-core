@@ -4,7 +4,7 @@
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
 
-## 3.8.0 / 2020-07-23 / Agent 7.22.0
+## 3.8.0 / 2020-07-23
 
 * [Added] IBM MQ metadata. See [#6979](https://github.com/DataDog/integrations-core/pull/6979).
 * [Added] Collect metrics from Statistics Messages. See [#6945](https://github.com/DataDog/integrations-core/pull/6945).
@@ -22,28 +22,28 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 3.5.1 / 2020-04-08 / Agent 7.20.0
+## 3.5.1 / 2020-04-08 / Agent 7.19.0
 
 * [Fixed] Don't import pymqi unconditionally. See [#6286](https://github.com/DataDog/integrations-core/pull/6286).
 
-## 3.5.0 / 2020-04-04 / Agent 7.19.0
+## 3.5.0 / 2020-04-04
 
 * [Added] Apply config specs to IBM MQ. See [#5903](https://github.com/DataDog/integrations-core/pull/5903).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 3.4.0 / 2020-03-11 / Agent 7.19.0
+## 3.4.0 / 2020-03-11
 
 * [Added] Add `connection_name` configuration. See [#6015](https://github.com/DataDog/integrations-core/pull/6015).
 * [Added] Add configuration option for the Channel Definition API version. See [#5905](https://github.com/DataDog/integrations-core/pull/5905).
 * [Added] Upgrade pymqi to 1.10.1. See [#5955](https://github.com/DataDog/integrations-core/pull/5955).
 * [Fixed] IBM MQ refactor. See [#5902](https://github.com/DataDog/integrations-core/pull/5902).
 
-## 3.3.1 / 2020-01-17 / Agent 7.18.0
+## 3.3.1 / 2020-01-17 / Agent 7.17.0
 
 * [Fixed] Fix metric type and missing metrics in metadata.csv. See [#5470](https://github.com/DataDog/integrations-core/pull/5470).
 
-## 3.3.0 / 2020-01-13 / Agent 7.17.0
+## 3.3.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
@@ -58,7 +58,7 @@
 
 * [Added] Add channel_status_mapping config. See [#4395](https://github.com/DataDog/integrations-core/pull/4395).
 
-## 3.1.1 / 2019-07-29 / Agent 6.14.0
+## 3.1.1 / 2019-07-29
 
 * [Fixed] Fix ibm_mq e2e import issue. See [#4140](https://github.com/DataDog/integrations-core/pull/4140).
 
@@ -67,7 +67,7 @@
 * [Fixed] Use MQCMD_INQUIRE_Q instead of queue.inquire. See [#3997](https://github.com/DataDog/integrations-core/pull/3997).
 * [Added] Add ibm_mq.channel.count metric and ibm_mq.channel.status service check. See [#3958](https://github.com/DataDog/integrations-core/pull/3958).
 
-## 3.0.0 / 2019-06-20 / Agent 6.13.0
+## 3.0.0 / 2019-06-20
 
 * [Changed] [ibm_mq] fix queue auto discovery to include any type in addition to qmodel and included regex matching on queue names. See [#3893](https://github.com/DataDog/integrations-core/pull/3893).
 
@@ -83,15 +83,15 @@
 * [Added] adds channel metrics. See [#3360](https://github.com/DataDog/integrations-core/pull/3360).
 * [Fixed] fix ssl variable naming for IBM MQ. See [#3312](https://github.com/DataDog/integrations-core/pull/3312).
 
-## 1.1.0 / 2019-02-18 / Agent 6.11.0
+## 1.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Autodiscover queues. See [#3061](https://github.com/DataDog/integrations-core/pull/3061).
 
-## 1.0.1 / 2019-01-04 / Agent 5.31.0
+## 1.0.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Fix Oldest Message Age. See [#2859][1].
 
-## 1.0.0 / 2018-12-09 / Agent 5.31.0
+## 1.0.0 / 2018-12-09 / Agent 6.8.0
 
 * [Added] IBM MQ Integration. See [#2154][2].
 

@@ -18,10 +18,10 @@
 
 * [Fixed] Remove unused variables. See [#5173](https://github.com/DataDog/integrations-core/pull/5173).
 
-## 1.0.1 / 2019-12-06 / Agent 7.17.0
+## 1.0.1 / 2019-12-06 / Agent 7.16.1
 
 * [Fixed] Raise configuration errors. See [#5163](https://github.com/DataDog/integrations-core/pull/5163).
 
-## 1.0.0 / 2019-11-19 / Agent 7.16.0
+## 1.0.0 / 2019-11-19
 
 * [Added] New Integration: Cilium. See [#4665](https://github.com/DataDog/integrations-core/pull/4665).

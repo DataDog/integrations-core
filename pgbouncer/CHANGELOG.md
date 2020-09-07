@@ -27,26 +27,26 @@
 * [Added] Upgrade psycopg2-binary to 2.8.2. See [#3649](https://github.com/DataDog/integrations-core/pull/3649).
 * [Added] Adhere to code style. See [#3554](https://github.com/DataDog/integrations-core/pull/3554).
 
-## 1.5.0 / 2019-02-18 / Agent 6.11.0
+## 1.5.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add support for database metrics. See [#2777](https://github.com/DataDog/integrations-core/pull/2777). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).
 * [Added] Support Python 3. See [#3039](https://github.com/DataDog/integrations-core/pull/3039).
 
-## 1.4.0 / 2019-01-04 / Agent 5.31.0
+## 1.4.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Bump psycopg2-binary version to 2.7.5. See [#2799][1].
 
-## 1.3.1 / 2018-11-30 / Agent 5.30.0
+## 1.3.1 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Failure to reconnect to PGBouncer when using database URL. See [#2587][2]. Thanks [VSpike][3].
 
-## 1.3.0 / 2018-08-07 / Agent 5.28.0
+## 1.3.0 / 2018-08-07 / Agent 6.5.0
 
 * [Added] Add the ability to specify 'use_cached' connections in config. See [#2000][4]. Thanks [kellydunn][5].
 * [Changed] Rename dependency psycopg2 to pyscopg2-binary. See [#1842][6].
 * [Changed] Add data files to the wheel package. See [#1727][7].
 
-## 1.2.1 / 2018-06-07 / Agent 5.25.0
+## 1.2.1 / 2018-06-07
 
 * [Security] Update psycopg2 for security fixes. See [#1538][8].
 

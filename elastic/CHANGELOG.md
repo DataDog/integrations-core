@@ -36,7 +36,7 @@
 * [Added] Add external refresh metrics. See [#4554](https://github.com/DataDog/integrations-core/pull/4554). Thanks [clandry94](https://github.com/clandry94).
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.13.2 / 2019-08-30 / Agent 6.15.0
+## 1.13.2 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
@@ -44,7 +44,7 @@
 
 * [Fixed] Add missing HTTP options to example config. See [#4129](https://github.com/DataDog/integrations-core/pull/4129).
 
-## 1.13.0 / 2019-07-13 / Agent 6.13.0
+## 1.13.0 / 2019-07-13
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4100](https://github.com/DataDog/integrations-core/pull/4100).
 
@@ -52,37 +52,37 @@
 
 * [Added] Adhere to code style. See [#3504](https://github.com/DataDog/integrations-core/pull/3504).
 
-## 1.11.0 / 2019-02-18 / Agent 6.11.0
+## 1.11.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
 
-## 1.10.0 / 2019-01-04 / Agent 5.31.0
+## 1.10.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Add completed metric for all ES thread pools. See [#2803][1].
 * [Added] Capture metrics for ES scroll requests . See [#2687][2].
 
-## 1.9.1 / 2018-11-30 / Agent 5.30.0
+## 1.9.1 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Add elasticsearch-oss as an auto_conf.yaml Elasticsearch identifier. See [#2644][3]. Thanks [jcassee][4].
 
-## 1.9.0 / 2018-10-23 / Agent 5.30.0
+## 1.9.0 / 2018-10-23
 
 * [Added] Add option to prevent duplicate hostnames. See [#2453][5].
 * [Added] Support Python 3. See [#2417][6].
 * [Fixed] Move metrics definition and logic into its own module. See [#2381][7].
 
-## 1.8.0 / 2018-10-12 / Agent 5.28.0
+## 1.8.0 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Move config parser to its own module. See [#2370][8].
 * [Added] Added delayed_unassigned_shards metric. See [#2361][9].
 * [Added] Added inflight_requests metrics (version 5.4 and later).. See [#2360][10].
 
-## 1.7.1 / 2018-09-04 / Agent 5.28.0
+## 1.7.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add thread write queue to fix Elasticsearch 6.3.x compatibility. See [#1943][11].
 * [Fixed] Add data files to the wheel package. See [#1727][12].
 
-## 1.7.0 / 2018-06-07 / Agent 5.25.0
+## 1.7.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][13].
 * [Fixed] [FIXED] Ensure base url path isn't removed when admin_forwarder is used. See [#1202][14].

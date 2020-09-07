@@ -34,7 +34,7 @@
 
 * [Added] Handle the refresh_counters flag. See [#3840](https://github.com/DataDog/integrations-core/pull/3840).
 
-## 2.5.0 / 2019-05-14 / Agent 6.12.0
+## 2.5.0 / 2019-05-14
 
 * [Added] Cosmetic cleanups. See [#3706](https://github.com/DataDog/integrations-core/pull/3706).
 * [Added] Adhere to code style. See [#3521](https://github.com/DataDog/integrations-core/pull/3521).
@@ -44,20 +44,20 @@
 * [Added] adds `iis_host` tag to metrics. See [#3294](https://github.com/DataDog/integrations-core/pull/3294).
 * [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
 
-## 2.3.0 / 2019-02-18 / Agent 6.11.0
+## 2.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * [Added] Support Python 3. See [#2999](https://github.com/DataDog/integrations-core/pull/2999).
 
-## 2.2.1 / 2019-01-04 / Agent 5.31.0
+## 2.2.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Change example config from "localhost" to ".". See [#2779][1].
 
-## 2.2.0 / 2018-10-12 / Agent 5.28.0
+## 2.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][2].
 
-## 2.1.1 / 2018-09-04 / Agent 5.28.0
+## 2.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Fix 'attempted connection' metrics. See [#1970][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].

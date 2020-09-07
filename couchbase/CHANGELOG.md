@@ -18,11 +18,11 @@
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 * [Fixed] Update `conf.yaml.example` log collection section. See [#5977](https://github.com/DataDog/integrations-core/pull/5977).
 
-## 1.12.1 / 2019-12-06 / Agent 7.17.0
+## 1.12.1 / 2019-12-06 / Agent 7.16.0
 
 * [Fixed] Fix version metadata parsing. See [#5148](https://github.com/DataDog/integrations-core/pull/5148).
 
-## 1.12.0 / 2019-12-02 / Agent 7.16.0
+## 1.12.0 / 2019-12-02
 
 * [Added] add version metadata. See [#4985](https://github.com/DataDog/integrations-core/pull/4985).
 * [Added] Standardize logging format. See [#4905](https://github.com/DataDog/integrations-core/pull/4905).
@@ -33,15 +33,15 @@
 * [Fixed] Fix typo for couchbase.by_node.cluster_membership service check. See [#4565](https://github.com/DataDog/integrations-core/pull/4565).
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.10.0 / 2019-09-16 / Agent 6.15.0
+## 1.10.0 / 2019-09-16
 
 * [Added] Add log documentation in the example configuration file. See [#4537](https://github.com/DataDog/integrations-core/pull/4537).
 
-## 1.9.1 / 2019-08-30 / Agent 6.15.0
+## 1.9.1 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
-## 1.9.0 / 2019-08-24 / Agent 6.14.0
+## 1.9.0 / 2019-08-24
 
 * [Added] Add RequestsWrapper to couchbase. See [#4119](https://github.com/DataDog/integrations-core/pull/4119).
 
@@ -57,29 +57,29 @@
 
 * [Fixed] Fixed a typo in the example config file. See [#3173](https://github.com/DataDog/integrations-core/pull/3173).
 
-## 1.7.0 / 2019-01-04 / Agent 5.31.0
+## 1.7.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2851][1].
 * [Fixed] Stop using deprecated 'device_name' parameter.. See [#2847][2].
 
-## 1.6.1 / 2018-11-23 / Agent 5.30.0
+## 1.6.1 / 2018-11-23 / Agent 6.8.0
 
 * [Fixed] Keep running the check when one endpoint fails. See [#2638][3].
 
-## 1.6.0 / 2018-11-14 / Agent 5.30.0
+## 1.6.0 / 2018-11-14
 
 * [Added] Add ssl_verify option. See [#2584][4].
 * [Fixed] Use raw string literals when \ is present. See [#2465][5].
 
-## 1.5.1 / 2018-09-04 / Agent 5.28.0
+## 1.5.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][6].
 
-## 1.5.0 / 2018-06-20 / Agent 5.26.0
+## 1.5.0 / 2018-06-20 / Agent 6.4.0
 
 * [Added] Add Couchbase health and cluster membership service checks and alerts. See [#1593][7].
 
-## 1.4.0 / 2018-06-07 / Agent 5.25.0
+## 1.4.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][8].
 * [Fixed] Couchbase integration was not working during server set up. See [#1571][9].

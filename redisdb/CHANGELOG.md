@@ -32,7 +32,7 @@
 
 * [Fixed] Handle error in config_get. See [#5676](https://github.com/DataDog/integrations-core/pull/5676).
 
-## 2.0.0 / 2020-02-05 / Agent 7.18.0
+## 2.0.0 / 2020-02-05
 
 * [Changed] Submit `redis.key.length` metric regardless of `warn_on_missing_keys`. See [#5591](https://github.com/DataDog/integrations-core/pull/5591).
 * [Added] Add aof loading metrics. See [#5431](https://github.com/DataDog/integrations-core/pull/5431). Thanks [tanner-bruce](https://github.com/tanner-bruce).
@@ -54,7 +54,7 @@
 
 * [Added] Submit version metadata. See [#4705](https://github.com/DataDog/integrations-core/pull/4705).
 
-## 1.12.2 / 2019-10-04 / Agent 6.15.0
+## 1.12.2 / 2019-10-04
 
 * [Fixed] Don't display warning for default keys value. See [#4641](https://github.com/DataDog/integrations-core/pull/4641).
 
@@ -66,35 +66,35 @@
 
 * [Added] Add redis.mem.overhead and redis.mem.startup. See [#3760](https://github.com/DataDog/integrations-core/pull/3760). Thanks [maximebedard](https://github.com/maximebedard).
 
-## 1.11.0 / 2019-05-14 / Agent 6.12.0
+## 1.11.0 / 2019-05-14
 
 * [Fixed] Adjust latency tracking in redisdb integration. See [#3689](https://github.com/DataDog/integrations-core/pull/3689). Thanks [Firehed](https://github.com/Firehed).
 * [Added] Adhere to code style. See [#3562](https://github.com/DataDog/integrations-core/pull/3562).
 
-## 1.10.0 / 2019-02-18 / Agent 6.11.0
+## 1.10.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add redis_db tag to redis.key.length. See [#3008](https://github.com/DataDog/integrations-core/pull/3008).
 
-## 1.9.0 / 2019-01-22 / Agent 5.32.0
+## 1.9.0 / 2019-01-22 / Agent 6.9.0
 
 * [Fixed] Only try to decode slowlog command entrypoint. See [#2998][1].
 * [Added] Finish Python 3 Support. See [#2951][2].
 
-## 1.8.0 / 2018-11-30 / Agent 5.30.0
+## 1.8.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Support Python 3. See [#2422][3].
 
-## 1.7.1 / 2018-10-12 / Agent 5.28.0
+## 1.7.1 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Handle `host:` command when parsing commandstats output. See [#2356][4].
 * [Fixed] Fix multiple db key length. See [#2187][5].
 
-## 1.7.0 / 2018-09-04 / Agent 5.28.0
+## 1.7.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Support finding key lengths on any db. See [#1948][6].
 * [Fixed] Add data files to the wheel package. See [#1727][7].
 
-## 1.6.0 / 2018-06-06 / Agent 5.25.0
+## 1.6.0 / 2018-06-06
 
 * [Added] Add a config option to disable connection cache. See [#1668][8].
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][9].

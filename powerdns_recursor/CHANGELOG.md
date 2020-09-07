@@ -29,11 +29,11 @@
 
 * [Added] Adhere to code style. See [#3558](https://github.com/DataDog/integrations-core/pull/3558).
 
-## 1.2.0 / 2019-01-04 / Agent 5.31.0
+## 1.2.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2789][1].
 
-## 1.1.1 / 2018-09-04 / Agent 5.28.0
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].

@@ -15,21 +15,21 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.8.1 / 2020-04-07 / Agent 7.20.0
+## 1.8.1 / 2020-04-07 / Agent 7.19.0
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
 
-## 1.8.0 / 2020-04-04 / Agent 7.19.0
+## 1.8.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.7.1 / 2020-02-25 / Agent 7.19.0
+## 1.7.1 / 2020-02-25 / Agent 7.18.0
 
 * [Fixed] Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
 
-## 1.7.0 / 2020-02-22 / Agent 7.18.0
+## 1.7.0 / 2020-02-22
 
 * [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
 * [Added] Adds RequestsWrapper to Kong. See [#5807](https://github.com/DataDog/integrations-core/pull/5807).
@@ -46,11 +46,11 @@
 
 * [Added] Update the kong integration with log instruction. See [#2935](https://github.com/DataDog/integrations-core/pull/2935).
 
-## 1.3.0 / 2019-01-04 / Agent 5.31.0
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2772][1].
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

@@ -6,11 +6,11 @@
 * [Fixed] Fix debug log line for job metrics. See [#6700](https://github.com/DataDog/integrations-core/pull/6700).
 * [Fixed] Fix issue when the storage class of a persistent volume is empty and add test. See [#6615](https://github.com/DataDog/integrations-core/pull/6615).
 
-## 5.4.1 / 2020-05-21 / Agent 7.21.0
+## 5.4.1 / 2020-05-21 / Agent 7.20.0
 
 * [Fixed] Document join_standard_tags setting in conf.example.yaml. See [#6707](https://github.com/DataDog/integrations-core/pull/6707).
 
-## 5.4.0 / 2020-05-17 / Agent 7.20.0
+## 5.4.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Added] Introduce join_standard_tags setting. See [#6253](https://github.com/DataDog/integrations-core/pull/6253).
@@ -22,11 +22,11 @@
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Do not fail on octet stream content type for OpenMetrics. See [#5843](https://github.com/DataDog/integrations-core/pull/5843).
 
-## 5.2.1 / 2020-02-27 / Agent 7.19.0
+## 5.2.1 / 2020-02-27 / Agent 7.18.0
 
 * [Fixed] Fix type error. See [#5904](https://github.com/DataDog/integrations-core/pull/5904).
 
-## 5.2.0 / 2020-02-22 / Agent 7.18.0
+## 5.2.0 / 2020-02-22
 
 * [Added] Add an option to enable KSM experimental metrics and add some new metrics from KSM 1.9. See [#5447](https://github.com/DataDog/integrations-core/pull/5447).
 * [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).
@@ -41,11 +41,11 @@
 * [Changed] Improves tagging compliancy. See [#5105](https://github.com/DataDog/integrations-core/pull/5105).
 * [Fixed] Fix job metrics. See [#4943](https://github.com/DataDog/integrations-core/pull/4943).
 
-## 4.7.1 / 2019-08-26 / Agent 6.15.0
+## 4.7.1 / 2019-08-26 / Agent 6.14.0
 
 * [Fixed] Properly ignore `kube_pod_created` and `kube_pod_container_info`. See [#4435](https://github.com/DataDog/integrations-core/pull/4435).
 
-## 4.7.0 / 2019-08-24 / Agent 6.14.0
+## 4.7.0 / 2019-08-24
 
 * [Added] Grab kube_node_info as kubernetes_state.node.count. See [#4383](https://github.com/DataDog/integrations-core/pull/4383). Thanks [therc](https://github.com/therc).
 * [Added] Add VPA metrics to kubernetes_state integration. See [#4353](https://github.com/DataDog/integrations-core/pull/4353). Thanks [dturn](https://github.com/dturn).
@@ -55,16 +55,16 @@
 
 * [Fixed] Fix openmetrics mixins telemetry metrics. See [#4155](https://github.com/DataDog/integrations-core/pull/4155).
 
-## 4.6.0 / 2019-07-19 / Agent 6.13.0
+## 4.6.0 / 2019-07-19
 
 * [Fixed] Fix kubernetes_state avoid tags collision. See [#4149](https://github.com/DataDog/integrations-core/pull/4149).
 * [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).
 
-## 4.5.0 / 2019-07-13 / Agent 6.13.0
+## 4.5.0 / 2019-07-13
 
 * [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025).
 
-## 4.4.1 / 2019-06-19 / Agent 6.13.0
+## 4.4.1 / 2019-06-19
 
 * [Fixed] Correct service check for ksm - cronjob. See [#3937](https://github.com/DataDog/integrations-core/pull/3937).
 
@@ -76,7 +76,7 @@
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
 
-## 4.2.0 / 2019-02-18 / Agent 6.11.0
+## 4.2.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Collect .hpa.condition gauges. See [#3107](https://github.com/DataDog/integrations-core/pull/3107).
 * [Added] Collect PodDisruptionBudget metrics. See [#3111](https://github.com/DataDog/integrations-core/pull/3111).
@@ -84,16 +84,16 @@
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * [Added] Support Python 3. See [#3030](https://github.com/DataDog/integrations-core/pull/3030).
 
-## 4.1.0 / 2018-12-02 / Agent 5.30.0
+## 4.1.0 / 2018-12-02 / Agent 6.8.0
 
 * [Added] Add phase tag to pod metrics. See [#2624][1].
 
-## 4.0.0 / 2018-11-30 / Agent 5.30.0
+## 4.0.0 / 2018-11-30
 
 * [Removed] Remove KSM deprecated pod phase service checks. See [#2631][2].
 * [Fixed] Use raw string literals when \ is present. See [#2465][3].
 
-## 3.1.0 / 2018-10-12 / Agent 5.28.0
+## 3.1.0 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Fix job metrics tagging on KSM 1.4+. See [#2384][4].
 * [Fixed] include node condition value in check message. See [#2362][5]. Thanks [dwradcliffe][6].
@@ -103,7 +103,7 @@
 * [Fixed] Fix KSM deprecation warning on A5. See [#2317][10].
 * [Fixed] Include ContainerCreating in pod waiting status reasons. See [#2063][11]. Thanks [deiwin][12].
 
-## 3.0.0 / 2018-09-04 / Agent 5.28.0
+## 3.0.0 / 2018-09-04 / Agent 6.5.0
 
 * [Changed] Update kubernetes_state to use the new OpenMetricsBaseCheck. See [#1983][13].
 * [Added] Add cluster-name suffix to node-names in kubernetes state. See [#2069][14].
@@ -118,12 +118,12 @@
 * [Changed] kubernetes_state: plumb more container waiting reasons. See [#1763][26]. Thanks [stevvooe][27].
 * [Added] Make HTTP request timeout configurable in prometheus checks. See [#1790][28].
 
-## 2.7.0 / 2018-06-26 / Agent 5.26.0
+## 2.7.0 / 2018-06-26 / Agent 6.3.1
 
 * [Added] Add an option to disable hostname override. See [#1800][29].
 * [Changed] Add data files to the wheel package. See [#1727][30].
 
-## 2.6.0 / 2018-06-13 / Agent 5.26.0
+## 2.6.0 / 2018-06-13
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][31].
 

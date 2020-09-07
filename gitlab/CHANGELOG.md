@@ -40,19 +40,19 @@
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
 
-## 2.6.1 / 2019-10-17 / Agent 7.16.0
+## 2.6.1 / 2019-10-17 / Agent 6.15.0
 
 * [Fixed] Add missing go_memstats_stack_sys_bytes metric in conf file. See [#4800](https://github.com/DataDog/integrations-core/pull/4800).
 
-## 2.6.0 / 2019-10-11 / Agent 6.15.0
+## 2.6.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 2.5.1 / 2019-08-30 / Agent 6.15.0
+## 2.5.1 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
-## 2.5.0 / 2019-08-24 / Agent 6.14.0
+## 2.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to gitlab. See [#4216](https://github.com/DataDog/integrations-core/pull/4216).
 
@@ -68,15 +68,15 @@
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
 
-## 2.1.0 / 2019-01-04 / Agent 5.31.0
+## 2.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2751][1].
 
-## 2.0.0 / 2018-10-12 / Agent 5.28.0
+## 2.0.0 / 2018-10-12 / Agent 6.6.0
 
 * [Changed] Update gitlab to use the new OpenMetricsBaseCheck. See [#1977][2].
 
-## 1.2.0 / 2018-09-04 / Agent 5.28.0
+## 1.2.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].

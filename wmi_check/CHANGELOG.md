@@ -20,11 +20,11 @@
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.7.2 / 2020-02-25 / Agent 7.19.0
+## 1.7.2 / 2020-02-25 / Agent 7.18.0
 
 * [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).
 
-## 1.7.1 / 2020-02-22 / Agent 7.18.0
+## 1.7.1 / 2020-02-22
 
 * [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
 * [Fixed] Change wmi_check to use lists instead of tuples for filters. See [#5510](https://github.com/DataDog/integrations-core/pull/5510).
@@ -45,7 +45,7 @@
 
 * [Fixed] Avoid WMISampler inheriting from Thread. See [#4051](https://github.com/DataDog/integrations-core/pull/4051).
 
-## 1.4.1 / 2019-07-04 / Agent 6.13.0
+## 1.4.1 / 2019-07-04
 
 * [Fixed] Make WMISampler hashable. See [#4043](https://github.com/DataDog/integrations-core/pull/4043).
 
@@ -53,15 +53,15 @@
 
 * [Added] Adhere to code style. See [#3584](https://github.com/DataDog/integrations-core/pull/3584).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3 for WMI. See [#3031](https://github.com/DataDog/integrations-core/pull/3031).
 
-## 1.2.0 / 2018-10-12 / Agent 5.28.0
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][1].
 
-## 1.1.2 / 2018-09-04 / Agent 5.28.0
+## 1.1.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Moves WMI Check to Pytest. See [#2133][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].

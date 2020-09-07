@@ -43,21 +43,21 @@
 * [Added] Simplify JSON flattening for timestamps and bool. See [#3648](https://github.com/DataDog/integrations-core/pull/3648). Thanks [jd](https://github.com/jd).
 * [Added] Adhere to code style. See [#3545](https://github.com/DataDog/integrations-core/pull/3545).
 
-## 3.1.0 / 2019-01-04 / Agent 5.31.0
+## 3.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2716][1].
 
-## 3.0.0 / 2018-09-04 / Agent 5.28.0
+## 3.0.0 / 2018-09-04 / Agent 6.5.0
 
 * [Changed] Send correct count values for NGINX ever increasing counters. See [#2041][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 
-## 2.2.0 / 2018-06-04 / Agent 5.25.0
+## 2.2.0 / 2018-06-04
 
 * [Changed] Log warning, not exception, when trying to collect stream metrics. See [#1536][4].
 * [Added] Add support for VTS module. See [#1295][5]. Thanks [mattjbray][6]
 
-## 2.1.0 / 2018-05-11 / Agent 5.24.0
+## 2.1.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support to service checks.
 

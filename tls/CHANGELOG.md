@@ -20,7 +20,7 @@
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
 
-## 1.1.0 / 2019-06-24 / Agent 6.13.0
+## 1.1.0 / 2019-06-24
 
 * [Added] Allow certificate validation to be completely disabled. See [#3966](https://github.com/DataDog/integrations-core/pull/3966).
 

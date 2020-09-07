@@ -6,7 +6,7 @@
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
 * [Fixed] Add domain to metrics.yaml. See [#7163](https://github.com/DataDog/integrations-core/pull/7163).
 
-## 1.5.2 / 2020-07-15 / Agent 7.22.0
+## 1.5.2 / 2020-07-15
 
 * [Fixed] Add new_gc_metrics to all jmx integrations. See [#7073](https://github.com/DataDog/integrations-core/pull/7073).
 
@@ -36,11 +36,11 @@
 
 * [Added] Add log section. See [#4013](https://github.com/DataDog/integrations-core/pull/4013).
 
-## 1.1.0 / 2018-10-12 / Agent 5.28.0
+## 1.1.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].
 
-## 1.0.2 / 2018-09-04 / Agent 5.28.0
+## 1.0.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

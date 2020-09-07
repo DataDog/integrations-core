@@ -4,11 +4,11 @@
 
 * [Fixed] Parse byte string versions. See [#7425](https://github.com/DataDog/integrations-core/pull/7425).
 
-## 2.0.1 / 2020-08-14
+## 2.0.1 / 2020-08-14 / Agent 7.22.0
 
 * [Fixed] Update config spec default values. See [#7340](https://github.com/DataDog/integrations-core/pull/7340).
 
-## 2.0.0 / 2020-08-10 / Agent 7.22.0
+## 2.0.0 / 2020-08-10
 
 * [Added] Send more useful metrics for wsrep flow control. See [#7316](https://github.com/DataDog/integrations-core/pull/7316). Thanks [sayap](https://github.com/sayap).
 * [Added] Add ability to specify which charset to use when connecting to mysql. See [#7216](https://github.com/DataDog/integrations-core/pull/7216).
@@ -23,7 +23,7 @@
 * [Added] Catch unicode error. See [#6947](https://github.com/DataDog/integrations-core/pull/6947).
 * [Fixed] Add config spec. See [#6908](https://github.com/DataDog/integrations-core/pull/6908).
 
-## 1.14.0 / 2020-06-03 / Agent 7.21.0
+## 1.14.0 / 2020-06-03
 
 * [Added] Add custom queries. See [#6776](https://github.com/DataDog/integrations-core/pull/6776).
 
@@ -40,7 +40,7 @@
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.11.0 / 2019-12-20 / Agent 7.17.0
+## 1.11.0 / 2019-12-20
 
 * [Added] Document log_processing_rules for MySQL slow query logs. See [#5237](https://github.com/DataDog/integrations-core/pull/5237).
 * [Fixed] Fix formatting and typos in the MySQL documentation. See [#5238](https://github.com/DataDog/integrations-core/pull/5238).
@@ -64,26 +64,26 @@
 
 * [Added] Adhere to code style. See [#3541](https://github.com/DataDog/integrations-core/pull/3541).
 
-## 1.7.0 / 2019-02-27 / Agent 6.11.0
+## 1.7.0 / 2019-02-27 / Agent 6.10.0
 
 * [Added] Remove Encrypted column from results. See [#3174](https://github.com/DataDog/integrations-core/pull/3174).
 
-## 1.6.0 / 2019-02-18 / Agent 6.11.0
+## 1.6.0 / 2019-02-18
 
 * [Added] Finish Python 3 Support. See [#2948](https://github.com/DataDog/integrations-core/pull/2948).
 
-## 1.5.0 / 2018-11-30 / Agent 5.30.0
+## 1.5.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Support Python 3. See [#2630][1].
 * [Fixed] Use raw string literals when \ is present. See [#2465][2].
 
-## 1.4.0 / 2018-09-04 / Agent 5.28.0
+## 1.4.0 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945][3].
 * [Added] Add channel tag to replica metrics. See [#1753][4].
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 1.3.0 / 2018-06-13 / Agent 5.26.0
+## 1.3.0 / 2018-06-13
 
 * [Added] Make the max custom queries configurable in the yaml file. See [#1713][6].
 

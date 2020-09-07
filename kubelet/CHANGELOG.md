@@ -21,15 +21,15 @@
 
 * [Added] Add pod tags to volume metrics. See [#5453](https://github.com/DataDog/integrations-core/pull/5453).
 
-## 3.5.2 / 2020-01-31 / Agent 7.18.0
+## 3.5.2 / 2020-01-31 / Agent 7.17.1
 
 * [Fixed] Ignore insecure warnings for kubelet requests. See [#5607](https://github.com/DataDog/integrations-core/pull/5607).
 
-## 3.5.1 / 2020-01-15 / Agent 7.18.0
+## 3.5.1 / 2020-01-15 / Agent 7.17.0
 
 * [Fixed] Fix Kubelet credentials handling. See [#5455](https://github.com/DataDog/integrations-core/pull/5455).
 
-## 3.5.0 / 2020-01-13 / Agent 7.17.0
+## 3.5.0 / 2020-01-13
 
 * [Fixed] Improve url join to not mutate the base url when proxying a call. See [#5416](https://github.com/DataDog/integrations-core/pull/5416).
 * [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
@@ -44,11 +44,11 @@
 * [Added] Collect a new metric: kubelet.evictions. See [#5076](https://github.com/DataDog/integrations-core/pull/5076).
 * [Added] Add a gauge for effective usage of ephemeral storage per POD. See [#5052](https://github.com/DataDog/integrations-core/pull/5052).
 
-## 3.3.4 / 2019-10-30 / Agent 7.16.0
+## 3.3.4 / 2019-10-30 / Agent 6.15.0
 
 * [Fixed] Fix container collection for k8s 1.16. See [#4925](https://github.com/DataDog/integrations-core/pull/4925).
 
-## 3.3.3 / 2019-10-11 / Agent 6.15.0
+## 3.3.3 / 2019-10-11
 
 * [Fixed] Send kubelet metrics with tags only. See [#4659](https://github.com/DataDog/integrations-core/pull/4659).
 
@@ -60,59 +60,59 @@
 
 * [Fixed] Update tagger usage to match prefix update. See [#4109](https://github.com/DataDog/integrations-core/pull/4109).
 
-## 3.3.0 / 2019-07-04 / Agent 6.13.0
+## 3.3.0 / 2019-07-04
 
 * [Added] Add swap memory checks to cadvisor kubelet checks. See [#3808](https://github.com/DataDog/integrations-core/pull/3808). Thanks [adammw](https://github.com/adammw).
 
-## 3.2.1 / 2019-06-28 / Agent 6.13.0
+## 3.2.1 / 2019-06-28 / Agent 6.12.1
 
 * [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
 
-## 3.2.0 / 2019-06-13 / Agent 6.13.0
+## 3.2.0 / 2019-06-13 / Agent 6.12.0
 
 * [Fixed] Revert "Collect network usage metrics (#3740)". See [#3914](https://github.com/DataDog/integrations-core/pull/3914).
 
-## 3.1.0 / 2019-05-14 / Agent 6.12.0
+## 3.1.0 / 2019-05-14
 
 * [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
 * [Added] add useful prometheus labels to metric tags. See [#3735](https://github.com/DataDog/integrations-core/pull/3735).
 * [Added] Adhere to code style. See [#3525](https://github.com/DataDog/integrations-core/pull/3525).
 
-## 3.0.1 / 2019-04-04 / Agent 6.12.0
+## 3.0.1 / 2019-04-04 / Agent 6.11.0
 
 * [Fixed] Fix podlist multiple iterations when using pod expiration. See [#3456](https://github.com/DataDog/integrations-core/pull/3456).
 * [Fixed] Fix health check during first check run. See [#3457](https://github.com/DataDog/integrations-core/pull/3457).
 
-## 3.0.0 / 2019-03-29 / Agent 6.11.0
+## 3.0.0 / 2019-03-29
 
 * [Changed] Do not tag container restarts/state metrics by container_id anymore. See [#3424](https://github.com/DataDog/integrations-core/pull/3424).
 * [Added] Allow to filter out old pods when parsing the podlist to reduce memory usage. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).
 
-## 2.4.0 / 2019-02-18 / Agent 6.11.0
+## 2.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Fix usage metrics collection for static pods. See [#3079](https://github.com/DataDog/integrations-core/pull/3079).
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * [Added] Support Python 3. See [#3028](https://github.com/DataDog/integrations-core/pull/3028).
 * [Fixed] Fix pods/container.running metrics to exclude non running ones. See [#3025](https://github.com/DataDog/integrations-core/pull/3025).
 
-## 2.3.1 / 2019-01-04 / Agent 5.31.0
+## 2.3.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] document kubernetes.pods.running and kubernetes.containers.running. See [#2792][1].
 * [Fixed] Fix default yaml instance. See [#2756][2].
 * [Fixed] Make the check robust to an unresponsive kubelet. See [#2719][3].
 
-## 2.3.0 / 2018-11-30 / Agent 5.30.0
+## 2.3.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Add restart and container state metrics to kubelet. See [#2605][4]. Thanks [schleyfox][5].
 * [Added] Add more cpu metrics. See [#2595][6].
 * [Added] Add kubelet volume metrics. See [#2256][7]. Thanks [derekchan][8].
 * [Fixed] [kubelet] correctly ignore pods that are neither running or pending for resource limits&requests. See [#2597][9].
 
-## 2.2.0 / 2018-10-12 / Agent 5.28.0
+## 2.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Add kubelet rss and working set memory metrics. See [#2390][10].
 
-## 2.1.0 / 2018-10-10 / Agent 5.28.0
+## 2.1.0 / 2018-10-10
 
 * [Fixed] Fix parsing errors when the podlist is in an inconsistent state. See [#2338][11].
 * [Fixed] Fix kubelet input filtering. See [#2344][12].
@@ -120,7 +120,7 @@
 * [Added] Add additional kubelet metrics. See [#2245][14].
 * [Added] Add the kubernetes.containers.running metric. See [#2191][15]. Thanks [Devatoria][16].
 
-## 2.0.0 / 2018-09-04 / Agent 5.28.0
+## 2.0.0 / 2018-09-04 / Agent 6.5.0
 
 * [Changed] Update kubelet to use the new OpenMetricsBaseCheck. See [#1982][17].
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][18].
@@ -131,7 +131,7 @@
 * [Fixed] Reduce log spam on kubernetes tagging. See [#1830][23].
 * [Fixed] Add data files to the wheel package. See [#1727][24].
 
-## 1.4.0 / 2018-06-14 / Agent 5.26.0
+## 1.4.0 / 2018-06-14 / Agent 6.3.1
 
 * [Changed] Kubelet check: better encapsulate the pod list retrieval. See [#1648][25].
 

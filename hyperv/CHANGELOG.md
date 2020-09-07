@@ -16,7 +16,7 @@
 
 * [Fixed] Add tags option to hyperv. See [#3337](https://github.com/DataDog/integrations-core/pull/3337).
 
-## 1.0.0 / 2019-01-03 / Agent 5.31.0
+## 1.0.0 / 2019-01-03 / Agent 6.9.0
 
 * [Added] Add Hyper-V integration. See [#2607][1].
 

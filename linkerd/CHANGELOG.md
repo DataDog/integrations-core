@@ -21,15 +21,15 @@
 
 * [Added] Adhere to code style. See [#3533](https://github.com/DataDog/integrations-core/pull/3533).
 
-## 2.1.0 / 2019-02-18 / Agent 6.11.0
+## 2.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#3032](https://github.com/DataDog/integrations-core/pull/3032).
 
-## 2.0.0 / 2018-10-12 / Agent 5.28.0
+## 2.0.0 / 2018-10-12 / Agent 6.6.0
 
 * [Changed] Update linkerd to use the new OpenMetricsBaseCheck. See [#1984][1].
 
-## 1.2.0 / 2018-09-04 / Agent 5.28.0
+## 1.2.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][2].
 * [Added] Make HTTP request timeout configurable in prometheus checks. See [#1790][3].

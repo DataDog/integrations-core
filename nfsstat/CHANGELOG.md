@@ -18,7 +18,7 @@
 
 * [Fixed] Fix non-ascii mounted folder name. See [#3805](https://github.com/DataDog/integrations-core/pull/3805).
 
-## 1.4.0 / 2019-05-14 / Agent 6.12.0
+## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3544](https://github.com/DataDog/integrations-core/pull/3544).
 
@@ -26,19 +26,19 @@
 
 * [Added] Support Python 3. See [#3228](https://github.com/DataDog/integrations-core/pull/3228).
 
-## 1.2.0 / 2019-02-18 / Agent 6.11.0
+## 1.2.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Don't raise Exception when No NFS mounts could be found. See [#3069](https://github.com/DataDog/integrations-core/pull/3069).
 
-## 1.1.0 / 2019-01-04 / Agent 5.31.0
+## 1.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2775][1].
 
-## 1.0.0 / 2018-10-13 / Agent 5.30.0
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] NFSIOStat Check. See [#720][2].
 
-## 0.2.1 / 2018-09-04 / Agent 5.28.0
+## 0.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 

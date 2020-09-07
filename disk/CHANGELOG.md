@@ -4,7 +4,7 @@
 
 * [Fixed] Rename disk check example config back to .default suffix. See [#6880](https://github.com/DataDog/integrations-core/pull/6880).
 
-## 2.10.0 / 2020-06-09 / Agent 7.21.0
+## 2.10.0 / 2020-06-09
 
 * [Added] Add disk timeout configuration option. See [#6826](https://github.com/DataDog/integrations-core/pull/6826).
 
@@ -31,11 +31,11 @@
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 2.5.3 / 2019-12-13 / Agent 7.17.0
+## 2.5.3 / 2019-12-13 / Agent 7.16.0
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
 
-## 2.5.2 / 2019-12-02 / Agent 7.16.0
+## 2.5.2 / 2019-12-02
 
 * [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
 
@@ -52,7 +52,7 @@
 
 * [Added] Remove legacy code. See [#4103](https://github.com/DataDog/integrations-core/pull/4103).
 
-## 2.3.0 / 2019-07-04 / Agent 6.13.0
+## 2.3.0 / 2019-07-04
 
 * [Added] Add disk label. See [#3953](https://github.com/DataDog/integrations-core/pull/3953).
 
@@ -61,16 +61,16 @@
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
 * [Added] Adhere to code style. See [#3500](https://github.com/DataDog/integrations-core/pull/3500).
 
-## 2.1.0 / 2019-02-18 / Agent 6.11.0
+## 2.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
 * [Fixed] Use `device` tag instead of the deprecated `device_name` parameter. See [#2946](https://github.com/DataDog/integrations-core/pull/2946). Thanks [aerostitch](https://github.com/aerostitch).
 
-## 2.0.1 / 2019-01-04 / Agent 5.31.0
+## 2.0.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Fix regression on agent 5 only. See [#2848][1].
 
-## 2.0.0 / 2018-11-30 / Agent 5.30.0
+## 2.0.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Update psutil. See [#2576][2].
 * [Added] Add new filtering options, continue deprecations. See [#2483][3].
@@ -78,16 +78,16 @@
 * [Added] Support Python 3. See [#2468][5].
 * [Fixed] Use raw string literals when \ is present. See [#2465][6].
 
-## 1.4.0 / 2018-10-12 / Agent 5.28.0
+## 1.4.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Upgrade psutil. See [#2190][7].
 
-## 1.3.0 / 2018-09-04 / Agent 5.28.0
+## 1.3.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Adding optional service_check_rw parameter to check for read-only filesystem. See [#2086][8]. Thanks [bberezov][9].
 * [Fixed] Add data files to the wheel package. See [#1727][10].
 
-## 1.2.0 / 2018-03-23 / Agent 6.1.1
+## 1.2.0 / 2018-03-23
 
 * [FEATURE] Adds custom tag support
 

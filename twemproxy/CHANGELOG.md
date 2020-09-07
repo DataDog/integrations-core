@@ -1,10 +1,10 @@
 # CHANGELOG - twemproxy
 
-## 1.7.1 / 2020-07-03 / Agent 7.22.0
+## 1.7.1 / 2020-07-03 / Agent 7.21.0
 
 * [Fixed] Don't collect version if metadata is not enabled. See [#7010](https://github.com/DataDog/integrations-core/pull/7010).
 
-## 1.7.0 / 2020-06-29 / Agent 7.21.0
+## 1.7.0 / 2020-06-29
 
 * [Added] Collect version metadata. See [#6899](https://github.com/DataDog/integrations-core/pull/6899).
 
@@ -20,12 +20,12 @@
 
 * [Added] Adhere to code style. See [#3577](https://github.com/DataDog/integrations-core/pull/3577).
 
-## 1.3.0 / 2019-01-04 / Agent 5.31.0
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Refactor Twemproxy tests and add E2E. See [#2820][1].
 * [Added] Support Python 3. See [#2817][2].
 
-## 1.2.1 / 2018-09-04 / Agent 5.28.0
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 

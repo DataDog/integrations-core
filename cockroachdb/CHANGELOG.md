@@ -13,7 +13,7 @@
 
 * [Added] Adhere to code style. See [#3490](https://github.com/DataDog/integrations-core/pull/3490).
 
-## 1.0.0 / 2018-10-13 / Agent 5.30.0
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] Add cockroachdb integration. See [#2150][1].
 

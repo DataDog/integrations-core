@@ -28,11 +28,11 @@
 
 * [Fixed] Fix example tags section. See [#3431](https://github.com/DataDog/integrations-core/pull/3431).
 
-## 1.3.0 / 2018-10-12 / Agent 5.28.0
+## 1.3.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].
 
-## 1.2.2 / 2018-09-04 / Agent 5.28.0
+## 1.2.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

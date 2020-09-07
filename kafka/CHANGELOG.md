@@ -30,23 +30,23 @@
 
 * [Changed] Fix unit type of `kafka.request.produce.time.avg` & `kafka.request.produce.time.99percentile`. See [#3834](https://github.com/DataDog/integrations-core/pull/3834).
 
-## 1.4.0 / 2019-02-18 / Agent 6.11.0
+## 1.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add extra Kafka broker metrics. See [#2484](https://github.com/DataDog/integrations-core/pull/2484). Thanks [jalaziz](https://github.com/jalaziz).
 
-## 1.3.0 / 2019-01-04 / Agent 5.31.0
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Add Per Topic IncomingMessages metric for Kafka.. See [#2732][1].
 
-## 1.2.1 / 2018-11-30 / Agent 5.30.0
+## 1.2.1 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Updated kafka.producer.record_error_rate to gauge. See [#2253][2].
 
-## 1.2.0 / 2018-10-12 / Agent 5.28.0
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][3].
 
-## 1.1.1 / 2018-09-04 / Agent 5.28.0
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 

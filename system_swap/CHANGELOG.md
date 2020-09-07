@@ -9,11 +9,11 @@
 * [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.6.3 / 2019-12-13 / Agent 7.17.0
+## 1.6.3 / 2019-12-13 / Agent 7.16.0
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
 
-## 1.6.2 / 2019-12-02 / Agent 7.16.0
+## 1.6.2 / 2019-12-02
 
 * [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
 
@@ -26,23 +26,23 @@
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
 * [Added] Adhere to code style. See [#3573](https://github.com/DataDog/integrations-core/pull/3573).
 
-## 1.5.0 / 2019-02-18 / Agent 6.11.0
+## 1.5.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
 
-## 1.4.0 / 2019-01-04 / Agent 5.31.0
+## 1.4.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2830][1].
 
-## 1.3.0 / 2018-11-30 / Agent 5.30.0
+## 1.3.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Update psutil. See [#2576][2].
 
-## 1.2.0 / 2018-10-12 / Agent 5.28.0
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Upgrade psutil. See [#2190][3].
 
-## 1.1.1 / 2018-09-04 / Agent 5.28.0
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 

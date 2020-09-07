@@ -14,21 +14,21 @@
 * [Fixed] Fix type override values in example config. See [#3717](https://github.com/DataDog/integrations-core/pull/3717).
 * [Added] Adhere to code style. See [#3560](https://github.com/DataDog/integrations-core/pull/3560).
 
-## 3.1.0 / 2019-02-18 / Agent 6.11.0
+## 3.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#3048](https://github.com/DataDog/integrations-core/pull/3048).
 
-## 3.0.1 / 2019-01-04 / Agent 5.31.0
+## 3.0.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Added crucial words to make sentence clearer. See [#2811][1]. Thanks [someword][2].
 * [Fixed] Change the prometheus example to use prometheus_url. See [#2790][3]. Thanks [someword][2].
 
-## 3.0.0 / 2018-10-12 / Agent 5.28.0
+## 3.0.0 / 2018-10-12 / Agent 6.6.0
 
 * [Changed] Change default prometheus metric limit to 2000. See [#2248][4].
 * [Fixed] Temporarily increase the limit of prometheus metrics sent for 6.5. See [#2214][5].
 
-## 2.0.0 / 2018-09-04 / Agent 5.28.0
+## 2.0.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][6].
 * [Fixed] Make sure all checks' versions are exposed. See [#1945][7].

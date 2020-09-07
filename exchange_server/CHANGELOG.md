@@ -25,20 +25,20 @@
 
 * [Added] Adhere to code style. See [#3506](https://github.com/DataDog/integrations-core/pull/3506).
 
-## 1.3.0 / 2019-02-18 / Agent 6.11.0
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Fix flake8. See [#3077](https://github.com/DataDog/integrations-core/pull/3077).
 * [Added] Support Python 3. See [#2988](https://github.com/DataDog/integrations-core/pull/2988).
 
-## 1.2.1 / 2019-01-04 / Agent 5.31.0
+## 1.2.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Change example config from "localhost" to ".". See [#2779][1].
 
-## 1.2.0 / 2018-10-12 / Agent 5.28.0
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][2].
 
-## 1.1.1 / 2018-09-04 / Agent 5.28.0
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 

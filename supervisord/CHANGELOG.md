@@ -23,15 +23,15 @@
 * [Added] Support Python 3. See [#3605](https://github.com/DataDog/integrations-core/pull/3605).
 * [Added] Adhere to code style. See [#3571](https://github.com/DataDog/integrations-core/pull/3571).
 
-## 1.1.4 / 2018-10-29 / Agent 5.30.0
+## 1.1.4 / 2018-10-29 / Agent 6.8.0
 
 * [Fixed] Fix AgentCheck import. See [#2482][1].
 
-## 1.1.3 / 2018-09-04 / Agent 5.28.0
+## 1.1.3 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.1.2 / 2018-06-20 / Agent 5.26.0
+## 1.1.2 / 2018-06-20 / Agent 6.4.0
 
 * [Tooling] Bump check to be in sync with new release tooling
 

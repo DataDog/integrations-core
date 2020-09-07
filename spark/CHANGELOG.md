@@ -26,29 +26,29 @@
 
 * [Fixed] Update documentation in example config. See [#5508](https://github.com/DataDog/integrations-core/pull/5508).
 
-## 1.11.3 / 2020-01-30 / Agent 7.18.0
+## 1.11.3 / 2020-01-30
 
 * [Fixed] Handle warning message from proxy. See [#5525](https://github.com/DataDog/integrations-core/pull/5525).
 
-## 1.11.2 / 2020-01-29 / Agent 7.18.0
+## 1.11.2 / 2020-01-29
 
 * [Fixed] Prevent crash when a single app fails. See [#5552](https://github.com/DataDog/integrations-core/pull/5552).
 
-## 1.11.1 / 2020-01-15 / Agent 7.18.0
+## 1.11.1 / 2020-01-15 / Agent 7.17.0
 
 * [Fixed] Make sure version collection fails gracefully. See [#5465](https://github.com/DataDog/integrations-core/pull/5465).
 
-## 1.11.0 / 2020-01-13 / Agent 7.17.0
+## 1.11.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * [Added] Collect version metadata. See [#5032](https://github.com/DataDog/integrations-core/pull/5032).
 
-## 1.10.1 / 2019-12-06 / Agent 7.17.0
+## 1.10.1 / 2019-12-06 / Agent 7.16.0
 
 * [Fixed] Remove reference to Kubernetes in the service check message for `spark_driver_mode`. See [#5159](https://github.com/DataDog/integrations-core/pull/5159).
 
-## 1.10.0 / 2019-12-02 / Agent 7.16.0
+## 1.10.0 / 2019-12-02
 
 * [Added] Add Spark driver support. See [#4631](https://github.com/DataDog/integrations-core/pull/4631). Thanks [mrmuggymuggy](https://github.com/mrmuggymuggy).
 
@@ -60,7 +60,7 @@
 
 * [Fixed] Remove unused configs and code for spark check. See [#4133](https://github.com/DataDog/integrations-core/pull/4133).
 
-## 1.8.0 / 2019-07-09 / Agent 6.13.0
+## 1.8.0 / 2019-07-09
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4058](https://github.com/DataDog/integrations-core/pull/4058).
 
@@ -68,20 +68,20 @@
 
 * [Added] Adhere to code style. See [#3566](https://github.com/DataDog/integrations-core/pull/3566).
 
-## 1.6.0 / 2019-01-08 / Agent 6.11.0
+## 1.6.0 / 2019-01-08 / Agent 6.10.0
 
 * [Added] Allow disabling of streaming metrics. See [#2889][1].
 * [Added] Support Kerberos auth. See [#2825][2].
 
-## 1.5.0 / 2018-12-20 / Agent 5.31.0
+## 1.5.0 / 2018-12-20 / Agent 6.9.0
 
 * [Added] Add streaming statistics metrics to the spark integration. See [#2437][3].
 
-## 1.4.1 / 2018-09-04 / Agent 5.28.0
+## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 
-## 1.4.0 / 2018-06-07 / Agent 5.25.0
+## 1.4.0 / 2018-06-07
 
 * [Added] Add support for HTTP authentication. See [#1680][5].
 

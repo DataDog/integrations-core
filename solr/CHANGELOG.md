@@ -17,16 +17,16 @@
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.3.0 / 2020-04-28 / Agent 7.20.0
+## 1.3.0 / 2020-04-28
 
 * [Added] Update metrics and use config spec. See [#6496](https://github.com/DataDog/integrations-core/pull/6496).
 
-## 1.2.0 / 2018-10-12 / Agent 5.28.0
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].
 * [Fixed] Fix Solr file indenting. See [#2189][2].
 
-## 1.1.0 / 2018-09-04 / Agent 5.28.0
+## 1.1.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Add metrics for Solr 7. See [#2042][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].

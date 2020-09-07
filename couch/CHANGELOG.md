@@ -37,11 +37,11 @@
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 3.4.1 / 2019-08-30 / Agent 6.15.0
+## 3.4.1 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
-## 3.4.0 / 2019-08-24 / Agent 6.14.0
+## 3.4.0 / 2019-08-24
 
 * [Added] Add RequestsWrapper to couch. See [#4118](https://github.com/DataDog/integrations-core/pull/4118).
 
@@ -53,29 +53,29 @@
 
 * [Fixed] Include exception in connection error messages. See [#3262](https://github.com/DataDog/integrations-core/pull/3262).
 
-## 3.2.0 / 2019-02-18 / Agent 6.11.0
+## 3.2.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Finish Python 3 Support. See [#2911](https://github.com/DataDog/integrations-core/pull/2911).
 
-## 3.1.0 / 2019-01-04 / Agent 5.31.0
+## 3.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2721][1].
 
-## 3.0.0 / 2018-11-30 / Agent 5.30.0
+## 3.0.0 / 2018-11-30 / Agent 6.8.0
 
 * [Removed] Add CouchDB 2.2.0 compatibility by dropping the `purge_seq` metric. See [#2287][2]. Thanks [janl][3].
 
-## 2.6.1 / 2018-09-04 / Agent 5.28.0
+## 2.6.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945][4].
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 2.6.0 / 2018-06-07 / Agent 5.25.0
+## 2.6.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][6].
 * [Added] Raise custom exceptions for specific errors instead of a generic `Exception`.
 
-## 2.5.0 / 2018-05-11 / Agent 5.24.0
+## 2.5.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 5984 port in the Autodiscovery template. See [#1444][7] for more information.
 

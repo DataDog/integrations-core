@@ -37,33 +37,33 @@
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4059](https://github.com/DataDog/integrations-core/pull/4059).
 
-## 1.8.0 / 2019-06-19 / Agent 6.13.0
+## 1.8.0 / 2019-06-19
 
 * [Deprecated] Add yarn.apps.<METRIC>_gauge metrics and deprecate yarn.apps.<METRIC> metrics. See [#3927](https://github.com/DataDog/integrations-core/pull/3927).
 
-## 1.7.1 / 2019-06-13 / Agent 6.13.0
+## 1.7.1 / 2019-06-13 / Agent 6.12.0
 
 * [Fixed] Fix `application_tags` in conf file. See [#3908](https://github.com/DataDog/integrations-core/pull/3908).
 
-## 1.7.0 / 2019-05-14 / Agent 6.12.0
+## 1.7.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3585](https://github.com/DataDog/integrations-core/pull/3585).
 
-## 1.6.0 / 2019-02-18 / Agent 6.11.0
+## 1.6.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Kerberos auth. See [#2824](https://github.com/DataDog/integrations-core/pull/2824).
 
-## 1.5.0 / 2019-01-04 / Agent 5.31.0
+## 1.5.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2786][1].
 
-## 1.4.0 / 2018-09-04 / Agent 5.28.0
+## 1.4.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Add option to verify ssl certificate. See [#1739][2].
 * [Fixed] Fix bug and typo in DEFAULT_CLUSTER_NAME for YARN check. See [#1814][3]. Thanks [eplanet][4].
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 1.3.0 / 2018-06-13 / Agent 5.26.0
+## 1.3.0 / 2018-06-13
 
 * [Added] Add support for HTTP authentication. See [#1684][6].
 

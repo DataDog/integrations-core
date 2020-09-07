@@ -13,15 +13,15 @@
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
 * [Fixed] Raise an error if only one of `username` or `password` is set. See [#6688](https://github.com/DataDog/integrations-core/pull/6688).
 
-## 1.16.1 / 2020-05-19 / Agent 7.21.0
+## 1.16.1 / 2020-05-19 / Agent 7.20.0
 
 * [Fixed] Fix encoding and parsing issues when processing connection configuration. See [#6686](https://github.com/DataDog/integrations-core/pull/6686).
 
-## 1.16.0 / 2020-05-17 / Agent 7.20.0
+## 1.16.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.15.0 / 2020-05-05 / Agent 7.20.0
+## 1.15.0 / 2020-05-05
 
 * [Deprecated] Refactor connection configuration. See [#6574](https://github.com/DataDog/integrations-core/pull/6574).
 
@@ -44,44 +44,44 @@
 
 * [Added] Upgrade pymongo to 3.8. See [#4095](https://github.com/DataDog/integrations-core/pull/4095).
 
-## 1.10.3 / 2019-06-18 / Agent 6.13.0
+## 1.10.3 / 2019-06-18
 
 * [Fixed] Reduce doc in configuration file in favor of official documentation. See [#3892](https://github.com/DataDog/integrations-core/pull/3892).
 
-## 1.10.2 / 2019-06-06 / Agent 6.13.0
+## 1.10.2 / 2019-06-06 / Agent 6.12.0
 
 * [Fixed] Custom queries: add examples and fix logging. See [#3871](https://github.com/DataDog/integrations-core/pull/3871).
 
-## 1.10.1 / 2019-06-05 / Agent 6.13.0
+## 1.10.1 / 2019-06-05
 
 * [Fixed] Add missing metrics. See [#3856](https://github.com/DataDog/integrations-core/pull/3856).
 * [Fixed] Fix 'custom_queries' field name. See [#3868](https://github.com/DataDog/integrations-core/pull/3868).
 
-## 1.10.0 / 2019-06-01 / Agent 6.12.0
+## 1.10.0 / 2019-06-01
 
 * [Added] Add custom query capabilities. See [#3796](https://github.com/DataDog/integrations-core/pull/3796).
 
-## 1.9.0 / 2019-05-14 / Agent 6.12.0
+## 1.9.0 / 2019-05-14
 
 * [Added] Add tcmalloc.spinlock_total_delay_ns to mongodb stats. See [#3643](https://github.com/DataDog/integrations-core/pull/3643). Thanks [glenjamin](https://github.com/glenjamin).
 * [Added] Adhere to code style. See [#3540](https://github.com/DataDog/integrations-core/pull/3540).
 
-## 1.8.0 / 2019-02-18 / Agent 6.11.0
+## 1.8.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Finish Support Python 3. See [#2916](https://github.com/DataDog/integrations-core/pull/2916).
 * [Fixed] Only run `top` against the admin database. See [#2937](https://github.com/DataDog/integrations-core/pull/2937).
 * [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
 
-## 1.7.0 / 2018-11-30 / Agent 5.30.0
+## 1.7.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Support Python 3. See [#2623][1].
 * [Fixed] Use raw string literals when \ is present. See [#2465][2].
 
-## 1.6.1 / 2018-09-04 / Agent 5.28.0
+## 1.6.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 
-## 1.6.0 / 2018-06-13 / Agent 5.26.0
+## 1.6.0 / 2018-06-13 / Agent 6.4.0
 
 * [Added] [mongo] allow disabling of replica access. See [#1516][4].
 * [Changed] [mongo] properly parse metric. See [#1498][5].
@@ -90,7 +90,7 @@
 
 * [IMPROVEMENT] Allow disabling of replica access. See #1516
 
-## 1.5.3 / 2018-05-11 / Agent 5.25.0
+## 1.5.3 / 2018-05-11
 
 * [BUGFIX] Added `top` metrics ending in `countps` that properly submit as `rate`s. See #1491
 
