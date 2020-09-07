@@ -30,7 +30,7 @@ from .common import (
     STICKTABLE_TYPES,
     requires_haproxy_tcp_stats,
     requires_shareable_unix_socket,
-    requires_socket_support,
+    requires_socket_support, USERNAME, PASSWORD,
 )
 
 
@@ -131,6 +131,33 @@ def test_check(aggregator, check, instance):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+
+
+@requires_socket_support
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_regex_tags_in_status_metrics(aggregator, check):
+    instance = {
+        'url': STATS_URL,
+        'username': USERNAME,
+        'password': PASSWORD,
+        'collect_aggregates_only': 'both',
+        'collect_status_metrics': True,
+        'collect_status_metrics_by_host': True,
+        'collate_status_tags_per_host': True,
+        'active_tag': True,
+        'tags_regex': 'another(?P<regex_tag>.+)',
+        'tags': ['environment:develop']
+    }
+    check = check(instance)
+    check.check(instance)
+
+    aggregator.assert_metric('haproxy.count_per_status',
+                             tags=['regex_tag:backend', 'haproxy_service:anotherbackend', 'service:anotherbackend',
+                                   'backend:otherserver', 'environment:develop', 'active:false', 'status:available'])
+    aggregator.assert_metric('haproxy.backend_hosts',
+                             tags=['regex_tag:backend', 'haproxy_service:anotherbackend', 'environment:develop',
+                                   'active:false', 'service:anotherbackend', 'available:true'])
 
 
 @requires_socket_support
