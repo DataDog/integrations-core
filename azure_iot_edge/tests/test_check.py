@@ -5,7 +5,7 @@ import copy
 
 import pytest
 
-from datadog_checks.azure_iot_edge import AzureIotEdgeCheck
+from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.platform import Platform
 
@@ -18,7 +18,7 @@ def test_check(aggregator, mock_instance):
     """
     Under normal conditions, metrics and service checks are collected as expected.
     """
-    check = AzureIotEdgeCheck('azure_iot_edge', {}, [mock_instance])
+    check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
     check.check(mock_instance)
 
     for metric, metric_type in common.HUB_METRICS:
@@ -38,18 +38,18 @@ def test_check(aggregator, mock_instance):
 
     aggregator.assert_service_check(
         'azure_iot_edge.edge_hub.prometheus.health',
-        AzureIotEdgeCheck.OK,
+        AzureIoTEdgeCheck.OK,
         count=1,
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.MOCK_EDGE_HUB_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
         'azure_iot_edge.edge_agent.prometheus.health',
-        AzureIotEdgeCheck.OK,
+        AzureIoTEdgeCheck.OK,
         count=1,
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.MOCK_EDGE_AGENT_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
-        'azure_iot_edge.security_daemon.can_connect', AzureIotEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
+        'azure_iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
     )
 
     aggregator.assert_all_metrics_covered()
@@ -69,10 +69,10 @@ def test_security_daemon_down(aggregator, mock_instance):
     wrong_port = common.MOCK_SERVER_PORT + 1  # Will trigger exception.
     instance['security_daemon_management_api_url'] = 'http://localhost:{}/mgmt.json'.format(wrong_port)
 
-    check = AzureIotEdgeCheck('azure_iot_edge', {}, [instance])
+    check = AzureIoTEdgeCheck('azure_iot_edge', {}, [instance])
     check.check(instance)
 
-    aggregator.assert_service_check('azure_iot_edge.security_daemon.can_connect', AzureIotEdgeCheck.CRITICAL)
+    aggregator.assert_service_check('azure_iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.CRITICAL)
     message = aggregator._service_checks['azure_iot_edge.security_daemon.can_connect'][0].message  # type: str
     if Platform.is_windows():
         assert 'No connection could be made' in message

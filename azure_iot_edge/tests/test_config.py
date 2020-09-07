@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.azure_iot_edge.check import AzureIotEdgeCheck
+from datadog_checks.azure_iot_edge.check import AzureIoTEdgeCheck
 from datadog_checks.azure_iot_edge.config import Config
 from datadog_checks.azure_iot_edge.metrics import EDGE_AGENT_METRICS, EDGE_HUB_METRICS
 from datadog_checks.azure_iot_edge.types import Instance
@@ -19,7 +19,7 @@ def test_config():
         'security_daemon_management_api_url': 'http://testserver:15580',
     }  # type: Instance
 
-    config = Config(instance, check_namespace=AzureIotEdgeCheck.__NAMESPACE__)
+    config = Config(instance, check_namespace=AzureIoTEdgeCheck.__NAMESPACE__)
 
     assert config.edge_hub_instance == {
         'prometheus_url': 'http://testserver:9601/metrics',
@@ -49,7 +49,7 @@ def test_config_custom_tags():
         'tags': tags,
     }  # type: Instance
 
-    config = Config(instance, check_namespace=AzureIotEdgeCheck.__NAMESPACE__)
+    config = Config(instance, check_namespace=AzureIoTEdgeCheck.__NAMESPACE__)
 
     assert config.tags == tags
     assert config.edge_hub_instance['tags'] == tags
@@ -71,7 +71,7 @@ def test_config_required_options(key):
     instance.pop(key)  # type: ignore
 
     with pytest.raises(ConfigurationError):
-        _ = Config(instance, check_namespace=AzureIotEdgeCheck.__NAMESPACE__)
+        _ = Config(instance, check_namespace=AzureIoTEdgeCheck.__NAMESPACE__)
 
 
 @pytest.mark.unit
@@ -85,4 +85,4 @@ def test_config_tags_must_be_list():
     }  # type: Instance
 
     with pytest.raises(ConfigurationError):
-        _ = Config(instance, check_namespace=AzureIotEdgeCheck.__NAMESPACE__)
+        _ = Config(instance, check_namespace=AzureIoTEdgeCheck.__NAMESPACE__)

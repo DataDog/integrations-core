@@ -9,12 +9,12 @@ from .config import Config
 from .types import Instance
 
 
-class AzureIotEdgeCheck(AgentCheck):
+class AzureIoTEdgeCheck(AgentCheck):
     __NAMESPACE__ = 'azure_iot_edge'
 
     def __init__(self, name, init_config, instances):
         # type: (str, dict, list) -> None
-        super(AzureIotEdgeCheck, self).__init__(name, init_config, instances)
+        super(AzureIoTEdgeCheck, self).__init__(name, init_config, instances)
         self._config = Config(cast(Instance, self.instance), check_namespace=self.__NAMESPACE__)
         self._edge_hub_check = OpenMetricsBaseCheck(name, init_config, [self._config.edge_hub_instance])
         self._edge_agent_check = OpenMetricsBaseCheck(name, init_config, [self._config.edge_agent_instance])
