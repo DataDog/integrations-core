@@ -31,8 +31,81 @@ The `SimulatedTemperatureSensor` is enabled in the environment.
 To view simulated data, run:
 
 ```bash
-docker exec -it iot-edge-device iotedge -H "http://$(docker inspect iot-edge-device -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'):15580" logs -f SimulatedTemperatureSensor
+docker logs -f SimulatedTemperatureSensor
 ```
+
+## Generate mock server metrics
+
+The data in [`metrics/`](./compose/device/mock_server/metrics) was generated as follows:
+
+* Start an E2E environment.
+* Let it run for a few minutes.
+* Generate metrics files:
+
+```bash
+curl localhost:9601/metrics > azure_iot_edge/tests/compose/mock_server/metrics/edge_hub.txt
+curl localhost:9602/metrics > azure_iot_edge/tests/compose/mock_server/metrics/edge_agent.txt
+```
+
+* Manually edit `edge_agent.txt` (replace `<INSTANCE_NUMBER>` with the instance number from the output):
+  * Add a value line for `edgeAgent_unsuccessful_iothub_syncs_total` (no way to trigger unsuccessful syncs were found):
+
+    ```
+    edgeAgent_unsuccessful_iothub_syncs_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 0
+    ```
+
+  * Add value lines for `edgeAgent_module_stop_total`:
+
+    ```
+    edgeAgent_module_stop_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",module_version="1.0",ms_telemetry="True"} 0
+    edgeAgent_module_stop_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",module_version="",ms_telemetry="True"} 0
+    ```
+
+  * Add value lines for `edgeAgent_total_disk_space_bytes` (containers don't have individual disks):
+
+    ```
+    edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 1073741824
+    edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 1073741824
+    edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 1073741824
+    ```
+
+* Manually edit `edge_hub.txt` (replace `<INSTANCE_NUMBER>` with the instance number from the output):
+  * Edit any `NaN` values so that all metrics report correctly.
+  * Add a value line for `edgehub_dropped_total`:
+
+    ```
+    edgehub_messages_dropped_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="<INSTANCE_NUMBER>",from="testEdgeDevice/SimulatedTemperatureSensor",from_route_output="temperatureOutput",reason="ttl_expiry",ms_telemetry="True"} 1
+    ```
+
+  * Add a value line for `edgehub_offline_count_total`:
+
+    ```
+    edgehub_offline_count_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="<INSTANCE_NUMBER>",id="testEdgeDevice/$edgeHub",ms_telemetry="True"} 1
+    ```
+
+  * Add a definition and value for the `edgehub_messages_unack_total` metric (no way to trigger storage failures locally was found):
+
+    ```
+    # HELP edgehub_messages_unack_total Total number of messages unack because storage failure
+    # TYPE edgehub_messages_unack_total counter
+    edgehub_messages_unack_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="<INSTANCE_NUMBER>",from="testEdgeDevice/SimulatedTemperatureSensor",from_route_output="temperatureOutput",reason="storage_failure",ms_telemetry="True"} 1
+    ```
+
+  * Add a definition and value for the `edgehub_operation_retry_total` metric (no way to trigger them locally was found):
+
+    ```
+    # HELP edgehub_operation_retry_total Total number of times edgeHub operations were retried
+    # TYPE edgehub_operation_retry_total counter
+    edgehub_operation_retry_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="<INSTANCE_NUMBER>",id="testEdgeDevice/$edgeHub",operation="test",ms_telemetry="True"} 1
+    ```
+
+  * Add a definition and value for the `edgehub_client_connect_failed_total` metric (we do not have auth set up yet):
+
+    ```
+    # HELP edgehub_client_connect_failed_total Total number of times clients failed to connect to edgeHub
+    # TYPE edgehub_client_connect_failed_total counter
+    edgehub_client_connect_failed_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="0dab21d7-d0de-4527-99df-27c8e5861eac",id="testEdgeDevice/SimulatedTemperatureSensor",reason="not_authenticated",ms_telemetry="True"} 1
+    ```
 
 ## Troubleshooting
 
