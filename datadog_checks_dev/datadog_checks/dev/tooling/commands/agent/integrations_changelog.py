@@ -10,7 +10,7 @@ from ....utils import read_file_lines, write_file
 from ...constants import get_integration_changelog
 from ...git import git_tag_list
 from ...utils import get_valid_checks
-from ..console import CONTEXT_SETTINGS, echo_info
+from ..console import CONTEXT_SETTINGS, echo_info, echo_debug
 
 EXCLUDED_CHECKS = {
     'datadog_checks_dev',
@@ -36,7 +36,7 @@ def integrations_changelog(write):
 
         changelog_file = get_integration_changelog(check)
         for line in read_file_lines(changelog_file):
-            match = re.search(r'^## (\d\.\d\.\d) / \d{4}-\d{2}-\d{2}$', line)
+            match = re.search(r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$', line)
             if match:
                 version = match.groups()[0]
                 tag = "{}-{}".format(check, version)
@@ -44,6 +44,8 @@ def integrations_changelog(write):
                 if tag_list:
                     first_agent_version = tag_list[0]
                     line = "{} / Agent {}\n".format(line.strip(), first_agent_version)
+                else:
+                    echo_debug("Agent version not found for {}".format(line.strip()))
             changelog_contents.write(line)
 
         # save the changelog on disk if --write was passed
