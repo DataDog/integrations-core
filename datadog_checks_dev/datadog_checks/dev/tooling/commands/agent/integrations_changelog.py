@@ -18,6 +18,8 @@ EXCLUDED_CHECKS = {
     'datadog_checks_dev',
     'datadog_checks_downloader',
 }
+INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
+AGENT_TAG_PATTERN = r'^\d+\.\d+\.\d+$'
 
 
 @click.command(
@@ -39,14 +41,14 @@ def integrations_changelog(checks, write):
 
     for check in checks:
         changelog_contents = StringIO()
-
         changelog_file = get_integration_changelog(check)
+
         for line in read_file_lines(changelog_file):
-            match = re.search(r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$', line)
+            match = re.search(INTEGRATION_CHANGELOG_PATTERN, line)
             if match:
                 version = match.groups()[0]
                 tag = "{}-{}".format(check, version)
-                tag_list = sorted(git_tag_list(pattern=r"^\d+\.\d+\.\d+$", contains=tag))
+                tag_list = sorted(git_tag_list(pattern=AGENT_TAG_PATTERN, contains=tag))
                 if tag_list:
                     first_agent_version = tag_list[0]
                     line = "{} / Agent {}\n".format(line.strip(), first_agent_version)
