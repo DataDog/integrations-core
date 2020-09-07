@@ -57,7 +57,7 @@ def integrations_changelog(checks, write):
                     echo_debug("Agent version not found for integration {} line {}".format(check, line.strip()))
             changelog_contents.write(line)
 
-        # save the changelog on disk if --write was passed
+        # Save the changelog on disk if --write was passed
         if write:
             echo_info("Writing to {}".format(changelog_file))
             write_file(changelog_file, changelog_contents.getvalue())
