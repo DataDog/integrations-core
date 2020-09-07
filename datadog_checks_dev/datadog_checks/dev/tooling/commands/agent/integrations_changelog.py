@@ -16,7 +16,6 @@ from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 from .common import get_changes_per_agent
 
 INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
-AGENT_TAG_PATTERN = r'^\d+\.\d+\.\d+$'
 
 
 @click.command(
@@ -43,11 +42,11 @@ def integrations_changelog(checks, since, to, write):
     changes_per_agent = get_changes_per_agent(since, to)
 
     integrations_versions = defaultdict(dict)
-    for agent, version_changes in changes_per_agent.items():
+    for agent_version, version_changes in changes_per_agent.items():
         for name, (ver, _) in version_changes.items():
             if name not in checks:
                 continue
-            integrations_versions[name][ver] = agent
+            integrations_versions[name][ver] = agent_version
 
     for check, versions in iteritems(integrations_versions):
         changelog_contents = StringIO()
