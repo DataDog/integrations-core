@@ -6,11 +6,13 @@ from io import StringIO
 
 import click
 
+from datadog_checks.dev.tooling.testing import complete_active_checks
+
 from ....utils import read_file_lines, write_file
 from ...constants import get_integration_changelog
 from ...git import git_tag_list
 from ...utils import get_valid_checks
-from ..console import CONTEXT_SETTINGS, echo_info, echo_debug
+from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 
 EXCLUDED_CHECKS = {
     'datadog_checks_dev',
@@ -22,14 +24,18 @@ EXCLUDED_CHECKS = {
     context_settings=CONTEXT_SETTINGS,
     short_help="Update integration change logs with first Agent version containing each integration release",
 )
+@click.argument('checks', autocompletion=complete_active_checks, nargs=-1)
 @click.option(
     '--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout"
 )
-def integrations_changelog(write):
+def integrations_changelog(checks, write):
     """
     Update integration change logs with first Agent version containing each integration release
     """
-    checks = sorted(set(get_valid_checks()) - EXCLUDED_CHECKS)
+
+    # Process all checks if no check is passed
+    if not checks:
+        checks = sorted(set(get_valid_checks()) - EXCLUDED_CHECKS)
 
     for check in checks:
         changelog_contents = StringIO()
