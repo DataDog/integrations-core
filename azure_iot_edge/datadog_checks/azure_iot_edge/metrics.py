@@ -5,7 +5,24 @@
 # See: https://github.com/Azure/iotedge/blob/1.0.10-rc2/doc/BuiltInMetrics.md#edgehub
 EDGE_HUB_METRICS = [
     {
-        'edgehub_queue_length': 'queue.length',
+        'edgehub_queue_length': 'queue_length',
+        'edgehub_gettwin_total': 'gettwin_total',
+        'edgehub_messages_received_total': 'messages_received_total',
+        'edgehub_messages_sent_total': 'messages_sent_total',
+        'edgehub_reported_properties_total': 'reported_properties_total',
+        'edgehub_gettwin_duration_seconds': 'gettwin_duration_seconds',
+        'edgehub_message_send_duration_seconds': 'message_send_duration_seconds',
+        'edgehub_message_process_duration_seconds': 'message_process_duration_seconds',
+        'edgehub_reported_properties_update_duration_seconds': 'reported_properties_update_duration_seconds',
+        'edgehub_direct_method_duration_seconds': 'direct_method_duration_seconds',
+        'edgehub_direct_methods_total': 'direct_methods_total',
+        'edgehub_queue_length': 'queue_length',
+        'edgehub_messages_dropped_total': 'messages_dropped_total',
+        'edgehub_messages_unack_total': 'messages_unack_total',
+        'edgehub_offline_count_total': 'offline_count_total',
+        'edgehub_offline_duration_seconds': 'offline_duration_seconds',
+        'edgehub_operation_retry_total': 'operation_retry_total',
+        'edgehub_client_connect_failed_total': 'client_connect_failed_total',
     },
 ]
 

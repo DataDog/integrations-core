@@ -16,18 +16,42 @@ MOCK_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_agent.txt'.fo
 CUSTOM_TAGS = ['env:testing']
 
 TAGS = [
-    *CUSTOM_TAGS,
+    *CUSTOM_TAGS,  # FIXME: python2 compatibility
     'edge_device:testEdgeDevice',
     'iothub:iot-edge-dev-hub.azure-devices.net',
 ]
 
 HUB_METRICS = [
-    (
-        'azure_iot_edge.edge_hub.queue.length',
-        AggregatorStub.GAUGE,
-        ['priority:2000000000', 'endpoint:iothub'],
-    ),
-]  # type: List[Tuple[str, int, List[str]]]
+    ('azure_iot_edge.edge_hub.gettwin_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.messages_received_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.messages_sent_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.reported_properties_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.gettwin_duration_seconds.sum', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.gettwin_duration_seconds.count', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.gettwin_duration_seconds.quantile', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.message_send_duration_seconds.sum', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.message_send_duration_seconds.count', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.message_send_duration_seconds.quantile', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.message_process_duration_seconds.sum', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.message_process_duration_seconds.count', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.message_process_duration_seconds.quantile', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.reported_properties_update_duration_seconds.sum', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.reported_properties_update_duration_seconds.count', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.reported_properties_update_duration_seconds.quantile', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.direct_method_duration_seconds.sum', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.direct_method_duration_seconds.count', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.direct_method_duration_seconds.quantile', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.direct_methods_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.queue_length', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.messages_dropped_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.messages_unack_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.offline_count_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.offline_duration_seconds.sum', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.offline_duration_seconds.count', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.offline_duration_seconds.quantile', AggregatorStub.GAUGE),
+    ('azure_iot_edge.edge_hub.operation_retry_total', AggregatorStub.MONOTONIC_COUNT),
+    ('azure_iot_edge.edge_hub.client_connect_failed_total', AggregatorStub.MONOTONIC_COUNT),
+]  # type: List[Tuple[str, int]]
 
 AGENT_METRICS = [
     (
@@ -314,13 +338,22 @@ E2E_METRICS = (
     # All metrics...
     {name for name, _ in MODULE_METRICS}
     .union(name for name, _, _ in AGENT_METRICS)
-    .union(name for name, _, _ in HUB_METRICS)
+    .union(name for name, _ in HUB_METRICS)
     # ... Except a few that don't get emitted by default.
     .difference(
         {
             'azure_iot_edge.edge_agent.module_stop_total',
             'azure_iot_edge.edge_agent.unsuccessful_iothub_syncs_total',
             'azure_iot_edge.edge_agent.total_disk_space_bytes',
+            'azure_iot_edge.edge_hub.direct_methods_total',
+            'azure_iot_edge.edge_hub.direct_method_duration_seconds.sum',
+            'azure_iot_edge.edge_hub.direct_method_duration_seconds.count',
+            'azure_iot_edge.edge_hub.direct_method_duration_seconds.quantile',
+            'azure_iot_edge.edge_hub.messages_unack_total',
+            'azure_iot_edge.edge_hub.messages_dropped_total',
+            'azure_iot_edge.edge_hub.offline_count_total',
+            'azure_iot_edge.edge_hub.operation_retry_total',
+            'azure_iot_edge.edge_hub.client_connect_failed_total',
         }
     )
 )

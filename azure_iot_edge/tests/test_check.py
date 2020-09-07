@@ -15,9 +15,11 @@ def test_check(aggregator, mock_instance):
     check = AzureIotEdgeCheck('azure_iot_edge', {}, [mock_instance])
     check.check(mock_instance)
 
-    for metric, metric_type, metric_tags in common.HUB_METRICS:
-        tags = common.TAGS + metric_tags
-        aggregator.assert_metric(metric, metric_type=metric_type, count=1, tags=tags)
+    for metric, metric_type in common.HUB_METRICS:
+        # Don't assert exact tags since they're very complex (many cross products).
+        aggregator.assert_metric(metric, metric_type=metric_type)
+        m = aggregator._metrics[metric][0]
+        assert set(m.tags) >= set(common.TAGS)
 
     for metric, metric_type, metric_tags in common.AGENT_METRICS:
         tags = common.TAGS + metric_tags
