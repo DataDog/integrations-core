@@ -43,14 +43,14 @@ def integrations_changelog(checks, since, to, write):
     if not checks:
         checks = sorted(set(get_valid_checks()) - EXCLUDED_CHECKS)
 
-    integrations_versions = defaultdict(dict)
     changes_per_agent = get_changes_per_agent(since, to)
-    for agent, version_changes in changes_per_agent.items():
-        # print(agent, version_changes)
-        for name, (ver, _) in version_changes.items():
-            integrations_versions[name][ver] = agent
 
-    integrations_versions = {intg: v for intg, v in iteritems(integrations_versions) if intg in checks}
+    integrations_versions = defaultdict(dict)
+    for agent, version_changes in changes_per_agent.items():
+        for name, (ver, _) in version_changes.items():
+            if name not in checks:
+                continue
+            integrations_versions[name][ver] = agent
 
     for check, versions in iteritems(integrations_versions):
         changelog_contents = StringIO()
