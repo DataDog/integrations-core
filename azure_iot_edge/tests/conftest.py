@@ -5,10 +5,10 @@ import os
 
 import pytest
 
+from datadog_checks.azure_iot_edge.types import Instance
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
-from datadog_checks.azure_iot_edge.types import Instance
 
 from . import common, e2e_utils
 

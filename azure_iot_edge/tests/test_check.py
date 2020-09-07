@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.azure_iot_edge import AzureIotEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.platform import Platform
 
 from . import common
 
@@ -73,4 +74,7 @@ def test_security_daemon_down(aggregator, mock_instance):
 
     aggregator.assert_service_check('azure_iot_edge.security_daemon.can_connect', AzureIotEdgeCheck.CRITICAL)
     message = aggregator._service_checks['azure_iot_edge.security_daemon.can_connect'][0].message  # type: str
-    assert 'Connection refused' in message
+    if Platform.is_windows():
+        assert 'No connection could be made' in message
+    else:
+        assert 'Connection refused' in message
