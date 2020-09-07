@@ -8,6 +8,7 @@ import pytest
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.azure_iot_edge.types import Instance
 
 from . import common, e2e_utils
 
@@ -44,14 +45,10 @@ def dd_environment(e2e_instance):
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    # type: () -> dict
+    # type: () -> Instance
     return {
-        'edge_hub': {
-            'prometheus_url': common.E2E_EDGE_HUB_PROMETHEUS_URL,
-        },
-        'edge_agent': {
-            'prometheus_url': common.E2E_EDGE_AGENT_PROMETHEUS_URL,
-        },
+        'edge_hub_prometheus_url': common.E2E_EDGE_HUB_PROMETHEUS_URL,
+        'edge_agent_prometheus_url': common.E2E_EDGE_AGENT_PROMETHEUS_URL,
         'security_daemon_management_api_url': common.E2E_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'tags': common.CUSTOM_TAGS,
     }
@@ -73,14 +70,10 @@ def mock_server():
 
 @pytest.fixture(scope='session')
 def mock_instance():
-    # type: () -> dict
+    # type: () -> Instance
     return {
-        'edge_hub': {
-            'prometheus_url': common.MOCK_EDGE_HUB_PROMETHEUS_URL,
-        },
-        'edge_agent': {
-            'prometheus_url': common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
-        },
+        'edge_hub_prometheus_url': common.MOCK_EDGE_HUB_PROMETHEUS_URL,
+        'edge_agent_prometheus_url': common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
         'security_daemon_management_api_url': common.MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'tags': common.CUSTOM_TAGS,
     }
