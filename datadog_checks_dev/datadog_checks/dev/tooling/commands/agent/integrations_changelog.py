@@ -15,10 +15,6 @@ from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 from .common import get_changes_per_agent
 
-EXCLUDED_CHECKS = {
-    'datadog_checks_dev',
-    'datadog_checks_downloader',
-}
 INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
 AGENT_TAG_PATTERN = r'^\d+\.\d+\.\d+$'
 
@@ -40,7 +36,7 @@ def integrations_changelog(checks, since, to, write):
 
     # Process all checks if no check is passed
     if not checks:
-        checks = sorted(set(get_valid_checks()) - EXCLUDED_CHECKS)
+        checks = get_valid_checks()
 
     changes_per_agent = get_changes_per_agent(since, to)
 
