@@ -204,6 +204,10 @@ metrics:
           name: memoryDeviceType
         tag: device_type
       - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.2
+          name: memoryDeviceIndex
+        tag: device_index
+      - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.1
           name: memoryDevicechassisIndex
         tag: chassis_index
