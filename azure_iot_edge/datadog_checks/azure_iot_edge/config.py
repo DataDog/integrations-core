@@ -54,9 +54,7 @@ class Config(object):
             'metrics': metrics,
             'tags': tags,
             'exclude_labels': [
-                'endpoint',  # Always 'iothub'.
                 'ms_telemetry',  # Always 'True'.
-                'priority',  # A configurable number like 2000000000 (not interesting).
-                'instance_number',  # Random UUID that changes on device restart (risk of context explosion).
+                'instance_number',  # Random GUID, changes on device restart (risk of context explosion).
             ],
         }

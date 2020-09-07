@@ -22,8 +22,12 @@ TAGS = [
 ]
 
 HUB_METRICS = [
-    ('azure_iot_edge.edge_hub.queue.length', AggregatorStub.GAUGE),
-]  # type: List[Tuple[str, int]]
+    (
+        'azure_iot_edge.edge_hub.queue.length',
+        AggregatorStub.GAUGE,
+        ['priority:2000000000', 'endpoint:iothub'],
+    ),
+]  # type: List[Tuple[str, int, List[str]]]
 
 AGENT_METRICS = [
     (
@@ -310,7 +314,7 @@ E2E_METRICS = (
     # All metrics...
     {name for name, _ in MODULE_METRICS}
     .union(name for name, _, _ in AGENT_METRICS)
-    .union(name for name, _ in HUB_METRICS)
+    .union(name for name, _, _ in HUB_METRICS)
     # ... Except a few that don't get emitted by default.
     .difference(
         {
