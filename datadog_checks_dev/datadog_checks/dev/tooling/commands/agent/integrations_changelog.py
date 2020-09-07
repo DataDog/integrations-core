@@ -2,15 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from collections import defaultdict
 from io import StringIO
 
 import click
+from six import iteritems
 
+from datadog_checks.dev.tooling.commands.agent.changelog import get_changes_per_agent
 from datadog_checks.dev.tooling.testing import complete_active_checks
 
 from ....utils import read_file_lines, write_file
 from ...constants import get_integration_changelog
-from ...git import git_tag_list
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 
@@ -27,10 +29,12 @@ AGENT_TAG_PATTERN = r'^\d+\.\d+\.\d+$'
     short_help="Update integration change logs with first Agent version containing each integration release",
 )
 @click.argument('checks', autocompletion=complete_active_checks, nargs=-1)
+@click.option('--since', help="Initial Agent version", default='6.3.0')
+@click.option('--to', help="Final Agent version")
 @click.option(
     '--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout"
 )
-def integrations_changelog(checks, write):
+def integrations_changelog(checks, since, to, write):
     """
     Update integration change logs with first Agent version containing each integration release
     """
@@ -39,7 +43,16 @@ def integrations_changelog(checks, write):
     if not checks:
         checks = sorted(set(get_valid_checks()) - EXCLUDED_CHECKS)
 
-    for check in checks:
+    integrations_versions = defaultdict(dict)
+    changes_per_agent = get_changes_per_agent(since, to)
+    for agent, version_changes in changes_per_agent.items():
+        # print(agent, version_changes)
+        for name, (ver, _) in version_changes.items():
+            integrations_versions[name][ver] = agent
+
+    integrations_versions = {intg: v for intg, v in iteritems(integrations_versions) if intg in checks}
+
+    for check, versions in iteritems(integrations_versions):
         changelog_contents = StringIO()
         changelog_file = get_integration_changelog(check)
 
@@ -47,12 +60,9 @@ def integrations_changelog(checks, write):
             match = re.search(INTEGRATION_CHANGELOG_PATTERN, line)
             if match:
                 version = match.groups()[0]
-                release_tag = "{}-{}".format(check, version)
-                tags = sorted(git_tag_list(pattern=AGENT_TAG_PATTERN, contains=release_tag))
-                if tags:
-                    # use the first agent version that include this release tag
-                    first_agent_version = tags[0]
-                    line = "{} / Agent {}\n".format(line.strip(), first_agent_version)
+                if version in versions:
+                    agent_version = versions[version]
+                    line = "{} / Agent {}\n".format(line.strip(), agent_version)
                 else:
                     echo_debug("Agent version not found for integration {} line {}".format(check, line.strip()))
             changelog_contents.write(line)
