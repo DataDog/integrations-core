@@ -21,7 +21,7 @@ AGENT_TAG_PATTERN = r'^\d+\.\d+\.\d+$'
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help="Update integration change logs with first Agent version containing each integration release",
+    short_help="Update integration CHANGELOG.md by adding the Agent version",
 )
 @click.argument('checks', autocompletion=complete_active_checks, nargs=-1)
 @click.option('--since', help="Initial Agent version", default='6.3.0')
@@ -31,7 +31,9 @@ AGENT_TAG_PATTERN = r'^\d+\.\d+\.\d+$'
 )
 def integrations_changelog(checks, since, to, write):
     """
-    Update integration change logs with first Agent version containing each integration release
+    Update integration CHANGELOG.md by adding the Agent version.
+
+    Agent version is only added to the integration versions released with a specific Agent release.
     """
 
     # Process all checks if no check is passed
