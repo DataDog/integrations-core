@@ -1,69 +1,69 @@
 # CHANGELOG - oracle
 
-## 2.1.0 / 2020-05-17
+## 2.1.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 2.0.1 / 2020-04-04
+## 2.0.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Lazy import of JDBC libraries. See [#6118](https://github.com/DataDog/integrations-core/pull/6118).
 
-## 2.0.0 / 2020-02-22
+## 2.0.0 / 2020-02-22 / Agent 7.18.0
 
 * [Changed] Migrate to QueryManager. See [#5529](https://github.com/DataDog/integrations-core/pull/5529).
 
-## 1.12.0 / 2020-02-04
+## 1.12.0 / 2020-02-04 / Agent 7.18.0
 
 * [Added] Add ability to only collect data defined in `custom_queries`. See [#5217](https://github.com/DataDog/integrations-core/pull/5217). Thanks [nowhammies](https://github.com/nowhammies).
 
-## 1.11.0 / 2020-01-13
+## 1.11.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * [Fixed] Fix deprecated exception. See [#5182](https://github.com/DataDog/integrations-core/pull/5182).
 
-## 1.10.1 / 2019-10-07
+## 1.10.1 / 2019-10-07 / Agent 6.15.0
 
 * [Fixed] Use fetchall instead of iterating cursor for custom queries. This fixes an issue with the JDBC driver. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
 
-## 1.10.0 / 2019-08-24
+## 1.10.0 / 2019-08-24 / Agent 6.14.0
 
 * [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
 
-## 1.9.0 / 2019-07-08
+## 1.9.0 / 2019-07-08 / Agent 6.13.0
 
 * [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).
 
-## 1.8.0 / 2019-06-01
+## 1.8.0 / 2019-06-01 / Agent 6.12.0
 
 * [Added] Support multiple results in custom queries. See [#3765](https://github.com/DataDog/integrations-core/pull/3765).
 
-## 1.7.0 / 2019-05-14
+## 1.7.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Turn an info log into debug. See [#3661](https://github.com/DataDog/integrations-core/pull/3661).
 * [Added] Adhere to code style. See [#3552](https://github.com/DataDog/integrations-core/pull/3552).
 
-## 1.6.0 / 2019-03-29
+## 1.6.0 / 2019-03-29 / Agent 6.11.0
 
 * [Added] Add custom_queries config globally. See [#3231](https://github.com/DataDog/integrations-core/pull/3231).
 
-## 1.5.0 / 2019-02-18
+## 1.5.0 / 2019-02-18 / Agent 6.11.0
 
 * [Added] Support Python 3. See [#3037](https://github.com/DataDog/integrations-core/pull/3037).
 * [Fixed] Fix tablespace metrics. See [#2841](https://github.com/DataDog/integrations-core/pull/2841).
 
-## 1.4.0 / 2018-09-04
+## 1.4.0 / 2018-09-04 / Agent 5.28.0
 
 * [Added] Add process metrics. See [#1856][1].
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.3.0 / 2018-06-07
+## 1.3.0 / 2018-06-07 / Agent 5.25.0
 
 * [Added] Support custom queries. See [#1528][3].
 * [Added] [oracle]  Add ability to use the JDBC Driver instead of cx_Oracle. See [#1459][4].
 * [FEATURE] ability to use the JDBC Driver instead of `cx_Oracle` to connect to the database. See [#1459][5]
 
-## 1.2.0 / 2018-05-11
+## 1.2.0 / 2018-05-11 / Agent 5.24.0
 
 * [FEATURE] adds metric `oracle.tablespace.offline`. See [#1402][6]
 * [BUGFIX] fix for DB with offline tablespace. See #1402

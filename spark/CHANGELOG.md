@@ -6,82 +6,82 @@
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
 * [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
 
-## 1.14.0 / 2020-08-10
+## 1.14.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add documentation for spark logs. See [#7109](https://github.com/DataDog/integrations-core/pull/7109).
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
 * [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
 
-## 1.13.0 / 2020-06-29
+## 1.13.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 * [Added] Add config specs. See [#6921](https://github.com/DataDog/integrations-core/pull/6921).
 
-## 1.12.0 / 2020-05-17
+## 1.12.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.11.4 / 2020-02-22
+## 1.11.4 / 2020-02-22 / Agent 7.18.0
 
 * [Fixed] Update documentation in example config. See [#5508](https://github.com/DataDog/integrations-core/pull/5508).
 
-## 1.11.3 / 2020-01-30
+## 1.11.3 / 2020-01-30 / Agent 7.18.0
 
 * [Fixed] Handle warning message from proxy. See [#5525](https://github.com/DataDog/integrations-core/pull/5525).
 
-## 1.11.2 / 2020-01-29
+## 1.11.2 / 2020-01-29 / Agent 7.18.0
 
 * [Fixed] Prevent crash when a single app fails. See [#5552](https://github.com/DataDog/integrations-core/pull/5552).
 
-## 1.11.1 / 2020-01-15
+## 1.11.1 / 2020-01-15 / Agent 7.18.0
 
 * [Fixed] Make sure version collection fails gracefully. See [#5465](https://github.com/DataDog/integrations-core/pull/5465).
 
-## 1.11.0 / 2020-01-13
+## 1.11.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * [Added] Collect version metadata. See [#5032](https://github.com/DataDog/integrations-core/pull/5032).
 
-## 1.10.1 / 2019-12-06
+## 1.10.1 / 2019-12-06 / Agent 7.17.0
 
 * [Fixed] Remove reference to Kubernetes in the service check message for `spark_driver_mode`. See [#5159](https://github.com/DataDog/integrations-core/pull/5159).
 
-## 1.10.0 / 2019-12-02
+## 1.10.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Add Spark driver support. See [#4631](https://github.com/DataDog/integrations-core/pull/4631). Thanks [mrmuggymuggy](https://github.com/mrmuggymuggy).
 
-## 1.9.0 / 2019-10-11
+## 1.9.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.8.1 / 2019-07-18
+## 1.8.1 / 2019-07-18 / Agent 6.13.0
 
 * [Fixed] Remove unused configs and code for spark check. See [#4133](https://github.com/DataDog/integrations-core/pull/4133).
 
-## 1.8.0 / 2019-07-09
+## 1.8.0 / 2019-07-09 / Agent 6.13.0
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4058](https://github.com/DataDog/integrations-core/pull/4058).
 
-## 1.7.0 / 2019-05-14
+## 1.7.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3566](https://github.com/DataDog/integrations-core/pull/3566).
 
-## 1.6.0 / 2019-01-08
+## 1.6.0 / 2019-01-08 / Agent 6.11.0
 
 * [Added] Allow disabling of streaming metrics. See [#2889][1].
 * [Added] Support Kerberos auth. See [#2825][2].
 
-## 1.5.0 / 2018-12-20
+## 1.5.0 / 2018-12-20 / Agent 5.31.0
 
 * [Added] Add streaming statistics metrics to the spark integration. See [#2437][3].
 
-## 1.4.1 / 2018-09-04
+## 1.4.1 / 2018-09-04 / Agent 5.28.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 
-## 1.4.0 / 2018-06-07
+## 1.4.0 / 2018-06-07 / Agent 5.25.0
 
 * [Added] Add support for HTTP authentication. See [#1680][5].
 

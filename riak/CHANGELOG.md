@@ -1,46 +1,46 @@
 # CHANGELOG - riak
 
-## 2.0.0 / 2020-08-10
+## 2.0.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config specs. See [#7068](https://github.com/DataDog/integrations-core/pull/7068).
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
 * [Changed] Use requests wrapper and remove httplib2 dependency. See [#7247](https://github.com/DataDog/integrations-core/pull/7247).
 
-## 1.9.0 / 2020-05-20
+## 1.9.0 / 2020-05-20 / Agent 7.21.0
 
 * [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
 
-## 1.8.0 / 2020-05-17
+## 1.8.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Use Agent 6 signature. See [#6448](https://github.com/DataDog/integrations-core/pull/6448).
 
-## 1.7.1 / 2020-04-04
+## 1.7.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.7.0 / 2020-01-13
+## 1.7.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 
-## 1.6.0 / 2019-07-12
+## 1.6.0 / 2019-07-12 / Agent 6.13.0
 
 * [Added] Add logs section. See [#3995](https://github.com/DataDog/integrations-core/pull/3995).
 
-## 1.5.0 / 2019-05-14
+## 1.5.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3563](https://github.com/DataDog/integrations-core/pull/3563).
 
-## 1.4.0 / 2019-01-04
+## 1.4.0 / 2019-01-04 / Agent 5.31.0
 
 * [Added] Support Python 3. See [#2774][1].
 
-## 1.3.1 / 2018-09-04
+## 1.3.1 / 2018-09-04 / Agent 5.28.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.3.0 / 2018-06-07
+## 1.3.0 / 2018-06-07 / Agent 5.25.0
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664][3].
 
