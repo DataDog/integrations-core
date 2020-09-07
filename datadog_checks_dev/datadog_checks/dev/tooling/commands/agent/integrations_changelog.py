@@ -34,22 +34,15 @@ def integrations_changelog(write):
 
     for check in checks:
         changelog_file = get_integration_changelog(check)
-        print("changelog_file:", changelog_file)
         for line in read_file_lines(changelog_file):
             match = re.search(r'## (\d\.\d\.\d) / \d{4}-\d{2}-\d{2}', line)
             if match:
                 version = match.groups()[0]
                 tag = "{}-{}".format(check, version)
-                print("version", version)
-                print("tag", tag)
-
                 tag_list = sorted(git_tag_list(pattern=r"^\d+\.\d+\.\d+$", contains=tag))
                 if tag_list:
                     first_agent_version = tag_list[0]
-                    print("tag_list", tag_list)
-                    print("first_agent_version", first_agent_version)
-                    line = "{} / Agent {}\n".format(line.strip(), first_agent_version)
-                    print("line:", line)
+                    line = "{} / first included in Agent {}\n".format(line.strip(), first_agent_version)
             changelog_contents.write(line)
 
         # save the changelog on disk if --write was passed
