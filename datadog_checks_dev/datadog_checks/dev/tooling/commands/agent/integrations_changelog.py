@@ -47,13 +47,14 @@ def integrations_changelog(checks, write):
             match = re.search(INTEGRATION_CHANGELOG_PATTERN, line)
             if match:
                 version = match.groups()[0]
-                tag = "{}-{}".format(check, version)
-                tag_list = sorted(git_tag_list(pattern=AGENT_TAG_PATTERN, contains=tag))
-                if tag_list:
-                    first_agent_version = tag_list[0]
+                release_tag = "{}-{}".format(check, version)
+                tags = sorted(git_tag_list(pattern=AGENT_TAG_PATTERN, contains=release_tag))
+                if tags:
+                    # use the first agent version that include this release tag
+                    first_agent_version = tags[0]
                     line = "{} / Agent {}\n".format(line.strip(), first_agent_version)
                 else:
-                    echo_debug("Agent version not found for {}".format(line.strip()))
+                    echo_debug("Agent version not found for integration {} line {}".format(check, line.strip()))
             changelog_contents.write(line)
 
         # save the changelog on disk if --write was passed
