@@ -440,25 +440,25 @@ class HAProxy(AgentCheck):
                     custom_tags=line_tags,
                 )
 
-        if collect_status_metrics:
-            self._process_status_metric(
-                self.hosts_statuses,
-                collect_status_metrics_by_host,
-                services_incl_filter=services_incl_filter,
-                services_excl_filter=services_excl_filter,
-                collate_status_tags_per_host=collate_status_tags_per_host,
-                count_status_by_service=count_status_by_service,
-                custom_tags=line_tags,
-                active_tag=active_tag,
-            )
+            if collect_status_metrics:
+                self._process_status_metric(
+                    self.hosts_statuses,
+                    collect_status_metrics_by_host,
+                    services_incl_filter=services_incl_filter,
+                    services_excl_filter=services_excl_filter,
+                    collate_status_tags_per_host=collate_status_tags_per_host,
+                    count_status_by_service=count_status_by_service,
+                    custom_tags=line_tags,
+                    active_tag=active_tag,
+                )
 
-            self._process_backend_hosts_metric(
-                self.hosts_statuses,
-                services_incl_filter=services_incl_filter,
-                services_excl_filter=services_excl_filter,
-                custom_tags=line_tags,
-                active_tag=active_tag,
-            )
+                self._process_backend_hosts_metric(
+                    self.hosts_statuses,
+                    services_incl_filter=services_incl_filter,
+                    services_excl_filter=services_excl_filter,
+                    custom_tags=line_tags,
+                    active_tag=active_tag,
+                )
 
         return data
 
