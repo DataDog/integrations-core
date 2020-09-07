@@ -15,8 +15,7 @@ MOCK_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_agent.txt'.fo
 
 CUSTOM_TAGS = ['env:testing']
 
-TAGS = [
-    *CUSTOM_TAGS,  # FIXME: python2 compatibility
+TAGS = CUSTOM_TAGS + [
     'edge_device:testEdgeDevice',
     'iothub:iot-edge-dev-hub.azure-devices.net',
 ]
@@ -358,8 +357,7 @@ E2E_METRICS = (
     )
 )
 
-E2E_TAGS = [
-    *CUSTOM_TAGS,
+E2E_TAGS = CUSTOM_TAGS + [
     'edge_device:testEdgeDevice',
     'iothub:iot-edge-dev-hub.azure-devices.net',
 ]
