@@ -750,9 +750,6 @@ class HAProxy(AgentCheck):
         """
         Stick table metrics processing. Two metrics will be created for each stick table (current and max size)
         """
-
-        custom_tags = [] if not custom_tags else custom_tags
-
         for line in data:
             table = StickTable.parse(line)
             if table is None:
@@ -760,7 +757,8 @@ class HAProxy(AgentCheck):
             if self._is_service_excl_filtered(table.name, services_incl_filter, services_excl_filter):
                 continue
 
-            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type] + custom_tags
+            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type]
+            tags.extend(self.custom_tags)
             self.gauge("haproxy.sticktable.size", float(table.size), tags=tags)
             self.gauge("haproxy.sticktable.used", float(table.used), tags=tags)
 

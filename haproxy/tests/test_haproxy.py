@@ -23,14 +23,16 @@ from .common import (
     CONFIG_UNIXSOCKET,
     FRONTEND_CHECK,
     FRONTEND_SERVICES,
+    PASSWORD,
     SERVICE_CHECK_NAME,
     STATS_SOCKET,
     STATS_URL,
     STATS_URL_OPEN,
     STICKTABLE_TYPES,
+    USERNAME,
     requires_haproxy_tcp_stats,
     requires_shareable_unix_socket,
-    requires_socket_support, USERNAME, PASSWORD,
+    requires_socket_support,
 )
 
 
@@ -147,17 +149,34 @@ def test_regex_tags_in_status_metrics(aggregator, check):
         'collate_status_tags_per_host': True,
         'active_tag': True,
         'tags_regex': 'another(?P<regex_tag>.+)',
-        'tags': ['environment:develop']
+        'tags': ['environment:develop'],
     }
     check = check(instance)
     check.check(instance)
 
-    aggregator.assert_metric('haproxy.count_per_status',
-                             tags=['regex_tag:backend', 'haproxy_service:anotherbackend', 'service:anotherbackend',
-                                   'backend:otherserver', 'environment:develop', 'active:false', 'status:available'])
-    aggregator.assert_metric('haproxy.backend_hosts',
-                             tags=['regex_tag:backend', 'haproxy_service:anotherbackend', 'environment:develop',
-                                   'active:false', 'service:anotherbackend', 'available:true'])
+    aggregator.assert_metric(
+        'haproxy.count_per_status',
+        tags=[
+            'regex_tag:backend',
+            'haproxy_service:anotherbackend',
+            'service:anotherbackend',
+            'backend:otherserver',
+            'environment:develop',
+            'active:false',
+            'status:available',
+        ],
+    )
+    aggregator.assert_metric(
+        'haproxy.backend_hosts',
+        tags=[
+            'regex_tag:backend',
+            'haproxy_service:anotherbackend',
+            'environment:develop',
+            'active:false',
+            'service:anotherbackend',
+            'available:true',
+        ],
+    )
 
 
 @requires_socket_support
