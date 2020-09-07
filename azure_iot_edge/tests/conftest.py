@@ -52,6 +52,7 @@ def e2e_instance():
         'edge_agent': {
             'prometheus_url': common.E2E_EDGE_AGENT_PROMETHEUS_URL,
         },
+        'security_daemon_management_api_url': common.E2E_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'tags': common.CUSTOM_TAGS,
     }
 
@@ -80,5 +81,6 @@ def mock_instance():
         'edge_agent': {
             'prometheus_url': common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
         },
+        'security_daemon_management_api_url': common.MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'tags': common.CUSTOM_TAGS,
     }

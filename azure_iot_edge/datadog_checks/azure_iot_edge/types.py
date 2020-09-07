@@ -8,6 +8,11 @@ EdgeAgentConfig = TypedDict('EdgeAgentConfig', {'prometheus_url': str})
 
 Instance = TypedDict(
     'Instance',
-    {'edge_hub': EdgeHubConfig, 'edge_agent': EdgeAgentConfig, 'tags': List[str]},
+    {
+        'edge_hub': EdgeHubConfig,
+        'edge_agent': EdgeAgentConfig,
+        'security_daemon_management_api_url': str,
+        'tags': List[str],
+    },
     total=False,
 )

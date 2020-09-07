@@ -32,4 +32,15 @@ class AzureIotEdgeCheck(AgentCheck):
 
     def _check_daemon_health(self):
         # type: () -> None
-        pass  # TODO
+        try:
+            _ = self.http.get(self._config.security_daemon_management_api_url)
+        except Exception as exc:
+            status = self.CRITICAL
+            message = str(exc)
+        else:
+            # The endpoint is responding, which means the management API server is running and accessible to the Agent,
+            # so it's fair to assume that the security daemon is running and in good shape.
+            status = self.OK
+            message = ''
+
+        self.service_check('security_daemon.can_connect', status, message=message, tags=self._config.tags)

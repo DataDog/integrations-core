@@ -12,6 +12,7 @@ HERE = get_here()
 MOCK_SERVER_PORT = 9678
 MOCK_EDGE_HUB_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_hub.txt'.format(MOCK_SERVER_PORT)
 MOCK_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_agent.txt'.format(MOCK_SERVER_PORT)
+MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL = 'http://localhost:{}/mgmt.json'.format(MOCK_SERVER_PORT)
 
 CUSTOM_TAGS = ['env:testing']
 
@@ -327,6 +328,7 @@ E2E_IOT_EDGE_CONNSTR = os.environ.get('IOT_EDGE_CONNSTR', '')
 E2E_NETWORK = 'iot-edge-network'
 E2E_EDGE_HUB_PROMETHEUS_URL = 'http://localhost:9601/metrics'
 E2E_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:9602/metrics'
+E2E_SECURITY_DAEMON_MANAGEMENT_API_URL = 'http://localhost:15580/'
 E2E_EXTRA_SPAWNED_CONTAINERS = [
     # Spawned by the Edge Agent after device has started.
     'edgeHub',

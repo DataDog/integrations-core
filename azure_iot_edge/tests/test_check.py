@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
 import pytest
 
 from datadog_checks.azure_iot_edge import AzureIotEdgeCheck
@@ -12,6 +14,9 @@ from . import common
 @pytest.mark.usefixtures("mock_server")
 def test_check(aggregator, mock_instance):
     # type: (AggregatorStub, dict) -> None
+    """
+    Under normal conditions, metrics and service checks are collected as expected.
+    """
     check = AzureIotEdgeCheck('azure_iot_edge', {}, [mock_instance])
     check.check(mock_instance)
 
@@ -42,11 +47,30 @@ def test_check(aggregator, mock_instance):
         count=1,
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.MOCK_EDGE_AGENT_PROMETHEUS_URL)],
     )
-    # TODO
-    # aggregator.assert_service_check(
-    #     'azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
-    # )
+    aggregator.assert_service_check(
+        'azure_iot_edge.security_daemon.can_connect', AzureIotEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
+    )
 
     aggregator.assert_all_metrics_covered()
+
     # TODO
     # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.usefixtures("mock_server")
+def test_security_daemon_down(aggregator, mock_instance):
+    # type: (AggregatorStub, dict) -> None
+    """
+    When the security daemon management API endpoint is unreachable, the security daemon service check
+    reports as CRITICAL.
+    """
+    instance = copy.deepcopy(mock_instance)
+    wrong_port = common.MOCK_SERVER_PORT + 1  # Will trigger exception.
+    instance['security_daemon_management_api_url'] = 'http://localhost:{}/mgmt.json'.format(wrong_port)
+
+    check = AzureIotEdgeCheck('azure_iot_edge', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_service_check('azure_iot_edge.security_daemon.can_connect', AzureIotEdgeCheck.CRITICAL)
+    message = aggregator._service_checks['azure_iot_edge.security_daemon.can_connect'][0].message  # type: str
+    assert 'Connection refused' in message

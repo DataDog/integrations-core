@@ -28,6 +28,8 @@ class Config(object):
 
         self.tags = tags  # type: List[str]
 
+        self.security_daemon_management_api_url = instance.get('security_daemon_management_api_url')
+
         self.edge_hub_instance = self._create_prometheus_instance(
             instance, namespace='edge_hub', metrics=EDGE_HUB_METRICS
         )
