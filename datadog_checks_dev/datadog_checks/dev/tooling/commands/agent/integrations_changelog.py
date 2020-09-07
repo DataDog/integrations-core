@@ -12,6 +12,11 @@ from ...git import git_tag_list
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_info
 
+EXCLUDED_CHECKS = {
+    'datadog_checks_dev',
+    'datadog_checks_downloader',
+}
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -24,7 +29,7 @@ def integrations_changelog(write):
     """
     Update integration change logs with first Agent version containing each integration release
     """
-    checks = sorted(get_valid_checks())
+    checks = sorted(set(get_valid_checks()) - EXCLUDED_CHECKS)
 
     for check in checks:
         changelog_contents = StringIO()
@@ -43,6 +48,7 @@ def integrations_changelog(write):
 
         # save the changelog on disk if --write was passed
         if write:
+            echo_info("Writing to {}".format(changelog_file))
             write_file(changelog_file, changelog_contents.getvalue())
         else:
             echo_info(changelog_contents.getvalue())
