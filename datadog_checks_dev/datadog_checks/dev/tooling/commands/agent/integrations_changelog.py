@@ -1,20 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-import os
 import re
 from io import StringIO
 
 import click
 
-from ....utils import read_file, write_file, read_file_lines
-from ...constants import get_agent_changelog, get_agent_release_requirements, get_root
-from ...git import git_show_file, git_tag_list
-from ...release import DATADOG_PACKAGE_PREFIX, get_folder_name, get_package_name
-from ...utils import parse_agent_req_file, get_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_info
-from .common import get_agent_tags
+from ....utils import read_file_lines, write_file
+from ...constants import get_integration_changelog
+from ...git import git_tag_list
+from ...utils import get_valid_checks
+from ..console import CONTEXT_SETTINGS, echo_info
 
 
 @click.command(
@@ -29,10 +25,10 @@ def integrations_changelog(write):
     Update integration change logs with first Agent version containing each integration release
     """
     checks = sorted(get_valid_checks())
-    # store the changelog in memory
-    changelog_contents = StringIO()
 
     for check in checks:
+        changelog_contents = StringIO()
+
         changelog_file = get_integration_changelog(check)
         for line in read_file_lines(changelog_file):
             match = re.search(r'^## (\d\.\d\.\d) / \d{4}-\d{2}-\d{2}$', line)
@@ -50,9 +46,3 @@ def integrations_changelog(write):
             write_file(changelog_file, changelog_contents.getvalue())
         else:
             echo_info(changelog_contents.getvalue())
-
-        break  # TODO: remove me
-
-
-def get_integration_changelog(check):
-    return os.path.join(get_root(), check, 'CHANGELOG.md')
