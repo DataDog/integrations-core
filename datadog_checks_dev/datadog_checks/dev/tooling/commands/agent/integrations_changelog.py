@@ -8,13 +8,12 @@ from io import StringIO
 import click
 from six import iteritems
 
-from datadog_checks.dev.tooling.commands.agent.changelog import get_changes_per_agent
-from datadog_checks.dev.tooling.testing import complete_active_checks
-
 from ....utils import read_file_lines, write_file
 from ...constants import get_integration_changelog
+from ...testing import complete_active_checks
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
+from .common import get_changes_per_agent
 
 EXCLUDED_CHECKS = {
     'datadog_checks_dev',
