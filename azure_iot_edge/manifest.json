@@ -6,7 +6,7 @@
   "metric_prefix": "azure_iot_edge.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "### TODO ###",
   "guid": "9eafeab9-daf4-4f54-befc-fcc623ec9c1b",
   "support": "core",
   "supported_os": [
