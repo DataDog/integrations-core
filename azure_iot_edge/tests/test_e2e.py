@@ -25,5 +25,4 @@ def test_e2e(dd_agent_check):
 
     aggregator.assert_service_check('azure_iot_edge.edge_hub.prometheus.health', AzureIotEdgeCheck.OK)
     aggregator.assert_service_check('azure_iot_edge.edge_agent.prometheus.health', AzureIotEdgeCheck.OK)
-    # TODO
-    # aggregator.assert_service_check('azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK)
+    aggregator.assert_service_check('azure_iot_edge.security_daemon.can_connect', AzureIotEdgeCheck.OK)
