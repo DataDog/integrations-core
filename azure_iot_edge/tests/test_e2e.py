@@ -18,8 +18,12 @@ def test_e2e(dd_agent_check):
 
     for metric in common.E2E_METRICS:
         aggregator.assert_metric(metric)
+        m = aggregator._metrics[metric][0]
+        assert set(m.tags) >= set(common.E2E_TAGS)
 
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('azure_iot_edge.edge_hub.prometheus.health', AzureIotEdgeCheck.OK)
     aggregator.assert_service_check('azure_iot_edge.edge_agent.prometheus.health', AzureIotEdgeCheck.OK)
+    # TODO
+    # aggregator.assert_service_check('azure_iot_edge.security_daemon.health', AzureIotEdgeCheck.OK)
