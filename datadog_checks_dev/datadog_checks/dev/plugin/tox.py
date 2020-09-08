@@ -18,7 +18,7 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
+ISORT_DEP = 'isort[pyproject]==5.5.1'
 BLACK_DEP = 'black==20.8b1'
 FLAKE8_DEP = 'flake8==3.8.3'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
