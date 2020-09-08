@@ -22,7 +22,7 @@ files:
         Guest authentication must be on if you want the check to be able to get data
         When using the optional `basic_http_authentication` use:
 
-          server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+         server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
       required: true
       value:
         type: string
