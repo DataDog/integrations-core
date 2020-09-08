@@ -423,7 +423,6 @@ class HAProxy(AgentCheck):
             if enable_service_check:
                 self._process_service_check(
                     data_dict,
-                    url,
                     tag_by_host=tag_service_check_by_host,
                     services_incl_filter=services_incl_filter,
                     services_excl_filter=services_excl_filter,
@@ -828,7 +827,7 @@ class HAProxy(AgentCheck):
         }
 
     def _process_service_check(
-        self, data, url, tag_by_host=False, services_incl_filter=None, services_excl_filter=None, custom_tags=None
+        self, data, tag_by_host=False, services_incl_filter=None, services_excl_filter=None, custom_tags=None
     ):
         """Report a service check, tagged by the service and the backend.
         Statuses are defined in `STATUS_TO_SERVICE_CHECK` mapping.
