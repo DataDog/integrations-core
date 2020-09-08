@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
-import psycopg2
 import semver
 from semver import VersionInfo
 
