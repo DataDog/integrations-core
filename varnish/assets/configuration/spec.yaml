@@ -85,4 +85,3 @@ files:
           - type: file
             path: /var/log/varnish/varnishncsa.log
             source: varnish
-            service: varnish
