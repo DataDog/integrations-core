@@ -6,6 +6,8 @@ from contextlib import contextmanager
 
 from six import raise_from
 
+from datadog_checks.base import AgentCheck
+
 try:
     import adodbapi
 except ImportError:
@@ -37,11 +39,10 @@ class Connection(object):
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
 
-    def __init__(self, init_config, check_instance):
-        self.instance = check_instance.instance
-        self.log = check_instance.log
-        self.service_check = check_instance.service_check
-        self.check_instance = check_instance
+    def __init__(self, init_config, instance_config, service_check_handler, logger):
+        self.instance = instance_config
+        self.service_check_handler = service_check_handler
+        self.log = logger
 
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
@@ -133,18 +134,12 @@ class Connection(object):
         conn_key = self._conn_key(db_key, db_name)
 
         dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-        custom_tags = self.instance.get("tags", [])
-        if custom_tags is None:
-            custom_tags = []
-        service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
-        service_check_tags.extend(custom_tags)
-        service_check_tags = list(set(service_check_tags))
 
         cs = self.instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
 
         try:
-            if self._get_connector() == 'adodbapi':
+            if self.get_connector() == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, db_name=db_name)
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
@@ -152,7 +147,8 @@ class Connection(object):
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
                 rawconn = pyodbc.connect(cs, timeout=self.timeout)
 
-            self.service_check(self.check_instance.SERVICE_CHECK_NAME, self.check_instance.OK, tags=service_check_tags)
+            self.service_check_handler(AgentCheck.OK, host, database)
+
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
             else:
@@ -171,12 +167,7 @@ class Connection(object):
             if password is not None:
                 message = message.replace(password, "*" * 6)
 
-            self.service_check(
-                self.check_instance.SERVICE_CHECK_NAME,
-                self.check_instance.CRITICAL,
-                tags=service_check_tags,
-                message=message,
-            )
+            self.service_check_handler(AgentCheck.CRITICAL, host, database, message)
 
             raise_from(SQLConnectionError(message), None)
 
@@ -222,7 +213,7 @@ class Connection(object):
 
         return database in self.existing_databases, context
 
-    def _get_connector(self):
+    def get_connector(self):
         connector = self.instance.get('connector', self.connector)
         if connector != self.connector:
             if connector.lower() not in self.valid_connectors:

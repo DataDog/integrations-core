@@ -122,7 +122,7 @@ class SQLServer(AgentCheck):
         self.do_check = True
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
 
-        self.connection = Connection(init_config, self)
+        self.connection = Connection(init_config, self.instance, self.handle_service_check, self.log)
 
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
@@ -156,6 +156,16 @@ class SQLServer(AgentCheck):
             raise
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
+
+    def handle_service_check(self, status, host, database, message=None):
+        custom_tags = self.instance.get("tags", [])
+        if custom_tags is None:
+            custom_tags = []
+        service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
+        service_check_tags.extend(custom_tags)
+        service_check_tags = list(set(service_check_tags))
+
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message)
 
     def _make_metric_list_to_collect(self, custom_metrics):
         """
@@ -411,7 +421,7 @@ class SQLServer(AgentCheck):
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection._get_connector() == 'adodbapi':
+                if self.connection.get_connector() == 'adodbapi':
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.
