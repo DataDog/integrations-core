@@ -4,18 +4,9 @@ files:
   options:
   - template: init_config
     options:
-    - name: global_custom_queries
-      description: |
-        See `custom_queries` defined below.
-
-        Global custom queries can be applied to all instances using the
-        `use_global_custom_queries` setting at the instance level.
-      value:
-        type: array
-        items:
-          type: object
-        default: null
-        example:
+    - template: init_config/db
+      overrides:
+        global_custom_queries.value.example:
           - metric_prefix: clickhouse
             query: <QUERY>
             columns: <COLUMNS>
