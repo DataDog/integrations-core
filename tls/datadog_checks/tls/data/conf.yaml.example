@@ -117,13 +117,13 @@ instances:
     ## number of CA certificates needed to establish the certificate’s authenticity for
     ## use when connecting to `server`. It may also contain an unencrypted private key to use.
     #
-    # cert: <CERT>
+    # cert: <CERT_PATH>
 
     ## @param private_key - string - optional
     ## The unencrypted private key to use for `cert` when connecting to `server`. This is
     ## required if `cert` is set and it does not already contain a private key.
     #
-    # private_key: <PRIVATE_KEY>
+    # private_key: <PRIVATE_KEY_PATH>
 
     ## @param ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
@@ -131,7 +131,7 @@ instances:
     ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
     ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
     #
-    # ca_cert: <CA_CERT>
+    # ca_cert: <CA_CERT_PATH>
 
     ## @param timeout - integer - optional - default: 10
     ## The timeout for connecting to `server`.

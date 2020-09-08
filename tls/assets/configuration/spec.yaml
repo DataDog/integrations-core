@@ -124,12 +124,16 @@ files:
         use when connecting to `server`. It may also contain an unencrypted private key to use.
       value:
         type: string
+        default: null
+        example: <CERT_PATH>
     - name: private_key
       description: |
         The unencrypted private key to use for `cert` when connecting to `server`. This is
         required if `cert` is set and it does not already contain a private key.
       value:
         type: string
+        default: null
+        example: <PRIVATE_KEY_PATH>
     - name: ca_cert
       description: |
         The path to a file of concatenated CA certificates in PEM format or a directory
@@ -138,6 +142,8 @@ files:
         https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
       value:
         type: string
+        default: null
+        example: <CA_CERT_PATH>
     - name: timeout
       description: The timeout for connecting to `server`.
       value:
