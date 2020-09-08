@@ -201,6 +201,8 @@ class HAProxy(AgentCheck):
         if version:
             self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
+        else:
+            self.log.debug("unable to find HAProxy version info")
 
     def _fetch_url_data(self, url):
         ''' Hit a given http url and return the stats lines '''
