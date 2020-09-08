@@ -30,7 +30,7 @@ instances:
     ## @param port - integer - optional - default: 443
     ## The port that is used. This overrides any port specified in `server`.
     #
-    # port: <PORT>
+    # port: 443
 
     ## @param transport - string - optional - default: TCP
     ## The transport protocol to use when connecting to `server`.
@@ -92,21 +92,21 @@ instances:
     ## Number of days before certificate expiration from which the service check
     ## `tls.cert_expiration` begins emitting WARNING.
     #
-    # days_warning: <DAYS_WARNING>
+    # days_warning: 14.0
 
     ## @param days_critical - number - optional - default: 7.0
     ## Number of days before certificate expiration from which the service check
     ## `tls.cert_expiration` begins emitting CRITICAL.
     #
-    # days_critical: <DAYS_CRITICAL>
+    # days_critical: 7.0
 
-    ## @param seconds_warning - number - optional
+    ## @param seconds_warning - integer - optional
     ## Number of seconds before certificate expiration from which the service check
     ## `tls.cert_expiration` begins emitting WARNING. Overrides `days_warning`.
     #
     # seconds_warning: <SECONDS_WARNING>
 
-    ## @param seconds_critical - number - optional
+    ## @param seconds_critical - integer - optional
     ## Number of seconds before certificate expiration from which the service check
     ## `tls.cert_expiration` begins emitting CRITICAL. Overrides `days_critical`.
     #

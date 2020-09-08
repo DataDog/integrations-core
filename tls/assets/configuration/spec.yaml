@@ -28,7 +28,7 @@ files:
       description: The port that is used. This overrides any port specified in `server`.
       value:
         type: integer
-        default: 443
+        example: 443
     - name: transport
       description: |
         The transport protocol to use when connecting to `server`.
@@ -97,26 +97,26 @@ files:
         `tls.cert_expiration` begins emitting WARNING.
       value:
         type: number
-        default: 14.0
+        example: 14.0
     - name: days_critical
       description: |
         Number of days before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting CRITICAL.
       value:
         type: number
-        default: 7.0
+        example: 7.0
     - name: seconds_warning
       description: |
         Number of seconds before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting WARNING. Overrides `days_warning`.
       value:
-        type: number
+        type: integer
     - name: seconds_critical
       description: |
         Number of seconds before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting CRITICAL. Overrides `days_critical`.
       value:
-        type: number
+        type: integer
     - name: cert
       description: |
         The path to a single file in PEM format containing a certificate as well as any
