@@ -86,6 +86,7 @@ setup(
             'twine>=1.11.0',
             'virtualenv>=20.0.8',
             'wheel>=0.31.0',
+            'pyrsistent<0.17.0'
         ]
     },
     entry_points={
