@@ -1,6 +1,13 @@
 ## All options defined here are available to all instances.
 #
-# init_config: {}
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
 #
@@ -35,6 +42,33 @@ instances:
     #
     # name: <INSTANCE_NAME>
 
+    ## @param varnishadm - string - optional
+    ## The path to the varnishadm binary signals the check to
+    ## emit a service check status on backend health using `debug.health`.
+    ## Similar to the varnishstat command this path can contain additional arguments
+    ## in order to support service discovery.
+    ##
+    ## The service check is tagged by backend.
+    #
+    # varnishadm: /usr/bin/varnishadm
+
+    ## @param secretfile - string - optional - default: /etc/varnish/secret
+    ## The path to the varnish secretfile used in the varnishadm command, if enabled.
+    #
+    # secretfile: /etc/varnish/secret
+
+    ## @param daemon_host - string - optional - default: localhost
+    ## The parameters for specifying the host to connect to varnishadm.
+    ## Used in version 4.1.0 and above.
+    #
+    # daemon_host: localhost
+
+    ## @param daemon_port - integer - optional - default: 6082
+    ## The parameters for specifying the port to connect to varnishadm.
+    ## Used in version 4.1.0 and above.
+    #
+    # daemon_port: 6082
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -64,33 +98,6 @@ instances:
     #
     # empty_default_hostname: false
 
-    ## @param varnishadm - string - optional - default: /usr/bin/varnishadm
-    ## The path to the varnishadm binary signals the check to
-    ## emit a service check status on backend health using `debug.health`.
-    ## Similar to the varnishstat command this path can contain additional arguments
-    ## in order to support service discovery.
-    ##
-    ## The service check is tagged by backend.
-    #
-    # varnishadm: /usr/bin/varnishadm
-
-    ## @param secretfile - string - optional - default: /etc/varnish/secret
-    ## The path to the varnish secretfile used in the varnishadm command, if enabled.
-    #
-    # secretfile: /etc/varnish/secret
-
-    ## @param daemon_host - string - optional - default: localhost
-    ## The parameters for specifying the host to connect to varnishadm.
-    ## Used in version 4.1.0 and above.
-    #
-    # daemon_host: localhost
-
-    ## @param daemon_port - integer - optional - default: 6082
-    ## The parameters for specifying the port to connect to varnishadm.
-    ## Used in version 4.1.0 and above.
-    #
-    # daemon_port: 6082
-
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
@@ -108,4 +115,3 @@ instances:
 #   - type: file
 #     path: /var/log/varnish/varnishncsa.log
 #     source: varnish
-#     service: varnish

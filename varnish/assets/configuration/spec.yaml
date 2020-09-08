@@ -3,8 +3,8 @@ files:
   - name: varnish.yaml
     options:
       - template: init_config
-         options:
-         - template: init_config/default
+        options:
+          - template: init_config/default
       - template: instances
         options:
           - name: varnishstat
@@ -19,7 +19,6 @@ files:
               type: string
               example: /usr/bin/varnishstat
           - name: metrics_filter
-            required: false
             description: |
               List of field inclusion blobs that are passed to varnishstat with the
               -f options to filter which metrics to collect.
@@ -37,16 +36,13 @@ files:
               example:
                 - <FIELD_INCLUSION>
           - name: name
-            required: false
             description: |
               The name used in the varnishstat command for the
               -n argument which will add a name:<INSTANCE_NAME> tag to all metrics.
             value:
               type: string
               example: <INSTANCE_NAME>
-          - template: instances/default
           - name: varnishadm
-            required: false
             description: |
               The path to the varnishadm binary signals the check to
               emit a service check status on backend health using `debug.health`.
@@ -57,20 +53,18 @@ files:
             value:
               type: string
               example: /usr/bin/varnishadm
+              default: None
           - name: secretfile
-            required: false
             description: The path to the varnish secretfile used in the varnishadm command, if enabled.
             value:
               type: string
               example: /etc/varnish/secret
           - name: daemon_host
-            required: false
             description: |
               The parameters for specifying the host to connect to varnishadm.
               Used in version 4.1.0 and above.
             value:
               type: string
-              default: localhost
               example: localhost
           - name: daemon_port
             description: |
@@ -78,8 +72,8 @@ files:
               Used in version 4.1.0 and above.
             value:
               type: integer
-              default: 6082
               example: 6082
+          - template: instances/default
       - template: logs
         example:
           - type: file
