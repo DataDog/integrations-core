@@ -17,10 +17,20 @@ class PostgresConfig:
 
     def __init__(self, instance):
         self.host = instance.get('host', '')
+        if not self.host:
+            raise ConfigurationError('Please specify a Postgres host to connect to.')
         self.port = instance.get('port', '')
         if self.port != '':
             self.port = int(self.port)
+        self.user = instance.get('username', '')
+        if not self.user:
+            raise ConfigurationError('Please specify a user to connect to Postgres as.')
+        self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
+        self.application_name = instance.get('application_name', 'datadog-agent')
+        if not self.application_name.isascii():
+            raise ConfigurationError("Application name can only include ASCII characters")
+
         self.query_timeout = instance.get('query_timeout')
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
@@ -34,9 +44,6 @@ class PostgresConfig:
         else:
             self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
 
-        self.user = instance.get('username', '')
-        self.password = instance.get('password', '')
-
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
@@ -45,12 +52,6 @@ class PostgresConfig:
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_default_db = is_affirmative(instance.get('collect_default_database', False))
         self.custom_queries = instance.get('custom_queries', [])
-
-        if not self.host:
-            raise ConfigurationError('Please specify a Postgres host to connect to.')
-        elif not self.user:
-            raise ConfigurationError('Please specify a user to connect to Postgres as.')
-
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
         self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))

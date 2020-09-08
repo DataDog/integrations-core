@@ -169,6 +169,14 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
+    - name: application_name
+      description: |
+        The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
+        It is typically set by an application upon connection to the server.
+        The name will be displayed in the pg_stat_activity view and included in CSV log entries.
+      value:
+        type: string
+        example: "datadog-agent"
     - template: instances/default
   - template: logs
     example:
