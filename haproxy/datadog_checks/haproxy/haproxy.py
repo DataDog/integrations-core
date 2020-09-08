@@ -16,12 +16,11 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.errors import CheckException
 
-from .version_utils import get_metadata_from_http, get_version_from_socket
+from .version_utils import get_version_from_http, get_version_from_socket
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
 BUFSIZE = 8192
-VERSION_PATTERN = re.compile(r"(?:HAProxy|hapee-lb) version ([^,]+)")
 
 
 class Services(object):
@@ -262,7 +261,7 @@ class HAProxy(AgentCheck):
             if raw_uptime and raw_version:
                 break
 
-        self._set_metadata(get_metadata_from_http, raw_version)
+        self._set_metadata(get_version_from_http, raw_version)
         if raw_uptime == "":
             self.log.debug("unable to find HAProxy uptime")
         else:
