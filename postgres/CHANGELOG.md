@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 5.0.3 / 2020-09-02
+
+* [Fixed] Cache version and is_aurora independently. See [#7480](https://github.com/DataDog/integrations-core/pull/7480).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* [Fixed] [datadog_checks_dev] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
 ## 5.0.2 / 2020-08-10
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).

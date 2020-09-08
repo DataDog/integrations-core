@@ -72,7 +72,7 @@ instances:
     #   - <DATABASE_1>
     #   - <DATABASE_2>
 
-    ## @param db_exclude - list of strings - optional - default: None
+    ## @param db_exclude - list of strings - optional
     ## The `db_exclude` should contain the names of any databases meant to be excluded
     ## from being checked. If a database is listed both as included and excluded,
     ## the exclusion takes precedence.
@@ -86,7 +86,7 @@ instances:
     #
     # max_dbs_per_check: 50
 
-    ## @param name - string - optional - default: None
+    ## @param name - string - optional
     ## CouchDB 2.x only. If not provided, the check scans up to max_nodes_per_check nodes of the cluster.
     #
     # name: <ERLANG_NAME>
@@ -162,6 +162,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -185,6 +186,11 @@ instances:
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify

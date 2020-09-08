@@ -13,14 +13,14 @@ init_config:
 #
 instances:
 
-    ## @param agent_endpoint - string - optional - default: None
+    ## @param agent_endpoint - string - optional
     ## The URL where your application metrics are exposed by Prometheus.
     ## By default, the Cilium integration collects `cilium-agent` metrics.
     ## One of agent_endpoint or operator_endpoint must be provided.
     #
   - agent_endpoint: http://localhost:9090/metrics
 
-    ## @param operator_endpoint - string - optional - default: None
+    ## @param operator_endpoint - string - optional
     ## Provide instead of `agent_endpoint` to collect `cilium-operator` metrics.
     ## Cilium operator metrics are exposed on port 6942.
     #
@@ -159,6 +159,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -182,6 +183,11 @@ instances:
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.

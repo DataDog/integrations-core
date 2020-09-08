@@ -71,7 +71,7 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param included_metrics - list of strings - optional - default: None
+    ## @param included_metrics - list of strings - optional
     ## Includes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
@@ -87,7 +87,7 @@ instances:
     # included_metrics:
     #   - cluster\.(in|out)\..*
 
-    ## @param excluded_metrics - list of strings - optional - default: None
+    ## @param excluded_metrics - list of strings - optional
     ## Excludes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
@@ -175,6 +175,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -198,6 +199,11 @@ instances:
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify

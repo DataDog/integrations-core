@@ -1,0 +1,57 @@
+name: Teamcity
+files:
+- name: teamcity.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: name
+      description: |
+        A custom unique name per build configuration that is shown
+        in the events.
+      required: true
+      value:
+        type: string
+        example: <BUILD_NAME>
+    - name: server
+      description: |
+        Specify the server name of your teamcity instance
+        Guest authentication must be on if you want the check to be able to get data
+        When using the optional `basic_http_authentication` use:
+
+         server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+      required: true
+      value:
+        type: string
+        example: http://teamcity.<ACCOUNT_NAME>.com
+    - name: build_configuration
+      description: |
+        This is the internal build ID of the build configuration you wish to track.
+        You can find it labelled as "Build configuration ID" when editing the configuration in question.
+      required: true
+      value:
+        type: string
+    - name: basic_http_authentication
+      description: |
+        Set to true to turn on basic http authentication.
+      value:
+        type: boolean
+        example: false
+    - name: host_affected
+      description: |
+        Use this parameter to override the host that is affected by this build configuration.
+        Defaults to the host that the agent is running on.
+      value:
+        type: string
+    - name: is_deployment
+      description: |
+        Set to true to change the event message slightly to specify that TeamCity was used to deploy something
+        rather than just that a successful build happened
+      value:
+        type: boolean
+        example: false
+    - template: instances/http
+    - template: instances/default
