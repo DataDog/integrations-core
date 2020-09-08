@@ -46,11 +46,11 @@ steps:
   displayName: 'Install Codecov'
 
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script: pip install ./datadog_checks_dev[cli]
+  - script: pip install ./datadog_checks_dev[cli] --use-feature=2020-resolver
     displayName: 'Install ddev from local folder'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:
-  - script: pip install datadog-checks-dev[cli]
+  - script: pip install datadog-checks-dev[cli] --use-feature=2020-resolver
     displayName: 'Install ddev from PyPI'
 
 - script: ddev config set repos.${{ parameters.repo }} . && ddev config set repo ${{ parameters.repo }}
