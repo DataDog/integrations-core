@@ -15,14 +15,10 @@ INSTANCES_QUERY = """select instance_name
                      from sys.dm_os_performance_counters
                      where counter_name=? and instance_name!='_Total';"""
 
-VALUE_AND_BASE_QUERY = """select counter_name, cntr_type, cntr_value, instance_name, object_name
-                          from sys.dm_os_performance_counters
-                          where counter_name in (%s)
-                          order by cntr_type;"""
-
 
 class SqlServerMetric(object):
     """General class for common methods, should never be instantiated directly"""
+    QUERY_BASE = None
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         self.cfg_instance = cfg_instance
@@ -44,27 +40,37 @@ class SqlServerMetric(object):
             self.__class__.__name__, self.datadog_name, self.sql_name, self.base_name, self.column
         )
 
+    @classmethod
+    def _fetch_generic_values(cls, cursor, counters_list, logger):
+        if counters_list:
+            placeholders = ', '.join('?' for _ in counters_list)
+            query = cls.QUERY_BASE.format(placeholders)
+            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query)
+            cursor.execute(query, counters_list)
+        else:
+            query = cls.QUERY_BASE
+            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query)
+            cursor.execute(query)
+
+        rows = cursor.fetchall()
+        columns = [i[0] for i in cursor.description]
+        return rows, columns
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        raise NotImplementedError
+
     def fetch_metric(self, rows, columns):
         raise NotImplementedError
 
 
 class SqlSimpleMetric(SqlServerMetric):
+    QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
+                    from sys.dm_os_performance_counters where counter_name in ({})"""
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = (
-            """
-            select counter_name, instance_name, object_name, cntr_value
-            from sys.dm_os_performance_counters where counter_name in (%s)
-            """
-            % placeholders
-        )
-
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base, counters_list)
-        rows = cursor.fetchall()
-        return rows, None
+        return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, _):
         for counter_name_long, instance_name_long, object_name, cntr_value in rows:
@@ -89,15 +95,20 @@ class SqlSimpleMetric(SqlServerMetric):
 
 
 class SqlFractionMetric(SqlServerMetric):
+    QUERY_BASE = """select counter_name, cntr_type, cntr_value, instance_name, object_name
+                    from sys.dm_os_performance_counters
+                    where counter_name in ({})
+                    order by cntr_type;"""
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        # TODO - check if counters has anything before actually running query?
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = VALUE_AND_BASE_QUERY % placeholders
 
-        logger.debug("query base: %s, %s", query_base, str(counters_list))
-        cursor.execute(query_base, counters_list)
+        placeholder = '?'
+        placeholders = ', '.join(placeholder for _ in counters_list)
+        query = cls.QUERY_BASE.format(placeholders)
+
+        logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, str(counters_list))
+        cursor.execute(query, counters_list)
         rows = cursor.fetchall()
         results = defaultdict(list)
         for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
@@ -189,23 +200,11 @@ class SqlIncrFractionMetric(SqlFractionMetric):
 
 
 class SqlOsWaitStat(SqlServerMetric):
+    QUERY_BASE = """select * from sys.dm_os_wait_stats where wait_type in ({})"""
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        if not counters_list:
-            return None, None
-
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = """
-            select * from sys.dm_os_wait_stats where wait_type in ({})
-            """.format(
-            placeholders
-        )
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base, counters_list)
-        rows = cursor.fetchall()
-        columns = [i[0] for i in cursor.description]
-        return rows, columns
+        return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns):
         name_column_index = columns.index("wait_type")
@@ -225,17 +224,11 @@ class SqlOsWaitStat(SqlServerMetric):
 
 
 class SqlIoVirtualFileStat(SqlServerMetric):
+    QUERY_BASE = "select * from sys.dm_io_virtual_file_stats(null, null)"
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        if not counters_list:
-            return None, None
-
-        query_base = "select * from sys.dm_io_virtual_file_stats(null, null)"
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base)
-        rows = cursor.fetchall()
-        columns = [i[0] for i in cursor.description]
-        return rows, columns
+        return cls._fetch_generic_values(cursor, None, logger)
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlIoVirtualFileStat, self).__init__(cfg_instance, base_name, report_function, column, logger)
@@ -273,23 +266,11 @@ class SqlIoVirtualFileStat(SqlServerMetric):
 
 
 class SqlOsMemoryClerksStat(SqlServerMetric):
+    QUERY_BASE = """select * from sys.dm_os_memory_clerks where type in ({})"""
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        if not counters_list:
-            return None, None
-
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for _ in counters_list)
-        query_base = """
-            select * from sys.dm_os_memory_clerks where type in ({})
-            """.format(
-            placeholders
-        )
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base, counters_list)
-        rows = cursor.fetchall()
-        columns = [i[0] for i in cursor.description]
-        return rows, columns
+        return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns):
         type_column_index = columns.index("type")
@@ -310,17 +291,11 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
 
 
 class SqlOsSchedulers(SqlServerMetric):
+    QUERY_BASE = "select * from sys.dm_os_schedulers"
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        if not counters_list:
-            return None, None
-
-        query_base = "select * from sys.dm_os_schedulers"
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base)
-        rows = cursor.fetchall()
-        columns = [i[0] for i in cursor.description]
-        return rows, columns
+        return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
@@ -339,17 +314,11 @@ class SqlOsSchedulers(SqlServerMetric):
 
 
 class SqlOsTasks(SqlServerMetric):
+    QUERY_BASE = "select * from sys.dm_os_tasks"
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        if not counters_list:
-            return None, None
-
-        query_base = "select * from sys.dm_os_tasks"
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base)
-        rows = cursor.fetchall()
-        columns = [i[0] for i in cursor.description]
-        return rows, columns
+        return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
         session_id_column_index = columns.index("session_id")

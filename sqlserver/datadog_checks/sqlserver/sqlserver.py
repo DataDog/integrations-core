@@ -35,7 +35,6 @@ if adodbapi is None and pyodbc is None:
 
 set_default_driver_conf()
 
-EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
 # Constant for SQLServer cntr_type
@@ -345,8 +344,11 @@ class SQLServer(AgentCheck):
 
                 # Execute the `fetch_all` operations first to minimize the database calls
                 for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
-                    rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
-                    instance_results[cls] = rows, cols
+                    if not metric_names:
+                        instance_results[cls] = None, None
+                    else:
+                        rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
+                        instance_results[cls] = rows, cols
 
                 for metric in metrics_to_collect:
                     try:
