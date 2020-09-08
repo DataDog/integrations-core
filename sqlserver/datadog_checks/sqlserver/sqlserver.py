@@ -245,10 +245,13 @@ class SQLServer(AgentCheck):
 
         # create an organized grouping of metric names to their metric classes
         for m in metrics_to_collect:
-            self.log.debug("Adding metric class %s named %s", m.__class__.__name__, m.sql_name or m.datadog_name)
-            self.instance_per_type_metrics[m.__class__.__name__].append(m.sql_name or m.datadog_name)
+            cls = m.__class__.__name__
+            name = m.sql_name or m.datadog_name
+            self.log.debug("Adding metric class %s named %s", cls, name)
+
+            self.instance_per_type_metrics[cls].append(name)
             if m.base_name:
-                self.instance_per_type_metrics[m.__class__.__name__].append(m.base_name)
+                self.instance_per_type_metrics[cls].append(m.base_name)
 
     def get_sql_type(self, counter_name):
         """
@@ -365,20 +368,21 @@ class SQLServer(AgentCheck):
 
                 for metric in metrics_to_collect:
                     try:
+                        # TODO - check if results are actually there before trying to fetch?
                         if type(metric) is SqlSimpleMetric:
-                            metric.fetch_metric(cursor, simple_rows, custom_tags)
+                            metric.fetch_metric(simple_rows, None, custom_tags)
                         elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
-                            metric.fetch_metric(cursor, fraction_results, custom_tags)
+                            metric.fetch_metric(fraction_results, None, custom_tags)
                         elif type(metric) is SqlOsWaitStat:
-                            metric.fetch_metric(cursor, waitstat_rows, waitstat_cols, custom_tags)
+                            metric.fetch_metric(waitstat_rows, waitstat_cols, custom_tags)
                         elif type(metric) is SqlIoVirtualFileStat:
-                            metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
+                            metric.fetch_metric(vfs_rows, vfs_cols, custom_tags)
                         elif type(metric) is SqlOsMemoryClerksStat:
-                            metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
+                            metric.fetch_metric(clerk_rows, clerk_cols, custom_tags)
                         elif type(metric) is SqlOsSchedulers:
-                            metric.fetch_metric(cursor, scheduler_rows, scheduler_cols, custom_tags)
+                            metric.fetch_metric(scheduler_rows, scheduler_cols, custom_tags)
                         elif type(metric) is SqlOsTasks:
-                            metric.fetch_metric(cursor, task_rows, task_cols, custom_tags)
+                            metric.fetch_metric(task_rows, task_cols, custom_tags)
 
                     except Exception as e:
                         self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
@@ -472,7 +476,7 @@ class SqlServerMetric(object):
             self.__class__.__name__, self.datadog_name, self.sql_name, self.base_name, self.column
         )
 
-    def fetch_metrics(self, cursor, tags):
+    def fetch_metric(self, rows, columns, tags):
         raise NotImplementedError
 
 
@@ -494,7 +498,7 @@ class SqlSimpleMetric(SqlServerMetric):
         rows = cursor.fetchall()
         return rows
 
-    def fetch_metric(self, cursor, rows, tags):
+    def fetch_metric(self, rows, _, tags):
         tags = tags + self.tags
 
         for counter_name_long, instance_name_long, object_name, cntr_value in rows:
@@ -521,6 +525,7 @@ class SqlSimpleMetric(SqlServerMetric):
 class SqlFractionMetric(SqlServerMetric):
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
+        # TODO - check if counters has anything before actually running query?
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = VALUE_AND_BASE_QUERY % placeholders
@@ -542,7 +547,7 @@ class SqlFractionMetric(SqlServerMetric):
         else:
             self.instances = [self.instance]
 
-    def fetch_metric(self, cursor, results, tags):
+    def fetch_metric(self, results, _, tags):
         """
         Because we need to query the metrics by matching pairs, we can't query
         all of them together without having to perform some matching based on
@@ -638,7 +643,7 @@ class SqlOsWaitStat(SqlServerMetric):
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
-    def fetch_metric(self, cursor, rows, columns, tags):
+    def fetch_metric(self, rows, columns, tags):
         name_column_index = columns.index("wait_type")
         value_column_index = columns.index(self.column)
         value = None
@@ -674,7 +679,7 @@ class SqlIoVirtualFileStat(SqlServerMetric):
         self.fid = self.cfg_instance.get('file_id', None)
         self.pvs_vals = defaultdict(lambda: None)
 
-    def fetch_metric(self, cursor, rows, columns, tags):
+    def fetch_metric(self, rows, columns, tags):
         # TODO - fix this function
         #  this function actually processes the change in value between two checks,
         #  but doesn't account for time differences.  This can work for some columns like `num_of_writes`, but is
@@ -723,7 +728,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
-    def fetch_metric(self, cursor, rows, columns, tags):
+    def fetch_metric(self, rows, columns, tags):
         tags = tags + self.tags
         type_column_index = columns.index("type")
         value_column_index = columns.index(self.column)
@@ -755,7 +760,7 @@ class SqlOsSchedulers(SqlServerMetric):
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
-    def fetch_metric(self, cursor, rows, columns, tags):
+    def fetch_metric(self, rows, columns, tags):
         tags = tags + self.tags
         value_column_index = columns.index(self.column)
         scheduler_index = columns.index("scheduler_id")
@@ -785,7 +790,7 @@ class SqlOsTasks(SqlServerMetric):
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
-    def fetch_metric(self, cursor, rows, columns, tags):
+    def fetch_metric(self, rows, columns, tags):
         tags = tags + self.tags
         session_id_column_index = columns.index("session_id")
         scheduler_id_column_index = columns.index("scheduler_id")
