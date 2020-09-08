@@ -1,0 +1,86 @@
+name: Varnish
+files:
+  - name: varnish.yaml
+    options:
+      - template: init_config
+      - template: instances
+        options:
+          - name: varnishstat
+            required: true
+            description: |
+              The full path to the varnishstat binary and can contain additional arguments.
+              In order to support monitoring a Varnish instance which is running as a Docker
+              container you need to wrap commands (varnishstat) with scripts which
+              perform a docker exec on the running container.  Passing along template variables
+              (%%host%%, %%port%%) allow for targeting the proper container via service discovery.
+            value:
+              type: string
+              example: /usr/bin/varnishstat
+          - name: metrics_filter
+            required: false
+            description: |
+              List of field inclusion blobs that are passed to varnishstat with the
+              -f options to filter which metrics to collect.
+
+              See https://www.varnish-cache.org/docs/4.1/reference/varnishstat.html#options.
+              The exclusion filter with '^' is broken with 'varnishstat' version 4.0 to 4.1.6 and 5.0 to 5.1.2.
+              See https://github.com/varnishcache/varnish-cache/issues/2320
+              Version 4.1.7 has been released and includes a fix for this.
+              Using the exclusion blob with a broken version silences the integration.
+              However, you can still use the inclusion blob with those versions.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - <FIELD_INCLUSION>
+          - name: name
+            required: false
+            description: |
+              The name used in the varnishstat command for the
+              -n argument which will add a name:<INSTANCE_NAME> tag to all metrics.
+            value:
+              type: string
+              example: <INSTANCE_NAME>
+          - template: instances/default
+          - name: varnishadm
+            required: false
+            description: |
+              The path to the varnishadm binary signals the check to
+              emit a service check status on backend health using `debug.health`.
+              Similar to the varnishstat command this path can contain additional arguments
+              in order to support service discovery.
+
+              The service check is tagged by backend.
+            value:
+              type: string
+              example: /usr/bin/varnishadm
+          - name: secretfile
+            required: false
+            description: The path to the varnish secretfile used in the varnishadm command, if enabled.
+            value:
+              type: string
+              example: /etc/varnish/secret
+          - name: daemon_host
+            required: false
+            description: |
+              The parameters for specifying the host to connect to varnishadm.
+              Used in version 4.1.0 and above.
+            value:
+              type: string
+              default: localhost
+              example: localhost
+          - name: daemon_port
+            description: |
+              The parameters for specifying the port to connect to varnishadm.
+              Used in version 4.1.0 and above.
+            value:
+              type: integer
+              default: 6082
+              example: 6082
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/varnish/varnishncsa.log
+            source: varnish
+            service: varnish
