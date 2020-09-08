@@ -4,11 +4,11 @@
 import os
 
 import pytest
-from datadog_test_libs.utils.mock_dns import mock_local
 from six import iteritems
 
 from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.tls.utils import days_to_seconds
+from datadog_test_libs.utils.mock_dns import mock_local
 
 from .utils import download_cert, temp_binary
 

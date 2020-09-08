@@ -1,13 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
 
 import pytest
-from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.aspdotnet import AspdotnetCheck
+from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 MINIMAL_INSTANCE = {'host': '.'}
