@@ -106,6 +106,14 @@ def haproxy_mock():
 
 
 @pytest.fixture(scope="module")
+def mock_data():
+    filepath = os.path.join(HERE, 'fixtures', 'statuses_mock')
+    with open(filepath, 'r') as f:
+        data = f.read()
+    return data.split('\n')
+
+
+@pytest.fixture(scope="module")
 def haproxy_mock_evil():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:

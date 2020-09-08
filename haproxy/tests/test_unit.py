@@ -124,10 +124,10 @@ def test_count_per_status_by_service_and_host(aggregator, check, haproxy_mock):
 
 
 def test_count_per_status_by_service_and_collate_per_host(aggregator, check, haproxy_mock):
-    haproxy_check = check(BASE_CONFIG)
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
     config['collate_status_tags_per_host'] = True
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     tags = ['backend:FRONTEND', 'status:available', 'service:a', 'haproxy_service:a']
@@ -167,10 +167,10 @@ def test_count_per_status_by_service_and_collate_per_host(aggregator, check, hap
 
 
 def test_count_per_status_by_service_and_collate_per_host_evil(aggregator, check, haproxy_mock_evil):
-    haproxy_check = check(BASE_CONFIG)
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
     config['collate_status_tags_per_host'] = True
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     tags = ['backend:FRONTEND', 'status:available', 'service:a', 'haproxy_service:a']
@@ -210,11 +210,11 @@ def test_count_per_status_by_service_and_collate_per_host_evil(aggregator, check
 
 
 def test_count_per_status_collate_per_host(aggregator, check, haproxy_mock):
-    haproxy_check = check(BASE_CONFIG)
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
     config['collate_status_tags_per_host'] = True
     config['count_status_by_service'] = False
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     aggregator.assert_metric('haproxy.count_per_status', value=2, tags=['backend:FRONTEND', 'status:available'])
@@ -231,17 +231,19 @@ def test_count_per_status_collate_per_host(aggregator, check, haproxy_mock):
 
 # This mock is only useful to make the first `run_check` run w/o errors
 # (which in turn is useful only to initialize the check)
-def test_count_hosts_statuses(aggregator, check, haproxy_mock):
-    haproxy_check = check(BASE_CONFIG)
-    haproxy_check.check(BASE_CONFIG)
-
-    filepath = os.path.join(common.HERE, 'fixtures', 'statuses_mock')
-    with open(filepath, 'r') as f:
-        data = f.read()
-    data = data.split('\n')
+def test_count_hosts_statuses_no_events(aggregator, check, haproxy_mock, mock_data):
+    config = copy.deepcopy(BASE_CONFIG)
+    config.update({
+        'collect_aggregates_only': True,
+        'process_events': False,
+        'collect_status_metrics': True,
+        'collect_status_metrics_by_host': False
+    })
+    haproxy_check = check(config)
+    haproxy_check.check(config)
 
     # per service
-    haproxy_check._process_data(data, True, False, collect_status_metrics=True, collect_status_metrics_by_host=False)
+    haproxy_check._process_data(mock_data)
 
     expected_hosts_statuses = defaultdict(int)
     expected_hosts_statuses[('b', 'FRONTEND', 'open')] = 1
@@ -257,12 +259,44 @@ def test_count_hosts_statuses(aggregator, check, haproxy_mock):
 
     assert expected_agg_statuses == dict(agg_statuses)
 
+
+def test_count_hosts_statuses_with_events(aggregator, check, haproxy_mock, mock_data):
+    config = copy.deepcopy(BASE_CONFIG)
+    config.update({
+        'collect_aggregates_only': True,
+        'process_events': True,
+        'collect_status_metrics': True,
+        'collect_status_metrics_by_host': False
+    })
+    haproxy_check = check(config)
+    haproxy_check.check(config)
     # with process_events set to True
-    haproxy_check._process_data(data, True, True, collect_status_metrics=True, collect_status_metrics_by_host=False)
+    haproxy_check._process_data(mock_data)
+
+    expected_hosts_statuses = defaultdict(int)
+    expected_hosts_statuses[('b', 'FRONTEND', 'open')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'up')] = 3
+    expected_hosts_statuses[('b', 'BACKEND', 'down')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'maint')] = 1
+    expected_hosts_statuses[('a', 'FRONTEND', 'open')] = 1
     assert haproxy_check.hosts_statuses == expected_hosts_statuses
 
+
+def test_count_hosts_statuses_per_host_no_events(aggregator, check, haproxy_mock, mock_data):
+    config = copy.deepcopy(BASE_CONFIG)
+    config.update({
+        'collect_aggregates_only': True,
+        'process_events': False,
+        'collect_status_metrics': True,
+        'collect_status_metrics_by_host': True
+    })
+    haproxy_check = check(config)
+    haproxy_check.check(config)
+    # with process_events set to True
+    haproxy_check._process_data(mock_data)
+
     # per host
-    haproxy_check._process_data(data, True, False, collect_status_metrics=True, collect_status_metrics_by_host=True)
+    haproxy_check._process_data(mock_data)
     expected_hosts_statuses = defaultdict(int)
     expected_hosts_statuses[('b', 'FRONTEND', 'FRONTEND', 'open')] = 1
     expected_hosts_statuses[('a', 'FRONTEND', 'FRONTEND', 'open')] = 1
@@ -273,14 +307,38 @@ def test_count_hosts_statuses(aggregator, check, haproxy_mock):
     expected_hosts_statuses[('b', 'BACKEND', 'i-5', 'maint')] = 1
     assert haproxy_check.hosts_statuses == expected_hosts_statuses
 
-    haproxy_check._process_data(data, True, True, collect_status_metrics=True, collect_status_metrics_by_host=True)
+
+def test_count_hosts_statuses_per_host_with_events(aggregator, check, haproxy_mock, mock_data):
+    config = copy.deepcopy(BASE_CONFIG)
+    config.update({
+        'collect_aggregates_only': True,
+        'process_events': True,
+        'collect_status_metrics': True,
+        'collect_status_metrics_by_host': True
+    })
+    haproxy_check = check(config)
+    haproxy_check.check(config)
+    # with process_events set to True
+    haproxy_check._process_data(mock_data)
+
+    # per host
+    haproxy_check._process_data(mock_data)
+    expected_hosts_statuses = defaultdict(int)
+    expected_hosts_statuses[('b', 'FRONTEND', 'FRONTEND', 'open')] = 1
+    expected_hosts_statuses[('a', 'FRONTEND', 'FRONTEND', 'open')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'i-1', 'up')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'i-2', 'up')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'i-3', 'up')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'i-4', 'down')] = 1
+    expected_hosts_statuses[('b', 'BACKEND', 'i-5', 'maint')] = 1
+    haproxy_check._process_data(mock_data)
     assert haproxy_check.hosts_statuses, expected_hosts_statuses
 
 
 def test_optional_tags(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     config['tags'] = ['new-tag', 'my:new:tag']
-    haproxy_check = check(BASE_CONFIG)
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'new-tag')
@@ -295,7 +353,7 @@ def test_regex_tags(aggregator, check, haproxy_mock):
     config['tags'] = ['region:infra']
     # OS3 service: be_edge_http_sre-production_elk-kibana
     config['tags_regex'] = r'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
-    haproxy_check = check(BASE_CONFIG)
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     expected_tags = [
@@ -374,9 +432,10 @@ def test_count_per_status_by_service_disable_service_tag(aggregator, check, hapr
 
 def test_enterprise_version_collection(datadog_agent, check, haproxy_mock_enterprise_version_info):
     config = copy.deepcopy(BASE_CONFIG)
+    config['url'] = "http://the_url_does_not_matter/"
     haproxy_check = check(config)
     haproxy_check.check_id = 'test:123'
-    haproxy_check._collect_info_from_http("http://the_url_does_not_matter/")
+    haproxy_check._collect_info_from_http()
     expected_version_metadata = {
         'version.scheme': 'semver',
         'version.major': '2',
