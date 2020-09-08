@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-from six import iteritems
+from six import iteritems, PY3, PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
@@ -27,9 +27,15 @@ class PostgresConfig:
             raise ConfigurationError('Please specify a user to connect to Postgres as.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
+
         self.application_name = instance.get('application_name', 'datadog-agent')
-        if not self.application_name.isascii():
+        if PY3 and not self.application_name.isascii():
             raise ConfigurationError("Application name can only include ASCII characters")
+        elif PY2:
+            try:
+                self.application_name.encode('ascii')
+            except UnicodeEncodeError:
+                raise ConfigurationError("Application name can only include ASCII characters")
 
         self.query_timeout = instance.get('query_timeout')
         self.relations = instance.get('relations', [])
