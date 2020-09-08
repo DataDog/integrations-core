@@ -233,12 +233,14 @@ def test_count_per_status_collate_per_host(aggregator, check, haproxy_mock):
 # (which in turn is useful only to initialize the check)
 def test_count_hosts_statuses_no_events(aggregator, check, haproxy_mock, mock_data):
     config = copy.deepcopy(BASE_CONFIG)
-    config.update({
-        'collect_aggregates_only': True,
-        'process_events': False,
-        'collect_status_metrics': True,
-        'collect_status_metrics_by_host': False
-    })
+    config.update(
+        {
+            'collect_aggregates_only': True,
+            'process_events': False,
+            'collect_status_metrics': True,
+            'collect_status_metrics_by_host': False,
+        }
+    )
     haproxy_check = check(config)
     haproxy_check.check(config)
 
@@ -262,12 +264,14 @@ def test_count_hosts_statuses_no_events(aggregator, check, haproxy_mock, mock_da
 
 def test_count_hosts_statuses_with_events(aggregator, check, haproxy_mock, mock_data):
     config = copy.deepcopy(BASE_CONFIG)
-    config.update({
-        'collect_aggregates_only': True,
-        'process_events': True,
-        'collect_status_metrics': True,
-        'collect_status_metrics_by_host': False
-    })
+    config.update(
+        {
+            'collect_aggregates_only': True,
+            'process_events': True,
+            'collect_status_metrics': True,
+            'collect_status_metrics_by_host': False,
+        }
+    )
     haproxy_check = check(config)
     haproxy_check.check(config)
     # with process_events set to True
@@ -284,12 +288,14 @@ def test_count_hosts_statuses_with_events(aggregator, check, haproxy_mock, mock_
 
 def test_count_hosts_statuses_per_host_no_events(aggregator, check, haproxy_mock, mock_data):
     config = copy.deepcopy(BASE_CONFIG)
-    config.update({
-        'collect_aggregates_only': True,
-        'process_events': False,
-        'collect_status_metrics': True,
-        'collect_status_metrics_by_host': True
-    })
+    config.update(
+        {
+            'collect_aggregates_only': True,
+            'process_events': False,
+            'collect_status_metrics': True,
+            'collect_status_metrics_by_host': True,
+        }
+    )
     haproxy_check = check(config)
     haproxy_check.check(config)
     # with process_events set to True
@@ -310,12 +316,14 @@ def test_count_hosts_statuses_per_host_no_events(aggregator, check, haproxy_mock
 
 def test_count_hosts_statuses_per_host_with_events(aggregator, check, haproxy_mock, mock_data):
     config = copy.deepcopy(BASE_CONFIG)
-    config.update({
-        'collect_aggregates_only': True,
-        'process_events': True,
-        'collect_status_metrics': True,
-        'collect_status_metrics_by_host': True
-    })
+    config.update(
+        {
+            'collect_aggregates_only': True,
+            'process_events': True,
+            'collect_status_metrics': True,
+            'collect_status_metrics_by_host': True,
+        }
+    )
     haproxy_check = check(config)
     haproxy_check.check(config)
     # with process_events set to True
@@ -368,8 +376,37 @@ def test_regex_tags(aggregator, check, haproxy_mock):
         'team:sre',
         'backend:BACKEND',
     ]
+
     aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
+
+    aggregator.assert_metric(
+        'haproxy.count_per_status',
+        tags=[
+            'service:be_edge_http_sre-production_elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+            'region:infra',
+            'security:edge_http',
+            'app:elk-kibana',
+            'env:production',
+            'team:sre',
+            'status:up',
+        ],
+    )
+    aggregator.assert_metric(
+        'haproxy.backend_hosts',
+        tags=[
+            'security:edge_http',
+            'team:sre',
+            'env:production',
+            'app:elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+            'region:infra',
+            'service:be_edge_http_sre-production_elk-kibana',
+            'available:true',
+        ],
+    )
+
     tags = [
         'service:be_edge_http_sre-production_elk-kibana',
         'haproxy_service:be_edge_http_sre-production_elk-kibana',
