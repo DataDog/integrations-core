@@ -166,9 +166,8 @@ def get_check_logger(default_logger=None):
     """
     Search the current AgentCheck log starting from closest stack frame.
 
-    Caveat: Frame lookup have a cost.
-      GOOD: Call `get_check_logger` in a check config class __init__ at check instance creation.
-      BAD: Call `get_check_logger` at every check run.
+    Caveat: Frame lookup has a cost so the recommended usage is to retrieve and store the logger once
+    and avoid calling this method on every check run.
     """
     from datadog_checks.base import AgentCheck
 
