@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 import os
 import sys
 from datetime import datetime
@@ -10,7 +11,6 @@ import mock
 import pytest
 import requests
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials, PodListUtils
@@ -1079,14 +1079,16 @@ def test_process_stats_summary_as_source(monkeypatch, aggregator, tagger):
     )
 
 
-def test_silent_tls_warning(monkeypatch, aggregator):
+def test_silent_tls_warning(caplog, monkeypatch, aggregator):
     check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "https://example.com/"
     check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
-    with pytest.warns(None) as record:
+
+    with caplog.at_level(logging.DEBUG):
         check._perform_kubelet_check([])
 
-    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+    for _, _, message in caplog.record_tuples:
+        assert not message.startswith('An unverified HTTPS request is being made to ')
 
 
 def test_create_pod_tags_by_pvc(monkeypatch, tagger):
