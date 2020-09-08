@@ -27,7 +27,7 @@ def is_aurora(db):
     try:
         cursor.execute("select * from pg_proc where proname = 'AURORA_VERSION';")
         return cursor.fetchone() is not None
-    except:
+    except Exception:
         db.rollback()
         return False
 
