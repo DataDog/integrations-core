@@ -4,6 +4,9 @@ files:
   options:
   - template: init_config
     options:
+    - template: init_config/default
+  - template: instances
+    options:
     - name: name
       description: Name to assign to your TCP check instance.
       required: true
