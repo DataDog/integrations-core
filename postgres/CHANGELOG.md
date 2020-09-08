@@ -1,5 +1,8 @@
 # CHANGELOG - postgres
 
+## 5.1.0-beta / 2020-09-08
+
+
 ## 5.0.3 / 2020-09-02
 
 * [Fixed] Cache version and is_aurora independently. See [#7480](https://github.com/DataDog/integrations-core/pull/7480).
