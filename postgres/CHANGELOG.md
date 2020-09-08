@@ -1,5 +1,8 @@
 # CHANGELOG - postgres
 
+## 5.1.1-beta / 2020-09-08
+
+
 ## 5.1.0-beta / 2020-09-08
 
 
