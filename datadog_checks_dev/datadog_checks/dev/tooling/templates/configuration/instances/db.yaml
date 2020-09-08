@@ -1,6 +1,7 @@
 - name: use_global_custom_queries
   description: |
     How `global_custom_queries` should be used for this instance. There are 3 options:
+
     1. true - `global_custom_queries` override `custom_queries`.
     2. false - `custom_queries` override `global_custom_queries`.
     2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
@@ -10,6 +11,7 @@
 - name: custom_queries
   description: |
     Each query must have 2 fields:
+
     1. query - The SQL to execute. It can be a simple statement or a multi-line script.
                Use the pipe `|` if you require a multi-line script.
     2. columns - The list representing each column, ordered sequentially from left to right.
@@ -27,7 +29,6 @@
                  Columns without a name are ignored, use this for any column you wish to skip:
                    - {}
     3. tags (optional) - A list of tags to apply to each metric.
-  enabled: false
   value:
     type: array
     items:
