@@ -34,6 +34,20 @@ To view simulated data, run:
 docker logs -f SimulatedTemperatureSensor
 ```
 
+## Logs collection
+
+To send integration logs to Staging US, edit your `ddev` configuration with:
+
+```toml
+[orgs.staging-us]
+api_key = "<STAGING_API_KEY>"
+logs_url = "<STAGING_AGENT_INTAKE_HOSTNAME>"
+```
+
+Then start the environment using `-o staging-us`.
+
+Validate that logs are being sent by inspecting the logs section of `docker exec -it <agent_container_name> agent status`.
+
 ## Generate mock server metrics
 
 The data in [`metrics/`](./compose/device/mock_server/metrics) was generated as follows:

@@ -363,3 +363,23 @@ E2E_TAGS = CUSTOM_TAGS + [
     'edge_device:testEdgeDevice',
     'iothub:iot-edge-dev-hub.azure-devices.net',
 ]
+
+E2E_LOGS_CONFIG = [
+    {
+        'type': 'docker',
+        'source': 'azure_iot_edge',
+        'service': 'azure_iot_edge_dev',
+    },
+]
+
+E2E_CONTAINERS = ['iot-edge-device'] + MODULES
+
+E2E_METADATA = {
+    'env_vars': {
+        'DD_LOGS_ENABLED': 'true',
+        'DD_CONTAINER_INCLUDE_LOGS': ' '.join('name:{}'.format(name) for name in E2E_CONTAINERS),
+    },
+    'docker_volumes': [
+        '/var/run/docker.sock:/var/run/docker.sock',
+    ],
+}
