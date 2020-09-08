@@ -12,7 +12,7 @@ init_config:
     #
     host: <TCP_HOST_TO_CONNECT_TO>
 
-    ## @param port - string - required
+    ## @param port - integer - required
     ## Port of the host to connect to.
     #
     port: <PORT>
