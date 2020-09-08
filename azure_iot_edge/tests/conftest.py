@@ -39,14 +39,8 @@ def dd_environment(e2e_instance):
     up = e2e_utils.IoTEdgeUp(compose_file, network_name=common.E2E_NETWORK)
     down = e2e_utils.IoTEdgeDown(compose_file, stop_extra_containers=common.E2E_EXTRA_SPAWNED_CONTAINERS)
 
-    e2e_config = {
-        'init_config': {},
-        'instances': [e2e_instance],
-        'logs': common.E2E_LOGS_CONFIG,
-    }
-
     with docker_run(conditions=conditions, env_vars=env_vars, up=up, down=down):
-        yield e2e_config, common.E2E_METADATA
+        yield e2e_instance, common.E2E_METADATA
 
 
 @pytest.fixture(scope='session')

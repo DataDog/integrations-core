@@ -20,6 +20,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - iot-edge-network
+    labels:
+      com.datadoghq.ad.check.id: azure_iot_edge
 
 networks:
   iot-edge-network:

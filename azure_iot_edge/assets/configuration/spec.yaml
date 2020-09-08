@@ -26,11 +26,3 @@ files:
               type: string
               example: http://localhost:15580
           - template: instances/default
-
-      - template: logs
-        example:
-          # Requires setting DD_CONTAINER_INCLUDE_LOGS="name:<CONTAINER_1> name:<CONTAINER_2> ..."
-          # See: https://docs.datadoghq.com/agent/guide/autodiscovery-management/?tab=containerizedagent#include-containers
-          - type: docker
-            source: azure_iot_edge
-            service: "<SERVICE_NAME>"
