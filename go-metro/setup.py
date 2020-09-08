@@ -59,7 +59,7 @@ setup(
     packages=['datadog_checks.go-metro'],
 
     # Run-time dependencies
-    install_requires=['datadog_checks_base'],
+    install_requires=['datadog-checks-base'],
     extras_require={'deps': get_dependencies()},
 
     # Extra files to ship with the wheel package
