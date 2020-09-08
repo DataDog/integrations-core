@@ -22,7 +22,7 @@ files:
       description: Port of the host to connect to.
       required: true
       value:
-        type: string
+        type: integer
     - name: timeout
       description: Timeout of the TCP query in second.
       value:
