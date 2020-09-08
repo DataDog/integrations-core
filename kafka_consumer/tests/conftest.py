@@ -5,10 +5,10 @@ import os
 import time
 
 import pytest
+from datadog_test_libs.utils.mock_dns import mock_local
 from kafka import KafkaConsumer
 
 from datadog_checks.dev import WaitFor, docker_run
-from datadog_test_libs.utils.mock_dns import mock_local
 
 from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
 from .runners import KConsumer, Producer, ZKConsumer

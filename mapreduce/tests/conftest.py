@@ -6,12 +6,12 @@ import os
 from copy import deepcopy
 
 import pytest
+from datadog_test_libs.utils.mock_dns import mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.mapreduce import MapReduceCheck
-from datadog_test_libs.utils.mock_dns import mock_local
 
 from .common import (
     CLUSTER_INFO_URL,

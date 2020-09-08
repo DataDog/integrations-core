@@ -4,9 +4,9 @@
 import re
 
 import pytest
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.iis import IIS
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
 
 from .common import (
     APP_POOL_METRICS,
