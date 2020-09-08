@@ -60,11 +60,11 @@ instances:
     #
     server: http://teamcity.<ACCOUNT_NAME>.com
 
-    ## @param build_configuration - string - optional
+    ## @param build_configuration - string - required
     ## This is the internal build ID of the build configuration you wish to track.
     ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
     #
-    # build_configuration: <BUILD_CONFIGURATION>
+    build_configuration: <BUILD_CONFIGURATION>
 
     ## @param basic_http_authentication - boolean - optional - default: false
     ## Set to true to turn on basic http authentication.
