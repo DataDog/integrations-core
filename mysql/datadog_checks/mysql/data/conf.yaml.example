@@ -88,7 +88,7 @@ instances:
     ##
     ## 1. true - `global_custom_queries` override `custom_queries`.
     ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
     #
     # use_global_custom_queries: 'true'
 
