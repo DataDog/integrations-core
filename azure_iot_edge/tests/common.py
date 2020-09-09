@@ -371,8 +371,4 @@ E2E_METADATA = {
     'docker_volumes': [
         '/var/run/docker.sock:/var/run/docker.sock',
     ],
-    'start_commands': [
-        # Ensure the Agent has access to the autodiscovery config template.
-        'cp -r /home/azure_iot_edge/datadog_checks/azure_iot_edge/data/auto_conf.yaml /etc/datadog-agent/conf.d/azure_iot_edge.d/auto_conf.yaml',  # noqa: E501
-    ],
 }
