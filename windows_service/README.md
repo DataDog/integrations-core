@@ -27,6 +27,9 @@ instances:
     ## This matches all services starting with service, as if service.* is configured.
     ## For an exact match, use ^service$
     #
+    # - services:
+    #    - <SERVICE_NAME_1>
+    #    - <SERVICE_NAME_2>
   - services:
       - wmiApSrv
       - SNMPTRAP
@@ -35,6 +38,7 @@ instances:
     ## Whether or not to stop submitting the tag `service` that has been renamed
     ## to `windows_service` and disable the associated deprecation warning.
     #
+    # disable_legacy_service_tag: false
     disable_legacy_service_tag: true
 
     ## @param tags - list of key:value element - optional
@@ -42,6 +46,9 @@ instances:
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
     tags:
       - provider:amazon
 ```
