@@ -1,11 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
-Check the performance counters from SQL Server
-For information on how to report the metrics available in the sys.dm_os_performance_counters table see
-http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-values-from-sys-dm-os-performance-counters.aspx  # noqa: E501
-"""
 from __future__ import division
 
 from collections import defaultdict
@@ -63,7 +58,8 @@ class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
-    # These metrics use the default performance table
+    # Default performance table metrics
+    # datadog metric name, counter name, instance name
     PERF_METRICS = [
         ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
         ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
@@ -77,6 +73,8 @@ class SQLServer(AgentCheck):
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
     ]
 
+    # Non-performance table metrics
+    # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
         ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
         ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),

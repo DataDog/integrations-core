@@ -13,7 +13,16 @@ ALL_INSTANCES = 'ALL'
 
 
 class BaseSqlServerMetric(object):
-    """Base class for SQL Server metrics collection operations."""
+    """Base class for SQL Server metrics collection operations.
+
+    Each subclass defines the TABLE it's associated with, and the default
+    query to collect all of the information in one request.  This query gets
+    executed as part of the classmethod `fetch_all_values` and the data gets passed
+    to the instance method `fetch_metric` which extracts the appropriate metric from
+    within the larger collection.
+
+    This approach limits the load on the server during each check run.
+    """
 
     TABLE = None
     DEFAULT_METRIC_TYPE = None
