@@ -40,7 +40,7 @@ class MoreUnixCheck(AgentCheck):
         self.get_stat_info()
         self.get_entropy_info()
         self.get_process_states()
-        if self.instance.get('include_interrupts_metrics', False):
+        if self.instance.get('include_interrupt_metrics', False):
             self.get_interrupts_info()
 
     def set_paths(self):
