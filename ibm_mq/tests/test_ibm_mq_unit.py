@@ -198,25 +198,25 @@ def test_ssl_connection_creation(instance):
     assert 'MQRC_KEY_REPOSITORY_ERROR' in warning
 
 
-def test_ssl_check_normal_connection_before_ssl_connection(instance):
+def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     import pymqi
 
-    instance['ssl_auth'] = 'yes'
-    instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
-    instance['ssl_key_repository_location'] = '/dummy'
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance_ssl_dummy)
 
     # normal connection failed with with MQRC_HOST_NOT_AVAILABLE
-    error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE)
-    with mock.patch(
-        'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
-    ) as get_normal_connection, mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection:
+    for error_reason in [pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME]:
+        error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, error_reason)
+        with mock.patch(
+            'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
+        ) as get_normal_connection, mock.patch(
+            'datadog_checks.ibm_mq.connection.get_ssl_connection'
+        ) as get_ssl_connection:
 
-        with pytest.raises(pymqi.MQMIError):
-            get_queue_manager_connection(config)
+            with pytest.raises(pymqi.MQMIError):
+                get_queue_manager_connection(config)
 
-        get_normal_connection.assert_called_with(config)
-        assert not get_ssl_connection.called
+            get_normal_connection.assert_called_with(config)
+            assert not get_ssl_connection.called
 
     # normal connection failed with with error other than MQRC_HOST_NOT_AVAILABLE
     error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_SSL_CONFIG_ERROR)
