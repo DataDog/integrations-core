@@ -121,7 +121,7 @@ def normalize_package_name(package_name):
 
 
 def kebab_case_name(name):
-    return re.sub('_| ', '-', name.lower())
+    return re.sub('[_ ]', '-', name.lower())
 
 
 def normalize_display_name(display_name):

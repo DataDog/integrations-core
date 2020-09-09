@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import re
 from datetime import datetime
 from uuid import uuid4
 
@@ -16,7 +15,7 @@ from ..utils import (
     write_file,
     write_file_binary,
 )
-from .utils import normalize_package_name
+from .utils import kebab_case_name, normalize_package_name
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
@@ -29,7 +28,7 @@ def get_valid_templates():
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
-    check_name_kebab = re.sub('_| ', '-', integration_name.lower())
+    check_name_kebab = kebab_case_name(integration_name)
 
     datadog_checks_base_req = 'datadog-checks-base[deps]>=6.6.0'
     third_party_install_info = f"""\
