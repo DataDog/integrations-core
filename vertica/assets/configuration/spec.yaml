@@ -11,6 +11,7 @@ files:
                 - metric_prefix: vertica
                   query: <QUERY>
                   columns: <COLUMNS>
+                  tags: <TAGS>
       - template: instances
         options:
           - name: db

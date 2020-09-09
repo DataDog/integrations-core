@@ -12,6 +12,7 @@ init_config:
     #   - metric_prefix: vertica
     #     query: <QUERY>
     #     columns: <COLUMNS>
+    #     tags: <TAGS>
 
 ## Every instance is scheduled independent of the others.
 #
