@@ -12,3 +12,9 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param include_interrupts_metrics - boolean - optional - default: false
+    ## Optionally include cpu/irq interrupt metrics.  Note this can dramatically increase cardinality
+    ## for large systems, use with caution.
+    ##
+    # include_interrupts_metrics: false
