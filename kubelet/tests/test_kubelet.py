@@ -1087,8 +1087,9 @@ def test_silent_tls_warning(caplog, monkeypatch, aggregator):
     with caplog.at_level(logging.DEBUG):
         check._perform_kubelet_check([])
 
+    expected_message = 'An unverified HTTPS request is being made to https://example.com/'
     for _, _, message in caplog.record_tuples:
-        assert not message.startswith('An unverified HTTPS request is being made to ')
+        assert message != expected_message
 
 
 def test_create_pod_tags_by_pvc(monkeypatch, tagger):

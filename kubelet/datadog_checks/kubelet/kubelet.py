@@ -364,9 +364,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
-        if not self.kubelet_credentials.verify():
-            self.log.warning(u'An unverified HTTPS request is being made to %s', url)
-
         return requests.get(
             url,
             timeout=timeout,
