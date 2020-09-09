@@ -216,10 +216,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.minor_collection_count
+          alias: jvm.gc.minor_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.minor_collection_time
+          alias: jvm.gc.minor_collection_time
   - include:
       domain: java.lang
       type: GarbageCollector
@@ -227,10 +227,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.minor_collection_count
+          alias: jvm.gc.minor_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.minor_collection_time
+          alias: jvm.gc.minor_collection_time
   - include:
       domain: java.lang
       type: GarbageCollector
@@ -238,10 +238,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.minor_collection_count
+          alias: jvm.gc.minor_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.minor_collection_time
+          alias: jvm.gc.minor_collection_time
   - include:
       domain: java.lang
       type: GarbageCollector
@@ -249,10 +249,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.minor_collection_count
+          alias: jvm.gc.minor_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.minor_collection_time
+          alias: jvm.gc.minor_collection_time
   # Old Gen Collectors (Major collections)
   - include:
       domain: java.lang
@@ -261,10 +261,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.major_collection_count
+          alias: jvm.gc.major_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.major_collection_time
+          alias: jvm.gc.major_collection_time
   - include:
       domain: java.lang
       type: GarbageCollector
@@ -272,10 +272,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.major_collection_count
+          alias: jvm.gc.major_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.major_collection_time
+          alias: jvm.gc.major_collection_time
   - include:
       domain: java.lang
       type: GarbageCollector
@@ -283,10 +283,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.major_collection_count
+          alias: jvm.gc.major_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.major_collection_time
+          alias: jvm.gc.major_collection_time
   - include:
       domain: java.lang
       type: GarbageCollector
@@ -294,10 +294,10 @@ jmx_metrics:
       attribute:
         CollectionCount:
           metric_type: counter
-          alias: jmx.gc.major_collection_count
+          alias: jvm.gc.major_collection_count
         CollectionTime:
           metric_type: counter
-          alias: jmx.gc.major_collection_time
+          alias: jvm.gc.major_collection_time
    # Deprecated metrics for pre Cassandra 3.0 versions compatibility.
    # If you are using cassandra 2, the metrics below will be used,
    # otherwise they will be ignored.
