@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.24.0 / 2020-09-08
+
+* [Added] Add marketplace to repo choices and make -x set repo_choice. See [#7508](https://github.com/DataDog/integrations-core/pull/7508).
+* [Fixed] Pin transient dependency pyrsistent to < 0.17.0. See [#7546](https://github.com/DataDog/integrations-core/pull/7546).
+* [Fixed] Add minItems to pricing and better validation error message. See [#7514](https://github.com/DataDog/integrations-core/pull/7514).
+* [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).
+
 ## 3.23.0 / 2020-09-04
 
 * [Added] Add initial validations for EULA files. See [#7473](https://github.com/DataDog/integrations-core/pull/7473).

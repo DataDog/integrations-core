@@ -40,6 +40,8 @@
       "etcd_overview": "assets/saved_views/etcd_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "etcd"
+    }
   }
 }

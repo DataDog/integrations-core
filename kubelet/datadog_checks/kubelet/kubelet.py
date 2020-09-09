@@ -294,7 +294,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
-            raise CheckException("Unable to detect the kubelet URL automatically.")
+            raise CheckException("Unable to detect the kubelet URL automatically: " + kubelet_conn_info.get('err', ''))
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
