@@ -37,18 +37,6 @@ files:
         value:
             type: boolean
             example: false
-      - name: empty_default_hostname
-        required: false
-        description: |
-          The vSphere integration is a cluster-level check where metrics are usually unrelated to the host
-          on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
-          (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
-          running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
-        value:
-          type: boolean
-          default: false
-          example: true
-      - template: instances/tags      
       - name: collection_level
         required: false
         description: |
@@ -72,7 +60,6 @@ files:
           as the collection of historical metrics will negatively impact the collection of your realtime metrics.
         value:
           type: string
-          default: "'realtime'"
           example: realtime
       - name: collect_events
         required: false
@@ -88,28 +75,24 @@ files:
           default: depends on collection_type value
           example: true 
       - name: use_collect_events_fallback
-        required: false
         description: |
           Some events might contain invalid types.
           Instead of having the whole event batch fail. Using the fallback will process events one by one
           and skip any event with parsing issues.
         value:
           type: boolean
-          default: false
           example: false
       - name: collect_events_only
         required: false
         description: Collect events only. If enabled, historical and realtime metrics won't be collected.
         value:
           type: boolean
-          default: false
           example: false
       - name: ssl_verify
         required: false
         description: Set to false to disable SSL verification, when connecting to vCenter
         value:
           type: boolean
-          default: true
           example: true
       - name: ssl_capath
         required: false
@@ -118,10 +101,8 @@ files:
           in PEM format
         value:
           type: string
-          default: '""'
           example: "<DIRECTORY_PATH>"
       - name: tls_ignore_warning
-        required: false
         description: |
           If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
           Disable those by setting `tls_ignore_warning` to true.
@@ -131,7 +112,6 @@ files:
           to true.
         value:
           type: boolean
-          default: false
           example: false
       - name: resource_filters
         required: false
@@ -291,7 +271,6 @@ files:
               items:
                 type: string            
       - name: collect_tags
-        required: false
         description: | 
           If true, the vSphere Tags will be collected.
           The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
@@ -318,10 +297,8 @@ files:
           e.g. vsphere_host, vsphere_type, etc.
         value:
           type: string
-          default: "''"
           example: ''
       - name: collect_attributes 
-        required: false
         description: |
           If true, the vSphere attributes will be collected and submitted as Datadog tags.
           The final tag sent to Datadog is composed of 'attribute_prefix' + vSphere attribute category as key and
@@ -332,7 +309,6 @@ files:
           - application_name:my_app
         value:
           type: boolean
-          default: false
           example: false
       - name: attributes_prefix
         required: false
@@ -350,10 +326,8 @@ files:
           e.g. vsphere_host, vsphere_type, etc.
         value:
           type: string
-          default: "''"
           example: ''
       - name: use_guest_hostname
-        required: false
         description: |
           If true, the check will use the guest hostname for VMs instead of the VM name
           This requires the VM to have VMware tools installed in it. If the guest hostname is
@@ -362,7 +336,6 @@ files:
           in the web application UI.
         value:
           type: boolean
-          default: false
           example: false
       - name: threads_count
         required: false
@@ -371,7 +344,6 @@ files:
           Increasing this value will put more charge onto your vCenter server but may improve performances.
         value:
           type: integer
-          default: 4
           example: 4
       - name: excluded_host_tags
         required: false
@@ -413,7 +385,6 @@ files:
           a value here.
         value:
           type: integer
-          default: 200
           example: 256
       - name: batch_tags_collector_size
         required: false
@@ -422,7 +393,6 @@ files:
           it might be that the batch size is too big.
         value:
           type: integer
-          default: 200
           example: 200
       - name: batch_property_collector_size
         required: false
@@ -434,7 +404,6 @@ files:
           A value <= 0 means unlimited: it will query for the maximum number of objects at once
         value:
           type: integer
-          default: 500
           example: 500
       - name: refresh_infrastructure_cache_interval
         required: false
@@ -443,7 +412,6 @@ files:
           Consider increasing this value if your environment is large, as caching can take some time to complete.
         value:
           type: integer
-          default: 300
           example: 300
       - name: refresh_metrics_metadata_cache_interval
         required: false
@@ -451,5 +419,5 @@ files:
           Number of seconds between each refresh of the metrics metadata cache
         value:
           type: integer
-          default: 1800
           example: 1800
+      - template: instances/default  
