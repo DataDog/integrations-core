@@ -14,7 +14,7 @@ files:
               In order to support monitoring a Varnish instance which is running as a Docker
               container you need to wrap commands (varnishstat) with scripts which
               perform a docker exec on the running container.  Passing along template variables
-              (%%host%%, %%port%%) allow for targeting the proper container via service discovery.
+              (%%host%%, %%port%%) allows for targeting the proper container via service discovery.
             value:
               type: string
               example: /usr/bin/varnishstat
