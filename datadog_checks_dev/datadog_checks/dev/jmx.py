@@ -31,8 +31,8 @@ JVM_E2E_METRICS = [
 ]
 
 JMX_E2E_METRICS = [
-    'jmx.gc.major_collection_count',
-    'jmx.gc.major_collection_time',
-    'jmx.gc.minor_collection_count',
-    'jmx.gc.minor_collection_time',
+    'jvm.gc.major_collection_count',
+    'jvm.gc.major_collection_time',
+    'jvm.gc.minor_collection_count',
+    'jvm.gc.minor_collection_time',
 ]
