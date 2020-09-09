@@ -139,17 +139,8 @@ def dd_environment():
         e2e_meta['docker_volumes'].append("{}:/opt/pki".format(pki_dir))
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq1', log_pattern)], sleep=10
+        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[
+            CheckDockerLogs('ibm_mq1', log_pattern),
+        ], sleep=10,
     ):
-        yield common.INSTANCE, common.E2E_METADATA
-        with docker_run(
-            common.COMPOSE_FILE_PATH, env_vars=env, conditions=[
-                CheckDockerLogs('ibm_mq1', log_pattern),
-                WaitFor(prepare_tls, attempts=1)
-            ], sleep=10,
-        ):
-            yield common.INSTANCE, e2e_meta
-
-
-def prepare_tls():
-    run_command(['docker', 'exec', 'ibm_mq1', 'sh', '/opt/prepare_tls.sh'], check=True)
+        yield common.INSTANCE, e2e_meta

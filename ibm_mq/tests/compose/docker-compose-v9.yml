@@ -5,11 +5,9 @@ services:
     container_name: ibm_mq1
     image: ibmcom/mq:${IBM_MQ_VERSION}
     environment:
-      - MQ_QMGR_NAME=QM1
+      - MQ_QMGR_NAME=MQTEST
       - LICENSE=accept
     ports:
       - "11414:1414"
     volumes:
-      - './config.mqsc:/etc/mqm/config.mqsc'
-      - './prepare_tls.sh:/opt/prepare_tls.sh'
-      - ${IBM_MQ_PKI_DIR}:/etc/mqm/pki
+      - '../keys:/etc/mqm/pki/keys'
