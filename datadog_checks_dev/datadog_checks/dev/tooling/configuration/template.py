@@ -87,6 +87,9 @@ class ConfigTemplates(object):
             # Iterate through all but the last key, attempting to find a dictionary at every step
             for i, key in enumerate(override_keys):
                 if isinstance(root, dict):
+                    if i == 0 and root.get('name') == key:
+                        continue
+
                     if key in root:
                         root = root[key]
                     else:
