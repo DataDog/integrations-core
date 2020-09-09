@@ -32,7 +32,6 @@ files:
             value:
               type: integer
               example: 5433
-              default: 5433
           - name: username
             required: true
             description: The database user to authenticate as.
@@ -52,7 +51,6 @@ files:
               type: array
               items:
                 type: object
-              default: null
               example:
                 - server: <SERVER_1>
                   port: <PORT_1>
@@ -75,19 +73,16 @@ files:
             value:
               type: integer
               example: 10
-              default: 10
           - name: tls_verify
             description: Whether or not to connect securely using TLS. The server must also support this.
             value:
               type: boolean
               example: false
-              default: false
           - name: validate_hostname
             description: Whether or not to verify the TLS certificate was issued for `server` if `tls_verify` is true.
             value:
               type: boolean
               example: true
-              default: true
           - name: cert
             description: |
               The path to a single file in PEM format containing a certificate as well as any
