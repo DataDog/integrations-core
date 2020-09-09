@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 2.6.0 / 2020-07-27
+
+* [Added] Smaller batches when fetching highwater offsets. See [#7093](https://github.com/DataDog/integrations-core/pull/7093).
+* [Fixed] Limit the number of reported contexts. See [#7084](https://github.com/DataDog/integrations-core/pull/7084).
+
 ## 2.5.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

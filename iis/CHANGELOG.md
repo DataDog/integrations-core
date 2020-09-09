@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.10.1 / 2020-08-19
+
+* [Fixed] Add debug lines on skipped metrics. See [#7394](https://github.com/DataDog/integrations-core/pull/7394).
+
 ## 2.10.0 / 2020-06-29
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

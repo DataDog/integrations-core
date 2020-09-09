@@ -28,7 +28,11 @@ See the [sample gunicorn.yaml][6] for all available configuration options.
 
 #### Metric collection
 
-1. Add this configuration block to your `gunicorn.d/conf.yaml` file to start gathering your [Gunicorn metrics](#metrics):
+##### Connect Gunicorn to DogStatsD
+
+1. As of version 19.1, Gunicorn [provides an option][7] to send its metrics to a daemon that implements the StatsD protocol, such as [DogStatsD][8]. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). To ensure that you collect **all Gunicorn metrics**, configure your app to send metrics to [DogStatsD][8] at `"localhost:8125"`, and restart the app.
+
+2. Add this configuration block to your `gunicorn.d/conf.yaml` file to start gathering [Gunicorn metrics](#metrics):
 
 ```yaml
 init_config:
@@ -41,12 +45,6 @@ instances:
 ```
 
 2. [Restart the Agent][3] to begin sending Gunicorn metrics to Datadog.
-
-#### Connect Gunicorn to DogStatsD
-
-Since version 19.1, Gunicorn [provides an option][7] to send its metrics to a daemon that implements the StatsD protocol, such as [DogStatsD][8]. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
-
-**Note**: If you are using this option, do **not** add the metric collection configuration block to `gunicorn.d/conf.yaml`. That is, if you are connecting Gunicorn to DogStatsD, ignore the directions in the [Metric Collection](#metric-collection) section of this document.
 
 #### Log collection
 

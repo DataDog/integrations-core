@@ -258,6 +258,11 @@ class DockerInterface(object):
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
 
+        # The docker `--add-host` command will reliably create entries in the `/etc/hosts` file,
+        # otherwise, edits to that file will be overwritten on container restarts
+        for host, ip in self.metadata.get('custom_hosts', []):
+            command.extend(['--add-host', f'{host}:{ip}'])
+
         if self.dogstatsd:
             command.extend(['-p', f'{DEFAULT_DOGSTATSD_PORT}:{DEFAULT_DOGSTATSD_PORT}/udp'])
 

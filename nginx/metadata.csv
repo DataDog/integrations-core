@@ -14,7 +14,7 @@ nginx.cache.bypass.responses,gauge,,response,,The total number of responses not 
 nginx.cache.bypass.responses_count,count,,response,,The total number of responses not taken from the cache (shown as count),0,nginx,cache bypass responses
 nginx.cache.bypass.responses_written,gauge,,response,,The total number of responses written to the cache,0,nginx,cache bypass responses_written
 nginx.cache.bypass.responses_written_count,count,,response,,The total number of responses written to the cache (shown as count),0,nginx,cache bypass responses_written
-nginx.cache.cold,gauge,,response,,A boolean value indicating whether the "cache loader" process is still loading data from disk into the cache,0,nginx,cache cold
+nginx.cache.cold,gauge,,response,,A boolean value indicating whether the cache loader process is still loading data from disk into the cache,0,nginx,cache cold
 nginx.cache.expired.bytes,gauge,,byte,,The total number of bytes read from the proxied server,0,nginx,cache expired bytes
 nginx.cache.expired.bytes_count,count,,byte,,The total number of bytes read from the proxied server (shown as count),0,nginx,cache expired bytes
 nginx.cache.expired.bytes_written,gauge,,byte,,The total number of bytes written to the cache,0,nginx,cache expired bytes_written

@@ -1,7 +1,7 @@
 extends:
   - _base.yaml
-  - _generic-router-tcp.yaml
-  - _generic-router-udp.yaml
+  - _generic-tcp.yaml
+  - _generic-udp.yaml
 
 sysobjectid: 1.3.6.1.4.1.318.1.*
 
@@ -89,7 +89,7 @@ metrics:
   - MIB: PowerNet-MIB
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
-      name: upsBasicStateOutputState.On
+      name: upsBasicStateOutputState
     forced_type: flag_stream
     options:
       placement: 19

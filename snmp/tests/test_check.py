@@ -18,7 +18,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = pytest.mark.usefixtures("dd_environment")
+pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
 
 
 def test_command_generator():
@@ -472,13 +472,12 @@ def test_forcedtype_metric(aggregator):
     check = common.create_check(instance)
     check.check(instance)
 
-    for metric in common.FORCED_METRICS:
-        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
-        if metric.get('forced_type') == 'counter':
-            # rate will be flushed as a gauge, so count should be 0.
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0, metric_type=aggregator.GAUGE)
-        elif metric.get('forced_type') == 'gauge':
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('snmp.IAmAGauge32', tags=common.CHECK_TAGS, count=1, metric_type=aggregator.RATE)
+    aggregator.assert_metric('snmp.IAmACounter64', tags=common.CHECK_TAGS, count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.IAmAOctetStringFloat', tags=common.CHECK_TAGS, value=3.1415, count=1, metric_type=aggregator.GAUGE
+    )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
@@ -488,18 +487,19 @@ def test_forcedtype_metric(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_forcedtype_metric(aggregator):
+def test_invalid_forcedtype_metric(aggregator, caplog):
     """
-    If a forced type is invalid a warning should be issued + a service check
-    should be available
+    If a forced type is invalid a warning should be issued
+    but the check should continue processing the remaining metrics.
     """
     instance = common.generate_instance_config(common.INVALID_FORCED_METRICS)
     check = common.create_check(instance)
 
     check.check(instance)
 
-    # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    assert "Unable to submit metric" in caplog.text
 
 
 def test_scalar_with_tags(aggregator):
@@ -1086,3 +1086,112 @@ def test_timeout(aggregator, caplog):
             break
     else:
         pytest.fail()
+
+
+def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
+    """
+    Test if we still collect all metrics using saved scalar oids.
+    """
+    instance = common.generate_instance_config(common.TABULAR_OBJECTS)
+    instance['refresh_oids_cache_interval'] = 3600
+    check = common.create_check(instance)
+
+    def run_check():
+        aggregator.reset()
+        check.check(instance)
+
+        # Test metrics
+        for symbol in common.TABULAR_OBJECTS[0]['symbols']:
+            metric_name = "snmp." + symbol
+            aggregator.assert_metric(metric_name, at_least=1)
+            aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+            for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
+                tag = mtag['tag']
+                aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+        aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+        # Test service check
+        aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+        common.assert_common_metrics(aggregator)
+        aggregator.all_metrics_asserted()
+
+    for _ in range(3):
+        run_check()
+
+
+@pytest.mark.parametrize(
+    "config, has_next_bulk_oids",
+    [
+        pytest.param({}, True, id='disabled_config_default'),
+        pytest.param({'refresh_oids_cache_interval': 0}, True, id='disabled_config_explicit'),
+        pytest.param({'refresh_oids_cache_interval': 60}, False, id='enabled_config_60'),
+        pytest.param({'refresh_oids_cache_interval': 3600}, False, id='enabled_config_3600'),
+    ],
+)
+def test_oids_cache_config_update(config, has_next_bulk_oids):
+    """
+    Check whether config oids are correctly updated depending on refresh_oids_cache_interval.
+    """
+    instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['bulk_threshold'] = 10
+    instance.update(config)
+    check = common.create_check(instance)
+
+    assert bool(check._config.oid_config.scalar_oids) is False
+    assert bool(check._config.oid_config.next_oids) is True
+    assert bool(check._config.oid_config.bulk_oids) is True
+
+    for _ in range(3):
+        check.check(instance)
+        assert bool(check._config.oid_config.scalar_oids) is True
+        assert bool(check._config.oid_config.next_oids) is has_next_bulk_oids
+        assert bool(check._config.oid_config.bulk_oids) is has_next_bulk_oids
+
+
+GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
+
+
+@pytest.mark.parametrize(
+    "refresh_interval, getnext_call_counts, getnext_call_count_after_reset",
+    [
+        # When the cache is enabled.
+        # GETNEXT calls are made only at the first check and run and after every reset
+        pytest.param(
+            3600,
+            [GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN],
+            2 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+            id='cache_enabled',
+        ),
+        # When the cache is disabled.
+        # GETNEXT calls are made only at the first check and run and after every reset
+        pytest.param(
+            0,
+            [
+                1 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+                2 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+                3 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+            ],
+            4 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+            id='cache_disabled',
+        ),
+    ],
+)
+def test_oids_cache_command_calls(refresh_interval, getnext_call_counts, getnext_call_count_after_reset):
+    """
+    Check that less snmp PDU calls are made using `refresh_oids_cache_interval` config.
+    """
+    instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['refresh_oids_cache_interval'] = refresh_interval
+    check = common.create_check(instance)
+
+    with mock.patch('datadog_checks.snmp.snmp.snmp_getnext') as snmp_getnext:
+        assert snmp_getnext.call_count == 0
+        for call_count in getnext_call_counts:
+            check.check(instance)
+            assert snmp_getnext.call_count == call_count
+
+        check._config.oid_config._last_ts = 0
+        check.check(instance)
+        assert snmp_getnext.call_count == getnext_call_count_after_reset

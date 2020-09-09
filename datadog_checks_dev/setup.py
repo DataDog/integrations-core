@@ -28,7 +28,7 @@ REQUIRES = [
     'psutil',
     'PyYAML>=5.3',
     'pytest',
-    'pytest-benchmark>=3.2.1',
+    'pytest-benchmark[histogram]>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
     'requests>=2.22.0',
@@ -75,6 +75,8 @@ setup(
             'colorama',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
+            'jsonschema',
+            'packaging',
             'pip-tools',
             'pyperclip>=1.7.0',
             'semver',
@@ -84,6 +86,8 @@ setup(
             'twine>=1.11.0',
             'virtualenv>=20.0.8',
             'wheel>=0.31.0',
+            # TODO: Remove when tobgu/pyrsistent#206 gets merged
+            'pyrsistent<0.17.0',
         ]
     },
     entry_points={

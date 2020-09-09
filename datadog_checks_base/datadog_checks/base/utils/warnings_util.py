@@ -6,6 +6,13 @@ from contextlib import contextmanager
 
 from six import PY2
 
+try:
+    import datadog_agent  # noqa: F401
+
+    dev_mode = False
+except ImportError:
+    dev_mode = True
+
 
 def _simplefilter_py2(action, category=Warning, lineno=0, append=0):
     """
@@ -32,7 +39,8 @@ def disable_warnings_ctx(action, disable=True):
     if disable:
         simplefilter('ignore', action)
         yield
-        simplefilter('default', action)
+        if not dev_mode:
+            simplefilter('default', action)
     else:
         # do nothing
         yield

@@ -122,6 +122,9 @@ def options_validator(options, loader, file_name, *sections):
     if sections_display:
         sections_display += ', '
 
+    overrides = {}
+    override_errors = []
+
     option_names_origin = {}
     for option_index, option in enumerate(options, 1):
         if not isinstance(option, dict):
@@ -134,15 +137,17 @@ def options_validator(options, loader, file_name, *sections):
 
         templates_resolved = False
         while 'template' in option:
-            parameters = {
-                parameter: option.pop(parameter) for parameter in loader.templates.fields if parameter in option
-            }
+            overrides.update(option.pop('overrides', {}))
 
             try:
-                template = loader.templates.load(option.pop('template'), parameters)
+                template = loader.templates.load(option.pop('template'))
             except Exception as e:
                 loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
                 break
+
+            errors = loader.templates.apply_overrides(template, overrides)
+            if errors:
+                override_errors.append((option_index, errors))
 
             if isinstance(template, dict):
                 template.update(option)
@@ -337,6 +342,14 @@ def options_validator(options, loader, file_name, *sections):
             previous_sections = list(sections)
             previous_sections.append(option_name)
             options_validator(nested_options, loader, file_name, *previous_sections)
+
+    # If there are unused overrides, add the associated error messages
+    if overrides:
+        for option_index, errors in override_errors:
+            error_message = '\n'.join(errors)
+            loader.errors.append(
+                f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {error_message}'
+            )
 
 
 VALID_TYPES = {

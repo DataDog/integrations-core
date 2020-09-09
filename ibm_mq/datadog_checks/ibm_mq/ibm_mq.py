@@ -30,11 +30,12 @@ class IbmMqCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         super(IbmMqCheck, self).__init__(*args, **kwargs)
-        self.config = IBMMQConfig(self.instance)
 
         if not pymqi:
             self.log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
+
+        self.config = IBMMQConfig(self.instance)
 
         self.queue_metric_collector = QueueMetricCollector(
             self.config, self.service_check, self.warning, self.send_metric, self.send_metrics_from_properties, self.log

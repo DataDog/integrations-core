@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.8.3 / 2020-07-23
+
+* [Fixed] Fix empty result case. See [#7192](https://github.com/DataDog/integrations-core/pull/7192).
+
 ## 1.8.2 / 2020-07-22
 
 * [Fixed] Add debug log for get info calls. See [#7182](https://github.com/DataDog/integrations-core/pull/7182).

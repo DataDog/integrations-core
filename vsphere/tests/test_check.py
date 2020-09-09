@@ -127,20 +127,14 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
     dd_run_check(check)
 
     # Following metrics should match and have instance value tag
+    aggregator.assert_metric('vsphere.cpu.usagemhz.avg', tags=['cpu_core:6', 'vcenter_server:FAKE'])
     aggregator.assert_metric(
-        'vsphere.cpu.usagemhz.avg', tags=['cpu_core:6', 'vcenter_server:FAKE'],
-    )
-    aggregator.assert_metric(
-        'vsphere.cpu.coreUtilization.avg', hostname='10.0.0.104', tags=['cpu_core:16', 'vcenter_server:FAKE'],
+        'vsphere.cpu.coreUtilization.avg', hostname='10.0.0.104', tags=['cpu_core:16', 'vcenter_server:FAKE']
     )
 
     # Following metrics should NOT match and do NOT have instance value tag
-    aggregator.assert_metric(
-        'vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'],
-    )
-    aggregator.assert_metric(
-        'vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'],
-    )
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'])
+    aggregator.assert_metric('vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'])
 
     # None of `vsphere.disk.usage.avg` metrics have instance values for specific metric+resource_type
     # Hence the aggregated metric IS collected
@@ -327,6 +321,24 @@ def test_tags_filters_with_prefix_when_tags_are_not_yet_collected(aggregator, dd
     aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
     # Assert that the resource that was collected is the one with the correct tag
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_attributes_filters(aggregator, dd_run_check, realtime_instance):
+    realtime_instance['collect_attributes'] = True
+    realtime_instance['attributes_prefix'] = 'vattr_'
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'attribute', 'patterns': [r'vattr_foo:bar\d']},
+        {'resource': 'host', 'property': 'name', 'type': 'blacklist', 'patterns': [r'.*']},
+    ]
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    # Assert that only a single resource was collected
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=2)
+    # Assert that the resource that was collected is the one with the correct tag
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-15')
+    # Assert that the resource that was collected is the one with the correct tag
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-9')
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')

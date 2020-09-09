@@ -11,6 +11,9 @@ class TrelloClient:
     BOARD_ENDPOINT = API_URL + '/1/boards/ICjijxr4/cards'
     LISTS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/lists'
     LABELS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/labels'
+    CARDS_ENDPOINT = API_URL + '/1/cards'
+    MEMBERSHIP_ENDPOINT = API_URL + '/1/boards/ICjijxr4/memberships'
+    MEMBER_ENPOINT = API_URL + '/1/members'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -25,6 +28,7 @@ class TrelloClient:
             'Processes': '5aeca4c8621e4359b9cb9c27',
             'Trace': '5bcf3ffbe0651642ae029038',
             'Tools and Libraries': '5ef373fb33b7b805120d5011',
+            'Runtime-Security': '5f3148683b7428276f0f2133',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
@@ -36,8 +40,24 @@ class TrelloClient:
             'team/container-app': 'Container App',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
-            'team/tools-and-libraries': 'Tools and Libraries',
+            'team/intg-tools-libs': 'Tools and Libraries',
+            'team/agent-security': 'Runtime-Security',
         }
+
+        self.label_github_team_map = {
+            'team/agent-apm': 'agent-apm',
+            'team/agent-core': 'agent-core',
+            'team/agent-platform': 'agent-platform',
+            'team/networks': 'networks',
+            'team/processes': 'processes',
+            'team/containers': 'container-integrations',
+            'team/container-app': 'container-app',
+            'team/integrations': 'agent-integrations',
+            'team/logs': 'logs-intake',
+            'team/intg-tools-libs': 'integrations-tools-and-libraries',
+            'team/agent-security': 'agent-security',
+        }
+
         self.label_map = {
             'Containers': '5e7910856f8e4363e3b51708',
             'Container App': '5e8b36f72f642272e75edd34',
@@ -48,7 +68,8 @@ class TrelloClient:
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
-            'Tools and Libs': '5ab12740841642c2a8829053',
+            'Tools and Libraries': '5ab12740841642c2a8829053',
+            'Runtime-Security': '5f314f0a364ee16ea4e78868',
         }
         self.progress_columns = {
             '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
@@ -56,6 +77,21 @@ class TrelloClient:
             '5d5a8a50ca7a0189ae8ac5ac': 'Awaiting Build',  # WAITING
             '5dfb4eef503607473af708ab': 'Done',
         }
+        self.__check_map_consistency(self.team_list_map, self.label_team_map, self.label_map)
+
+    def __check_map_consistency(self, team_list_map, label_team_map, label_map):
+        if len(team_list_map) != len(label_team_map):
+            raise Exception('`team_list_map` and `label_team_map` do not have the same size')
+        if len(team_list_map) != len(label_map):
+            raise Exception('`team_list_map` and `label_map` do not have the same size')
+        if team_list_map.keys() != label_map.keys():
+            raise Exception(
+                f'Keys should be the same for `team_list_map` and `label_map` {team_list_map.keys()} '
+                + 'vs {label_map.keys()}'
+            )
+        for team in label_team_map.values():
+            if team not in team_list_map:
+                raise Exception(f'Team {team} cannot be found in `team_list_map`')
 
     def create_card(self, team, name, body, member=None):
         rate_limited = False
@@ -120,3 +156,37 @@ class TrelloClient:
                         counts[team][self.progress_columns[id_list]] += 1
 
         return counts
+
+    def get_card(self, card_id):
+        response = requests.get(f'{self.CARDS_ENDPOINT}/{card_id}', params=self.auth)
+        response.raise_for_status()
+        return response.json()
+
+    def update_card(self, card_id, data):
+        headers = {'Content-Type': 'application/json'}
+        response = requests.put(f'{self.CARDS_ENDPOINT}/{card_id}', headers=headers, data=data, params=self.auth)
+        response.raise_for_status()
+        return response.json()
+
+    def get_membership(self):
+        """
+        Get the members.
+        """
+        membership = requests.get(self.MEMBERSHIP_ENDPOINT, params=self.auth)
+        membership.raise_for_status()
+        return membership.json()
+
+    def get_member(self, id_member):
+        """
+        Get the member.
+        """
+        try:
+            membership = requests.get(f'{self.MEMBER_ENPOINT}/{id_member}', params=self.auth)
+            membership.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                raise Exception('Timeout, please try in 900 secondes') from e
+            else:
+                raise e
+
+        return membership.json()

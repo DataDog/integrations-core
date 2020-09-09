@@ -114,10 +114,22 @@ def test_get_infrastructure(realtime_instance):
 @pytest.mark.parametrize(
     'exception, expected_calls',
     [
-        (Exception('error'), 2,),
-        (vmodl.fault.InvalidArgument(), 1,),
-        (vim.fault.InvalidName(), 1,),
-        (vim.fault.RestrictedByAdministrator(), 1,),
+        (
+            Exception('error'),
+            2,
+        ),
+        (
+            vmodl.fault.InvalidArgument(),
+            1,
+        ),
+        (
+            vim.fault.InvalidName(),
+            1,
+        ),
+        (
+            vim.fault.RestrictedByAdministrator(),
+            1,
+        ),
     ],
 )
 def test_smart_retry(realtime_instance, exception, expected_calls):

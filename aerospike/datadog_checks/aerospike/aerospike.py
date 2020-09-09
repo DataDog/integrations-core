@@ -231,6 +231,8 @@ class AerospikeCheck(AgentCheck):
 
         if not separator:
             return data
+        if not data:
+            return []
 
         return data.split(separator)
 

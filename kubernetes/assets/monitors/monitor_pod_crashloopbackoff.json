@@ -1,0 +1,27 @@
+{
+	"name": "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
+	"type": "query alert",
+	"query": "avg(last_30m):default(avg:kubernetes.containers.state.waiting{reason:crashloopbackoff} by {kube_namespace,pod_name}, 0) >= 1",
+	"message": "pod {{pod_name.name}} is CrashloopBackOff on {{kube_namespace.name}}",
+	"tags": [
+		"integration:kubernetes"
+	],
+	"options": {
+		"notify_audit": true,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"no_data_timeframe": 5,
+		"require_full_window": true,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 1
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when a pod is in a CrashloopBackOff state for your Kubernetes integration."
+	}
+}

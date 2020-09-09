@@ -30,7 +30,7 @@ instances:
     #
     # bearer_token_path: /var/run/secrets/kubernetes.io/serviceaccount/token
 
-    ## @param ssl_verify - boolean - optional - default: False
+    ## @param ssl_verify - boolean - optional - default: false
     ## Used to verify self signed certificates.
     #
     # ssl_verify: false

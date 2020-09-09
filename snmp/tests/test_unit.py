@@ -31,7 +31,7 @@ from datadog_checks.snmp.utils import (
 from . import common
 from .utils import mock_profiles_confd_root
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, common.python_autodiscovery_only]
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
@@ -305,21 +305,23 @@ def test_removing_host():
     check.check(instance)
 
     assert len(warnings) == 1
-    warning = warnings[0]
-    msg = 'Failed to collect some metrics: No SNMP response received before timeout'
-    assert msg in warning
+    msg = 'No SNMP response received before timeout'
+    assert all(msg in warning for warning in warnings)
 
     check.check(instance)
-    assert warnings == [warning, warning]
+    assert len(warnings) == 2
+    assert all(msg in warning for warning in warnings)
 
     check.check(instance)
-    assert warnings == [warning, warning, warning]
+    assert len(warnings) == 3
+    assert all(msg in warning for warning in warnings)
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [warning, warning, warning]
+    assert len(warnings) == 3
+    assert all(msg in warning for warning in warnings)
 
 
 def test_invalid_discovery_interval():

@@ -25,19 +25,19 @@ init_config:
 #
 instances:
 
-    ## @param server - string - required
-    ## MySQL server to connect to.
-    ## NOTE: Even if the server name is "localhost", the agent connects to MySQL using TCP/IP, unless you also
+    ## @param host - string - optional
+    ## MySQL host to connect to.
+    ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
     ## provide a value for the sock key (below).
     #
-  - server: localhost
+  - host: localhost
 
-    ## @param user - string - required
+    ## @param user - string - optional
     ## Username used to connect to MySQL.
     #
     user: datadog
 
-    ## @param pass - string - required
+    ## @param pass - string - optional
     ## Password associated to the MySQL user.
     #
     pass: <PASS>
@@ -45,15 +45,22 @@ instances:
     ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.
     #
-    # port: 3306
+    port: 3306
 
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
+    ## If you specify a socket you dont need to specify a host.
     #
     # sock: <SOCK>
 
+    ## @param charset - string - optional
+    ## Charset you want to use.
+    #
+    # charset: utf8
+
     ## @param defaults_file - string - optional
     ## Path to an alternative configuration mechanism file.
+    ## If providing this then there is no need to specify host, port, user, pass or socket.
     #
     # defaults_file: <DEFAULTS_FILE>
 
@@ -258,7 +265,7 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

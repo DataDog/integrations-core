@@ -11,11 +11,11 @@ import requests
 from ....utils import ensure_dir_exists, path_join, write_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, write_manifest
-from ..console import CONTEXT_SETTINGS, abort
+from ..console import CONTEXT_SETTINGS, abort, echo_success
 
-BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.+'
-SCREEN_API = 'https://api.{site}/api/v1/screen/{board_id}'
-REQUIRED_FIELDS = ["board_title", "description", "template_variables", "widgets"]
+BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.*'
+DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'
+REQUIRED_FIELDS = ["layout_type", "title", "description", "template_variables", "widgets"]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
@@ -25,7 +25,7 @@ def dash():
 
 @dash.command(context_settings=CONTEXT_SETTINGS, short_help='Export a Dashboard as JSON')
 @click.argument('url')
-@click.argument('integration', required=False)
+@click.argument('integration', required=True)
 @click.option(
     '--author',
     '-a',
@@ -67,7 +67,7 @@ def export(ctx, url, integration, author):
 
     try:
         response = requests.get(
-            SCREEN_API.format(site=site, board_id=board_id), params={'api_key': api_key, 'application_key': app_key}
+            DASHBOARD_API.format(site=site, board_id=board_id), params={'api_key': api_key, 'application_key': app_key}
         )
         response.raise_for_status()
     except Exception as e:
@@ -75,12 +75,11 @@ def export(ctx, url, integration, author):
 
     payload = response.json()
     new_payload = {field: payload[field] for field in REQUIRED_FIELDS}
-    new_payload.setdefault('author_info', {})
-    new_payload['author_info']['author_name'] = author
+    new_payload['author_name'] = author
 
     output = json.dumps(new_payload, indent=4, sort_keys=True)
 
-    file_name = new_payload['board_title'].strip().lower()
+    file_name = new_payload['title'].strip().lower()
     if integration:
         manifest = load_manifest(integration)
 
@@ -101,7 +100,7 @@ def export(ctx, url, integration, author):
         location = path_join(get_root(), integration, 'assets', 'dashboards')
         ensure_dir_exists(location)
 
-        manifest['assets']['dashboards'][new_payload['board_title']] = f'assets/dashboards/{file_name}'
+        manifest['assets']['dashboards'][new_payload['title']] = f'assets/dashboards/{file_name}'
         write_manifest(manifest, integration)
     else:
         file_name = f"{file_name.replace(' ', '_')}.json"
@@ -109,3 +108,4 @@ def export(ctx, url, integration, author):
 
     file_path = path_join(location, file_name)
     write_file(file_path, output)
+    echo_success(f"Successfully wrote dashboard: `{file_name}` for integration: `{integration}`")

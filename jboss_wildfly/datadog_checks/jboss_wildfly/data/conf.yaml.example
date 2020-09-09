@@ -12,7 +12,7 @@ init_config:
     #
     collect_default_metrics: true
 
-    ## @param new_gc_metrics - boolean - optional - default: False
+    ## @param new_gc_metrics - boolean - optional - default: false
     ## Set to true to use better metric names for garbage collection metrics.
     ## jvm.gc.cms.count   => jvm.gc.minor_collection_count
     ##                       jvm.gc.major_collection_count
@@ -89,7 +89,7 @@ instances:
 
     ## @param tools_jar_path - string - optional
     ## The tool.jar path to be used with the `process_name_regex` parameter,
-    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## for example: /usr/lib/jvm/java-11-openjdk-amd64/lib/tools.jar
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
@@ -185,7 +185,7 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

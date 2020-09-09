@@ -27,6 +27,12 @@ def config():
     pass
 
 
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Edit the config file with your default EDITOR')
+def edit():
+    """Edit the config file with your default EDITOR."""
+    click.edit(filename=CONFIG_FILE)
+
+
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Open the config location in your file manager')
 def explore():
     """Open the config location in your file manager."""
@@ -98,7 +104,7 @@ def set_value(ctx, key, value):
         scrubbing = any(fnmatch(key, pattern) for pattern in SECRET_KEYS)
         value = click.prompt(f'Value for `{key}`', hide_input=scrubbing)
 
-    if key in ('repos.core', 'repos.extras', 'repos.agent') and not value.startswith('~'):
+    if key in ('repos.core', 'repos.extras', 'repos.agent', 'repos.marketplace') and not value.startswith('~'):
         value = os.path.abspath(value)
 
     user_config = new_config = ctx.obj

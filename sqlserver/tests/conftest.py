@@ -14,6 +14,7 @@ from .common import (
     FULL_E2E_CONFIG,
     HERE,
     INIT_CONFIG,
+    INIT_CONFIG_ALT_TABLES,
     INIT_CONFIG_OBJECT_NAME,
     INSTANCE_DOCKER,
     INSTANCE_E2E,
@@ -35,6 +36,11 @@ def init_config():
 @pytest.fixture
 def init_config_object_name():
     return deepcopy(INIT_CONFIG_OBJECT_NAME)
+
+
+@pytest.fixture
+def init_config_alt_tables():
+    return deepcopy(INIT_CONFIG_ALT_TABLES)
 
 
 @pytest.fixture

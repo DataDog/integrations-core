@@ -106,7 +106,7 @@ def test_go_expvar_mocked(go_expvar_mock, check, aggregator):
         )
     for count in CHECK_COUNT:
         aggregator.assert_metric(
-            count.format(common.CHECK_NAME), count=1, metric_type=aggregator.MONOTONIC_COUNT, tags=shared_tags,
+            count.format(common.CHECK_NAME), count=1, metric_type=aggregator.MONOTONIC_COUNT, tags=shared_tags
         )
 
     aggregator.assert_all_metrics_covered()

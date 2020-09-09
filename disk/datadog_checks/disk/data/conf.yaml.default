@@ -44,6 +44,9 @@ instances:
     ## start matching from the beginning and therefore to match anywhere you
     ## must prepend `.*`. For exact matches append `$`.
     ##
+    ## Devices from pseudo or memory-based file systems can be excluded by disabling the
+    ## `include_all_devices` option.
+    ##
     ## When conflicts arise, this will override `file_system_whitelist`.
     #
     # file_system_blacklist:
@@ -97,6 +100,14 @@ instances:
     #   - /proc/sys/fs/binfmt_misc
     #   - /dev/sde
     #   - '[FJ]:'
+
+    ## @param include_all_devices - boolean - optional - default: true
+    ## Instruct the check to collect from all devices, including non-physical devices.
+    ## Set this to false to exclude pseudo, memory, duplicate or inaccessible file systems.
+    ##
+    ## For more fine-grained control, use the inclusion and exclusion options.
+    #
+    # include_all_devices: true
 
     ## @param service_check_rw - boolean - optional - default: false
     ## Instruct the check to notify based on partition state.

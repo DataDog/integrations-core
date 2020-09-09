@@ -81,6 +81,8 @@ class HAProxy(AgentCheck):
         # https://en.wikipedia.org/wiki/Autovivification
         # https://gist.github.com/hrldcpr/2012250
         self.host_status = defaultdict(lambda: defaultdict(lambda: None))
+        self.tags_regex = self.instance.get('tags_regex')
+        self.custom_tags = tuple(self.instance.get('tags', []))
 
     METRICS = {
         "qcur": ("gauge", "queue.current"),
@@ -155,9 +157,6 @@ class HAProxy(AgentCheck):
         services_incl_filter = instance.get('services_include', [])
         services_excl_filter = instance.get('services_exclude', [])
 
-        tags_regex = instance.get('tags_regex', None)
-        custom_tags = instance.get('tags', [])
-
         active_tag_bool = instance.get('active_tag', False)
         active_tag = []
         if active_tag_bool:
@@ -173,7 +172,6 @@ class HAProxy(AgentCheck):
                 tables,
                 services_incl_filter=services_incl_filter,
                 services_excl_filter=services_excl_filter,
-                custom_tags=custom_tags,
             )
 
         self._process_data(
@@ -188,8 +186,6 @@ class HAProxy(AgentCheck):
             services_excl_filter=services_excl_filter,
             collate_status_tags_per_host=collate_status_tags_per_host,
             count_status_by_service=count_status_by_service,
-            custom_tags=custom_tags,
-            tags_regex=tags_regex,
             active_tag=active_tag,
             enable_service_check=enable_service_check,
         )
@@ -353,13 +349,11 @@ class HAProxy(AgentCheck):
         services_excl_filter=None,
         collate_status_tags_per_host=False,
         count_status_by_service=True,
-        custom_tags=None,
-        tags_regex=None,
         active_tag=None,
         enable_service_check=False,
     ):
-        ''' Main data-processing loop. For each piece of useful data, we'll
-        either save a metric, save an event or both. '''
+        """Main data-processing loop. For each piece of useful data, we'll
+        either save a metric, save an event or both."""
 
         # Split the first line into an index of fields
         # The line looks like (broken up onto multiple lines)
@@ -380,11 +374,7 @@ class HAProxy(AgentCheck):
 
         # Sanitize CSV, handle line breaks
         data = self._sanitize_lines(data)
-        custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
-
-        # First initialize here so that it is defined whether or not we enter the for loop
-        line_tags = list(custom_tags)
 
         # Skip the first line, go backwards to set back_or_front
         for line in data[:0:-1]:
@@ -405,9 +395,9 @@ class HAProxy(AgentCheck):
 
             # Clone the list to avoid extending the original
             # which would carry over previous iteration tags
-            line_tags = list(custom_tags)
+            line_tags = list(self.custom_tags)
 
-            regex_tags = self._tag_from_regex(tags_regex, data_dict['pxname'])
+            regex_tags = self._tag_from_regex(data_dict['pxname'])
             if regex_tags:
                 line_tags.extend(regex_tags)
 
@@ -433,7 +423,6 @@ class HAProxy(AgentCheck):
             if enable_service_check:
                 self._process_service_check(
                     data_dict,
-                    url,
                     tag_by_host=tag_service_check_by_host,
                     services_incl_filter=services_incl_filter,
                     services_excl_filter=services_excl_filter,
@@ -448,7 +437,6 @@ class HAProxy(AgentCheck):
                 services_excl_filter=services_excl_filter,
                 collate_status_tags_per_host=collate_status_tags_per_host,
                 count_status_by_service=count_status_by_service,
-                custom_tags=line_tags,
                 active_tag=active_tag,
             )
 
@@ -456,7 +444,6 @@ class HAProxy(AgentCheck):
                 self.hosts_statuses,
                 services_incl_filter=services_incl_filter,
                 services_excl_filter=services_excl_filter,
-                custom_tags=line_tags,
                 active_tag=active_tag,
             )
 
@@ -550,8 +537,7 @@ class HAProxy(AgentCheck):
             hosts_statuses[key] += 1
 
     def _should_process(self, data_dict, collect_aggregates_only):
-        """if collect_aggregates_only, we process only the aggregates
-        """
+        """if collect_aggregates_only, we process only the aggregates"""
         if is_affirmative(collect_aggregates_only):
             return self._is_aggregate(data_dict)
         elif str(collect_aggregates_only).lower() == 'both':
@@ -574,17 +560,17 @@ class HAProxy(AgentCheck):
                 return True
         return False
 
-    def _tag_from_regex(self, tags_regex, service_name):
+    def _tag_from_regex(self, service_name):
         """
         Use a named regexp on the current service_name to create extra tags
         Example HAProxy service name: be_edge_http_sre-prod_elk
         Example named regexp: be_edge_http_(?P<team>[a-z]+)\\-(?P<env>[a-z]+)_(?P<app>.*)
         Resulting tags: ['team:sre','env:prod','app:elk']
         """
-        if not tags_regex or not service_name:
+        if not self.tags_regex or not service_name:
             return []
 
-        match = re.compile(tags_regex).match(service_name)
+        match = re.compile(self.tags_regex).match(service_name)
 
         if not match:
             return []
@@ -608,10 +594,9 @@ class HAProxy(AgentCheck):
         return formatted_status
 
     def _process_backend_hosts_metric(
-        self, hosts_statuses, services_incl_filter=None, services_excl_filter=None, custom_tags=None, active_tag=None
+        self, hosts_statuses, services_incl_filter=None, services_excl_filter=None, active_tag=None
     ):
         agg_statuses = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
-        custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
 
         for host_status, count in iteritems(hosts_statuses):
@@ -633,8 +618,9 @@ class HAProxy(AgentCheck):
                 agg_statuses[service]
 
         for service in agg_statuses:
-            tags = ['haproxy_service:%s' % service]
-            tags.extend(custom_tags)
+            tags = self._tag_from_regex(service)
+            tags.append('haproxy_service:%s' % service)
+            tags.extend(self.custom_tags)
             tags.extend(active_tag)
             self._handle_legacy_service_tag(tags, service)
 
@@ -654,11 +640,9 @@ class HAProxy(AgentCheck):
         services_excl_filter=None,
         collate_status_tags_per_host=False,
         count_status_by_service=True,
-        custom_tags=None,
         active_tag=None,
     ):
         agg_statuses_counter = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
-        custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
         # Initialize `statuses_counter`: every value is a defaultdict initialized with the correct
         # keys, which depends on the `collate_status_tags_per_host` option
@@ -686,14 +670,14 @@ class HAProxy(AgentCheck):
             if self._is_service_excl_filtered(service, services_incl_filter, services_excl_filter):
                 continue
 
-            tags = []
+            tags = self._tag_from_regex(service)
             if count_status_by_service:
                 tags.append('haproxy_service:%s' % service)
                 self._handle_legacy_service_tag(tags, service)
             if hostname:
                 tags.append('backend:%s' % hostname)
 
-            tags.extend(custom_tags)
+            tags.extend(self.custom_tags)
             tags.extend(active_tag)
 
             counter_status = status
@@ -761,15 +745,10 @@ class HAProxy(AgentCheck):
                 except ValueError:
                     pass
 
-    def _process_stick_table_metrics(
-        self, data, services_incl_filter=None, services_excl_filter=None, custom_tags=None
-    ):
+    def _process_stick_table_metrics(self, data, services_incl_filter=None, services_excl_filter=None):
         """
         Stick table metrics processing. Two metrics will be created for each stick table (current and max size)
         """
-
-        custom_tags = [] if not custom_tags else custom_tags
-
         for line in data:
             table = StickTable.parse(line)
             if table is None:
@@ -777,16 +756,17 @@ class HAProxy(AgentCheck):
             if self._is_service_excl_filtered(table.name, services_incl_filter, services_excl_filter):
                 continue
 
-            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type] + custom_tags
+            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type]
+            tags.extend(self.custom_tags)
             self.gauge("haproxy.sticktable.size", float(table.size), tags=tags)
             self.gauge("haproxy.sticktable.used", float(table.used), tags=tags)
 
     def _process_event(self, data, url, services_incl_filter=None, services_excl_filter=None, custom_tags=None):
-        '''
+        """
         Main event processing loop. An event will be created for a service
         status change.
         Service checks on the server side can be used to provide the same functionality
-        '''
+        """
         hostname = data['svname']
         service_name = data['pxname']
         key = "%s:%s" % (hostname, service_name)
@@ -847,11 +827,11 @@ class HAProxy(AgentCheck):
         }
 
     def _process_service_check(
-        self, data, url, tag_by_host=False, services_incl_filter=None, services_excl_filter=None, custom_tags=None
+        self, data, tag_by_host=False, services_incl_filter=None, services_excl_filter=None, custom_tags=None
     ):
-        ''' Report a service check, tagged by the service and the backend.
-            Statuses are defined in `STATUS_TO_SERVICE_CHECK` mapping.
-        '''
+        """Report a service check, tagged by the service and the backend.
+        Statuses are defined in `STATUS_TO_SERVICE_CHECK` mapping.
+        """
         custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']

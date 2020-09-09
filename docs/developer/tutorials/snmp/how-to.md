@@ -32,7 +32,7 @@ instances:
   port: 1161
 ```
 
-1. The `community_string` must match the corresponding device `.snmprec` file name.
+1. The `community_string` must match the corresponding device `.snmprec` file name. For example, `myprofile.snmprec` gives `community_string: myprofile`. This also applies to [walk files](#generate-simulation-data-from-a-walk): `myprofile.snmpwalk` gives `community_string: myprofile`.
 2. To find the IP address of the SNMP container, run:
 
 ```bash
@@ -118,6 +118,119 @@ SNMP table: hrStorageTable
 
 (In this case, we added the `-Os` option which prints only the last symbolic element and reduces the output of `hrStorageTypes`.)
 
+#### Walk query
+
+A walk query can be used to query all OIDs in a given [sub-tree](./introduction.md#the-oid-tree).
+
+The `snmpwalk` command can be used to perform a walk query.
+
+To facilitate usage of walk files for debugging, the following options are recommended: `-ObentU`. Here's what each option does:
+
+- `b`: do not break OID indexes down.
+- `e`: print enums numerically (for example, `24` instead of `softwareLoopback(24)`).
+- `n`: print OIDs numerically (for example, `.1.3.6.1.2.1.2.2.1.1.1` instead of `IF-MIB::ifIndex.1`).
+- `t`: print timeticks numerically (for example, `4226041` instead of `Timeticks: (4226041) 11:44:20.41`).
+- `U`: don't print units.
+
+For example, the following command gets a walk of the `1.3.6.1.2.1.1` (`system`) sub-tree:
+
+```console
+$ snmpwalk -v 2c -c public -ObentU 127.0.0.1:1161 1.3.6.1.2.1.1
+.1.3.6.1.2.1.1.1.0 = STRING: Linux 41ba948911b9 4.9.87-linuxkit-aufs #1 SMP Wed Mar 14 15:12:16 UTC 2018 x86_64
+.1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.8072.3.2.10
+.1.3.6.1.2.1.1.3.0 = 4226041
+.1.3.6.1.2.1.1.4.0 = STRING: root@localhost
+.1.3.6.1.2.1.1.5.0 = STRING: 41ba948911b9
+.1.3.6.1.2.1.1.6.0 = STRING: Unknown
+.1.3.6.1.2.1.1.8.0 = 9
+.1.3.6.1.2.1.1.9.1.2.1 = OID: .1.3.6.1.6.3.11.3.1.1
+.1.3.6.1.2.1.1.9.1.2.2 = OID: .1.3.6.1.6.3.15.2.1.1
+.1.3.6.1.2.1.1.9.1.2.3 = OID: .1.3.6.1.6.3.10.3.1.1
+.1.3.6.1.2.1.1.9.1.2.4 = OID: .1.3.6.1.6.3.1
+.1.3.6.1.2.1.1.9.1.2.5 = OID: .1.3.6.1.2.1.49
+.1.3.6.1.2.1.1.9.1.2.6 = OID: .1.3.6.1.2.1.4
+.1.3.6.1.2.1.1.9.1.2.7 = OID: .1.3.6.1.2.1.50
+.1.3.6.1.2.1.1.9.1.2.8 = OID: .1.3.6.1.6.3.16.2.2.1
+.1.3.6.1.2.1.1.9.1.2.9 = OID: .1.3.6.1.6.3.13.3.1.3
+.1.3.6.1.2.1.1.9.1.2.10 = OID: .1.3.6.1.2.1.92
+.1.3.6.1.2.1.1.9.1.3.1 = STRING: The MIB for Message Processing and Dispatching.
+.1.3.6.1.2.1.1.9.1.3.2 = STRING: The management information definitions for the SNMP User-based Security Model.
+.1.3.6.1.2.1.1.9.1.3.3 = STRING: The SNMP Management Architecture MIB.
+.1.3.6.1.2.1.1.9.1.3.4 = STRING: The MIB module for SNMPv2 entities
+.1.3.6.1.2.1.1.9.1.3.5 = STRING: The MIB module for managing TCP implementations
+.1.3.6.1.2.1.1.9.1.3.6 = STRING: The MIB module for managing IP and ICMP implementations
+.1.3.6.1.2.1.1.9.1.3.7 = STRING: The MIB module for managing UDP implementations
+.1.3.6.1.2.1.1.9.1.3.8 = STRING: View-based Access Control Model for SNMP.
+.1.3.6.1.2.1.1.9.1.3.9 = STRING: The MIB modules for managing SNMP Notification, plus filtering.
+.1.3.6.1.2.1.1.9.1.3.10 = STRING: The MIB module for logging SNMP Notifications.
+.1.3.6.1.2.1.1.9.1.4.1 = 9
+.1.3.6.1.2.1.1.9.1.4.2 = 9
+.1.3.6.1.2.1.1.9.1.4.3 = 9
+.1.3.6.1.2.1.1.9.1.4.4 = 9
+.1.3.6.1.2.1.1.9.1.4.5 = 9
+.1.3.6.1.2.1.1.9.1.4.6 = 9
+.1.3.6.1.2.1.1.9.1.4.7 = 9
+.1.3.6.1.2.1.1.9.1.4.8 = 9
+.1.3.6.1.2.1.1.9.1.4.9 = 9
+.1.3.6.1.2.1.1.9.1.4.10 = 9
+```
+
+As you can see, all OIDs that the device has available in the `.1.3.6.1.2.1.1.*` sub-tree are returned. In particular, one can recognize:
+
+- `sysObjectID` (`.1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.8072.3.2.10`)
+- `sysUpTime` (`.1.3.6.1.2.1.1.3.0 = 4226041`)
+- `sysName` (`.1.3.6.1.2.1.1.5.0 = STRING: 41ba948911b9`).
+
+Here is another example that queries the entire contents of `ifTable` (the table in `IF-MIB` that contains information about network interfaces):
+
+```console
+snmpwalk -v 2c -c public -OentU 127.0.0.1:1161 1.3.6.1.2.1.2.2
+.1.3.6.1.2.1.2.2.1.1.1 = INTEGER: 1
+.1.3.6.1.2.1.2.2.1.1.90 = INTEGER: 90
+.1.3.6.1.2.1.2.2.1.2.1 = STRING: lo
+.1.3.6.1.2.1.2.2.1.2.90 = STRING: eth0
+.1.3.6.1.2.1.2.2.1.3.1 = INTEGER: 24
+.1.3.6.1.2.1.2.2.1.3.90 = INTEGER: 6
+.1.3.6.1.2.1.2.2.1.4.1 = INTEGER: 65536
+.1.3.6.1.2.1.2.2.1.4.90 = INTEGER: 1500
+.1.3.6.1.2.1.2.2.1.5.1 = Gauge32: 10000000
+.1.3.6.1.2.1.2.2.1.5.90 = Gauge32: 4294967295
+.1.3.6.1.2.1.2.2.1.6.1 = STRING:
+.1.3.6.1.2.1.2.2.1.6.90 = STRING: 2:42:ac:11:0:2
+.1.3.6.1.2.1.2.2.1.7.1 = INTEGER: 1
+.1.3.6.1.2.1.2.2.1.7.90 = INTEGER: 1
+.1.3.6.1.2.1.2.2.1.8.1 = INTEGER: 1
+.1.3.6.1.2.1.2.2.1.8.90 = INTEGER: 1
+.1.3.6.1.2.1.2.2.1.9.1 = 0
+.1.3.6.1.2.1.2.2.1.9.90 = 0
+.1.3.6.1.2.1.2.2.1.10.1 = Counter32: 5300203
+.1.3.6.1.2.1.2.2.1.10.90 = Counter32: 2928
+.1.3.6.1.2.1.2.2.1.11.1 = Counter32: 63808
+.1.3.6.1.2.1.2.2.1.11.90 = Counter32: 40
+.1.3.6.1.2.1.2.2.1.12.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.12.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.13.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.13.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.14.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.14.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.15.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.15.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.16.1 = Counter32: 5300203
+.1.3.6.1.2.1.2.2.1.16.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.17.1 = Counter32: 63808
+.1.3.6.1.2.1.2.2.1.17.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.18.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.18.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.19.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.19.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.20.1 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.20.90 = Counter32: 0
+.1.3.6.1.2.1.2.2.1.21.1 = Gauge32: 0
+.1.3.6.1.2.1.2.2.1.21.90 = Gauge32: 0
+.1.3.6.1.2.1.2.2.1.22.1 = OID: .0.0
+.1.3.6.1.2.1.2.2.1.22.90 = OID: .0.0
+```
+
 ## Generate table simulation data
 
 If you'd like to generate [simulation data for tables](./sim-format.md#tables) automatically, you can use the [`mib2dev.py`](http://snmplabs.com/snmpsim/documentation/building-simulation-data.html?highlight=snmpsim-record-mibs#examples) tool shipped with `snmpsim`. (This tool will be renamed as `snmpsim-record-mibs` in the upcoming 1.0 release of the library.)
@@ -135,6 +248,12 @@ For example:
 ```bash
 mib2dev.py --mib-module=<MIB> --start-oid=1.3.6.1.4.1.674.10892.1.400.20 --stop-oid=1.3.6.1.4.1.674.10892.1.600.12 > /path/to/mytable.snmprec
 ```
+
+## Generate simulation data from a walk
+
+As an alternative to [`.snmprec` files](./sim-format.md), it is possible to [use a walk as simulation data](http://snmplabs.com/snmpsim/documentation/building-simulation-data.html#using-snmpwalk-reporting). This is especially useful when debugging live devices, since you can export the device walk and use this real data locally.
+
+To do so, paste the output of a [walk query](#walk-query) into a `.snmpwalk` file, and add this file to the test data directory. Then, pass the name of the walk file as the `community_string`. For more information, see [Test SNMP profiles locally](#test-snmp-profiles-locally).
 
 ## Find where MIBs are installed on your machine
 

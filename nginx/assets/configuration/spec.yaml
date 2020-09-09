@@ -34,6 +34,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: use_plus_api_stream
+      description: |
+       If you are using the commercial version of NGINX, for releases R13 and above,
+       there is an API that replaces the extended status API.
+       See https://www.nginx.com/blog/nginx-plus-r13-released/
+       If you're not using Stream servers, you can disable this part to remove errors in NGINX Plus API calls.
+       To use it set `use_plus_api_stream` to `true`.
+      value:
+        type: boolean
+        example: false
+        default: true
     - name: plus_api_version
       description: Specify the version of the Plus API to use. The check supports versions 1 & 2.
       value:
