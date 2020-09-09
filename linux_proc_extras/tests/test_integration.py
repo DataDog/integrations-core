@@ -25,6 +25,7 @@ def test_check_no_irq(aggregator, check):
     for metric in common.EXPECTED_BASE_METRICS:
         aggregator.assert_metric_has_tag(metric, common.EXPECTED_TAG)
 
+
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)
