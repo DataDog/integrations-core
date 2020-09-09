@@ -280,7 +280,7 @@ def test_count_hosts_statuses(aggregator, check, haproxy_mock):
 def test_optional_tags(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     config['tags'] = ['new-tag', 'my:new:tag']
-    haproxy_check = check(BASE_CONFIG)
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'new-tag')
@@ -295,7 +295,7 @@ def test_regex_tags(aggregator, check, haproxy_mock):
     config['tags'] = ['region:infra']
     # OS3 service: be_edge_http_sre-production_elk-kibana
     config['tags_regex'] = r'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
-    haproxy_check = check(BASE_CONFIG)
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     expected_tags = [
@@ -310,8 +310,37 @@ def test_regex_tags(aggregator, check, haproxy_mock):
         'team:sre',
         'backend:BACKEND',
     ]
+
     aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
+
+    aggregator.assert_metric(
+        'haproxy.count_per_status',
+        tags=[
+            'service:be_edge_http_sre-production_elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+            'region:infra',
+            'security:edge_http',
+            'app:elk-kibana',
+            'env:production',
+            'team:sre',
+            'status:up',
+        ],
+    )
+    aggregator.assert_metric(
+        'haproxy.backend_hosts',
+        tags=[
+            'security:edge_http',
+            'team:sre',
+            'env:production',
+            'app:elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+            'region:infra',
+            'service:be_edge_http_sre-production_elk-kibana',
+            'available:true',
+        ],
+    )
+
     tags = [
         'service:be_edge_http_sre-production_elk-kibana',
         'haproxy_service:be_edge_http_sre-production_elk-kibana',

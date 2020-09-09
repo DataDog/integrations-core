@@ -24,15 +24,15 @@ yum install -y kernel-headers-$(uname -r)
 
 ### Configuration
 
-1. Ensure that the `oom_kill.d/conf.yaml` file is present in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OOM Kill metrics.
+1. In the `system-probe.yaml` file at the root of your Agent's configuration directory, add the following configuration:
 
-2. Ensure the following configuration is set in `system_probe.yaml`:
+    ```yaml
+    system_probe_config:
+        enabled: true
+        enable_oom_kill: true
+    ```
 
-```yaml
-system_probe_config:
-    enabled: true
-    enable_oom_kill: true
-```
+2. Ensure that the `oom_kill.d/conf.yaml` file is present in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OOM Kill metrics.
 
 3. [Restart the Agent][2].
 
