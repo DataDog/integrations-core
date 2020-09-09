@@ -22,7 +22,7 @@ def get_queue_manager_connection(config):
     if config.ssl:
         # There is a memory leak when SSL connections fail.
         # By testing with a normal connection first, we avoid making unnecessary SSL connections.
-        # This does not fix the memory leak but mitigate it's likelihood.
+        # This does not fix the memory leak but mitigate its likelihood.
         # Details: https://github.com/dsuch/pymqi/issues/208
         try:
             get_normal_connection(config)
