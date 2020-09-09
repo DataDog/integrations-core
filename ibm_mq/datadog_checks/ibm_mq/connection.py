@@ -20,6 +20,15 @@ def get_queue_manager_connection(config):
     Get the queue manager connection
     """
     if config.ssl:
+        # There is a memory leak when SSL connections fail.
+        # By testing with a normal connection first, we avoid making unnecessary SSL connections.
+        # This does not fix the memory leak but mitigate it's likelihood.
+        # Details: https://github.com/dsuch/pymqi/issues/208
+        try:
+            get_normal_connection(config)
+        except pymqi.MQMIError as e:
+            if e.reason == pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE:
+                raise
         return get_ssl_connection(config)
     else:
         return get_normal_connection(config)
