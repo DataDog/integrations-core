@@ -18,6 +18,7 @@ PASSWORD = 'passw0rd'
 
 QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
+CHANNEL_SSL = 'PYMQI.SSL.SVRCONN'
 
 QUEUE = 'DEV.QUEUE.1'
 
@@ -35,6 +36,22 @@ COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
 INSTANCE = {
     'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+    'collect_statistics_metrics': True,
+    'ssl_auth': 'yes',
+    'ssl_cipher_spec': 'TLS_RSA_WITH_AES_256_CBC_SHA256',
+    'ssl_key_repository_location': '/opt/pki/keys/client',
+}
+
+INSTANCE_SSL = {
+    'channel': CHANNEL_SSL,
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
     'port': PORT,
