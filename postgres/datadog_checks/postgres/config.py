@@ -29,13 +29,8 @@ class PostgresConfig:
         self.dbname = instance.get('dbname', 'postgres')
 
         self.application_name = instance.get('application_name', 'datadog-agent')
-        if PY3 and not self.application_name.isascii():
+        if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
-        elif PY2:
-            try:
-                self.application_name.encode('ascii')
-            except UnicodeEncodeError:
-                raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = instance.get('query_timeout')
         self.relations = instance.get('relations', [])
@@ -119,3 +114,14 @@ class PostgresConfig:
             except Exception as e:
                 raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
         return custom_metrics
+
+    @staticmethod
+    def isascii(application_name):
+        if PY3:
+            return application_name.isascii()
+        elif PY2:
+            try:
+                application_name.encode('ascii')
+                return True
+            except UnicodeEncodeError:
+                return False
