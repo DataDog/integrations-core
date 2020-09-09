@@ -11,13 +11,12 @@ from collections import defaultdict
 # Queries
 ALL_INSTANCES = 'ALL'
 
-INSTANCES_QUERY = """select instance_name
-                     from sys.dm_os_performance_counters
-                     where counter_name=? and instance_name!='_Total';"""
 
+class BaseSqlServerMetric(object):
+    """Base class for SQL Server metrics collection operations."""
 
-class SqlServerMetric(object):
-    """General class for common methods, should never be instantiated directly"""
+    TABLE = None
+    DEFAULT_METRIC_TYPE = None
     QUERY_BASE = None
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
@@ -64,7 +63,9 @@ class SqlServerMetric(object):
         raise NotImplementedError
 
 
-class SqlSimpleMetric(SqlServerMetric):
+class SqlSimpleMetric(BaseSqlServerMetric):
+    TABLE = 'sys.dm_os_performance_counters'
+    DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
     QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
                     from sys.dm_os_performance_counters where counter_name in ({})"""
 
@@ -94,11 +95,17 @@ class SqlSimpleMetric(SqlServerMetric):
                         break
 
 
-class SqlFractionMetric(SqlServerMetric):
+class SqlFractionMetric(BaseSqlServerMetric):
+    TABLE = 'sys.dm_os_performance_counters'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select counter_name, cntr_type, cntr_value, instance_name, object_name
                     from sys.dm_os_performance_counters
                     where counter_name in ({})
                     order by cntr_type;"""
+
+    INSTANCES_QUERY = """select instance_name
+                         from sys.dm_os_performance_counters
+                         where counter_name=? and instance_name!='_Total';"""
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -117,7 +124,7 @@ class SqlFractionMetric(SqlServerMetric):
 
     def set_instances(self, cursor):
         if self.instance == ALL_INSTANCES:
-            cursor.execute(INSTANCES_QUERY, (self.sql_name,))
+            cursor.execute(self.INSTANCES_QUERY, (self.sql_name,))
             self.instances = [row.instance_name for row in cursor.fetchall()]
         else:
             self.instances = [self.instance]
@@ -197,7 +204,9 @@ class SqlIncrFractionMetric(SqlFractionMetric):
         self.past_values[key] = (value, base)
 
 
-class SqlOsWaitStat(SqlServerMetric):
+class SqlOsWaitStat(BaseSqlServerMetric):
+    TABLE = 'sys.dm_os_wait_stats'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select * from sys.dm_os_wait_stats where wait_type in ({})"""
 
     @classmethod
@@ -221,7 +230,9 @@ class SqlOsWaitStat(SqlServerMetric):
         self.report_function(metric_name, value, tags=self.tags)
 
 
-class SqlIoVirtualFileStat(SqlServerMetric):
+class SqlIoVirtualFileStat(BaseSqlServerMetric):
+    TABLE = 'sys.dm_io_virtual_file_stats'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from sys.dm_io_virtual_file_stats(null, null)"
 
     @classmethod
@@ -263,7 +274,9 @@ class SqlIoVirtualFileStat(SqlServerMetric):
             self.report_function(metric_name, report_value, tags=metric_tags)
 
 
-class SqlOsMemoryClerksStat(SqlServerMetric):
+class SqlOsMemoryClerksStat(BaseSqlServerMetric):
+    TABLE = 'sys.dm_os_memory_clerks'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select * from sys.dm_os_memory_clerks where type in ({})"""
 
     @classmethod
@@ -288,7 +301,9 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-class SqlOsSchedulers(SqlServerMetric):
+class SqlOsSchedulers(BaseSqlServerMetric):
+    TABLE = 'sys.dm_os_schedulers'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from sys.dm_os_schedulers"
 
     @classmethod
@@ -311,7 +326,9 @@ class SqlOsSchedulers(SqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-class SqlOsTasks(SqlServerMetric):
+class SqlOsTasks(BaseSqlServerMetric):
+    TABLE = 'sys.dm_os_tasks'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from sys.dm_os_tasks"
 
     @classmethod
@@ -332,3 +349,12 @@ class SqlOsTasks(SqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
+VALID_TABLES = set(cls.TABLE for cls in BaseSqlServerMetric.__subclasses__())
+TABLE_MAPPING = {
+    cls.TABLE: (cls.DEFAULT_METRIC_TYPE, cls)
+    for cls in BaseSqlServerMetric.__subclasses__()
+    if cls.TABLE != DEFAULT_PERFORMANCE_TABLE
+}

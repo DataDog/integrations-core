@@ -17,6 +17,7 @@ from datadog_checks.base.config import is_affirmative
 
 from . import metrics
 from .connection import Connection, SQLConnectionError
+from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from .utils import set_default_driver_conf
 
 try:
@@ -44,14 +45,6 @@ PERF_AVERAGE_BULK = 1073874176
 PERF_COUNTER_BULK_COUNT = 272696576
 PERF_COUNTER_LARGE_RAWCOUNT = 65792
 
-# Performance tables
-DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
-DM_OS_WAIT_STATS_TABLE = "sys.dm_os_wait_stats"
-DM_OS_MEMORY_CLERKS_TABLE = "sys.dm_os_memory_clerks"
-DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
-DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
-DM_OS_TASKS = "sys.dm_os_tasks"
-
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
                         from sys.dm_os_performance_counters
@@ -70,6 +63,7 @@ class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
+    # These metrics use the default performance table
     PERF_METRICS = [
         ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
         ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
@@ -84,24 +78,15 @@ class SQLServer(AgentCheck):
     ]
 
     TASK_SCHEDULER_METRICS = [
-        ('sqlserver.scheduler.current_tasks_count', DM_OS_SCHEDULERS, 'current_tasks_count'),
-        ('sqlserver.scheduler.current_workers_count', DM_OS_SCHEDULERS, 'current_workers_count'),
-        ('sqlserver.scheduler.active_workers_count', DM_OS_SCHEDULERS, 'active_workers_count'),
-        ('sqlserver.scheduler.runnable_tasks_count', DM_OS_SCHEDULERS, 'runnable_tasks_count'),
-        ('sqlserver.scheduler.work_queue_count', DM_OS_SCHEDULERS, 'work_queue_count'),
-        ('sqlserver.task.context_switches_count', DM_OS_TASKS, 'context_switches_count'),
-        ('sqlserver.task.pending_io_count', DM_OS_TASKS, 'pending_io_count'),
-        ('sqlserver.task.pending_io_byte_count', DM_OS_TASKS, 'pending_io_byte_count'),
-        ('sqlserver.task.pending_io_byte_average', DM_OS_TASKS, 'pending_io_byte_average'),
-    ]
-
-    valid_tables = [
-        DEFAULT_PERFORMANCE_TABLE,
-        DM_OS_WAIT_STATS_TABLE,
-        DM_OS_MEMORY_CLERKS_TABLE,
-        DM_OS_VIRTUAL_FILE_STATS,
-        DM_OS_SCHEDULERS,
-        DM_OS_TASKS,
+        ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
+        ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),
+        ('sqlserver.scheduler.active_workers_count', 'sys.dm_os_schedulers', 'active_workers_count'),
+        ('sqlserver.scheduler.runnable_tasks_count', 'sys.dm_os_schedulers', 'runnable_tasks_count'),
+        ('sqlserver.scheduler.work_queue_count', 'sys.dm_os_schedulers', 'work_queue_count'),
+        ('sqlserver.task.context_switches_count', 'sys.dm_os_tasks', 'context_switches_count'),
+        ('sqlserver.task.pending_io_count', 'sys.dm_os_tasks', 'pending_io_count'),
+        ('sqlserver.task.pending_io_byte_count', 'sys.dm_os_tasks', 'pending_io_byte_count'),
+        ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -207,7 +192,7 @@ class SQLServer(AgentCheck):
             cfg['tags'] = custom_tags
 
             db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
-            if db_table not in self.valid_tables:
+            if db_table not in VALID_TABLES:
                 self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
                 continue
 
@@ -284,7 +269,7 @@ class SQLServer(AgentCheck):
 
     def typed_metric(self, cfg_inst, table, base_name=None, user_type=None, sql_type=None, column=None):
         """
-        Create the appropriate SqlServerMetric object, each implementing its method to
+        Create the appropriate BaseSqlServerMetric object, each implementing its method to
         fetch the metrics properly.
         If a `type` was specified in the config, it is used to report the value
         directly fetched from SQLServer. Otherwise, it is decided based on the
@@ -306,14 +291,9 @@ class SQLServer(AgentCheck):
             else:
                 metric_type, cls = metric_type_mapping[sql_type]
         else:
-            table_type_mapping = {
-                DM_OS_WAIT_STATS_TABLE: (self.gauge, metrics.SqlOsWaitStat),
-                DM_OS_MEMORY_CLERKS_TABLE: (self.gauge, metrics.SqlOsMemoryClerksStat),
-                DM_OS_VIRTUAL_FILE_STATS: (self.gauge, metrics.SqlIoVirtualFileStat),
-                DM_OS_SCHEDULERS: (self.gauge, metrics.SqlOsSchedulers),
-                DM_OS_TASKS: (self.gauge, metrics.SqlOsTasks),
-            }
-            metric_type, cls = table_type_mapping[table]
+            # Lookup metrics classes by their associated table
+            metric_type_str, cls = metrics.TABLE_MAPPING[table]
+            metric_type = getattr(self, metric_type_str)
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
