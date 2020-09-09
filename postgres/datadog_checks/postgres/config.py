@@ -18,24 +18,24 @@ class PostgresConfig:
     def __init__(self, instance):
         self.host = instance.get('host', '')
         if not self.host:
-            raise ConfigurationError('Please specify a Postgres host to connect to.')
+            raise ConfigurationError('Specify a Postgres host to connect to.')
         self.port = instance.get('port', '')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
         if not self.user:
-            raise ConfigurationError('Please specify a user to connect to Postgres as.')
+            raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if PY3 and not self.application_name.isascii():
-            raise ConfigurationError("Application name can only include ASCII characters")
+            raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
         elif PY2:
             try:
                 self.application_name.encode('ascii')
             except UnicodeEncodeError:
-                raise ConfigurationError("Application name can only include ASCII characters")
+                raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = instance.get('query_timeout')
         self.relations = instance.get('relations', [])
