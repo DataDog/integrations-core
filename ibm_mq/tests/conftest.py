@@ -7,12 +7,11 @@ import os
 import re
 
 import pytest
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from six.moves import range
 
-from datadog_checks.dev import docker_run, TempDir, run_command
-from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.ibm_mq import IbmMqCheck
-
 from . import common
 
 log = logging.getLogger(__file__)
@@ -127,19 +126,12 @@ def dd_environment():
     else:
         raise RuntimeError('Invalid version: {}'.format(common.MQ_VERSION))
 
-    with TempDir('ibm_mq') as tmp_dir:
-        pki_dir = os.path.join(tmp_dir, 'pki')
-        env = {
-            'COMPOSE_DIR': common.COMPOSE_DIR,
-            'IBM_MQ_PKI_DIR': pki_dir,
-        }
-
-        e2e_meta = copy.deepcopy(common.E2E_METADATA)
-        e2e_meta.setdefault('docker_volumes', [])
-        e2e_meta['docker_volumes'].append("{}:/opt/pki".format(pki_dir))
+    e2e_meta = copy.deepcopy(common.E2E_METADATA)
+    e2e_meta.setdefault('docker_volumes', [])
+    e2e_meta['docker_volumes'].append("{}:/opt/pki/keys".format(os.path.join(common.HERE, 'keys')))
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[
+        common.COMPOSE_FILE_PATH, conditions=[
             CheckDockerLogs('ibm_mq1', log_pattern),
         ], sleep=10,
     ):
