@@ -67,7 +67,6 @@ files:
             value:
               type: boolean
               example: false
-              default: false
           - name: timeout
             description: The timeout for connecting to `server` or `backup_servers`.
             value:
