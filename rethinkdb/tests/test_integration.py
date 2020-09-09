@@ -6,8 +6,8 @@ from typing import ContextManager, Set
 
 import mock
 import pytest
-
 import rethinkdb
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.base.types import ServiceCheckStatus

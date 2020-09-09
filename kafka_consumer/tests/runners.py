@@ -5,10 +5,9 @@ import os
 import threading
 import time
 
+from kafka import KafkaConsumer, KafkaProducer
 from kazoo.client import KazooClient
 from six import binary_type, iteritems
-
-from kafka import KafkaConsumer, KafkaProducer
 
 from .common import KAFKA_CONNECT_STR, PARTITIONS, ZK_CONNECT_STR
 
