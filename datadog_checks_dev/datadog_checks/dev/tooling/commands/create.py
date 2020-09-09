@@ -142,8 +142,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             template_fields['terms'] = ''
             template_fields['integration_id'] = kebab_case_name(name)
             template_fields['package_url'] = (
-                f"    \n# The project's main homepage."
-                f"    \nurl='https://github.com/DataDog/integrations-{repo_choice}',"
+                f"\n    # The project's main homepage."
+                f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
             )
     config = construct_template_fields(name, repo_choice, **template_fields)
 
