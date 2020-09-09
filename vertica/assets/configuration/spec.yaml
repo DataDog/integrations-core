@@ -125,51 +125,9 @@ files:
               type: string
               example: <CA_CERT_PATH>
           - template: instances/tags
-          - name: use_global_custom_queries
-            description: |
-              How `global_custom_queries` should be used for this instance. There are 3 options:
-
-              1. true - `global_custom_queries` overrides `custom_queries`
-              2. false - `custom_queries` overrides `global_custom_queries`
-              2. extend - `global_custom_queries` is used in addition to any `custom_queries`
-            value:
-              type: string
-              example: "true"
-              default: "true"
-          - name: custom_queries
-            description: |
-              Each query must have 2 fields:
-
-              1. query - This is the SQL to execute. It can be a simple statement or a multi-line script.
-              2. columns - This is a list representing each column, ordered sequentially from left to right.
-                           The number of columns must equal the number of columns returned in the query.
-                           There are 2 required pieces of data:
-                             a. name - This is the suffix to append to `vertica.` in order to form
-                                       the full metric name. If `type` is `tag`, this column will
-                                       instead be considered a tag and will be applied to every
-                                       metric collected by this particular query.
-                             b. type - This is the submission method (gauge, monotonic_count, etc.).
-                                       This can also be set to `tag` to tag each metric in the row
-                                       with the name and value of the item in this column. You can
-                                       use the `count` type to perform aggregation for queries that
-                                       return multiple rows with the same or no tags.
-              3. tags (optional) - A list of tags to apply to each metric.
-            value:
-              type: array
-              items:
-                type: object
-                properties:
-                  - name: query
-                    type: string
-                  - name: columns
-                    type: array
-                    items:
-                      type: object
-                  - name: tags
-                    type: array
-                    items:
-                      type: string
-              example:
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
                 - query: SELECT force_outer, table_name FROM v_catalog.tables
                   columns:
                     - name: table.force_outer
