@@ -85,7 +85,7 @@ instances:
     # use_global_custom_queries: 'true'
 
     ## @param custom_queries - list of mappings - optional
-    ## Each query must have 2 fields:
+    ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
     ##            Use the pipe `|` if you require a multi-line script.
@@ -101,7 +101,7 @@ instances:
     ##                          with the name and value of the item in this column. You can
     ##                          use the `count` type to perform aggregation for queries that
     ##                          return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored, use this for any column you wish to skip:
+    ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
     #
