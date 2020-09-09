@@ -49,11 +49,11 @@ class MySQLStatementMetrics(object):
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
         try:
-            _collect_per_statement_metrics(instance, db, instance_tags)
+            self.__collect_per_statement_metrics(instance, db, instance_tags)
         except:
             self.log.exception('Unable to collect statement metrics due to an error')
 
-    def _collect_per_statement_metrics(self, instance, db, instance_tags):
+    def __collect_per_statement_metrics(self, instance, db, instance_tags):
         start_time = time.time()
         if not (is_dbm_enabled() and self.is_enabled):
             return []

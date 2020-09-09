@@ -297,7 +297,7 @@ class ExecutionPlansMixin(object):
 
     def _collect_execution_plans(self, db, tags, options, min_collection_interval):
         try:
-            _collect_execution_plans(db, tags, options, min_collection_interval)
+            self.__collect_execution_plans(db, tags, options, min_collection_interval)
         except:
             self.log.exception('Unable to collect execution plans due to an error')
 
