@@ -38,7 +38,6 @@ files:
             type: boolean
             example: false
       - name: collection_level
-        required: false
         description: |
           A number between 1 and 4 to specify how many metrics will be sent
           1: Only basic metrics - 4: every metric available.
@@ -50,7 +49,6 @@ files:
           type: integer
           example: 1
       - name: collection_type
-        required: false
         description: |
           Should be either 'realtime' or 'historical'
           Use 'realtime' to collect metrics about Hosts and VMs.
@@ -62,7 +60,6 @@ files:
           type: string
           example: realtime
       - name: collect_events
-        required: false
         description: |
           Whether or not to pull events data from vCenter.
           If you have multiple configuration instances collecting data from the same vCenter server (i.e if you collect
@@ -83,19 +80,16 @@ files:
           type: boolean
           example: false
       - name: collect_events_only
-        required: false
         description: Collect events only. If enabled, historical and realtime metrics won't be collected.
         value:
           type: boolean
           example: false
       - name: ssl_verify
-        required: false
         description: Set to false to disable SSL verification, when connecting to vCenter
         value:
           type: boolean
           example: true
       - name: ssl_capath
-        required: false
         description: |
           Set to the absolute file path of a directory containing CA certificates 
           in PEM format
@@ -114,7 +108,6 @@ files:
           type: boolean
           example: false
       - name: resource_filters
-        required: false
         description: |
           Each filter in the list is composed of three parameters.
           'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
@@ -184,7 +177,6 @@ files:
               - name: property
                 type: string
       - name: metric_filters
-        required: false
         description: |
           For each resource type (vm, host, datastore, datacenter, cluster) collected,
           you can choose which metric you want to collect using a list of regex.
@@ -231,7 +223,6 @@ files:
               items:
                 type: string
       - name: collect_per_instance_filters
-        required: false
         description: | 
           Some vSphere metrics can be tagged with instance values.
           For each resource type (vm, host, datastore, cluster) to collect,
@@ -283,7 +274,6 @@ files:
           type: boolean
           example: false
       - name: tags_prefix
-        required: false
         description: |
           Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
           Example use cases:
@@ -311,7 +301,6 @@ files:
           type: boolean
           example: false
       - name: attributes_prefix
-        required: false
         description: |
           Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
           Example use cases:
@@ -338,7 +327,6 @@ files:
           type: boolean
           example: false
       - name: threads_count
-        required: false
         description: |
           This integration is using threads internally when making queries against the vCenter API.
           Increasing this value will put more charge onto your vCenter server but may improve performances.
@@ -346,7 +334,6 @@ files:
           type: integer
           example: 4
       - name: excluded_host_tags
-        required: false
         description: |
           The vSphere integration collects tags for every ESXi host or VM in your environment.
           Those tags can be `vcenter_server`, vsphere_type`, `vsphere_host`, `vsphere_folder`, `vsphere_cluster`
@@ -365,7 +352,6 @@ files:
           example: 
             - <HOST_TAG>
       - name: metrics_per_query
-        required: false
         description: |
           This value is used to determine the number of metrics the check will retrieve in the same API call.
           If too many API calls are made by the check, consider increasing this value
@@ -376,7 +362,6 @@ files:
           default: 500
           example: 50
       - name: max_historical_metrics
-        required: false
         description: |
           This value is used to determine the number of historical metrics the check will retrieve in the same API call.
           Historical metrics collection is limited by the "config.vpxd.stats.maxQueryMetrics" configuration option
@@ -387,7 +372,6 @@ files:
           type: integer
           example: 256
       - name: batch_tags_collector_size
-        required: false
         description: |
           To fetch tags from your resources, queries are batched. If tags cannot be collected
           it might be that the batch size is too big.
@@ -395,7 +379,6 @@ files:
           type: integer
           example: 200
       - name: batch_property_collector_size
-        required: false
         description: |
           This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
           when exploring the infrastructure.
@@ -406,7 +389,6 @@ files:
           type: integer
           example: 500
       - name: refresh_infrastructure_cache_interval
-        required: false
         description: |
           Number of seconds between each discovering and caching of your vSphere environment
           Consider increasing this value if your environment is large, as caching can take some time to complete.
@@ -414,7 +396,6 @@ files:
           type: integer
           example: 300
       - name: refresh_metrics_metadata_cache_interval
-        required: false
         description: |
           Number of seconds between each refresh of the metrics metadata cache
         value:
