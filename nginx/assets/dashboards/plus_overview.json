@@ -81,7 +81,7 @@
       "definition": {
         "type": "note",
         "content": "Connections",
-        "background_color": "green",
+        "background_color": "blue",
         "font_size": "18",
         "text_align": "center",
         "show_tick": false,
@@ -129,6 +129,7 @@
             }
           }
         ],
+        "custom_links": [],
         "yaxis": {
           "label": "",
           "scale": "linear",
@@ -139,7 +140,6 @@
         "title": "Dropped connections per second",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -254,10 +254,10 @@
             ]
           }
         ],
+        "custom_links": [],
         "title": "Active connections",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "autoscale": true,
         "precision": 2
       },
@@ -492,6 +492,7 @@
             }
           }
         ],
+        "custom_links": [],
         "yaxis": {
           "label": "",
           "scale": "linear",
@@ -502,7 +503,6 @@
         "title": "Missed bytes in cache",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -528,6 +528,7 @@
             }
           }
         ],
+        "custom_links": [],
         "yaxis": {
           "label": "",
           "scale": "linear",
@@ -538,7 +539,6 @@
         "title": "Bypassed bytes in cached",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -554,7 +554,7 @@
       "definition": {
         "type": "note",
         "content": "Cache",
-        "background_color": "green",
+        "background_color": "blue",
         "font_size": "18",
         "text_align": "center",
         "show_tick": false,
@@ -573,7 +573,7 @@
       "definition": {
         "type": "note",
         "content": "SSL",
-        "background_color": "green",
+        "background_color": "blue",
         "font_size": "18",
         "text_align": "center",
         "show_tick": false,
@@ -670,8 +670,8 @@
       "id": 2771656542084460,
       "definition": {
         "type": "note",
-        "content": "Basic Activity Summary\n",
-        "background_color": "vivid_green",
+        "content": "Basic Activity Summary",
+        "background_color": "vivid_blue",
         "font_size": "18",
         "text_align": "center",
         "show_tick": false,
@@ -690,7 +690,7 @@
       "definition": {
         "type": "note",
         "content": "Error Summary",
-        "background_color": "vivid_green",
+        "background_color": "vivid_blue",
         "font_size": "18",
         "text_align": "center",
         "show_tick": false,
@@ -708,7 +708,7 @@
       "id": 8186862559661412,
       "definition": {
         "type": "note",
-        "content": "The terms are different between NGINX and NGINX Plus:\n\n### NGINX (open source)\t\n\n- `accepts`\n\n- `dropped` must be calculated directly\n\n- `reading` + `writing`\n\n- `waiting`\n\n- `active` (includes `waiting` states)\n\n- `requests`\n\n\n### NGINX Plus\n\n- `accepted`\n\n- `dropped` is reported\n\n- `current`\n\n- `idle`\n\n- `active` (excludes `idle` states)\n\n- `total`",
+        "content": "Terms are different between NGINX and NGINX Plus:\n\n### NGINX (open source)\tvs. NGINX Plus\n\n- `accepts` ->  `accepted`\n\n- `reading` + `writing`-> `current`\n\n- `waiting` -> `idle`\n\n- `active` (includes `waiting` states) -> `active` (excludes `idle` states)\n\n- `requests` -> `total`\n\nFor more information on the differences between NGINX and NGINX Plus, please refer to this [blog post](https://www.datadoghq.com/blog/how-to-monitor-nginx/#basic-activity-metrics).",
         "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
@@ -720,7 +720,7 @@
         "x": 0,
         "y": 45,
         "width": 41,
-        "height": 40
+        "height": 25
       }
     },
     {
@@ -728,9 +728,9 @@
       "definition": {
         "type": "note",
         "content": "Performance Summary",
-        "background_color": "vivid_green",
+        "background_color": "vivid_blue",
         "font_size": "18",
-        "text_align": "left",
+        "text_align": "center",
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "left"
