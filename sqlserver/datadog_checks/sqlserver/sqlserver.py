@@ -44,6 +44,13 @@ PERF_AVERAGE_BULK = 1073874176
 PERF_COUNTER_BULK_COUNT = 272696576
 PERF_COUNTER_LARGE_RAWCOUNT = 65792
 
+# Performance tables
+DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
+DM_OS_WAIT_STATS_TABLE = "sys.dm_os_wait_stats"
+DM_OS_MEMORY_CLERKS_TABLE = "sys.dm_os_memory_clerks"
+DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
+DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
+DM_OS_TASKS = "sys.dm_os_tasks"
 
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
@@ -57,14 +64,6 @@ BASE_NAME_QUERY = (
        or counter_name=?) and cntr_type=%s;"""
     % PERF_LARGE_RAW_BASE
 )
-
-# Performance tables
-DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
-DM_OS_WAIT_STATS_TABLE = "sys.dm_os_wait_stats"
-DM_OS_MEMORY_CLERKS_TABLE = "sys.dm_os_memory_clerks"
-DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
-DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
-DM_OS_TASKS = "sys.dm_os_tasks"
 
 
 class SQLServer(AgentCheck):
@@ -350,10 +349,9 @@ class SQLServer(AgentCheck):
                         rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
                         instance_results[cls] = rows, cols
 
+                # Using the cached data, extract and report individual metrics
                 for metric in metrics_to_collect:
                     try:
-                        # TODO - check if results are actually there before trying to fetch?
-
                         if type(metric) is metrics.SqlIncrFractionMetric:
                             # special case, since it uses the same results as SqlFractionMetric
                             rows, cols = instance_results['SqlFractionMetric']

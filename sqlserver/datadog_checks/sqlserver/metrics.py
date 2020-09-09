@@ -102,9 +102,7 @@ class SqlFractionMetric(SqlServerMetric):
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for _ in counters_list)
+        placeholders = ', '.join('?' for _ in counters_list)
         query = cls.QUERY_BASE.format(placeholders)
 
         logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, str(counters_list))
