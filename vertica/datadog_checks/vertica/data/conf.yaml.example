@@ -9,9 +9,9 @@ init_config:
     ## `use_global_custom_queries` setting at the instance level.
     #
     # global_custom_queries:
-    #   - query: <QUERY>
+    #   - metric_prefix: vertica
+    #     query: <QUERY>
     #     columns: <COLUMNS>
-    #     tags: <TAGS>
 
 ## Every instance is scheduled independent of the others.
 #
