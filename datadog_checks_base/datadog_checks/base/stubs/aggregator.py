@@ -339,19 +339,19 @@ class AggregatorStub(object):
             if metric_name in exclude:
                 continue
             for metric_stub in metric_stubs:
-                normalized_metric_stub_name = backend_normalize_metric_name(metric_stub.name)
-                if normalized_metric_stub_name not in metadata_metrics:
-                    errors.add("Expect `{}` to be in metadata.csv.".format(normalized_metric_stub_name))
+                metric_stub_name = backend_normalize_metric_name(metric_stub.name)
+                if metric_stub_name not in metadata_metrics:
+                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub_name))
                     continue
 
                 if check_metric_type:
-                    expected_metric_type = metadata_metrics[normalized_metric_stub_name]['metric_type']
+                    expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
                     actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
                     if expected_metric_type != actual_metric_type:
                         errors.add(
                             "Expect `{}` to have type `{}` but got `{}`.".format(
-                                normalized_metric_stub_name, expected_metric_type, actual_metric_type
+                                metric_stub_name, expected_metric_type, actual_metric_type
                             )
                         )
 
