@@ -31,7 +31,6 @@ def dd_environment():
     with docker_run(
         compose_file=compose_file,
         conditions=[CheckDockerLogs(compose_file, r'Deleted'), WaitFor(setup_admin_user), WaitFor(setup_datadog_users)],
-        sleep=10,
     ):
         yield CHECK_CONFIG
 

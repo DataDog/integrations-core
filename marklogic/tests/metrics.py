@@ -49,9 +49,6 @@ FOREST_STATUS_SUMMARY_METRICS = [
     'marklogic.forests.write-lock-rate',
     'marklogic.forests.write-lock-wait-load',
     # Cached
-    'marklogic.forests.compressed-tree-cache-hit-rate',
-    'marklogic.forests.compressed-tree-cache-miss-rate',
-    'marklogic.forests.compressed-tree-cache-ratio',
     'marklogic.forests.large-binary-cache-hit-rate',
     'marklogic.forests.large-binary-cache-miss-rate',
     'marklogic.forests.list-cache-hit-rate',
@@ -61,6 +58,12 @@ FOREST_STATUS_SUMMARY_METRICS = [
     'marklogic.forests.triple-cache-miss-rate',
     'marklogic.forests.triple-value-cache-hit-rate',
     'marklogic.forests.triple-value-cache-miss-rate',
+]
+
+FOREST_STATUS_TREE_CACHE_METRICS = [
+    'marklogic.forests.compressed-tree-cache-hit-rate',
+    'marklogic.forests.compressed-tree-cache-miss-rate',
+    'marklogic.forests.compressed-tree-cache-ratio',
 ]
 
 HOST_STATUS_METRICS_SPECIFIC = [
