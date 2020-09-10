@@ -60,6 +60,7 @@ INSTANCE_SSL = {
     'ssl_auth': 'yes',
     'ssl_cipher_spec': 'TLS_RSA_WITH_AES_256_CBC_SHA256',
     'ssl_key_repository_location': '/opt/pki/keys/client',
+    'ssl_certificate_label': 'client',
 }
 
 INSTANCE_METADATA = {
