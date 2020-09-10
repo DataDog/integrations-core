@@ -109,6 +109,9 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         abort(f'Path `{integration_dir}` already exists!')
 
     template_fields = {}
+    if non_interactive and repo_choice != 'core':
+        abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
+
     if not non_interactive and not dry_run:
         if repo_choice != 'core':
             template_fields['email'] = click.prompt('Email used for support requests')
