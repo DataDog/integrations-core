@@ -135,7 +135,9 @@ def prepare_queue_manager():
     pcf = pymqi.PCFExecute(qmgr, response_wait_interval=5000)
 
     attrs = [
-        pymqi.CFST(Parameter=pymqi.CMQC.MQCA_SSL_KEY_REPOSITORY, String=b'/etc/mqm/pki/keys/qm1'),
+        pymqi.CFST(
+            Parameter=pymqi.CMQC.MQCA_SSL_KEY_REPOSITORY, String=ensure_bytes('/etc/mqm/pki/keys/{}'.format(qm_name))
+        ),
         pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL, String=ensure_bytes(qm_name)),
     ]
     pcf.MQCMD_CHANGE_Q_MGR(attrs)
