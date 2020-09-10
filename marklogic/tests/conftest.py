@@ -31,7 +31,7 @@ def dd_environment():
     with docker_run(
         compose_file=compose_file,
         conditions=[CheckDockerLogs(compose_file, r'Deleted'), WaitFor(setup_admin_user), WaitFor(setup_datadog_users)],
-        sleep=5,
+        sleep=10,
     ):
         yield CHECK_CONFIG
 
@@ -58,12 +58,12 @@ def setup_admin_user():
 
 def setup_datadog_users():
     # type: () -> None
-    # Create datadog user with the admin account
+    # Create datadog users with the admin account
     r = requests.post(
         '{}/manage/v2/users'.format(API_URL),
         headers={'Content-Type': 'application/json'},
-        data='{{"user-name": "{}", "password": "{}", "roles": {{"role": "manage-admin"}}}}'.format(
-            MANAGE_ADMIN_USERNAME, PASSWORD
+        data='{{"user-name": "{}", "password": "{}", "roles": {{"role": "manage-user"}}}}'.format(
+            MANAGE_USER_USERNAME, PASSWORD
         ),
         auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
     )
@@ -73,8 +73,8 @@ def setup_datadog_users():
     r = requests.post(
         '{}/manage/v2/users'.format(API_URL),
         headers={'Content-Type': 'application/json'},
-        data='{{"user-name": "{}", "password": "{}", "roles": {{"role": "manage-user"}}}}'.format(
-            MANAGE_USER_USERNAME, PASSWORD
+        data='{{"user-name": "{}", "password": "{}", "roles": {{"role": "manage-admin"}}}}'.format(
+            MANAGE_ADMIN_USERNAME, PASSWORD
         ),
         auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
     )
