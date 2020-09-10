@@ -10,18 +10,21 @@ files:
           - name: edge_hub_prometheus_url
             description: |
               The URL where Edge Hub metrics are exposed via Prometheus.
+            required: true
             value:
               type: string
               example: http://edgeHub:9600/metrics
           - name: edge_agent_prometheus_url
             description: |
               The URL where Edge Agent metrics are exposed via Prometheus.
+            required: true
             value:
               type: string
               example: http://edgeAgent:9600/metrics
           - name: security_daemon_management_api_url
             description: |
               The URL of the Security Daemon management API, for health check purposes.
+            required: true
             value:
               type: string
               example: http://localhost:15580
