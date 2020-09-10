@@ -9,3 +9,6 @@ services:
       - LICENSE=accept
     ports:
       - "11414:1414"
+    volumes:
+      - './config.mqsc:/etc/mqm/config.mqsc'
+      - '../keys:/etc/mqm/pki/keys'
