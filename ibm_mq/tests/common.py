@@ -45,9 +45,6 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
     'collect_statistics_metrics': True,
-    'ssl_auth': 'yes',
-    'ssl_cipher_spec': 'TLS_RSA_WITH_AES_256_CBC_SHA256',
-    'ssl_key_repository_location': '/opt/pki/keys/client',
 }
 
 INSTANCE_SSL = {
@@ -57,10 +54,9 @@ INSTANCE_SSL = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queues': [QUEUE],
-    'channels': [CHANNEL, BAD_CHANNEL],
-    'tags': ['foo:bar'],
+    'auto_discover_queues': True,
     'collect_statistics_metrics': True,
+    'channels': [CHANNEL, BAD_CHANNEL],
     'ssl_auth': 'yes',
     'ssl_cipher_spec': 'TLS_RSA_WITH_AES_256_CBC_SHA256',
     'ssl_key_repository_location': '/opt/pki/keys/client',

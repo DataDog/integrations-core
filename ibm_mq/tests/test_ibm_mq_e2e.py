@@ -15,3 +15,11 @@ def test_e2e_check_all(dd_agent_check, instance_collect_all):
 
     assert_all_metrics(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_e2e_check_ssl(dd_agent_check, instance_ssl):
+    aggregator = dd_agent_check(instance_ssl, rate=True)
+
+    assert_all_metrics(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

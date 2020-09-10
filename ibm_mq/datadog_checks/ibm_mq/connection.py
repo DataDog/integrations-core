@@ -68,8 +68,9 @@ def get_ssl_connection(config):
     queue_manager = pymqi.QueueManager(None)
 
     opts = pymqi.CMQC.MQCNO_HANDLE_SHARE_NO_BLOCK
-    queue_manager.connect_with_options(config.queue_manager_name, cd, sco, opts=opts,
-                                user=config.username, password=config.password)
+    queue_manager.connect_with_options(
+        config.queue_manager_name, cd, sco, opts=opts, user=config.username, password=config.password
+    )
 
     return queue_manager
 

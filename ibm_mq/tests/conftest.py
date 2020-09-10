@@ -7,12 +7,13 @@ import os
 import re
 
 import pytest
-from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from pymqi import ensure_bytes
 from six.moves import range
 
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.ibm_mq import IbmMqCheck
+
 from . import common
 
 log = logging.getLogger(__file__)
@@ -26,6 +27,12 @@ def check():
 @pytest.fixture
 def instance():
     inst = copy.deepcopy(common.INSTANCE)
+    return inst
+
+
+@pytest.fixture
+def instance_ssl():
+    inst = copy.deepcopy(common.INSTANCE_SSL)
     return inst
 
 
@@ -132,12 +139,11 @@ def dd_environment():
     e2e_meta['docker_volumes'].append("{}:/opt/pki/keys".format(os.path.join(common.HERE, 'keys')))
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, conditions=[
-            CheckDockerLogs('ibm_mq1', log_pattern),
-            WaitFor(prepare_queue_manager, attempts=5)
-        ], sleep=10,
+        common.COMPOSE_FILE_PATH,
+        conditions=[CheckDockerLogs('ibm_mq1', log_pattern), WaitFor(prepare_queue_manager, attempts=5)],
+        sleep=10,
     ):
-        yield common.INSTANCE_SSL, e2e_meta
+        yield common.INSTANCE, e2e_meta
 
 
 def prepare_queue_manager():
@@ -147,13 +153,12 @@ def prepare_queue_manager():
     conn_info = '{0}({1})'.format(common.HOST, common.PORT)
 
     qmgr = pymqi.QueueManager(None)
-    qmgr.connectTCPClient(common.QUEUE_MANAGER, pymqi.CD(), common.CHANNEL,
-        conn_info, common.USERNAME, common.PASSWORD)
+    qmgr.connectTCPClient(common.QUEUE_MANAGER, pymqi.CD(), common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
     pcf = pymqi.PCFExecute(qmgr, response_wait_interval=5000)
 
     attrs = [
         pymqi.CFST(Parameter=pymqi.CMQC.MQCA_SSL_KEY_REPOSITORY, String=b'/etc/mqm/pki/keys/qm1'),
-        pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL, String=b'qm1')
+        pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL, String=b'qm1'),
     ]
     pcf.MQCMD_CHANGE_Q_MGR(attrs)
 
@@ -163,53 +168,34 @@ def prepare_queue_manager():
     certificate_label_qmgr = b'qm1'
 
     attrs = []
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME,
-                            String=ensure_bytes(tls_channel_name)))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_CHANNEL_TYPE,
-                            Value=pymqi.CMQC.MQCHT_SVRCONN))
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_SSL_CIPHER_SPEC,
-                            String=cypher_spec))
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_SSL_PEER_NAME,
-                            String=client_dn))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_SSL_CLIENT_AUTH,
-                            Value=pymqi.CMQXC.MQSCA_OPTIONAL))
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL,
-                            String=certificate_label_qmgr))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_REPLACE,
-                            Value=pymqi.CMQCFC.MQRP_YES))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(tls_channel_name)))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_CHANNEL_TYPE, Value=pymqi.CMQC.MQCHT_SVRCONN))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_SSL_CIPHER_SPEC, String=cypher_spec))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_SSL_PEER_NAME, String=client_dn))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_SSL_CLIENT_AUTH, Value=pymqi.CMQXC.MQSCA_OPTIONAL))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL, String=certificate_label_qmgr))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_REPLACE, Value=pymqi.CMQCFC.MQRP_YES))
     res = create_channel(pcf, tls_channel_name, attrs)
     print("res", res)
 
     attrs = []
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME,
-                            String=ensure_bytes(tls_channel_name)))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE,
-                            Value=pymqi.CMQCFC.MQCAUT_USERMAP))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION,
-                            Value=pymqi.CMQCFC.MQACT_REPLACE))
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CLIENT_USER_ID,
-                            String=ensure_bytes(common.USERNAME)))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQC.MQIA_CHECK_CLIENT_BINDING,
-                            Value=pymqi.CMQCFC.MQCHK_REQUIRED_ADMIN))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_USER_SOURCE,
-                            Value=pymqi.CMQC.MQUSRC_MAP))
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID,
-                            String=b'mqm'))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(tls_channel_name)))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE, Value=pymqi.CMQCFC.MQCAUT_USERMAP))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION, Value=pymqi.CMQCFC.MQACT_REPLACE))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CLIENT_USER_ID, String=ensure_bytes(common.USERNAME)))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQC.MQIA_CHECK_CLIENT_BINDING, Value=pymqi.CMQCFC.MQCHK_REQUIRED_ADMIN))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_USER_SOURCE, Value=pymqi.CMQC.MQUSRC_MAP))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID, String=b'mqm'))
 
     res = pcf.MQCMD_SET_CHLAUTH_REC(attrs)
     print("res", res)
 
     attrs = []
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME,
-                            String=ensure_bytes(tls_channel_name)))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE,
-                            Value=pymqi.CMQCFC.MQCAUT_BLOCKUSER))
-    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID_LIST,
-                            String=b'nobody'))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_WARNING,
-                            Value=pymqi.CMQC.MQWARN_NO))
-    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION,
-                            Value=pymqi.CMQCFC.MQACT_REPLACE))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(tls_channel_name)))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE, Value=pymqi.CMQCFC.MQCAUT_BLOCKUSER))
+    attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID_LIST, String=b'nobody'))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_WARNING, Value=pymqi.CMQC.MQWARN_NO))
+    attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION, Value=pymqi.CMQCFC.MQACT_REPLACE))
 
     res = pcf.MQCMD_SET_CHLAUTH_REC(attrs)
     print("res", res)
@@ -220,10 +206,7 @@ def create_channel(pcf, channel_name, attrs=None):
 
     if not attrs:
         attrs = []
-        attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME,
-                                String=ensure_bytes(channel_name)))
-        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_CHANNEL_TYPE,
-                                Value=pymqi.CMQC.MQCHT_SVRCONN))
-        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_REPLACE,
-                                Value=pymqi.CMQCFC.MQRP_YES))
+        attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(channel_name)))
+        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_CHANNEL_TYPE, Value=pymqi.CMQC.MQCHT_SVRCONN))
+        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_REPLACE, Value=pymqi.CMQCFC.MQRP_YES))
     return pcf.MQCMD_CREATE_CHANNEL(attrs)
