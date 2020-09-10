@@ -59,9 +59,9 @@ def get_ssl_connection(config):
     if config.ssl_certificate_label:
         sco.CertificateLabel = pymqi.ensure_bytes(config.ssl_certificate_label)
 
-    options_kwargs = {}
+    connect_options = {}
     if config.username and config.password:
-        options_kwargs.update(
+        connect_options.update(
             {
                 'user': config.username,
                 'password': config.password,
@@ -69,7 +69,7 @@ def get_ssl_connection(config):
         )
 
     queue_manager = pymqi.QueueManager(None)
-    queue_manager.connect_with_options(config.queue_manager_name, cd, sco, **options_kwargs)
+    queue_manager.connect_with_options(config.queue_manager_name, cd, sco, **connect_options)
     return queue_manager
 
 
