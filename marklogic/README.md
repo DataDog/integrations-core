@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [MarkLogic][1] through the Datadog Agent.
+This check monitors [MarkLogic][1] through the Datadog Agent. MarkLogic Server is a multi-model database designed to be a data hub for operational and analytical data.
 
 ## Setup
 
@@ -15,8 +15,8 @@ No additional installation is needed on your server.
 
 #### Prepare MarkLogic
 
-Using the API or the Admin interface, create a user for the Datadog Agent with at least the [`manage-user`][3] role.
-In order to use the `enable_health_service_checks` configuration, the Datadog MarkLogic user should have at least the [`manage-admin`][4] role
+Using the API or the Admin interface, create a user for the Datadog Agent with the [`manage-user`][3] role permissions at minimum.
+In order to use the `enable_health_service_checks` configuration, the Datadog MarkLogic user should have at least the [`manage-admin`][4] role.
 
 ##### Using the API
 
@@ -25,7 +25,7 @@ In order to use the `enable_health_service_checks` configuration, the Datadog Ma
     curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-user"}}' http://<HOSTNAME>:8002/manage/v2/users
     ```
     Use the correct `<ADMIN_USER>` and `<ADMIN_PASSWORD>`, and replace `<USER>` and `<PASSWORD>` with what the Datadog Agent will use.
-    Full documentation about the endpoint [here][5].
+    For more information on the endpoint, see [documentation][5].
 
 2. Confirm the user was created with enough permissions with a request like:
     ```shell
@@ -34,7 +34,7 @@ In order to use the `enable_health_service_checks` configuration, the Datadog Ma
 
 ##### Using the Admin interface
 
-1. Go to the QConsole with an admin account. By default it's at http://<HOSTNAME>:8000/qconsole.
+1. Go to the QConsole with an admin account. By default, the QConsole is available at http://<HOSTNAME>:8000/qconsole.
 
 2. Select `Security` as Database and `XQuery` as query type.
 
@@ -53,13 +53,13 @@ In order to use the `enable_health_service_checks` configuration, the Datadog Ma
         ("http://marklogic.com/dev_modules"))
     
     ```
-    Full documentation about the query [here][6]
+   For more information on the query, see [documentation][6].
 
 4. Confirm the user was created with enough permissions using `<USER>` and `<PASSWORD>` to authenticate at http://<HOSTNAME>:8002 (default port).
 
 ### Configuration
 
-1. Edit the `marklogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your marklogic performance data. See the [sample marklogic.d/conf.yaml][7] for all available configuration options. Use the Datadog Agent user previously created in the configuration file.
+1. Edit the `marklogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your MarkLogic performance data. See the [sample marklogic.d/conf.yaml][7] for all available configuration options. Use the Datadog Agent user previously created in the configuration file.
 
 2. [Restart the Agent][8].
 
