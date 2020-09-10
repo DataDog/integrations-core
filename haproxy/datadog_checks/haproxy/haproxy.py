@@ -16,42 +16,8 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.errors import CheckException
 
+from .const import BUFSIZE, EVENT_TYPE, METRICS, SOURCE_TYPE_NAME, STATS_URL, Services
 from .version_utils import get_version_from_http, get_version_from_socket
-
-STATS_URL = "/;csv;norefresh"
-EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
-BUFSIZE = 8192
-
-
-class Services(object):
-    BACKEND = 'BACKEND'
-    FRONTEND = 'FRONTEND'
-    ALL = (BACKEND, FRONTEND)
-
-    # Statuses that we normalize to and that are reported by
-    # `haproxy.count_per_status` by default (unless `collate_status_tags_per_host` is enabled)
-    ALL_STATUSES = ('up', 'open', 'down', 'maint', 'nolb')
-
-    AVAILABLE = 'available'
-    UNAVAILABLE = 'unavailable'
-    COLLATED_STATUSES = (AVAILABLE, UNAVAILABLE)
-
-    BACKEND_STATUS_TO_COLLATED = {'up': AVAILABLE, 'down': UNAVAILABLE, 'maint': UNAVAILABLE, 'nolb': UNAVAILABLE}
-
-    STATUS_TO_COLLATED = {
-        'up': AVAILABLE,
-        'open': AVAILABLE,
-        'down': UNAVAILABLE,
-        'maint': UNAVAILABLE,
-        'nolb': UNAVAILABLE,
-    }
-
-    STATUS_TO_SERVICE_CHECK = {
-        'up': AgentCheck.OK,
-        'down': AgentCheck.CRITICAL,
-        'no_check': AgentCheck.UNKNOWN,
-        'maint': AgentCheck.OK,
-    }
 
 
 class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
@@ -74,6 +40,10 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
 
 
 class HAProxy(AgentCheck):
+
+    SERVICE_CHECK_NAME = 'haproxy.backend_up'
+    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
+
     def __init__(self, name, init_config, instances):
         super(HAProxy, self).__init__(name, init_config, instances)
 
@@ -84,43 +54,6 @@ class HAProxy(AgentCheck):
         self.host_status = defaultdict(lambda: defaultdict(lambda: None))
         self.tags_regex = self.instance.get('tags_regex')
         self.custom_tags = tuple(self.instance.get('tags', []))
-
-    METRICS = {
-        "qcur": ("gauge", "queue.current"),
-        "scur": ("gauge", "session.current"),
-        "slim": ("gauge", "session.limit"),
-        "spct": ("gauge", "session.pct"),  # Calculated as: (scur/slim)*100
-        "stot": ("rate", "session.rate"),
-        "bin": ("rate", "bytes.in_rate"),
-        "bout": ("rate", "bytes.out_rate"),
-        "dreq": ("rate", "denied.req_rate"),
-        "dresp": ("rate", "denied.resp_rate"),
-        "ereq": ("rate", "errors.req_rate"),
-        "econ": ("rate", "errors.con_rate"),
-        "eresp": ("rate", "errors.resp_rate"),
-        "wretr": ("rate", "warnings.retr_rate"),
-        "wredis": ("rate", "warnings.redis_rate"),
-        "lastchg": ("gauge", "uptime"),
-        "req_rate": ("gauge", "requests.rate"),  # HA Proxy 1.4 and higher
-        "req_tot": ("rate", "requests.tot_rate"),  # HA Proxy 1.4 and higher
-        "hrsp_1xx": ("rate", "response.1xx"),  # HA Proxy 1.4 and higher
-        "hrsp_2xx": ("rate", "response.2xx"),  # HA Proxy 1.4 and higher
-        "hrsp_3xx": ("rate", "response.3xx"),  # HA Proxy 1.4 and higher
-        "hrsp_4xx": ("rate", "response.4xx"),  # HA Proxy 1.4 and higher
-        "hrsp_5xx": ("rate", "response.5xx"),  # HA Proxy 1.4 and higher
-        "hrsp_other": ("rate", "response.other"),  # HA Proxy 1.4 and higher
-        "qtime": ("gauge", "queue.time"),  # HA Proxy 1.5 and higher
-        "ctime": ("gauge", "connect.time"),  # HA Proxy 1.5 and higher
-        "rtime": ("gauge", "response.time"),  # HA Proxy 1.5 and higher
-        "ttime": ("gauge", "session.time"),  # HA Proxy 1.5 and higher
-        "conn_rate": ("gauge", "connections.rate"),  # HA Proxy 1.7 and higher
-        "conn_tot": ("rate", "connections.tot_rate"),  # HA Proxy 1.7 and higher
-        "intercepted": ("rate", "requests.intercepted"),  # HA Proxy 1.7 and higher
-    }
-
-    SERVICE_CHECK_NAME = 'haproxy.backend_up'
-
-    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
     def check(self, instance):
         url = instance.get('url')
@@ -726,11 +659,11 @@ class HAProxy(AgentCheck):
                 tags.append('server_address:{}'.format(data.get('addr')))
 
         for key, value in data.items():
-            if HAProxy.METRICS.get(key):
-                suffix = HAProxy.METRICS[key][1]
+            if METRICS.get(key):
+                suffix = METRICS[key][1]
                 name = "haproxy.%s.%s" % (back_or_front.lower(), suffix)
                 try:
-                    if HAProxy.METRICS[key][0] == 'rate':
+                    if METRICS[key][0] == 'rate':
                         self.rate(name, float(value), tags=tags)
                     else:
                         self.gauge(name, float(value), tags=tags)
