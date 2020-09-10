@@ -59,7 +59,7 @@ def get_ssl_connection(config):
 
     queue_manager = pymqi.QueueManager(None)
 
-    options_kwargs = {'opts': pymqi.CMQC.MQCNO_HANDLE_SHARE_NO_BLOCK}
+    options_kwargs = {}
     if config.username and config.password:
         options_kwargs.update(
             {
