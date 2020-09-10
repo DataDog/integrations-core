@@ -140,7 +140,7 @@ def dd_environment():
 
     with docker_run(
         common.COMPOSE_FILE_PATH,
-        conditions=[CheckDockerLogs('ibm_mq1', log_pattern), WaitFor(prepare_queue_manager, attempts=5)],
+        conditions=[CheckDockerLogs('ibm_mq1', log_pattern), WaitFor(prepare_queue_manager)],
         sleep=10,
     ):
         yield common.INSTANCE, e2e_meta
