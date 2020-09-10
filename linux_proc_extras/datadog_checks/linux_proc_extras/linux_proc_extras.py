@@ -40,7 +40,8 @@ class MoreUnixCheck(AgentCheck):
         self.get_stat_info()
         self.get_entropy_info()
         self.get_process_states()
-        self.get_interrupts_info()
+        if self.instance.get('include_interrupt_metrics', False):
+            self.get_interrupts_info()
 
     def set_paths(self):
         proc_location = (datadog_agent.get_config('procfs_path') or '/proc').rstrip('/')

@@ -15,9 +15,9 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.errors import CheckException
-from datadog_checks.haproxy.version_utils import get_metadata_from_http, get_version_from_socket
 
 from .const import BUFSIZE, EVENT_TYPE, METRICS, SOURCE_TYPE_NAME, STATS_URL, Services
+from .version_utils import get_version_from_http, get_version_from_socket
 
 
 class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
@@ -130,6 +130,8 @@ class HAProxy(AgentCheck):
         if version:
             self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
+        else:
+            self.log.debug("unable to find HAProxy version info")
 
     def _fetch_url_data(self, url):
         ''' Hit a given http url and return the stats lines '''
@@ -190,7 +192,7 @@ class HAProxy(AgentCheck):
             if raw_uptime and raw_version:
                 break
 
-        self._set_metadata(get_metadata_from_http, raw_version)
+        self._set_metadata(get_version_from_http, raw_version)
         if raw_uptime == "":
             self.log.debug("unable to find HAProxy uptime")
         else:

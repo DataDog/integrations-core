@@ -132,3 +132,10 @@ def get_agent_changelog():
     have changed with any Datadog Agent release.
     """
     return os.path.join(get_root(), 'AGENT_CHANGELOG.md')
+
+
+def get_integration_changelog(check):
+    """
+    Return the full path to the integration changelog.
+    """
+    return os.path.join(get_root(), check, 'CHANGELOG.md')
