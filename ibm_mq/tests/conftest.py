@@ -59,6 +59,15 @@ def instance_queue_regex_tag():
 
 
 @pytest.fixture
+def instance_ssl_dummy():
+    inst = copy.deepcopy(common.INSTANCE)
+    inst['ssl_auth'] = 'yes'
+    inst['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
+    inst['ssl_key_repository_location'] = '/dummy'
+    return inst
+
+
+@pytest.fixture
 def seed_data():
     publish()
     consume()

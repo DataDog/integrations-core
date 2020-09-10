@@ -24,6 +24,9 @@
   "is_public": true,
   "integration_id": "tls",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "TLS Overview": "assets/dashboards/overview.json"

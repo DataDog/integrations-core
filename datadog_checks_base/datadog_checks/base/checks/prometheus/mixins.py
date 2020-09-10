@@ -10,10 +10,8 @@ from math import isinf, isnan
 import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from six import PY3, iteritems, itervalues, string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from ...utils.prometheus import metrics_pb2
-from ...utils.warnings_util import disable_warnings_ctx
 from .. import AgentCheck
 from ..libs.prometheus import text_fd_to_metric_families
 
@@ -529,11 +527,14 @@ class PrometheusScraperMixin(object):
         elif self.ssl_ca_cert is False:
             disable_insecure_warnings = True
             verify = False
+
+        if not disable_insecure_warnings and not verify:
+            self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
+
         try:
-            with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
-                response = requests.get(
-                    endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
-                )
+            response = requests.get(
+                endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
+            )
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
