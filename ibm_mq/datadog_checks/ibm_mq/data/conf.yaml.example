@@ -136,6 +136,11 @@ instances:
     #
     # ssl_key_repository_location: /var/mqm/ssl-db/client/KeyringClient
 
+    ## @param ssl_certificate_label - string - optional
+    ## Certificate label used for ssl connection.
+    #
+    # ssl_certificate_label: <SSL_CERTIFICATE_LABEL>
+
     ## @param queue_tag_re - mapping - optional
     ## Instruct the check to apply additional tags to matching
     ## queues
