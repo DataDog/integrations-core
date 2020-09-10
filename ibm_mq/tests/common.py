@@ -24,7 +24,7 @@ QUEUE = 'DEV.QUEUE.1'
 
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
-MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_VERSION = int(os.environ.get('IBM_MQ_VERSION', '9'))
 MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
 MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
