@@ -463,10 +463,17 @@
             }
           }
         ],
-        "custom_links": [],
-        "title": "Hitten bytes in cache",
+        "yaxis": {
+          "label": "",
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "include_zero": true
+        },
+        "title": "Bytes hit in cache",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -597,10 +604,10 @@
             "aggregator": "avg"
           }
         ],
-        "custom_links": [],
-        "title": "Avg hitten bytes",
+        "title": "Avg bytes hit",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "autoscale": true,
         "precision": 2
       },
@@ -894,25 +901,6 @@
         "y": 17,
         "width": 21,
         "height": 10
-      }
-    },
-    {
-      "id": 1656771019877712,
-      "definition": {
-        "type": "note",
-        "content": "Hitten refers to bytes that are hit",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": {
-        "x": 165,
-        "y": 47,
-        "width": 28,
-        "height": 6
       }
     },
     {
