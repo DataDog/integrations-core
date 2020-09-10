@@ -3,15 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from collections import OrderedDict, defaultdict
 import re
+from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
-
 
 METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
 METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
