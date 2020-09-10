@@ -19,6 +19,8 @@ PASSWORD = 'passw0rd'
 QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
 CHANNEL_SSL = 'PYMQI.SSL.SVRCONN'
+SSL_CLIENT_LABEL = 'client'
+SSL_CYPHER_SPEC = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
 
 QUEUE = 'DEV.QUEUE.1'
 
@@ -58,9 +60,9 @@ INSTANCE_SSL = {
     'collect_statistics_metrics': True,
     'channels': [CHANNEL, BAD_CHANNEL],
     'ssl_auth': 'yes',
-    'ssl_cipher_spec': 'TLS_RSA_WITH_AES_256_CBC_SHA256',
+    'ssl_cipher_spec': SSL_CYPHER_SPEC,
     'ssl_key_repository_location': '/opt/pki/keys/client',
-    'ssl_certificate_label': 'client',
+    'ssl_certificate_label': SSL_CLIENT_LABEL,
 }
 
 INSTANCE_METADATA = {
