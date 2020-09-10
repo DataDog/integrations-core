@@ -8,16 +8,16 @@ import shutil
 
 # How long ddev will wait for GPG to finish, especially when asking dev for signature.
 import securesystemslib.settings
-
 securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
-from in_toto import runlib, util
 from securesystemslib.gpg.constants import GPG_COMMAND
 
-from ..subprocess import run_command
-from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines
+from in_toto import runlib, util
+
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git
+from ..subprocess import run_command
+from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines
 
 LINK_DIR = '.in-toto'
 STEP_NAME = 'tag'
