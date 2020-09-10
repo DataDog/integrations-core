@@ -4,7 +4,6 @@
 
 import logging
 
-from datadog_checks.base.log import get_check_logger
 from datadog_checks.ibm_mq.config import IBMMQConfig
 
 try:
@@ -58,19 +57,17 @@ def get_ssl_connection(config):
     sco.KeyRepository = pymqi.ensure_bytes(config.ssl_key_repository_location)
     sco.CertificateLabel = pymqi.ensure_bytes('client')
 
-    logger = get_check_logger()
-    logger.warning("SSLCipherSpec: %s", cd.SSLCipherSpec)
-    logger.warning("KeyRepository: %s", sco.KeyRepository)
-    logger.warning("CertificateLabel: %s", sco.CertificateLabel)
-    logger.warning("username: %s", config.username)
-    logger.warning("p: %s", config.password)
-
     queue_manager = pymqi.QueueManager(None)
 
-    opts = pymqi.CMQC.MQCNO_HANDLE_SHARE_NO_BLOCK
-    queue_manager.connect_with_options(
-        config.queue_manager_name, cd, sco, opts=opts, user=config.username, password=config.password
-    )
+    options_kwargs = {'opts': pymqi.CMQC.MQCNO_HANDLE_SHARE_NO_BLOCK}
+    if config.username and config.password:
+        options_kwargs.update(
+            {
+                'user': config.username,
+                'password': config.password,
+            }
+        )
+    queue_manager.connect_with_options(config.queue_manager_name, cd, sco, **options_kwargs)
 
     return queue_manager
 
