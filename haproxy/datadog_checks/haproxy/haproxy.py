@@ -16,10 +16,11 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.errors import CheckException
 
+from .version_utils import get_version_from_http, get_version_from_socket
+
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
 BUFSIZE = 8192
-VERSION_PATTERN = re.compile(r"(?:HAProxy|hapee-lb) version ([^,]+)")
 
 
 class Services(object):
@@ -129,7 +130,7 @@ class HAProxy(AgentCheck):
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
             info, data, tables = self._fetch_socket_data(parsed_url)
-            self._set_version_metadata(self._collect_version_from_socket(info))
+            self._set_metadata(get_version_from_socket, info)
             uptime = self._collect_uptime_from_socket(info)
         else:
             try:
@@ -190,6 +191,15 @@ class HAProxy(AgentCheck):
             enable_service_check=enable_service_check,
         )
 
+    @AgentCheck.metadata_entrypoint
+    def _set_metadata(self, collection_method, version_info):
+        version = collection_method(version_info)
+        if version:
+            self.log.debug("HAProxy version is %s", version)
+            self.set_metadata('version', version)
+        else:
+            self.log.debug("unable to find HAProxy version info")
+
     def _fetch_url_data(self, url):
         ''' Hit a given http url and return the stats lines '''
         # Try to fetch data from the stats URL
@@ -249,12 +259,7 @@ class HAProxy(AgentCheck):
             if raw_uptime and raw_version:
                 break
 
-        if raw_version == "":
-            self.log.debug("unable to find HAProxy version info")
-        else:
-            version = VERSION_PATTERN.search(raw_version).group(1)
-            self.log.debug("HAProxy version is %s", version)
-            self.set_metadata('version', version)
+        self._set_metadata(get_version_from_http, raw_version)
         if raw_uptime == "":
             self.log.debug("unable to find HAProxy uptime")
         else:
@@ -302,8 +307,9 @@ class HAProxy(AgentCheck):
         # commands were sent, so we have to check the version and only send the
         # command when supported
         tables = []
+        raw_version = ''
         try:
-            raw_version = self._collect_version_from_socket(info)
+            raw_version = get_version_from_socket(info)
             haproxy_major_version = tuple(int(vernum) for vernum in raw_version.split('.')[:2])
 
             if len(haproxy_major_version) == 2 and haproxy_major_version >= (1, 5):
@@ -315,20 +321,6 @@ class HAProxy(AgentCheck):
             self.log.debug("No tables returned")
 
         return info, stat, tables
-
-    def _collect_version_from_socket(self, info):
-        for line in info:
-            key, value = line.split(':')
-            if key == 'Version':
-                return value
-        return ''
-
-    def _set_version_metadata(self, version):
-        if not version:
-            self.log.debug("unable to collect version info from socket")
-        else:
-            self.log.debug("HAProxy version is %s", version)
-            self.set_metadata('version', version)
 
     def _collect_uptime_from_socket(self, info):
         for line in info:
