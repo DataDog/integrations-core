@@ -3,7 +3,7 @@ version: '3'
 services:
   ibm_mq1:
     container_name: ibm_mq1
-    # Note: We already do some configuration in the v8 image
+    # Note: v8 is a custom image with a lot of IBM MQ configs already baked in.
     # https://github.com/DataDog/docker-library/tree/master/ibmmq/v8
     image: datadog/docker-library:ibm_mq_v8
     environment:
@@ -11,5 +11,3 @@ services:
       - LICENSE=accept
     ports:
       - "11414:1414"
-    volumes:
-      - '../keys:/etc/mqm/pki/keys'
