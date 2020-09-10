@@ -35,6 +35,7 @@ from .utils import (
     get_profile_definition,
     oid_pattern_specificity,
     recursively_expand_base_profiles,
+    transform_index,
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
@@ -499,10 +500,17 @@ class SnmpCheck(AgentCheck):
 
         for column_tag in column_tags:
             raw_column_value = column_tag.column
+
+            if column_tag.index_slices:
+                new_index = transform_index(index, column_tag.index_slices)
+            else:
+                new_index = index
             try:
-                column_value = results[raw_column_value][index]
+                column_value = results[raw_column_value][new_index]
             except KeyError:
-                self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
+                self.log.warning(
+                    'Column `%s not present in the table, skipping this tag. index=%s', raw_column_value, new_index
+                )
                 continue
             if reply_invalid(column_value):
                 self.log.warning("Can't deduct tag from column %s", column_tag.column)

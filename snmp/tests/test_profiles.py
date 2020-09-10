@@ -1639,7 +1639,7 @@ def test_chatsworth(aggregator):
         aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=line_tags, count=1)
 
     for branch in [1, 17]:
-        branch_tags = common_tags + ['branch_id:{}'.format(branch)]
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name1']
         aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduBranchMaxCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)

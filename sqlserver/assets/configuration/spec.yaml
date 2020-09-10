@@ -105,6 +105,11 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_task_scheduler_metrics
+      description: Include additional Task and Scheduler metrics
+      value:
+        type: boolean
+        example: false
     - template: instances/tags
 
   - template: logs

@@ -98,6 +98,11 @@ instances:
     #
     # ignore_missing_database: false
 
+    ## @param include_task_scheduler_metrics - boolean - optional - default: false
+    ## Include additional Task and Scheduler metrics
+    #
+    # include_task_scheduler_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
