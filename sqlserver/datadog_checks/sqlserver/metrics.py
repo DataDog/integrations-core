@@ -53,11 +53,11 @@ class BaseSqlServerMetric(object):
         if counters_list:
             placeholders = ', '.join('?' for _ in counters_list)
             query = cls.QUERY_BASE.format(placeholders)
-            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query)
+            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, counters_list)
             cursor.execute(query, counters_list)
         else:
             query = cls.QUERY_BASE
-            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
             cursor.execute(query)
 
         rows = cursor.fetchall()
