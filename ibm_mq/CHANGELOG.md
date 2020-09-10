@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 3.8.2 / 2020-09-10
+
+* [Fixed] Try normal connection before SSL connection. See [#7554](https://github.com/DataDog/integrations-core/pull/7554).
+* [Fixed] Improve error reporting when pymqi is not installed. See [#7048](https://github.com/DataDog/integrations-core/pull/7048).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 3.8.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
