@@ -186,7 +186,7 @@ METRICS_MAP = {
     "geo_terraform_states_checksummed": "geo.terraform_states_checksummed",
     "geo_terraform_states_failed": "geo.terraform_states_failed",
     "geo_terraform_states_registry": "geo.terraform_states_registry",
-    "geo_terraform_states_synced": "terraform_states_states_synced",
+    "geo_terraform_states_synced": "geo.terraform_states_synced",
     "gitlab_ci_pipeline_creation_duration_seconds": "ci_pipeline_creation_duration_seconds",
     "gitlab_ci_pipeline_size_builds": "ci_pipeline_size_builds",
     "gitlab_database_connection_pool_busy": "database_connection_pool_busy",
