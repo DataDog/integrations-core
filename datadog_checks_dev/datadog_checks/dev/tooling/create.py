@@ -45,8 +45,7 @@ To install the {integration_name} check on your host:
 
 4. Upload the build artifact to any host with an Agent and
  run `datadog-agent integration install -w
- path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl`.
-"""
+ path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl`."""
 
     if repo_choice == 'core':
         check_name = normalized_integration_name
