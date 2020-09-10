@@ -60,6 +60,7 @@ class MarklogicCheck(AgentCheck):
                 e,
             )
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
+            return
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
 

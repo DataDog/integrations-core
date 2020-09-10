@@ -72,6 +72,8 @@ def test_check(aggregator):
 
     aggregator.assert_no_duplicate_all()
 
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
