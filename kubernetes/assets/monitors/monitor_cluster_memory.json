@@ -23,6 +23,6 @@
 		}
 	},
 	"recommended_monitor_metadata": {
-		"description": "Notify your team when your kubernetes cluster memory usage approaches maximum capacity."
+		"description": "Notify your team when your Kubernetes cluster memory usage approaches maximum capacity."
 	}
 }
