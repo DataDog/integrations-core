@@ -87,6 +87,16 @@ class SQLServer(AgentCheck):
         ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
     ]
 
+    # Non-performance table metrics
+    # datadog metric name, sql table, column name
+    # State enum:
+    #   0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending,
+    #   4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct
+    DATABASE_METRICS = [
+        ('sqlserver.database.size', 'sys.master_files', 'size'),
+        ('sqlserver.database.state', 'sys.master_files', 'state'),
+    ]
+
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
@@ -153,11 +163,7 @@ class SQLServer(AgentCheck):
         for name, counter_name, instance_name in self.PERF_METRICS:
             try:
                 sql_type, base_name = self.get_sql_type(counter_name)
-                cfg = {}
-                cfg['name'] = name
-                cfg['counter_name'] = counter_name
-                cfg['instance_name'] = instance_name
-                cfg['tags'] = tags
+                cfg = {'name': name, 'counter_name': counter_name, 'instance_name': instance_name, 'tags': tags}
 
                 metrics_to_collect.append(
                     self.typed_metric(
@@ -170,15 +176,15 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
+        # Load database statistics
+        for name, table, column in self.DATABASE_METRICS:
+            cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+            metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load metrics from scheduler and task tables, if enabled
         if self.instance.get('include_task_scheduler_metrics', False):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
-                cfg = {}
-                cfg['name'] = name
-                cfg['table'] = table
-                cfg['column'] = column
-                cfg['tags'] = tags
-
+                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml

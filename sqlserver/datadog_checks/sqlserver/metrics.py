@@ -72,6 +72,7 @@ class BaseSqlServerMetric(object):
         raise NotImplementedError
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-performance-counters-transact-sql
 class SqlSimpleMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
@@ -213,6 +214,7 @@ class SqlIncrFractionMetric(SqlFractionMetric):
         self.past_values[key] = (value, base)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-wait-stats-transact-sql
 class SqlOsWaitStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_wait_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
@@ -239,6 +241,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
         self.report_function(metric_name, value, tags=self.tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-io-virtual-file-stats-transact-sql
 class SqlIoVirtualFileStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_io_virtual_file_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
@@ -283,6 +286,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
             self.report_function(metric_name, report_value, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-memory-clerks-transact-sql
 class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_memory_clerks'
     DEFAULT_METRIC_TYPE = 'gauge'
@@ -310,6 +314,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
 class SqlOsSchedulers(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_schedulers'
     DEFAULT_METRIC_TYPE = 'gauge'
@@ -335,6 +340,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-tasks-transact-sql
 class SqlOsTasks(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_tasks'
     DEFAULT_METRIC_TYPE = 'gauge'
@@ -355,6 +361,46 @@ class SqlOsTasks(BaseSqlServerMetric):
             scheduler_id = row[scheduler_id_column_index]
 
             metric_tags = ['session_id:{}'.format(str(session_id)), 'scheduler_id:{}'.format(str(scheduler_id))]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
+class SqlDatabaseStats(BaseSqlServerMetric):
+    TABLE = 'sys.master_files'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = "select * from sys.master_files"
+
+    DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        database_id = columns.index("database_id")
+        database_type = columns.index("type")
+        database_name = columns.index("name")
+        database_file_location = columns.index("physical_name")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            column_val = row[value_column_index]
+            if self.column in ('size', 'max_size'):
+                column_val *= 8  # size reported in 8 KB pages
+
+            dbid = row[database_id]
+            dbtype = self.DB_TYPE_MAP[row[database_type]]
+            dbname = row[database_name]
+            location = row[database_file_location]
+
+            metric_tags = [
+                'database_id:{}'.format(str(dbid)),
+                'database_type:{}'.format(str(dbtype)),
+                'database_name:{}'.format(str(dbname)),
+                'database_location:{}'.format(str(location)),
+            ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
