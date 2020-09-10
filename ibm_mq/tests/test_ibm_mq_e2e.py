@@ -20,7 +20,7 @@ def test_e2e_check_all(dd_agent_check, instance_collect_all):
 
 @pytest.mark.e2e
 @pytest.mark.skipif(
-    common.MQ_VERSION < 9, reason='Only test for for version >=9, for v8 is a custom image with ' 'custom setup.'
+    common.MQ_VERSION < 9, reason='Only test for for version >=9, for v8 use a custom image with custom setup.'
 )
 def test_e2e_check_ssl(dd_agent_check, instance_ssl):
     aggregator = dd_agent_check(instance_ssl, rate=True)
