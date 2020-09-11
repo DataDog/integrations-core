@@ -103,7 +103,7 @@ class HAProxy(AgentCheck):
             self.log.debug("unable to find HAProxy version info")
 
     def _fetch_url_data(self):
-        """ Hit a given http url and return the stats lines."""
+        """Hit a given http url and return the stats lines."""
         # Try to fetch data from the stats URL
         url = "%s%s" % (self.url, STATS_URL)
 
