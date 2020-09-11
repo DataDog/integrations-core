@@ -1,53 +1,53 @@
 # CHANGELOG - nginx
 
-## 3.8.1 / 2020-08-10
+## 3.8.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
 * [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
 
-## 3.8.0 / 2020-06-29
+## 3.8.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 * [Added] Add config specs. See [#6797](https://github.com/DataDog/integrations-core/pull/6797).
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
 
-## 3.7.0 / 2020-05-17
+## 3.7.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 3.6.1 / 2020-04-04
+## 3.6.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 3.6.0 / 2020-01-13
+## 3.6.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * [Fixed] Handle missing version. See [#5250](https://github.com/DataDog/integrations-core/pull/5250).
 
-## 3.5.0 / 2019-12-02
+## 3.5.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Submit version metadata. See [#4736](https://github.com/DataDog/integrations-core/pull/4736).
 
-## 3.4.0 / 2019-10-11
+## 3.4.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 3.3.0 / 2019-08-24
+## 3.3.0 / 2019-08-24 / Agent 6.14.0
 
 * [Added] Add requests wrapper to Nginx. See [#4268](https://github.com/DataDog/integrations-core/pull/4268).
 
-## 3.2.0 / 2019-05-14
+## 3.2.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Simplify JSON flattening for timestamps and bool. See [#3648](https://github.com/DataDog/integrations-core/pull/3648). Thanks [jd](https://github.com/jd).
 * [Added] Adhere to code style. See [#3545](https://github.com/DataDog/integrations-core/pull/3545).
 
-## 3.1.0 / 2019-01-04
+## 3.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2716][1].
 
-## 3.0.0 / 2018-09-04
+## 3.0.0 / 2018-09-04 / Agent 6.5.0
 
 * [Changed] Send correct count values for NGINX ever increasing counters. See [#2041][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].

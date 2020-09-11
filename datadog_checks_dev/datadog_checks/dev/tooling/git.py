@@ -126,13 +126,16 @@ def git_tag(tag_name, push=False):
         return result
 
 
-def git_tag_list(pattern=None):
+def git_tag_list(pattern=None, contains=None):
     """
     Return a list of all the tags in the git repo matching a regex passed in
     `pattern`. If `pattern` is None, return all the tags.
     """
     with chdir(get_root()):
-        result = run_command('git tag', capture=True).stdout
+        cmd = ['git', 'tag']
+        if contains:
+            cmd.extend(['--contains', contains])
+        result = run_command(cmd, capture=True).stdout
         result = result.splitlines()
 
     if not pattern:

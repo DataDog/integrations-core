@@ -8,18 +8,18 @@ from six import string_types
 from .. import ensure_unicode
 
 try:
-    from _util import get_subprocess_output as subprocess_output
     from _util import SubprocessOutputEmptyError  # noqa
+    from _util import get_subprocess_output as subprocess_output
 except ImportError:
     # No agent
-    from ..stubs._util import subprocess_output
     from ..stubs._util import SubprocessOutputEmptyError  # noqa
+    from ..stubs._util import subprocess_output
 
 
 log = logging.getLogger(__name__)
 
 
-def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=True):
+def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=True, env=None):
     """
     Run the given subprocess command and return its output. Raise an Exception
     if an error occurs.
@@ -33,6 +33,9 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
     :param bool raise_on_empty_output: Whether to raise a SubprocessOutputEmptyError exception when
                                        the subprocess doesn't output anything to its stdout.
     :param bool log_debug: Whether to enable debug logging of full command.
+    :param env: The environment variables to run the command with. If this parameter is set to None
+                then, the environment variables of the agent are used. The default value is None.
+    :type env: dict(str, str) or None
     :returns: The stdout contents, stderr contents and status code of the command
     :rtype: tuple(str, str, int)
     """
@@ -50,7 +53,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
     if log_debug:
         log.debug('Running get_subprocess_output with cmd: %s', cmd_args)
 
-    out, err, returncode = subprocess_output(cmd_args, raise_on_empty_output)
+    out, err, returncode = subprocess_output(cmd_args, raise_on_empty_output, env=env)
 
     log.debug(
         'get_subprocess_output returned (len(out): %s ; len(err): %s ; returncode: %s)', len(out), len(err), returncode

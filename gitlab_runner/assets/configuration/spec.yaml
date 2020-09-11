@@ -75,3 +75,7 @@ files:
       - template: instances/openmetrics
         overrides:
           prometheus_url.hidden: true
+  - template: logs
+    example:
+      - type: journald
+        source: gitlab-runner

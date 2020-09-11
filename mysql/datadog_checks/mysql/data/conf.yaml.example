@@ -53,7 +53,7 @@ instances:
     #
     # sock: <SOCK>
 
-    ## @param charset - string - optional - default: None
+    ## @param charset - string - optional
     ## Charset you want to use.
     #
     # charset: utf8

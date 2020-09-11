@@ -15,7 +15,15 @@ TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
-ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
+
+# Style deps:
+# We pin deps in order to make CI more stable/reliable.
+ISORT_DEP = 'isort[pyproject]==5.5.1'
+BLACK_DEP = 'black==20.8b1'
+FLAKE8_DEP = 'flake8==3.8.3'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
+FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
+MYPY_DEP = 'mypy==0.770'
 
 
 @tox.hookimpl
@@ -68,17 +76,17 @@ def add_style_checker(config, sections, make_envconfig, reader):
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
 
     dependencies = [
-        'flake8',
-        'flake8-bugbear',
-        'flake8-logging-format',
-        'black',
+        FLAKE8_DEP,
+        FLAKE8_BUGBEAR_DEP,
+        FLAKE8_LOGGING_FORMAT_DEP,
+        BLACK_DEP,
         ISORT_DEP,
     ]
 
     commands = [
         'flake8 --config=../.flake8 .',
         'black --check --diff .',
-        'isort --check-only --diff --recursive .',
+        'isort --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -90,7 +98,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
         mypy_args = mypy_args.replace('\n', ' ')
 
-        dependencies.append('mypy==0.770')  # Use a pinned version to avoid large-scale CI breakage on new releases.
+        dependencies.append(MYPY_DEP)
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
     sections[section] = {
@@ -117,8 +125,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     dependencies = [
-        'flake8',
-        'black',
+        FLAKE8_DEP,
+        BLACK_DEP,
         ISORT_DEP,
     ]
     sections[section] = {
@@ -131,7 +139,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort --recursive .',
+                'isort .',
                 'black .',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',

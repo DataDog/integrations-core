@@ -4,7 +4,7 @@
 import re
 
 import psycopg2 as pg
-import psycopg2.extras as pgextras
+from psycopg2 import extras as pgextras
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative

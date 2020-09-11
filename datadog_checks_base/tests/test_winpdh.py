@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import logging
 from collections import defaultdict
 
@@ -10,12 +9,13 @@ import pytest
 from .utils import requires_windows
 
 try:
-    from datadog_checks.checks.win.winpdh import WinPDHCounter, SINGLE_INSTANCE_KEY
     from datadog_test_libs.win.pdh_mocks import (  # noqa: F401
         initialize_pdh_tests,
-        pdh_mocks_fixture_bad_perf_strings,
         pdh_mocks_fixture,
+        pdh_mocks_fixture_bad_perf_strings,
     )
+
+    from datadog_checks.checks.win.winpdh import SINGLE_INSTANCE_KEY, WinPDHCounter
 except ImportError:
     import platform
 
