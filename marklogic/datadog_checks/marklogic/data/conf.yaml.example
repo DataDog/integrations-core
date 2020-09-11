@@ -23,7 +23,7 @@ init_config:
     #   - <HOSTNAME_1>
     #   - <HOSTNAME_2>
 
-    ## @param skip_proxy - boolean - optional - default: false
+    ## @param skip_proxy - Boolean - optional - default: `false`
     ## If set to `true`, this makes the check bypass any proxy
     ## settings enabled and attempt to reach services directly.
     #
@@ -53,7 +53,7 @@ instances:
     ## @param enable_health_service_checks - boolean - optional - default: false
     ## If `true`, the integration query the `/manage/v2?view=health` and submit the databases and forests health as 
     ## `marklogic.database.health` and `marklogic.forests.health` service checks.
-    ## In order to send the service checks successfuly, the MarkLogic user should have `manage-admin` permission.
+    ## To send the service checks, the MarkLogic user must have `manage-admin` permission.
     #
     # enable_health_service_checks: false
 

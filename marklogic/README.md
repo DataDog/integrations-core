@@ -16,29 +16,29 @@ No additional installation is needed on your server.
 #### Prepare MarkLogic
 
 Using the API or the Admin interface, create a user for the Datadog Agent with the [`manage-user`][3] role permissions at minimum.
-In order to use the `enable_health_service_checks` configuration, the Datadog MarkLogic user should have at least the [`manage-admin`][4] role.
+If you plan to use the `enable_health_service_checks` configuration, give the Datadog MarkLogic user at least the [`manage-admin`][4] role.
 
 ##### Using the API
 
-1. Create the Datadog user with a request like:
+1. Create the Datadog user by modifying this request with your specific values:
     ```shell
     curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-user"}}' http://<HOSTNAME>:8002/manage/v2/users
     ```
-    Use the correct `<ADMIN_USER>` and `<ADMIN_PASSWORD>`, and replace `<USER>` and `<PASSWORD>` with what the Datadog Agent will use.
-    For more information on the endpoint, see [documentation][5].
+    Use the correct `<ADMIN_USER>` and `<ADMIN_PASSWORD>`, and replace `<USER>` and `<PASSWORD>` with the username and password that the Datadog Agent uses.
+    For more information about the endpoint, see the [MarkLogic documentation][5].
 
-2. Confirm the user was created with enough permissions with a request like:
+2. To verify the user was created with enough permissions:
     ```shell
     curl -X GET --anyauth --user <USER>:<PASSWORD> -i http://<HOSTNAME>:8002/manage/v2
     ```
 
 ##### Using the Admin interface
 
-1. Go to the QConsole with an admin account. By default, the QConsole is available at http://<HOSTNAME>:8000/qconsole.
+1. Log into the QConsole with an admin account. By default, the QConsole is available at `http://<HOSTNAME>:8000/qconsole`.
 
 2. Select `Security` as Database and `XQuery` as query type.
 
-3. Run this query, replacing `<USER>` and `<PASSWORD>` with what the Datadog Agent will use:
+3. Run this query, replacing `<USER>` and `<PASSWORD>` with the ones that the Datadog Agent uses:
     ```
     xquery version "1.0-ml";
     import module namespace sec="http://marklogic.com/xdmp/security" at 
@@ -53,13 +53,13 @@ In order to use the `enable_health_service_checks` configuration, the Datadog Ma
         ("http://marklogic.com/dev_modules"))
     
     ```
-   For more information on the query, see [documentation][6].
+   For more information about the query, see the [MarkLogic documentation][6].
 
-4. Confirm the user was created with enough permissions using `<USER>` and `<PASSWORD>` to authenticate at http://<HOSTNAME>:8002 (default port).
+4. To verify that the user was created with enough permissions, use `<USER>` and `<PASSWORD>` to authenticate at `http://<HOSTNAME>:8002` (default port).
 
 ### Configuration
 
-1. Edit the `marklogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your MarkLogic performance data. See the [sample marklogic.d/conf.yaml][7] for all available configuration options. Use the Datadog Agent user previously created in the configuration file.
+1. Edit the `marklogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your MarkLogic performance data. See the [sample `marklogic.d/conf.yaml` file][7] for all available configuration options. For user-related settings in the config file, use the Datadog Agent user you created.
 
 2. [Restart the Agent][8].
 
@@ -75,14 +75,14 @@ See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**marklogic.can_connect**:<br>
+**marklogic.can_connect**: 
 Returns `CRITICAL` if the Agent is enabled to reach the query endpoint. Returns `OK` otherwise.
 
 **marklogic.database.health**:<br>
-Returns `CRITICAL` if the database state is `critical`, `WARNING` if it is `maintenance`, `offline` or `at-risk` and `OK` otherwise.
+Returns `CRITICAL` if the database state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
 
 **marklogic.forest.health**:<br>
-Returns `CRITICAL` if the forest state is `critical`, `WARNING` if it is `maintenance`, `offline` or `at-risk` and `OK` otherwise.
+Returns `CRITICAL` if the forest state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
 
 ### Events
 

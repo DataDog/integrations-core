@@ -18,7 +18,7 @@ files:
       description: |
         If `true`, the integration query the `/manage/v2?view=health` and submit the databases and forests health as 
         `marklogic.database.health` and `marklogic.forests.health` service checks.
-        In order to send the service checks successfuly, the MarkLogic user should have `manage-admin` permission.
+        To send the service checks, the MarkLogic user must have `manage-admin` permission.
       value:
         default: false
         example: false
@@ -28,11 +28,10 @@ files:
       # TODO: Add the `metric_groups` option (storage, status, query)
       description: |
         Each filter in the list is composed of two to four parameters.
-        'resource_type' is one of forest/database/host/server on which to apply the filter (required)
+        'resource_type' is one of `forest`, `database`, `host`, or `server` on which to apply the filter (required)
         'pattern' is a pattern to match the resource name (required)
-        'include' is whether or not the filter include (default) or exclude the specified resources.
-              `True` (default) include the matching resources, and `False` exclude them.
-              If a resource match both an exclude filter and an include filter, it will be considered excluded.
+        'include' is a Boolean indicating whether the filter includes (`true`, the default) or excludes (`false`) the specified resources.
+              If a resource matches both an exclude pattern and an include pattern, it will be excluded.
         'group' is the resource group to match (optional)
       value:
         type: array

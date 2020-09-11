@@ -1,8 +1,8 @@
 # Test environment for MarkLogic
 
-This integration can be tested using the Docker Compose environment.
+Test this integration using the Docker Compose environment.
 
-In order to have the MarkLogic docker image, you need to `docker login` and get the docker image here https://hub.docker.com/_/marklogic.
+To get the MarkLogic Docker image, run `docker login` and download the Docker image here https://hub.docker.com/_/marklogic.
 
 ## Cluster mode
 
