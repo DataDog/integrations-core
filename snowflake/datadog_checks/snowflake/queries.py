@@ -131,9 +131,11 @@ QueryHistory = Query(
 DataTransferHistory = Query(
     {
         'name': 'data_transfer.metrics',
-        'query': 'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
-        'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;',
+        'query': (
+            'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
+            'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;'
+        ),
         'columns': [
             {'name': 'source_cloud', 'type': 'tag'},
             {'name': 'source_region', 'type': 'tag'},
