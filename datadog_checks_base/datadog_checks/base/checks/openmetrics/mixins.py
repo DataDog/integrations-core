@@ -513,8 +513,17 @@ class OpenMetricsScraperMixin(object):
             if label_name in labels:
                 self.set_metadata(metadata_name, labels[label_name])
 
+    def _metric_name_with_namespace(self, metric_name, scraper_config):
+        namespace = scraper_config['namespace']
+        if not namespace:
+            return metric_name
+        return '{}.{}'.format(namespace, metric_name)
+
     def _telemetry_metric_name_with_namespace(self, metric_name, scraper_config):
-        return '{}.{}.{}'.format(scraper_config['namespace'], 'telemetry', metric_name)
+        namespace = scraper_config['namespace']
+        if not namespace:
+            return '{}.{}'.format('telemetry', metric_name)
+        return '{}.{}.{}'.format(namespace, 'telemetry', metric_name)
 
     def _send_telemetry_gauge(self, metric_name, val, scraper_config):
         if scraper_config['telemetry']:
@@ -696,7 +705,7 @@ class OpenMetricsScraperMixin(object):
 
         # Should we send a service check for when we make a request
         health_service_check = scraper_config['health_service_check']
-        service_check_name = '{}{}'.format(scraper_config['namespace'], '.prometheus.health')
+        service_check_name = self._metric_name_with_namespace('prometheus.health', scraper_config)
         service_check_tags = ['endpoint:{}'.format(endpoint)]
         service_check_tags.extend(scraper_config['custom_tags'])
 
@@ -749,7 +758,7 @@ class OpenMetricsScraperMixin(object):
         metric when sending the gauge to Datadog.
         """
         if metric.type in ["gauge", "counter", "rate"]:
-            metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], metric_name)
+            metric_name_with_namespace = self._metric_name_with_namespace(metric_name, scraper_config)
             for sample in metric.samples:
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
@@ -809,7 +818,7 @@ class OpenMetricsScraperMixin(object):
                 self._submit_distribution_count(
                     scraper_config['send_distribution_sums_as_monotonic'],
                     scraper_config['send_monotonic_with_gauge'],
-                    "{}.{}.sum".format(scraper_config['namespace'], metric_name),
+                    "{}.sum".format(self._metric_name_with_namespace(metric_name, scraper_config)),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
@@ -819,7 +828,7 @@ class OpenMetricsScraperMixin(object):
                 self._submit_distribution_count(
                     scraper_config['send_distribution_counts_as_monotonic'],
                     scraper_config['send_monotonic_with_gauge'],
-                    "{}.{}.count".format(scraper_config['namespace'], metric_name),
+                    "{}.count".format(self._metric_name_with_namespace(metric_name, scraper_config)),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
@@ -840,7 +849,7 @@ class OpenMetricsScraperMixin(object):
                 sample[self.SAMPLE_LABELS]["quantile"] = str(float(quantile))
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge(
-                    "{}.{}.quantile".format(scraper_config['namespace'], metric_name),
+                    "{}.quantile".format(self._metric_name_with_namespace(metric_name, scraper_config)),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
@@ -863,7 +872,7 @@ class OpenMetricsScraperMixin(object):
                 self._submit_distribution_count(
                     scraper_config['send_distribution_sums_as_monotonic'],
                     scraper_config['send_monotonic_with_gauge'],
-                    "{}.{}.sum".format(scraper_config['namespace'], metric_name),
+                    "{}.sum".format(self._metric_name_with_namespace(metric_name, scraper_config)),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
@@ -875,7 +884,7 @@ class OpenMetricsScraperMixin(object):
                 self._submit_distribution_count(
                     scraper_config['send_distribution_counts_as_monotonic'],
                     scraper_config['send_monotonic_with_gauge'],
-                    "{}.{}.count".format(scraper_config['namespace'], metric_name),
+                    "{}.count".format(self._metric_name_with_namespace(metric_name, scraper_config)),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
@@ -889,7 +898,7 @@ class OpenMetricsScraperMixin(object):
                     self._submit_distribution_count(
                         scraper_config['send_distribution_counts_as_monotonic'],
                         scraper_config['send_monotonic_with_gauge'],
-                        "{}.{}.count".format(scraper_config['namespace'], metric_name),
+                        "{}.count".format(self._metric_name_with_namespace(metric_name, scraper_config)),
                         val,
                         tags=tags,
                         hostname=custom_hostname,
@@ -981,7 +990,7 @@ class OpenMetricsScraperMixin(object):
             return
         tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
         self.submit_histogram_bucket(
-            "{}.{}".format(scraper_config['namespace'], metric_name),
+            self._metric_name_with_namespace(metric_name, scraper_config),
             sample[self.SAMPLE_VALUE],
             float(sample[self.SAMPLE_LABELS]["lower_bound"]),
             float(sample[self.SAMPLE_LABELS]["le"]),
