@@ -30,7 +30,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=4.6.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.6.0'
 
 setup(
     name='datadog-http_check',

@@ -16,41 +16,8 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.errors import CheckException
 
-STATS_URL = "/;csv;norefresh"
-EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
-BUFSIZE = 8192
-VERSION_PATTERN = re.compile(r"(?:HAProxy|hapee-lb) version ([^,]+)")
-
-
-class Services(object):
-    BACKEND = 'BACKEND'
-    FRONTEND = 'FRONTEND'
-    ALL = (BACKEND, FRONTEND)
-
-    # Statuses that we normalize to and that are reported by
-    # `haproxy.count_per_status` by default (unless `collate_status_tags_per_host` is enabled)
-    ALL_STATUSES = ('up', 'open', 'down', 'maint', 'nolb')
-
-    AVAILABLE = 'available'
-    UNAVAILABLE = 'unavailable'
-    COLLATED_STATUSES = (AVAILABLE, UNAVAILABLE)
-
-    BACKEND_STATUS_TO_COLLATED = {'up': AVAILABLE, 'down': UNAVAILABLE, 'maint': UNAVAILABLE, 'nolb': UNAVAILABLE}
-
-    STATUS_TO_COLLATED = {
-        'up': AVAILABLE,
-        'open': AVAILABLE,
-        'down': UNAVAILABLE,
-        'maint': UNAVAILABLE,
-        'nolb': UNAVAILABLE,
-    }
-
-    STATUS_TO_SERVICE_CHECK = {
-        'up': AgentCheck.OK,
-        'down': AgentCheck.CRITICAL,
-        'no_check': AgentCheck.UNKNOWN,
-        'maint': AgentCheck.OK,
-    }
+from .const import BUFSIZE, EVENT_TYPE, METRICS, SOURCE_TYPE_NAME, STATS_URL, Services
+from .version_utils import get_version_from_http, get_version_from_socket
 
 
 class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
@@ -73,6 +40,10 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
 
 
 class HAProxy(AgentCheck):
+
+    SERVICE_CHECK_NAME = 'haproxy.backend_up'
+    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
+
     def __init__(self, name, init_config, instances):
         super(HAProxy, self).__init__(name, init_config, instances)
 
@@ -84,43 +55,6 @@ class HAProxy(AgentCheck):
         self.tags_regex = self.instance.get('tags_regex')
         self.custom_tags = tuple(self.instance.get('tags', []))
 
-    METRICS = {
-        "qcur": ("gauge", "queue.current"),
-        "scur": ("gauge", "session.current"),
-        "slim": ("gauge", "session.limit"),
-        "spct": ("gauge", "session.pct"),  # Calculated as: (scur/slim)*100
-        "stot": ("rate", "session.rate"),
-        "bin": ("rate", "bytes.in_rate"),
-        "bout": ("rate", "bytes.out_rate"),
-        "dreq": ("rate", "denied.req_rate"),
-        "dresp": ("rate", "denied.resp_rate"),
-        "ereq": ("rate", "errors.req_rate"),
-        "econ": ("rate", "errors.con_rate"),
-        "eresp": ("rate", "errors.resp_rate"),
-        "wretr": ("rate", "warnings.retr_rate"),
-        "wredis": ("rate", "warnings.redis_rate"),
-        "lastchg": ("gauge", "uptime"),
-        "req_rate": ("gauge", "requests.rate"),  # HA Proxy 1.4 and higher
-        "req_tot": ("rate", "requests.tot_rate"),  # HA Proxy 1.4 and higher
-        "hrsp_1xx": ("rate", "response.1xx"),  # HA Proxy 1.4 and higher
-        "hrsp_2xx": ("rate", "response.2xx"),  # HA Proxy 1.4 and higher
-        "hrsp_3xx": ("rate", "response.3xx"),  # HA Proxy 1.4 and higher
-        "hrsp_4xx": ("rate", "response.4xx"),  # HA Proxy 1.4 and higher
-        "hrsp_5xx": ("rate", "response.5xx"),  # HA Proxy 1.4 and higher
-        "hrsp_other": ("rate", "response.other"),  # HA Proxy 1.4 and higher
-        "qtime": ("gauge", "queue.time"),  # HA Proxy 1.5 and higher
-        "ctime": ("gauge", "connect.time"),  # HA Proxy 1.5 and higher
-        "rtime": ("gauge", "response.time"),  # HA Proxy 1.5 and higher
-        "ttime": ("gauge", "session.time"),  # HA Proxy 1.5 and higher
-        "conn_rate": ("gauge", "connections.rate"),  # HA Proxy 1.7 and higher
-        "conn_tot": ("rate", "connections.tot_rate"),  # HA Proxy 1.7 and higher
-        "intercepted": ("rate", "requests.intercepted"),  # HA Proxy 1.7 and higher
-    }
-
-    SERVICE_CHECK_NAME = 'haproxy.backend_up'
-
-    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
-
     def check(self, instance):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s', url)
@@ -129,7 +63,7 @@ class HAProxy(AgentCheck):
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
             info, data, tables = self._fetch_socket_data(parsed_url)
-            self._set_version_metadata(self._collect_version_from_socket(info))
+            self._set_metadata(get_version_from_socket, info)
             uptime = self._collect_uptime_from_socket(info)
         else:
             try:
@@ -190,6 +124,15 @@ class HAProxy(AgentCheck):
             enable_service_check=enable_service_check,
         )
 
+    @AgentCheck.metadata_entrypoint
+    def _set_metadata(self, collection_method, version_info):
+        version = collection_method(version_info)
+        if version:
+            self.log.debug("HAProxy version is %s", version)
+            self.set_metadata('version', version)
+        else:
+            self.log.debug("unable to find HAProxy version info")
+
     def _fetch_url_data(self, url):
         ''' Hit a given http url and return the stats lines '''
         # Try to fetch data from the stats URL
@@ -249,12 +192,7 @@ class HAProxy(AgentCheck):
             if raw_uptime and raw_version:
                 break
 
-        if raw_version == "":
-            self.log.debug("unable to find HAProxy version info")
-        else:
-            version = VERSION_PATTERN.search(raw_version).group(1)
-            self.log.debug("HAProxy version is %s", version)
-            self.set_metadata('version', version)
+        self._set_metadata(get_version_from_http, raw_version)
         if raw_uptime == "":
             self.log.debug("unable to find HAProxy uptime")
         else:
@@ -302,8 +240,9 @@ class HAProxy(AgentCheck):
         # commands were sent, so we have to check the version and only send the
         # command when supported
         tables = []
+        raw_version = ''
         try:
-            raw_version = self._collect_version_from_socket(info)
+            raw_version = get_version_from_socket(info)
             haproxy_major_version = tuple(int(vernum) for vernum in raw_version.split('.')[:2])
 
             if len(haproxy_major_version) == 2 and haproxy_major_version >= (1, 5):
@@ -315,20 +254,6 @@ class HAProxy(AgentCheck):
             self.log.debug("No tables returned")
 
         return info, stat, tables
-
-    def _collect_version_from_socket(self, info):
-        for line in info:
-            key, value = line.split(':')
-            if key == 'Version':
-                return value
-        return ''
-
-    def _set_version_metadata(self, version):
-        if not version:
-            self.log.debug("unable to collect version info from socket")
-        else:
-            self.log.debug("HAProxy version is %s", version)
-            self.set_metadata('version', version)
 
     def _collect_uptime_from_socket(self, info):
         for line in info:
@@ -734,11 +659,11 @@ class HAProxy(AgentCheck):
                 tags.append('server_address:{}'.format(data.get('addr')))
 
         for key, value in data.items():
-            if HAProxy.METRICS.get(key):
-                suffix = HAProxy.METRICS[key][1]
+            if METRICS.get(key):
+                suffix = METRICS[key][1]
                 name = "haproxy.%s.%s" % (back_or_front.lower(), suffix)
                 try:
-                    if HAProxy.METRICS[key][0] == 'rate':
+                    if METRICS[key][0] == 'rate':
                         self.rate(name, float(value), tags=tags)
                     else:
                         self.gauge(name, float(value), tags=tags)
