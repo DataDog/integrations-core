@@ -189,9 +189,11 @@ TableStorage = Query(
 PipeHistory = Query(
     {
         'name': 'pipe.metrics',
-        'query': 'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
-        'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;',
+        'query': (
+            'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
+            'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'pipe', 'type': 'tag'},
             {'name': 'pipe.credits_used.avg', 'type': 'gauge'},
