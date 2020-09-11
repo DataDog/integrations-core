@@ -34,7 +34,6 @@ def dd_environment():
             CheckDockerLogs(compose_file, r'Deleted'),
             WaitFor(setup_admin_user),
             WaitFor(setup_datadog_users),
-            WaitFor(tree_cache_ratio_available),
         ],
     ):
         yield CHECK_CONFIG
@@ -84,21 +83,3 @@ def setup_datadog_users():
     )
 
     r.raise_for_status()
-
-
-def tree_cache_ratio_available():
-    # type: () -> bool
-
-    r = requests.get(
-        '{}/manage/v2/forests?format=json&view=status'.format(API_URL),
-        headers={'Content-Type': 'application/json'},
-        auth=requests.auth.HTTPDigestAuth(MANAGE_ADMIN_USERNAME, PASSWORD),
-    )
-
-    r.raise_for_status()
-
-    # Metric finally available
-    return (
-        r.json()['forest-status-list']['status-list-summary']['cache-properties']['compressed-tree-cache-ratio']
-        is not None
-    )
