@@ -107,6 +107,8 @@ def get_parent_tags_recursively(mor, infrastructure_data):
         parent_name = to_string(parent_props.get('name', 'unknown'))
         if isinstance(parent, vim.HostSystem):
             tags.append('vsphere_host:{}'.format(parent_name))
+        elif isinstance(parent, vim.StoragePod):
+            tags.append('vsphere_datastore_cluster:{}'.format(parent_name))
         elif isinstance(parent, vim.Folder):
             tags.append('vsphere_folder:{}'.format(parent_name))
         elif isinstance(parent, vim.ComputeResource):
