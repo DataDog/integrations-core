@@ -68,6 +68,17 @@ def get_ssl_connection(config):
             }
         )
 
+    log.debug(
+        "Create SSL connection with ConnectionName=%s, ChannelName=%s, Version=%s, SSLCipherSpec=%s, "
+        "KeyRepository=%s, CertificateLabel=%s, user=%s",
+        cd.ConnectionName,
+        cd.ChannelName,
+        cd.Version,
+        cd.SSLCipherSpec,
+        sco.KeyRepository,
+        sco.CertificateLabel,
+        connect_options.get('user'),
+    )
     queue_manager = pymqi.QueueManager(None)
     queue_manager.connect_with_options(config.queue_manager_name, cd, sco, **connect_options)
     return queue_manager
