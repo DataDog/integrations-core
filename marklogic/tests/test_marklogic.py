@@ -32,9 +32,8 @@ def _assert_metrics(aggregator, tags):
     for metric in GLOBAL_METRICS:
         aggregator.assert_metric(metric, tags=tags)
 
-    # May take some times to be available
     for metric in FOREST_STATUS_TREE_CACHE_METRICS:
-        aggregator.assert_metric(metric, tags=tags, at_least=0)
+        aggregator.assert_metric(metric, tags=tags)
 
     storage_tag_prefixes = ['storage_path', 'host_name', 'host_id']
     for metric in STORAGE_HOST_METRICS:

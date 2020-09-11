@@ -20,7 +20,8 @@ def dd_environment():
         conditions=[
             CheckDockerLogs(compose_file, r'Detected quorum'),
             WaitFor(setup_admin_user),
-            WaitFor(setup_datadog_user),
+            WaitFor(setup_datadog_users),
+            WaitFor(tree_cache_ratio_available),
         ],
     ):
         yield CHECK_CONFIG
