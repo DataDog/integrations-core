@@ -57,10 +57,12 @@ CreditUsage = Query(
 WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
-        'query': "select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
-        "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
-        "sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY "
-        "where start_time >= date_trunc(day, current_date) group by 1;",
+        'query': (
+            'select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+            'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+            'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
