@@ -47,7 +47,7 @@ VM_MONITORING_FLAG = 'DatadogMonitored'
 # The size of the ThreadPool used to process the request queue
 DEFAULT_SIZE_POOL = 10
 # The interval in seconds between two refresh of the entities list
-REFRESH_MORLIST_INTERVAL = 3 * 60
+REFRESH_MORLIST_INTERVAL = 5 * 60
 # The interval in seconds between two refresh of metrics metadata (id<->name)
 REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
 
@@ -946,7 +946,7 @@ class VSphereCheck(AgentCheck):
         Resolve the vCenter `rootFolder` and initiate hosts and virtual machines discovery.
 
         """
-
+        t = Timer()
         i_key = self._instance_key(instance)
         self.log.info(u"Caching the morlist for vcenter instance %s" % i_key)
         for resource_type in ALL_RESOURCES_WITH_METRICS:
@@ -968,6 +968,9 @@ class VSphereCheck(AgentCheck):
 
         # Discover hosts and virtual machines
         self._discover_mor(instance, [instance_tag], regexes, include_only_marked)
+
+        self.log.debug(u"Finished morlist discovery for vcenter instance %s in %.3f seconds",i_key,t.total())
+        self.log.info(u"Finished morlist discovery for vcenter instance {0}".format(i_key))
 
         self.cache_times[i_key][MORLIST][LAST] = time.time()
 
@@ -1168,6 +1171,7 @@ class VSphereCheck(AgentCheck):
         if error_msg and error_code:
             self.raiseAlert(instance, error_code, error_msg)
 
+        self.log.debug(u"Vsphere metric collection time in %.3f seconds.",t.total())
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_colection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
@@ -1316,7 +1320,7 @@ class VSphereCheck(AgentCheck):
 
             n_mors += mor_count
 
-        self.log.debug(u"Collecting metrics of %d mors",n_mors)
+        self.log.info(u"Collecting metrics of %d mors for vcenter instance %s",n_mors,i_key)
 
         for query_specs in self.make_query_specs(instance):
             if query_specs:
