@@ -82,6 +82,7 @@ class SnowflakeCheck(AgentCheck):
             return cursor.fetchall()
 
     def connect(self):
+        # verify connection is still active
         if self._conn is not None:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return
@@ -90,8 +91,8 @@ class SnowflakeCheck(AgentCheck):
                 user=self.config.user,
                 password=self.config.password,
                 account=self.config.account,
-                database="SNOWFLAKE",  # This integration only queries SNOWFLAKE DB and ACCOUNT_USAGE schema
-                schema="ACCOUNT_USAGE",
+                database=self.config.database,
+                schema=self.config.schema,
                 warehouse=self.config.warehouse,
                 role=self.config.role,
                 passcode_in_password=self.config.passcode_in_password,

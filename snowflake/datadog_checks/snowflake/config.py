@@ -27,6 +27,8 @@ class Config(object):
         user = instance.get('user')
         password = instance.get('password')
         role = instance.get('role', 'ACCOUNTADMIN')
+        database = instance.get('database', 'SNOWFLAKE')
+        schema = instance.get('schema', 'ACCOUNT_USAGE')
         warehouse = instance.get('warehouse')
         passcode_in_password = instance.get('passcode_in_password', False)
         passcode = instance.get('passcode')
@@ -56,6 +58,8 @@ class Config(object):
         self.user = user  # type: str
         self.password = password  # type: str
         self.role = role  # type: Optional[str]
+        self.database = database  # type: str   # By default only queries SNOWFLAKE DB and ACCOUNT_USAGE schema
+        self.schema = schema  # type: str
         self.warehouse = warehouse  # type: Optional[str]
         self.passcode_in_password = passcode_in_password  # type: bool
         self.passcode = passcode  # type: Optional[str]
