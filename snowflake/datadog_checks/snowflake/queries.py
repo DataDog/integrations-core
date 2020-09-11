@@ -92,9 +92,11 @@ LoginMetrics = Query(
 WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': "select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), "
-        "AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY "
-        "where start_time >= date_trunc(day, current_date) group by 1;",
+        'query': (
+            'select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), '
+            'AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'query.executed', 'type': 'gauge'},
