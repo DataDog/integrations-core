@@ -8,8 +8,10 @@ from datadog_checks.base.utils.db import Query
 StorageUsageMetrics = Query(
     {
         'name': 'storage.metrics',
-        'query': 'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE'
-        ' ORDER BY USAGE_DATE DESC LIMIT 1;',
+        'query': (
+            'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE '
+            'ORDER BY USAGE_DATE DESC LIMIT 1;'
+        ),
         'columns': [
             {'name': 'storage.storage_bytes.total', 'type': 'gauge'},
             {'name': 'storage.stage_bytes.total', 'type': 'gauge'},
@@ -22,8 +24,10 @@ StorageUsageMetrics = Query(
 DatabaseStorageMetrics = Query(
     {
         'name': 'database_storage.metrics',
-        'query': 'SELECT DATABASE_NAME, AVERAGE_DATABASE_BYTES, '
-        'AVERAGE_FAILSAFE_BYTES from DATABASE_STORAGE_USAGE_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;',
+        'query': (
+            'SELECT DATABASE_NAME, AVERAGE_DATABASE_BYTES, AVERAGE_FAILSAFE_BYTES '
+            'from DATABASE_STORAGE_USAGE_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;'
+        ),
         'columns': [
             {'name': 'database', 'type': 'tag'},
             {'name': 'storage.database.storage_bytes', 'type': 'gauge'},
@@ -36,10 +40,12 @@ DatabaseStorageMetrics = Query(
 CreditUsage = Query(
     {
         'name': 'billing.metrics',
-        'query': "select SERVICE_TYPE, NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
-        "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
-        "sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY"
-        " where start_time >= date_trunc(day, current_date) group by 1, 2;",
+        'query': (
+            'select SERVICE_TYPE, NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+            'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+            'sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1, 2;'
+        ),
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
@@ -57,10 +63,12 @@ CreditUsage = Query(
 WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
-        'query': "select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), "
-        "sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), "
-        "sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY "
-        "where start_time >= date_trunc(day, current_date) group by 1;",
+        'query': (
+            'select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+            'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+            'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
@@ -77,8 +85,10 @@ WarehouseCreditUsage = Query(
 LoginMetrics = Query(
     {
         'name': 'login.metrics',
-        'query': "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)), "
-        "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
+        'query': (
+            "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)), "
+            "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;"
+        ),
         'columns': [
             {'name': 'client_type', 'type': 'tag'},
             {'name': 'logins.fail.count', 'type': 'monotonic_count'},
@@ -92,9 +102,11 @@ LoginMetrics = Query(
 WarehouseLoad = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': "select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), "
-        "AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY "
-        "where start_time >= date_trunc(day, current_date) group by 1;",
+        'query': (
+            'select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), '
+            'AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'query.executed', 'type': 'gauge'},
@@ -109,10 +121,12 @@ WarehouseLoad = Query(
 QueryHistory = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': "select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), "
-        "AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) "
-        "from QUERY_HISTORY where start_time >= date_trunc(day, current_date)"
-        " group by 1, 2, 3, 4;",
+        'query': (
+            'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
+            'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
+            'from QUERY_HISTORY where start_time >= date_trunc(day, current_date) '
+            'group by 1, 2, 3, 4;'
+        ),
         'columns': [
             {'name': 'query_type', 'type': 'tag'},
             {'name': 'warehouse', 'type': 'tag'},
@@ -131,9 +145,11 @@ QueryHistory = Query(
 DataTransferHistory = Query(
     {
         'name': 'data_transfer.metrics',
-        'query': 'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
-        'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;',
+        'query': (
+            'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
+            'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
+            'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;'
+        ),
         'columns': [
             {'name': 'source_cloud', 'type': 'tag'},
             {'name': 'source_region', 'type': 'tag'},
@@ -150,10 +166,12 @@ DataTransferHistory = Query(
 AutoReclusterHistory = Query(
     {
         'name': 'auto_recluster.metrics',
-        'query': 'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
-        'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
-        'avg(num_rows_reclustered), sum(num_rows_reclustered) '
-        'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;',
+        'query': (
+            'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
+            'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
+            'avg(num_rows_reclustered), sum(num_rows_reclustered) '
+            'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;'
+        ),
         'columns': [
             {'name': 'table', 'type': 'tag'},
             {'name': 'database', 'type': 'tag'},
@@ -172,8 +190,10 @@ AutoReclusterHistory = Query(
 TableStorage = Query(
     {
         'name': 'table_storage.metrics',
-        'query': 'select table_name, table_schema, avg(ACTIVE_BYTES), avg(TIME_TRAVEL_BYTES), avg(FAILSAFE_BYTES), '
-        'avg(RETAINED_FOR_CLONE_BYTES) from table_storage_metrics group by 1, 2',
+        'query': (
+            'select table_name, table_schema, avg(ACTIVE_BYTES), avg(TIME_TRAVEL_BYTES), avg(FAILSAFE_BYTES), '
+            'avg(RETAINED_FOR_CLONE_BYTES) from table_storage_metrics group by 1, 2'
+        ),
         'columns': [
             {'name': 'table', 'type': 'tag'},
             {'name': 'schema', 'type': 'tag'},
@@ -189,9 +209,11 @@ TableStorage = Query(
 PipeHistory = Query(
     {
         'name': 'pipe.metrics',
-        'query': 'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
-        'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;',
+        'query': (
+            'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
+            'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'pipe', 'type': 'tag'},
             {'name': 'pipe.credits_used.avg', 'type': 'gauge'},
@@ -208,9 +230,11 @@ PipeHistory = Query(
 ReplicationUsage = Query(
     {
         'name': 'replication.metrics',
-        'query': 'select database_name, avg(credits_used), sum(credits_used), '
-        'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;',
+        'query': (
+            'select database_name, avg(credits_used), sum(credits_used), '
+            'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'database', 'type': 'tag'},
             {'name': 'replication.credits_used.avg', 'type': 'gauge'},
