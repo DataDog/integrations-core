@@ -109,10 +109,12 @@ WarehouseLoad = Query(
 QueryHistory = Query(
     {
         'name': 'warehouse_load.metrics',
-        'query': "select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), "
-        "AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) "
-        "from QUERY_HISTORY where start_time >= date_trunc(day, current_date)"
-        " group by 1, 2, 3, 4;",
+        'query': (
+            'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
+            'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
+            'from QUERY_HISTORY where start_time >= date_trunc(day, current_date) '
+            'group by 1, 2, 3, 4;'
+        ),
         'columns': [
             {'name': 'query_type', 'type': 'tag'},
             {'name': 'warehouse', 'type': 'tag'},
