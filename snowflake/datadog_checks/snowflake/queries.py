@@ -150,10 +150,12 @@ DataTransferHistory = Query(
 AutoReclusterHistory = Query(
     {
         'name': 'auto_recluster.metrics',
-        'query': 'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
-        'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
-        'avg(num_rows_reclustered), sum(num_rows_reclustered) '
-        'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;',
+        'query': (
+            'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
+            'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
+            'avg(num_rows_reclustered), sum(num_rows_reclustered) '
+            'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;'
+        ),
         'columns': [
             {'name': 'table', 'type': 'tag'},
             {'name': 'database', 'type': 'tag'},
