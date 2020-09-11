@@ -144,7 +144,7 @@ files:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
       - name: ssl_certificate_label
-        description: Certificate label used for ssl connection.
+        description: Certificate label used for SSL connection.
         value:
           type: string
       - name: queue_tag_re

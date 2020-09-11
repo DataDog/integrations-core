@@ -137,7 +137,7 @@ instances:
     # ssl_key_repository_location: /var/mqm/ssl-db/client/KeyringClient
 
     ## @param ssl_certificate_label - string - optional
-    ## Certificate label used for ssl connection.
+    ## Certificate label used for SSL connection.
     #
     # ssl_certificate_label: <SSL_CERTIFICATE_LABEL>
 
