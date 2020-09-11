@@ -1,5 +1,10 @@
 # CHANGELOG - process
 
+## 1.16.0 / 2020-09-09
+
+* [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
+* [Fixed] Handle unfound processes in no matching PIDs logs. See [#7474](https://github.com/DataDog/integrations-core/pull/7474). Thanks [TheBooper](https://github.com/TheBooper).
+
 ## 1.15.1 / 2020-07-02 / Agent 7.21.0
 
 * [Fixed] Fix NoSuchProcess log message level. See [#7045](https://github.com/DataDog/integrations-core/pull/7045).

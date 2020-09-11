@@ -178,16 +178,20 @@ def test_channel_queue_config_error(instance_config):
 def test_ssl_connection_creation(instance):
     """
     Test that we are not getting unicode/bytes type error.
-
-    TODO: We should test SSL in e2e
     """
+    # Late import to not require it for e2e
+    import pymqi
+
     instance['ssl_auth'] = 'yes'
     instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
     instance['ssl_key_repository_location'] = '/dummy'
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
-    check.check(instance)
+    with pytest.raises(pymqi.MQMIError) as excinfo:
+        check.check(instance)
+
+    assert excinfo.value.reason == pymqi.CMQC.MQRC_KEY_REPOSITORY_ERROR
 
     assert len(check.warnings) == 1
     warning = check.warnings[0]
