@@ -47,9 +47,9 @@ def dd_environment(e2e_instance):
 def e2e_instance():
     # type: () -> Instance
     return {
+        'security_daemon_management_api_url': common.E2E_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'edge_hub_prometheus_url': common.E2E_EDGE_HUB_PROMETHEUS_URL,
         'edge_agent_prometheus_url': common.E2E_EDGE_AGENT_PROMETHEUS_URL,
-        'security_daemon_management_api_url': common.E2E_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'tags': common.CUSTOM_TAGS,
     }
 
@@ -72,8 +72,8 @@ def mock_server():
 def mock_instance():
     # type: () -> Instance
     return {
+        'security_daemon_management_api_url': common.MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'edge_hub_prometheus_url': common.MOCK_EDGE_HUB_PROMETHEUS_URL,
         'edge_agent_prometheus_url': common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
-        'security_daemon_management_api_url': common.MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL,
         'tags': common.CUSTOM_TAGS,
     }

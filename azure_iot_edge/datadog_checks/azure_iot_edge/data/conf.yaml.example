@@ -13,20 +13,20 @@ init_config:
 #
 instances:
 
+    ## @param security_daemon_management_api_url - string - required
+    ## The URL of the Security Daemon management API, for health check purposes.
+    #
+  - security_daemon_management_api_url: http://localhost:15580
+
     ## @param edge_hub_prometheus_url - string - required
     ## The URL where Edge Hub metrics are exposed via Prometheus.
     #
-  - edge_hub_prometheus_url: http://edgeHub:9600/metrics
+    edge_hub_prometheus_url: http://edgeHub:9600/metrics
 
     ## @param edge_agent_prometheus_url - string - required
     ## The URL where Edge Agent metrics are exposed via Prometheus.
     #
     edge_agent_prometheus_url: http://edgeAgent:9600/metrics
-
-    ## @param security_daemon_management_api_url - string - required
-    ## The URL of the Security Daemon management API, for health check purposes.
-    #
-    security_daemon_management_api_url: http://localhost:15580
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
