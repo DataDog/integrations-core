@@ -172,8 +172,10 @@ AutoReclusterHistory = Query(
 TableStorage = Query(
     {
         'name': 'table_storage.metrics',
-        'query': 'select table_name, table_schema, avg(ACTIVE_BYTES), avg(TIME_TRAVEL_BYTES), avg(FAILSAFE_BYTES), '
-        'avg(RETAINED_FOR_CLONE_BYTES) from table_storage_metrics group by 1, 2',
+        'query': (
+            'select table_name, table_schema, avg(ACTIVE_BYTES), avg(TIME_TRAVEL_BYTES), avg(FAILSAFE_BYTES), '
+            'avg(RETAINED_FOR_CLONE_BYTES) from table_storage_metrics group by 1, 2'
+        ),
         'columns': [
             {'name': 'table', 'type': 'tag'},
             {'name': 'schema', 'type': 'tag'},
