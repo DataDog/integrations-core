@@ -8,6 +8,7 @@ import pytest
 from packaging import version
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
 
 from .common import (
@@ -82,7 +83,7 @@ def test_check(aggregator):
 
     aggregator.assert_no_duplicate_all()
 
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -103,6 +104,8 @@ def test_check_simple_user(aggregator):
     len(aggregator._service_checks) == 1  # can_connect service check only
 
     aggregator.assert_no_duplicate_all()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -131,6 +134,8 @@ def test_check_with_filters(aggregator):
     _assert_service_checks(aggregator, COMMON_TAGS)
 
     aggregator.assert_no_duplicate_all()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -168,6 +173,8 @@ def test_e2e(dd_agent_check):
 
     # Service checks
     _assert_service_checks(aggregator, COMMON_TAGS, count=2)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_submit_health_service_checks(aggregator, caplog):
