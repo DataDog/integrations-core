@@ -77,8 +77,10 @@ WarehouseCreditUsage = Query(
 LoginMetrics = Query(
     {
         'name': 'login.metrics',
-        'query': "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)), "
-        "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;",
+        'query': (
+            "select REPORTED_CLIENT_TYPE, sum(iff(IS_SUCCESS = 'NO', 1, 0)), sum(iff(IS_SUCCESS = 'YES', 1, 0)), "
+            "count(*) from LOGIN_HISTORY group by REPORTED_CLIENT_TYPE;"
+        ),
         'columns': [
             {'name': 'client_type', 'type': 'tag'},
             {'name': 'logins.fail.count', 'type': 'monotonic_count'},
