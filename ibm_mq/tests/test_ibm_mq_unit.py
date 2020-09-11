@@ -178,8 +178,6 @@ def test_channel_queue_config_error(instance_config):
 def test_ssl_connection_creation(instance):
     """
     Test that we are not getting unicode/bytes type error.
-
-    TODO: We should test SSL in e2e
     """
     # Late import to not require it for e2e
     import pymqi
