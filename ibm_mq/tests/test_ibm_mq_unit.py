@@ -177,8 +177,6 @@ def test_channel_queue_config_error(instance_config):
 def test_ssl_connection_creation(instance):
     """
     Test that we are not getting unicode/bytes type error.
-
-    TODO: We should test SSL in e2e
     """
     instance['ssl_auth'] = 'yes'
     instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
