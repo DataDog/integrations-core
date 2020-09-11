@@ -121,7 +121,7 @@
 [5]: https://github.com/asandeep
 [6]: https://github.com/DataDog/integrations-core/pull/1729
 [7]: https://github.com/DataDog/integrations-core/pull/1727
-[8]:
+[8]: https://github.com/DataDog/integrations-core/pull/1530
 [9]: https://github.com/pdecat
 [10]: https://github.com/DataDog/integrations-core/pull/337
 [11]: https://github.com/DataDog/integrations-core/pull/609
