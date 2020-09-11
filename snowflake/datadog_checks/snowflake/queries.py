@@ -208,9 +208,11 @@ PipeHistory = Query(
 ReplicationUsage = Query(
     {
         'name': 'replication.metrics',
-        'query': 'select database_name, avg(credits_used), sum(credits_used), '
-        'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;',
+        'query': (
+            'select database_name, avg(credits_used), sum(credits_used), '
+            'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
+            'where start_time >= date_trunc(day, current_date) group by 1;'
+        ),
         'columns': [
             {'name': 'database', 'type': 'tag'},
             {'name': 'replication.credits_used.avg', 'type': 'gauge'},
