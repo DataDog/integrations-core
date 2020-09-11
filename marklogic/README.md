@@ -78,10 +78,10 @@ See [metadata.csv][10] for a list of metrics provided by this check.
 **marklogic.can_connect**: 
 Returns `CRITICAL` if the Agent is enabled to reach the query endpoint. Returns `OK` otherwise.
 
-**marklogic.database.health**:<br>
+**marklogic.database.health**:
 Returns `CRITICAL` if the database state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
 
-**marklogic.forest.health**:<br>
+**marklogic.forest.health**:
 Returns `CRITICAL` if the forest state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
 
 ### Events

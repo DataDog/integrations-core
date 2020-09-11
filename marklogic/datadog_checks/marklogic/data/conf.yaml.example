@@ -23,7 +23,7 @@ init_config:
     #   - <HOSTNAME_1>
     #   - <HOSTNAME_2>
 
-    ## @param skip_proxy - Boolean - optional - default: `false`
+    ## @param skip_proxy - boolean - optional - default: false
     ## If set to `true`, this makes the check bypass any proxy
     ## settings enabled and attempt to reach services directly.
     #
@@ -59,11 +59,11 @@ instances:
 
     ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of two to four parameters.
-    ## 'resource_type' is one of forest/database/host/server on which to apply the filter (required)
+    ## 'resource_type' is one of `forest`, `database`, `host`, or `server` on which to apply the filter (required)
     ## 'pattern' is a pattern to match the resource name (required)
-    ## 'include' is whether or not the filter include (default) or exclude the specified resources.
-    ##       `True` (default) include the matching resources, and `False` exclude them.
-    ##       If a resource match both an exclude filter and an include filter, it will be considered excluded.
+    ## 'include' is a Boolean indicating whether the filter includes (`true`, the default) or 
+    ##       excludes (`false`) the specified resources.
+    ##       If a resource matches both an exclude pattern and an include pattern, it will be excluded.
     ## 'group' is the resource group to match (optional)
     #
     # resource_filters:

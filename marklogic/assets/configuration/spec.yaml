@@ -30,7 +30,8 @@ files:
         Each filter in the list is composed of two to four parameters.
         'resource_type' is one of `forest`, `database`, `host`, or `server` on which to apply the filter (required)
         'pattern' is a pattern to match the resource name (required)
-        'include' is a Boolean indicating whether the filter includes (`true`, the default) or excludes (`false`) the specified resources.
+        'include' is a Boolean indicating whether the filter includes (`true`, the default) or 
+              excludes (`false`) the specified resources.
               If a resource matches both an exclude pattern and an include pattern, it will be excluded.
         'group' is the resource group to match (optional)
       value:
