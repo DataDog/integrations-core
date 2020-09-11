@@ -52,6 +52,8 @@ class HAProxy(AgentCheck):
         # https://en.wikipedia.org/wiki/Autovivification
         # https://gist.github.com/hrldcpr/2012250
         self.host_status = defaultdict(str)
+        self.tags_regex = self.instance.get('tags_regex')
+        self.custom_tags = tuple(self.instance.get('tags', []))
         self.url = self.instance.get('url')
         self.collect_aggregates_only = self.instance.get('collect_aggregates_only', True)
         self.collect_status_metrics = is_affirmative(self.instance.get('collect_status_metrics', False))
@@ -63,8 +65,6 @@ class HAProxy(AgentCheck):
         self.startup_grace_period = float(self.instance.get('startup_grace_seconds', 0))
         self.services_incl_filter = self.instance.get('services_include', [])
         self.services_excl_filter = self.instance.get('services_exclude', [])
-        self.tags_regex = self.instance.get('tags_regex', None)
-        self.custom_tags = self.instance.get('tags', [])
         self.include_active_tag = self.instance.get('active_tag', False)
         self.process_events = self.instance.get('status_check', self.init_config.get('status_check', False))
 
@@ -83,7 +83,7 @@ class HAProxy(AgentCheck):
             except Exception as e:
                 self.log.warning("Couldn't collect version or uptime information: %s", e)
                 uptime = None
-            data = self._fetch_url_data(self.url)
+            data = self._fetch_url_data()
 
         if uptime is not None and uptime < self.startup_grace_period:
             return
@@ -102,10 +102,10 @@ class HAProxy(AgentCheck):
         else:
             self.log.debug("unable to find HAProxy version info")
 
-    def _fetch_url_data(self, url):
+    def _fetch_url_data(self):
         """ Hit a given http url and return the stats lines."""
         # Try to fetch data from the stats URL
-        url = "%s%s" % (url, STATS_URL)
+        url = "%s%s" % (self.url, STATS_URL)
 
         self.log.debug("Fetching haproxy stats from url: %s", url)
 
