@@ -22,8 +22,10 @@ StorageUsageMetrics = Query(
 DatabaseStorageMetrics = Query(
     {
         'name': 'database_storage.metrics',
-        'query': 'SELECT DATABASE_NAME, AVERAGE_DATABASE_BYTES, '
-        'AVERAGE_FAILSAFE_BYTES from DATABASE_STORAGE_USAGE_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;',
+        'query': (
+            'SELECT DATABASE_NAME, AVERAGE_DATABASE_BYTES, AVERAGE_FAILSAFE_BYTES '
+            'from DATABASE_STORAGE_USAGE_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;'
+        ),
         'columns': [
             {'name': 'database', 'type': 'tag'},
             {'name': 'storage.database.storage_bytes', 'type': 'gauge'},
