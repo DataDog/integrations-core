@@ -15,10 +15,10 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origin and Enterprise clusters. Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
 
 - [Restricted SCC operations](#restricted-scc-operations)
-- [Host network SCC operations](#host-network-scc-operations)
+- [Host network SCC operations](#host)
 - [Custom Datadog SCC for all features](#custom-datadog-scc-for-all-features)
 
-| Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host-network-scc-operations) | [Custom](#custom-datadog-scc-for-all-features) |
+| Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host) | [Custom](#custom-datadog-scc-for-all-features) |
 | ------------------------------ | ---------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
 | Kubernetes layer monitoring    | ✅                                       | ✅                                           | ✅                                             |
 | Kubernetes-based Autodiscovery | ✅                                       | ✅                                           | ✅                                             |
