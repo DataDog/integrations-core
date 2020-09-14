@@ -59,9 +59,37 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
 
 ### Configuration
 
+#### Host
+
 1. Edit the `marklogic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your MarkLogic performance data. See the [sample `marklogic.d/conf.yaml` file][7] for all available configuration options. For user-related settings in the config file, use the Datadog Agent user you created.
 
 2. [Restart the Agent][8].
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `hive.d/conf.yaml` file to start collecting your Hive logs:
+
+   ```yaml
+     logs:
+       - type: file
+         path: /var/opt/MarkLogic/Logs/ErrorLog.txt
+         source: marklogic
+       - type: file
+         path: /var/opt/MarkLogic/Logs/80002_AccessLog.txt
+         source: marklogic
+   ```
+
+    Change the `path` value and configure it for your environment. See the [sample `marklogic.d/conf.yaml` file][7] for all available configuration options.
+
+3. [Restart the Agent][8].
 
 ### Validation
 
