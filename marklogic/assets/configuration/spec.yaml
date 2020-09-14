@@ -47,3 +47,11 @@ files:
           group: Default
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/opt/MarkLogic/Logs/ErrorLog.txt
+        source: marklogic
+      - type: file
+        path: /var/opt/MarkLogic/Logs/8002_AccessLog.txt
+        source: marklogic

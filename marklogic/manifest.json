@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-MarkLogic Integration",
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
@@ -29,6 +30,8 @@
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "marklogic"
+    }
   }
 }
