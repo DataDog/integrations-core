@@ -16,6 +16,9 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+
+METRIC_MONOTONIC_COUNT = 'mysql.queries.monotonic_count'
+
 # monotonically increasing count metrics
 METRICS = {
     'count': 'mysql.queries.count',
@@ -61,12 +64,13 @@ class MySQLStatementMetrics(object):
         def keyfunc(row):
             return (row['schema'], row['digest'])
 
-        rows = self._query_summary_per_statement(db)
-        rows = self._state.compute_derivative_rows(rows, METRICS.keys(), key=keyfunc)
+        monotonic_rows = self._query_summary_per_statement(db)
+        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS.keys(), key=keyfunc)
         rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=keyfunc)
 
         for row in rows:
             tags = list(instance_tags)
+            tags.append('digest:' + row['digest'])
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
 
@@ -87,6 +91,10 @@ class MySQLStatementMetrics(object):
                 value = row[col]
                 self.log.debug("AgentCheck.count(%s, %s, tags=%s)", name, value, tags)
                 instance.count(name, value, tags=tags)
+
+            # For debugging, add the monotonic query count
+            if 'monotonic_count' in row:
+                instance.gauge(METRIC_MONOTONIC_COUNT, row['monotonic_count'], tags=tags)
 
         statsd.timing(
             "dd.mysql.collect_per_statement_metrics.time", (time.time() - start_time) * 1000, tags=instance_tags

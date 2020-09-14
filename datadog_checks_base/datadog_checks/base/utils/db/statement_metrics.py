@@ -57,7 +57,10 @@ class StatementMetrics:
             if all([row[k] - prev[k] == 0 for k in metric_columns]):
                 # No metrics to report; query did not run
                 continue
-            result.append({k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()})
+            derived = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
+            # Add the original monotonic counts for debugging
+            derived.update({'monotonic_' + k: row[k] for k in row.keys()})
+            result.append(derived)
 
         self.previous_statements = new_cache
         if dropped_metrics:
