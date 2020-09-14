@@ -53,6 +53,8 @@ HOST_METRICS = {
 #     'cpu.ready.summation' : None,
     'cpu.usage.average' : None,
     'mem.usage.average' : None,
+    'mem.swapinRate.average' : None,
+    'mem.swapoutRate.average' : None,
     'datastore.numberReadAveraged.average' : "*",
     'datastore.numberWriteAveraged.average' : "*",
     'datastore.read.average' : "*",
