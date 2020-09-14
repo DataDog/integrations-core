@@ -18,7 +18,7 @@ from datadog_checks.couch import CouchDb
 
 from . import common
 
-pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 2, reason='Test for version Couch v2')
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason='Test for version Couch v2+')
 
 INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
 
