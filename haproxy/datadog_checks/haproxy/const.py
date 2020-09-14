@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 
 from datadog_checks.base import AgentCheck
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
 BUFSIZE = 8192
+UPTIME_PARSER = re.compile(r"(?P<days>\d+)d (?P<hours>\d+)h(?P<minutes>\d+)m(?P<seconds>\d+)s")
 
 
 class Services(object):

@@ -2605,3 +2605,19 @@ def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data)
     assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 1
     assert list(check.config_map[FAKE_ENDPOINT]['_type_override_patterns'].values())[0] == 'counter'
     assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 0
+
+
+def test_empty_namespace(aggregator, mocked_prometheus_check, text_data, ref_gauge):
+    """
+    Test that metric type is overridden correctly with wildcard.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['namespace'] = ''
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('process.vm.bytes', count=1)
