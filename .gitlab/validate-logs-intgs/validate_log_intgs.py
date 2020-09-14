@@ -22,7 +22,7 @@ EXCEPTIONS = {
     'azure_active_directory': [
         ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
         ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
-    ]
+    ],
     'cilium': [
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # cilium does not need a pipeline to automatically parse the logs
         ERR_UNEXPECTED_LOG_DOC  # The documentation says to use 'source: cilium'
