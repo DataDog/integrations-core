@@ -47,9 +47,8 @@ def edge_hub_endpoint_ready():
         response.raise_for_status()
     except requests.HTTPError:
         return False
-
-    # Not all metrics are available right away, wait for one known such metric to be returned.
-    return response.status_code == 200 and "edgehub_queue_length{" in response.text
+    else:
+        return response.status_code == 200
 
 
 def edge_agent_endpoint_ready():
@@ -59,6 +58,5 @@ def edge_agent_endpoint_ready():
         response.raise_for_status()
     except requests.HTTPError:
         return False
-
-    # Not all metrics are available right away, wait for one known such metric to be returned.
-    return response.status_code == 200 and "total_network_out_bytes{" in response.text
+    else:
+        return response.status_code == 200
