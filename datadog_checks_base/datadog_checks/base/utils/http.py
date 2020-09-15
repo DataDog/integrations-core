@@ -7,10 +7,11 @@ from contextlib import contextmanager
 from ipaddress import ip_address, ip_network
 
 import requests
+import requests_unixsocket
 from requests import auth as requests_auth
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import quote, urlparse, urlunparse
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -87,6 +88,8 @@ PROXY_SETTINGS_DISABLED = {
 }
 
 KERBEROS_STRATEGIES = {}
+
+UDS_SCHEME = 'unix'
 
 
 class RequestsWrapper(object):
@@ -320,6 +323,7 @@ class RequestsWrapper(object):
                 stack.enter_context(hook())
 
             if persist:
+                url = auto_quote_uds_url(url)
                 return getattr(self.session, method)(url, **new_options)
             else:
                 return getattr(requests, method)(url, **new_options)
@@ -344,6 +348,10 @@ class RequestsWrapper(object):
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
                 self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
+
+            # Enable Unix Domain Socket (UDS) support.
+            # See: https://github.com/msabramo/requests-unixsocket
+            self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
 
             # Attributes can't be passed to the constructor
             for option, value in iteritems(self.options):
@@ -491,6 +499,30 @@ AUTH_TYPES = {
     'kerberos': create_kerberos_auth,
     'aws': create_aws_auth,
 }
+
+
+def auto_quote_uds_url(url):
+    # type: (str) -> str
+    """
+    Automatically convert an URL like 'unix:///var/run/docker.sock/info' to 'unix://%2Fvar%2Frun%2Fdocker.sock/info',
+    for user experience purposes.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme != UDS_SCHEME:
+        return url
+
+    # When passing an UDS path URL, `netloc` is empty and `path` contains everything that's after '://'.
+    # We want to extract the socket path from the URL path, and percent-encode it, and set it as the `netloc`.
+    # For now we assume that UDS paths end in '.sock'. This is by far the most common convention.
+    uds_path_head, has_dot_sock, path = parsed.path.partition('.sock')
+    if not has_dot_sock:
+        return url
+
+    uds_path = '{}.sock'.format(uds_path_head)
+    netloc = quote(uds_path, safe='')
+    parsed = parsed._replace(netloc=netloc, path=path)
+
+    return urlunparse(parsed)
 
 
 # For documentation generation

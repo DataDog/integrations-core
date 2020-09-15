@@ -10,13 +10,14 @@ import pytest
 import requests
 import requests_kerberos
 import requests_ntlm
+import requests_unixsocket
 from aws_requests_auth import boto_utils as requests_aws
 from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
+from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, auto_quote_uds_url
 from datadog_checks.dev import EnvVars
 from datadog_checks.dev.utils import running_on_windows_ci
 
@@ -937,6 +938,37 @@ class TestIgnoreTLSWarning:
                 break
         else:
             raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+
+class TestUnixDomainSocket:
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
+            pytest.param('http://example.org', 'http://example.org', id='non-uds-url'),
+            pytest.param('unix:///var/run/test.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='uds-url'),
+            pytest.param('unix:///var/run/test.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='uds-url-no-path'),
+        ],
+    )
+    def test_auto_quote_uds_url(self, value, expected):
+        # type: (str, str) -> None
+        assert auto_quote_uds_url(value) == expected
+
+    def test_adapter_mounted(self):
+        # type: () -> None
+        http = RequestsWrapper({}, {})
+
+        url = 'unix:///var/run/test.sock'
+        adapter = http.session.get_adapter(url=url)
+        assert adapter is not None
+        assert isinstance(adapter, requests_unixsocket.UnixAdapter)
+
+    def test_uds_request(self, uds_path):
+        # type: (str) -> None
+        http = RequestsWrapper({}, {})
+        url = 'unix://{}'.format(uds_path)
+        response = http.get(url)
+        assert response.status_code == 200
+        assert response.text == 'Hello, World!'
 
 
 class TestSession:

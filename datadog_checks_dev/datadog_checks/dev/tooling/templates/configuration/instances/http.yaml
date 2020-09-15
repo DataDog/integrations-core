@@ -269,4 +269,7 @@
   value:
     example: false
     type: boolean
-  description: Whether or not to persist cookies and use connection pooling for increased performance.
+  description: |
+    Whether or not to persist cookies and use connection pooling for increased performance.
+
+    Must be turned if you want to perform requests through a Unix Domain Socket ('unix://' URLs).
