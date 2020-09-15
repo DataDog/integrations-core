@@ -10,7 +10,6 @@
       type: object
     default: null
     example:
-      - metric_prefix: <INTEGRATION>
-        query: <QUERY>
+      - query: <QUERY>
         columns: <COLUMNS>
         tags: <TAGS>
