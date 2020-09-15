@@ -168,10 +168,13 @@ class PgStatementsMixin(object):
         if not rows:
             return
 
+        instance_tags = list(instance_tags)
+        instance_tags.sort()
+
         def row_keyfunc(row):
             # old versions of pg_stat_statements don't have a query ID so fall back to the query string itself
             queryid = row['queryid'] if 'queryid' in row else row['query']
-            return (queryid, row['datname'], row['rolname'])
+            return (queryid, row['datname'], row['rolname'], ','.join(instance_tags))
 
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
         metric_limits = self.config.query_metric_limits if self.config.query_metric_limits else DEFAULT_METRIC_LIMITS

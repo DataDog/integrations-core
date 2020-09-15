@@ -61,16 +61,18 @@ class MySQLStatementMetrics(object):
         if not (is_dbm_enabled() and self.is_enabled):
             return []
 
+        instance_tags = list(instance_tags)
+        instance_tags.sort()
+
         def keyfunc(row):
-            return (row['schema'], row['digest'])
+            return (row['schema'], row['digest'], ','.join(instance_tags))
 
         monotonic_rows = self._query_summary_per_statement(db)
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS.keys(), key=keyfunc)
         rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=keyfunc)
 
         for row in rows:
-            tags = list(instance_tags)
-            tags.append('digest:' + row['digest'])
+            tags = ['digest:' + row['digest']] + instance_tags
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
 

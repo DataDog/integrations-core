@@ -45,6 +45,8 @@ class StatementMetrics:
         dropped_metrics = set()
         for row in rows:
             row_key = key(row)
+            if row_key in new_cache:
+                self.log.warning('Collision in cached query metrics. Dropping row, current=%s existing=%s', row_key, new_cache[row_key])
             new_cache[row_key] = row
             prev = self.previous_statements.get(row_key)
             if prev is None:
