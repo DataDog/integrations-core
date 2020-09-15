@@ -138,6 +138,11 @@ class VSphereCheck(AgentCheck):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
+            self.log.debug(
+                "Set metadata for mor_type %s: %s",
+                mor_type,
+                metadata,
+            )
 
         # TODO: Later - Understand how much data actually changes between check runs
         # Apparently only when the server restarts?
@@ -180,6 +185,7 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Refreshing the infrastructure cache...")
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
+        self.log.debug("Infrastructure cache: %s", infrastructure_data)
         self.gauge(
             "datadog.vsphere.refresh_infrastructure_cache.time",
             t0.total(),
