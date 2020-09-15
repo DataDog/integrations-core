@@ -44,6 +44,8 @@ from .common import (
     VOLUME_INFO_FIXTURE,
 )
 
+HTTP_SESSION_REQUEST = 'datadog_checks.base.utils.http.SessionMockTarget.request'
+
 
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance):
@@ -110,7 +112,7 @@ def harbor_api(harbor_check, admin_instance, patch_requests):
 
 @pytest.fixture
 def patch_requests():
-    with patch("requests.api.request", side_effect=mocked_requests):
+    with patch(HTTP_SESSION_REQUEST, side_effect=mocked_requests):
         yield
 
 

@@ -10,6 +10,9 @@ from datadog_checks.squid import SquidCheck
 
 from . import common
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_SUBMIT_VERSION = 'datadog_checks.squid.SquidCheck.submit_version'
+
 
 def test_parse_counter(aggregator, check):
     # Good format
@@ -62,8 +65,8 @@ def test_get_counters(check):
     due to a missing = character.
     See https://github.com/DataDog/integrations-core/pull/1643
     """
-    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
-        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+    with mock.patch(MOCK_HTTP_GET) as g:
+        with mock.patch(MOCK_SUBMIT_VERSION):
             g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
             check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
             check.get_counters('host', 'port', [])
@@ -84,8 +87,8 @@ def test_legacy_username_password(instance, auth_config):
     instance.update(auth_config)
     check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests.get') as g:
-        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+    with mock.patch(MOCK_HTTP_GET) as g:
+        with mock.patch(MOCK_SUBMIT_VERSION):
             check.get_counters('host', 'port', [])
 
             g.assert_called_with(

@@ -5,6 +5,8 @@ from datadog_checks.envoy import Envoy
 
 from .common import INSTANCES, response
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.mark.usefixtures('dd_environment')
 def test_run(benchmark):
@@ -21,7 +23,7 @@ def test_fixture(benchmark):
     instance = INSTANCES['main']
     c = Envoy('envoy', {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('multiple_services')):
         # Run once to get logging of unknown metrics out of the way.
         c.check(instance)
 

@@ -8,6 +8,8 @@ import pytest
 
 from .common import FIXTURE_DIR
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.fixture
 def mock_external_dns():
@@ -16,7 +18,7 @@ def mock_external_dns():
         text_data = f.read()
 
     with mock.patch(
-        'requests.get',
+        MOCK_HTTP_GET,
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split('\n'), headers={'Content-Type': 'text/plain'}
         ),

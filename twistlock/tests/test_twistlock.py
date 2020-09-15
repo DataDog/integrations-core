@@ -42,6 +42,8 @@ METRICS = [
 
 HERE = get_here()
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 class MockResponse:
     def __init__(self, j):
@@ -74,7 +76,7 @@ def test_check(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
+    with mock.patch(MOCK_HTTP_GET, side_effect=mock_get_factory(fixture_group), autospec=True):
         check.check(instance)
         check.check(instance)
 
@@ -96,7 +98,7 @@ def test_config_project(aggregator, fixture_group):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
+    with mock.patch(MOCK_HTTP_GET, side_effect=mock_get_factory(fixture_group), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(
@@ -119,6 +121,6 @@ def test_err_response(aggregator):
     check = TwistlockCheck('twistlock', {}, [instance])
 
     with pytest.raises(Exception, match='^Error in response'):
-        with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
+        with mock.patch(MOCK_HTTP_GET, return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
 
             check.check(instance)

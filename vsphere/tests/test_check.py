@@ -19,6 +19,8 @@ from datadog_checks.vsphere.config import VSphereConfig
 from .common import HERE
 from .mocked_api import MockedAPI
 
+MOCK_HTTP_POST = 'datadog_checks.base.utils.http.SessionMockTarget.post'
+
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
 def test_realtime_metrics(aggregator, dd_run_check, realtime_instance):
@@ -251,7 +253,7 @@ def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_inst
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.log = MagicMock()
 
-    with mock.patch('requests.post', side_effect=Exception, autospec=True):
+    with mock.patch(MOCK_HTTP_POST, side_effect=Exception, autospec=True):
         dd_run_check(check)
 
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')

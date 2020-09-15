@@ -7,6 +7,8 @@ import pytest
 
 from . import common
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
@@ -70,7 +72,7 @@ def test_check_ok(aggregator, check, instance):
 )
 @pytest.mark.usefixtures("dd_environment")
 def test_version_metadata(check, instance, datadog_agent, raw_version, version_metadata, count):
-    with mock.patch('datadog_checks.base.utils.http.requests.get') as g:
+    with mock.patch(MOCK_HTTP_GET) as g:
         g.return_value.headers = {'Server': raw_version}
 
         check.check_id = 'test:123'

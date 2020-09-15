@@ -20,6 +20,8 @@ from .common import (
     TEST_USERNAME,
 )
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.fixture(scope="session")
 def dd_environment():
@@ -42,13 +44,13 @@ def check():
 
 @pytest.fixture
 def mocked_request():
-    with patch("requests.get", new=requests_get_mock):
+    with patch(MOCK_HTTP_GET, new=requests_get_mock):
         yield
 
 
 @pytest.fixture
 def mocked_auth_request():
-    with patch("requests.get", new=requests_auth_mock):
+    with patch(MOCK_HTTP_GET, new=requests_auth_mock):
         yield
 
 

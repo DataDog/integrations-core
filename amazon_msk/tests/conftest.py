@@ -9,6 +9,8 @@ from six.moves.urllib.parse import urlparse
 
 from .common import read_fixture, stream_fixture
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 def mock_requests_get(url, *args, **kwargs):
     fixture = 'jmx_metrics.txt' if urlparse(url).port == 11001 else 'node_metrics.txt'
@@ -17,7 +19,7 @@ def mock_requests_get(url, *args, **kwargs):
 
 @pytest.fixture
 def mock_data():
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+    with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
         yield
 
 

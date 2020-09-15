@@ -31,6 +31,8 @@ DEPLOYMENTS_LEGACY = [
     ('istio-ingressgateway', 80),
 ]
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -100,7 +102,7 @@ def istio_proxy_mesh_fixture():
     with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
 
@@ -111,7 +113,7 @@ def istiod_mixture_fixture():
     with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
 
@@ -122,7 +124,7 @@ def mesh_fixture():
     with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
 
@@ -133,7 +135,7 @@ def mixture_fixture():
     with open(mixer_file_path, 'r') as f:
         responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
 
@@ -146,7 +148,7 @@ def new_mesh_mixture_fixture():
         with open(file_path, 'r') as f:
             responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
 
@@ -159,7 +161,7 @@ def new_pilot_fixture():
         with open(file_path, 'r') as f:
             responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
 
@@ -172,5 +174,5 @@ def new_galley_fixture():
         with open(file_path, 'r') as f:
             responses.append(f.read())
 
-    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield

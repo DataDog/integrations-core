@@ -14,6 +14,8 @@ from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
 from .common import AUTO_STATUS_URL, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
 
+MOCK_HTTP_SESSION = 'datadog_checks.base.utils.http.SessionMockTarget'
+
 
 @pytest.fixture(scope="session")
 def dd_environment():
@@ -49,7 +51,7 @@ def check_status_page_ready():
 
 @pytest.fixture
 def mock_hide_server_version():
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    with mock.patch(MOCK_HTTP_SESSION) as req:
 
         def mock_requests_get_headers(*args, **kwargs):
             r = requests.get(*args, **kwargs)

@@ -26,6 +26,8 @@ from .common import (
 
 log = logging.getLogger('test_haproxy')
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 def wait_for_haproxy():
     res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
@@ -100,7 +102,7 @@ def haproxy_mock():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    p = mock.patch(MOCK_HTTP_GET, return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
@@ -118,7 +120,7 @@ def haproxy_mock_evil():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    p = mock.patch(MOCK_HTTP_GET, return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
@@ -128,7 +130,7 @@ def haproxy_mock_enterprise_version_info():
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.get', return_value=mock.Mock(content=data)) as p:
+    with mock.patch(MOCK_HTTP_GET, return_value=mock.Mock(content=data)) as p:
         yield p
 
 

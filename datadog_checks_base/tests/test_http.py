@@ -31,6 +31,14 @@ DEFAULT_OPTIONS = {
     'verify': True,
 }
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_POST = 'datadog_checks.base.utils.http.SessionMockTarget.post'
+MOCK_HTTP_HEAD = 'datadog_checks.base.utils.http.SessionMockTarget.head'
+MOCK_HTTP_PUT = 'datadog_checks.base.utils.http.SessionMockTarget.put'
+MOCK_HTTP_PATCH = 'datadog_checks.base.utils.http.SessionMockTarget.patch'
+MOCK_HTTP_DELETE = 'datadog_checks.base.utils.http.SessionMockTarget.delete'
+MOCK_REQUESTS_WRAPPER_SESSION_ATTR = 'datadog_checks.base.utils.http.RequestsWrapper.session'
+
 
 class TestAttribute:
     def test_default(self):
@@ -124,7 +132,7 @@ class TestHeaders:
         http = RequestsWrapper(instance, init_config)
 
         extra_headers = {"foo": "bar"}
-        with mock.patch("requests.get") as get:
+        with mock.patch(MOCK_HTTP_GET) as get:
             http.get("http://example.com/hello", extra_headers=extra_headers)
 
             expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
@@ -344,7 +352,7 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
+        with mock.patch(MOCK_HTTP_GET, side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
             assert http.get('https://www.google.com') == '/test/file'
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
@@ -357,7 +365,7 @@ class TestAuth:
 
         assert os.environ.get('KRB5CCNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+        with mock.patch(MOCK_HTTP_GET, side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
             assert http.get('https://www.google.com') == '/test/file'
 
         assert os.environ.get('KRB5CCNAME') is None
@@ -369,7 +377,7 @@ class TestAuth:
         http = RequestsWrapper(instance, init_config)
 
         with EnvVars({'KRB5CCNAME': 'old'}):
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+            with mock.patch(MOCK_HTTP_GET, side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
                 assert http.get('https://www.google.com') == '/test/file'
 
             assert os.environ.get('KRB5CCNAME') == 'old'
@@ -383,7 +391,7 @@ class TestAuth:
         with EnvVars({'KRB5_CLIENT_KTNAME': 'old'}):
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
+            with mock.patch(MOCK_HTTP_GET, side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
                 assert http.get('https://www.google.com') == '/test/file'
 
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
@@ -835,7 +843,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -850,7 +858,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -862,7 +870,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -877,7 +885,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -889,7 +897,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -901,7 +909,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -916,7 +924,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -928,7 +936,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -1019,7 +1027,7 @@ class TestLogger:
     def test_default(self, caplog):
         check = AgentCheck('test', {}, [{}])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1033,7 +1041,7 @@ class TestLogger:
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1050,7 +1058,7 @@ class TestLogger:
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1065,7 +1073,7 @@ class TestLogger:
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch(MOCK_HTTP_GET):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1077,25 +1085,25 @@ class TestAPI:
     def test_get(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.get'):
+        with mock.patch(MOCK_HTTP_GET) as m:
             http.get('https://www.google.com')
-            requests.get.assert_called_once_with('https://www.google.com', **http.options)
+            m.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_get_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.get('https://www.google.com')
-            http.session.get.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+            m.get.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_get_option_override(self):
         http = RequestsWrapper({}, {})
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.get'):
+        with mock.patch(MOCK_HTTP_GET) as m:
             http.get('https://www.google.com', auth=options['auth'])
-            requests.get.assert_called_once_with('https://www.google.com', **options)
+            m.assert_called_once_with('https://www.google.com', **options)
 
     def test_get_session_option_override(self):
         http = RequestsWrapper({}, {})
@@ -1109,162 +1117,162 @@ class TestAPI:
     def test_post(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.post'):
+        with mock.patch(MOCK_HTTP_POST) as m:
             http.post('https://www.google.com')
-            requests.post.assert_called_once_with('https://www.google.com', **http.options)
+            m.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_post_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.post('https://www.google.com')
-            http.session.post.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+            m.post.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_post_option_override(self):
         http = RequestsWrapper({}, {})
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.post'):
+        with mock.patch(MOCK_HTTP_POST) as m:
             http.post('https://www.google.com', auth=options['auth'])
-            requests.post.assert_called_once_with('https://www.google.com', **options)
+            m.assert_called_once_with('https://www.google.com', **options)
 
     def test_post_session_option_override(self):
         http = RequestsWrapper({}, {})
         options = DEFAULT_OPTIONS.copy()
         options.update({'auth': ('user', 'pass')})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.post('https://www.google.com', persist=True, auth=options['auth'])
-            http.session.post.assert_called_once_with('https://www.google.com', **options)
+            m.post.assert_called_once_with('https://www.google.com', **options)
 
     def test_head(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.head'):
+        with mock.patch(MOCK_HTTP_HEAD) as m:
             http.head('https://www.google.com')
-            requests.head.assert_called_once_with('https://www.google.com', **http.options)
+            m.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_head_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.head('https://www.google.com')
-            http.session.head.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+            m.head.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_head_option_override(self):
         http = RequestsWrapper({}, {})
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.head'):
+        with mock.patch(MOCK_HTTP_HEAD) as m:
             http.head('https://www.google.com', auth=options['auth'])
-            requests.head.assert_called_once_with('https://www.google.com', **options)
+            m.assert_called_once_with('https://www.google.com', **options)
 
     def test_head_session_option_override(self):
         http = RequestsWrapper({}, {})
         options = DEFAULT_OPTIONS.copy()
         options.update({'auth': ('user', 'pass')})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.head('https://www.google.com', persist=True, auth=options['auth'])
-            http.session.head.assert_called_once_with('https://www.google.com', **options)
+            m.head.assert_called_once_with('https://www.google.com', **options)
 
     def test_put(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.put'):
+        with mock.patch(MOCK_HTTP_PUT) as m:
             http.put('https://www.google.com')
-            requests.put.assert_called_once_with('https://www.google.com', **http.options)
+            m.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_put_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.put('https://www.google.com')
-            http.session.put.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+            m.put.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_put_option_override(self):
         http = RequestsWrapper({}, {})
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.put'):
+        with mock.patch(MOCK_HTTP_PUT) as m:
             http.put('https://www.google.com', auth=options['auth'])
-            requests.put.assert_called_once_with('https://www.google.com', **options)
+            m.assert_called_once_with('https://www.google.com', **options)
 
     def test_put_session_option_override(self):
         http = RequestsWrapper({}, {})
         options = DEFAULT_OPTIONS.copy()
         options.update({'auth': ('user', 'pass')})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.put('https://www.google.com', persist=True, auth=options['auth'])
-            http.session.put.assert_called_once_with('https://www.google.com', **options)
+            m.put.assert_called_once_with('https://www.google.com', **options)
 
     def test_patch(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.patch'):
+        with mock.patch(MOCK_HTTP_PATCH) as m:
             http.patch('https://www.google.com')
-            requests.patch.assert_called_once_with('https://www.google.com', **http.options)
+            m.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_patch_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.patch('https://www.google.com')
-            http.session.patch.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+            m.patch.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_patch_option_override(self):
         http = RequestsWrapper({}, {})
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.patch'):
+        with mock.patch(MOCK_HTTP_PATCH) as m:
             http.patch('https://www.google.com', auth=options['auth'])
-            requests.patch.assert_called_once_with('https://www.google.com', **options)
+            m.assert_called_once_with('https://www.google.com', **options)
 
     def test_patch_session_option_override(self):
         http = RequestsWrapper({}, {})
         options = DEFAULT_OPTIONS.copy()
         options.update({'auth': ('user', 'pass')})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.patch('https://www.google.com', persist=True, auth=options['auth'])
-            http.session.patch.assert_called_once_with('https://www.google.com', **options)
+            m.patch.assert_called_once_with('https://www.google.com', **options)
 
     def test_delete(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.delete'):
+        with mock.patch(MOCK_HTTP_DELETE) as m:
             http.delete('https://www.google.com')
-            requests.delete.assert_called_once_with('https://www.google.com', **http.options)
+            m.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_delete_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.delete('https://www.google.com')
-            http.session.delete.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+            m.delete.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_delete_option_override(self):
         http = RequestsWrapper({}, {})
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.delete'):
+        with mock.patch(MOCK_HTTP_DELETE) as m:
             http.delete('https://www.google.com', auth=options['auth'])
-            requests.delete.assert_called_once_with('https://www.google.com', **options)
+            m.assert_called_once_with('https://www.google.com', **options)
 
     def test_delete_session_option_override(self):
         http = RequestsWrapper({}, {})
         options = DEFAULT_OPTIONS.copy()
         options.update({'auth': ('user', 'pass')})
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+        with mock.patch(MOCK_REQUESTS_WRAPPER_SESSION_ATTR) as m:
             http.delete('https://www.google.com', persist=True, auth=options['auth'])
-            http.session.delete.assert_called_once_with('https://www.google.com', **options)
+            m.delete.assert_called_once_with('https://www.google.com', **options)
 
 
 class TestIntegration:

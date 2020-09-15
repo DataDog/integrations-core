@@ -16,6 +16,8 @@ from .common import ATHOST, CONFIG_FILE, HERE, URL
 # One lookup each for the forward and proxy plugins
 DIG_ARGS = ["dig", "google.com", ATHOST, "example.com", ATHOST, "-p", "54"]
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 def init_coredns():
     res = requests.get(URL)
@@ -49,7 +51,7 @@ def mock_get():
     mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
     with open(mesh_file_path, 'r') as f:
         text_data = f.read()
-    with mock.patch('requests.get', return_value=MockResponse(text_data, 'text/plain; version=0.0.4'), __name__='get'):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse(text_data, 'text/plain; version=0.0.4'), __name__='get'):
         yield
 
 

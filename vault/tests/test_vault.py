@@ -16,6 +16,8 @@ from .utils import run_check
 
 pytestmark = pytest.mark.usefixtures('dd_environment')
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 class TestVault:
     def test_bad_config(self, aggregator):
@@ -72,7 +74,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
@@ -98,7 +100,7 @@ class TestVault:
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with mock.patch('requests.get', return_value=MockResponse('', status_code=500)):
+        with mock.patch(MOCK_HTTP_GET, return_value=MockResponse('', status_code=500)):
             with pytest.raises(
                 Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
             ):
@@ -148,7 +150,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         expected_tags = ['is_leader:true', 'cluster_name:vault-cluster-f5f44063', 'vault_version:0.10.2']
@@ -180,7 +182,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
@@ -220,7 +222,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         expected_tags = ['is_leader:true', 'cluster_name:vault-cluster-f5f44063', 'vault_version:0.10.2']
@@ -252,7 +254,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
@@ -284,7 +286,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         assert len(aggregator.events) > 0
@@ -318,7 +320,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         assert len(aggregator.events) == 0
@@ -337,7 +339,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -356,7 +358,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 0)
@@ -388,7 +390,7 @@ class TestVault:
                 )
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -406,7 +408,7 @@ class TestVault:
                 return MockResponse({'errors': ["Vault is sealed"]}, status_code=503)
             return requests_get(url, *args, **kwargs)
 
-        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch(MOCK_HTTP_GET, side_effect=mock_requests_get, autospec=True):
             run_check(c)
 
         aggregator.assert_metric('vault.is_leader', count=0)

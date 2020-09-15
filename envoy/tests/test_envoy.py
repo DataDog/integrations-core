@@ -14,6 +14,8 @@ from .common import ENVOY_VERSION, HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -34,7 +36,7 @@ def test_success_fixture(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('multiple_services')):
         c.check(instance)
 
     metrics_collected = 0
@@ -63,7 +65,7 @@ def test_success_fixture_included_metrics(aggregator):
     instance = INSTANCES['included_metrics']
     c = Envoy(CHECK_NAME, {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('multiple_services')):
         c.check(instance)
 
     for metric in aggregator.metric_names:
@@ -75,7 +77,7 @@ def test_success_fixture_excluded_metrics(aggregator):
     instance = INSTANCES['excluded_metrics']
     c = Envoy(CHECK_NAME, {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('multiple_services')):
         c.check(instance)
 
     for metric in aggregator.metric_names:
@@ -87,7 +89,7 @@ def test_success_fixture_inclued_and_excluded_metrics(aggregator):
     instance = INSTANCES['included_excluded_metrics']
     c = Envoy(CHECK_NAME, {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('multiple_services')):
         c.check(instance)
 
     for metric in aggregator.metric_names:
@@ -99,7 +101,7 @@ def test_service_check(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('multiple_services')):
         c.check(instance)
 
     assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
@@ -110,7 +112,7 @@ def test_unknown():
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('unknown_metrics')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('unknown_metrics')):
         c.check(instance)
 
     assert sum(c.unknown_metrics.values()) == 5
@@ -150,7 +152,7 @@ def test_metadata(datadog_agent):
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
+    with mock.patch(MOCK_HTTP_GET, side_effect=requests.exceptions.Timeout()):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(
@@ -158,7 +160,7 @@ def test_metadata(datadog_agent):
         )
 
     datadog_agent.reset()
-    with mock.patch('requests.get', side_effect=IndexError()):
+    with mock.patch(MOCK_HTTP_GET, side_effect=IndexError()):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(
@@ -166,7 +168,7 @@ def test_metadata(datadog_agent):
         )
 
     datadog_agent.reset()
-    with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
+    with mock.patch(MOCK_HTTP_GET, side_effect=requests.exceptions.RequestException('Req Exception')):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(
@@ -176,7 +178,7 @@ def test_metadata(datadog_agent):
         )
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=response('server_info')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('server_info')):
         check._collect_metadata(instance['stats_url'])
 
         major, minor, patch = ENVOY_VERSION.split('.')
@@ -192,7 +194,7 @@ def test_metadata(datadog_agent):
         datadog_agent.assert_metadata_count(len(version_metadata))
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=response('server_info_before_1_9')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('server_info_before_1_9')):
         check._collect_metadata(instance['stats_url'])
 
         expected_version = '1.8.0'
@@ -209,7 +211,7 @@ def test_metadata(datadog_agent):
         datadog_agent.assert_metadata_count(len(version_metadata))
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=response('server_info_invalid')):
+    with mock.patch(MOCK_HTTP_GET, return_value=response('server_info_invalid')):
         check._collect_metadata(instance['stats_url'])
 
         datadog_agent.assert_metadata('test:123', {})

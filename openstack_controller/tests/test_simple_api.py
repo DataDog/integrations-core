@@ -23,6 +23,8 @@ from . import common
 
 log = logging.getLogger('test_openstack_controller')
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 def test_get_endpoint():
     authenticator = Authenticator()
@@ -727,7 +729,7 @@ def test__make_request_failure(requests_wrapper):
         api = ApiFactory.create(log, instance, requests_wrapper)
 
     response_mock = mock.MagicMock()
-    with mock.patch("datadog_checks.openstack_controller.api.requests.get", return_value=response_mock):
+    with mock.patch(MOCK_HTTP_GET, return_value=response_mock):
         response_mock.raise_for_status.side_effect = requests.exceptions.HTTPError
         response_mock.status_code = 401
         with pytest.raises(AuthenticationNeeded):

@@ -206,6 +206,8 @@ METRICS_WITH_INTERFACE_TAG = {
     'kubernetes.network.tx_dropped': 'eth0',
 }
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 class MockStreamResponse:
     """
@@ -403,7 +405,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
     get = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
     )
-    with mock.patch('requests.get', return_value=get):
+    with mock.patch(MOCK_HTTP_GET, return_value=get):
         check.check(instance)
 
     assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
@@ -413,7 +415,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
         status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
     )
     kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
-    with mock.patch('requests.get', return_value=get), mock.patch(
+    with mock.patch(MOCK_HTTP_GET, return_value=get), mock.patch(
         'datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info
     ):
         check.check(instance)
@@ -787,7 +789,7 @@ def test_perform_kubelet_check(monkeypatch):
 
     instance_tags = ["one:1"]
     get = MockResponse()
-    with mock.patch("requests.get", side_effect=get):
+    with mock.patch(MOCK_HTTP_GET, side_effect=get):
         check._perform_kubelet_check(instance_tags)
 
     get.assert_has_calls(
@@ -828,7 +830,7 @@ def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
 
     get = mock.MagicMock(status_code=404, iter_lines=lambda **kwargs: "Error Code")
     get.raise_for_status.side_effect = requests.HTTPError('error')
-    with mock.patch('requests.get', return_value=get):
+    with mock.patch(MOCK_HTTP_GET, return_value=get):
         check._report_node_metrics(['foo:bar'])
         aggregator.assert_all_metrics_covered()
 

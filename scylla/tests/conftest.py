@@ -12,6 +12,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 INSTANCE_PORT = 9180
 INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
 
 
 @pytest.fixture(scope='session')
@@ -34,7 +35,7 @@ def mock_db_data():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        MOCK_HTTP_GET,
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),

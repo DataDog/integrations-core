@@ -25,6 +25,8 @@ INSTANCE_UNIT = {
     'send_monotonic_counter': True,
 }
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.fixture(scope="session")
 def instance():
@@ -59,7 +61,7 @@ def poll_mock():
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
     poll_mock_patch = mock.patch(
-        'requests.get',
+        MOCK_HTTP_GET,
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),

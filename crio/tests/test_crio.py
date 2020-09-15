@@ -12,6 +12,7 @@ instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
 
 
 @pytest.fixture()
@@ -20,7 +21,7 @@ def mock_data():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        MOCK_HTTP_GET,
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),

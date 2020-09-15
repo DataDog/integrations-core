@@ -644,10 +644,12 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
 
 SPARK_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME]
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.mark.unit
 def test_yarn(aggregator):
-    with mock.patch('requests.get', yarn_requests_get_mock):
+    with mock.patch(MOCK_HTTP_GET, yarn_requests_get_mock):
         c = SparkCheck('spark', {}, [YARN_CONFIG])
         c.check(YARN_CONFIG)
 
@@ -697,7 +699,7 @@ def test_yarn(aggregator):
 
 @pytest.mark.unit
 def test_auth_yarn(aggregator):
-    with mock.patch('requests.get', yarn_requests_auth_mock):
+    with mock.patch(MOCK_HTTP_GET, yarn_requests_auth_mock):
         c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
         c.check(YARN_AUTH_CONFIG)
 
@@ -717,7 +719,7 @@ def test_auth_yarn(aggregator):
 
 @pytest.mark.unit
 def test_mesos(aggregator):
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch(MOCK_HTTP_GET, mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
         c.check(MESOS_CONFIG)
 
@@ -774,7 +776,7 @@ def test_mesos(aggregator):
 
 @pytest.mark.unit
 def test_mesos_filter(aggregator):
-    with mock.patch('requests.get', mesos_requests_get_mock):
+    with mock.patch(MOCK_HTTP_GET, mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
         c.check(MESOS_FILTERED_CONFIG)
 
@@ -787,7 +789,7 @@ def test_mesos_filter(aggregator):
 
 @pytest.mark.unit
 def test_driver_unit(aggregator):
-    with mock.patch('requests.get', driver_requests_get_mock):
+    with mock.patch(MOCK_HTTP_GET, driver_requests_get_mock):
         c = SparkCheck('spark', {}, [DRIVER_CONFIG])
         c.check(DRIVER_CONFIG)
 
@@ -844,7 +846,7 @@ def test_driver_unit(aggregator):
 
 @pytest.mark.unit
 def test_standalone_unit(aggregator):
-    with mock.patch('requests.get', standalone_requests_get_mock):
+    with mock.patch(MOCK_HTTP_GET, standalone_requests_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
         c.check(STANDALONE_CONFIG)
 
@@ -899,7 +901,7 @@ def test_standalone_unit(aggregator):
 @pytest.mark.unit
 def test_standalone_unit_with_proxy_warning_page(aggregator):
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
-    with mock.patch('requests.get', proxy_with_warning_page_mock):
+    with mock.patch(MOCK_HTTP_GET, proxy_with_warning_page_mock):
         c.check(STANDALONE_CONFIG)
 
         # Check the running job metrics
@@ -952,7 +954,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
 @pytest.mark.unit
 def test_standalone_pre20(aggregator):
-    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+    with mock.patch(MOCK_HTTP_GET, standalone_requests_pre20_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
         c.check(STANDALONE_CONFIG_PRE_20)
 
@@ -1006,7 +1008,7 @@ def test_standalone_pre20(aggregator):
 
 @pytest.mark.unit
 def test_metadata(aggregator, datadog_agent):
-    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+    with mock.patch(MOCK_HTTP_GET, standalone_requests_pre20_get_mock):
         c = SparkCheck(CHECK_NAME, {}, [STANDALONE_CONFIG_PRE_20])
         c.check_id = "test:123"
         c.check(STANDALONE_CONFIG_PRE_20)

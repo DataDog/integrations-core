@@ -52,6 +52,10 @@ EXTRA_NETWORK_METRICS = [
     'ecs.fargate.net.bytes_sent',
 ]
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_GET_TAGS = 'datadog_checks.ecs_fargate.ecs_fargate.get_tags'
+MOCK_C_IS_EXCLUDED = 'datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded'
+
 
 @pytest.fixture
 def instance():
@@ -143,7 +147,7 @@ def test_failing_check(check, instance, aggregator):
     """
     Testing fargate metadata endpoint error.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 500)):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse("{}", 500)):
         check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
@@ -153,7 +157,7 @@ def test_invalid_response_check(check, instance, aggregator):
     """
     Testing invalid fargate metadata payload.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 200)):
+    with mock.patch(MOCK_HTTP_GET, return_value=MockResponse("{}", 200)):
         check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
@@ -163,9 +167,9 @@ def test_successful_check(check, instance, aggregator):
     """
     Testing successful fargate check.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get):
-        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
-            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+    with mock.patch(MOCK_HTTP_GET, side_effect=mocked_requests_get):
+        with mock.patch(MOCK_GET_TAGS, side_effect=mocked_get_tags):
+            with mock.patch(MOCK_C_IS_EXCLUDED, side_effect=mocked_is_excluded):
                 check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)

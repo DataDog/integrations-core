@@ -25,6 +25,8 @@ from .common import (
     YARN_SCHEDULER_URL,
 )
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.fixture(scope="session")
 def dd_environment():
@@ -48,7 +50,7 @@ def instance():
 
 @pytest.fixture
 def mocked_request():
-    with patch("requests.get", new=requests_get_mock):
+    with patch(MOCK_HTTP_GET, new=requests_get_mock):
         yield
 
 
@@ -64,7 +66,7 @@ def mocked_auth_request():
         # Return mocked request.get(...)
         return requests_get_mock(*args, **kwargs)
 
-    with patch("requests.get", new=requests_auth_get):
+    with patch(MOCK_HTTP_GET, new=requests_auth_get):
         yield
 
 
@@ -84,7 +86,7 @@ def mocked_bad_cert_request():
         # Return the actual response
         return requests_get_mock(*args, **kwargs)
 
-    with patch("requests.get", new=requests_bad_cert_get):
+    with patch(MOCK_HTTP_GET, new=requests_bad_cert_get):
         yield
 
 

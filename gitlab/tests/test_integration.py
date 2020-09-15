@@ -11,6 +11,8 @@ from .common import AUTH_CONFIG, BAD_CONFIG, CONFIG, CUSTOM_TAGS, HOST, METRICS,
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
+MOCK_HTTP_RESPONSE_JSON = 'datadog_checks.base.utils.http.requests.Response.json'
+
 
 def test_connection_failure(aggregator):
     """
@@ -59,7 +61,7 @@ def test_connection_failure(aggregator):
     ],
 )
 def test_check_submit_metadata(aggregator, datadog_agent, raw_version, version_metadata, count):
-    with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
+    with mock.patch(MOCK_HTTP_RESPONSE_JSON) as g:
         # mock the api call so that it returns the given version
         g.return_value = {"version": raw_version}
 

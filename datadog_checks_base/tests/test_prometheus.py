@@ -17,6 +17,8 @@ from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 class MockResponse:
     """
@@ -332,7 +334,7 @@ def test_poll_protobuf(mocked_prometheus_check, bin_data):
     """ Tests poll using the protobuf format """
     check = mocked_prometheus_check
     mock_response = mock.MagicMock(status_code=200, content=bin_data, headers={'Content-Type': protobuf_content_type})
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         assert len(messages) == 61
@@ -345,7 +347,7 @@ def test_poll_text_plain(mocked_prometheus_check, text_data):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         messages.sort(key=lambda x: x.name)
@@ -1282,7 +1284,7 @@ def test_label_joins(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {
@@ -1632,7 +1634,7 @@ def test_label_joins_gc(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1682,7 +1684,7 @@ def test_label_joins_gc(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check.process("http://fake.endpoint:10055/metrics")
         assert 'dd-agent-1337' in check._label_mapping['pod']
         assert 'dd-agent-62bgh' not in check._label_mapping['pod']
@@ -1698,7 +1700,7 @@ def test_label_joins_missconfigured(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}}
@@ -1751,7 +1753,7 @@ def test_label_join_not_existing(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1790,7 +1792,7 @@ def test_label_join_metric_not_existing(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1829,7 +1831,7 @@ def test_label_join_with_hostname(sorted_tags_check):
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch(MOCK_HTTP_GET, return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}}
@@ -1881,7 +1883,7 @@ def mock_get():
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_get = mock.patch(
-        'requests.get',
+        MOCK_HTTP_GET,
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),

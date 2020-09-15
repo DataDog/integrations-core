@@ -10,19 +10,21 @@ from datadog_checks.teamcity import TeamCityCheck
 
 from .common import CHECK_NAME, CONFIG
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 @pytest.mark.integration
 def test_build_event(aggregator):
     teamcity = TeamCityCheck(CHECK_NAME, {}, [CONFIG])
 
-    with patch('datadog_checks.base.utils.http.requests.get', get_mock_first_build):
+    with patch(MOCK_HTTP_GET, get_mock_first_build):
         teamcity.check(CONFIG['instances'][0])
 
     assert len(aggregator.metric_names) == 0
     assert len(aggregator.events) == 0
     aggregator.reset()
 
-    with patch('datadog_checks.base.utils.http.requests.get', get_mock_one_more_build):
+    with patch(MOCK_HTTP_GET, get_mock_one_more_build):
         teamcity.check(CONFIG['instances'][0])
 
     events = aggregator.events
@@ -38,7 +40,7 @@ def test_build_event(aggregator):
     aggregator.reset()
 
     # One more check should not create any more events
-    with patch('datadog_checks.base.utils.http.requests.get', get_mock_one_more_build):
+    with patch(MOCK_HTTP_GET, get_mock_one_more_build):
         teamcity.check(CONFIG['instances'][0])
 
     assert len(aggregator.events) == 0
@@ -122,7 +124,7 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = TeamCityCheck(CHECK_NAME, {}, [instance])
 
-    with patch('datadog_checks.base.utils.http.requests.get') as r:
+    with patch(MOCK_HTTP_GET) as r:
         check.check(instance)
 
         http_wargs = dict(auth=ANY, cert=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY)

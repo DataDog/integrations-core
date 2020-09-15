@@ -10,6 +10,8 @@ from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 def test_metadata_unit(datadog_agent):
     version = common._get_pdns_version()
@@ -23,19 +25,19 @@ def test_metadata_unit(datadog_agent):
 
     config_obj, tags = check._get_config(instance)
 
-    with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
+    with mock.patch(MOCK_HTTP_GET, side_effect=requests.exceptions.Timeout()):
         check._collect_metadata(config_obj)
         datadog_agent.assert_metadata_count(0)
         check.log.debug.assert_called_with('Error collecting PowerDNS Recursor version: %s', '')
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=common.MockResponse({}, 200)):
+    with mock.patch(MOCK_HTTP_GET, return_value=common.MockResponse({}, 200)):
         check._collect_metadata(config_obj)
         datadog_agent.assert_metadata_count(0)
         check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=common.MockResponse({'Server': 'wrong_stuff'}, 200)):
+    with mock.patch(MOCK_HTTP_GET, return_value=common.MockResponse({'Server': 'wrong_stuff'}, 200)):
         check._collect_metadata(config_obj)
         datadog_agent.assert_metadata_count(0)
         check.log.debug.assert_called_with(

@@ -15,6 +15,8 @@ pytestmark = pytest.mark.unit
 
 log = logging.getLogger(__file__)
 
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+
 
 def test_get_nodes_with_service(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
@@ -157,7 +159,7 @@ def test_get_nodes_with_service_critical(aggregator):
 
 def test_consul_request(aggregator, instance):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
-    with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
+    with mock.patch(MOCK_HTTP_GET) as mock_requests_get:
         consul_check.consul_request("foo")
         url = "{}/{}".format(instance["url"], "foo")
         aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
