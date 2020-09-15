@@ -174,7 +174,10 @@ class VSphereCheck(AgentCheck):
             self.log.error("Failed to collect tags: %s", e)
             return {}
 
-        self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.gauge(
+            'datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True, hostname=self._hostname
+        )
+
         return mor_tags
 
     def refresh_infrastructure_cache(self):
@@ -371,7 +374,13 @@ class VSphereCheck(AgentCheck):
         """
         t0 = Timer()
         metrics_values = self.api.query_metrics(query_specs)
-        self.histogram('datadog.vsphere.query_metrics.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.histogram(
+            'datadog.vsphere.query_metrics.time',
+            t0.total(),
+            tags=self.config.base_tags,
+            raw=True,
+            hostname=self._hostname,
+        )
         return metrics_values
 
     def make_query_specs(self):
