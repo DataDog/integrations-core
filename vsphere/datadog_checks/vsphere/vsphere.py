@@ -185,7 +185,6 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Refreshing the infrastructure cache...")
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
-        self.log.debug("Infrastructure cache: %s", infrastructure_data)
         self.gauge(
             "datadog.vsphere.refresh_infrastructure_cache.time",
             t0.total(),
@@ -194,6 +193,7 @@ class VSphereCheck(AgentCheck):
             hostname=self._hostname,
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
+        self.log.debug("Infrastructure cache: %s", infrastructure_data)
 
         all_tags = {}
         if self.config.should_collect_tags:
