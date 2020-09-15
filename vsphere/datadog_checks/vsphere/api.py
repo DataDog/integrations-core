@@ -285,6 +285,8 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
+        self.log.debug("Received %s values from QueryPerf", len(values))
+        self.log.trace("QueryPerf response for specs `%s`: %s", query_specs, values)
         return values
 
     @smart_retry

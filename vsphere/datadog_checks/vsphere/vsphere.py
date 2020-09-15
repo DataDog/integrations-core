@@ -4,6 +4,7 @@
 from __future__ import division
 
 import datetime as dt
+import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -137,6 +138,11 @@ class VSphereCheck(AgentCheck):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
+            self.log.debug(
+                "Set metadata for mor_type %s: %s",
+                mor_type,
+                metadata,
+            )
 
         # TODO: Later - Understand how much data actually changes between check runs
         # Apparently only when the server restarts?
@@ -187,6 +193,7 @@ class VSphereCheck(AgentCheck):
             hostname=self._hostname,
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
+        self.log.debug("Infrastructure cache: %s", infrastructure_data)
 
         all_tags = {}
         if self.config.should_collect_tags:
@@ -274,10 +281,23 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
+            self.log.debug(
+                "Retrieved mor props for entity %s: %s",
+                results_per_mor.entity,
+                mor_props,
+            )
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)
+                if self.log.isEnabledFor(logging.DEBUG):
+                    # Use isEnabledFor to avoid unnecessary processing
+                    self.log.debug(
+                        "Processing metric `%s`: resource_type=`%s`, result=`%s`",
+                        metric_name,
+                        resource_type,
+                        str(result).replace("\n", "\\n"),
+                    )
                 if not metric_name:
                     # Fail-safe
                     self.log.debug(
@@ -296,8 +316,9 @@ class VSphereCheck(AgentCheck):
                 if not valid_values:
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
-                        " is negative (i.e. the metric is not yet available).",
+                        " is negative (i.e. the metric is not yet available). values: %s",
                         to_string(metric_name),
+                        list(result.value),
                     )
                     continue
 
@@ -333,6 +354,13 @@ class VSphereCheck(AgentCheck):
                     # Convert the percentage to a float.
                     value /= 100.0
 
+                self.log.debug(
+                    "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                    metric_name,
+                    value,
+                    hostname,
+                    tags,
+                )
                 # vSphere "rates" should be submitted as gauges (rate is precomputed).
                 self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
