@@ -4,6 +4,7 @@
 from __future__ import division
 
 import datetime as dt
+import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -274,10 +275,22 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
+            self.log.debug(
+                "Retrieved mor props for entity %s: %s",
+                results_per_mor.entity,
+                mor_props,
+            )
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)
+                if self.log.isEnabledFor(logging.DEBUG):
+                    # Use isEnabledFor to avoid unnecessary processing
+                    self.log.debug(
+                        "Processing metric `%s`: result=`%s`",
+                        metric_name,
+                        str(result).replace("\n", "\\n"),
+                    )
                 if not metric_name:
                     # Fail-safe
                     self.log.debug(
