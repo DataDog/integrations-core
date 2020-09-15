@@ -573,6 +573,7 @@ class VSphereCheck(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.base_tags, hostname=None)
 
         self._server_current_time = self.api.get_current_time()
+        self.log.debug("Server current time: %s", self._server_current_time)
 
         # Collect and submit events
         if self.config.should_collect_events:
