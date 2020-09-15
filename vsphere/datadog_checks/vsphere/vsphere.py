@@ -296,8 +296,9 @@ class VSphereCheck(AgentCheck):
                 if not valid_values:
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
-                        " is negative (i.e. the metric is not yet available).",
+                        " is negative (i.e. the metric is not yet available). values: %s",
                         to_string(metric_name),
+                        list(result.value),
                     )
                     continue
 
