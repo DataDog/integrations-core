@@ -24,7 +24,6 @@
   "integration_id": "kubernetes",
   "assets": {
     "monitors": {
-      "[kubernetes] Monitor Kubernetes Cluster Memory Usage": "assets/monitors/monitor_cluster_memory.json",
       "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",
       "[kubernetes] Monitor Unschedulable Kubernetes Nodes": "assets/monitors/monitor_node_unavailable.json",
       "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_crashloopbackoff.json",
