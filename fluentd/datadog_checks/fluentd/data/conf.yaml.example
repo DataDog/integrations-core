@@ -350,5 +350,7 @@ instances:
 
     ## @param persist_connections - boolean - optional - default: false
     ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ##
+    ## Must be turned if you want to perform requests through a Unix Domain Socket ('unix://' URLs).
     #
     # persist_connections: false
