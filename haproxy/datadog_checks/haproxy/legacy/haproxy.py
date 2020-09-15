@@ -39,13 +39,13 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
         )
 
 
-class HAProxy(AgentCheck):
+class HAProxyCheckLegacy(AgentCheck):
 
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
     def __init__(self, name, init_config, instances):
-        super(HAProxy, self).__init__(name, init_config, instances)
+        super(HAProxyCheckLegacy, self).__init__(name, init_config, instances)
 
         # Host status needs to persist across all checks.
         # We'll create keys when they are referenced. See:
