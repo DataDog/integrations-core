@@ -7,7 +7,7 @@ import mock
 from . import common
 
 BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def _assert_agg_statuses(

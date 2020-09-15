@@ -14,7 +14,7 @@ INSTANCE_HISTO = {'prometheus_url': 'http://localhost:10249/metrics', 'collect_n
 
 CHECK_NAME = 'nginx_ingress_controller'
 NAMESPACE = 'nginx_ingress'
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture()

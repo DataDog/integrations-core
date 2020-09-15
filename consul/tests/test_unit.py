@@ -15,7 +15,7 @@ pytestmark = pytest.mark.unit
 
 log = logging.getLogger(__file__)
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def test_get_nodes_with_service(aggregator):

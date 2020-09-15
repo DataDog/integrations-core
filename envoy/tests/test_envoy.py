@@ -14,7 +14,7 @@ from .common import ENVOY_VERSION, HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.mark.integration

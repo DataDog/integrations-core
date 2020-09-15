@@ -15,7 +15,7 @@ customtag = "custom:tag"
 
 instance = {'prometheus_endpoint': 'http://localhost:10055/metrics', 'tags': [customtag]}
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture()

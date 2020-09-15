@@ -14,7 +14,7 @@ from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
 from .common import AUTO_STATUS_URL, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
 
-MOCK_HTTP_SESSION = 'datadog_checks.base.utils.http.SessionMockTarget'
+MOCK_HTTP_SESSION = 'datadog_checks.base.utils.http.requests'
 
 
 @pytest.fixture(scope="session")

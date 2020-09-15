@@ -644,7 +644,7 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
 
 SPARK_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME]
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.mark.unit

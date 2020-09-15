@@ -12,7 +12,7 @@ instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture()

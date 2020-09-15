@@ -10,7 +10,7 @@ from datadog_checks.teamcity import TeamCityCheck
 
 from .common import CHECK_NAME, CONFIG
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.mark.integration

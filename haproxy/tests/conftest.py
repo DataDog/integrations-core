@@ -26,7 +26,7 @@ from .common import (
 
 log = logging.getLogger('test_haproxy')
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def wait_for_haproxy():

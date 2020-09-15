@@ -17,7 +17,7 @@ from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 class MockResponse:

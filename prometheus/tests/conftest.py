@@ -25,7 +25,7 @@ INSTANCE_UNIT = {
     'send_monotonic_counter': True,
 }
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope="session")

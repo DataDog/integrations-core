@@ -20,7 +20,7 @@ from .common import (
     TEST_USERNAME,
 )
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope="session")

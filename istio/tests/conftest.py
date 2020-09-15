@@ -31,7 +31,7 @@ DEPLOYMENTS_LEGACY = [
     ('istio-ingressgateway', 80),
 ]
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope='session')

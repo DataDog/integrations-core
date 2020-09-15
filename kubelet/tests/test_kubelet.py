@@ -206,7 +206,7 @@ METRICS_WITH_INTERFACE_TAG = {
     'kubernetes.network.tx_dropped': 'eth0',
 }
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 class MockStreamResponse:

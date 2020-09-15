@@ -10,7 +10,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster
 
-MOCK_HTTP_SESSION = 'datadog_checks.base.utils.http.SessionMockTarget'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def test_check(check, instance, aggregator):
@@ -135,8 +135,8 @@ def test_can_connect_service_check(
 ):
     check = MesosMaster('mesos_master', {}, [instance])
 
-    with mock.patch(MOCK_HTTP_SESSION) as r:
-        r.get.side_effect = request_mock_side_effects
+    with mock.patch(MOCK_HTTP_GET) as m:
+        m.side_effect = request_mock_side_effects
 
         try:
             check._get_master_state('http://hello.com', ['my:tag'])

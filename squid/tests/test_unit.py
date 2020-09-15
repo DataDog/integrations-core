@@ -10,7 +10,7 @@ from datadog_checks.squid import SquidCheck
 
 from . import common
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 MOCK_SUBMIT_VERSION = 'datadog_checks.squid.SquidCheck.submit_version'
 
 

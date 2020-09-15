@@ -23,7 +23,7 @@ from . import common
 
 log = logging.getLogger('test_openstack_controller')
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def test_get_endpoint():

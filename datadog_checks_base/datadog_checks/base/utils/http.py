@@ -89,11 +89,6 @@ PROXY_SETTINGS_DISABLED = {
 KERBEROS_STRATEGIES = {}
 
 
-# Stable reference to the session-like object used by the wrapper for non-persistent requests.
-# For mocking purposes in tests only.
-SessionMockTarget = requests
-
-
 class RequestsWrapper(object):
     __slots__ = (
         '_session',

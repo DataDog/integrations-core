@@ -22,7 +22,7 @@ from datadog_checks.dev import get_here
 
 text_content_type = 'text/plain; version=0.0.4'
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 class MockResponse:
@@ -119,7 +119,7 @@ def mock_get():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+        MOCK_HTTP_GET,
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),

@@ -14,7 +14,7 @@ from datadog_checks.hdfs_datanode import HDFSDataNode
 
 from .common import HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope="session")

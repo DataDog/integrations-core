@@ -12,7 +12,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 INSTANCE_PORT = 9180
 INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope='session')

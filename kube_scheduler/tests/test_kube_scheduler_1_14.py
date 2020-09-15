@@ -15,7 +15,7 @@ instance = {'prometheus_url': 'http://localhost:10251/metrics', 'send_histograms
 # Constants
 CHECK_NAME = 'kube_scheduler'
 NAMESPACE = 'kube_scheduler'
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture()

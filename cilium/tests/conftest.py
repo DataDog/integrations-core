@@ -26,7 +26,7 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 PORTS = [AGENT_PORT, OPERATOR_PORT]
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def setup_cilium():

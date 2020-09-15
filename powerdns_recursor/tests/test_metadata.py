@@ -10,7 +10,7 @@ from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def test_metadata_unit(datadog_agent):

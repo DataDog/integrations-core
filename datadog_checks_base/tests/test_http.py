@@ -31,12 +31,12 @@ DEFAULT_OPTIONS = {
     'verify': True,
 }
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
-MOCK_HTTP_POST = 'datadog_checks.base.utils.http.SessionMockTarget.post'
-MOCK_HTTP_HEAD = 'datadog_checks.base.utils.http.SessionMockTarget.head'
-MOCK_HTTP_PUT = 'datadog_checks.base.utils.http.SessionMockTarget.put'
-MOCK_HTTP_PATCH = 'datadog_checks.base.utils.http.SessionMockTarget.patch'
-MOCK_HTTP_DELETE = 'datadog_checks.base.utils.http.SessionMockTarget.delete'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
+MOCK_HTTP_POST = 'datadog_checks.base.utils.http.requests.post'
+MOCK_HTTP_HEAD = 'datadog_checks.base.utils.http.requests.head'
+MOCK_HTTP_PUT = 'datadog_checks.base.utils.http.requests.put'
+MOCK_HTTP_PATCH = 'datadog_checks.base.utils.http.requests.patch'
+MOCK_HTTP_DELETE = 'datadog_checks.base.utils.http.requests.delete'
 MOCK_REQUESTS_WRAPPER_SESSION_ATTR = 'datadog_checks.base.utils.http.RequestsWrapper.session'
 
 

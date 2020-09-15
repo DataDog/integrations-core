@@ -16,7 +16,7 @@ from .common import ATHOST, CONFIG_FILE, HERE, URL
 # One lookup each for the forward and proxy plugins
 DIG_ARGS = ["dig", "google.com", ATHOST, "example.com", ATHOST, "-p", "54"]
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def init_coredns():

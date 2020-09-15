@@ -13,7 +13,7 @@ from datadog_checks.dev import docker_run
 
 from .common import HERE, INSTANCE
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope="session")

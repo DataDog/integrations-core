@@ -14,7 +14,7 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
-MOCK_HTTP_REQUEST = 'datadog_checks.base.utils.http.SessionMockTarget.request'
+MOCK_HTTP_REQUEST = 'datadog_checks.base.utils.http.requests.request'
 
 
 @pytest.fixture(scope='session')

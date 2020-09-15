@@ -27,7 +27,7 @@ instance2 = {
 # Constants
 CHECK_NAME = 'kube_controller_manager'
 NAMESPACE = 'kube_controller_manager'
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture()

@@ -9,7 +9,7 @@ from six.moves.urllib.parse import urlparse
 
 from .common import read_fixture, stream_fixture
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 def mock_requests_get(url, *args, **kwargs):

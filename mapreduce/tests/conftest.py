@@ -29,7 +29,7 @@ from .common import (
 )
 
 MOCKED_HOSTS = ('namenode', 'datanode', 'resourcemanager', 'nodemanager', 'historyserver')
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 
 
 @pytest.fixture(scope="session")

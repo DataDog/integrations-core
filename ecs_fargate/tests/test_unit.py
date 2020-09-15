@@ -52,7 +52,7 @@ EXTRA_NETWORK_METRICS = [
     'ecs.fargate.net.bytes_sent',
 ]
 
-MOCK_HTTP_GET = 'datadog_checks.base.utils.http.SessionMockTarget.get'
+MOCK_HTTP_GET = 'datadog_checks.base.utils.http.requests.get'
 MOCK_GET_TAGS = 'datadog_checks.ecs_fargate.ecs_fargate.get_tags'
 MOCK_C_IS_EXCLUDED = 'datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded'
 

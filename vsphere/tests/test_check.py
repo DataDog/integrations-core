@@ -19,7 +19,7 @@ from datadog_checks.vsphere.config import VSphereConfig
 from .common import HERE
 from .mocked_api import MockedAPI
 
-MOCK_HTTP_POST = 'datadog_checks.base.utils.http.SessionMockTarget.post'
+MOCK_HTTP_POST = 'datadog_checks.base.utils.http.requests.post'
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
