@@ -88,6 +88,7 @@ class VSphereCheck(AgentCheck):
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
+        self._server_current_time = None
 
     def initiate_api_connection(self):
         # type: () -> None
@@ -407,7 +408,7 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = dt.datetime.now() - dt.timedelta(hours=2)
+                        query_spec.startTime = self._server_current_time - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
@@ -570,6 +571,8 @@ class VSphereCheck(AgentCheck):
             raise
         else:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.base_tags, hostname=None)
+
+        self._server_current_time = self.api.get_current_time()
 
         # Collect and submit events
         if self.config.should_collect_events:
