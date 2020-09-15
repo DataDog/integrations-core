@@ -293,8 +293,9 @@ class VSphereCheck(AgentCheck):
                 if self.log.isEnabledFor(logging.DEBUG):
                     # Use isEnabledFor to avoid unnecessary processing
                     self.log.debug(
-                        "Processing metric `%s`: result=`%s`",
+                        "Processing metric `%s`: resource_type=`%s`, result=`%s`",
                         metric_name,
+                        resource_type,
                         str(result).replace("\n", "\\n"),
                     )
                 if not metric_name:
@@ -353,6 +354,13 @@ class VSphereCheck(AgentCheck):
                     # Convert the percentage to a float.
                     value /= 100.0
 
+                self.log.debug(
+                    "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                    metric_name,
+                    value,
+                    hostname,
+                    tags,
+                )
                 # vSphere "rates" should be submitted as gauges (rate is precomputed).
                 self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
