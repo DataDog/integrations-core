@@ -322,7 +322,8 @@ class RequestsWrapper(object):
             if persist:
                 return getattr(self.session, method)(url, **new_options)
             else:
-                return getattr(requests, method)(url, **new_options)
+                session = self._create_session()
+                return getattr(session, method)(url, **new_options)
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options
@@ -335,20 +336,24 @@ class RequestsWrapper(object):
 
         return options
 
+    def _create_session(self):
+        session = requests.Session()
+
+        # Enables HostHeaderSSLAdapter
+        # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
+        if self.tls_use_host_header:
+            session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
+
+        # Attributes can't be passed to the constructor
+        for option, value in iteritems(self.options):
+            setattr(session, option, value)
+
+        return session
+
     @property
     def session(self):
         if self._session is None:
-            self._session = requests.Session()
-
-            # Enables HostHeaderSSLAdapter
-            # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
-            if self.tls_use_host_header:
-                self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
-
-            # Attributes can't be passed to the constructor
-            for option, value in iteritems(self.options):
-                setattr(self._session, option, value)
-
+            self._session = self._create_session()
         return self._session
 
     def __del__(self):  # no cov

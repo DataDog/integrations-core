@@ -124,7 +124,7 @@ class TestHeaders:
         http = RequestsWrapper(instance, init_config)
 
         extra_headers = {"foo": "bar"}
-        with mock.patch("requests.get") as get:
+        with mock.patch("requests.Session.get") as get:
             http.get("http://example.com/hello", extra_headers=extra_headers)
 
             expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
@@ -344,7 +344,9 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
+        with mock.patch(
+            'requests.Session.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')
+        ):
             assert http.get('https://www.google.com') == '/test/file'
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
@@ -357,7 +359,7 @@ class TestAuth:
 
         assert os.environ.get('KRB5CCNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+        with mock.patch('requests.Session.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
             assert http.get('https://www.google.com') == '/test/file'
 
         assert os.environ.get('KRB5CCNAME') is None
@@ -369,7 +371,7 @@ class TestAuth:
         http = RequestsWrapper(instance, init_config)
 
         with EnvVars({'KRB5CCNAME': 'old'}):
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+            with mock.patch('requests.Session.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
                 assert http.get('https://www.google.com') == '/test/file'
 
             assert os.environ.get('KRB5CCNAME') == 'old'
@@ -383,7 +385,9 @@ class TestAuth:
         with EnvVars({'KRB5_CLIENT_KTNAME': 'old'}):
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
+            with mock.patch(
+                'requests.Session.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')
+            ):
                 assert http.get('https://www.google.com') == '/test/file'
 
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
@@ -835,7 +839,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -850,7 +854,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -862,7 +866,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -877,7 +881,7 @@ class TestIgnoreTLSWarning:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -889,7 +893,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -901,7 +905,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -916,7 +920,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -928,7 +932,7 @@ class TestIgnoreTLSWarning:
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -1019,7 +1023,7 @@ class TestLogger:
     def test_default(self, caplog):
         check = AgentCheck('test', {}, [{}])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1033,7 +1037,7 @@ class TestLogger:
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1050,7 +1054,7 @@ class TestLogger:
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1065,7 +1069,7 @@ class TestLogger:
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -1077,9 +1081,9 @@ class TestAPI:
     def test_get(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.get'):
+        with mock.patch('requests.Session.get'):
             http.get('https://www.google.com')
-            requests.get.assert_called_once_with('https://www.google.com', **http.options)
+            requests.Session.get.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_get_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
@@ -1093,9 +1097,9 @@ class TestAPI:
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.get'):
+        with mock.patch('requests.Session.get'):
             http.get('https://www.google.com', auth=options['auth'])
-            requests.get.assert_called_once_with('https://www.google.com', **options)
+            requests.Session.get.assert_called_once_with('https://www.google.com', **options)
 
     def test_get_session_option_override(self):
         http = RequestsWrapper({}, {})
@@ -1109,9 +1113,9 @@ class TestAPI:
     def test_post(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.post'):
+        with mock.patch('requests.Session.post'):
             http.post('https://www.google.com')
-            requests.post.assert_called_once_with('https://www.google.com', **http.options)
+            requests.Session.post.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_post_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
@@ -1125,9 +1129,9 @@ class TestAPI:
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.post'):
+        with mock.patch('requests.Session.post'):
             http.post('https://www.google.com', auth=options['auth'])
-            requests.post.assert_called_once_with('https://www.google.com', **options)
+            requests.Session.post.assert_called_once_with('https://www.google.com', **options)
 
     def test_post_session_option_override(self):
         http = RequestsWrapper({}, {})
@@ -1141,9 +1145,9 @@ class TestAPI:
     def test_head(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.head'):
+        with mock.patch('requests.Session.head'):
             http.head('https://www.google.com')
-            requests.head.assert_called_once_with('https://www.google.com', **http.options)
+            requests.Session.head.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_head_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
@@ -1157,9 +1161,9 @@ class TestAPI:
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.head'):
+        with mock.patch('requests.Session.head'):
             http.head('https://www.google.com', auth=options['auth'])
-            requests.head.assert_called_once_with('https://www.google.com', **options)
+            requests.Session.head.assert_called_once_with('https://www.google.com', **options)
 
     def test_head_session_option_override(self):
         http = RequestsWrapper({}, {})
@@ -1173,9 +1177,9 @@ class TestAPI:
     def test_put(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.put'):
+        with mock.patch('requests.Session.put'):
             http.put('https://www.google.com')
-            requests.put.assert_called_once_with('https://www.google.com', **http.options)
+            requests.Session.put.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_put_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
@@ -1189,9 +1193,9 @@ class TestAPI:
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.put'):
+        with mock.patch('requests.Session.put'):
             http.put('https://www.google.com', auth=options['auth'])
-            requests.put.assert_called_once_with('https://www.google.com', **options)
+            requests.Session.put.assert_called_once_with('https://www.google.com', **options)
 
     def test_put_session_option_override(self):
         http = RequestsWrapper({}, {})
@@ -1205,9 +1209,9 @@ class TestAPI:
     def test_patch(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.patch'):
+        with mock.patch('requests.Session.patch'):
             http.patch('https://www.google.com')
-            requests.patch.assert_called_once_with('https://www.google.com', **http.options)
+            requests.Session.patch.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_patch_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
@@ -1221,9 +1225,9 @@ class TestAPI:
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.patch'):
+        with mock.patch('requests.Session.patch'):
             http.patch('https://www.google.com', auth=options['auth'])
-            requests.patch.assert_called_once_with('https://www.google.com', **options)
+            requests.Session.patch.assert_called_once_with('https://www.google.com', **options)
 
     def test_patch_session_option_override(self):
         http = RequestsWrapper({}, {})
@@ -1237,9 +1241,9 @@ class TestAPI:
     def test_delete(self):
         http = RequestsWrapper({}, {})
 
-        with mock.patch('requests.delete'):
+        with mock.patch('requests.Session.delete'):
             http.delete('https://www.google.com')
-            requests.delete.assert_called_once_with('https://www.google.com', **http.options)
+            requests.Session.delete.assert_called_once_with('https://www.google.com', **http.options)
 
     def test_delete_session(self):
         http = RequestsWrapper({'persist_connections': True}, {})
@@ -1253,9 +1257,9 @@ class TestAPI:
         options = http.options.copy()
         options['auth'] = ('user', 'pass')
 
-        with mock.patch('requests.delete'):
+        with mock.patch('requests.Session.delete'):
             http.delete('https://www.google.com', auth=options['auth'])
-            requests.delete.assert_called_once_with('https://www.google.com', **options)
+            requests.Session.delete.assert_called_once_with('https://www.google.com', **options)
 
     def test_delete_session_option_override(self):
         http = RequestsWrapper({}, {})
