@@ -27,6 +27,6 @@
 		}
 	},
 	"recommended_monitor_metadata": {
-    "description": "Notifies when NGINX upstream 5xx errors are higher than usual"
-  }
+		"description": "Notifies when NGINX upstream 5xx errors are higher than usual"
+	}
 }

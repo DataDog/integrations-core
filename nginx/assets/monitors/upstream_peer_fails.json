@@ -4,8 +4,8 @@
 	"query": "avg(last_1h):anomalies(avg:nginx.stream.upstream.peers.fails{*} by {upstream}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
 	"message": "NGINX upstream peer failures are higher than usual at {{value}}.",
 	"tags": [
-    "integration:nginx"
-  ],
+		"integration:nginx"
+  	],
 	"options": {
 		"notify_audit": false,
 		"locked": false,
@@ -26,7 +26,7 @@
 			"recovery_window": "last_15m"
 		}
 	},
-  "recommended_monitor_metadata": {
-    "description": "Notify your team when NGINX upstream peer failures are higher than usual"
-  }
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when NGINX upstream peer failures are higher than usual"
+	}
 }
