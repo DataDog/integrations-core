@@ -14,7 +14,6 @@ from aws_requests_auth import boto_utils as requests_aws
 from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
@@ -831,77 +830,113 @@ class TestIgnoreTLSWarning:
 
         assert http.ignore_tls_warning is False
 
-    def test_default_no_ignore(self):
+    def test_default_no_ignore(self, caplog):
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-    def test_ignore(self):
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+    def test_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_default_no_ignore_session(self):
+    def test_default_no_ignore_session(self, caplog):
         instance = {'persist_connections': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-    def test_ignore_session(self):
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+    def test_ignore_session(self, caplog):
         instance = {'tls_ignore_warning': True, 'persist_connections': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_init_ignore(self):
+    def test_init_ignore(self, caplog):
         instance = {}
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_default_init_no_ignore(self):
+    def test_default_init_no_ignore(self, caplog):
         instance = {}
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-    def test_instance_ignore(self):
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+    def test_instance_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_instance_no_ignore(self):
+    def test_instance_no_ignore(self, caplog):
         instance = {'tls_ignore_warning': False}
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
+
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
 
 
 class TestSession:

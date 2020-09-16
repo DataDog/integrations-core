@@ -40,7 +40,7 @@ def get_requirements(fpath, exclude=None, only=None):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-    name='datadog_checks_base',
+    name='datadog-checks-base',
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',

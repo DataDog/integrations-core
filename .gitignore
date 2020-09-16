@@ -115,5 +115,8 @@ wheelhouse/
 .in-toto/
 *.link
 
+# isort (python imports sorting tool) temporary files
+*.isorted
+
 # Benchmark histograms
 benchmark_*.svg

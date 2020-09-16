@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 
+import mock
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -23,7 +26,20 @@ def test_get_cursor(instance_sql2017):
     """
     check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
     with pytest.raises(SQLConnectionError):
-        check.get_cursor('foo')
+        check.connection.get_cursor('foo')
+
+
+def test_missing_db(instance_sql2017):
+    instance = copy.copy(instance_sql2017)
+    instance['ignore_missing_database'] = False
+    with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
+        with pytest.raises(ConfigurationError):
+            check = SQLServer(CHECK_NAME, {}, [instance])
+
+    instance['ignore_missing_database'] = True
+    with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
+        check = SQLServer(CHECK_NAME, {}, [instance])
+        assert check.do_check is False
 
 
 def test_set_default_driver_conf():

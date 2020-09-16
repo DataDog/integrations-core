@@ -28,6 +28,9 @@
   "type": "check",
   "integration_id": "varnish",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {

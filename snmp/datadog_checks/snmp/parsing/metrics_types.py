@@ -20,7 +20,9 @@ IndexTableMetricTag = TypedDict(
 )
 
 ColumnTableMetricTag = TypedDict(
-    'ColumnTableMetricTag', {'MIB': str, 'column': Symbol, 'table': str, 'tag': str}, total=False
+    'ColumnTableMetricTag',
+    {'MIB': str, 'column': Symbol, 'table': str, 'tag': str, 'index_transform': str},
+    total=False,
 )
 
 TableMetricTag = Union[IndexTableMetricTag, ColumnTableMetricTag]

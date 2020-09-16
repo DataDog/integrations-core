@@ -138,6 +138,16 @@ class TestApplyOverrides:
 
         assert template == {'example': ['foo', 'bar'], 'type': 'array', 'items': {'type': 'string'}}
 
+    def test_mapping_with_name(self):
+        templates = ConfigTemplates()
+
+        template = templates.load('instances/tags')
+        overrides = {'tags.required': True}
+        templates.apply_overrides(template, overrides)
+        assert not overrides
+
+        assert template.get('required') is True
+
     def test_list(self):
         templates = ConfigTemplates()
 
