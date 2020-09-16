@@ -34,6 +34,15 @@ def get_current_branch():
         return run_command(command, capture='out').stdout.strip()
 
 
+def content_changed(file_glob="*"):
+    """
+    Return the content changed in the current branch compared to `master`
+    """
+    with chdir(get_root()):
+        output = run_command(f'git diff master -U0 -- "{file_glob}"', capture='out')
+    return output.stdout
+
+
 def files_changed(include_uncommitted=True):
     """
     Return the list of file changed in the current branch compared to `master`
