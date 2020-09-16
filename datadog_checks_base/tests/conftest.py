@@ -69,7 +69,7 @@ def uds_path():
         with docker_run(
             compose_file=compose_file,
             env_vars={
-                "UDS_HOST_DIR": tmp_dir,
+                "UDS_HOST_DIRECTORY": tmp_dir,
                 'UDS_FILENAME': uds_filename,
             },
         ):
