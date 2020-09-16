@@ -123,6 +123,10 @@ coverage:
         target: 75
         flags:
         - datadog_checks_downloader
+      Datadog Cluster Agent:
+        target: 75
+        flags:
+        - datadog_cluster_agent
       Directory:
         target: 75
         flags:
@@ -650,6 +654,11 @@ flags:
     paths:
     - datadog_checks_downloader/datadog_checks/downloader
     - datadog_checks_downloader/tests
+  datadog_cluster_agent:
+    carryforward: true
+    paths:
+    - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
+    - datadog_cluster_agent/tests
   directory:
     carryforward: true
     paths:

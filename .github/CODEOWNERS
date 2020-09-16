@@ -25,6 +25,8 @@ assets/               @DataDog/agent-integrations
 /crio/                                    @DataDog/container-integrations @DataDog/agent-integrations
 /crio/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /crio/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/datadog_cluster_agent/                   @DataDog/container-integrations @DataDog/agent-integrations
+/datadog_cluster_agent/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation

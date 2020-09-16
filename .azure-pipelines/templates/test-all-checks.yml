@@ -97,6 +97,9 @@ jobs:
     - checkName: crio
       displayName: CRI-O
       os: linux
+    - checkName: datadog_cluster_agent
+      displayName: Datadog Cluster Agent
+      os: linux
     - checkName: directory
       displayName: Directory
       os: linux

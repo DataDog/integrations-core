@@ -1,0 +1,19 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+datadog.cluster_agent.admission_webhooks.certificate_expiry,gauge,,hour,,Time left before the certificate expires in hours.,0,datadog_cluster_agent,admission webhooks certificate expiry
+datadog.cluster_agent.admission_webhooks.mutation_attempts,gauge,,,,"Number of pod mutation attempts by mutation type (agent config, standard tags).",0,datadog_cluster_agent,admission webhooks mutation attempts
+datadog.cluster_agent.admission_webhooks.reconcile_success,gauge,,,,Number of reconcile success per controller.,0,datadog_cluster_agent,admission webhooks reconcile success
+datadog.cluster_agent.admission_webhooks.webhooks_received,gauge,,request,,Number of mutation webhook requests received.,0,datadog_cluster_agent,admission webhooks received
+datadog.cluster_agent.cluster_checks.busyness,gauge,,,,Busyness of a node per the number of metrics submitted and average duration of all checks run,-1,datadog_cluster_agent,cluster check node busyness
+datadog.cluster_agent.cluster_checks.configs_dangling,gauge,,,,Number of check configurations not dispatched.,-1,datadog_cluster_agent,cluster check configs dangling
+datadog.cluster_agent.cluster_checks.configs_dispatched,gauge,,,,"Number of check configurations dispatched, by node.",0,datadog_cluster_agent,cluster check configs dispatched
+datadog.cluster_agent.cluster_checks.nodes_reporting,gauge,,node,,Number of node agents reporting.,0,datadog_cluster_agent,cluster check nodes reporting
+datadog.cluster_agent.cluster_checks.rebalancing_decisions,count,,,,Total number of check rebalancing decisions,0,datadog_cluster_agent,cluster check rebalancing decisions
+datadog.cluster_agent.cluster_checks.rebalancing_duration_seconds,gauge,,second,,Duration of the check rebalancing algorithm last execution,0,datadog_cluster_agent,cluster check rebalancing duration
+datadog.cluster_agent.cluster_checks.successful_rebalancing_moves,count,,,,Total number of successful check rebalancing decisions,0,datadog_cluster_agent,cluster check rebalancing moves
+datadog.cluster_agent.cluster_checks.updating_stats_duration_seconds,gauge,,second,,Duration of collecting stats from check runners and updating cache,0,datadog_cluster_agent,cluster check updating stats duration
+datadog.cluster_agent.external_metrics.delay_seconds,gauge,,second,,Freshness of the metric evaluated from querying Datadog,0,datadog_cluster_agent,external metrics delay
+datadog.cluster_agent.external_metrics.processed_value,gauge,,,,Value processed from querying Datadog,0,datadog_cluster_agent,external metrics processed value
+datadog.cluster_agent.datadog.rate_limit_queries.limit,gauge,,query,,Maximum number of queries to the Datadog API allowed in the period,0,datadog_cluster_agent,rate limit queries limit
+datadog.cluster_agent.datadog.rate_limit_queries.period,gauge,,,,Period of rate limiting to the Datadog API,0,datadog_cluster_agent,rate limit queries period
+datadog.cluster_agent.datadog.rate_limit_queries.remaining,gauge,,query,,Number of queries to the Datadog API remaining before next reset,0,datadog_cluster_agent,rate limit queries remaining
+datadog.cluster_agent.datadog.rate_limit_queries.reset,gauge,,second,,Number of seconds before next reset of the rate limiting to the Datadog API,0,datadog_cluster_agent,rate limit queries reset
