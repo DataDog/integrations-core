@@ -318,12 +318,15 @@ class RequestsWrapper(object):
             new_options['headers'] = new_options['headers'].copy()
             new_options['headers'].update(extra_headers)
 
+        if is_uds_url(url):
+            persist = True  # UDS support is only enabled on the shared session.
+            url = quote_uds_url(url)
+
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
             if persist:
-                url = auto_quote_uds_url(url)
                 return getattr(self.session, method)(url, **new_options)
             else:
                 return getattr(requests, method)(url, **new_options)
@@ -501,15 +504,20 @@ AUTH_TYPES = {
 }
 
 
-def auto_quote_uds_url(url):
+def is_uds_url(url):
+    # type: (str) -> bool
+    parsed = urlparse(url)
+    return parsed.scheme == UDS_SCHEME
+
+
+def quote_uds_url(url):
     # type: (str) -> str
     """
-    Automatically convert an URL like 'unix:///var/run/docker.sock/info' to 'unix://%2Fvar%2Frun%2Fdocker.sock/info',
-    for user experience purposes.
+    Automatically convert an URL like 'unix:///var/run/docker.sock/info' to 'unix://%2Fvar%2Frun%2Fdocker.sock/info'.
+
+    For user experience purposes, since `requests-unixsocket` only accepts the latter form.
     """
     parsed = urlparse(url)
-    if parsed.scheme != UDS_SCHEME:
-        return url
 
     # When passing an UDS path URL, `netloc` is empty and `path` contains everything that's after '://'.
     # We want to extract the socket path from the URL path, and percent-encode it, and set it as the `netloc`.

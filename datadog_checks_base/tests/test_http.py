@@ -17,7 +17,7 @@ from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, auto_quote_uds_url
+from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, quote_uds_url, is_uds_url
 from datadog_checks.dev import EnvVars
 from datadog_checks.dev.utils import running_on_windows_ci
 
@@ -944,20 +944,33 @@ class TestUnixDomainSocket:
     @pytest.mark.parametrize(
         'value, expected',
         [
+            pytest.param('http://example.org', False, id='non-uds-url'),
+            pytest.param('unix:///var/run/test.sock/info', True, id='unquoted'),
+            pytest.param('unix://%2Fvar%2Frun%2Ftest.sock', True, id='quoted'),
+        ],
+    )
+    def test_is_uds_url(self, value, expected):
+        # type: (str, bool) -> None
+        assert is_uds_url(value) == expected
+
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
             pytest.param('http://example.org', 'http://example.org', id='non-uds-url'),
             pytest.param('unix:///var/run/test.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='uds-url'),
             pytest.param('unix:///var/run/test.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='uds-url-no-path'),
-            pytest.param('unix://%2Fvar%2Frun%2Ftest.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='already-quoted'),
+            pytest.param(
+                'unix://%2Fvar%2Frun%2Ftest.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='already-quoted'
+            ),
         ],
     )
-    def test_auto_quote_uds_url(self, value, expected):
+    def test_quote_uds_url(self, value, expected):
         # type: (str, str) -> None
-        assert auto_quote_uds_url(value) == expected
+        assert quote_uds_url(value) == expected
 
     def test_adapter_mounted(self):
         # type: () -> None
         http = RequestsWrapper({}, {})
-
         url = 'unix:///var/run/test.sock'
         adapter = http.session.get_adapter(url=url)
         assert adapter is not None
