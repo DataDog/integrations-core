@@ -8,7 +8,7 @@ import os
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.haproxy import HAProxy
+from datadog_checks.haproxy import HAProxyCheck
 
 from .common import (
     BACKEND_AGGREGATE_ONLY_CHECK,
@@ -29,9 +29,12 @@ from .common import (
     STATS_URL_OPEN,
     STICKTABLE_TYPES,
     requires_haproxy_tcp_stats,
+    requires_legacy_environment,
     requires_shareable_unix_socket,
     requires_socket_support,
 )
+
+pytestmark = [requires_legacy_environment]
 
 
 def _test_frontend_metrics(aggregator, shared_tag, count=1):
@@ -83,9 +86,9 @@ def _test_service_checks(aggregator, services=None, count=1):
     for service in services:
         for backend in BACKEND_LIST:
             tags = ['service:' + service, 'haproxy_service:' + service, 'backend:' + backend]
-            aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxy.UNKNOWN, count=count, tags=tags)
+            aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxyCheck.UNKNOWN, count=count, tags=tags)
         tags = ['service:' + service, 'haproxy_service:' + service, 'backend:BACKEND']
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxy.OK, count=count, tags=tags)
+        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxyCheck.OK, count=count, tags=tags)
 
 
 def _test_sticktable_metrics(aggregator, services=None, count=1):

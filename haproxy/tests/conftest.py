@@ -1,7 +1,11 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import getpass
 import logging
 import os
 import subprocess
+from contextlib import contextmanager
 from copy import deepcopy
 
 import mock
@@ -9,14 +13,14 @@ import pytest
 import requests
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
-from datadog_checks.haproxy import HAProxy
+from datadog_checks.haproxy import HAProxyCheck
 
-from .common import (
+from .common import HERE, INSTANCE
+from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
     CONFIG_TCPSOCKET,
     HAPROXY_VERSION,
-    HERE,
     PASSWORD,
     STATS_URL,
     STATS_URL_OPEN,
@@ -25,6 +29,15 @@ from .common import (
 )
 
 log = logging.getLogger('test_haproxy')
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    if os.environ['HAPROXY_LEGACY'] == 'true':
+        with legacy_environment() as e:
+            yield e
+    else:
+        yield INSTANCE
 
 
 def wait_for_haproxy():
@@ -37,8 +50,8 @@ def wait_for_haproxy_open():
     res_open.raise_for_status()
 
 
-@pytest.fixture(scope='session')
-def dd_environment():
+@contextmanager
+def legacy_environment():
     env = {}
     env['HAPROXY_CONFIG_DIR'] = os.path.join(HERE, 'compose')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(HERE, 'compose', 'haproxy-open.cfg')
@@ -86,7 +99,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return lambda instance: HAProxy('haproxy', {}, [instance])
+    return lambda instance: HAProxyCheck('haproxy', {}, [instance])
 
 
 @pytest.fixture
