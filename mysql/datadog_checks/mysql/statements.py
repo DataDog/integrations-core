@@ -3,6 +3,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import time
+import copy
 from contextlib import closing
 
 import pymysql
@@ -65,6 +66,7 @@ class MySQLStatementMetrics(object):
             return (row['schema'], row['digest'])
 
         monotonic_rows = self._query_summary_per_statement(db)
+        monotonic_rows = self._merge_duplicate_rows(monotonic_rows, key=keyfunc)
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS.keys(), key=keyfunc)
         rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=keyfunc)
 
@@ -99,6 +101,24 @@ class MySQLStatementMetrics(object):
         statsd.timing(
             "dd.mysql.collect_per_statement_metrics.time", (time.time() - start_time) * 1000, tags=instance_tags
         )
+
+    @staticmethod
+    def _merge_duplicate_rows(rows, key):
+        """
+        Merges the metrics from duplicate rows because the (schema, digest) identifier may not be
+        unique, see: https://bugs.mysql.com/bug.php?id=79533
+        """
+        merged = {}
+
+        for row in rows:
+            k = key(row)
+            if k in merged:
+                for m in METRICS:
+                    merged[k][m] += row[m]
+            else:
+                merged[k] = copy.copy(row)
+
+        return merged.values()
 
     def _query_summary_per_statement(self, db):
         """
