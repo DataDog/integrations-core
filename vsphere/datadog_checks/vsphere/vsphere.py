@@ -558,6 +558,12 @@ class VSphereCheck(AgentCheck):
 
     def get_server_current_time(self):
         # type: (Any) -> dt.datetime
+        """
+        Return server current datetime.
+        On failure, of getting server current datetime, use local datetime.
+
+        The server current datetime is cached for a check run.
+        """
         if self._server_current_time is None:
             try:
                 self._server_current_time = self.api.get_current_time()
@@ -574,6 +580,8 @@ class VSphereCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
+        self._server_current_time = None
+
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
         try:
             version_info = self.api.get_version()
@@ -646,5 +654,3 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting metric collection in %d threads.", self.config.threads_count)
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
-
-        self._server_current_time = None
