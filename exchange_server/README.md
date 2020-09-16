@@ -18,6 +18,29 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 
 2. [Restart the Agent][3].
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `exchange_server.d/conf.yaml` file to start collecting your Exchange Server Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: exchange-server
+   ```
+
+   Change the `path` parameter value and configure it for your environment.
+   See the [sample exchange_server.d/conf.yaml][6] for all available configuration options.
+
+3. [Restart the Agent][3].
+
+
 ### Validation
 
 [Run the Agent's status subcommand][4] and look for `exchange_server` under the Checks section.
@@ -41,3 +64,4 @@ The Exchange server check does not include any service checks.
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
+[6]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/datadog_checks/exchange_server/data/conf.yaml.example
