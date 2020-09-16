@@ -560,7 +560,7 @@ class VSphereCheck(AgentCheck):
         # type: (Any) -> dt.datetime
         """
         Return server current datetime.
-        On failure, of getting server current datetime, use local datetime.
+        If the retrieval of server current datetime fails, use local current datetime.
 
         The server current datetime is cached for a check run.
         """
