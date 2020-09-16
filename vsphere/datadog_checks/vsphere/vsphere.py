@@ -408,7 +408,7 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = self._server_current_time - dt.timedelta(hours=2)
+                        query_spec.startTime = self.get_server_current_time() - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
@@ -556,6 +556,21 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
+    def get_server_current_time(self):
+        # type: (Any) -> dt.datetime
+        if self._server_current_time is None:
+            try:
+                self._server_current_time = self.api.get_current_time()
+                self.log.debug("Server current datetime: %s", self._server_current_time)
+            except Exception as e:
+                self._server_current_time = dt.datetime.now()
+                self.log.debug(
+                    "Cannot retrieve server current time (%s), using local datetime as fallback: %s",
+                    e,
+                    self._server_current_time,
+                )
+        return self._server_current_time
+
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
@@ -571,9 +586,6 @@ class VSphereCheck(AgentCheck):
             raise
         else:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.base_tags, hostname=None)
-
-        self._server_current_time = self.api.get_current_time()
-        self.log.debug("Server current time: %s", self._server_current_time)
 
         # Collect and submit events
         if self.config.should_collect_events:
@@ -634,3 +646,5 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting metric collection in %d threads.", self.config.threads_count)
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
+
+        self._server_current_time = None

@@ -147,7 +147,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_current_time(self):
-        # type: () -> None
+        # type: () -> dt.datetime
         return self._conn.CurrentTime()
 
     @smart_retry
