@@ -380,6 +380,8 @@ class VSphereCheck(AgentCheck):
         """
         Build query specs using MORs and metrics metadata.
         """
+        server_current_time = self.api.get_current_time()
+        self.log.debug("Server current datetime: %s", server_current_time)
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
@@ -408,7 +410,7 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = self.get_server_current_time() - dt.timedelta(hours=2)
+                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
@@ -556,31 +558,9 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
-    def get_server_current_time(self):
-        # type: (Any) -> dt.datetime
-        """
-        Return server current datetime.
-        If the retrieval of server current datetime fails, use local current datetime.
-
-        The server current datetime is cached for a check run.
-        """
-        if self._server_current_time is None:
-            try:
-                self._server_current_time = self.api.get_current_time()
-                self.log.debug("Server current datetime: %s", self._server_current_time)
-            except Exception as e:
-                self._server_current_time = dt.datetime.now()
-                self.log.warning(
-                    "Cannot retrieve server current time (%s), using local datetime as fallback: %s",
-                    e,
-                    self._server_current_time,
-                )
-        return self._server_current_time
-
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
-        self._server_current_time = None
 
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
         try:

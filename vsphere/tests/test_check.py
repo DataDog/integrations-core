@@ -359,45 +359,19 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_server_current_time_cache(aggregator, dd_run_check, historical_instance):
-
-    mock_time1 = dt.datetime.now()
+def test_specs_start_time(aggregator, dd_run_check, historical_instance):
+    mock_time = dt.datetime.now()
 
     check = VSphereCheck('vsphere', {}, [historical_instance])
-    check.initiate_api_connection()
+    dd_run_check(check)
 
-    check.api.server_time = mock_time1
-    time1 = check.get_server_current_time()
+    check.api.server_time = mock_time
 
-    mock_time2 = dt.datetime.now()
-    check.api.server_time = mock_time2
+    start_times = []
+    for specs in check.make_query_specs():
+        for spec in specs:
+            start_times.append(spec.startTime)
 
-    # verify that server time is cached
-    # server time is cached so, time2 should be same as time1
-    time2 = check.get_server_current_time()
-
-    assert time1 == mock_time1
-    assert time1 == time2
-
-    # verify that running the check will reset the server time cache
-    check.check(historical_instance)
-    time3 = check.get_server_current_time()
-
-    assert time3 != time1
-    assert time3 == mock_time2
-
-
-@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_server_current_time_fallback(aggregator, dd_run_check, historical_instance, caplog):
-    mock_time = dt.datetime.now()
-    with mock.patch('datadog_checks.vsphere.vsphere.dt') as mock_dt:
-        mock_dt.datetime.now.return_value = mock_time
-
-        check = VSphereCheck('vsphere', {}, [historical_instance])
-        check.initiate_api_connection()
-
-        check.api.get_current_time = mock.MagicMock(side_effect=RuntimeError('Error'))
-        time1 = check.get_server_current_time()
-
-        assert time1 == mock_time
-        assert "Cannot retrieve server current time" in caplog.text
+    assert len(start_times) != 0
+    for start_time in start_times:
+        assert start_time == (mock_time - dt.timedelta(hours=2))
