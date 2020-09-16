@@ -62,6 +62,9 @@ def uds_path():
         # See: https://github.com/docker/for-mac/issues/483
         pytest.skip('Sharing Unix sockets is not supported by Docker for Mac.')
 
+    if Platform.is_windows():
+        pytest.skip('Nginx does not run on Windows.')
+
     with TempDir() as tmp_dir:
         compose_file = os.path.join(HERE, 'compose', 'uds.yaml')
         uds_filename = 'tmp.sock'
