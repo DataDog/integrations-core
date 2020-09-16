@@ -356,3 +356,22 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_specs_start_time(aggregator, dd_run_check, historical_instance):
+    mock_time = dt.datetime.now()
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    check.api.server_time = mock_time
+
+    start_times = []
+    for specs in check.make_query_specs():
+        for spec in specs:
+            start_times.append(spec.startTime)
+
+    assert len(start_times) != 0
+    for start_time in start_times:
+        assert start_time == (mock_time - dt.timedelta(hours=2))

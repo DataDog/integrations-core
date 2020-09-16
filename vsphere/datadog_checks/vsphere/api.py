@@ -146,9 +146,9 @@ class VSphereAPI(object):
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
-    def check_health(self):
-        # type: () -> None
-        self._conn.CurrentTime()
+    def get_current_time(self):
+        # type: () -> dt.datetime
+        return self._conn.CurrentTime()
 
     @smart_retry
     def get_version(self):
