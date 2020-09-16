@@ -361,28 +361,30 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_server_current_time_cache(aggregator, dd_run_check, historical_instance):
 
-    mock_time = dt.datetime.now()
+    mock_time1 = dt.datetime.now()
 
     check = VSphereCheck('vsphere', {}, [historical_instance])
     check.initiate_api_connection()
 
-    check.api.server_time = mock_time
+    check.api.server_time = mock_time1
     time1 = check.get_server_current_time()
 
-    check.api.server_time = dt.datetime.now()
+    mock_time2 = dt.datetime.now()
+    check.api.server_time = mock_time2
 
     # verify that server time is cached
     # server time is cached so, time2 should be same as time1
     time2 = check.get_server_current_time()
 
-    assert time1 == mock_time
+    assert time1 == mock_time1
     assert time1 == time2
 
     # verify that running the check will reset the server time cache
     check.check(historical_instance)
     time3 = check.get_server_current_time()
 
-    assert time1 != time3
+    assert time3 != time1
+    assert time3 == mock_time2
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
