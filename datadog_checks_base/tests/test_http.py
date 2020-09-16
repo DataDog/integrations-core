@@ -947,6 +947,7 @@ class TestUnixDomainSocket:
             pytest.param('http://example.org', 'http://example.org', id='non-uds-url'),
             pytest.param('unix:///var/run/test.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='uds-url'),
             pytest.param('unix:///var/run/test.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='uds-url-no-path'),
+            pytest.param('unix://%2Fvar%2Frun%2Ftest.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='already-quoted'),
         ],
     )
     def test_auto_quote_uds_url(self, value, expected):
