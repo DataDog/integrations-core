@@ -564,7 +564,7 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Server current datetime: %s", self._server_current_time)
             except Exception as e:
                 self._server_current_time = dt.datetime.now()
-                self.log.debug(
+                self.log.warning(
                     "Cannot retrieve server current time (%s), using local datetime as fallback: %s",
                     e,
                     self._server_current_time,

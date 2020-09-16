@@ -356,3 +356,46 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_server_current_time_cache(aggregator, dd_run_check, historical_instance):
+
+    mock_time = dt.datetime.now()
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    check.initiate_api_connection()
+
+    check.api.server_time = mock_time
+    time1 = check.get_server_current_time()
+
+    check.api.server_time = dt.datetime.now()
+
+    # verify that server time is cached
+    # server time is cached so, time2 should be same as time1
+    time2 = check.get_server_current_time()
+
+    assert time1 == mock_time
+    assert time1 == time2
+
+    # verify that running the check will reset the server time cache
+    check.check(historical_instance)
+    time3 = check.get_server_current_time()
+
+    assert time1 != time3
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_server_current_time_fallback(aggregator, dd_run_check, historical_instance, caplog):
+    mock_time = dt.datetime.now()
+    with mock.patch('datadog_checks.vsphere.vsphere.dt') as mock_dt:
+        mock_dt.datetime.now.return_value = mock_time
+
+        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check.initiate_api_connection()
+
+        check.api.get_current_time = mock.MagicMock(side_effect=RuntimeError('Error'))
+        time1 = check.get_server_current_time()
+
+        assert time1 == mock_time
+        assert "Cannot retrieve server current time" in caplog.text
