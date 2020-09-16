@@ -6,7 +6,7 @@
   "metric_prefix": "marklogic.",
   "metric_to_check": "marklogic.hosts.total_hosts",
   "process_signatures": [
-    "start-marklogic.sh"
+    "MarkLogic"
   ],
   "creates_events": false,
   "short_description": "Tracks metrics about MarkLogic databases, forests, hosts and servers.",
