@@ -291,6 +291,10 @@ coverage:
         target: 75
         flags:
         - marathon
+      MarkLogic:
+        target: 75
+        flags:
+        - marklogic
       Memcached:
         target: 75
         flags:
@@ -881,6 +885,11 @@ flags:
     paths:
     - marathon/datadog_checks/marathon
     - marathon/tests
+  marklogic:
+    carryforward: true
+    paths:
+    - marklogic/datadog_checks/marklogic
+    - marklogic/tests
   mcache:
     carryforward: true
     paths:

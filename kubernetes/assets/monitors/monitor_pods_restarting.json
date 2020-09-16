@@ -1,6 +1,6 @@
 {
 	"name": "[kubernetes] Monitor Kubernetes Pods Restarting",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "change(sum(last_5m),last_5m):exclude_null(avg:kubernetes.containers.restarts{*} by {pod_name}) > 5",
 	"message": "Pods are restarting multiple times in the last five minutes.",
 	"tags": [
@@ -11,8 +11,7 @@
 		"locked": false,
 		"timeout_h": 0,
 		"include_tags": true,
-		"no_data_timeframe": 5,
-		"require_full_window": true,
+		"require_full_window": false,
 		"new_host_delay": 300,
 		"notify_no_data": true,
 		"renotify_interval": 0,

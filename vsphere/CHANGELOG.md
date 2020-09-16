@@ -1,5 +1,16 @@
 # CHANGELOG - vsphere
 
+## 5.6.0 / 2020-09-16
+
+* [Added] Add hostname to vsphere debug metrics. See [#7580](https://github.com/DataDog/integrations-core/pull/7580).
+* [Fixed] Use server time to compute startTime. See [#7586](https://github.com/DataDog/integrations-core/pull/7586).
+
+## 5.5.0 / 2020-09-15
+
+* [Added] Add debug logs to help support. See [#7577](https://github.com/DataDog/integrations-core/pull/7577).
+* [Added] Add config spec for vsphere. See [#7537](https://github.com/DataDog/integrations-core/pull/7537).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 5.4.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Collect and submit vSphere attributes. See [#7180](https://github.com/DataDog/integrations-core/pull/7180).

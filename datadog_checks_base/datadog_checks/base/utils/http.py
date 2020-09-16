@@ -7,10 +7,11 @@ from contextlib import contextmanager
 from ipaddress import ip_address, ip_network
 
 import requests
+import requests_unixsocket
 from requests import auth as requests_auth
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import quote, urlparse, urlunparse
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -87,6 +88,8 @@ PROXY_SETTINGS_DISABLED = {
 }
 
 KERBEROS_STRATEGIES = {}
+
+UDS_SCHEME = 'unix'
 
 
 class RequestsWrapper(object):
@@ -315,6 +318,10 @@ class RequestsWrapper(object):
             new_options['headers'] = new_options['headers'].copy()
             new_options['headers'].update(extra_headers)
 
+        if is_uds_url(url):
+            persist = True  # UDS support is only enabled on the shared session.
+            url = quote_uds_url(url)
+
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
@@ -344,6 +351,10 @@ class RequestsWrapper(object):
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
                 self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
+
+            # Enable Unix Domain Socket (UDS) support.
+            # See: https://github.com/msabramo/requests-unixsocket
+            self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
 
             # Attributes can't be passed to the constructor
             for option, value in iteritems(self.options):
@@ -491,6 +502,35 @@ AUTH_TYPES = {
     'kerberos': create_kerberos_auth,
     'aws': create_aws_auth,
 }
+
+
+def is_uds_url(url):
+    # type: (str) -> bool
+    parsed = urlparse(url)
+    return parsed.scheme == UDS_SCHEME
+
+
+def quote_uds_url(url):
+    # type: (str) -> str
+    """
+    Automatically convert an URL like 'unix:///var/run/docker.sock/info' to 'unix://%2Fvar%2Frun%2Fdocker.sock/info'.
+
+    For user experience purposes, since `requests-unixsocket` only accepts the latter form.
+    """
+    parsed = urlparse(url)
+
+    # When passing an UDS path URL, `netloc` is empty and `path` contains everything that's after '://'.
+    # We want to extract the socket path from the URL path, and percent-encode it, and set it as the `netloc`.
+    # For now we assume that UDS paths end in '.sock'. This is by far the most common convention.
+    uds_path_head, has_dot_sock, path = parsed.path.partition('.sock')
+    if not has_dot_sock:
+        return url
+
+    uds_path = '{}.sock'.format(uds_path_head)
+    netloc = quote(uds_path, safe='')
+    parsed = parsed._replace(netloc=netloc, path=path)
+
+    return urlunparse(parsed)
 
 
 # For documentation generation

@@ -106,4 +106,4 @@ If not:
 
 To automatically assign [QA cards](../process/agent-release/pre-release.md#create-items), add a `trello_users_$team` table, with keys being
 GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member
-information in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).
+information in [this document](https://github.com/DataDog/mars-jenkins-scripts/blob/master/release_documentation/users_github_trello.toml).
