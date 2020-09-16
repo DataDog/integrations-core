@@ -88,7 +88,6 @@ class VSphereCheck(AgentCheck):
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
-        self._server_current_time = None
 
     def initiate_api_connection(self):
         # type: () -> None
@@ -561,7 +560,6 @@ class VSphereCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
-
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
         try:
             version_info = self.api.get_version()
