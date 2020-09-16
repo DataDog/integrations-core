@@ -4,21 +4,7 @@ files:
   options:
   - template: init_config
     options:
-      - name: global_custom_queries
-        description: |
-          See `custom_queries` defined below.
-          Global custom queries can be applied to all instances using the
-          `use_global_custom_queries` setting at the instance level.
-        value:
-          type: array
-          items:
-            type: object
-          default: null
-          example:
-            - metric_prefix: snowflake
-              query: <QUERY>
-              columns: <COLUMNS>
-              tags: <TAGS>
+      - template: init_config/db
       - template: init_config/default
   - template: instances
     options:
@@ -86,19 +72,21 @@ files:
           type: string
           example: <OCSP_RESPONSE_CACHE_FILENAME>
       - name: metric_groups
-        required: true
         description: |
           List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
-          - snowflake.query
-          - snowflake.billing
-          - snowflake.storage
-          - snowflake.storage.database
-          - snowflake.storage.table
-          - snowflake.logins
-          - snowflake.data_transfer
-          - snowflake.auto_recluster
-          - snowflake.pipe
-          - snowflake.replication
+
+          The available metric groups are:
+
+            - snowflake.query
+            - snowflake.billing
+            - snowflake.storage
+            - snowflake.storage.database
+            - snowflake.storage.table
+            - snowflake.logins
+            - snowflake.data_transfer
+            - snowflake.auto_recluster
+            - snowflake.pipe
+            - snowflake.replication
         value:
           type: array
           items:
@@ -108,52 +96,9 @@ files:
             - snowflake.billing
             - snowflake.storage
             - snowflake.logins
-      - name: use_global_custom_queries
-        description: |
-          How `global_custom_queries` should be used for this instance. There are 3 options:
-          1. true - `global_custom_queries` override `custom_queries`.
-          2. false - `custom_queries` override `global_custom_queries`.
-          2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-        value:
-          type: string
-          example: "true"
-      - name: custom_queries
-        description: |
-          Each query must have 2 fields:
-          1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-                     Use the pipe `|` if you require a multi-line script.
-          2. columns - The list representing each column, ordered sequentially from left to right.
-                       The number of columns must equal the number of columns returned in the query.
-                       There are 2 required pieces of data:
-                         a. name - The suffix to append to `clickhouse.` to form
-                                   the full metric name. If `type` is `tag`, this column is
-                                   considered a tag and applied to every
-                                   metric collected by this particular query.
-                         b. type - The submission method (gauge, monotonic_count, etc.).
-                                   This can also be set to `tag` to tag each metric in the row
-                                   with the name and value of the item in this column. You can
-                                   use the `count` type to perform aggregation for queries that
-                                   return multiple rows with the same or no tags.
-                       Columns without a name are ignored, use this for any column you wish to skip:
-                         - {}
-          3. tags (optional) - A list of tags to apply to each metric.
-        enabled: false
-        value:
-          type: array
-          items:
-            type: object
-            properties:
-              - name: query
-                type: string
-              - name: columns
-                type: array
-                items:
-                  type: object
-              - name: tags
-                type: array
-                items:
-                  type: string
-          example:
+      - template: instances/db
+        overrides:
+          custom_queries.value.example:
             - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
               columns:
                 - name: foo
@@ -172,4 +117,3 @@ files:
             so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
           min_collection_interval.default: 3600
           min_collection_interval.value.example: 3600
-

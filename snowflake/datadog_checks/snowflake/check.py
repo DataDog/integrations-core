@@ -85,7 +85,7 @@ class SnowflakeCheck(AgentCheck):
         # verify connection is still active
         if self._conn is not None:
             if self._conn.is_closed():
-                self.log.debug("Connection failed, retry establish connection.")
+                self.log.warning("Connection failed, establishing a new connection.")
             else:
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
                 return

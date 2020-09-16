@@ -9,7 +9,7 @@ StorageUsageMetrics = Query(
     {
         'name': 'storage.metrics',
         'query': (
-            'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE ' 'ORDER BY USAGE_DATE DESC LIMIT 1;'
+            'SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE ORDER BY USAGE_DATE DESC LIMIT 1;'
         ),
         'columns': [
             {'name': 'storage.storage_bytes.total', 'type': 'gauge'},
