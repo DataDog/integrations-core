@@ -14,8 +14,9 @@ import requests
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
+from datadog_checks.haproxy.metrics import METRIC_MAP
 
-from .common import HERE, INSTANCE
+from .common import ENDPOINT_PROMETHEUS, HERE, INSTANCE
 from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
@@ -37,7 +38,15 @@ def dd_environment():
         with legacy_environment() as e:
             yield e
     else:
-        yield INSTANCE
+        with docker_run(compose_file=os.path.join(HERE, 'docker', 'haproxy.yaml'), endpoints=[ENDPOINT_PROMETHEUS]):
+            yield INSTANCE
+
+
+@pytest.fixture(scope='session')
+def prometheus_metrics():
+    metrics = list(METRIC_MAP.values())
+
+    return metrics
 
 
 def wait_for_haproxy():
