@@ -182,7 +182,7 @@ class SQLServer(AgentCheck):
             metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load metrics from scheduler and task tables, if enabled
-        if self.instance.get('include_task_scheduler_metrics', False):
+        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
