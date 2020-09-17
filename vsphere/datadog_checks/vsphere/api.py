@@ -286,7 +286,11 @@ class VSphereAPI(object):
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
         self.log.debug("Received %s values from QueryPerf", len(values))
-        self.log.trace("QueryPerf response for specs `%s`: %s", query_specs, values)
+        self.log.trace(
+            "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
+            query_specs,
+            values,
+        )
         return values
 
     @smart_retry
