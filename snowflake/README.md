@@ -16,7 +16,7 @@ Follow the instructions below to install and configure this check for an Agent r
 The Snowflake check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-Note: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
+**Note**: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
 
 ### Configuration
 
