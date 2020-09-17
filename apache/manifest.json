@@ -47,6 +47,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "apache"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

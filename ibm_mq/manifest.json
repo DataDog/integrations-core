@@ -32,6 +32,7 @@
     },
     "logs": {
       "source": "ibm_mq"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }
