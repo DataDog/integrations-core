@@ -58,9 +58,9 @@ class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
-    # Default performance table metrics
+    # Default performance table metrics - Database Instance level
     # datadog metric name, counter name, instance name
-    PERF_METRICS = [
+    INSTANCE_METRICS = [
         ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
         ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
         ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
@@ -71,9 +71,13 @@ class SQLServer(AgentCheck):
         ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
+        # Transactions
+        ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
+        ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
+        ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
     ]
 
-    # Non-performance table metrics
+    # Non-performance table metrics - can be database specific
     # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
         ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
@@ -89,12 +93,16 @@ class SQLServer(AgentCheck):
 
     # Non-performance table metrics
     # datadog metric name, sql table, column name
-    # State enum:
+    # Files State enum:
     #   0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending,
     #   4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct
+    # Database State enum:
+    #   0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending,
+    #   4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary
     DATABASE_METRICS = [
-        ('sqlserver.database.size', 'sys.master_files', 'size'),
-        ('sqlserver.database.state', 'sys.master_files', 'state'),
+        ('sqlserver.database.files.size', 'sys.database_files', 'size'),
+        ('sqlserver.database.files.state', 'sys.database_files', 'state'),
+        ('sqlserver.database.state', 'sys.databases', 'state'),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -160,25 +168,36 @@ class SQLServer(AgentCheck):
         metrics_to_collect = []
         tags = self.instance.get('tags', [])
 
-        for name, counter_name, instance_name in self.PERF_METRICS:
-            try:
-                sql_type, base_name = self.get_sql_type(counter_name)
-                cfg = {'name': name, 'counter_name': counter_name, 'instance_name': instance_name, 'tags': tags}
+        # Load instance-level (previously Performance) metrics)
+        # If several check instances are querying the same server host, it can be wise to turn these off
+        # to avoid sending duplicate metrics
+        if is_affirmative(self.instance.get('include_instance_metrics', True)):
+            for name, counter_name, instance_name in self.INSTANCE_METRICS:
+                try:
+                    sql_type, base_name = self.get_sql_type(counter_name)
+                    cfg = {
+                        'name': name,
+                        'counter_name': counter_name,
+                        'instance_name': instance_name,
+                        'tags': tags,
+                    }
 
-                metrics_to_collect.append(
-                    self.typed_metric(
-                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                    metrics_to_collect.append(
+                        self.typed_metric(
+                            cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                        )
                     )
-                )
-            except SQLConnectionError:
-                raise
-            except Exception:
-                self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
-                continue
+                except SQLConnectionError:
+                    raise
+                except Exception:
+                    self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
+                    continue
 
         # Load database statistics
         for name, table, column in self.DATABASE_METRICS:
-            cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+            # include database as a filter option
+            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
             metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load metrics from scheduler and task tables, if enabled
@@ -188,6 +207,7 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
+        # TODO - if dbid or database specified in custom metric pass the instance database value so it can be filtered
         for cfg in custom_metrics:
             sql_type = None
             base_name = None
@@ -232,7 +252,7 @@ class SQLServer(AgentCheck):
         # create an organized grouping of metric names to their metric classes
         for m in metrics_to_collect:
             cls = m.__class__.__name__
-            name = m.sql_name or m.datadog_name
+            name = m.sql_name or m.column
             self.log.debug("Adding metric class %s named %s", cls, name)
 
             self.instance_per_type_metrics[cls].append(name)
@@ -305,16 +325,15 @@ class SQLServer(AgentCheck):
         if self.do_check:
             proc = self.instance.get('stored_procedure')
             if proc is None:
-                self.do_perf_counter_check()
+                self.collect_metrics()
             else:
                 self.do_stored_procedure_check(proc)
         else:
             self.log.debug("Skipping check")
 
-    def do_perf_counter_check(self):
-        """
-        Fetch the metrics from the sys.dm_os_performance_counters table
-        """
+    def collect_metrics(self):
+        """Fetch the metrics from all of the associated database tables."""
+
         with self.connection.open_managed_default_connection():
             # if the server was down at check __init__ key could be missing.
             if not self.instance_metrics:
@@ -335,17 +354,17 @@ class SQLServer(AgentCheck):
 
                 # Using the cached data, extract and report individual metrics
                 for metric in metrics_to_collect:
-                    try:
-                        if type(metric) is metrics.SqlIncrFractionMetric:
-                            # special case, since it uses the same results as SqlFractionMetric
-                            rows, cols = instance_results['SqlFractionMetric']
-                            metric.fetch_metric(rows, cols)
-                        else:
-                            rows, cols = instance_results[metric.__class__.__name__]
-                            metric.fetch_metric(rows, cols)
+                    # try:
+                    if type(metric) is metrics.SqlIncrFractionMetric:
+                        # special case, since it uses the same results as SqlFractionMetric
+                        rows, cols = instance_results['SqlFractionMetric']
+                        metric.fetch_metric(rows, cols)
+                    else:
+                        rows, cols = instance_results[metric.__class__.__name__]
+                        metric.fetch_metric(rows, cols)
 
-                    except Exception as e:
-                        self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
+                # except Exception as e:
+                #     self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
 
     def do_stored_procedure_check(self, proc):
         """
