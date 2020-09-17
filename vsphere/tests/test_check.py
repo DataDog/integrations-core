@@ -61,11 +61,16 @@ def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_i
     check.config.include_datastore_cluster_folder_tag = False
     dd_run_check(check)
 
-    fixture_file = os.path.join(HERE, 'fixtures', 'metrics_historical_values_no_dsc_folder.json')
+    fixture_file = os.path.join(HERE, 'fixtures', 'metrics_historical_values.json')
+
     with open(fixture_file, 'r') as f:
         data = json.load(f)
         for metric in data:
-            aggregator.assert_metric(metric['name'], metric.get('value'), tags=metric.get('tags'))
+            all_tags = metric.get('tags')
+            if all_tags is not None:
+                # The tag 'vsphere_folder:Datastores' is not supposed to be there anymore!
+                all_tags = filter(lambda x: x != 'vsphere_folder:Datastores', all_tags)
+            aggregator.assert_metric(metric['name'], metric.get('value'), tags=all_tags)
 
     aggregator.assert_all_metrics_covered()
 
