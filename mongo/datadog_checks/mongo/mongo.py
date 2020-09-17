@@ -18,8 +18,15 @@ from datadog_checks.mongo.collectors import (
     ServerStatusCollector,
     TopCollector,
 )
-from datadog_checks.mongo.common import DEFAULT_TIMEOUT, SERVICE_CHECK_NAME
+from datadog_checks.mongo.common import DEFAULT_TIMEOUT, SERVICE_CHECK_NAME, MongosDeploymentType, \
+    ReplicaSetDeploymentType, StandaloneDeploymentType
 from six import PY3, iteritems, itervalues
+from six.moves.urllib.parse import urlsplit
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
@@ -64,8 +71,8 @@ class MongoDb(AgentCheck):
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
 
-        # Members' last replica set states
-        self._last_state_by_server = {}
+        # Members' last replica set state
+        self._last_state = None
 
         self.collection_metrics_names = tuple(key.split('.')[1] for key in metrics.COLLECTION_METRICS)
 
@@ -150,6 +157,17 @@ class MongoDb(AgentCheck):
         self.collections_indexes_stats = is_affirmative(self.instance.get('collections_indexes_stats'))
         self.coll_names = self.instance.get('collections', [])
         self.custom_queries = self.instance.get("custom_queries", [])
+        # By default consider that this instance is a standalone, updated on each check run.
+        self.deployment_type = StandaloneDeploymentType()
+
+        # Makes a reasonable hostname for a replset membership event to mention.
+        uri = urlsplit(self.clean_server_name)
+        if '@' in uri.netloc:
+            self.hostname = uri.netloc.split('@')[1].split(':')[0]
+        else:
+            self.hostname = uri.netloc.split(':')[0]
+        if self.hostname == 'localhost':
+            self.hostname = datadog_agent.get_hostname()
 
     @classmethod
     def get_library_versions(cls):
@@ -216,6 +234,16 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
+    def update_deployment_type(self, admindb):
+        props = admindb.command("isMaster")
+        if props.get("ismaster") == "isdbgrid":
+            self.deployment_type = MongosDeploymentType()
+        elif props.get("hosts"):
+            repl_set_payload = admindb.command("replSetGetStatus")
+            self.deployment_type = ReplicaSetDeploymentType(repl_set_payload)
+        else:
+            self.deployment_type = StandaloneDeploymentType()
+
     def check(self, _):
         """
         Returns a dictionary that looks a lot like what's sent back by
@@ -245,6 +273,14 @@ class MongoDb(AgentCheck):
                 self._authenticate(db)
 
         tags = deepcopy(self.base_tags)
+
+        self.update_deployment_type(cli['admin'])
+        if isinstance(self.deployment_type, ReplicaSetDeploymentType):
+            tags.extend([
+                "replset_name:{}".format(self.deployment_type.replset_name),
+                "replset_state:{}".format(self.deployment_type.replset_state)]
+            )
+
         try:
             mongo_version = cli.server_info().get('version', '0.0')
             self.set_metadata('version', mongo_version)
@@ -252,7 +288,7 @@ class MongoDb(AgentCheck):
             self.log.exception("Error when collecting the version from the mongo server.")
             mongo_version = '0.0'
 
-        collector = ServerStatusCollector(self, self.db_name, tcmalloc=self.collect_tcmalloc_metrics)
+        collector = ServerStatusCollector(self, self.db_name, tags, tcmalloc=self.collect_tcmalloc_metrics)
         try:
             collector.collect(cli)
         except Exception:
@@ -274,14 +310,14 @@ class MongoDb(AgentCheck):
         #     if status['ok'] == 0:
         #         raise Exception(status['errmsg'].__str__())
 
-        collector = CurrentOpCollector(self, self.db_name)
+        collector = CurrentOpCollector(self, self.db_name, tags)
         collector.collect(cli)
         # Replaces
         #
         #    ops = db.current_op()
         #    status['fsyncLocked'] = 1 if ops.get('fsyncLock') else 0
 
-        collector = DbStatCollector(self, self.db_name)
+        collector = DbStatCollector(self, self.db_name, tags)
         collector.collect(cli)
         # Replaces
         #
@@ -292,9 +328,9 @@ class MongoDb(AgentCheck):
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
         if self.replica_check:
-            collector = ReplicaCollector(self)
+            collector = ReplicaCollector(self, tags, self._last_state)
             try:
-                collector.collect(cli)
+                self._last_state = collector.collect(cli)
                 # Replaces
                 # data = {}
                 #
@@ -373,7 +409,7 @@ class MongoDb(AgentCheck):
         self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
         for db_n in dbnames:
-            collector = DbStatCollector(self, db_n)
+            collector = DbStatCollector(self, db_n, tags)
             collector.collect(cli)
             # Replaces
             #
@@ -439,7 +475,7 @@ class MongoDb(AgentCheck):
 
         if self.collections_indexes_stats:
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
-                collector = IndexStatsCollector(self, self.db_name, self.coll_names)
+                collector = IndexStatsCollector(self, self.db_name, tags, self.coll_names)
                 collector.collect(cli)
                 # Removed by collectors:
                 # self._collect_indexes_stats(db, tags)
@@ -450,7 +486,7 @@ class MongoDb(AgentCheck):
         # Report the usage metrics for dbs/collections
         if 'top' in self.additional_metrics:
             try:
-                collector = TopCollector(self)
+                collector = TopCollector(self, tags)
                 collector.collect(cli)
 
                 # Replaces:
@@ -494,7 +530,7 @@ class MongoDb(AgentCheck):
                 self.log.warning('Failed to record `top` metrics %s', e)
 
         if 'local' in dbnames:  # it might not be if we are connecting through mongos
-            collector = ReplicationInfoCollector(self)
+            collector = ReplicationInfoCollector(self, tags)
             collector.collect(cli)
             # Replaces:
             # # Fetch information analogous to Mongo's db.getReplicationInfo()
@@ -540,7 +576,7 @@ class MongoDb(AgentCheck):
 
         # get collection level stats
         try:
-            collector = CollStatsCollector(self, self.db_name, coll_names=self.coll_names)
+            collector = CollStatsCollector(self, self.db_name, tags, coll_names=self.coll_names)
             collector.collect(cli)
 
             # Replaces
@@ -576,7 +612,7 @@ class MongoDb(AgentCheck):
             self.log.warning(u"Failed to record `collection` metrics.")
             self.log.exception(e)
 
-        collector = CustomQueriesCollector(self, self.db_name, self.custom_queries)
+        collector = CustomQueriesCollector(self, self.db_name, tags, self.custom_queries)
         collector.collect(cli)
 
         # Replaces:

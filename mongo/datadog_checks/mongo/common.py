@@ -26,3 +26,36 @@ REPLSET_MEMBER_STATES = {
 DEFAULT_TIMEOUT = 30
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
+
+
+def get_state_name(state):
+    if state in REPLSET_MEMBER_STATES:
+        return REPLSET_MEMBER_STATES[state][0]
+    else:
+        return 'UNKNOWN'
+
+
+class DeploymentType(object):
+    def get_available_metrics(self):
+        # TODO: Use this method to know what metrics to collect based on the deployment type.
+        raise NotImplementedError
+
+
+class MongosDeploymentType(DeploymentType):
+    def get_available_metrics(self):
+        return None
+
+
+class ReplicaSetDeploymentType(DeploymentType):
+    def __init__(self, replset_get_status_payload):
+        self.replset_name = replset_get_status_payload['set']
+        self.replset_state = get_state_name(replset_get_status_payload['myState']).lower()
+
+    def get_available_metrics(self):
+        return None
+
+
+class StandaloneDeploymentType(DeploymentType):
+    def get_available_metrics(self):
+        return None
+

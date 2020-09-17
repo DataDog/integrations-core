@@ -8,7 +8,7 @@ from datadog_checks.mongo.common import (
     ALLOWED_CUSTOM_QUERIES_COMMANDS,
     REPLSET_MEMBER_STATES,
     SOURCE_TYPE_NAME,
-)
+    get_state_name)
 from datadog_checks.mongo.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES, COLLECTION_METRICS, TOP_METRICS
 from six import PY3, iteritems
 from six.moves.urllib.parse import urlsplit
@@ -26,12 +26,12 @@ if PY3:
 
 
 class MongoCollector(object):
-    def __init__(self, check, db_name):
+    def __init__(self, check, db_name, tags):
         self.check = check
         self.db_name = db_name
         self.log = self.check.log
         self.gauge = self.check.gauge
-        self.base_tags = self.check.base_tags
+        self.base_tags = tags
         self.metrics_to_collect = self.check.metrics_to_collect
 
     def collect(self, client):
@@ -99,8 +99,8 @@ class MongoCollector(object):
 
 
 class ServerStatusCollector(MongoCollector):
-    def __init__(self, check, db_name, tcmalloc=False):
-        super(ServerStatusCollector, self).__init__(check, db_name)
+    def __init__(self, check, db_name, tags, tcmalloc=False):
+        super(ServerStatusCollector, self).__init__(check, db_name, tags)
         self.collect_tcmalloc_metrics = tcmalloc
 
     def collect(self, client):
@@ -136,10 +136,10 @@ class DbStatCollector(MongoCollector):
 
 
 class ReplicaCollector(MongoCollector):
-    def __init__(self, check):
-        super(ReplicaCollector, self).__init__(check, "admin")
+    def __init__(self, check, tags, last_state):
+        super(ReplicaCollector, self).__init__(check, "admin", tags)
         # Members' last replica set states
-        self._last_state_by_server = {}
+        self._last_state = last_state
 
         # Makes a reasonable hostname for a replset membership event to mention.
         uri = urlsplit(self.check.clean_server_name)
@@ -156,9 +156,7 @@ class ReplicaCollector(MongoCollector):
         * Submit a service check.
         * Create an event on state change.
         """
-        last_state = self._last_state_by_server.get(self.check.clean_server_name, -1)
-        self._last_state_by_server[self.check.clean_server_name] = state
-        if last_state == state or last_state == -1:
+        if self._last_state == state or self._last_state == -1:
             return
 
         status = (
@@ -166,8 +164,8 @@ class ReplicaCollector(MongoCollector):
             if state in REPLSET_MEMBER_STATES
             else 'Replset state %d is unknown to the Datadog agent' % state
         )
-        short_status = self._get_state_name(state)
-        last_short_status = self._get_state_name(last_state)
+        short_status = get_state_name(state)
+        last_short_status = get_state_name(self._last_state)
         msg_title = "%s is %s for %s" % (self.hostname, short_status, replset_name)
         msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before."
         msg = msg % (self.hostname, self.check.clean_server_name, status, short_status, replset_name, last_short_status)
@@ -188,20 +186,10 @@ class ReplicaCollector(MongoCollector):
             }
         )
 
-    def _get_state_name(self, state):
-        if state in REPLSET_MEMBER_STATES:
-            return REPLSET_MEMBER_STATES[state][0]
-        else:
-            return 'UNKNOWN'
-
     def collect(self, client):
         db = client["admin"]
         status = db.command('replSetGetStatus')
         result = {}
-
-        # Replication set information
-        replset_name = status['set']
-        replset_state = self._get_state_name(status['myState']).lower()
 
         # Find nodes: master and current node (ourself)
         current = primary = None
@@ -231,14 +219,16 @@ class ReplicaCollector(MongoCollector):
             result['voteFraction'] = result['votes'] / total
 
         result['state'] = status['myState']
-        # TODO: Set those as common tags
-        additional_tags = ["replset_name:{}".format(replset_name), "replset_state:{}".format(replset_state)]
-        self._submit_payload(result, additional_tags)
+
+        self._submit_payload({'replSet': result})
+        self._report_replica_set_state(status['myState'], status['set'])
+
+        return status['myState']
 
 
 class ReplicationInfoCollector(MongoCollector):
-    def __init__(self, check):
-        super(ReplicationInfoCollector, self).__init__(check, "local")
+    def __init__(self, check, tags):
+        super(ReplicationInfoCollector, self).__init__(check, "local", tags)
 
     def collect(self, client):
         # Fetch information analogous to Mongo's db.getReplicationInfo()
@@ -277,12 +267,12 @@ class ReplicationInfoCollector(MongoCollector):
                 # encountered an error trying to access options.size for the oplog collection
                 self.log.warning(u"Failed to record `ReplicationInfo` metrics.")
 
-        self._submit_payload(oplog_data)
+        self._submit_payload({'oplog': oplog_data})
 
 
 class IndexStatsCollector(MongoCollector):
-    def __init__(self, check, db_name, coll_names=None):
-        super(IndexStatsCollector, self).__init__(check, db_name)
+    def __init__(self, check, db_name, tags, coll_names=None):
+        super(IndexStatsCollector, self).__init__(check, db_name, tags)
         self.coll_names = coll_names
 
     def collect(self, client):
@@ -301,8 +291,8 @@ class IndexStatsCollector(MongoCollector):
 
 
 class CollStatsCollector(MongoCollector):
-    def __init__(self, check, db_name, coll_names=None):
-        super(CollStatsCollector, self).__init__(check, db_name)
+    def __init__(self, check, db_name, tags, coll_names=None):
+        super(CollStatsCollector, self).__init__(check, db_name, tags)
         self.coll_names = coll_names
 
     def collect(self, client):
@@ -320,13 +310,13 @@ class CollStatsCollector(MongoCollector):
             metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
             for idx, val in iteritems(index_sizes):
                 # we tag the index
-                idx_tags = additional_tags + ["index:%s" % idx]
-                self.gauge(self, metric_name_alias, val, tags=idx_tags)
+                idx_tags = self.base_tags + additional_tags + ["index:%s" % idx]
+                self.gauge(metric_name_alias, val, tags=idx_tags)
 
 
 class TopCollector(MongoCollector):
-    def __init__(self, check):
-        super(TopCollector, self).__init__(check, "admin")
+    def __init__(self, check, tags):
+        super(TopCollector, self).__init__(check, "admin", tags)
 
     # mongod only
     def collect(self, client):
@@ -343,8 +333,8 @@ class TopCollector(MongoCollector):
 
 
 class CustomQueriesCollector(MongoCollector):
-    def __init__(self, check, db_name, custom_queries):
-        super(CustomQueriesCollector, self).__init__(check, db_name)
+    def __init__(self, check, db_name, tags, custom_queries):
+        super(CustomQueriesCollector, self).__init__(check, db_name, tags)
         self.custom_queries = custom_queries
 
     @staticmethod
@@ -460,9 +450,10 @@ class CustomQueriesCollector(MongoCollector):
                 submit_method(metric_name, metric_value, tags=query_tags)
 
     def collect(self, client):
+        db = client[self.db_name]
         for raw_query in self.custom_queries:
             try:
-                self._collect_custom_metrics_for_query(client[self.db_name], raw_query)
+                self._collect_custom_metrics_for_query(db, raw_query)
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
                 self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)
