@@ -7,6 +7,9 @@ from copy import deepcopy
 from distutils.version import LooseVersion
 
 import pymongo
+from six import PY3, iteritems, itervalues
+from six.moves.urllib.parse import urlsplit
+
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
     CurrentOpCollector,
@@ -18,10 +21,13 @@ from datadog_checks.mongo.collectors import (
     ServerStatusCollector,
     TopCollector,
 )
-from datadog_checks.mongo.common import DEFAULT_TIMEOUT, SERVICE_CHECK_NAME, MongosDeploymentType, \
-    ReplicaSetDeploymentType, StandaloneDeploymentType
-from six import PY3, iteritems, itervalues
-from six.moves.urllib.parse import urlsplit
+from datadog_checks.mongo.common import (
+    DEFAULT_TIMEOUT,
+    SERVICE_CHECK_NAME,
+    MongosDeploymentType,
+    ReplicaSetDeploymentType,
+    StandaloneDeploymentType,
+)
 
 try:
     import datadog_agent
@@ -276,9 +282,11 @@ class MongoDb(AgentCheck):
 
         self.update_deployment_type(cli['admin'])
         if isinstance(self.deployment_type, ReplicaSetDeploymentType):
-            tags.extend([
-                "replset_name:{}".format(self.deployment_type.replset_name),
-                "replset_state:{}".format(self.deployment_type.replset_state)]
+            tags.extend(
+                [
+                    "replset_name:{}".format(self.deployment_type.replset_name),
+                    "replset_state:{}".format(self.deployment_type.replset_state),
+                ]
             )
 
         try:
@@ -297,32 +305,11 @@ class MongoDb(AgentCheck):
         else:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
-        # Replaces
-        #
-        #     try:
-        #         status = db.command('serverStatus', tcmalloc=self.collect_tcmalloc_metrics)
-        #     except Exception:
-        #         self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
-        #         raise
-        #     else:
-        #         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
-        #
-        #     if status['ok'] == 0:
-        #         raise Exception(status['errmsg'].__str__())
-
         collector = CurrentOpCollector(self, self.db_name, tags)
         collector.collect(cli)
-        # Replaces
-        #
-        #    ops = db.current_op()
-        #    status['fsyncLocked'] = 1 if ops.get('fsyncLock') else 0
 
         collector = DbStatCollector(self, self.db_name, tags)
         collector.collect(cli)
-        # Replaces
-        #
-        #    status['stats'] = db.command('dbstats')
-        #   dbstats = {self.db_name: {'stats': status['stats']}}
 
         # Handle replica data, if any
         # See
@@ -331,72 +318,6 @@ class MongoDb(AgentCheck):
             collector = ReplicaCollector(self, tags, self._last_state)
             try:
                 self._last_state = collector.collect(cli)
-                # Replaces
-                # data = {}
-                #
-                # replSet = admindb.command('replSetGetStatus')
-                # if replSet:
-                #     primary = None
-                #     current = None
-                #
-                #     # need a new connection to deal with replica sets
-                #     setname = replSet.get('set')
-                #     cli_rs = pymongo.mongo_client.MongoClient(
-                #         self.server,
-                #         socketTimeoutMS=self.timeout,
-                #         connectTimeoutMS=self.timeout,
-                #         serverSelectionTimeoutMS=self.timeout,
-                #         replicaset=setname,
-                #         read_preference=pymongo.ReadPreference.NEAREST,
-                #         **self.ssl_params
-                #     )
-                #
-                #     if self.do_auth:
-                #         if self.auth_source:
-                #             self._authenticate(cli_rs[self.auth_source])
-                #         else:
-                #             self._authenticate(cli_rs[self.db_name])
-                #
-                #     # Replication set information
-                #     replset_name = replSet['set']
-                #     replset_state = self.get_state_name(replSet['myState']).lower()
-                #
-                #     tags.extend([
-                #         u"replset_name:{0}".format(replset_name),
-                #         u"replset_state:{0}".format(replset_state)]
-                #     )
-                #
-                #     # Find nodes: master and current node (ourself)
-                #     for member in replSet.get('members'):
-                #         if member.get('self'):
-                #             current = member
-                #         if int(member.get('state')) == 1:
-                #             primary = member
-                #
-                #     # Compute a lag time
-                #     if current is not None and primary is not None:
-                #         if 'optimeDate' in primary and 'optimeDate' in current:
-                #             lag = primary['optimeDate'] - current['optimeDate']
-                #             data['replicationLag'] = total_seconds(lag)
-                #
-                #     if current is not None:
-                #         data['health'] = current['health']
-                #
-                #     data['state'] = replSet['myState']
-                #
-                #     if current is not None:
-                #         total = 0.0
-                #         cfg = cli_rs['local']['system.replset'].find_one()
-                #         for member in cfg.get('members'):
-                #             total += member.get('votes', 1)
-                #             if member['_id'] == current['_id']:
-                #                 data['votes'] = member.get('votes', 1)
-                #         data['voteFraction'] = data['votes'] / total
-                #
-                #     status['replSet'] = data
-                #
-                #     # Submit events
-                #     self._report_replica_set_state(data['state'], replset_name)
             except Exception as e:
                 if "OperationFailure" in repr(e) and (
                     "not running with --replSet" in str(e) or "replSetGetStatus" in str(e)
@@ -411,74 +332,11 @@ class MongoDb(AgentCheck):
         for db_n in dbnames:
             collector = DbStatCollector(self, db_n, tags)
             collector.collect(cli)
-            # Replaces
-            #
-            #     db_aux = cli[db_n]
-            #     dbstats[db_n] = {'stats': db_aux.command('dbstats')}
-
-        # -- Removed by collectors: --
-        # # Go through the metrics and save the values
-        # for metric_name in self.metrics_to_collect:
-        #     # each metric is of the form: x.y.z with z optional
-        #     # and can be found at status[x][y][z]
-        #     value = status
-        #
-        #     if metric_name.startswith('stats'):
-        #         continue
-        #     else:
-        #         try:
-        #             for c in metric_name.split("."):
-        #                 value = value[c]
-        #         except KeyError:
-        #             continue
-        #
-        #     # value is now status[x][y][z]
-        #     if not isinstance(value, (int, long, float)):
-        #         raise TypeError(
-        #             u"{0} value is a {1}, it should be an int, a float or a long instead.".format(
-        #                 metric_name, type(value)
-        #             )
-        #         )
-        #
-        #     # Submit the metric
-        #     submit_method, metric_name_alias = self._resolve_metric(metric_name, self.metrics_to_collect)
-        #     submit_method(self, metric_name_alias, value, tags=tags)
-
-        # -- Removed by collectors: --
-        #
-        # for st, value in iteritems(dbstats):
-        #     for metric_name in self.metrics_to_collect:
-        #         if not metric_name.startswith('stats.'):
-        #             continue
-        #
-        #         try:
-        #             val = value['stats'][metric_name.split('.')[1]]
-        #         except KeyError:
-        #             continue
-        #
-        #         # value is now status[x][y][z]
-        #         if not isinstance(val, (int, long, float)):
-        #             raise TypeError(
-        #                 u"{0} value is a {1}, it should be an int, a float or a long instead.".format(
-        #                     metric_name, type(val)
-        #                 )
-        #             )
-        #
-        #         # Submit the metric
-        #         metrics_tags = tags + [
-        #             u"cluster:db:{0}".format(st),  # FIXME: 8.x, was kept for backward compatibility
-        #             u"db:{0}".format(st),
-        #         ]
-        #
-        #         submit_method, metric_name_alias = self._resolve_metric(metric_name, self.metrics_to_collect)
-        #         submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
         if self.collections_indexes_stats:
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                 collector = IndexStatsCollector(self, self.db_name, tags, self.coll_names)
                 collector.collect(cli)
-                # Removed by collectors:
-                # self._collect_indexes_stats(db, tags)
             else:
                 msg = "'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s"
                 self.log.error(msg, mongo_version)
@@ -488,89 +346,12 @@ class MongoDb(AgentCheck):
             try:
                 collector = TopCollector(self, tags)
                 collector.collect(cli)
-
-                # Replaces:
-                #     dbtop = admindb.command('top')
-                #     for ns, ns_metrics in iteritems(dbtop['totals']):
-                #         if "." not in ns:
-                #             continue
-                #
-                #         # configure tags for db name and collection name
-                #         dbname, collname = ns.split(".", 1)
-                #         ns_tags = tags + ["db:%s" % dbname, "collection:%s" % collname]
-                #
-                #         # iterate over DBTOP metrics
-                #         for m in metrics.TOP_METRICS:
-                #             # each metric is of the form: x.y.z with z optional
-                #             # and can be found at ns_metrics[x][y][z]
-                #             value = ns_metrics
-                #             try:
-                #                 for c in m.split("."):
-                #                     value = value[c]
-                #             except Exception:
-                #                 continue
-                #
-                #             # value is now status[x][y][z]
-                #             if not isinstance(value, (int, long, float)):
-                #                 raise TypeError(
-                #                     u"{0} value is a {1}, it should be an int, a float or a long instead.".format(
-                #                         m, type(value)
-                #                     )
-                #                 )
-                #
-                #             # Submit the metric
-                #             submit_method, metric_name_alias = self._resolve_metric(
-                #                 m, self.metrics_to_collect, prefix="usage"
-                #             )
-                #             submit_method(self, metric_name_alias, value, tags=ns_tags)
-                #             # Keep old incorrect metric
-                #             if metric_name_alias.endswith('countps'):
-                #                 self.gauge(metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s', e)
 
         if 'local' in dbnames:  # it might not be if we are connecting through mongos
             collector = ReplicationInfoCollector(self, tags)
             collector.collect(cli)
-            # Replaces:
-            # # Fetch information analogous to Mongo's db.getReplicationInfo()
-            # localdb = cli['local']
-            #
-            # oplog_data = {}
-            #
-            # for ol_collection_name in ("oplog.rs", "oplog.$main"):
-            #     ol_options = localdb[ol_collection_name].options()
-            #     if ol_options:
-            #         break
-            #
-            # if ol_options:
-            #     try:
-            #         oplog_data['logSizeMB'] = round_value(ol_options['size'] / 2.0 ** 20, 2)
-            #
-            #         oplog = localdb[ol_collection_name]
-            #
-            #         oplog_data['usedSizeMB'] = round_value(
-            #             localdb.command("collstats", ol_collection_name)['size'] / 2.0 ** 20, 2
-            #         )
-            #
-            #         op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
-            #         op_dsc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
-            #
-            #         try:
-            #             first_timestamp = op_asc_cursor[0]['ts'].as_datetime()
-            #             last_timestamp = op_dsc_cursor[0]['ts'].as_datetime()
-            #             oplog_data['timeDiff'] = total_seconds(last_timestamp - first_timestamp)
-            #         except (IndexError, KeyError):
-            #             # if the oplog collection doesn't have any entries
-            #             # if an object in the collection doesn't have a ts value, we ignore it
-            #             pass
-            #     except KeyError:
-            #         # encountered an error trying to access options.size for the oplog collection
-            #         self.log.warning(u"Failed to record `ReplicationInfo` metrics.")
-            #
-            # for m, value in iteritems(oplog_data):
-            #     submit_method, metric_name_alias = self._resolve_metric('oplog.%s' % m, self.metrics_to_collect)
-            #     submit_method(self, metric_name_alias, value, tags=tags)
         else:
             self.log.debug('"local" database not in dbnames. Not collecting ReplicationInfo metrics')
 
@@ -578,48 +359,9 @@ class MongoDb(AgentCheck):
         try:
             collector = CollStatsCollector(self, self.db_name, tags, coll_names=self.coll_names)
             collector.collect(cli)
-
-            # Replaces
-            # # Ensure that you're on the right db
-            # db = cli[self.db_name]
-            # # loop through the collections
-            # for coll_name in self.coll_names:
-            #     # grab the stats from the collection
-            #     stats = db.command("collstats", coll_name)
-            #     # loop through the metrics
-            #     for m in self.collection_metrics_names:
-            #         coll_tags = tags + ["db:%s" % self.db_name, "collection:%s" % coll_name]
-            #         value = stats.get(m, None)
-            #         if value is None:
-            #             continue
-            #
-            #         # if it's the index sizes, then it's a dict.
-            #         if m == 'indexSizes':
-            #             submit_method, metric_name_alias = self._resolve_metric(
-            #                 'collection.%s' % m, metrics.COLLECTION_METRICS
-            #             )
-            #             # loop through the indexes
-            #             for idx, val in iteritems(value):
-            #                 # we tag the index
-            #                 idx_tags = coll_tags + ["index:%s" % idx]
-            #                 submit_method(self, metric_name_alias, val, tags=idx_tags)
-            #         else:
-            #             submit_method, metric_name_alias = self._resolve_metric(
-            #                 'collection.%s' % m, metrics.COLLECTION_METRICS
-            #             )
-            #             submit_method(self, metric_name_alias, value, tags=coll_tags)
         except Exception as e:
             self.log.warning(u"Failed to record `collection` metrics.")
             self.log.exception(e)
 
         collector = CustomQueriesCollector(self, self.db_name, tags, self.custom_queries)
         collector.collect(cli)
-
-        # Replaces:
-        # custom_query_tags = tags + ["db:{}".format(self.db_name)]
-        # for raw_query in self.custom_queries:
-        #     try:
-        #         self._collect_custom_metrics_for_query(db, raw_query, custom_query_tags)
-        #     except Exception as e:
-        #         metric_prefix = raw_query.get('metric_prefix')
-        #         self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)

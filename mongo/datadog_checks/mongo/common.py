@@ -58,4 +58,3 @@ class ReplicaSetDeploymentType(DeploymentType):
 class StandaloneDeploymentType(DeploymentType):
     def get_available_metrics(self):
         return None
-

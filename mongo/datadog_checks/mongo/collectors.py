@@ -3,18 +3,19 @@ import time
 from copy import deepcopy
 
 import pymongo
-from datadog_checks.mongo.common import (
-    ALLOWED_CUSTOM_METRICS_TYPES,
-    ALLOWED_CUSTOM_QUERIES_COMMANDS,
-    REPLSET_MEMBER_STATES,
-    SOURCE_TYPE_NAME,
-    get_state_name)
-from datadog_checks.mongo.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES, COLLECTION_METRICS, TOP_METRICS
 from six import PY3, iteritems
 from six.moves.urllib.parse import urlsplit
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.mongo.common import (
+    ALLOWED_CUSTOM_METRICS_TYPES,
+    ALLOWED_CUSTOM_QUERIES_COMMANDS,
+    REPLSET_MEMBER_STATES,
+    SOURCE_TYPE_NAME,
+    get_state_name,
+)
+from datadog_checks.mongo.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES, COLLECTION_METRICS, TOP_METRICS
 
 try:
     import datadog_agent
