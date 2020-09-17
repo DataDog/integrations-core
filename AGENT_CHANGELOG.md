@@ -1,3 +1,7 @@
+## Datadog Agent version [7.22.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7221)
+
+* Linux proc extras [2.0.0](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/CHANGELOG.md) **BREAKING CHANGE**
+
 ## Datadog Agent version [7.22.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7220)
 
 * Active Directory [1.9.1](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
@@ -84,7 +88,7 @@
 
 ## Datadog Agent version [7.21.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7211)
 
-* There were no integration updates for this version of the Agent.
+* datadog_checks_downloader [3.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
 
 ## Datadog Agent version [7.21.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7210)
 
@@ -98,7 +102,7 @@
 * Cassandra [1.6.1](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
 * Ceph [2.1.1](https://github.com/DataDog/integrations-core/blob/master/ceph/CHANGELOG.md)
 * datadog_checks_base [11.12.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
-* datadog_checks_downloader [3.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+* datadog_checks_downloader [3.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
 * Cisco ACI [1.10.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
 * ClickHouse [1.3.1](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
 * Confluent Platform [1.1.1](https://github.com/DataDog/integrations-core/blob/master/confluent_platform/CHANGELOG.md)
