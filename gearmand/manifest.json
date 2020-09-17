@@ -4,7 +4,8 @@
   ],
   "categories": [
     "processing",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Gearman",
@@ -35,6 +36,8 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "gearman"
+    }
   }
 }
