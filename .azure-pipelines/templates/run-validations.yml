@@ -24,7 +24,7 @@ steps:
   - script: ddev validate dep
     displayName: 'Validate dependencies'
 
-- script: ddev validate manifest -i
+- script: ddev validate manifest
   displayName: 'Validate manifest files'
 
 - script: ddev validate metadata
