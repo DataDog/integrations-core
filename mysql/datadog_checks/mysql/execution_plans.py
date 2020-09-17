@@ -183,7 +183,7 @@ class ExecutionPlansMixin(object):
                 )
 
         if num_truncated > 0:
-            self.log.warning(
+            self.log.debug(
                 'Unable to collect %d/%d execution plans due to truncated SQL text. Consider raising '
                 '`performance_schema_max_sql_text_length` to capture these queries.',
                 num_truncated,
@@ -211,7 +211,7 @@ class ExecutionPlansMixin(object):
                     # --read-only mode failure is expected so log at debug level
                     self.log.debug('failed to enable performance_schema consumer %s: %s', name, e)
                     return False
-                self.log.warning('failed to enable performance_schema consumer %s: %s', name, e)
+                self.log.debug('failed to enable performance_schema consumer %s: %s', name, e)
         return False
 
     def _get_plan_collection_strategy(self, db, options, min_collection_interval):
@@ -289,7 +289,7 @@ class ExecutionPlansMixin(object):
                 "plan_collection_strategy", strategy, options.get('plan_collection_strategy_cache_time', 10 * 60)
             )
         else:
-            self.log.warning(
+            self.log.info(
                 "no valid performance_schema.events_statements table found. cannot collect execution plans."
             )
 
@@ -390,7 +390,7 @@ class ExecutionPlansMixin(object):
                 raise
             if e.args[0] in non_retryable_errors:
                 self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
-            self.log.warning(
+            self.log.debug(
                 'Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s',
                 schema,
                 e.args,
@@ -429,7 +429,7 @@ class ExecutionPlansMixin(object):
                 break
 
         if not plan:
-            self.log.warning(
+            self.log.info(
                 'Cannot collect execution plan for statement (enable debug logs to log attempts): %s',
                 obfuscated_statement,
             )
