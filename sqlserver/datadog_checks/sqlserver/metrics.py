@@ -52,7 +52,7 @@ class BaseSqlServerMetric(object):
     def _fetch_generic_values(cls, cursor, counters_list, logger):
         if counters_list:
             placeholders = ', '.join('?' for _ in counters_list)
-            query = cls.QUERY_BASE.format(placeholders)
+            query = cls.QUERY_BASE.format(placeholders=placeholders)
             logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, counters_list)
             cursor.execute(query, counters_list)
         else:
@@ -77,7 +77,9 @@ class SqlSimpleMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
     QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
-                    from sys.dm_os_performance_counters where counter_name in ({})"""
+                    from {table} where counter_name in ({{placeholders}})""".format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -109,18 +111,22 @@ class SqlFractionMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select counter_name, cntr_type, cntr_value, instance_name, object_name
-                    from sys.dm_os_performance_counters
-                    where counter_name in ({})
-                    order by cntr_type;"""
+                    from {table}
+                    where counter_name in ({{placeholders}})
+                    order by cntr_type;""".format(
+        table=TABLE
+    )
 
     INSTANCES_QUERY = """select instance_name
-                         from sys.dm_os_performance_counters
-                         where counter_name=? and instance_name!='_Total';"""
+                         from {table}
+                         where counter_name=? and instance_name!='_Total';""".format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
         placeholders = ', '.join('?' for _ in counters_list)
-        query = cls.QUERY_BASE.format(placeholders)
+        query = cls.QUERY_BASE.format(placeholders=placeholders)
 
         logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, str(counters_list))
         cursor.execute(query, counters_list)
@@ -218,7 +224,7 @@ class SqlIncrFractionMetric(SqlFractionMetric):
 class SqlOsWaitStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_wait_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """select * from sys.dm_os_wait_stats where wait_type in ({})"""
+    QUERY_BASE = """select * from {table} where wait_type in ({{placeholders}})""".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -245,7 +251,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
 class SqlIoVirtualFileStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_io_virtual_file_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.dm_io_virtual_file_stats(null, null)"
+    QUERY_BASE = "select * from {table}(null, null)".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -290,7 +296,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
 class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_memory_clerks'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """select * from sys.dm_os_memory_clerks where type in ({})"""
+    QUERY_BASE = """select * from {table} where type in ({{placeholders}})""".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -318,7 +324,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
 class SqlOsSchedulers(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_schedulers'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.dm_os_schedulers"
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -344,7 +350,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
 class SqlOsTasks(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_tasks'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.dm_os_tasks"
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -368,9 +374,9 @@ class SqlOsTasks(BaseSqlServerMetric):
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
 class SqlDatabaseStats(BaseSqlServerMetric):
-    TABLE = 'sys.master_files'
+    TABLE = 'sys.database_files'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.master_files"
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
 
@@ -379,7 +385,6 @@ class SqlDatabaseStats(BaseSqlServerMetric):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
-        database_id = columns.index("database_id")
         database_type = columns.index("type")
         database_name = columns.index("name")
         database_file_location = columns.index("physical_name")
@@ -390,13 +395,11 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             if self.column in ('size', 'max_size'):
                 column_val *= 8  # size reported in 8 KB pages
 
-            dbid = row[database_id]
             dbtype = self.DB_TYPE_MAP[row[database_type]]
             dbname = row[database_name]
             location = row[database_file_location]
 
             metric_tags = [
-                'database_id:{}'.format(str(dbid)),
                 'database_type:{}'.format(str(dbtype)),
                 'database_name:{}'.format(str(dbname)),
                 'database_location:{}'.format(str(location)),
