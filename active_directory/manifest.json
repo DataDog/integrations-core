@@ -30,6 +30,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ruby"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

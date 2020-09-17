@@ -42,6 +42,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "haproxy"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

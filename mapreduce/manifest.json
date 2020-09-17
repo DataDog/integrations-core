@@ -32,6 +32,7 @@
     "logs": {
       "source": "mapreduce"
     },
-    "monitors": {}
+    "monitors": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

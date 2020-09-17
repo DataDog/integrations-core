@@ -30,6 +30,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "openldap"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }
