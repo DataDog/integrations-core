@@ -13,11 +13,10 @@ def test_integration(instance_custom_queries, aggregator, mock_pymongo, check):
     instance_custom_queries["collections_indexes_stats"] = True
     mongo_check = check(instance_custom_queries)
     # Set node as "secondary" initially to trigger an event
-    mongo_check._last_state_by_server[mongo_check.clean_server_name] = 2
+    mongo_check._last_state = 2
 
     mongo_check.check(instance_custom_queries)
 
-    expected_metrics = []
     with open(os.path.join(HERE, "results", "metrics.json"), 'r') as f:
         expected_metrics = json.load(f)
 
