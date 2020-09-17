@@ -2,17 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import itertools
-import json
 import os
 import time
-from functools import partial
 
 import mock
 import pymongo
 import pytest
-from bson import Timestamp, json_util
 from mock import MagicMock
+from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
@@ -90,64 +87,7 @@ def instance_custom_queries():
 
 @pytest.fixture
 def mock_pymongo():
-    mocked_client = MagicMock(
-        spec_set=["__getitem__", "server_info", "list_database_names"], name="MockedPyMongoClient"
-    )
-    with open(os.path.join(common.HERE, "fixtures", "server_info"), 'r') as f:
-        mocked_client.server_info = MagicMock(return_value=json.load(f))
-    with open(os.path.join(common.HERE, "fixtures", "list_database_names"), 'r') as f:
-        mocked_client.list_database_names = MagicMock(return_value=json.load(f))
-
-    def get_collection(self, coll_name):
-        if coll_name == "system.replset":
-            m = MagicMock(spec_set=["find_one"], name="MockColl<{}:{}>".format(self._db_name, coll_name))
-            with open(os.path.join(common.HERE, "fixtures", "find_one_system_replset"), 'r') as f:
-                m.find_one = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
-            return m
-        elif coll_name in ("oplog.rs", "oplog.$main"):
-            m = MagicMock(spec_set=["options", "find"], name="MockColl<{}:{}>".format(self._db_name, coll_name))
-            with open(os.path.join(common.HERE, "fixtures", "oplog_rs_options"), 'r') as f:
-                m.options = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
-
-            val1 = [{'ts': Timestamp(1600262019, 1)}]
-            val2 = [{'ts': Timestamp(1600327624, 8)}]
-            limit = MagicMock(limit=MagicMock(side_effect=itertools.cycle([val1, val2])))
-            sort = MagicMock(sort=MagicMock(return_value=limit))
-            m.find = MagicMock(return_value=sort)
-            return m
-        else:
-            m = MagicMock(spec_set=['aggregate'])
-            with open(os.path.join(common.HERE, "fixtures", "indexStats-{}".format(coll_name)), 'r') as f:
-                m.aggregate = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
-            return m
-
-    def mock_command(self, command, *args, **kwargs):
-        filename = command
-        if command == "dbstats":
-            filename += "-{}".format(self._db_name)
-        elif command == "collstats":
-            coll_name = args[0]
-            filename += "-{}".format(coll_name)
-        elif command in ("find", "count", "aggregate"):
-            # At time of writing, those commands only are for custom queries.
-            filename = "custom-query-{}".format(self._query_count)
-            self._query_count += 1
-        with open(os.path.join(common.HERE, "fixtures", filename), 'r') as f:
-            return json.load(f, object_hook=json_util.object_hook)
-
-    def get_db(_, db_name):
-        mocked_db = MagicMock(
-            spec_set=["authenticate", "command", "_db_name", "current_op", "__getitem__", "_query_count"],
-            name="MockDB<%s>" % db_name,
-        )
-        mocked_db._db_name = db_name
-        mocked_db.command = partial(mock_command, mocked_db)
-        mocked_db.current_op = lambda: mocked_db.command("current_op")
-        mocked_db.__getitem__ = get_collection
-        mocked_db._query_count = 0
-        return mocked_db
-
-    mocked_client.__getitem__ = get_db
+    mocked_client = MockedPyMongoClient()
 
     with mock.patch('pymongo.mongo_client.MongoClient', MagicMock(return_value=mocked_client),), mock.patch(
         'pymongo.collection.Collection'
