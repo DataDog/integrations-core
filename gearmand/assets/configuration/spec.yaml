@@ -1,0 +1,22 @@
+name: Gearman
+files:
+- name: gearmand.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+      - name: server
+        description: Server to connect to.
+        required: true
+        value:
+          example: localhost
+          type: string
+      - name: port
+        description: Port to use when connecting to "server".
+        required: true
+        value:
+          example: 4730
+          type: integer
+      - template: instances/default
