@@ -69,7 +69,7 @@ def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_i
             all_tags = metric.get('tags')
             if all_tags is not None:
                 # The tag 'vsphere_folder:Datastores' is not supposed to be there anymore!
-                all_tags = filter(lambda x: x != 'vsphere_folder:Datastores', all_tags)
+                all_tags = [tag for tag in all_tags if tag != 'vsphere_folder:Datastores']
             aggregator.assert_metric(metric['name'], metric.get('value'), tags=all_tags)
 
     aggregator.assert_all_metrics_covered()
