@@ -59,7 +59,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `gearmand.d/conf.yaml` file to start collecting your SQL Server logs:
+2. Add this configuration block to your `gearmand.d/conf.yaml` file to start collecting your Gearman logs:
 
     ```yaml
     logs:
