@@ -61,20 +61,40 @@ class SQLServer(AgentCheck):
     # Default performance table metrics - Database Instance level
     # datadog metric name, counter name, instance name
     INSTANCE_METRICS = [
-        ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
-        ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
-        ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
-        ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+        # SQLServer:General Statistics
         ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
-        ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
-        # Transactions
+        # SQLServer:Locks
+        ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
+        # SQLServer:Access Methods
+        ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
+        # SQLServer:Plan Cache
+        ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
+        ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+        # SQLServer:Databases
+        ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
+        ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
+        ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
+        ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
         ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
         ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
         ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
+        # SQLServer:Memory Manager
+        ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
+        ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
+        # SQLServer:Buffer Manager
+        ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
+        ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.buffer.page_reads', 'Page reads/sec', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.buffer.page_writes', 'Page writes/sec', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
+        # SQLServer:SQL Statistics
+        ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', ''),
+        ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', ''),
+        ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', ''),
+        ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
+        ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
+        ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
     ]
 
     # Non-performance table metrics - can be database specific
