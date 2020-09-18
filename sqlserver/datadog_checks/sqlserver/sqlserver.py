@@ -207,7 +207,6 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
-        # TODO - if dbid or database specified in custom metric pass the instance database value so it can be filtered
         for cfg in custom_metrics:
             sql_type = None
             base_name = None
@@ -218,6 +217,11 @@ class SQLServer(AgentCheck):
             db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
             if db_table not in VALID_TABLES:
                 self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
+                continue
+
+            if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
+                self.log.debug('Skipping custom metric %s for database %s, check instance configured for database %s',
+                               cfg['name'], cfg.get('database'), self.instance.get('database'))
                 continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
