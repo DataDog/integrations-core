@@ -20,7 +20,7 @@ files:
               example: false
               type: boolean
           - template: instances/tags
-          - name: file_system_whitelist
+          - name: file_system_include
             description: |
               Instruct the check to only collect from matching file systems.
              
@@ -34,7 +34,10 @@ files:
                 type: array
                 items:
                   type: string
-          - name: file_system_blacklist
+          - name: file_system_whitelist
+            description: |
+              Deprecated, use file_system_include instead.
+          - name: file_system_exclude
             description: |
               Instruct the check to not collect from matching file systems.
 
@@ -54,7 +57,10 @@ files:
               type: array
               items:
                 type: string
-          - name: device_whitelist
+          - name: file_system_blacklist
+            description: |
+              Deprecated, use file_system_exclude instead.
+          - name: device_include
             description: |
                 Instruct the check to only collect from matching devices.
 
@@ -68,7 +74,10 @@ files:
               type: array
               items:
                 type: string
-          - name: device_blacklist
+          - name: device_whitelist
+            description: |
+              Deprecated, use device_include instead.
+          - name: device_exclude
             description: |
               Instruct the check to not collect from matching devices.
 
@@ -84,7 +93,10 @@ files:
               type: array
               items:
                 type: string
-          - name: mount_point_whitelist
+          - name: device_blacklist
+            description: |
+              Deprecated, use device_exclude instead.
+          - name: mount_point_include
             description: |
                Instruct the check to only collect from matching mount points.
 
@@ -98,7 +110,10 @@ files:
               type: array
               items:
                 type: string
-          - name: mount_point_blacklist
+          - name: mount_point_whitelist
+            description: |
+              Deprecated, use mount_point_include instead.
+          - name: mount_point_exclude
             description: |
               Instruct the check to not collect from matching mount points.
 
@@ -113,6 +128,9 @@ files:
               type: array
               items:
                 type: string
+          - name: mount_point_blacklist
+            description: |
+              Deprecated, use mount_point_exclude instead.
           - name: include_all_devices
             description: |
               Instruct the check to collect from all devices, including non-physical devices.

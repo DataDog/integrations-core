@@ -45,14 +45,14 @@ class Disk(AgentCheck):
         instance = instances[0]
         self._use_mount = is_affirmative(instance.get('use_mount', False))
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
-        self._file_system_whitelist = instance.get('file_system_whitelist', [])
-        self._file_system_blacklist = instance.get('file_system_blacklist', [])
+        self._file_system_include = instance.get('file_system_include', []) or instance.get('file_system_whitelist', [])
+        self._file_system_exclude = instance.get('file_system_exclude', []) or instance.get('file_system_blacklist', [])
         # FIXME (8.X): Exclude special file systems by default
         self._include_all_devices = is_affirmative(instance.get('include_all_devices', True))
-        self._device_whitelist = instance.get('device_whitelist', [])
-        self._device_blacklist = instance.get('device_blacklist', [])
-        self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
-        self._mount_point_blacklist = instance.get('mount_point_blacklist', [])
+        self._device_include = instance.get('device_include', []) or instance.get('device_whitelist', [])
+        self._device_exclude = instance.get('device_exclude', []) or instance.get('device_blacklist', [])
+        self._mount_point_include = instance.get('mount_point_include', []) or instance.get('mount_point_whitelist', [])
+        self._mount_point_exclude = instance.get('mount_point_exclude', []) or instance.get('mount_point_blacklist', [])
         self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
         self._tag_by_label = is_affirmative(instance.get('tag_by_label', True))
         self._device_tag_re = instance.get('device_tag_re', {})
@@ -64,6 +64,22 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        deprecations = {
+            'file_system_whitelist': 'file_system_include',
+            'file_system_blacklist': 'file_system_exclude',
+            'device_whitelist': 'device_include',
+            'device_blacklist': 'device_exclude',
+            'mount_point_whitelist': 'mount_point_include',
+            'mount_point_blacklist': 'mount_point_exclude',
+            'excluded_filesystems': 'file_system_exclude',
+            'excluded_disks': 'device_exclude',
+            'excluded_disk_re': 'device_exclude',
+            'excluded_mountpoint_re': 'mountpoint_exclude',
+        }
+        for old_name, new_name in deprecations.items():
+            if instance.get('old_name'):
+                self.warning('`%s` is deprecated and will be removed in a future release. Please use `%s` instead.', old_name, new_name)
 
         self.devices_label = {}
 
@@ -168,59 +184,59 @@ class Disk(AgentCheck):
         # account a space might be in the mount point.
         mount_point = mount_point.rsplit(' ', 1)[0]
 
-        return self._partition_blacklisted(device, file_system, mount_point) or not self._partition_whitelisted(
+        return self._partition_excludeed(device, file_system, mount_point) or not self._partition_includeed(
             device, file_system, mount_point
         )
 
-    def _partition_whitelisted(self, device, file_system, mount_point):
+    def _partition_includeed(self, device, file_system, mount_point):
         return (
-            self._file_system_whitelisted(file_system)
-            and self._device_whitelisted(device)
-            and self._mount_point_whitelisted(mount_point)
+            self._file_system_includeed(file_system)
+            and self._device_includeed(device)
+            and self._mount_point_includeed(mount_point)
         )
 
-    def _partition_blacklisted(self, device, file_system, mount_point):
+    def _partition_excludeed(self, device, file_system, mount_point):
         return (
-            self._file_system_blacklisted(file_system)
-            or self._device_blacklisted(device)
-            or self._mount_point_blacklisted(mount_point)
+            self._file_system_excludeed(file_system)
+            or self._device_excludeed(device)
+            or self._mount_point_excludeed(mount_point)
         )
 
-    def _file_system_whitelisted(self, file_system):
-        if self._file_system_whitelist is None:
+    def _file_system_includeed(self, file_system):
+        if self._file_system_include is None:
             return True
 
-        return not not self._file_system_whitelist.match(file_system)
+        return not not self._file_system_include.match(file_system)
 
-    def _file_system_blacklisted(self, file_system):
-        if self._file_system_blacklist is None:
+    def _file_system_excludeed(self, file_system):
+        if self._file_system_exclude is None:
             return False
 
-        return not not self._file_system_blacklist.match(file_system)
+        return not not self._file_system_exclude.match(file_system)
 
-    def _device_whitelisted(self, device):
-        if not device or self._device_whitelist is None:
+    def _device_includeed(self, device):
+        if not device or self._device_include is None:
             return True
 
-        return not not self._device_whitelist.match(device)
+        return not not self._device_include.match(device)
 
-    def _device_blacklisted(self, device):
-        if not device or self._device_blacklist is None:
+    def _device_excludeed(self, device):
+        if not device or self._device_exclude is None:
             return False
 
-        return not not self._device_blacklist.match(device)
+        return not not self._device_exclude.match(device)
 
-    def _mount_point_whitelisted(self, mount_point):
-        if self._mount_point_whitelist is None:
+    def _mount_point_includeed(self, mount_point):
+        if self._mount_point_include is None:
             return True
 
-        return not not self._mount_point_whitelist.match(mount_point)
+        return not not self._mount_point_include.match(mount_point)
 
-    def _mount_point_blacklisted(self, mount_point):
-        if self._mount_point_blacklist is None:
+    def _mount_point_excludeed(self, mount_point):
+        if self._mount_point_exclude is None:
             return False
 
-        return not not self._mount_point_blacklist.match(mount_point)
+        return not not self._mount_point_exclude.match(mount_point)
 
     def _collect_part_metrics(self, part, usage):
         metrics = {}
@@ -293,42 +309,36 @@ class Disk(AgentCheck):
 
     def _compile_pattern_filters(self, instance):
         # Force exclusion of CDROM (iso9660)
-        file_system_blacklist_extras = ['iso9660$']
-        device_blacklist_extras = []
-        mount_point_blacklist_extras = []
-
-        deprecation_message = '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.'
+        file_system_exclude_extras = ['iso9660$']
+        device_exclude_extras = []
+        mount_point_exclude_extras = []
 
         if 'excluded_filesystems' in instance:
-            file_system_blacklist_extras.extend(
+            file_system_exclude_extras.extend(
                 '{}$'.format(pattern) for pattern in instance['excluded_filesystems'] if pattern
             )
-            self.warning(deprecation_message, 'excluded_filesystems', 'file_system_blacklist')
 
         if 'excluded_disks' in instance:
-            device_blacklist_extras.extend('{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern)
-            self.warning(deprecation_message, 'excluded_disks', 'device_blacklist')
+            device_exclude_extras.extend('{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern)
 
         if 'excluded_disk_re' in instance:
-            device_blacklist_extras.append(instance['excluded_disk_re'])
-            self.warning(deprecation_message, 'excluded_disk_re', 'device_blacklist')
+            device_exclude_extras.append(instance['excluded_disk_re'])
 
         if 'excluded_mountpoint_re' in instance:
-            mount_point_blacklist_extras.append(instance['excluded_mountpoint_re'])
-            self.warning(deprecation_message, 'excluded_mountpoint_re', 'mount_point_blacklist')
+            mount_point_exclude_extras.append(instance['excluded_mountpoint_re'])
 
         # Any without valid patterns will become None
-        self._file_system_whitelist = self._compile_valid_patterns(self._file_system_whitelist, casing=re.I)
-        self._file_system_blacklist = self._compile_valid_patterns(
-            self._file_system_blacklist, casing=re.I, extra_patterns=file_system_blacklist_extras
+        self._file_system_include = self._compile_valid_patterns(self._file_system_include, casing=re.I)
+        self._file_system_exclude = self._compile_valid_patterns(
+            self._file_system_exclude, casing=re.I, extra_patterns=file_system_exclude_extras
         )
-        self._device_whitelist = self._compile_valid_patterns(self._device_whitelist)
-        self._device_blacklist = self._compile_valid_patterns(
-            self._device_blacklist, extra_patterns=device_blacklist_extras
+        self._device_include = self._compile_valid_patterns(self._device_include)
+        self._device_exclude = self._compile_valid_patterns(
+            self._device_exclude, extra_patterns=device_exclude_extras
         )
-        self._mount_point_whitelist = self._compile_valid_patterns(self._mount_point_whitelist)
-        self._mount_point_blacklist = self._compile_valid_patterns(
-            self._mount_point_blacklist, extra_patterns=mount_point_blacklist_extras
+        self._mount_point_include = self._compile_valid_patterns(self._mount_point_include)
+        self._mount_point_exclude = self._compile_valid_patterns(
+            self._mount_point_exclude, extra_patterns=mount_point_exclude_extras
         )
 
     def _compile_valid_patterns(self, patterns, casing=IGNORE_CASE, extra_patterns=None):
