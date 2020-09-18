@@ -181,7 +181,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             echo_warning(f'Unable to detect the current Git branch, defaulting to `{branch}`.')
 
         env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
-        env_vars['DD_TRACEMALLOC_WHITELIST'] = check
+        env_vars['DD_TRACEMALLOC_INCLUDE'] = check
 
         if on_ci:
             env_vars.setdefault('DD_AGGREGATOR_STOP_TIMEOUT', '10')

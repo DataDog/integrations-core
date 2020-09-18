@@ -4,16 +4,16 @@
 
 
 def should_profile_memory(datadog_agent, check_name):
-    tracemalloc_whitelist = datadog_agent.get_config('tracemalloc_whitelist') or ''
-    if tracemalloc_whitelist:
-        tracemalloc_whitelist = [check.strip() for check in tracemalloc_whitelist.split(',')]
-        tracemalloc_whitelist = [check for check in tracemalloc_whitelist if check]
+    tracemalloc_include = datadog_agent.get_config('tracemalloc_include') or datadog_agent.get_config('tracemalloc_whitelist') or ''
+    if tracemalloc_include:
+        tracemalloc_include = [check.strip() for check in tracemalloc_include.split(',')]
+        tracemalloc_include = [check for check in tracemalloc_include if check]
 
-    tracemalloc_blacklist = datadog_agent.get_config('tracemalloc_blacklist') or ''
-    if tracemalloc_blacklist:
-        tracemalloc_blacklist = [check.strip() for check in tracemalloc_blacklist.split(',')]
-        tracemalloc_blacklist = [check for check in tracemalloc_blacklist if check]
+    tracemalloc_exclude = datadog_agent.get_config('tracemalloc_exclude') or datadog_agent.get_config('tracemalloc_blacklist') or ''
+    if tracemalloc_exclude:
+        tracemalloc_exclude = [check.strip() for check in tracemalloc_exclude.split(',')]
+        tracemalloc_exclude = [check for check in tracemalloc_exclude if check]
 
-    return check_name not in tracemalloc_blacklist and (
-        check_name in tracemalloc_whitelist if tracemalloc_whitelist else True
+    return check_name not in tracemalloc_exclude and (
+        check_name in tracemalloc_include if tracemalloc_include else True
     )
