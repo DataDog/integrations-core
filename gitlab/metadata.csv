@@ -300,12 +300,12 @@ gitlab.ci_pipeline_creation_duration_seconds.count,count,,,,"The count of the ti
 gitlab.ci_pipeline_creation_duration_seconds.sum,gauge,,second,,"The sum of the time in seconds it takes to create a CI/CD pipeline",0,gitlab,ci pipeline creation seconds
 gitlab.ci_pipeline_size_builds.count,count,,,,"The count of total number of builds within a pipeline grouped by a pipeline source",0,gitlab,ci pipeline size
 gitlab.ci_pipeline_size_builds.sum,gauge,,,,"The sum of total number of builds within a pipeline grouped by a pipeline source",0,gitlab,ci pipeline size
-gitlab.database_connection_pool_busy,gauge,,connection,,"Connections in use where the owner is still alive",0,gitlab,database connection busy
-gitlab.database_connection_pool_connections,gauge,,connection,,"Current connections in the pool",0,gitlab,database connection
-gitlab.database_connection_pool_dead,gauge,,connection,,"Connections in use where the owner is not alive",0,gitlab,database connection dead
-gitlab.database_connection_pool_idle,gauge,,connection,,"Connections not in use",0,gitlab,database connection idle
-gitlab.database_connection_pool_size,gauge,,connection,,"Total connection pool capacity",0,gitlab,database connection size
-gitlab.database_connection_pool_waiting,gauge,,thread,,"Threads currently waiting on this queue",0,gitlab,database connection waiting
+gitlab.database.connection_pool_busy,gauge,,connection,,"Connections in use where the owner is still alive",0,gitlab,database connection busy
+gitlab.database.connection_pool_connections,gauge,,connection,,"Current connections in the pool",0,gitlab,database connection
+gitlab.database.connection_pool_dead,gauge,,connection,,"Connections in use where the owner is not alive",0,gitlab,database connection dead
+gitlab.database.connection_pool_idle,gauge,,connection,,"Connections not in use",0,gitlab,database connection idle
+gitlab.database.connection_pool_size,gauge,,connection,,"Total connection pool capacity",0,gitlab,database connection size
+gitlab.database.connection_pool_waiting,gauge,,thread,,"Threads currently waiting on this queue",0,gitlab,database connection waiting
 gitlab.redis.client_exceptions_total,count,,error,,"Number of Redis client exceptions, broken down by exception class",0,gitlab,redis client exceptions
 gitlab.redis.client_requests_total,count,,request,,"Number of Redis client requests",0,gitlab,redis client requests
 gitlab.redis.client_requests_duration_seconds.count,count,,,,"The count of redis request latency, excluding blocking commands",0,gitlab,redis requests duration
