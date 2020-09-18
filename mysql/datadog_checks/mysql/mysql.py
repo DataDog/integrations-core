@@ -11,7 +11,7 @@ from contextlib import closing, contextmanager
 import pymysql
 from six import PY3, iteritems, itervalues
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
@@ -443,7 +443,7 @@ class MySql(AgentCheck):
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute("SHOW VARIABLES LIKE 'pid_file'")
-                pid_file = cursor.fetchone()[1]
+                pid_file = to_native_string(cursor.fetchone()[1])
         except Exception:
             self.warning("Error while fetching pid_file variable of MySQL.")
 
@@ -609,7 +609,7 @@ class MySql(AgentCheck):
                     return None
 
                 row = cursor.fetchone()
-                query_exec_time_95th_per = row[0]
+                query_exec_time_95th_per = to_native_string(row[0])
 
                 return query_exec_time_95th_per
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:

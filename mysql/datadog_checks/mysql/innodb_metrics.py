@@ -8,7 +8,7 @@ from contextlib import closing
 import pymysql
 from six import PY3, iteritems
 
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import is_affirmative, to_native_string
 from datadog_checks.base.log import get_check_logger
 
 from .collection_utils import collect_scalar
@@ -59,7 +59,7 @@ class InnoDBMetrics(object):
             return {}
 
         innodb_status = cursor.fetchone()
-        innodb_status_text = innodb_status[2]
+        innodb_status_text = to_native_string(innodb_status[2])
 
         results = defaultdict(int)
 
