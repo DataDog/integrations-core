@@ -114,7 +114,7 @@ datadog-scylla==1.2.1
 datadog-sidekiq==1.1.2
 datadog-snmp==3.8.0
 datadog-snowflake==1.0.0
-datadog-solr==1.5.0
+datadog-solr==1.5.1
 datadog-spark==1.15.0
 datadog-sqlserver==1.18.1
 datadog-squid==1.7.1
