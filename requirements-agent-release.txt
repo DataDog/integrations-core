@@ -17,6 +17,7 @@ datadog-checks-downloader==3.1.0
 datadog-cilium==1.3.0
 datadog-cisco-aci==1.10.1
 datadog-clickhouse==1.3.2
+datadog-cloud-foundry-api==1.0.0
 datadog-cockroachdb==1.3.0
 datadog-confluent-platform==1.1.2
 datadog-consul==1.15.1
@@ -77,6 +78,7 @@ datadog-linux-proc-extras==2.0.0; sys_platform == 'linux2'
 datadog-mapr==1.3.0; sys_platform == 'linux2'
 datadog-mapreduce==1.11.1
 datadog-marathon==1.15.0; sys_platform != 'win32'
+datadog-marklogic==1.0.0
 datadog-mcache==1.10.0; sys_platform != 'win32'
 datadog-mesos-master==1.9.1; sys_platform != 'win32'
 datadog-mesos-slave==2.4.0; sys_platform != 'win32'
@@ -111,6 +113,7 @@ datadog-sap-hana==1.2.0
 datadog-scylla==1.2.0
 datadog-sidekiq==1.1.2
 datadog-snmp==3.8.0
+datadog-snowflake==1.0.0
 datadog-solr==1.5.0
 datadog-spark==1.15.0
 datadog-sqlserver==1.18.1
