@@ -1,5 +1,9 @@
 # CHANGELOG - Cloud Foundry API
 
+## 1.0.0 / 2020-09-21
+
+* [Added] Add integration for Cloud Foundry API. See [#6832](https://github.com/DataDog/integrations-core/pull/6832).
+
 ## 0.2.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add space and org names as tags to events. See [#7297](https://github.com/DataDog/integrations-core/pull/7297).
