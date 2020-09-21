@@ -318,6 +318,15 @@ instances:
     #
     # refresh_metrics_metadata_cache_interval: 1800
 
+    ## @param include_datastore_cluster_folder_tag - boolean - optional - default: true
+    ## If a datastore is part of a datastore cluster, the tag "vsphere_datastore_cluster" indicating the datastore
+    ## cluster name is sent along with datastore metrics.
+    ## However, for compatibility reasons, this name is also sent as tag "vsphere_folder".
+    ## You can disable this by setting this property to false.
+    ## The default value is true.
+    #
+    # include_datastore_cluster_folder_tag: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

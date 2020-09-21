@@ -1,6 +1,6 @@
 # CHANGELOG - linux_proc_extras
 
-## 2.0.0 / 2020-09-09
+## 2.0.0 / 2020-09-09 / Agent 7.22.1
 
 * [Changed] Put interrupt metrics behind a config option. See [#7553](https://github.com/DataDog/integrations-core/pull/7553).
 

@@ -493,12 +493,18 @@ def manifest(ctx, fix):
                     display_queue.append((echo_failure, output))
 
             # Ensure attributes haven't changed
+            # Skip if the manifest is a new file (i.e. new integration)
             manifest_fields_changed = content_changed(file_glob=f"{check_name}/manifest.json")
-            for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
-                if field in manifest_fields_changed:
-                    output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
-                    file_failures += 1
-                    display_queue.append((echo_failure, output))
+            if 'new file' not in manifest_fields_changed:
+                for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
+                    if field in manifest_fields_changed:
+                        output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
+                        file_failures += 1
+                        display_queue.append((echo_failure, output))
+            else:
+                display_queue.append(
+                    (echo_info, "  skipping check for changed fields: integration not on default branch")
+                )
 
             if file_failures > 0:
                 failed_checks += 1

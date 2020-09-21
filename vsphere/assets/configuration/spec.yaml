@@ -401,4 +401,14 @@ files:
         value:
           type: integer
           example: 1800
+      - name: include_datastore_cluster_folder_tag
+        description: |
+          If a datastore is part of a datastore cluster, the tag "vsphere_datastore_cluster" indicating the datastore
+          cluster name is sent along with datastore metrics.
+          However, for compatibility reasons, this name is also sent as tag "vsphere_folder".
+          You can disable this by setting this property to false.
+          The default value is true.
+        value:
+          type: boolean
+          example: true
       - template: instances/default  

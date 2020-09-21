@@ -38,6 +38,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "gearman"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }
