@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 3.1.1 / 2020-09-21
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* [Fixed] Handle redis role missing. See [#7413](https://github.com/DataDog/integrations-core/pull/7413).
+
 ## 3.1.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add auto_conf.yaml spec for redisdb. See [#7161](https://github.com/DataDog/integrations-core/pull/7161).

@@ -1,5 +1,10 @@
 # CHANGELOG - win32_event_log
 
+## 2.6.1 / 2020-09-21
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* [Fixed] Make it easier to configure legacy vs new options. See [#7406](https://github.com/DataDog/integrations-core/pull/7406).
+
 ## 2.6.0 / 2020-08-19
 
 * [Added] Introduce new, more performant implementation. See [#7005](https://github.com/DataDog/integrations-core/pull/7005).

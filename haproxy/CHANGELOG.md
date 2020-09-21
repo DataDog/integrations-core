@@ -1,5 +1,12 @@
 # CHANGELOG - haproxy
 
+## 2.11.0 / 2020-09-21
+
+* [Added] Add config spec. See [#7625](https://github.com/DataDog/integrations-core/pull/7625).
+* [Added] Refactor check to support new implementation. See [#7587](https://github.com/DataDog/integrations-core/pull/7587).
+* [Added] Do not use instance in check method. See [#7534](https://github.com/DataDog/integrations-core/pull/7534).
+* [Fixed] Extract version utils. See [#7533](https://github.com/DataDog/integrations-core/pull/7533).
+
 ## 2.10.2 / 2020-09-09
 
 * [Fixed] Add regex tags in status metrics. See [#7524](https://github.com/DataDog/integrations-core/pull/7524).

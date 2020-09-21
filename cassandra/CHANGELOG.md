@@ -1,5 +1,9 @@
 # CHANGELOG - cassandra
 
+## 1.7.1 / 2020-09-21
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
 ## 1.7.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config specs. See [#7308](https://github.com/DataDog/integrations-core/pull/7308).

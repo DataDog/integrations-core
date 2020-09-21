@@ -1,5 +1,11 @@
 # CHANGELOG - nginx
 
+## 3.9.0 / 2020-09-21
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Added] Option to disable stream api checking in Nginx Plus. See [#7241](https://github.com/DataDog/integrations-core/pull/7241). Thanks [szibis](https://github.com/szibis).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 3.8.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
