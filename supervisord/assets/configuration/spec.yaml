@@ -66,3 +66,12 @@ files:
             example: [<PROCESS_NAME_1>, <PROCESS_NAME_2>]
             default: None
         - template: instances/default
+    - template: logs
+      example:
+        - type: file
+          path: /var/log/supervisor/supervisord.log
+          source: supervisord
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2},\d{3} 
