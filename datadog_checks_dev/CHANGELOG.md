@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 4.0.1 / 2020-09-21
+
+* [Fixed] Fix changed manifest validation for new integrations. See [#7623](https://github.com/DataDog/integrations-core/pull/7623).
+
 ## 4.0.0 / 2020-09-16
 
 * [Changed] Use `git diff` instead of GitHub's API to detect if manifest fields changed during validation. See [#7599](https://github.com/DataDog/integrations-core/pull/7599).
