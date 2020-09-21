@@ -109,7 +109,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         for col, var_bind in enumerate(ctx['var_bind_table']):
             name, val = var_bind
             if name in already_processed_oids:
-                logger.warn("Skipping already processing OID: %s", name)
+                logger.debug("Skipping already processed OID: %s", name)
                 continue
             if not isinstance(val, Null) and initial_vars[col].isPrefixOf(name):
                 var_binds.append(var_bind)
@@ -171,7 +171,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             if endOfMibView.isSameTypeWith(value):
                 return
             if name in already_processed_oids:
-                logger.warn("Skipping already processing OID: %s", name)
+                logger.debug("Skipping already processed OID: %s", name)
                 continue
             if initial_var.isPrefixOf(name):
                 already_processed_oids.add(name)
