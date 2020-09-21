@@ -34,9 +34,6 @@ files:
                 type: array
                 items:
                   type: string
-          - name: file_system_whitelist
-            description: |
-              Deprecated, use file_system_include instead.
           - name: file_system_exclude
             description: |
               Instruct the check to not collect from matching file systems.
@@ -48,7 +45,7 @@ files:
               Devices from pseudo or memory-based file systems can be excluded by disabling the
               `include_all_devices` option.
 
-              When conflicts arise, this will override `file_system_whitelist`.
+              When conflicts arise, this will override `file_system_include`.
             value:
               example:
                 - tmpfs$
@@ -57,9 +54,6 @@ files:
               type: array
               items:
                 type: string
-          - name: file_system_blacklist
-            description: |
-              Deprecated, use file_system_exclude instead.
           - name: device_include
             description: |
                 Instruct the check to only collect from matching devices.
@@ -74,9 +68,6 @@ files:
               type: array
               items:
                 type: string
-          - name: device_whitelist
-            description: |
-              Deprecated, use device_include instead.
           - name: device_exclude
             description: |
               Instruct the check to not collect from matching devices.
@@ -85,7 +76,7 @@ files:
               expressions start matching from the beginning and therefore to match
               anywhere you must prepend `.*`. For exact matches append `$`.
 
-              When conflicts arise, this will override `device_whitelist`.
+              When conflicts arise, this will override `device_include`.
             value:
               example:
                - /dev/sde
@@ -93,9 +84,6 @@ files:
               type: array
               items:
                 type: string
-          - name: device_blacklist
-            description: |
-              Deprecated, use device_exclude instead.
           - name: mount_point_include
             description: |
                Instruct the check to only collect from matching mount points.
@@ -110,9 +98,6 @@ files:
               type: array
               items:
                 type: string
-          - name: mount_point_whitelist
-            description: |
-              Deprecated, use mount_point_include instead.
           - name: mount_point_exclude
             description: |
               Instruct the check to not collect from matching mount points.
@@ -128,9 +113,6 @@ files:
               type: array
               items:
                 type: string
-          - name: mount_point_blacklist
-            description: |
-              Deprecated, use mount_point_exclude instead.
           - name: include_all_devices
             description: |
               Instruct the check to collect from all devices, including non-physical devices.
