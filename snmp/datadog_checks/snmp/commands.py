@@ -66,11 +66,14 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
+    logger = config.get_logger()
+
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
     ):
         var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
+            logger.debug('Ignore error indication: %s', errorIndication)
             errorIndication = None
         cbCtx['error'] = errorIndication
         cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
@@ -82,6 +85,8 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     var_binds = oids
 
     gen = cmdgen.NextCommandGenerator()
+
+    already_processed_oids = set()
 
     while True:
         gen.sendVarBinds(
@@ -103,9 +108,13 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         new_initial_vars = []
         for col, var_bind in enumerate(ctx['var_bind_table']):
             name, val = var_bind
+            if name in already_processed_oids:
+                logger.warn("Skipping already processing OID: %s", name)
+                continue
             if not isinstance(val, Null) and initial_vars[col].isPrefixOf(name):
                 var_binds.append(var_bind)
                 new_initial_vars.append(initial_vars[col])
+                already_processed_oids.add(name)
                 yield var_bind
         if not var_binds:
             return
@@ -119,11 +128,14 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
+    logger = config.get_logger()
+
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
     ):
         var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
+            logger.debug('Ignore error indication: %s', errorIndication)
             errorIndication = None
         cbCtx['error'] = errorIndication
         cbCtx['var_bind_table'] = var_bind_table
@@ -134,6 +146,8 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
+
+    already_processed_oids = set()
 
     while True:
         gen.sendVarBinds(
@@ -156,7 +170,11 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             name, value = var_binds[0]
             if endOfMibView.isSameTypeWith(value):
                 return
+            if name in already_processed_oids:
+                logger.warn("Skipping already processing OID: %s", name)
+                continue
             if initial_var.isPrefixOf(name):
+                already_processed_oids.add(name)
                 yield var_binds[0]
             else:
                 return
