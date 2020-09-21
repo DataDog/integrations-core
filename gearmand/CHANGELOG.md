@@ -1,5 +1,9 @@
 # CHANGELOG - gearmand
 
+## 1.7.0 / 2020-09-21
+
+* [Added] Add config spec. See [#7612](https://github.com/DataDog/integrations-core/pull/7612).
+
 ## 1.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
