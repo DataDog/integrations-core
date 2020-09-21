@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.1.1 / 2020-09-21
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 3.1.0 / 2020-07-14 / Agent 7.21.1
 
 * [Added] Update to v6 root from @FlorianVeaux. See [#7115](https://github.com/DataDog/integrations-core/pull/7115).
