@@ -110,7 +110,7 @@ datadog-rethinkdb==1.2.2
 datadog-riak==2.1.0
 datadog-riakcs==2.3.0
 datadog-sap-hana==1.2.0
-datadog-scylla==1.2.0
+datadog-scylla==1.2.1
 datadog-sidekiq==1.1.2
 datadog-snmp==3.8.0
 datadog-snowflake==1.0.0
