@@ -75,7 +75,7 @@ class Disk(AgentCheck):
             'excluded_filesystems': 'file_system_exclude',
             'excluded_disks': 'device_exclude',
             'excluded_disk_re': 'device_exclude',
-            'excluded_mountpoint_re': 'mountpoint_exclude',
+            'excluded_mountpoint_re': 'mount_point_exclude',
         }
         for old_name, new_name in deprecations.items():
             if instance.get('old_name'):
@@ -184,55 +184,55 @@ class Disk(AgentCheck):
         # account a space might be in the mount point.
         mount_point = mount_point.rsplit(' ', 1)[0]
 
-        return self._partition_excludeed(device, file_system, mount_point) or not self._partition_includeed(
+        return self._partition_excluded(device, file_system, mount_point) or not self._partition_included(
             device, file_system, mount_point
         )
 
-    def _partition_includeed(self, device, file_system, mount_point):
+    def _partition_included(self, device, file_system, mount_point):
         return (
-            self._file_system_includeed(file_system)
-            and self._device_includeed(device)
-            and self._mount_point_includeed(mount_point)
+            self.(file_system)
+            and self._device_included(device)
+            and self._mount_point_included(mount_point)
         )
 
-    def _partition_excludeed(self, device, file_system, mount_point):
+    def _partition_excluded(self, device, file_system, mount_point):
         return (
-            self._file_system_excludeed(file_system)
-            or self._device_excludeed(device)
-            or self._mount_point_excludeed(mount_point)
+            self._file_system_excluded(file_system)
+            or self._device_excluded(device)
+            or self._mount_point_excluded(mount_point)
         )
 
-    def _file_system_includeed(self, file_system):
+    def _file_system_included(self, file_system):
         if self._file_system_include is None:
             return True
 
         return not not self._file_system_include.match(file_system)
 
-    def _file_system_excludeed(self, file_system):
+    def _file_system_excluded(self, file_system):
         if self._file_system_exclude is None:
             return False
 
         return not not self._file_system_exclude.match(file_system)
 
-    def _device_includeed(self, device):
+    def _device_included(self, device):
         if not device or self._device_include is None:
             return True
 
         return not not self._device_include.match(device)
 
-    def _device_excludeed(self, device):
+    def _device_excluded(self, device):
         if not device or self._device_exclude is None:
             return False
 
         return not not self._device_exclude.match(device)
 
-    def _mount_point_includeed(self, mount_point):
+    def _mount_point_included(self, mount_point):
         if self._mount_point_include is None:
             return True
 
         return not not self._mount_point_include.match(mount_point)
 
-    def _mount_point_excludeed(self, mount_point):
+    def _mount_point_excluded(self, mount_point):
         if self._mount_point_exclude is None:
             return False
 
