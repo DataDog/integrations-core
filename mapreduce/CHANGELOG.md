@@ -1,5 +1,11 @@
 # CHANGELOG - mapreduce
 
+## 1.12.0 / 2020-09-21
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Added] Add mapreduce config specs. See [#7178](https://github.com/DataDog/integrations-core/pull/7178).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 1.11.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
