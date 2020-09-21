@@ -1,0 +1,721 @@
+{
+    "author_name": "Datadog",
+    "description": "## Snowflake overview\n\nThe Snowflake overview dashboard provides a high-level view of your Snowflake warehouse and monitor storage usage, credit billing, and user metrics.\n\n\n- [This might link to a dashboard](#)\n- [This might link to a wiki](#)",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "warehouse",
+            "prefix": "warehouse"
+        },
+        {
+            "default": "*",
+            "name": "account",
+            "prefix": "account"
+        }
+    ],
+    "title": "Snowflake",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/snowflake@2x.png"
+            },
+            "id": 5002096770255618,
+            "layout": {
+                "height": 7,
+                "width": 27,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:snowflake.logins.fail.count{$account}.as_count(), sum:snowflake.logins.success.count{$account}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Login attempts",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2279587759964716,
+            "layout": {
+                "height": 22,
+                "width": 70,
+                "x": 30,
+                "y": 100
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Logins",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8950646673707174,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 30,
+                "y": 92
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Credit billing",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5427395946434624,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 30,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.billing.total_credit.avg{$account}"
+                    }
+                ],
+                "title": "Overall credit",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1315035853097830,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 30,
+                "y": 17
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "With this dashboard, you can get a high-level view of your Snowflake warehouse and monitor storage usage, credit billing, and user metrics.\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5466166763253712,
+            "layout": {
+                "height": 29,
+                "width": 27,
+                "x": 1,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.billing.cloud_service.avg{$account}"
+                    }
+                ],
+                "title": "Cloud service credits",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1350889926908904,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 54,
+                "y": 17
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.billing.virtual_warehouse.avg{$account}"
+                    }
+                ],
+                "title": "Virtual warehouse credits",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5574938816243942,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 78,
+                "y": 17
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Average credit usage per hour",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8020467613684310,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 30,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Average credit usage by warehouse",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3014336292062552,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 30,
+                "y": 31
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Virtual warehouse",
+                        "q": "avg:snowflake.billing.warehouse.virtual_warehouse.avg{$warehouse,$account} by {warehouse}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "cloud service",
+                        "q": "avg:snowflake.billing.warehouse.cloud_service.avg{$warehouse,$account} by {warehouse}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Total",
+                        "limit": 50,
+                        "order": "desc",
+                        "q": "avg:snowflake.billing.warehouse.total_credit.avg{$warehouse,$account} by {warehouse}"
+                    }
+                ],
+                "title": "Credit billing by warehouse",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 336954691912300,
+            "layout": {
+                "height": 22,
+                "width": 70,
+                "x": 30,
+                "y": 39
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Storage",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1519036457306010,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 30,
+                "y": 62
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Overall storage",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8663475809886096,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 30,
+                "y": 70
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.storage.storage_bytes.total{$account}"
+                    }
+                ],
+                "title": "Total storage bytes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 2274352867711788,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 30,
+                "y": 78
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.storage.storage_bytes.total{$account}"
+                    }
+                ],
+                "title": "Total stage bytes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8898238741459760,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 54,
+                "y": 78
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.storage.failsafe_bytes.total{$account}"
+                    }
+                ],
+                "title": "Total failsafe bytes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5157893992053258,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 78,
+                "y": 78
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Query",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4323540139019152,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 102,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Warehouse load",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4588240208431866,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 102,
+                "y": 72
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Blocked by transaction lock",
+                        "q": "avg:snowflake.query.blocked{$warehouse,$account} by {warehouse}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "queued due to warehouse overload",
+                        "q": "avg:snowflake.query.queued_overload{$warehouse,$account} by {warehouse}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "queued due to provisioning",
+                        "limit": 50,
+                        "order": "desc",
+                        "q": "avg:snowflake.query.queued_provision{$warehouse,$account} by {warehouse}"
+                    }
+                ],
+                "title": "Queries not executed by reason",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 3800643259697952,
+            "layout": {
+                "height": 21,
+                "width": 70,
+                "x": 102,
+                "y": 80
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Query metrics",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4966469183499800,
+            "layout": {
+                "height": 7,
+                "width": 70,
+                "x": 102,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:snowflake.query.execution_time{$warehouse,$account}, avg:snowflake.query.compilation_time{$warehouse,$account}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Query execution vs compilation time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8430825419057978,
+            "layout": {
+                "height": 18,
+                "width": 34,
+                "x": 138,
+                "y": 53
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:snowflake.query.executed{$warehouse,$account}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Average queries executed",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2531669257580950,
+            "layout": {
+                "height": 18,
+                "width": 34,
+                "x": 102,
+                "y": 53
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.query.bytes_scanned{$warehouse,$account}"
+                    }
+                ],
+                "title": "Average bytes scanned",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1638149577486212,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 102,
+                "y": 39
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.query.bytes_written{$warehouse,$account}"
+                    }
+                ],
+                "title": "Average bytes written",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 7706392680654262,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 126,
+                "y": 39
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.query.bytes_deleted{$warehouse,$account}"
+                    }
+                ],
+                "title": "Average bytes deleted",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 16583397444740,
+            "layout": {
+                "height": 13,
+                "width": 22,
+                "x": 150,
+                "y": 39
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Average bytes scanned",
+                        "limit": 10,
+                        "order": "desc",
+                        "q": "top(avg:snowflake.query.bytes_scanned{$warehouse,$account} by {query_type,database,schema,warehouse}, 10, 'mean', 'desc')"
+                    }
+                ],
+                "time": {},
+                "title": "Top queries scanned",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 7513259344861700,
+            "layout": {
+                "height": 21,
+                "width": 70,
+                "x": 102,
+                "y": 17
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitor hourly average credits billed per service across your entire Snowflake account or per warehouse. Values are calculated by day.",
+                "font_size": "18",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2069100823249938,
+            "layout": {
+                "height": 20,
+                "width": 27,
+                "x": 1,
+                "y": 41
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Observe login attempts over time. If there are increased failed attempts, there may be misconfiguration issues or user errors.",
+                "font_size": "18",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3341805532718830,
+            "layout": {
+                "height": 22,
+                "width": 27,
+                "x": 1,
+                "y": 100
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitor the types of queries run by warehouse, database, schema and its loads.\n\nAs well as the rate of queries per hour and compare execution vs compilation time.",
+                "font_size": "18",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2341814810952518,
+            "layout": {
+                "height": 28,
+                "width": 27,
+                "x": 174,
+                "y": 17
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Observe queries that were blocked or queued by reason per warehouse.",
+                "font_size": "18",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2943110546631750,
+            "layout": {
+                "height": 21,
+                "width": 25,
+                "x": 174,
+                "y": 80
+            }
+        }
+    ]
+}
