@@ -19,7 +19,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_windows_ci, ON_WINDOWS
+from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
