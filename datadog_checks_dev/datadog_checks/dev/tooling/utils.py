@@ -274,7 +274,7 @@ def get_metadata_file(check_name):
 
 
 def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula')
+    path = load_manifest(check_name).get('terms', {}).get('eula', '')
     path = os.path.join(get_root(), check_name, *path.split('/'))
     return path, file_exists(path)
 
