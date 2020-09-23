@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
+from contextlib import contextmanager
 
 import requests
 from datadog_test_libs.utils.mock_dns import mock_local
@@ -69,6 +70,7 @@ def setup_mapreduce():
     return False
 
 
+@contextmanager
 def mock_local_mapreduce_dns():
     mapping = {x: ('127.0.0.1', 443) for x in MOCKED_E2E_HOSTS}
     with mock_local(mapping):
