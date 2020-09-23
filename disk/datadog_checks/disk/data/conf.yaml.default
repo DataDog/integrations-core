@@ -1,6 +1,22 @@
 ## All options defined here are available to all instances.
 #
-# init_config: {}
+init_config:
+
+    ## @param file_system_global_blacklist - list of strings - optional
+    ## Instruct the check to always add these patterns to `file_system_blacklist`.
+    #
+    # file_system_global_blacklist:
+    #   - iso9660$
+
+    ## @param device_global_blacklist - list of strings - optional
+    ## Instruct the check to always add these patterns to `device_blacklist`.
+    #
+    # device_global_blacklist: []
+
+    ## @param mount_point_global_blacklist - list of strings - optional
+    ## Instruct the check to always add these patterns to `mount_point_blacklist`.
+    #
+    # mount_point_global_blacklist: []
 
 ## Every instance is scheduled independent of the others.
 #
@@ -54,12 +70,6 @@ instances:
     #   - rootfs$
     #   - autofs$
 
-    ## @param file_system_global_blacklist - list of strings - optional
-    ## Instruct the check to always add these patterns to `file_system_blacklist`.
-    #
-    # file_system_global_blacklist:
-    #   - iso9660$
-
     ## @param device_whitelist - list of strings - optional
     ## Instruct the check to only collect from matching devices.
     ##
@@ -84,11 +94,6 @@ instances:
     #   - /dev/sde
     #   - '[FJ]:'
 
-    ## @param device_global_blacklist - list of strings - optional
-    ## Instruct the check to always add these patterns to `device_blacklist`.
-    #
-    # device_global_blacklist: []
-
     ## @param mount_point_whitelist - list of strings - optional
     ## Instruct the check to only collect from matching mount points.
     ##
@@ -111,11 +116,6 @@ instances:
     #   - /proc/sys/fs/binfmt_misc
     #   - /dev/sde
     #   - '[FJ]:'
-
-    ## @param mount_point_global_blacklist - list of strings - optional
-    ## Instruct the check to always add these patterns to `mount_point_blacklist`.
-    #
-    # mount_point_global_blacklist: []
 
     ## @param include_all_devices - boolean - optional - default: true
     ## Instruct the check to collect from all devices, including non-physical devices.

@@ -292,11 +292,11 @@ class Disk(AgentCheck):
                 self.log.debug('Latency metrics not collected for %s: %s', disk_name, e)
 
     def _compile_pattern_filters(self, instance):
-        file_system_blacklist_extras = instance.get(
+        file_system_blacklist_extras = self.init_config.get(
             'file_system_global_blacklist', self.get_default_file_system_blacklist()
         )
-        device_blacklist_extras = instance.get('device_global_blacklist', self.get_default_device_blacklist())
-        mount_point_blacklist_extras = instance.get(
+        device_blacklist_extras = self.init_config.get('device_global_blacklist', self.get_default_device_blacklist())
+        mount_point_blacklist_extras = self.init_config.get(
             'mount_point_global_blacklist', self.get_default_mount_mount_blacklist()
         )
 
