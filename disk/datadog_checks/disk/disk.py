@@ -292,10 +292,13 @@ class Disk(AgentCheck):
                 self.log.debug('Latency metrics not collected for %s: %s', disk_name, e)
 
     def _compile_pattern_filters(self, instance):
-        # Force exclusion of CDROM (iso9660)
-        file_system_blacklist_extras = ['iso9660$']
-        device_blacklist_extras = []
-        mount_point_blacklist_extras = []
+        file_system_blacklist_extras = instance.get(
+            'file_system_global_blacklist', self.get_default_file_system_blacklist()
+        )
+        device_blacklist_extras = instance.get('device_global_blacklist', self.get_default_device_blacklist())
+        mount_point_blacklist_extras = instance.get(
+            'mount_point_global_blacklist', self.get_default_mount_mount_blacklist()
+        )
 
         deprecation_message = '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.'
 
@@ -421,3 +424,18 @@ class Disk(AgentCheck):
                 )
 
         return devices_label
+
+    @staticmethod
+    def get_default_file_system_blacklist():
+        return [
+            # CDROM
+            'iso9660$',
+        ]
+
+    @staticmethod
+    def get_default_device_blacklist():
+        return []
+
+    @staticmethod
+    def get_default_mount_mount_blacklist():
+        return []
