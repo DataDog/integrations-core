@@ -19,7 +19,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_windows_ci
+from datadog_checks.dev.utils import running_on_windows_ci, ON_WINDOWS
 
 pytestmark = pytest.mark.http
 
@@ -976,6 +976,7 @@ class TestUnixDomainSocket:
         assert adapter is not None
         assert isinstance(adapter, requests_unixsocket.UnixAdapter)
 
+    @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None
         http = RequestsWrapper({}, {})
