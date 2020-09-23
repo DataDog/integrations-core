@@ -4,6 +4,32 @@ files:
     example_name: conf.yaml.default
     options:
       - template: init_config
+        options:
+          - name: file_system_global_blacklist
+            description: |
+              Instruct the check to always add these patterns to `file_system_blacklist`.
+            value:
+              example:
+                - iso9660$
+              type: array
+              items:
+                type: string
+          - name: device_global_blacklist
+            description: |
+              Instruct the check to always add these patterns to `device_blacklist`.
+            value:
+              example: []
+              type: array
+              items:
+                type: string
+          - name: mount_point_global_blacklist
+            description: |
+              Instruct the check to always add these patterns to `mount_point_blacklist`.
+            value:
+              example: []
+              type: array
+              items:
+                type: string
       - template: instances
         options:
           - name: use_mount
@@ -23,7 +49,7 @@ files:
           - name: file_system_whitelist
             description: |
               Instruct the check to only collect from matching file systems.
-             
+
               Character casing is ignored. For convenience, the regular expressions
               start matching from the beginning and therefore to match anywhere you
               must prepend `.*`. For exact matches append `$`.
