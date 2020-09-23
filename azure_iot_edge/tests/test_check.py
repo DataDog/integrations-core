@@ -37,19 +37,19 @@ def test_check(aggregator, mock_instance):
             aggregator.assert_metric(metric, metric_type=metric_type, count=1, tags=tags)
 
     aggregator.assert_service_check(
-        'azure_iot_edge.edge_hub.prometheus.health',
+        'azure.iot_edge.edge_hub.prometheus.health',
         AzureIoTEdgeCheck.OK,
         count=1,
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.MOCK_EDGE_HUB_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
-        'azure_iot_edge.edge_agent.prometheus.health',
+        'azure.iot_edge.edge_agent.prometheus.health',
         AzureIoTEdgeCheck.OK,
         count=1,
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.MOCK_EDGE_AGENT_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
-        'azure_iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
+        'azure.iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
     )
 
     aggregator.assert_all_metrics_covered()
@@ -72,8 +72,8 @@ def test_security_daemon_down(aggregator, mock_instance):
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [instance])
     check.check(instance)
 
-    aggregator.assert_service_check('azure_iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.CRITICAL)
-    message = aggregator._service_checks['azure_iot_edge.security_daemon.can_connect'][0].message  # type: str
+    aggregator.assert_service_check('azure.iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.CRITICAL)
+    message = aggregator._service_checks['azure.iot_edge.security_daemon.can_connect'][0].message  # type: str
     if Platform.is_windows():
         assert 'No connection could be made' in message
     else:

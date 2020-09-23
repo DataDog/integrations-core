@@ -10,7 +10,7 @@ from .types import Instance
 
 
 class AzureIoTEdgeCheck(AgentCheck):
-    __NAMESPACE__ = 'azure_iot_edge'
+    __NAMESPACE__ = 'azure.iot_edge'  # Child of `azure.` namespace.
 
     def __init__(self, name, init_config, instances):
         # type: (str, dict, list) -> None

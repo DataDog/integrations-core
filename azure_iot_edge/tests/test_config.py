@@ -23,14 +23,14 @@ def test_config():
 
     assert config.edge_hub_instance == {
         'prometheus_url': 'http://testserver:9601/metrics',
-        'namespace': 'azure_iot_edge.edge_hub',
+        'namespace': 'azure.iot_edge.edge_hub',
         'metrics': EDGE_HUB_METRICS,
         'tags': [],
         'exclude_labels': ['ms_telemetry', 'instance_number'],
     }
     assert config.edge_agent_instance == {
         'prometheus_url': 'http://testserver:9602/metrics',
-        'namespace': 'azure_iot_edge.edge_agent',
+        'namespace': 'azure.iot_edge.edge_agent',
         'metrics': EDGE_AGENT_METRICS,
         'tags': [],
         'exclude_labels': ['ms_telemetry', 'instance_number'],
