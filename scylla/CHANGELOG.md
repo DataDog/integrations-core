@@ -1,5 +1,9 @@
 # CHANGELOG - Scylla
 
+## 1.2.1 / 2020-09-21
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 1.2.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).

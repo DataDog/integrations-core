@@ -1,5 +1,9 @@
 # CHANGELOG - btrfs
 
+## 1.11.0 / 2020-09-21
+
+* [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
+
 ## 1.10.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

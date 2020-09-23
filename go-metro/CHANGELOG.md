@@ -1,5 +1,9 @@
 # CHANGELOG - go-metro
 
+## 1.2.1 / 2020-09-21
+
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+
 ## 1.2.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

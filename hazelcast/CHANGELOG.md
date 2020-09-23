@@ -1,5 +1,9 @@
 # CHANGELOG - Hazelcast
 
+## 1.1.4 / 2020-09-21
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
 ## 1.1.3 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).

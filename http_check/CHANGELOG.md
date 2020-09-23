@@ -1,5 +1,11 @@
 # CHANGELOG - http_check
 
+## 4.11.0 / 2020-09-21
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 4.10.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config specs to http check. See [#7245](https://github.com/DataDog/integrations-core/pull/7245).

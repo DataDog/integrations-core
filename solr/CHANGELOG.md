@@ -1,5 +1,9 @@
 # CHANGELOG - solr
 
+## 1.5.1 / 2020-09-21
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
 ## 1.5.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Convert jmx to in-app types for replay_check_run. See [#7275](https://github.com/DataDog/integrations-core/pull/7275).

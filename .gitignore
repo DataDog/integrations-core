@@ -120,3 +120,7 @@ wheelhouse/
 
 # Benchmark histograms
 benchmark_*.svg
+
+
+## Kind
+.kube

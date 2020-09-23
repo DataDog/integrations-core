@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+## 2.0.3 / 2020-09-21
+
+* [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
+* [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 2.0.2 / 2020-08-25
 
 * [Fixed] Parse byte string versions. See [#7425](https://github.com/DataDog/integrations-core/pull/7425).

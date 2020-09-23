@@ -35,7 +35,7 @@ class MyCheck(AgentCheck):
     ...
 ```
 
-Support for Unix socket (provided by [requests-unixsocket][requests-unixsocket-pypi]) allows making UDS requests on the `unix://` scheme:
+Support for Unix socket is provided via [requests-unixsocket][requests-unixsocket-pypi] and allows making UDS requests on the `unix://` scheme (not supported on Windows until Python adds support for `AF_UNIX`, see [ticket][python-bpo-af-unix-win]):
 
 ```python
 url = 'unix:///var/run/docker.sock'
