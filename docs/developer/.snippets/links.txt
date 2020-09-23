@@ -104,12 +104,14 @@
 [pytest-markers]: http://doc.pytest.org/en/latest/example/markers.html
 [pytest-mock-github]: https://github.com/pytest-dev/pytest-mock
 [pytest-usage]: https://docs.pytest.org/en/latest/usage.html
+[python-bpo-af-unix-win]: https://bugs.python.org/issue33408
 [python-cprofile]: https://docs.python.org/3/library/profile.html#module-cProfile
 [python-downloads-windows]: https://www.python.org/downloads/windows
 [python-home]: https://www.python.org
 [python-markdown-extensions]: https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
 [python-pdb]: https://docs.python.org/3/library/pdb.html
 [requests-github]: https://github.com/psf/requests
+[requests-unixsocket-pypi]: https://pypi.org/project/requests-unixsocket/
 [root-tox-config]: https://github.com/DataDog/integrations-core/blob/master/tox.ini
 [rtloader]: https://github.com/DataDog/datadog-agent/tree/master/rtloader
 [semver-home]: https://semver.org
