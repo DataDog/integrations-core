@@ -4,17 +4,26 @@ init_config:
 
     ## @param file_system_global_blacklist - list of strings - optional
     ## Instruct the check to always add these patterns to `file_system_blacklist`.
+    ##
+    ## WARNING: Overriding these defaults could negatively impact your system or
+    ## the performance of the check.
     #
     # file_system_global_blacklist:
     #   - iso9660$
 
     ## @param device_global_blacklist - list of strings - optional
     ## Instruct the check to always add these patterns to `device_blacklist`.
+    ##
+    ## WARNING: Overriding these defaults could negatively impact your system or
+    ## the performance of the check.
     #
     # device_global_blacklist: []
 
     ## @param mount_point_global_blacklist - list of strings - optional
     ## Instruct the check to always add these patterns to `mount_point_blacklist`.
+    ##
+    ## WARNING: Overriding these defaults could negatively impact your system or
+    ## the performance of the check.
     #
     # mount_point_global_blacklist:
     #   - (/host)?/proc/sys/fs/binfmt_misc$

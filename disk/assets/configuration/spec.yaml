@@ -8,6 +8,9 @@ files:
           - name: file_system_global_blacklist
             description: |
               Instruct the check to always add these patterns to `file_system_blacklist`.
+
+              WARNING: Overriding these defaults could negatively impact your system or
+              the performance of the check.
             value:
               example:
                 - iso9660$
@@ -17,6 +20,9 @@ files:
           - name: device_global_blacklist
             description: |
               Instruct the check to always add these patterns to `device_blacklist`.
+
+              WARNING: Overriding these defaults could negatively impact your system or
+              the performance of the check.
             value:
               example: []
               type: array
@@ -25,6 +31,9 @@ files:
           - name: mount_point_global_blacklist
             description: |
               Instruct the check to always add these patterns to `mount_point_blacklist`.
+
+              WARNING: Overriding these defaults could negatively impact your system or
+              the performance of the check.
             value:
               example:
                 - (/host)?/proc/sys/fs/binfmt_misc$
