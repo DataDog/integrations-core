@@ -27,7 +27,7 @@ def test_default_options():
     assert check._device_whitelist is None
     assert check._device_blacklist is None
     assert check._mount_point_whitelist is None
-    assert check._mount_point_blacklist == re.compile('/proc/sys/fs/binfmt_misc$', IGNORE_CASE)
+    assert check._mount_point_blacklist == re.compile('(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE)
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False

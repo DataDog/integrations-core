@@ -27,7 +27,7 @@ files:
               Instruct the check to always add these patterns to `mount_point_blacklist`.
             value:
               example:
-                - /proc/sys/fs/binfmt_misc$
+                - (/host)?/proc/sys/fs/binfmt_misc$
               type: array
               items:
                 type: string

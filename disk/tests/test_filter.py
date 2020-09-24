@@ -39,7 +39,7 @@ def test_bad_config_string_regex():
     assert_regex_equal(c._device_whitelist, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_blacklist, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_whitelist, re.compile('test', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_blacklist, re.compile('test|/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_blacklist, re.compile('test|(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
 
 
 def test_ignore_empty_regex():
@@ -58,7 +58,7 @@ def test_ignore_empty_regex():
     assert_regex_equal(c._device_whitelist, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_blacklist, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_whitelist, re.compile('test', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_blacklist, re.compile('test|/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_blacklist, re.compile('test|(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
 
 
 def test_exclude_bad_devices():
@@ -191,7 +191,7 @@ def test_legacy_config():
 
     assert_regex_equal(c._file_system_blacklist, re.compile('iso9660$|test$', re.I))
     assert_regex_equal(c._device_blacklist, re.compile('test1$|test2', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_blacklist, re.compile('/proc/sys/fs/binfmt_misc$|test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_blacklist, re.compile('(/host)?/proc/sys/fs/binfmt_misc$|test', IGNORE_CASE))
 
 
 def test_legacy_exclude_disk():
