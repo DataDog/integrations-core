@@ -118,7 +118,7 @@ datadog-solr==1.5.1
 datadog-spark==1.15.0
 datadog-sqlserver==2.0.0
 datadog-squid==1.8.0
-datadog-ssh-check==1.11.2
+datadog-ssh-check==1.11.3
 datadog-statsd==1.5.0
 datadog-supervisord==1.6.1
 datadog-system-core==1.8.0
