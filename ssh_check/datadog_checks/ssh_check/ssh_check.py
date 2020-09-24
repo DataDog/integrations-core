@@ -65,9 +65,7 @@ class CheckSSH(AgentCheck):
             # Try to connect to check status of SSH
             try:
                 if not private_key:
-                    client.connect(
-                        self.host, port=self.port, username=self.username, password=self.password, pkey=private_key
-                    )
+                    client.connect(self.host, port=self.port, username=self.username, password=self.password)
                 else:
                     # If the private key is not valid and we pass password instead of passphrase it will attempt to
                     # connect using the password and the error will be misleading
