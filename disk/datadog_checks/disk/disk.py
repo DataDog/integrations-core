@@ -438,4 +438,8 @@ class Disk(AgentCheck):
 
     @staticmethod
     def get_default_mount_mount_blacklist():
-        return []
+        return [
+            # https://github.com/DataDog/datadog-agent/issues/1961
+            # https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1049
+            '(/host)?/proc/sys/fs/binfmt_misc$'
+        ]
