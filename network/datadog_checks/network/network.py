@@ -20,6 +20,11 @@ from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 if PY3:
     long = int
 
@@ -290,7 +295,10 @@ class Network(AgentCheck):
         For that procfs_path can be set to something like "/host/proc"
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
-        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+        proc_location = datadog_agent.get_config('procfs_path')
+        if not proc_location:
+            proc_location = '/proc'
+        proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
