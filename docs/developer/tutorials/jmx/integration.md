@@ -39,6 +39,22 @@ The metrics filters format details can be found on [JMX integration page](https:
 
 [JMXFetch test cases](https://github.com/DataDog/jmxfetch/tree/master/src/test/resources) also help understand how metrics filters work.  
 
+Example of `metrics.yaml`
+
+```yaml
+jmx_metrics:
+  - include:
+      domain: org.apache.activemq
+      destinationType: Queue
+      attribute:
+        AverageEnqueueTime:
+          alias: activemq.queue.avg_enqueue_time
+          metric_type: gauge
+        ConsumerCount:
+          alias: activemq.queue.consumer_count
+          metric_type: gauge
+```
+
 ### Testing
 
 Using [`ddev` tool](https://datadoghq.dev/integrations-core/ddev/cli/), you can test against the JMX service by providing a `dd_environment` like this one:
