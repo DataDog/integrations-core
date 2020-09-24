@@ -8,4 +8,6 @@ services:
       - "8022:22"
     environment:
       - ROOT_PASSWORD=${ROOT_PASSWORD}
-      - ROOT_KEYPAIR_LOGIN_ENABLED=false
+      - ROOT_KEYPAIR_LOGIN_ENABLED=true
+    volumes:
+      - ./config/authorized_keys:/root/.ssh/authorized_keys
