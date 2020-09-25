@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.6.1 / 2020-09-21
+
+* [Fixed] lazy initialisation of kafka_consumer client. See [#7432](https://github.com/DataDog/integrations-core/pull/7432).
+
 ## 2.6.0 / 2020-07-27 / Agent 7.22.0
 
 * [Added] Smaller batches when fetching highwater offsets. See [#7093](https://github.com/DataDog/integrations-core/pull/7093).

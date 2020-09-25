@@ -11,6 +11,7 @@ from six import iteritems
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.disk import Disk
+from datadog_checks.disk.disk import IGNORE_CASE
 
 from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockDiskMetrics, MockPart, mock_blkid_output
@@ -26,7 +27,7 @@ def test_default_options():
     assert check._device_include is None
     assert check._device_exclude is None
     assert check._mount_point_include is None
-    assert check._mount_point_exclude is None
+    assert check._mount_point_exclude == re.compile('(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE)
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False

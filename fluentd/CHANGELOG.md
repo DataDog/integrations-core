@@ -1,5 +1,10 @@
 # CHANGELOG - fluentd
 
+## 1.10.0 / 2020-09-21
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 1.9.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).

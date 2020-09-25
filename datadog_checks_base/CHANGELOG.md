@@ -1,5 +1,14 @@
 # CHANGELOG - datadog_checks_base
 
+## 14.0.0 / 2020-09-21
+
+* [Added] New Integration: Snowflake. See [#7043](https://github.com/DataDog/integrations-core/pull/7043).
+* [Added] Add Unix Domain Socket support to RequestsWrapper. See [#7585](https://github.com/DataDog/integrations-core/pull/7585).
+* [Fixed] Better metric names handling when the namespace is empty. See [#7567](https://github.com/DataDog/integrations-core/pull/7567).
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+* [Fixed] Add doc for get_check_logger. See [#7536](https://github.com/DataDog/integrations-core/pull/7536).
+* [Changed] Replace InsecureRequestWarning with standard logs. See [#7512](https://github.com/DataDog/integrations-core/pull/7512).
+
 ## 13.1.0 / 2020-09-04
 
 * [Added] Add the new env parameter to get_subprocess_output. See [#7479](https://github.com/DataDog/integrations-core/pull/7479).

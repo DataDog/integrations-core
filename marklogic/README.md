@@ -75,7 +75,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `hive.d/conf.yaml` file to start collecting your Hive logs:
+2. Add this configuration block to your `marklogic.d/conf.yaml` file to start collecting your MarkLogic logs:
 
    ```yaml
      logs:

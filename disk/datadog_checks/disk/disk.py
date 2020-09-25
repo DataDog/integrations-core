@@ -66,6 +66,9 @@ class Disk(AgentCheck):
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
 
         deprecations = {
+            'file_system_global_blacklist': 'file_system_global_exclude',
+            'device_global_blacklist': 'device_global_exclude',
+            'mount_point_global_blacklist': 'mount_point_global_exclude',
             'file_system_whitelist': 'file_system_include',
             'file_system_blacklist': 'file_system_exclude',
             'device_whitelist': 'device_include',
@@ -79,7 +82,11 @@ class Disk(AgentCheck):
         }
         for old_name, new_name in deprecations.items():
             if instance.get('old_name'):
-                self.warning('`%s` is deprecated and will be removed in a future release. Please use `%s` instead.', old_name, new_name)
+                self.warning(
+                    '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.',
+                    old_name,
+                    new_name,
+                )
 
         self.devices_label = {}
 
@@ -190,7 +197,7 @@ class Disk(AgentCheck):
 
     def _partition_included(self, device, file_system, mount_point):
         return (
-            self.(file_system)
+            self._file_system_included(file_system)
             and self._device_included(device)
             and self._mount_point_included(mount_point)
         )
@@ -308,10 +315,13 @@ class Disk(AgentCheck):
                 self.log.debug('Latency metrics not collected for %s: %s', disk_name, e)
 
     def _compile_pattern_filters(self, instance):
-        # Force exclusion of CDROM (iso9660)
-        file_system_exclude_extras = ['iso9660$']
-        device_exclude_extras = []
-        mount_point_exclude_extras = []
+        file_system_exclude_extras = self.init_config.get(
+            'file_system_global_exclude', self.get_default_file_system_exclude()
+        )
+        device_exclude_extras = self.init_config.get('device_global_exclude', self.get_default_device_exclude())
+        mount_point_exclude_extras = self.init_config.get(
+            'mount_point_global_exclude', self.get_default_mount_mount_exclude()
+        )
 
         if 'excluded_filesystems' in instance:
             file_system_exclude_extras.extend(
@@ -333,9 +343,7 @@ class Disk(AgentCheck):
             self._file_system_exclude, casing=re.I, extra_patterns=file_system_exclude_extras
         )
         self._device_include = self._compile_valid_patterns(self._device_include)
-        self._device_exclude = self._compile_valid_patterns(
-            self._device_exclude, extra_patterns=device_exclude_extras
-        )
+        self._device_exclude = self._compile_valid_patterns(self._device_exclude, extra_patterns=device_exclude_extras)
         self._mount_point_include = self._compile_valid_patterns(self._mount_point_include)
         self._mount_point_exclude = self._compile_valid_patterns(
             self._mount_point_exclude, extra_patterns=mount_point_exclude_extras
@@ -431,3 +439,22 @@ class Disk(AgentCheck):
                 )
 
         return devices_label
+
+    @staticmethod
+    def get_default_file_system_exclude():
+        return [
+            # CDROM
+            'iso9660$',
+        ]
+
+    @staticmethod
+    def get_default_device_exclude():
+        return []
+
+    @staticmethod
+    def get_default_mount_mount_exclude():
+        return [
+            # https://github.com/DataDog/datadog-agent/issues/1961
+            # https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1049
+            '(/host)?/proc/sys/fs/binfmt_misc$'
+        ]

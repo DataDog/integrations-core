@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.15.0 / 2020-09-21
+
+* [Added] Add config specs. See [#7466](https://github.com/DataDog/integrations-core/pull/7466).
+
 ## 1.14.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).

@@ -1,5 +1,13 @@
 # CHANGELOG - ssh_check
 
+## 1.11.3 / 2020-09-24
+
+* [Fixed] Add integration test for ssh keypair and make code more accurate. See [#7655](https://github.com/DataDog/integrations-core/pull/7655).
+
+## 1.11.2 / 2020-09-21
+
+* [Fixed] pass the password to be used for pkey decryption. See [#6862](https://github.com/DataDog/integrations-core/pull/6862).
+
 ## 1.11.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Add config specs. See [#6923](https://github.com/DataDog/integrations-core/pull/6923).

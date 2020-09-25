@@ -39,7 +39,7 @@ def test_bad_config_string_regex():
     assert_regex_equal(c._device_include, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_exclude, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_include, re.compile('test', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_exclude, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_exclude, re.compile('test|(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
 
 
 def test_ignore_empty_regex():
@@ -58,7 +58,7 @@ def test_ignore_empty_regex():
     assert_regex_equal(c._device_include, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_exclude, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_include, re.compile('test', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_exclude, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_exclude, re.compile('test|(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
 
 
 def test_exclude_bad_devices():
