@@ -4,6 +4,7 @@
 import logging
 import os
 from contextlib import contextmanager
+from copy import deepcopy
 from ipaddress import ip_address, ip_network
 
 import requests
@@ -41,6 +42,7 @@ LOGGER = logging.getLogger(__file__)
 DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
+    'auth_token': None,
     'auth_type': 'basic',
     'aws_host': None,
     'aws_region': None,
@@ -103,6 +105,7 @@ class RequestsWrapper(object):
         'options',
         'persist_connections',
         'request_hooks',
+        'auth_token_handler',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -271,6 +274,12 @@ class RequestsWrapper(object):
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
+        # Set up any auth token handlers
+        if config['auth_token'] is not None:
+            self.auth_token_handler = create_auth_token_handler(config['auth_token'])
+        else:
+            self.auth_token_handler = None
+
         # Context managers that should wrap all requests
         self.request_hooks = []
 
@@ -322,14 +331,27 @@ class RequestsWrapper(object):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
+        self.handle_auth_token(method=method, url=url, default_options=self.options)
+
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
-            if persist:
-                return getattr(self.session, method)(url, **new_options)
+            try:
+                if persist:
+                    response = getattr(self.session, method)(url, **new_options)
+                else:
+                    response = getattr(requests, method)(url, **new_options)
+            except Exception as e:
+                self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                raise e
             else:
-                return getattr(requests, method)(url, **new_options)
+                try:
+                    response.raise_for_status()
+                except Exception as e:
+                    self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+
+                return response
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options
@@ -361,6 +383,10 @@ class RequestsWrapper(object):
                 setattr(self._session, option, value)
 
         return self._session
+
+    def handle_auth_token(self, **request):
+        if self.auth_token_handler is not None:
+            self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:
@@ -502,6 +528,112 @@ AUTH_TYPES = {
     'kerberos': create_kerberos_auth,
     'aws': create_aws_auth,
 }
+
+
+def create_auth_token_handler(config):
+    if not isinstance(config, dict):
+        raise ConfigurationError('The `auth_token` field must be a mapping')
+    elif 'reader' not in config or 'writer' not in config:
+        raise ConfigurationError('The `auth_token` field must define both `reader` and `writer` settings')
+
+    config = deepcopy(config)
+
+    reader_config = config['reader']
+    if not isinstance(reader_config, dict):
+        raise ConfigurationError('The `reader` settings of field `auth_token` must be a mapping')
+
+    writer_config = config['writer']
+    if not isinstance(writer_config, dict):
+        raise ConfigurationError('The `writer` settings of field `auth_token` must be a mapping')
+
+    reader_type = reader_config.pop('type', '')
+    if not isinstance(reader_type, str):
+        raise ConfigurationError('The reader `type` of field `auth_token` must be a string')
+    elif not reader_type:
+        raise ConfigurationError('The reader `type` of field `auth_token` is required')
+    elif reader_type not in AUTH_TOKEN_READERS:
+        raise ConfigurationError(
+            'Unknown `auth_token` reader type, must be one of: {}'.format(', '.join(sorted(AUTH_TOKEN_READERS)))
+        )
+
+    writer_type = writer_config.pop('type', '')
+    if not isinstance(writer_type, str):
+        raise ConfigurationError('The writer `type` of field `auth_token` must be a string')
+    elif not writer_type:
+        raise ConfigurationError('The writer `type` of field `auth_token` is required')
+    elif writer_type not in AUTH_TOKEN_WRITERS:
+        raise ConfigurationError(
+            'Unknown `auth_token` writer type, must be one of: {}'.format(', '.join(sorted(AUTH_TOKEN_WRITERS)))
+        )
+
+    reader = AUTH_TOKEN_READERS[reader_type](reader_config)
+    writer = AUTH_TOKEN_WRITERS[writer_type](writer_config)
+
+    return AuthTokenHandler(reader, writer)
+
+
+class AuthTokenHandler(object):
+    def __init__(self, reader, writer):
+        self.reader = reader
+        self.writer = writer
+
+    def poll(self, **request):
+        token = self.reader.read(**request)
+        if token is not None:
+            self.writer.write(token, **request)
+
+
+class AuthTokenFileReader(object):
+    def __init__(self, config):
+        self._path = config.get('path', '')
+        if not isinstance(self._path, str):
+            raise ConfigurationError('The `path` setting of `auth_token` reader must be a string')
+        elif not self._path:
+            raise ConfigurationError('The `path` setting of `auth_token` reader is required')
+
+        # Cache all updates just in case
+        self._token = None
+
+    def read(self, **request):
+        if self._token is None or 'error' in request:
+            with open(self._path, 'rb') as f:
+                self._token = f.read().decode('utf-8').strip()
+
+            return self._token
+
+
+class AuthTokenHeaderWriter(object):
+    def __init__(self, config):
+        self._name = config.get('name', '')
+        if not isinstance(self._name, str):
+            raise ConfigurationError('The `name` setting of `auth_token` writer must be a string')
+        elif not self._name:
+            raise ConfigurationError('The `name` setting of `auth_token` writer is required')
+
+        self._value = config.get('value', '')
+        if not isinstance(self._value, str):
+            raise ConfigurationError('The `value` setting of `auth_token` writer must be a string')
+        elif not self._value:
+            raise ConfigurationError('The `value` setting of `auth_token` writer is required')
+
+        self._placeholder = config.get('placeholder', '<TOKEN>')
+        if not isinstance(self._placeholder, str):
+            raise ConfigurationError('The `placeholder` setting of `auth_token` writer must be a string')
+        elif not self._placeholder:
+            raise ConfigurationError('The `placeholder` setting of `auth_token` writer cannot be an empty string')
+        elif self._placeholder not in self._value:
+            raise ConfigurationError(
+                'The `value` setting of `auth_token` writer does not contain the placeholder string `{}`'.format(
+                    self._placeholder
+                )
+            )
+
+    def write(self, token, **request):
+        request['default_options']['headers'][self._name] = self._value.replace(self._placeholder, token, 1)
+
+
+AUTH_TOKEN_READERS = {'file': AuthTokenFileReader}
+AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}
 
 
 def is_uds_url(url):
