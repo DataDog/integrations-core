@@ -14,7 +14,6 @@ class AzureIoTEdgeCheck(AgentCheck):
     __NAMESPACE__ = 'azure.iot_edge'  # Child of `azure.` namespace.
 
     def __init__(self, name, init_config, instances):
-        # type: (str, dict, list) -> None
         super(AzureIoTEdgeCheck, self).__init__(name, init_config, instances)
         self._config = Config(cast(Instance, self.instance), check_namespace=self.__NAMESPACE__)
         self._edge_hub_check = OpenMetricsBaseCheck(name, init_config, [self._config.edge_hub_instance])
@@ -39,7 +38,7 @@ class AzureIoTEdgeCheck(AgentCheck):
 
         NOTE: we want the Security Manager version, not the Edge Agent version.
         """
-        labels = metric.samples[0][OpenMetricsBaseCheck.SAMPLE_LABELS]
+        labels = metric.samples[0][OpenMetricsBaseCheck.SAMPLE_LABELS]  # type: dict
 
         host_information = labels.get('host_information')
         if host_information is None:
@@ -47,7 +46,7 @@ class AzureIoTEdgeCheck(AgentCheck):
             return
 
         try:
-            host_info = json.loads(host_information)
+            host_info = json.loads(host_information)  # type: dict
         except json.JSONDecodeError as exc:
             self.log.debug('Error decoding host information: %r', exc)
             return
@@ -60,7 +59,6 @@ class AzureIoTEdgeCheck(AgentCheck):
         self.set_metadata('version', iot_edge_runtime_version)
 
     def check(self, _):
-        # type: (dict) -> None
         self._check_daemon_health()
 
         # Sync Agent-assigned check ID so that metrics of these sub-checks are reported as coming from this check.
@@ -71,7 +69,6 @@ class AzureIoTEdgeCheck(AgentCheck):
         self._edge_agent_check.check(self._config.edge_agent_instance)
 
     def _check_daemon_health(self):
-        # type: () -> None
         try:
             _ = self.http.get(self._config.security_daemon_management_api_url)
         except Exception as exc:
