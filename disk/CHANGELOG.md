@@ -1,5 +1,10 @@
 # CHANGELOG - disk
 
+## 3.0.0 / 2020-09-24
+
+* [Added] Add options for global exclusion patterns. See [#7648](https://github.com/DataDog/integrations-core/pull/7648).
+* [Changed] Ignore `/proc/sys/fs/binfmt_misc` by default. See [#7650](https://github.com/DataDog/integrations-core/pull/7650).
+
 ## 2.11.0 / 2020-09-21
 
 * [Added] [disk] Add `include_all_devices` option and improve error logs. See [#7378](https://github.com/DataDog/integrations-core/pull/7378).
