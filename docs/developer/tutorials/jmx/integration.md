@@ -2,7 +2,7 @@
 
 Tutorial for starting a JMX integration
 
-## Step 1: Create a JMX integration scaffolding using
+## Step 1: Create a JMX integration scaffolding
 
 ```bash
 ddev create --type jmx MyJMXIntegration
@@ -16,8 +16,8 @@ init_config:
     collect_default_metrics: true  # if true, metrics declared in `metrics.yaml` are collected
 
 instances:
-  - host: <HOST>
-    port: <PORT>
+  - host: <HOST>                   # JMX hostname
+    port: <PORT>                   # JMX port
     ...
 ```
 
@@ -25,10 +25,9 @@ Other init and instance configs can be found in on [JMX integration page](https:
 
 ## Step 2: Define metrics you want to collect
 
-Select what metrics you want to collect from JMX. You can use:
+Select what metrics you want to collect from JMX. Available metrics can be usually found on official documentation of the service you want to monitor.
 
-- official documentation of the service you want to monitor
-- [VisualVM](https://visualvm.github.io/), [JConsole](https://docs.oracle.com/javase/7/docs/technotes/guides/management/jconsole.html) or [jmxterm](https://datadoghq.dev/integrations-core/tutorials/jmx/tools/) to explore the available beans and their descriptions
+You can also use tools like [VisualVM](https://visualvm.github.io/), [JConsole](https://docs.oracle.com/javase/7/docs/technotes/guides/management/jconsole.html) or [jmxterm](https://datadoghq.dev/integrations-core/tutorials/jmx/tools/) to explore the available JMX beans and their descriptions.
 
 
 ## Step 3: Define metrics filters
@@ -37,7 +36,7 @@ Edit the `metrics.yaml` to define the filters for collecting metrics.
 
 The metrics filters format details can be found on [JMX integration doc](https://docs.datadoghq.com/integrations/java/?tab=host#description-of-the-filters)
 
-[JMXFetch test cases](https://github.com/DataDog/jmxfetch/tree/master/src/test/resources) also help understand how metrics filters work.  
+[JMXFetch test cases](https://github.com/DataDog/jmxfetch/tree/master/src/test/resources) also help understanding how metrics filters work and provide many examples.  
 
 Example of `metrics.yaml`
 
@@ -90,5 +89,6 @@ def test(dd_agent_check):
 ```
 
 Real examples of:
-- [dd_environment](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/conftest.py)
-- [e2e test](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/test_check.py)
+
+- [JMX dd_environment](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/conftest.py)
+- [JMX e2e test](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/test_check.py)
