@@ -56,7 +56,7 @@ jmx_metrics:
 
 ### Testing
 
-Using [`ddev` tool](https://datadoghq.dev/integrations-core/ddev/cli/), you can test against the JMX service by providing a `dd_environment` like this one:
+Using [`ddev` tool](https://datadoghq.dev/integrations-core/ddev/cli/), you can test against the JMX service by providing a `dd_environment` in `tests/conftest.py` like this one:
 
 ```python
 @pytest.fixture(scope="session")
