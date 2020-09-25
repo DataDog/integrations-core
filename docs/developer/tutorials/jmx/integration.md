@@ -21,7 +21,7 @@ instances:
     ...
 ```
 
-Other init and instance configs can be found in on [JMX integration page](https://docs.datadoghq.com/integrations/java)
+Other init and instance configs can be found on [JMX integration page](https://docs.datadoghq.com/integrations/java)
 
 ## Step 2: Define metrics you want to collect
 
