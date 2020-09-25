@@ -1,4 +1,4 @@
-# Building a JMX integration
+# JMX integration
 
 Tutorial for starting a JMX integration
 

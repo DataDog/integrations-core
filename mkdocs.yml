@@ -60,6 +60,7 @@ nav:
     - Status: meta/status.md
   - Tutorials:
     - JMX:
+      - tutorials/jmx/integration.md
       - tutorials/jmx/tools.md
     - SNMP:
       - tutorials/snmp/introduction.md
