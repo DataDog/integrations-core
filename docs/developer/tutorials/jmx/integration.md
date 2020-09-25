@@ -21,7 +21,7 @@ instances:
     ...
 ```
 
-Other instance configs can be found in on [JMX integration page](https://docs.datadoghq.com/integrations/java)
+Other init and instance configs can be found in on [JMX integration page](https://docs.datadoghq.com/integrations/java)
 
 ## Step 2: Define metrics you want to collect
 
@@ -35,7 +35,7 @@ Select what metrics you want to collect from JMX. You can use:
 
 Edit the `metrics.yaml` to define the filters for collecting metrics.
 
-The metrics filters format details can be found on [JMX integration page](https://docs.datadoghq.com/integrations/java)
+The metrics filters format details can be found on [JMX integration doc](https://docs.datadoghq.com/integrations/java/?tab=host#description-of-the-filters)
 
 [JMXFetch test cases](https://github.com/DataDog/jmxfetch/tree/master/src/test/resources) also help understand how metrics filters work.  
 
@@ -89,6 +89,6 @@ def test(dd_agent_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS)
 ```
 
-Real example with ActiveMQ:
-- [dd_environment](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/conftest.py).
-- [e2e test](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/test_check.py).
+Real examples of:
+- [dd_environment](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/conftest.py)
+- [e2e test](https://github.com/DataDog/integrations-core/blob/master/activemq/tests/test_check.py)
