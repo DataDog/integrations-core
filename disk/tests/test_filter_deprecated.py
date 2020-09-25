@@ -25,7 +25,7 @@ def test_bad_config_string_regex_deprecated():
     assert_regex_equal(c._device_include, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_exclude, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_include, re.compile('test', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_exclude, re.compile('(/host)?/proc/sys/fs/binfmt_misc$|test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_exclude, re.compile('test|(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
 
 
 def test_ignore_empty_regex_deprecated():
@@ -44,7 +44,7 @@ def test_ignore_empty_regex_deprecated():
     assert_regex_equal(c._device_include, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._device_exclude, re.compile('test', IGNORE_CASE))
     assert_regex_equal(c._mount_point_include, re.compile('test', IGNORE_CASE))
-    assert_regex_equal(c._mount_point_exclude, re.compile('(/host)?/proc/sys/fs/binfmt_misc$|test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_exclude, re.compile('test|(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE))
 
 
 def test_file_system_whitelist_deprecated():
