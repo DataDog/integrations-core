@@ -644,6 +644,31 @@ class Network(AgentCheck):
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
+        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+
+        net_proc_base_location = self._get_net_proc_base_location(proc_location)
+
+        if self._is_collect_cx_state_runnable(net_proc_base_location):
+            try:
+                self.log.debug("Using `netstat` to collect connection state")
+                output_TCP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)
+                output_UDP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"], self.log)
+                lines = output_TCP.splitlines() + output_UDP.splitlines()
+                # Active Internet connections (w/o servers)
+                # Proto Recv-Q Send-Q Local Address           Foreign Address         State
+                # tcp        0      0 46.105.75.4:80          79.220.227.193:2032     SYN_RECV
+                # tcp        0      0 46.105.75.4:143         90.56.111.177:56867     ESTABLISHED
+                # tcp        0      0 46.105.75.4:50468       107.20.207.175:443      TIME_WAIT
+                # tcp6       0      0 46.105.75.4:80          93.15.237.188:58038     FIN_WAIT2
+                # tcp6       0      0 46.105.75.4:80          79.220.227.193:2029     ESTABLISHED
+                # udp        0      0 0.0.0.0:123             0.0.0.0:*
+                # udp6       0      0 :::41458                :::*
+
+                metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
+                for metric, value in iteritems(metrics):
+                    self.gauge(metric, value, tags=custom_tags)
+            except SubprocessOutputEmptyError:
+
     def _check_solaris(self, instance):
         # Can't get bytes sent and received via netstat
         # Default to kstat -p link:0:
