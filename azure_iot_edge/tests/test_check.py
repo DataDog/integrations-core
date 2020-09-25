@@ -9,6 +9,7 @@ from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -54,9 +55,7 @@ def test_check(aggregator, mock_instance):
     )
 
     aggregator.assert_all_metrics_covered()
-
-    # TODO
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures("mock_server")
