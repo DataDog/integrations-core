@@ -233,6 +233,34 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     options:
+    ##       path (required): the absolute path to the file with which to read from
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     options:
+    ##       name (required): the name of the field e.g.: Authorization
+    ##       value (required): the template value e.g.: Bearer <TOKEN>
+    ##       placeholder: the substring in `value` to replace by the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 signing, set the region.
     ##
