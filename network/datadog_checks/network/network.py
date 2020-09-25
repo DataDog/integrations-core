@@ -346,7 +346,7 @@ class Network(AgentCheck):
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
-                self.log.exception("Error collecting connection stats.")
+                self.log.exception("Error collecting connection states.")
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
         try:
@@ -668,6 +668,7 @@ class Network(AgentCheck):
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
+                self.log.exception("Error collecting connection states.")
 
     def _check_solaris(self, instance):
         # Can't get bytes sent and received via netstat
