@@ -60,10 +60,13 @@ class ReportSerializer:
 @click.pass_context
 def merged_prs(ctx, from_ref, to_ref, release_milestone):
 
-    release = Release.from_github(ctx, release_milestone, from_ref=from_ref, to_ref=to_ref)
+    agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
+    integrations_release = Release.from_github(ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref)
 
-    serializer = ReportSerializer(release)
-    serializer.print_prs()
+    print("datadog-agent")
+    ReportSerializer(agent_release).print_prs()
+    print("integrations-core")
+    ReportSerializer(integrations_release).print_prs()
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Prints some release stats we want to track")
@@ -73,7 +76,7 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone):
 @click.pass_context
 def report(ctx, from_ref, to_ref, release_milestone):
 
-    release = Release.from_github(ctx, release_milestone, from_ref=from_ref, to_ref=to_ref)
+    release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
 
     serializer = ReportSerializer(release)
     serializer.print_report()
