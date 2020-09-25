@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from typing import cast
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
@@ -18,6 +19,45 @@ class AzureIoTEdgeCheck(AgentCheck):
         self._config = Config(cast(Instance, self.instance), check_namespace=self.__NAMESPACE__)
         self._edge_hub_check = OpenMetricsBaseCheck(name, init_config, [self._config.edge_hub_instance])
         self._edge_agent_check = OpenMetricsBaseCheck(name, init_config, [self._config.edge_agent_instance])
+
+        # Need a custom metric transformer due to version info being located in a JSON-encoded string.
+        edge_agent_metric_transformers = {'edgeAgent_metadata': self._transform_version_metadata}
+        scraper_config = self._edge_agent_check.get_scraper_config(self._config.edge_agent_instance)
+        scraper_config['_default_metric_transformers'].update(edge_agent_metric_transformers)
+
+    def _transform_version_metadata(self, metric, scraper_config):
+        """
+        Submit version metadata from an Edge Agent metadata metric instance.
+
+        Metadata metric look like this:
+
+        ```
+        edgeAgent_metadata{...,edge_agent_version="...",host_information="{\"...\", \"Version\": \"1.0.10~rc2\"}"}
+        ```
+
+        See: https://github.com/Azure/iotedge/blob/1.0.10-rc2/doc/BuiltInMetrics.md#edgeagent
+
+        NOTE: we want the Security Manager version, not the Edge Agent version.
+        """
+        labels = metric.samples[0][OpenMetricsBaseCheck.SAMPLE_LABELS]
+
+        host_information = labels.get('host_information')
+        if host_information is None:
+            self.log.debug('Label "host_information" not found, skipping version metadata')
+            return
+
+        try:
+            host_info = json.loads(host_information)
+        except json.JSONDecodeError as exc:
+            self.log.debug('Error decoding host information: %r', exc)
+            return
+
+        iot_edge_runtime_version = host_info.get('Version')
+        if iot_edge_runtime_version is None:
+            self.log.debug('Key "Version" not found in host_information, skipping version metadata')
+            return
+
+        self.set_metadata('version', iot_edge_runtime_version)
 
     def check(self, _):
         # type: (dict) -> None

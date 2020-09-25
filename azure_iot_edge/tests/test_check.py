@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.base.utils.platform import Platform
 
 from . import common
@@ -56,6 +57,24 @@ def test_check(aggregator, mock_instance):
 
     # TODO
     # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.usefixtures("mock_server")
+def test_version_metadata(datadog_agent, mock_instance):
+    # type: (DatadogAgentStub, dict) -> None
+    check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
+    check.check_id = 'test:123'
+    check.run()
+
+    major, minor, patch, raw = common.MOCK_IOT_EDGE_VERSION
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw,
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 @pytest.mark.usefixtures("mock_server")

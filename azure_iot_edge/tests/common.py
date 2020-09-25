@@ -13,6 +13,7 @@ MOCK_SERVER_PORT = 9678
 MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL = 'http://localhost:{}/mgmt.json'.format(MOCK_SERVER_PORT)
 MOCK_EDGE_HUB_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_hub.txt'.format(MOCK_SERVER_PORT)
 MOCK_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:{}/metrics/edge_agent.txt'.format(MOCK_SERVER_PORT)
+MOCK_IOT_EDGE_VERSION = ('1', '0', '10', '1.0.10~rc2')  # Defined in Edge Agent fixtures.
 
 CUSTOM_TAGS = ['env:testing']
 
