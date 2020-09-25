@@ -23,7 +23,9 @@ class ReportSerializer:
         print('Release Branch', self.release.release_version)
         print('Release candidates', len(self.release.rc_tags))
         print('Number of Commits', len(self.release.commits))
-        print('Commits with unknown PR', len([commit for commit in self.release.commits if commit.pull_request is None]))
+        print(
+            'Commits with unknown PR', len([commit for commit in self.release.commits if commit.pull_request is None])
+        )
         print('Release time (days)', self._release_delay())
 
     def _release_delay(self):
@@ -53,7 +55,10 @@ class ReportSerializer:
         return {'sha': commit.sha, 'title': title, 'url': url, 'teams': ' & '.join(teams), 'next_tag': next_tag}
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help="Prints the PRs merged between the first RC and the current RC/final build")
+@click.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help="Prints the PRs merged between the first RC and the current RC/final build",
+)
 @click.option('--from-ref', '-f', help="Reference to start stats on (first RC tagged)", required=True)
 @click.option('--to-ref', '-t', help="Reference to end stats at (current RC/final tag)", required=True)
 @click.option('--release-milestone', '-r', help="Github release milestone", required=True)
@@ -61,7 +66,9 @@ class ReportSerializer:
 def merged_prs(ctx, from_ref, to_ref, release_milestone):
 
     agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
-    integrations_release = Release.from_github(ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref)
+    integrations_release = Release.from_github(
+        ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref
+    )
 
     print("datadog-agent")
     ReportSerializer(agent_release).print_prs()
