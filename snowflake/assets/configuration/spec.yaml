@@ -71,6 +71,17 @@ files:
         value:
           type: string
           example: <OCSP_RESPONSE_CACHE_FILENAME>
+      - name: authenticator
+        description: |
+          Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
+          Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+        value:
+          type: string
+          default: snowflake
+      - name: token
+        description: Token used for OAuth connection to Snowflake.
+        value:
+          type: string
       - name: metric_groups
         description: |
           List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
