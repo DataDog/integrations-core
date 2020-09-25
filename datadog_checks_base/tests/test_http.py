@@ -846,6 +846,16 @@ class TestIgnoreTLSWarning:
         else:
             raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
 
+    def test_default_no_ignore_http(self, caplog):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            http.get('http://www.google.com', verify=False)
+
+        assert sum(1 for _, level, _ in caplog.record_tuples if level == logging.WARNING) == 0
+
     def test_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {}

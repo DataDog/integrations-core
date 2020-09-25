@@ -528,7 +528,7 @@ class PrometheusScraperMixin(object):
             disable_insecure_warnings = True
             verify = False
 
-        if not disable_insecure_warnings and not verify:
+        if endpoint.startswith('https') and not disable_insecure_warnings and not verify:
             self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
 
         try:
