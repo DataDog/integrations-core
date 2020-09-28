@@ -2,6 +2,8 @@ from datadog_checks.mongo.collectors.base import MongoCollector
 
 
 class IndexStatsCollector(MongoCollector):
+    """Collect statistics on collection indexes by running the indexStats command."""
+
     def __init__(self, check, db_name, tags, coll_names=None):
         super(IndexStatsCollector, self).__init__(check, db_name, tags)
         self.coll_names = coll_names

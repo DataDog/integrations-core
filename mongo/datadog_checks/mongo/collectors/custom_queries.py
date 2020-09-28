@@ -7,6 +7,8 @@ from datadog_checks.mongo.common import ALLOWED_CUSTOM_METRICS_TYPES, ALLOWED_CU
 
 
 class CustomQueriesCollector(MongoCollector):
+    """A collector dedicated to running cutom queries defined in the configuration."""
+
     def __init__(self, check, db_name, tags, custom_queries):
         super(CustomQueriesCollector, self).__init__(check, db_name, tags)
         self.custom_queries = custom_queries
@@ -30,7 +32,7 @@ class CustomQueriesCollector(MongoCollector):
         return getattr(self.check, method_name)
 
     def _collect_custom_metrics_for_query(self, db, raw_query):
-        """Validates the raw_query object, executes the mongo query then submits the metrics to datadog"""
+        """Validates the raw_query object, executes the mongo query then submits the metrics to Datadog"""
         tags = self.base_tags + ["db:{}".format(self.db_name)]
         metric_prefix = raw_query.get('metric_prefix')
         if not metric_prefix:  # no cov

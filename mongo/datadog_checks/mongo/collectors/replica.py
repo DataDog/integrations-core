@@ -12,6 +12,10 @@ except ImportError:
 
 
 class ReplicaCollector(MongoCollector):
+    """Collect replica set metrics by running the replSetGetStatus command. Also keep track of the previous node state
+    in order to submit events on any status change.
+    """
+
     def __init__(self, check, tags, last_state):
         super(ReplicaCollector, self).__init__(check, "admin", tags)
         # Members' last replica set states

@@ -29,6 +29,7 @@ ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
 
 
 def get_state_name(state):
+    """Maps a mongod node state id to a human readable string."""
     if state in REPLSET_MEMBER_STATES:
         return REPLSET_MEMBER_STATES[state][0]
     else:

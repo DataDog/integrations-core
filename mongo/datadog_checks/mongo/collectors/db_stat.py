@@ -2,6 +2,11 @@ from datadog_checks.mongo.collectors.base import MongoCollector
 
 
 class DbStatCollector(MongoCollector):
+    """Collects database statistics using the 'dbstats' mongo command. This collector can be instantiated multiple
+    times, for each database to monitor.
+    Metrics are tagged with the database name so they don't overlap with each other.
+    """
+
     def collect(self, client):
         db = client[self.db_name]
         # Submit the metric

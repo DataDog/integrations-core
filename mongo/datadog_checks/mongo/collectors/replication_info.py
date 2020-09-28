@@ -5,6 +5,9 @@ from datadog_checks.mongo.collectors.base import MongoCollector
 
 
 class ReplicationInfoCollector(MongoCollector):
+    """Additional replication metrics regarding the operation log. Useful to check how backed up is a secondary
+    compared to the primary."""
+
     def __init__(self, check, tags):
         super(ReplicationInfoCollector, self).__init__(check, "local", tags)
 

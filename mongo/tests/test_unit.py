@@ -89,8 +89,6 @@ def test_state_translation(check, instance):
 
 
 def test_server_uri_sanitization(check, instance):
-    check = check(instance)
-
     # Batch with `sanitize_username` set to False
     server_names = (
         ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
@@ -171,3 +169,21 @@ def test_legacy_config_deprecation(check):
     assert check.get_warnings() == [
         'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.'
     ]
+
+
+def test_collector_submit_payload(check, aggregator):
+    check = check(common.INSTANCE_BASIC)
+    collector = MongoCollector(check, 'admin', ['foo:1'])
+
+    metrics_to_collect = {
+        'foo.bar1': GAUGE,
+        'foo.x.y.z': RATE,
+        'foo.R': RATE,
+    }
+    payload = {'foo': {'bar1': 1, 'x': {'y': {'z': 1}, 'y2': 1}, 'R': 1}}
+    collector._submit_payload(payload, additional_tags=['bar:1'], metrics_to_collect=metrics_to_collect)
+    tags = ['foo:1', 'bar:1']
+    aggregator.assert_metric('mongodb.foo.sharedps', 1, tags, metric_type=aggregator.RATE)
+    aggregator.assert_metric('mongodb.foo.x.y.zps', 1, tags, metric_type=aggregator.RATE)
+    aggregator.assert_metric('mongodb.foo.bar1', 1, tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_all_metrics_covered()
