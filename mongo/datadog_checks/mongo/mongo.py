@@ -92,13 +92,15 @@ class MongoDb(AgentCheck):
             hosts = self.instance.get('hosts', [])
             if not hosts:
                 raise ConfigurationError('No `hosts` specified')
-            if isinstance(hosts, str):
-                hosts = [hosts]
+
             username = self.instance.get('username')
             password = self.instance.get('password')
 
             if password and not username:
                 raise ConfigurationError('`username` must be set when a `password` is specified')
+
+            if username and not password:
+                raise ConfigurationError('`password` must be set when a `username` is specified')
 
             self.server = build_connection_string(
                 hosts,
