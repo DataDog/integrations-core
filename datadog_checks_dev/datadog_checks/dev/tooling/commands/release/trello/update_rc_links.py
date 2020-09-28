@@ -5,8 +5,8 @@
 import click
 
 from ....trello import TrelloClient
-from .rc_build_cards_updater import RCBuildCardsUpdater
 from ...console import CONTEXT_SETTINGS, echo_success
+from .rc_build_cards_updater import RCBuildCardsUpdater
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update links to RCs in the QA board Trello cards')
