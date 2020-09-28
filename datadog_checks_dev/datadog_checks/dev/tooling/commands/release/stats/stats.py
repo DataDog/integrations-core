@@ -46,6 +46,8 @@ class ReportSerializer:
 
         if pull_request:
             teams = [label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('team')]
+            if not teams and pull_request.repo == 'integrations-core':
+                teams = ['agent-integrations']
             title = pull_request.title
             url = pull_request.url
 
