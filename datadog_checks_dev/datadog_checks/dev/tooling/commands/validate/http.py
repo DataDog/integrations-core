@@ -23,7 +23,7 @@ def validate_config_http(file, check):
     if os.path.isfile(file):
         with open(file, "r") as f:
             if 'instances/http' not in f.read():
-                echo_warning(f'{check}\'s spec.yaml file does not contain `instances/http` '
+                echo_warning(f'Detected {check}\'s spec.yaml file does not contain `instances/http` '
                              f'but {check} uses http wrapper')
 
     return config_valid
