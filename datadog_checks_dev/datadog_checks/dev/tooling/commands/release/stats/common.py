@@ -138,6 +138,13 @@ class Release:
         self.commits = commits
         self.rc_tags = rc_tags
 
+    def release_duration_days(self):
+        # Returns the number of days between the first and last change
+        rc_1 = self.commits[0]
+        last_change = self.commits[-1]
+        duration = (last_change.date - rc_1.date).total_seconds()
+        return divmod(duration, 24 * 60 * 60)[0]
+
     @classmethod
     def from_github(cls, ctx, repo, release_version, from_ref, to_ref):
         # this will only contain agent 7 or 6 RCs but it's okay
@@ -145,7 +152,7 @@ class Release:
         version_re = re.compile(f'{release_version}-rc')
         # comparing using provided references but using parent commit of from-reference to
         # also have the from-ref commit included
-        echo_info(f'Fetching commits using compare from parent of "{from_ref}" to "{to_ref}"...')
+        echo_info(f'Fetching commits from "{repo}" using compare from parent of "{from_ref}" to "{to_ref}"...')
         commits = Commit.from_github_compare(ctx, repo, f'{from_ref}^', to_ref)
         echo_info(f'Fetching tags matching "/{version_re}/"...')
         rc_tags = [

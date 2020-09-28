@@ -19,22 +19,8 @@ class ReportSerializer:
         for change in changes:
             print(','.join([change[field] for field in ['url', 'teams', 'next_tag', 'title']]))
 
-    def print_report(self):
-        print('Release Branch', self.release.release_version)
-        print('Release candidates', len(self.release.rc_tags))
-        print('Number of Commits', len(self.release.commits))
-        print(
-            'Commits with unknown PR', len([commit for commit in self.release.commits if commit.pull_request is None])
-        )
-        print('Release time (days)', self._release_delay())
 
-    def _release_delay(self):
-        rc_1 = self.release.commits[0]
-        last_change = self.release.commits[-1]
 
-        duration = (last_change.date - rc_1.date).total_seconds()
-
-        return divmod(duration, 24 * 60 * 60)[0]
 
     def _change(self, commit):
         teams = []
@@ -85,7 +71,11 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone):
 @click.pass_context
 def report(ctx, from_ref, to_ref, release_milestone):
 
-    release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
+    agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
+    integrations_release = Release.from_github(ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref)
 
-    serializer = ReportSerializer(release)
-    serializer.print_report()
+    print('Release Branch:', agent_release.release_version)
+    print('Release candidates:', len(agent_release.rc_tags))
+    print('Number of Commits (datadog-agent):', len(agent_release.commits))
+    print('Number of Commits (integrations-core):', len(integrations_release.commits))
+    print('Release time in days:', agent_release.release_duration_days())
