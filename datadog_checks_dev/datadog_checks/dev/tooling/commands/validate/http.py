@@ -74,7 +74,6 @@ def validate_use_http_wrapper(file, check):
                     echo_failure(f'Check \'{check}\' uses \'{http_func}\' on line {num} in \'{os.path.basename(file)}\''
                                  f', please use the HTTP wrapper instead')
 
-    #                 Check hazelcast uses legacy agent signature in check.py on line 14
     return False
 
 
