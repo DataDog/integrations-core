@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.20.1 / 2020-09-28
+
+* [Fixed] Extra debug for missing metrics. See [#7673](https://github.com/DataDog/integrations-core/pull/7673).
+
 ## 1.20.0 / 2020-09-21
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
