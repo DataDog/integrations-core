@@ -4,10 +4,14 @@
 import os
 from typing import List, Tuple
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev import get_here
 
 HERE = get_here()
+
+IOT_EDGE_DEVICE_ID = 'testEdgeDevice'
+IOT_EDGE_IOTHUB_HOSTNAME = 'iot-edge-dev-hub.azure-devices.net'
 
 MOCK_SERVER_PORT = 9678
 MOCK_SECURITY_DAEMON_MANAGEMENT_API_URL = 'http://localhost:{}/mgmt.json'.format(MOCK_SERVER_PORT)
@@ -18,8 +22,8 @@ MOCK_IOT_EDGE_VERSION = ('1', '0', '10', '1.0.10~rc2')  # Defined in Edge Agent 
 CUSTOM_TAGS = ['env:testing']
 
 TAGS = CUSTOM_TAGS + [
-    'edge_device:testEdgeDevice',
-    'iothub:iot-edge-dev-hub.azure-devices.net',
+    'edge_device:{}'.format(IOT_EDGE_DEVICE_ID),
+    'iothub:{}'.format(IOT_EDGE_IOTHUB_HOSTNAME),
 ]
 
 HUB_METRICS = [
@@ -322,11 +326,16 @@ MODULE_METRICS = [
 E2E_LIBIOTHSM_STD_URL = os.environ['IOT_EDGE_E2E_LIBIOTHSM_STD_URL']
 E2E_IOTEDGE_URL = os.environ['IOT_EDGE_E2E_IOTEDGE_URL']
 E2E_IMAGE = os.environ['IOT_EDGE_E2E_IMAGE']
+E2E_IOT_EDGE_TLS_ENABLED = is_affirmative(os.environ.get('IOT_EDGE_E2E_TLS_ENABLED'))
 
 # Obtained from: `az iot hub device-identity connection-string show --device-id <DEVICE_ID> --hub-name <HUB_NAME>`
 E2E_IOT_EDGE_CONNSTR = os.environ.get('IOT_EDGE_CONNSTR', '')
 
-E2E_NETWORK = 'iot-edge-network'
+E2E_IOT_EDGE_ROOT_CA_CERT = os.path.join(HERE, 'tls', 'certs', 'azure-iot-test-only.root.ca.cert.pem')
+E2E_IOT_EDGE_DEVICE_CA_CERT = os.path.join(HERE, 'tls', 'certs', 'new-device.cert.pem')
+E2E_IOT_EDGE_DEVICE_CA_PK = os.path.join(HERE, 'tls', 'private', 'new-device.key.pem')
+
+E2E_NETWORK = 'iot-edge-network'  # External, create it using `$ docker network create`.
 E2E_SECURITY_DAEMON_MANAGEMENT_API_URL = 'http://localhost:15580/'
 E2E_EDGE_HUB_PROMETHEUS_URL = 'http://localhost:9601/metrics'
 E2E_EDGE_AGENT_PROMETHEUS_URL = 'http://localhost:9602/metrics'
@@ -361,8 +370,8 @@ E2E_METRICS = (
 )
 
 E2E_TAGS = CUSTOM_TAGS + [
-    'edge_device:testEdgeDevice',
-    'iothub:iot-edge-dev-hub.azure-devices.net',
+    'edge_device:{}'.format(IOT_EDGE_DEVICE_ID),
+    'iothub:{}'.format(IOT_EDGE_IOTHUB_HOSTNAME),
 ]
 
 E2E_METADATA = {

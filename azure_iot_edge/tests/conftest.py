@@ -18,7 +18,12 @@ def dd_environment(e2e_instance):
     if not common.E2E_IOT_EDGE_CONNSTR:
         raise RuntimeError("IOT_EDGE_CONNSTR must be set to start or stop the E2E environment.")
 
-    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    if common.E2E_IOT_EDGE_TLS_ENABLED:
+        compose_filename = 'docker-compose-tls.yaml'
+    else:
+        compose_filename = 'docker-compose.yaml'
+
+    compose_file = os.path.join(common.HERE, 'compose', compose_filename)
 
     conditions = [
         CheckDockerLogs(compose_file, r'[mgmt] .* 200 OK', wait=5),  # Verify any connectivity issues.
@@ -35,6 +40,28 @@ def dd_environment(e2e_instance):
         "E2E_IMAGE": common.E2E_IMAGE,
         "E2E_IOT_EDGE_CONNSTR": common.E2E_IOT_EDGE_CONNSTR,
     }
+
+    if common.E2E_IOT_EDGE_TLS_ENABLED:
+        for path in (
+            common.E2E_IOT_EDGE_DEVICE_CA_CERT,
+            common.E2E_IOT_EDGE_DEVICE_CA_CERT,
+            common.E2E_IOT_EDGE_DEVICE_CA_PK,
+        ):
+            if not os.path.exists(path):
+                message = (
+                    "Path {!r} does not exist. "
+                    "Please follow instructions in azure_iot_edge/tests/tls/README.md to "
+                    "configure test TLS certificates."
+                ).format(path)
+                raise RuntimeError(message)
+
+        env_vars.update(
+            {
+                "E2E_IOT_EDGE_ROOT_CA_CERT": common.E2E_IOT_EDGE_ROOT_CA_CERT,
+                "E2E_IOT_EDGE_DEVICE_CA_CERT": common.E2E_IOT_EDGE_DEVICE_CA_CERT,
+                "E2E_IOT_EDGE_DEVICE_CA_PK": common.E2E_IOT_EDGE_DEVICE_CA_PK,
+            }
+        )
 
     up = e2e_utils.IoTEdgeUp(compose_file, network_name=common.E2E_NETWORK)
     down = e2e_utils.IoTEdgeDown(compose_file, stop_extra_containers=common.E2E_EXTRA_SPAWNED_CONTAINERS)
