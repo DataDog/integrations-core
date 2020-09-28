@@ -10,37 +10,25 @@ from ...console import CONTEXT_SETTINGS, echo_success
 from .common import Release
 
 
-class ReportSerializer:
-    def __init__(self, release):
-        self.release = release
+def parse_commit(commit):
+    teams = []
+    title = commit.title
+    url = commit.url
+    next_tag = None
 
-    def print_prs(self):
-        changes = [self._change(commit) for commit in self.release.commits]
-        for change in changes:
-            print(','.join([change[field] for field in ['url', 'teams', 'next_tag', 'title']]))
+    pull_request = commit.pull_request
 
+    if pull_request:
+        teams = [label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('team')]
+        if not teams and pull_request.repo == 'integrations-core':
+            teams = ['agent-integrations']
+        title = pull_request.title
+        url = pull_request.url
 
+    if commit.included_in_tag:
+        next_tag = commit.included_in_tag.name
 
-
-    def _change(self, commit):
-        teams = []
-        title = commit.title
-        url = commit.url
-        next_tag = None
-
-        pull_request = commit.pull_request
-
-        if pull_request:
-            teams = [label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('team')]
-            if not teams and pull_request.repo == 'integrations-core':
-                teams = ['agent-integrations']
-            title = pull_request.title
-            url = pull_request.url
-
-        if commit.included_in_tag:
-            next_tag = commit.included_in_tag.name
-
-        return {'sha': commit.sha, 'title': title, 'url': url, 'teams': ' & '.join(teams), 'next_tag': next_tag}
+    return {'sha': commit.sha, 'title': title, 'url': url, 'teams': ' & '.join(teams), 'next_tag': next_tag}
 
 
 @click.command(
@@ -58,11 +46,10 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone):
         ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref
     )
 
-    print("datadog-agent")
-    ReportSerializer(agent_release).print_prs()
-    print("integrations-core")
-    ReportSerializer(integrations_release).print_prs()
-
+    changes = [parse_commit(commit) for commit in agent_release.commits + integrations_release.commits]
+    changes = sorted(changes, key=lambda x: x['next_tag']) # sort by RC
+    for change in changes:
+        print(','.join([change[field] for field in ['url', 'teams', 'next_tag', 'title']]))
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Prints some release stats we want to track")
 @click.option('--from-ref', '-f', help="Reference to start stats on (first RC tagged)", required=True)
