@@ -5,7 +5,7 @@
 Define our own models and interfaces for dealing with SNMP data.
 """
 
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union, cast
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_inspect import object_identity_from_object_type
@@ -88,6 +88,19 @@ class OID(object):
     def __repr__(self):
         # type: () -> str
         return 'OID({!r})'.format(str(self))
+
+    def __hash__(self):
+        # type: () -> int
+        # Returns the hash of the repr of the underlying ObjectType
+        return hash(repr(self.as_object_type()))
+
+    def __eq__(self, other):
+        # type: (object) -> bool
+        if type(self) is type(other):
+            other_oid = cast(OID, other)
+            return repr(self.as_object_type()) == repr(other_oid.as_object_type())
+        else:
+            return False
 
 
 class Device:

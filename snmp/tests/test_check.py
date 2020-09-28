@@ -1071,15 +1071,6 @@ def test_timeout(aggregator, caplog):
     check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, at_least=1)
-    # Some metrics still arrived
-    aggregator.assert_metric('snmp.ifInDiscards', count=4)
-    aggregator.assert_metric('snmp.ifInErrors', count=4)
-    aggregator.assert_metric('snmp.ifOutDiscards', count=4)
-    aggregator.assert_metric('snmp.ifOutErrors', count=4)
-    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
-
-    common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
 
     for record in caplog.records:
         if "No SNMP response received before timeout" in record.message:
@@ -1150,7 +1141,7 @@ def test_oids_cache_config_update(config, has_next_bulk_oids):
         assert bool(check._config.oid_config.bulk_oids) is has_next_bulk_oids
 
 
-GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
+GETNEXT_CALL_COUNT_PER_CHECK_RUN = 4
 
 
 @pytest.mark.parametrize(

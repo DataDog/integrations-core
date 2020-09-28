@@ -31,6 +31,36 @@ def test_oid():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    'value1, value2, expected',
+    [
+        pytest.param((1, 3, 6, 1, 2, 1, 0), (1, 3, 6, 1, 2, 1, 0), True, id='tuples-eq'),
+        pytest.param((1, '3', 6, '1', 2, 1, '0'), (1, 3, 6, 1, 2, 1, 0), True, id='mixed-tuples-eq'),
+        pytest.param(ObjectName((1, 3, 6, 1, 2, 1, 0)), (1, 3, 6, 1, 2, 1, 0), True, id='object-name-tuple-eq'),
+        pytest.param((1, 3, 6, 1, 2, 1, 0), ObjectName((1, 3, 6, 1, 2, 1, 0)), True, id='tuple-object-name-eq'),
+        pytest.param((1, 3, 6, 1, 2, 1, 1), (1, 3, 6, 1, 2, 1, 0), False, id='tuple-not-eq'),
+    ],
+)
+def test_oid_eq(value1, value2, expected):
+    assert (OID(value1) == OID(value2)) == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'value1, value2, expected',
+    [
+        pytest.param((1, 3, 6, 1, 2, 1, 0), (1, 3, 6, 1, 2, 1, 0), True, id='tuples-eq'),
+        pytest.param((1, '3', 6, '1', 2, 1, '0'), (1, 3, 6, 1, 2, 1, 0), True, id='mixed-tuples-eq'),
+        pytest.param(ObjectName((1, 3, 6, 1, 2, 1, 0)), (1, 3, 6, 1, 2, 1, 0), True, id='object-name-tuple-eq'),
+        pytest.param((1, 3, 6, 1, 2, 1, 0), ObjectName((1, 3, 6, 1, 2, 1, 0)), True, id='tuple-object-name-eq'),
+        pytest.param((1, 3, 6, 1, 2, 1, 1), (1, 3, 6, 1, 2, 1, 0), False, id='tuple-not-eq'),
+    ],
+)
+def test_oid_hash(value1, value2, expected):
+    assert (hash(OID(value1)) == hash(OID(value2))) == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'value, expected_tuple',
     [
         pytest.param((1, 3, 6, 1, 2, 1, 0), (1, 3, 6, 1, 2, 1, 0), id='tuple'),
