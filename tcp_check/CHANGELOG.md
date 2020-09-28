@@ -1,5 +1,10 @@
 # CHANGELOG - tcp_check
 
+## 2.6.0 / 2020-09-21
+
+* [Added] Add config spec. See [#7531](https://github.com/DataDog/integrations-core/pull/7531).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 2.5.0 / 2020-06-16 / Agent 7.21.0
 
 * [Added] Use higher precision clock measurements for Python 3. See [#6849](https://github.com/DataDog/integrations-core/pull/6849).

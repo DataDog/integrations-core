@@ -1,5 +1,14 @@
 # CHANGELOG - network
 
+## 1.18.1 / 2020-09-28
+
+* [Fixed] Fix procfs_path retrieval in network check. See [#7652](https://github.com/DataDog/integrations-core/pull/7652).
+
+## 1.18.0 / 2020-09-21
+
+* [Added] Pass `PROC_ROOT` as environment variable to `ss`. See [#7095](https://github.com/DataDog/integrations-core/pull/7095).
+* [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
+
 ## 1.17.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add network spec. See [#6889](https://github.com/DataDog/integrations-core/pull/6889).

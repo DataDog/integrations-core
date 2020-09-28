@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 5.5.1 / 2020-09-21
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 5.5.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Refactor to use Agent 6+ signature. See [#6906](https://github.com/DataDog/integrations-core/pull/6906).

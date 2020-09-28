@@ -1,5 +1,9 @@
 # CHANGELOG - teamcity
 
+## 1.10.0 / 2020-09-21
+
+* [Added] Add config spec. See [#7530](https://github.com/DataDog/integrations-core/pull/7530).
+
 ## 1.9.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).

@@ -1,5 +1,11 @@
 # CHANGELOG - pgbouncer
 
+## 1.11.0 / 2020-09-21
+
+* [Added] Add config spec. See [#7589](https://github.com/DataDog/integrations-core/pull/7589).
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 1.10.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

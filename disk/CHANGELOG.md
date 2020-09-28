@@ -1,5 +1,16 @@
 # CHANGELOG - disk
 
+## 3.0.0 / 2020-09-24
+
+* [Added] Add options for global exclusion patterns. See [#7648](https://github.com/DataDog/integrations-core/pull/7648).
+* [Changed] Ignore `/proc/sys/fs/binfmt_misc` by default. See [#7650](https://github.com/DataDog/integrations-core/pull/7650).
+
+## 2.11.0 / 2020-09-21
+
+* [Added] [disk] Add `include_all_devices` option and improve error logs. See [#7378](https://github.com/DataDog/integrations-core/pull/7378).
+* [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+
 ## 2.10.1 / 2020-06-11 / Agent 7.21.0
 
 * [Fixed] Rename disk check example config back to .default suffix. See [#6880](https://github.com/DataDog/integrations-core/pull/6880).

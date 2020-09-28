@@ -53,6 +53,28 @@ def test_historical_metrics(aggregator, dd_run_check, historical_instance):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_instance):
+    """This test does the same check than test_historical_events, but deactivate the option to get datastore cluster
+    folder in metrics tags"""
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    check.config.include_datastore_cluster_folder_tag = False
+    dd_run_check(check)
+
+    fixture_file = os.path.join(HERE, 'fixtures', 'metrics_historical_values.json')
+
+    with open(fixture_file, 'r') as f:
+        data = json.load(f)
+        for metric in data:
+            all_tags = metric.get('tags')
+            if all_tags is not None:
+                # The tag 'vsphere_folder:Datastores' is not supposed to be there anymore!
+                all_tags = [tag for tag in all_tags if tag != 'vsphere_folder:Datastores']
+            aggregator.assert_metric(metric['name'], metric.get('value'), tags=all_tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_events_only(aggregator, events_only_instance):
     check = VSphereCheck('vsphere', {}, [events_only_instance])

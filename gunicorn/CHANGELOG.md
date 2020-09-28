@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.13.0 / 2020-09-21
+
+* [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
+
 ## 1.12.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config specs. See [#7258](https://github.com/DataDog/integrations-core/pull/7258).

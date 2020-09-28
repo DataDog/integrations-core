@@ -19,7 +19,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_windows_ci
+from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
@@ -846,6 +846,16 @@ class TestIgnoreTLSWarning:
         else:
             raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
 
+    def test_default_no_ignore_http(self, caplog):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            http.get('http://www.google.com', verify=False)
+
+        assert sum(1 for _, level, _ in caplog.record_tuples if level == logging.WARNING) == 0
+
     def test_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {}
@@ -976,6 +986,7 @@ class TestUnixDomainSocket:
         assert adapter is not None
         assert isinstance(adapter, requests_unixsocket.UnixAdapter)
 
+    @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None
         http = RequestsWrapper({}, {})
