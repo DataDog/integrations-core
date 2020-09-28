@@ -9,3 +9,12 @@ sqlserver.stats.lock_waits,gauge,,lock,second,The number of times per second tha
 sqlserver.access.page_splits,gauge,,operation,second,The number of page splits per second.,-1,sql_server,page splits
 sqlserver.stats.procs_blocked,gauge,,process,,The number of processes blocked.,-1,sql_server,procs blocked
 sqlserver.buffer.checkpoint_pages,gauge,,page,second,The number of pages flushed to disk per second by a checkpoint or other operation that require all dirty pages to be flushed.,-1,sql_server,checkpoint pages
+sqlserver.scheduler.current_tasks_count,gauge,,task,,Number of current tasks that are associated with this scheduler.,0,sql_server,task count
+sqlserver.scheduler.current_workers_count,gauge,,worker,,Number of workers that are associated with this scheduler.,0,sql_server,worker count
+sqlserver.scheduler.active_workers_count,gauge,,worker,,"Number of workers that are active. An active worker is never preemptive, must have an associated task, and is either running, runnable, or suspended.",0,sql_server,active worker
+sqlserver.scheduler.runnable_tasks_count,gauge,,task,,"Number of workers, with tasks assigned to them, that are waiting to be scheduled on the runnable queue.",0,sql_server,runnable task
+sqlserver.scheduler.work_queue_count,gauge,,unit,,Number of tasks in the pending queue. These tasks are waiting for a worker to pick them up.,0,sql_server,work queue
+sqlserver.task.context_switches_count,gauge,,unit,,Number of scheduler context switches that this task has completed.,0,sql_server,context switch
+sqlserver.task.pending_io_count,gauge,,unit,,Number of physical I/Os that are performed by this task.,0,sql_server,task io pending
+sqlserver.task.pending_io_byte_count,gauge,,byte,,Total byte count of I/Os that are performed by this task.,0,sql_server,task io byte
+sqlserver.task.pending_io_byte_average,gauge,,byte,,Average byte count of I/Os that are performed by this task.,0,sql_server,task avg io byte
