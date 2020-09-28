@@ -224,8 +224,6 @@ class ReplicaCollector(MongoCollector):
         self._submit_payload({'replSet': result})
         self._report_replica_set_state(status['myState'], status['set'])
 
-        return status['myState']
-
 
 class ReplicationInfoCollector(MongoCollector):
     def __init__(self, check, tags):

@@ -49,7 +49,8 @@ class MongosDeploymentType(DeploymentType):
 class ReplicaSetDeploymentType(DeploymentType):
     def __init__(self, replset_get_status_payload):
         self.replset_name = replset_get_status_payload['set']
-        self.replset_state = get_state_name(replset_get_status_payload['myState']).lower()
+        self.replset_state = replset_get_status_payload['myState']
+        self.replset_state_name = get_state_name(replset_get_status_payload['myState']).lower()
 
     def get_available_metrics(self):
         return None

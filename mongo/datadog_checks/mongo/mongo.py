@@ -7,6 +7,7 @@ from copy import deepcopy
 from distutils.version import LooseVersion
 
 import pymongo
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from six import PY3, iteritems, itervalues
 from six.moves.urllib.parse import urlsplit
 
@@ -78,19 +79,16 @@ class MongoDb(AgentCheck):
         super(MongoDb, self).__init__(name, init_config, instances)
 
         # Members' last replica set state
-        self._last_state = None
-
-        self.collection_metrics_names = tuple(key.split('.')[1] for key in metrics.COLLECTION_METRICS)
+        self._previous_state = None
 
         # x.509 authentication
-        ssl_params = {
+        self.ssl_params = exclude_undefined_keys({
             'ssl': self.instance.get('ssl', None),
             'ssl_keyfile': self.instance.get('ssl_keyfile', None),
             'ssl_certfile': self.instance.get('ssl_certfile', None),
             'ssl_cert_reqs': self.instance.get('ssl_cert_reqs', None),
             'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
-        }
-        self.ssl_params = {key: value for key, value in iteritems(ssl_params) if value is not None}
+        })
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
@@ -99,12 +97,10 @@ class MongoDb(AgentCheck):
             hosts = self.instance.get('hosts', [])
             if not hosts:
                 raise ConfigurationError('No `hosts` specified')
-
+            if isinstance(hosts, str):
+                hosts = [hosts]
             username = self.instance.get('username')
             password = self.instance.get('password')
-
-            if username and not password:
-                raise ConfigurationError('`password` must be set when a `username` is specified')
 
             if password and not username:
                 raise ConfigurationError('`username` must be set when a `password` is specified')
@@ -166,15 +162,6 @@ class MongoDb(AgentCheck):
         # By default consider that this instance is a standalone, updated on each check run.
         self.deployment_type = StandaloneDeploymentType()
 
-        # Makes a reasonable hostname for a replset membership event to mention.
-        uri = urlsplit(self.clean_server_name)
-        if '@' in uri.netloc:
-            self.hostname = uri.netloc.split('@')[1].split(':')[0]
-        else:
-            self.hostname = uri.netloc.split(':')[0]
-        if self.hostname == 'localhost':
-            self.hostname = datadog_agent.get_hostname()
-
     @classmethod
     def get_library_versions(cls):
         return {'pymongo': pymongo.version}
@@ -185,7 +172,7 @@ class MongoDb(AgentCheck):
         """
         metrics_to_collect = {}
 
-        # Defaut metrics
+        # Default metrics
         for default_metrics in itervalues(metrics.DEFAULT_METRICS):
             metrics_to_collect.update(default_metrics)
 
@@ -251,10 +238,6 @@ class MongoDb(AgentCheck):
             self.deployment_type = StandaloneDeploymentType()
 
     def check(self, _):
-        """
-        Returns a dictionary that looks a lot like what's sent back by
-        db.serverStatus()
-        """
         try:
             cli = pymongo.mongo_client.MongoClient(
                 self.server,
@@ -264,19 +247,12 @@ class MongoDb(AgentCheck):
                 read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
                 **self.ssl_params
             )
-            # some commands can only go against the admin DB
-            db = cli[self.db_name]
+            if self.do_auth:
+                self.log.info("Using '%s' as the authentication database", self.auth_source)
+                self._authenticate(cli[self.auth_source])
         except Exception:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             raise
-
-        if self.do_auth:
-            if self.auth_source:
-                msg = "authSource was specified in the the server URL: using '%s' as the authentication database"
-                self.log.info(msg, self.auth_source)
-                self._authenticate(cli[self.auth_source])
-            else:
-                self._authenticate(db)
 
         tags = deepcopy(self.base_tags)
 
@@ -285,7 +261,7 @@ class MongoDb(AgentCheck):
             tags.extend(
                 [
                     "replset_name:{}".format(self.deployment_type.replset_name),
-                    "replset_state:{}".format(self.deployment_type.replset_state),
+                    "replset_state:{}".format(self.deployment_type.replset_state_name),
                 ]
             )
 
@@ -314,10 +290,11 @@ class MongoDb(AgentCheck):
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        if self.replica_check:
-            collector = ReplicaCollector(self, tags, self._last_state)
+        if self.replica_check and isinstance(self.deployment_type, ReplicaSetDeploymentType):
+            collector = ReplicaCollector(self, tags, self._previous_state)
             try:
-                self._last_state = collector.collect(cli)
+                collector.collect(cli)
+                self._previous_state = self.deployment_type.replset_state
             except Exception as e:
                 if "OperationFailure" in repr(e) and (
                     "not running with --replSet" in str(e) or "replSetGetStatus" in str(e)
