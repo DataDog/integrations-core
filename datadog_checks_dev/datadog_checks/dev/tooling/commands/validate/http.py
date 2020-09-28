@@ -11,7 +11,7 @@ from ..console import CONTEXT_SETTINGS, echo_info, echo_failure
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
 EXCLUDED_INTEGRATIONS = {
     'kubelet',
-    # 'openstack'
+    'openstack'
 }
 
 REQUEST_LIBRARY_FUNCTIONS = {
