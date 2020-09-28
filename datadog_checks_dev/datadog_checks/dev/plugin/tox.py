@@ -18,7 +18,7 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
+ISORT_DEP = 'isort[pyproject]==5.5.1'
 BLACK_DEP = 'black==20.8b1'
 FLAKE8_DEP = 'flake8==3.8.3'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
@@ -86,7 +86,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     commands = [
         'flake8 --config=../.flake8 .',
         'black --check --diff .',
-        'isort --check-only --diff --recursive .',
+        'isort --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -139,7 +139,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort --recursive .',
+                'isort .',
                 'black .',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',

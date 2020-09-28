@@ -10,16 +10,16 @@ import pytest
 import requests
 import requests_kerberos
 import requests_ntlm
+import requests_unixsocket
 from aws_requests_auth import boto_utils as requests_aws
 from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
+from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_windows_ci
+from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
@@ -831,77 +831,169 @@ class TestIgnoreTLSWarning:
 
         assert http.ignore_tls_warning is False
 
-    def test_default_no_ignore(self):
+    def test_default_no_ignore(self, caplog):
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-    def test_ignore(self):
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+    def test_default_no_ignore_http(self, caplog):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            http.get('http://www.google.com', verify=False)
+
+        assert sum(1 for _, level, _ in caplog.record_tuples if level == logging.WARNING) == 0
+
+    def test_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_default_no_ignore_session(self):
+    def test_default_no_ignore_session(self, caplog):
         instance = {'persist_connections': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-    def test_ignore_session(self):
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+    def test_ignore_session(self, caplog):
         instance = {'tls_ignore_warning': True, 'persist_connections': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_init_ignore(self):
+    def test_init_ignore(self, caplog):
         instance = {}
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_default_init_no_ignore(self):
+    def test_default_init_no_ignore(self, caplog):
         instance = {}
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-    def test_instance_ignore(self):
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+    def test_instance_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {'tls_ignore_warning': False}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(None) as record:
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
 
-        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
-    def test_instance_no_ignore(self):
+    def test_instance_no_ignore(self, caplog):
         instance = {'tls_ignore_warning': False}
         init_config = {'tls_ignore_warning': True}
         http = RequestsWrapper(instance, init_config)
 
-        with pytest.warns(InsecureRequestWarning):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             http.get('https://www.google.com', verify=False)
+
+        expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.WARNING and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+
+class TestUnixDomainSocket:
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
+            pytest.param('http://example.org', False, id='non-uds-url'),
+            pytest.param('unix:///var/run/test.sock/info', True, id='unquoted'),
+            pytest.param('unix://%2Fvar%2Frun%2Ftest.sock', True, id='quoted'),
+        ],
+    )
+    def test_is_uds_url(self, value, expected):
+        # type: (str, bool) -> None
+        assert is_uds_url(value) == expected
+
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
+            pytest.param('http://example.org', 'http://example.org', id='non-uds-url'),
+            pytest.param('unix:///var/run/test.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='uds-url'),
+            pytest.param('unix:///var/run/test.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='uds-url-no-path'),
+            pytest.param(
+                'unix://%2Fvar%2Frun%2Ftest.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='already-quoted'
+            ),
+        ],
+    )
+    def test_quote_uds_url(self, value, expected):
+        # type: (str, str) -> None
+        assert quote_uds_url(value) == expected
+
+    def test_adapter_mounted(self):
+        # type: () -> None
+        http = RequestsWrapper({}, {})
+        url = 'unix:///var/run/test.sock'
+        adapter = http.session.get_adapter(url=url)
+        assert adapter is not None
+        assert isinstance(adapter, requests_unixsocket.UnixAdapter)
+
+    @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
+    def test_uds_request(self, uds_path):
+        # type: (str) -> None
+        http = RequestsWrapper({}, {})
+        url = 'unix://{}'.format(uds_path)
+        response = http.get(url)
+        assert response.status_code == 200
+        assert response.text == 'Hello, World!'
 
 
 class TestSession:

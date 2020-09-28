@@ -15,7 +15,6 @@ import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -2495,7 +2494,7 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_data):
+def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, text_data):
     instance = dict(
         {
             'prometheus_url': 'https://www.example.com',
@@ -2507,14 +2506,17 @@ def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_dat
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
-    with pytest.warns(None) as record:
+    with caplog.at_level(logging.DEBUG):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
-    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
+    for _, _, message in caplog.record_tuples:
+        assert message != expected_message
 
 
-def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_factory, text_data):
+def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_check_factory, text_data):
     instance = dict(
         {
             'prometheus_url': 'https://www.example.com',
@@ -2529,11 +2531,14 @@ def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_facto
     # `prometheus_url` changed just before calling `send_request`
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
-    with pytest.warns(None) as record:
+    with caplog.at_level(logging.DEBUG):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
-    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
+    for _, _, message in caplog.record_tuples:
+        assert message != expected_message
 
 
 def test_http_handler(mocked_openmetrics_check_factory):
@@ -2600,3 +2605,19 @@ def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data)
     assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 1
     assert list(check.config_map[FAKE_ENDPOINT]['_type_override_patterns'].values())[0] == 'counter'
     assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 0
+
+
+def test_empty_namespace(aggregator, mocked_prometheus_check, text_data, ref_gauge):
+    """
+    Test that metric type is overridden correctly with wildcard.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['namespace'] = ''
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('process.vm.bytes', count=1)

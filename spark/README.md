@@ -65,7 +65,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
 
 
-##### Log collection
+#### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

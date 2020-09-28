@@ -38,6 +38,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "elasticsearch"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

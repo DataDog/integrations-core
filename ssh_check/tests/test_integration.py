@@ -4,6 +4,7 @@
 import re
 
 import pytest
+from tests.conftest import PRIVATE_KEY_FILE
 
 from datadog_checks.ssh_check import CheckSSH
 
@@ -41,3 +42,13 @@ def test_metadata(aggregator, instance, datadog_agent):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
     common.wait_for_threads()  # needed, otherwise the next won't count correctly threads
+
+
+@pytest.mark.usefixtures("dd_environment_keypair")
+def test_check_keypair(aggregator, instance):
+    instance['private_key_file'] = PRIVATE_KEY_FILE
+    instance['password'] = 'testpassprase'
+    check = CheckSSH('ssh_check', {}, [instance])
+    check.check(instance)
+    common._test_check(aggregator, instance)
+    common.wait_for_threads()

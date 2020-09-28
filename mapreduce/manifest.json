@@ -29,7 +29,10 @@
     },
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "monitors": {}
+    "logs": {
+      "source": "mapreduce"
+    },
+    "monitors": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

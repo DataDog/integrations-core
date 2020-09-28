@@ -293,10 +293,10 @@ class PostgreSql(AgentCheck):
         else:
             if self.config.host == 'localhost' and self.config.password == '':
                 # Use ident method
-                connection_string = "user=%s dbname=%s, application_name=%s" % (
+                connection_string = "user=%s dbname=%s application_name=%s" % (
                     self.config.user,
                     self.config.dbname,
-                    "datadog-agent",
+                    self.config.application_name,
                 )
                 if self.config.query_timeout:
                     connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
@@ -308,7 +308,7 @@ class PostgreSql(AgentCheck):
                     'password': self.config.password,
                     'database': self.config.dbname,
                     'sslmode': self.config.ssl_mode,
-                    'application_name': "datadog-agent",
+                    'application_name': self.config.application_name,
                 }
                 if self.config.port:
                     args['port'] = self.config.port

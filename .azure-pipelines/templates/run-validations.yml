@@ -24,7 +24,7 @@ steps:
   - script: ddev validate dep
     displayName: 'Validate dependencies'
 
-- script: ddev validate manifest -i
+- script: ddev validate manifest
   displayName: 'Validate manifest files'
 
 - script: ddev validate metadata
@@ -44,3 +44,10 @@ steps:
 
 - script: ddev validate imports
   displayName: 'Validate imports'
+
+- script: ddev validate package
+  displayName: 'Validate package'
+
+- ${{ if eq(parameters.repo, 'marketplace') }}:
+  - script: ddev validate eula
+    displayName: 'Validate EULA files'

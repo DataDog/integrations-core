@@ -4,22 +4,13 @@ files:
     options:
       - template: init_config
         options:
-          - name: global_custom_queries
-            description: |
-              Global custom queries can be applied to all instances using the
-              `use_global_custom_queries` setting at the instance level.
-
-              See `custom_queries` defined below for syntax and documentation about each option.
-            value:
-              type: array
-              items:
-                type: object
-              example:
+          - template: init_config/db
+            overrides:
+              global_custom_queries.value.example:
                 - metric_prefix: mysql
                   query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
-
           - template: init_config/default
 
       - template: instances
@@ -107,50 +98,9 @@ files:
                 key: <KEY_FILE_PATH>
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
-
-          - name: use_global_custom_queries
-            description: |
-              How `global_custom_queries` should be used for this instance. There are 3 options:
-
-              * 'true' - `global_custom_queries` override `custom_queries`.
-              * 'false' - `custom_queries` override `global_custom_queries`.
-              * 'extend' - `global_custom_queries` are used in addition to any `custom_queries`.
-            value:
-              type: string
-              example: 'true'
-
-          - name: custom_queries
-            description: |
-              A list of custom queries used to retrieve custom metrics.
-
-              The following fields are expected:
-
-              query:
-                The SQL query to execute. It can be a simple statement, or a multi-line script.
-              columns:
-                A list representing each column, ordered sequentially from left to right.
-                The number of columns must be equal to the number of columns returned in the `query`.
-
-                Each column is an object with the following fields:
-
-                name:
-                  The suffix to append to `mysql.` to form the full metric name.
-                  If `type` is `tag`, this column is considered a tag and applied to every metric
-                  collected by this query.
-                type:
-                  The submission method (gauge, monotonic_count, etc.).
-                  Use the 'tag' type to tag each metric in the row with the name and value
-                  of the item in this column.
-                  Use the 'count' type to perform aggregation for queries that return multiple
-                  rows with the same or no tags.
-              tags: (optional)
-                A list of tags to apply to each metric.
-
-            value:
-              type: array
-              items:
-                type: object
-              example:
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
                 - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
                   columns:
                     - name: foo

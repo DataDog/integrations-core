@@ -11,9 +11,9 @@ from ... import AgentCheck, is_affirmative
 from ...utils.containers import hash_mutable
 
 try:
-    from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
+    from .winpdh import DATA_TYPE_DOUBLE, DATA_TYPE_INT, WinPDHCounter
 except ImportError:
-    from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
+    from .winpdh_stub import DATA_TYPE_DOUBLE, DATA_TYPE_INT, WinPDHCounter
 
 
 RESOURCETYPE_ANY = 0
