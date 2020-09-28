@@ -24,7 +24,6 @@ read VERIFICATION_CODE
 ./certGen.sh create_device_certificate $TEST_DEVICE_NAME
 echo
 echo 'SUCCESS: created device certificate files'
-echo "NOTE: you must specify these files in the test device config.yaml under 'provisioning' section."
 echo
 echo "Please upload $DIR/certs/verification-code.cert.pem to IoT Hub to complete certificate validation"
 echo "See steps 7/ and 8/ here: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started#register-x509-ca-certificates-to-your-iot-hub"
