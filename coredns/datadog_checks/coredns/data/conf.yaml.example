@@ -45,12 +45,20 @@ init_config:
 #
 instances:
 
+    ## @param tags - list of strings - required
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+  - tags:
+      - dns-pod:%%host%%
+
     ## @param prometheus_url - string - required
     ## To enable CoreDNS metrics you must specify the prometheus url
     ## and enable the plugin within coredns.
     ## See: https://coredns.io/plugins/metrics/
     #
-  - prometheus_url: http://%%host%%:9153/metrics
+    prometheus_url: http://%%host%%:9153/metrics
 
     ## @param metrics - list of strings - required
     ## List of metrics to be fetched from the prometheus endpoint, if there's a
@@ -194,6 +202,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -217,6 +226,11 @@ instances:
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
@@ -400,15 +414,6 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
-
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
