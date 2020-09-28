@@ -7,10 +7,10 @@ from copy import deepcopy
 from distutils.version import LooseVersion
 
 import pymongo
-from datadog_checks.base.utils.common import exclude_undefined_keys
-from six import PY3, iteritems, itervalues
-from six.moves.urllib.parse import urlsplit
+from six import PY3, itervalues
 
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
     CurrentOpCollector,
@@ -29,13 +29,6 @@ from datadog_checks.mongo.common import (
     ReplicaSetDeploymentType,
     StandaloneDeploymentType,
 )
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from . import metrics
 from .utils import build_connection_string, parse_mongo_uri
@@ -82,13 +75,15 @@ class MongoDb(AgentCheck):
         self._previous_state = None
 
         # x.509 authentication
-        self.ssl_params = exclude_undefined_keys({
-            'ssl': self.instance.get('ssl', None),
-            'ssl_keyfile': self.instance.get('ssl_keyfile', None),
-            'ssl_certfile': self.instance.get('ssl_certfile', None),
-            'ssl_cert_reqs': self.instance.get('ssl_cert_reqs', None),
-            'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
-        })
+        self.ssl_params = exclude_undefined_keys(
+            {
+                'ssl': self.instance.get('ssl', None),
+                'ssl_keyfile': self.instance.get('ssl_keyfile', None),
+                'ssl_certfile': self.instance.get('ssl_certfile', None),
+                'ssl_cert_reqs': self.instance.get('ssl_cert_reqs', None),
+                'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
+            }
+        )
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
