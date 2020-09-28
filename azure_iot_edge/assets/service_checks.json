@@ -1,1 +1,46 @@
-[]
+[
+    {
+        "agent_version": "6.24.0",
+        "integration": "Azure IoT Edge",
+        "groups": [
+            "host"
+        ],
+        "check": "azure.iot_edge.security_manager.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Security Manager health",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Security Manager management API, `OK` otherwise."
+    },
+    {
+        "agent_version": "6.24.0",
+        "integration": "Azure IoT Edge",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "azure.iot_edge.edge_agent.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Edge Agent health",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Agent module, `OK` otherwise."
+    },
+    {
+        "agent_version": "6.24.0",
+        "integration": "Azure IoT Edge",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "azure.iot_edge.edge_hub.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Edge Hub health",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Hub module, `OK` otherwise."
+    }
+]
