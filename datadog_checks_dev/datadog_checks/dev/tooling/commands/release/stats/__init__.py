@@ -4,7 +4,7 @@
 import click
 
 from ...console import CONTEXT_SETTINGS
-from .stats import report, merged_prs
+from .stats import merged_prs, report
 
 ALL_COMMANDS = (report, merged_prs)
 

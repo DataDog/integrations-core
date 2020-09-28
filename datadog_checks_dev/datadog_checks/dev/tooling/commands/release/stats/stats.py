@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import csv
-from pathlib import Path
-
 import click
 
-from ...console import CONTEXT_SETTINGS, echo_success
+from ...console import CONTEXT_SETTINGS
 from .common import Release
 
 
@@ -47,9 +44,10 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone):
     )
 
     changes = [parse_commit(commit) for commit in agent_release.commits + integrations_release.commits]
-    changes = sorted(changes, key=lambda x: x['next_tag']) # sort by RC
+    changes = sorted(changes, key=lambda x: x['next_tag'])  # sort by RC
     for change in changes:
         print(','.join([change[field] for field in ['url', 'teams', 'next_tag', 'title']]))
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Prints some release stats we want to track")
 @click.option('--from-ref', '-f', help="Reference to start stats on (first RC tagged)", required=True)
@@ -59,7 +57,9 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone):
 def report(ctx, from_ref, to_ref, release_milestone):
 
     agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
-    integrations_release = Release.from_github(ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref)
+    integrations_release = Release.from_github(
+        ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref
+    )
 
     print('Release Branch:', agent_release.release_version)
     print('Release candidates:', len(agent_release.rc_tags))
