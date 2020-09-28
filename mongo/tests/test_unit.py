@@ -187,17 +187,3 @@ def test_collector_submit_payload(check, aggregator):
     aggregator.assert_metric('mongodb.foo.x.y.zps', 1, tags, metric_type=aggregator.RATE)
     aggregator.assert_metric('mongodb.foo.bar1', 1, tags, metric_type=aggregator.GAUGE)
     aggregator.assert_all_metrics_covered()
-
-
-def test_collection_metrics_names_can_be_iterated_multiple_times(check, instance):
-    check = check(instance)
-    there_are_metric_names = False
-    for _ in check.collection_metrics_names:
-        there_are_metric_names = True
-    assert there_are_metric_names, 'No collection metric names found'
-
-    there_are_metric_names = False
-    for _ in check.collection_metrics_names:
-        there_are_metric_names = True
-        break
-    assert there_are_metric_names, 'Collection metric names have been depleted'
