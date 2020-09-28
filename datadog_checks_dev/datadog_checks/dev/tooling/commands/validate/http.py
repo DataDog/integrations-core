@@ -4,8 +4,7 @@
 import os
 
 import click
-from datadog_checks.dev.tooling.utils import get_valid_integrations, get_check_files, get_config_spec, \
-    get_default_config_spec
+from datadog_checks.dev.tooling.utils import get_valid_integrations, get_check_files, get_default_config_spec
 
 from ..console import CONTEXT_SETTINGS, echo_info, echo_failure
 
@@ -72,8 +71,10 @@ def validate_use_http_wrapper(file, check):
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
                 if http_func in line:
-                    echo_failure(f'Detected `{http_func}` on line {num} in {check}\'s {file}, '
-                                 f'please make sure to use http wrapper class instead of request library')
+                    echo_failure(f'Check `{http_func}` uses {http_func} on line {num} in {os.path.basename(file)}, '
+                                 f'please use the HTTP wrapper instead')
+
+    #                 Check hazelcast uses legacy agent signature in check.py on line 14
     return False
 
 
