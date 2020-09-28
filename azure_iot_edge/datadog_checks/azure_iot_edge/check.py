@@ -61,6 +61,15 @@ class AzureIoTEdgeCheck(AgentCheck):
     def check(self, _):
         self._check_daemon_health()
 
+        # NOTE: This check consumes configuration from a single instance, and then delegates the Edge Agent and Edge Hub
+        # Prometheus endpoints checks to to two OpenMetrics checks, using a composition approach.
+        # Compared to requiring separate instances for monitor the Edge Agent, Edge Hub, and the Security Manager,
+        # we keep the "1 instance = 1 IoT Edge device" mental model, which provides better configuration UX for users
+        # (as having to configure 3 separate instances is more error-prone).
+        # The composition approach also hopefully makes the code more natural and easier to understand, compared
+        # to subclassing from OpenMetricsBaseCheck and having to dig into its internals such as `.process()` and
+        # scraper configurations.
+
         # Sync Agent-assigned check ID so that metrics of these sub-checks are reported as coming from this check.
         self._edge_hub_check.check_id = self.check_id
         self._edge_agent_check.check_id = self.check_id
