@@ -348,6 +348,9 @@ class AggregatorStub(object):
                     expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
                     actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
+                    if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
+                        actual_metric_type = 'count'
+
                     if expected_metric_type != actual_metric_type:
                         errors.add(
                             "Expect `{}` to have type `{}` but got `{}`.".format(
