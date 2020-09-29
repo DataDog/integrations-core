@@ -25,7 +25,12 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "Disk usage": "assets/monitors/disk_usage.json",
+      "Memory usage": "assets/monitors/memory_usage.json",
+      "IoT Hub syncs": "assets/monitors/iothub_syncs.json",
+      "Edge Hub retries": "assets/monitors/edgehub_retries.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {
