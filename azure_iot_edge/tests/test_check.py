@@ -51,7 +51,7 @@ def test_check(aggregator, mock_instance):
         tags=common.CUSTOM_TAGS + ['endpoint:{}'.format(common.MOCK_EDGE_AGENT_PROMETHEUS_URL)],
     )
     aggregator.assert_service_check(
-        'azure.iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
+        'azure.iot_edge.security_manager.can_connect', AzureIoTEdgeCheck.OK, count=1, tags=common.CUSTOM_TAGS
     )
 
     aggregator.assert_all_metrics_covered()
@@ -77,21 +77,20 @@ def test_version_metadata(datadog_agent, mock_instance):
 
 
 @pytest.mark.usefixtures("mock_server")
-def test_security_daemon_down(aggregator, mock_instance):
+def test_security_manager_down(aggregator, mock_instance):
     # type: (AggregatorStub, dict) -> None
     """
-    When the security daemon management API endpoint is unreachable, the security daemon service check
-    reports as CRITICAL.
+    When the management API endpoint is unreachable, the security manager service check reports as CRITICAL.
     """
     instance = copy.deepcopy(mock_instance)
     wrong_port = common.MOCK_SERVER_PORT + 1  # Will trigger exception.
-    instance['security_daemon_management_api_url'] = 'http://localhost:{}/mgmt.json'.format(wrong_port)
+    instance['security_manager_management_api_url'] = 'http://localhost:{}/mgmt.json'.format(wrong_port)
 
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [instance])
     check.check(instance)
 
-    aggregator.assert_service_check('azure.iot_edge.security_daemon.can_connect', AzureIoTEdgeCheck.CRITICAL)
-    message = aggregator._service_checks['azure.iot_edge.security_daemon.can_connect'][0].message  # type: str
+    aggregator.assert_service_check('azure.iot_edge.security_manager.can_connect', AzureIoTEdgeCheck.CRITICAL)
+    message = aggregator._service_checks['azure.iot_edge.security_manager.can_connect'][0].message  # type: str
     if Platform.is_windows():
         assert 'No connection could be made' in message
     else:

@@ -8,7 +8,7 @@ Instance = TypedDict(
     {
         'edge_hub_prometheus_url': str,
         'edge_agent_prometheus_url': str,
-        'security_daemon_management_api_url': str,
+        'security_manager_management_api_url': str,
         'tags': List[str],
     },
     total=False,

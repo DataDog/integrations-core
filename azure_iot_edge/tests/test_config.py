@@ -16,7 +16,7 @@ def test_config():
     instance = {
         'edge_hub_prometheus_url': 'http://testserver:9601/metrics',
         'edge_agent_prometheus_url': 'http://testserver:9602/metrics',
-        'security_daemon_management_api_url': 'http://testserver:15580',
+        'security_manager_management_api_url': 'http://testserver:15580',
     }  # type: Instance
 
     config = Config(instance, check_namespace=AzureIoTEdgeCheck.__NAMESPACE__)
@@ -35,7 +35,7 @@ def test_config():
         'tags': [],
         'exclude_labels': ['ms_telemetry', 'instance_number'],
     }
-    assert config.security_daemon_management_api_url == 'http://testserver:15580'
+    assert config.security_manager_management_api_url == 'http://testserver:15580'
 
 
 @pytest.mark.unit
@@ -45,7 +45,7 @@ def test_config_custom_tags():
     instance = {
         'edge_hub_prometheus_url': '...',
         'edge_agent_prometheus_url': '...',
-        'security_daemon_management_api_url': '...',
+        'security_manager_management_api_url': '...',
         'tags': tags,
     }  # type: Instance
 
@@ -58,14 +58,14 @@ def test_config_custom_tags():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'key', ['edge_hub_prometheus_url', 'edge_agent_prometheus_url', 'security_daemon_management_api_url']
+    'key', ['edge_hub_prometheus_url', 'edge_agent_prometheus_url', 'security_manager_management_api_url']
 )
 def test_config_required_options(key):
     # type: (str) -> None
     instance = {
         'edge_hub_prometheus_url': '...',
         'edge_agent_prometheus_url': '...',
-        'security_daemon_management_api_url': '...',
+        'security_manager_management_api_url': '...',
     }  # type: Instance
 
     instance.pop(key)  # type: ignore
@@ -80,7 +80,7 @@ def test_config_tags_must_be_list():
     instance = {
         'edge_hub_prometheus_url': '...',
         'edge_agent_prometheus_url': '...',
-        'security_daemon_management_api_url': '...',
+        'security_manager_management_api_url': '...',
         'tags': 'string:tags',  # type: ignore
     }  # type: Instance
 

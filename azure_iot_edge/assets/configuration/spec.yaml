@@ -7,9 +7,9 @@ files:
           - template: init_config/default
       - template: instances
         options:
-          - name: security_daemon_management_api_url
+          - name: security_manager_management_api_url
             description: |
-              The URL of the Security Daemon management API, for health check purposes.
+              The URL of the management API exposed by the Security Manager, for health check purposes.
             required: true
             value:
               type: string

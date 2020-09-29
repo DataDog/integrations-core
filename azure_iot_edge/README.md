@@ -82,7 +82,7 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
                 "Labels": {
                     "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
                     "com.datadoghq.ad.init_configs": "[{}]",
-                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\", \"security_daemon_management_api_url\": \"unix:///var/run/iotedge/mgmt.sock\"}]"
+                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\", \"security_manager_management_api_url\": \"unix:///var/run/iotedge/mgmt.sock\"}]"
                 }
             }
             ```
@@ -97,7 +97,7 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
                 "Labels": {
                     "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
                     "com.datadoghq.ad.init_configs": "[{}]",
-                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\", \"security_daemon_management_api_url\": \"http://host.docker.internal:15580/\"]}]"
+                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\", \"security_manager_management_api_url\": \"http://host.docker.internal:15580/\"]}]"
                 }
             }
             ```

@@ -59,7 +59,7 @@ class AzureIoTEdgeCheck(AgentCheck):
         self.set_metadata('version', iot_edge_runtime_version)
 
     def check(self, _):
-        self._check_daemon_health()
+        self._check_security_manager_health()
 
         # NOTE: This check consumes configuration from a single instance, and then delegates the Edge Agent and Edge Hub
         # Prometheus endpoints checks to to two OpenMetrics checks, using a composition approach.
@@ -77,16 +77,16 @@ class AzureIoTEdgeCheck(AgentCheck):
         self._edge_hub_check.check(self._config.edge_hub_instance)
         self._edge_agent_check.check(self._config.edge_agent_instance)
 
-    def _check_daemon_health(self):
+    def _check_security_manager_health(self):
         try:
-            _ = self.http.get(self._config.security_daemon_management_api_url)
+            _ = self.http.get(self._config.security_manager_management_api_url)
         except Exception as exc:
             status = self.CRITICAL
             message = str(exc)
         else:
             # The endpoint is responding, which means the management API server is running and accessible to the Agent,
-            # so it's fair to assume that the security daemon is running and in good shape.
+            # so it's fair to assume that the security manager is running and in good shape.
             status = self.OK
             message = ''
 
-        self.service_check('security_daemon.can_connect', status, message=message, tags=self._config.tags)
+        self.service_check('security_manager.can_connect', status, message=message, tags=self._config.tags)

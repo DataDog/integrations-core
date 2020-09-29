@@ -28,11 +28,11 @@ class Config(object):
 
         self.tags = tags  # type: List[str]
 
-        security_daemon_management_api_url = instance.get('security_daemon_management_api_url')
-        if not security_daemon_management_api_url:
-            raise ConfigurationError('option "security_daemon_management_api_url" is required')
+        security_manager_management_api_url = instance.get('security_manager_management_api_url')
+        if not security_manager_management_api_url:
+            raise ConfigurationError('option "security_manager_management_api_url" is required')
 
-        self.security_daemon_management_api_url = security_daemon_management_api_url
+        self.security_manager_management_api_url = security_manager_management_api_url
 
         edge_hub_prometheus_url = instance.get('edge_hub_prometheus_url')
         if not edge_hub_prometheus_url:
