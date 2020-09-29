@@ -11,7 +11,7 @@
             "critical"
         ],
         "name": "Security Manager health",
-        "description": "Returns `CRITICAL` if the Agent is unable to reach the Security Manager management API, `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Security Manager management API. Returns `OK` otherwise."
     },
     {
         "agent_version": "6.24.0",
@@ -26,7 +26,7 @@
             "critical"
         ],
         "name": "Edge Agent health",
-        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Agent module, `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise."
     },
     {
         "agent_version": "6.24.0",
@@ -41,6 +41,6 @@
             "critical"
         ],
         "name": "Edge Hub health",
-        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Hub module, `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise."
     }
 ]
