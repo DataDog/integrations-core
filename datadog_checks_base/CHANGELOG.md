@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 14.0.1 / 2020-09-28
+
+* [Fixed] Normalize count metric type in `assert_metrics_using_metadata()`. See [#7666](https://github.com/DataDog/integrations-core/pull/7666).
+* [Fixed] Do not emit insecure warning log for HTTP requests. See [#7661](https://github.com/DataDog/integrations-core/pull/7661).
+
 ## 14.0.0 / 2020-09-21
 
 * [Added] New Integration: Snowflake. See [#7043](https://github.com/DataDog/integrations-core/pull/7043).

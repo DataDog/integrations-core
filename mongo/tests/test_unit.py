@@ -199,3 +199,17 @@ def test_legacy_config_deprecation(check):
     assert check.get_warnings() == [
         'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.'
     ]
+
+
+def test_collection_metrics_names_can_be_iterated_multiple_times(check, instance):
+    check = check(instance)
+    there_are_metric_names = False
+    for _ in check.collection_metrics_names:
+        there_are_metric_names = True
+    assert there_are_metric_names, 'No collection metric names found'
+
+    there_are_metric_names = False
+    for _ in check.collection_metrics_names:
+        there_are_metric_names = True
+        break
+    assert there_are_metric_names, 'Collection metric names have been depleted'

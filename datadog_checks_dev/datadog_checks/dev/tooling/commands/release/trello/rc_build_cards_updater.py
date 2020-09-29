@@ -35,8 +35,9 @@ class RCBuildCardsUpdater:
             'DyjjKkZD',  # [A6] Windows
             'BOvSs9Le',  # [IOT] Linux
             'hu1JXJ18',  # [A7] Linux + Docker
-            'E7bHwa14',
-        ]  # [A6] Linux + Docker
+            'E7bHwa14',  # [A6] Linux + Docker
+            'dYrSpOLW',  # MacOS
+        ]
 
         for card_id in rc_build_cards:
             card = self.__trello.get_card(card_id)
