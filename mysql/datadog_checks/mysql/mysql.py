@@ -390,7 +390,7 @@ class MySql(AgentCheck):
                         # http://www.python.org/dev/peps/pep-0249/
                         # cursor.description is a tuple of (column_name, ..., ...)
                         try:
-                            col_idx = [d[0].lower() for d in cursor.description].index(field.lower())
+                            col_idx = [to_native_string(d[0].lower()) for d in cursor.description].index(field.lower())
                             self.log.debug("Collecting metric: %s", metric)
                             if result[col_idx] is not None:
                                 self.log.debug("Collecting done, value %s", result[col_idx])
@@ -479,7 +479,8 @@ class MySql(AgentCheck):
     def _get_stats_from_status(cls, db):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW /*!50002 GLOBAL */ STATUS;")
-            results = dict(cursor.fetchall())
+            raw_results = dict(cursor.fetchall())
+            results = {to_native_string(r[0]): r[1] for r in iteritems(raw_results)}
 
             return results
 
@@ -487,7 +488,8 @@ class MySql(AgentCheck):
     def _get_stats_from_variables(cls, db):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW GLOBAL VARIABLES;")
-            results = dict(cursor.fetchall())
+            raw_results = dict(cursor.fetchall())
+            results = {to_native_string(r[0]): r[1] for r in iteritems(raw_results)}
 
             return results
 
@@ -535,10 +537,15 @@ class MySql(AgentCheck):
                 for slave_result in cursor.fetchall():
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = replication_channel or slave_result.get('Channel_Name') or 'default'
+                    channel = (
+                        replication_channel
+                        or slave_result.get('Channel_Name')
+                        or slave_result.get(b'Channel_Name')
+                        or 'default'
+                    )
                     for key, value in iteritems(slave_result):
                         if value is not None:
-                            replica_results[key]['channel:{0}'.format(channel)] = value
+                            replica_results[key]['channel:{0}'.format(to_native_string(channel))] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
@@ -632,7 +639,7 @@ class MySql(AgentCheck):
 
                 schema_query_avg_run_time = {}
                 for row in cursor.fetchall():
-                    schema_name = str(row[0])
+                    schema_name = to_native_string(row[0])
                     avg_us = long(row[1])
 
                     # set the tag as the dictionary key
@@ -656,7 +663,7 @@ class MySql(AgentCheck):
 
                 schema_size = {}
                 for row in cursor.fetchall():
-                    schema_name = str(row[0])
+                    schema_name = to_native_string(row[0])
                     size = long(row[1])
 
                     # set the tag as the dictionary key
