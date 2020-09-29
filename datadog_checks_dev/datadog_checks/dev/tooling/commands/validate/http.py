@@ -37,23 +37,29 @@ def validate_config_http(file, check):
     check -- name of the check that file belongs to
     """
 
-    if os.path.exists(file):
-        has_instance_http = False
-        has_init_config_http = False
-        with open(file, "r") as f:
-            for _, line in enumerate(f):
-                if 'instances/http' in line:
-                    has_instance_http = True
-                if 'init_config/http' in line:
-                    has_init_config_http = True
+    if not os.path.exists(file):
+        return
 
-        if not has_instance_http:
-            echo_failure(f'Detected {check}\'s spec.yaml file does not contain `instances/http` '
-                         f'but {check} uses http wrapper')
+    has_instance_http = False
+    has_init_config_http = False
+    with open(file, 'r', encoding='utf-8') as f:
+        for _, line in enumerate(f):
+            if 'instances/http' in line:
+                has_instance_http = True
+            if 'init_config/http' in line:
+                has_init_config_http = True
 
-        if not has_init_config_http:
-            echo_failure(f'Detected {check}\'s spec.yaml file does not contain `init_config/http` '
-                         f'but {check} uses http wrapper')
+    if not has_instance_http:
+        echo_failure(
+            f"Detected {check}'s spec.yaml file does not contain `instances/http` "
+            f"but {check} uses http wrapper"
+        )
+
+    if not has_init_config_http:
+        echo_failure(
+            f"Detected {check}'s spec.yaml file does not contain `init_config/http` "
+            f"but {check} uses http wrapper"
+        )
 
 
 def validate_use_http_wrapper(file, check):
@@ -63,31 +69,34 @@ def validate_use_http_wrapper(file, check):
     file -- filepath of file to validate
     check -- name of the check that file belongs to
     """
-
-    with open(file, "r") as f:
+    uses_http_wrapper = False
+    with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
             if 'self.http' in line:
-                return True
+                uses_http_wrapper = True
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
                 if http_func in line:
-                    echo_failure(f'Check \'{check}\' uses \'{http_func}\' on line {num} in \'{os.path.basename(file)}\''
-                                 f', please use the HTTP wrapper instead')
+                    echo_failure(
+                        f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
+                        f'please use the HTTP wrapper instead'
+                    )
 
-    return False
+    return uses_http_wrapper
 
 
-@click.command('http', context_settings=CONTEXT_SETTINGS, short_help='Validate usage of http wrapper')
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate usage of http wrapper')
 def http():
     """Validate all integrations for usage of http wrapper."""
     echo_info("Validating all integrations for usage of http wrapper...")
 
     for check in sorted(get_valid_integrations()):
         uses_http_wrapper = False
+
         # Validate use of http wrapper (self.http.[...]) in check's .py files
         if check not in EXCLUDED_INTEGRATIONS:
             for file in get_check_files(check, include_tests=False):
-                uses_http_wrapper = validate_use_http_wrapper(file, check)
+                uses_http_wrapper = validate_use_http_wrapper(file, check) or uses_http_wrapper
 
         # Validate use of http template in check's spec.yaml (if exists)
         if uses_http_wrapper:
