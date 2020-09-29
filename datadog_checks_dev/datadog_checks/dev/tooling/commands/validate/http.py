@@ -47,13 +47,13 @@ def validate_config_http(file, check):
 
     if not has_instance_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `instances/http` " f"but {check} uses http wrapper"
+            f"Detected {check}'s spec.yaml file does not contain `instances/http` but {check} uses http wrapper"
         )
         has_failed = True
 
     if not has_init_config_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `init_config/http` " f"but {check} uses http wrapper"
+            f"Detected {check}'s spec.yaml file does not contain `init_config/http` but {check} uses http wrapper"
         )
         has_failed = True
 
