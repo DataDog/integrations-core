@@ -480,7 +480,7 @@ class MySql(AgentCheck):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW /*!50002 GLOBAL */ STATUS;")
             raw_results = dict(cursor.fetchall())
-            results = {to_native_string(r[0]): r[1] for r in iteritems(raw_results)}
+            results = {to_native_string(r[0]): to_native_string(r[1]) for r in iteritems(raw_results)}
 
             return results
 
@@ -489,7 +489,7 @@ class MySql(AgentCheck):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW GLOBAL VARIABLES;")
             raw_results = dict(cursor.fetchall())
-            results = {to_native_string(r[0]): r[1] for r in iteritems(raw_results)}
+            results = {to_native_string(r[0]): to_native_string(r[1]) for r in iteritems(raw_results)}
 
             return results
 
