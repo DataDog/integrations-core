@@ -6,12 +6,12 @@ import os
 import click
 from datadog_checks.dev.tooling.utils import get_valid_integrations, get_check_files, get_default_config_spec
 
-from ..console import CONTEXT_SETTINGS, echo_info, echo_failure
+from ..console import CONTEXT_SETTINGS, echo_info, echo_failure, abort, echo_success
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
 EXCLUDED_INTEGRATIONS = {
     'kubelet',
-    'openstack'
+    # 'openstack'
 }
 
 REQUEST_LIBRARY_FUNCTIONS = {
@@ -42,6 +42,7 @@ def validate_config_http(file, check):
 
     has_instance_http = False
     has_init_config_http = False
+    has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for _, line in enumerate(f):
             if 'instances/http' in line:
@@ -54,26 +55,31 @@ def validate_config_http(file, check):
             f"Detected {check}'s spec.yaml file does not contain `instances/http` "
             f"but {check} uses http wrapper"
         )
+        has_failed = True
 
     if not has_init_config_http:
         echo_failure(
             f"Detected {check}'s spec.yaml file does not contain `init_config/http` "
             f"but {check} uses http wrapper"
         )
+        has_failed = True
+
+    return has_failed
 
 
-def validate_use_http_wrapper(file, check):
+def validate_use_http_wrapper_file(file, check):
     """Return true if the file uses the http wrapper class.
-    Otherwise outputs every instance of request library function use
+    Also outputs every instance of deprecated request library function use
 
     file -- filepath of file to validate
-    check -- name of the check that file belongs to
+    check -- name of the check
     """
-    uses_http_wrapper = False
+    file_uses_http_wrapper = False
+    has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
             if 'self.http' in line:
-                uses_http_wrapper = True
+                file_uses_http_wrapper = True
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
                 if http_func in line:
@@ -81,25 +87,43 @@ def validate_use_http_wrapper(file, check):
                         f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
                         f'please use the HTTP wrapper instead'
                     )
+                    has_failed = True
 
-    return uses_http_wrapper
+    return file_uses_http_wrapper, has_failed
+
+
+def validate_use_http_wrapper(check):
+    """Return true if the check uses the http wrapper class in any of its files.
+    If any of the check's files uses the request library, abort.
+
+    check -- name of the check
+    """
+    has_failed = False
+    check_uses_http_wrapper = False
+    for file in get_check_files(check, include_tests=False):
+        file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
+        has_failed = has_failed or file_uses_request_lib
+        check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
+
+    if has_failed:
+        abort()
+    return check_uses_http_wrapper
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate usage of http wrapper')
 def http():
     """Validate all integrations for usage of http wrapper."""
-    echo_info("Validating all integrations for usage of http wrapper...")
 
+    echo_info("Validating all integrations for usage of http wrapper...")
     for check in sorted(get_valid_integrations()):
-        uses_http_wrapper = False
+        check_uses_http_wrapper = False
 
         # Validate use of http wrapper (self.http.[...]) in check's .py files
         if check not in EXCLUDED_INTEGRATIONS:
-            for file in get_check_files(check, include_tests=False):
-                uses_http_wrapper = validate_use_http_wrapper(file, check) or uses_http_wrapper
+            check_uses_http_wrapper = validate_use_http_wrapper(check)
 
         # Validate use of http template in check's spec.yaml (if exists)
-        if uses_http_wrapper:
+        if check_uses_http_wrapper:
             validate_config_http(get_default_config_spec(check), check)
 
-    echo_info('Completed http validation!')
+    echo_success('Completed http validation!')
