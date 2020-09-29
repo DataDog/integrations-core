@@ -11,7 +11,7 @@ from ..console import CONTEXT_SETTINGS, echo_info, echo_failure, abort, echo_suc
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
 EXCLUDED_INTEGRATIONS = {
     'kubelet',
-    # 'openstack'
+    'openstack'
 }
 
 REQUEST_LIBRARY_FUNCTIONS = {
@@ -114,6 +114,7 @@ def validate_use_http_wrapper(check):
 def http():
     """Validate all integrations for usage of http wrapper."""
 
+    has_failed = False
     echo_info("Validating all integrations for usage of http wrapper...")
     for check in sorted(get_valid_integrations()):
         check_uses_http_wrapper = False
@@ -124,6 +125,9 @@ def http():
 
         # Validate use of http template in check's spec.yaml (if exists)
         if check_uses_http_wrapper:
-            validate_config_http(get_default_config_spec(check), check)
+            has_failed = validate_config_http(get_default_config_spec(check), check) or has_failed
+
+    if has_failed:
+        abort()
 
     echo_success('Completed http validation!')
