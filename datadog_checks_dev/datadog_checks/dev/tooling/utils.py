@@ -370,7 +370,7 @@ def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_t
     """
     base_dirs = ['datadog_checks']
     if include_tests:
-        base_dirs += 'tests'
+        base_dirs.append('tests')
     if include_dirs is not None:
         base_dirs += include_dirs
 

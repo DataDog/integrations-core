@@ -41,7 +41,7 @@ def validate_config_http(file, check):
         has_instance_http = False
         has_init_config_http = False
         with open(file, "r") as f:
-            for num, line in enumerate(f):
+            for _, line in enumerate(f):
                 if 'instances/http' in line:
                     has_instance_http = True
                 if 'init_config/http' in line:
