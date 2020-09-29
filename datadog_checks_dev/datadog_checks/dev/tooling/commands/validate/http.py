@@ -4,15 +4,13 @@
 import os
 
 import click
-from datadog_checks.dev.tooling.utils import get_valid_integrations, get_check_files, get_default_config_spec
 
-from ..console import CONTEXT_SETTINGS, echo_info, echo_failure, abort, echo_success
+from datadog_checks.dev.tooling.utils import get_check_files, get_default_config_spec, get_valid_integrations
+
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
-EXCLUDED_INTEGRATIONS = {
-    'kubelet',
-    'openstack'
-}
+EXCLUDED_INTEGRATIONS = {'kubelet', 'openstack'}
 
 REQUEST_LIBRARY_FUNCTIONS = {
     'requests.get',
@@ -20,13 +18,10 @@ REQUEST_LIBRARY_FUNCTIONS = {
     'requests.head',
     'requests.put',
     'requests.patch',
-    'requests.delete'
+    'requests.delete',
 }
 
-SPEC_CONFIG_HTTP = {
-    'instances/http',
-    'init_config/http'
-}
+SPEC_CONFIG_HTTP = {'instances/http', 'init_config/http'}
 
 
 def validate_config_http(file, check):
@@ -52,15 +47,13 @@ def validate_config_http(file, check):
 
     if not has_instance_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `instances/http` "
-            f"but {check} uses http wrapper"
+            f"Detected {check}'s spec.yaml file does not contain `instances/http` " f"but {check} uses http wrapper"
         )
         has_failed = True
 
     if not has_init_config_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `init_config/http` "
-            f"but {check} uses http wrapper"
+            f"Detected {check}'s spec.yaml file does not contain `init_config/http` " f"but {check} uses http wrapper"
         )
         has_failed = True
 
