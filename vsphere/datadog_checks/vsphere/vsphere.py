@@ -56,7 +56,7 @@ REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
 # is significantly lower than the size of the queryPerf response, so allow specifying a different value.
 BATCH_COLLECTOR_SIZE = 500
 
-DEFAULT_METRICS_PER_QUERY = 5000
+DEFAULT_METRICS_PER_QUERY = 500
 DEFAULT_MAX_QUERY_METRICS = 64
 # the vcenter maxquerymetrics option
 MAX_QUERY_METRICS_OPTION = "config.vpxd.stats.maxQueryMetrics"
@@ -212,11 +212,13 @@ class VSphereCheck(AgentCheck):
                 self.restart_pool()
                 break
 
-    def raiseAlert(self,instance,error_code,error_msg):
+    def raiseAlert(self,instance,error_code,error_msg,reset=True):
         if error_code == 'InvalidLogin':
             title = 'NTNX_NC_VC_user_authentication_alert'
         elif error_code == 'RuntimeFault':
-                title = 'NTNX_NC_VC_server_not_reachable'
+            title = 'NTNX_NC_VC_server_not_reachable'
+        elif error_code == 'CollectionError':
+            title = 'NTNX_NC_VC_no_data_alert'
         else:
             title = None
 
@@ -231,6 +233,12 @@ class VSphereCheck(AgentCheck):
             tags.append('timestampISO8601:%s' % datetime.now().isoformat())
             self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s",title,text,alert_type,tags)
             statsd.event(title = title, text = text, alert_type = alert_type, tags = tags)
+
+        if reset is True:
+            #reset the error config
+            i_key = self._instance_key(instance)
+            error_config = self.error_configs[i_key]
+            error_config.update({ERR_CODE : None,ERR_MSG : None})
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -315,15 +323,15 @@ class VSphereCheck(AgentCheck):
                     sslContext=context if not ssl_verify or ssl_capath else None
                 )
 
-            except vim.fault.InvalidLogin , e:
+            except vim.fault.InvalidLogin as e:
                 err_msg = u"Invalid login credentials to %s , %s" % (instance.get('host'), str(e.msg))
                 error_config.update({ERR_CODE : 'InvalidLogin'})
                 error_config.update({ERR_MSG : err_msg})
                 self.log.error(err_msg)
 
-            except AttributeError , e:
+            except AttributeError as e:
                 err_msg = u"Invalid configuration parameters : %s" % str(e)
-                error_config.update({ERR_CODE : 'AttributeError'})
+                error_config.update({ERR_CODE : 'ConfigError'})
                 error_config.update({ERR_MSG : err_msg})
                 self.log.error(err_msg)
 
@@ -425,43 +433,51 @@ class VSphereCheck(AgentCheck):
         # Collect the objects and their properties
         try:
             res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            if res is None:
+                err_msg = u"No matching clusters while collecting properties"
+                error_config.update({ERR_CODE : 'CollectionError'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.error(err_msg)
+                return cluster_mors
+
             objects = res.objects
             # Results can be paginated
             while res.token is not None:
                 res = collector.ContinueRetrievePropertiesEx(res.token)
                 objects.extend(res.objects)
 
-        except vmodl.query.InvalidProperty, e:
+        except vmodl.query.InvalidProperty as e:
             err_msg = u"InvalidProperty fault while retrieving cluster properties : %s , %s" % (e.name, str(e.faultMessage))
-            error_config.update(code = 'InvalidProperty')
-            error_config.update(msg = err_msg)
+            error_config.update({ERR_CODE : 'CollectionError'})
+            error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
 
-        except vmodl.fault.InvalidArgument:
+        except vmodl.fault.InvalidArgument as e:
             err_msg = u"InvalidArgument fault while retrieving cluster properties : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
-            error_config.update(code = 'InvalidArgument')
-            error_config.update(msg = err_msg)
+            error_config.update({ERR_CODE : 'CollectionError'})
+            error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
 
-        except vmodl.fault.InvalidType:
+        except vmodl.fault.InvalidType as e:
             err_msg = u"InvalidType fault while retrieving cluster properties : %s , %s" % (str(e.argument),str(e.faultMessage))
-            error_config.update(code = 'InvalidType')
-            error_config.update(msg = err_msg)
+            error_config.update({ERR_CODE : 'CollectionError'})
+            error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
 
-        except vmodl.RuntimeFault, e:
+        except vmodl.RuntimeFault as e:
             err_msg = u"Runtime fault while retrieving cluster properties : %s , %s" % (str(e.faultCause),str(e.faultMessage))
-            error_config.update(code = 'RuntimeFault')
-            error_config.update(msg = err_msg)
+            error_config.update({ERR_CODE : 'RuntimeFault'})
+            error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
 
         else:
             for obj in objects:
                 if obj.missingSet:
                     for prop in obj.missingSet:
-                        self.log.warning(
-                            u"Unable to retrieve property %s for object %s: %s",
-                                                prop.path,str(obj.obj),str(prop.fault))
+                        err_msg = u"Unable to retrieve property %s for object %s , %s" % (prop.path, str(obj.obj), str(prop.fault))
+                        error_config.update({ERR_CODE : 'CollectionError'})
+                        error_config.update({ERR_MSG : err_msg})
+                        self.log.warning(err_msg)
 
                 if obj.propSet:
                     properties = {}
@@ -507,6 +523,11 @@ class VSphereCheck(AgentCheck):
                 self.log.info(u"Vcenter Cluster list : %s",vcenter_clusters)
                 cluster_mors = self.getClusters(instance)
                 if cluster_mors:
+                    #raise alarms for vcenter errors if any
+                    error_msg = error_config.get(ERR_MSG)
+                    error_code = error_config.get(ERR_CODE)
+                    if error_code and error_msg:
+                        self.raiseAlert(instance, error_code, error_msg)
                     self.log.info(u"Completed enumeration of clusters for vcenter instance %s" % i_key)
                     for vcenter_cluster in vcenter_clusters:
                         cluster_mor = cluster_mors.get(vcenter_cluster)
@@ -520,17 +541,18 @@ class VSphereCheck(AgentCheck):
                         error_msg = u"Invalid cluster list in vcenter configuration"
                         self.log.error(error_msg)
                         error_config.update({ERR_MSG : error_msg})
-                        error_config.update({ERR_CODE : None})
+                        error_config.update({ERR_CODE : 'CollectionError'})
                 else:
                     self.log.error(u"Discovery of clusters failed.")
                     error_msg = error_config.get(ERR_MSG)
                     error_msg = u"Discovery of clusters failed due to %s" % error_msg
                     error_config.update({ERR_MSG : error_msg})
+                    error_config.update({ERR_CODE : 'CollectionError'})
             else:
                 error_msg = u"Empty cluster list in vcenter configuration"
                 self.log.error(error_msg)
                 error_config.update({ERR_MSG : error_msg})
-                error_config.update({ERR_CODE : None})
+                error_config.update({ERR_CODE : 'CollectionError'})
             #update the cluster monitor list
             self.monitor_cluster_mors[i_key] = monitor_clusters
         else:
@@ -655,31 +677,38 @@ class VSphereCheck(AgentCheck):
             try:
                 collector = server_instance.content.propertyCollector
                 res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+                if res is None:
+                    err_msg = u"No matching objects while collecting properties"
+                    error_config.update({ERR_CODE : 'CollectionError'})
+                    error_config.update({ERR_MSG : err_msg})
+                    self.log.error(err_msg)
+                    return mor_properties
+
                 objects = res.objects
                 # Results can be paginated
                 while res.token is not None:
                     res = collector.ContinueRetrievePropertiesEx(res.token)
                     objects.extend(res.objects)
 
-            except vmodl.query.InvalidProperty, e:
+            except vmodl.query.InvalidProperty as e:
                 err_msg = u"InvalidProperty fault while collecting properties : %s , %s" % (e.name, str(e.faultMessage))
-                error_config.update({ERR_CODE : 'InvalidProperty'})
+                error_config.update({ERR_CODE : 'CollectionError'})
                 error_config.update({ERR_MSG : err_msg})
                 self.log.warning(err_msg)
 
-            except vmodl.fault.InvalidArgument:
+            except vmodl.fault.InvalidArgument as e:
                 err_msg = u"InvalidArgument fault while collecting properties : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
-                error_config.update({ERR_CODE : 'InvalidArgument'})
+                error_config.update({ERR_CODE : 'CollectionError'})
                 error_config.update({ERR_MSG : err_msg})
                 self.log.warning(err_msg)
 
-            except vmodl.fault.InvalidType:
+            except vmodl.fault.InvalidType as e:
                 err_msg = u"InvalidType fault while collecting properties : %s , %s" % (str(e.argument),str(e.faultMessage))
-                error_config.update({ERR_CODE : 'InvalidType'})
+                error_config.update({ERR_CODE : 'CollectionError'})
                 error_config.update({ERR_MSG : err_msg})
                 self.log.warning(err_msg)
 
-            except vmodl.RuntimeFault, e:
+            except vmodl.RuntimeFault as e:
                 err_msg = u"Runtime fault while collecting properties : %s , %s" % (str(e.faultCause),str(e.faultMessage))
                 error_config.update({ERR_CODE : 'RuntimeFault'})
                 error_config.update({ERR_MSG : err_msg})
@@ -689,8 +718,10 @@ class VSphereCheck(AgentCheck):
                 for obj in objects:
                     if obj.missingSet:
                         for prop in obj.missingSet:
-                            self.log.warning(u"Unable to retrieve property %s for object %s: %s",
-                                                            prop.path,str(obj.obj),str(prop.fault))
+                            err_msg = u"Unable to retrieve property %s for object %s , %s" % (prop.path, str(obj.obj), str(prop.fault))
+                            error_config.update({ERR_CODE : 'CollectionError'})
+                            error_config.update({ERR_MSG : err_msg})
+                            self.log.warning(err_msg)
 
                     mor_properties[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
 
@@ -710,33 +741,43 @@ class VSphereCheck(AgentCheck):
             return mor_attrs
 
         def _collect_non_metric_mors_and_attributes(server_instance,error_config):
+            mor_attrs = {}
             #collect the non metric types for parents info
             content = server_instance.content
-            view_ref = content.viewManager.CreateContainerView(content.rootFolder, ALL_RESOURCES_WITH_NO_METRICS, True)
+            try:
+                view_ref = content.viewManager.CreateContainerView(content.rootFolder, ALL_RESOURCES_WITH_NO_METRICS, True)
 
-            # Specify the root object from where we collect the rest of the objects
-            obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
-            obj_spec.obj = view_ref
-            obj_spec.skip = True
+            except vim.fault.NotAuthenticated as e:
+                err_msg = u"Invalid session while collecting properties : %s , %s" % (str(e.msg), str(e.faultMessage))
+                error_config.update({ERR_CODE : 'CollectionError'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.warning(err_msg)
 
-            # Specify the attribute of the root object to traverse to obtain all the attributes
-            traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
-            traversal_spec.path = "view"
-            traversal_spec.skip = False
-            traversal_spec.type = view_ref.__class__
-            obj_spec.selectSet = [traversal_spec]
+            else:
+                # Specify the root object from where we collect the rest of the objects
+                obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+                obj_spec.obj = view_ref
+                obj_spec.skip = True
 
-            # Specify which attributes we want to retrieve per object
-            property_specs = createPropertySpecs(ALL_RESOURCES_WITH_NO_METRICS)
+                # Specify the attribute of the root object to traverse to obtain all the attributes
+                traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
+                traversal_spec.path = "view"
+                traversal_spec.skip = False
+                traversal_spec.type = view_ref.__class__
+                obj_spec.selectSet = [traversal_spec]
 
-            # Create our filter spec from the above specs
-            filter_spec = vmodl.query.PropertyCollector.FilterSpec()
-            filter_spec.objectSet = [obj_spec]
-            filter_spec.propSet = property_specs
-            filter_spec.reportMissingObjectsInResults = True
+                # Specify which attributes we want to retrieve per object
+                property_specs = createPropertySpecs(ALL_RESOURCES_WITH_NO_METRICS)
 
-            retr_opts = self.createPropertyOptions()
-            mor_attrs = collectProperties(server_instance,error_config,filter_spec,retr_opts)
+                # Create our filter spec from the above specs
+                filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+                filter_spec.objectSet = [obj_spec]
+                filter_spec.propSet = property_specs
+                filter_spec.reportMissingObjectsInResults = True
+
+                retr_opts = self.createPropertyOptions()
+                mor_attrs = collectProperties(server_instance,error_config,filter_spec,retr_opts)
+
             return mor_attrs
 
         def getDatastoreUuid(mor,properties,datastore_cache):
@@ -795,13 +836,14 @@ class VSphereCheck(AgentCheck):
             metric_mors = _collect_metric_mors_and_attributes(server_instance,error_config,clusters)
             self.log.debug(u"count of metric mors %d",len(metric_mors))
 
+            #extract the error config to check why collection failed
+            #raise alarms for vcenter errors if any
+            error_msg = error_config.get(ERR_MSG)
+            error_code = error_config.get(ERR_CODE)
+            if error_code and error_msg:
+                self.raiseAlert(instance, error_code, error_msg)
+
             if not metric_mors:
-                #extract the error config to check why collection failed
-                #raise alarms for vcenter errors if any
-                error_msg = error_config.get(ERR_MSG)
-                error_code = error_config.get(ERR_CODE)
-                if error_code and error_msg:
-                    self.raiseAlert(instance, error_code, error_msg)
                 self.log.error(u"Discovery of metric mors failed : %s",error_msg)
             else:
                 all_mors.update(metric_mors)
@@ -809,15 +851,16 @@ class VSphereCheck(AgentCheck):
                 non_metric_mors = _collect_non_metric_mors_and_attributes(server_instance,error_config)
                 self.log.debug(u"count of non metric mors %d",len(non_metric_mors))
 
+                #extract the error config to check why collection failed
+                #raise alarms for vcenter errors if any
+                error_msg = error_config.get(ERR_MSG)
+                error_code = error_config.get(ERR_CODE)
+                if error_code and error_msg:
+                    self.raiseAlert(instance, error_code, error_msg)
+
                 if non_metric_mors:
                     all_mors.update(non_metric_mors)
                 else:
-                    #extract the error config to check why monitor exited
-                    #raise alarms for vcenter errors if any
-                    error_msg = error_config.get(ERR_MSG)
-                    error_code = error_config.get(ERR_CODE)
-                    if error_code and error_msg:
-                        self.raiseAlert(instance, error_code, error_msg)
                     self.log.error(u"Discovery of non-metric mors failed: %s",error_msg)
 
                 # Add rootFolder since it is not explored by the propertyCollector
@@ -882,6 +925,14 @@ class VSphereCheck(AgentCheck):
 
             return obj_list
 
+        def validate_resource_registry(all_resources):
+            if all_resources:
+                for resource_type in ALL_RESOURCES_WITH_METRICS:
+                    if resource_type not in all_resources:
+                        return False
+
+            return True
+
         def build_resource_registry(instance, tags, regexes=None, include_only_marked=False):
             i_key = self._instance_key(instance)
             error_config = self.error_configs[i_key]
@@ -893,6 +944,14 @@ class VSphereCheck(AgentCheck):
                 uuid_cache = self.cache_uuids[i_key]
                 all_objs = _get_all_objs(instance,regexes,include_only_marked,tags,clusters,uuid_cache)
                 self.morlist_raw[i_key] = all_objs
+                #validate if all resource types are discovered
+                #raise no data alert if required
+                if not validate_resource_registry(all_objs):
+                    error_msg = u"Missing objects while collecting properties"
+                    error_code = 'CollectionError'
+                    error_config.update({ERR_CODE : error_code,ERR_MSG : error_msg})
+                    self.log.error(error_msg)
+                    self.raiseAlert(instance, error_code, error_msg)
             else:
                 #extract the error config to check why monitor exited
                 #raise alarms for vcenter errors if any
@@ -1006,8 +1065,10 @@ class VSphereCheck(AgentCheck):
                 last_seen = mor['last_seen']
                 if (time.time() - last_seen) > 2 * REFRESH_MORLIST_INTERVAL:
                     del self.morlist[i_key][resource_type][mor_name]
-                    if resource_type in HISTORICAL_RESOURCES and mor_name in self.cache_uuids[i_key][resource_type]:
-                        del self.cache_uuids[i_key][resource_type][mor_name]
+                    if resource_type in HISTORICAL_RESOURCES:
+                        mor_obj = mor['mor']
+                        if mor_obj in self.cache_uuids[i_key][resource_type]:
+                            del self.cache_uuids[i_key][resource_type][mor_obj]
                     self.log.debug(u"deleted mor %s",mor_name)
 
     def format_metric_name(self,counter):
@@ -1022,39 +1083,56 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
+        error_config = self.error_configs[i_key]
         self.log.info(u"Warming metrics metadata cache for instance {0}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
 
-        counters = perfManager.perfCounter
-        new_metadata = {}
-        for counter in counters:
-            metric_name = self.format_metric_name(counter)
-            for mor_type in ALL_RESOURCES_WITH_METRICS:
-                if mor_type not in new_metadata:
-                    new_metadata[mor_type] = {}
-                if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type]:
-                    instances = []
-                    instance_value = ALLOWED_METRICS_FOR_MOR[mor_type].get(metric_name)
-                    if instance_value is None:
-                        instances.append("") #aggregate
-                    else:
-                        instances = instance_value.split(",") #add * or comma separated instance values
+        try:
+            counters = perfManager.perfCounter
 
-                    new_metadata[mor_type][counter.key] = dict(name = metric_name, unit=counter.unitInfo.key, instance=instances)
+        except vim.fault.NotAuthenticated as e:
+            error_msg = u"Invalid session while collecting metadata : %s , %s" % (str(e.msg), str(e.faultMessage))
+            error_code = 'CollectionError'
+            error_config.update({ERR_CODE : error_code,ERR_MSG : error_msg})
+            self.log.warning(error_msg)
 
-        self.log.debug(u"Collected %d counters metadata in %.3f seconds.", len(counters), t.total())
-        self.log.info(u"Finished metadata collection for instance {0}".format(i_key))
-        # Reset metadata
-        self.metrics_metadata[i_key] = new_metadata
+        else:
+            if counters:
+                new_metadata = {}
+                for counter in counters:
+                    metric_name = self.format_metric_name(counter)
+                    for mor_type in ALL_RESOURCES_WITH_METRICS:
+                        if mor_type not in new_metadata:
+                            new_metadata[mor_type] = {}
+                        if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type]:
+                            instances = []
+                            instance_value = ALLOWED_METRICS_FOR_MOR[mor_type].get(metric_name)
+                            if instance_value is None:
+                                instances.append("") #aggregate
+                            else:
+                                instances = instance_value.split(",") #add * or comma separated instance values
 
-        #update the timestamp
-        self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
+                            new_metadata[mor_type][counter.key] = dict(name = metric_name, unit=counter.unitInfo.key, instance=instances)
 
-        # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
-        # ## </TEST-INSTRUMENTATION>
+                self.log.debug(u"Collected %d counters metadata in %.3f seconds.", len(counters), t.total())
+                self.log.info(u"Finished metadata collection for instance {0}".format(i_key))
+                # Reset metadata
+                self.metrics_metadata[i_key] = new_metadata
+
+                #update the timestamp
+                self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
+
+                # ## <TEST-INSTRUMENTATION>
+                self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
+                # ## </TEST-INSTRUMENTATION>
+
+        #raise alarms for vcenter errors if any
+        error_msg = error_config.get(ERR_MSG)
+        error_code = error_config.get(ERR_CODE)
+        if error_code and error_msg:
+            self.raiseAlert(instance, error_code, error_msg)
 
     def _transform_value(self, instance, counter_id, mor_type, value):
         """ Given the counter_id, look up for the metrics metadata to check the vsphere
@@ -1169,19 +1247,24 @@ class VSphereCheck(AgentCheck):
                             hostname=mor['hostname'],
                             tags=tags
                         )
-        except vmodl.fault.InvalidArgument , e:
+        except vmodl.fault.InvalidArgument as e:
             err_msg = u"InvalidArgument fault while querying perf metrics : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
-            error_config.update({ERR_CODE : 'InvalidArgument'})
+            error_config.update({ERR_CODE : 'CollectionError'})
             error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
-        except vim.fault.RestrictedByAdministrator , e:
+        except vim.fault.RestrictedByAdministrator as e:
             err_msg = u"RestrictedByAdministrator fault while querying perf metrics : %s , %s" % (str(e.details), str(e.faultMessage))
-            error_config.update({ERR_CODE : 'RestrictedByAdministrator'})
+            error_config.update({ERR_CODE : 'CollectionError'})
             error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
-        except vmodl.RuntimeFault , e:
+        except vmodl.RuntimeFault as e:
             err_msg = u"Runtime fault while querying perf metrics : %s , %s" % (str(e.faultCause),str(e.faultMessage))
             error_config.update({ERR_CODE : 'RuntimeFault'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
+        except ssl.SSLError:
+            err_msg = u"Read operation timed out while querying perf metrics"
+            error_config.update({ERR_CODE : 'CollectionError'})
             error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
 
@@ -1190,7 +1273,7 @@ class VSphereCheck(AgentCheck):
         error_msg = error_config.get(ERR_MSG)
         error_code = error_config.get(ERR_CODE)
         if error_msg and error_code:
-            self.raiseAlert(instance, error_code, error_msg)
+            self.raiseAlert(instance, error_code, error_msg,False)
 
         self.log.debug(u"Vsphere metric collection time in %.3f seconds.",t.total())
         # ## <TEST-INSTRUMENTATION>
@@ -1359,6 +1442,11 @@ class VSphereCheck(AgentCheck):
             self.start_pool()
 
         custom_tags = instance.get('tags', [])
+
+        # Reset the errors
+        i_key = self._instance_key(instance)
+        error_config = self.error_configs[i_key]
+        error_config.update({ERR_CODE : None,ERR_MSG : None})
 
         # Update the value of `max_query_metrics` if needed
         server_instance = self._get_server_instance(instance)
