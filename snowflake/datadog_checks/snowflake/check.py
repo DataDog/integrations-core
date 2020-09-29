@@ -69,6 +69,9 @@ class SnowflakeCheck(AgentCheck):
 
         self._collect_version()
 
+        self.log.debug("Closing connection to Snowflake...")
+        self._conn.close()
+
     def execute_query_raw(self, query):
         """
         Executes query with timestamp from parts if comparing start_time field.
@@ -82,13 +85,9 @@ class SnowflakeCheck(AgentCheck):
             return cursor.fetchall()
 
     def connect(self):
-        # verify connection is still active
-        if self._conn is not None:
-            if self._conn.is_closed():
-                self.log.warning("Connection failed, establishing a new connection.")
-            else:
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-                return
+
+        self.log.debug("Establishing a new connection to Snowflake.")
+
         try:
             conn = sf.connect(
                 user=self.config.user,
@@ -105,6 +104,7 @@ class SnowflakeCheck(AgentCheck):
                 ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
                 authenticator=self.config.authenticator,
                 token=self.config.token,
+                client_session_keep_alive=True,
             )
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
@@ -112,6 +112,7 @@ class SnowflakeCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
+
 
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):
