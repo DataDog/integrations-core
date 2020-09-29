@@ -64,13 +64,14 @@ class SnowflakeCheck(AgentCheck):
     def check(self, _):
         self.connect()
 
-        # Execute queries
-        self._query_manager.execute()
+        if self._conn is not None:
+            # Execute queries
+            self._query_manager.execute()
 
-        self._collect_version()
+            self._collect_version()
 
-        self.log.debug("Closing connection to Snowflake...")
-        self._conn.close()
+            self.log.debug("Closing connection to Snowflake...")
+            self._conn.close()
 
     def execute_query_raw(self, query):
         """
@@ -85,7 +86,6 @@ class SnowflakeCheck(AgentCheck):
             return cursor.fetchall()
 
     def connect(self):
-
         self.log.debug("Establishing a new connection to Snowflake.")
 
         try:
@@ -109,6 +109,7 @@ class SnowflakeCheck(AgentCheck):
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
+            self.warning(msg)
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
