@@ -13,9 +13,9 @@ theme:
   name: material
   language: en
   features:
-    - tabs
+    - navigation.tabs
     # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
-    # - instant
+    # - navigation.instant
   palette:
     scheme: slate
     primary: deep purple
