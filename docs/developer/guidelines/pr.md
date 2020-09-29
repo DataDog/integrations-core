@@ -46,9 +46,4 @@ Every pull request should do one thing only, for many reasons:
 ## Merges
 
 To keep a clean Git history we disable standard merges and use GitHub's [squash and merge][github-squash-and-merge].
-
-You may [rebase and merge][github-rebase-and-merge] only if all of the following conditions are true:
-
-1. the change is massive and cannot be broken into multiple pull requests
-1. retaining the history of commits is actually deemed to be important
-1. the commits are curated so each represents a distinct change
+Our release tooling also relies on [squash and merge][github-squash-and-merge] in order to list changes between versions. By doing so, the resulting commit will be suffixed with the id of the PR.
