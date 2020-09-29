@@ -33,3 +33,8 @@ files:
             - <TASK_1>
             - <TASK_2>
       - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/gearmand.log
+        source: gearman
