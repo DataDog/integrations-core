@@ -14,8 +14,9 @@ files:
           and enable the plugin within coredns.
           See: https://coredns.io/plugins/metrics/
         prometheus_url.value.example: "http://%%host%%:9153/metrics"
+        prometheus_url.display_priority: 2
         tags.required: True
-        tags.display_priority: 2
+        tags.display_priority: 1
         tags.value.example:
           - "dns-pod:%%host%%"
         metrics.hidden: false
