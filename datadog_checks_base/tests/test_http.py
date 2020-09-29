@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
 from collections import OrderedDict
 
 import mock
@@ -651,6 +652,26 @@ class TestAuthTokenFileReaderCreation:
         with pytest.raises(ConfigurationError, match='^The `path` setting of `auth_token` reader must be a string$'):
             RequestsWrapper(instance, init_config)
 
+    def test_pattern_not_string(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'file', 'path': '/foo', 'pattern': 0}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `pattern` setting of `auth_token` reader must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_pattern_no_groups(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'file', 'path': '/foo', 'pattern': 'bar'}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ValueError, match='^The pattern `bar` setting of `auth_token` reader must define exactly one group$'
+        ):
+            RequestsWrapper(instance, init_config)
+
 
 class TestAuthTokenHeaderWriterCreation:
     def test_name_missing(self):
@@ -730,6 +751,60 @@ class TestAuthTokenHeaderWriterCreation:
             match='^The `value` setting of `auth_token` writer does not contain the placeholder string `<TOKEN>`$',
         ):
             RequestsWrapper(instance, init_config)
+
+
+class TestAuthTokenReadFile:
+    def test_pattern_no_match(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file, 'pattern': 'foo(.+)'},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            with mock.patch('requests.get'):
+                write_file(token_file, '\nsecret\nsecret\n')
+
+                with pytest.raises(
+                    ValueError,
+                    match='^{}$'.format(
+                        re.escape('The pattern `foo(.+)` does not match anything in file: {}'.format(token_file))
+                    ),
+                ):
+                    http.get('https://www.google.com')
+
+    def test_pattern_match(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file, 'pattern': 'foo(.+)'},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer bar'}
+            with mock.patch('requests.get') as get:
+                write_file(token_file, '\nfoobar\nfoobaz\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
 
 
 class TestAuthTokenFileReaderWithHeaderWriter:
