@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
 from contextlib import contextmanager
 from copy import deepcopy
+from io import open
 from ipaddress import ip_address, ip_network
 
 import requests
@@ -591,13 +593,37 @@ class AuthTokenFileReader(object):
         elif not self._path:
             raise ConfigurationError('The `path` setting of `auth_token` reader is required')
 
+        self._pattern = config.get('pattern')
+        if self._pattern is not None:
+            if not isinstance(self._pattern, str):
+                raise ConfigurationError('The `pattern` setting of `auth_token` reader must be a string')
+            else:
+                self._pattern = re.compile(self._pattern)
+                if self._pattern.groups != 1:
+                    raise ValueError(
+                        'The pattern `{}` setting of `auth_token` reader must define exactly one group'.format(
+                            self._pattern.pattern
+                        )
+                    )
+
         # Cache all updates just in case
         self._token = None
 
     def read(self, **request):
         if self._token is None or 'error' in request:
-            with open(self._path, 'rb') as f:
-                self._token = f.read().decode('utf-8').strip()
+            with open(self._path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            if self._pattern is None:
+                self._token = content.strip()
+            else:
+                match = self._pattern.search(content)
+                if not match:
+                    raise ValueError(
+                        'The pattern `{}` does not match anything in file: {}'.format(self._pattern.pattern, self._path)
+                    )
+
+                self._token = match.group(1)
 
             return self._token
 
