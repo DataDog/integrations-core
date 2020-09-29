@@ -4,6 +4,7 @@
 import copy
 import os
 import time
+from contextlib import contextmanager
 
 import mock
 import pymongo
@@ -86,8 +87,17 @@ def instance_custom_queries():
 
 
 @pytest.fixture
-def mock_pymongo():
-    mocked_client = MockedPyMongoClient()
+def instance_integration(instance_custom_queries):
+    instance = copy.deepcopy(instance_custom_queries)
+    instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top"]
+    instance["collections"] = ["foo", "bar"]
+    instance["collections_indexes_stats"] = True
+    return instance
+
+
+@contextmanager
+def mock_pymongo(deployment):
+    mocked_client = MockedPyMongoClient(deployment=deployment)
 
     with mock.patch('pymongo.mongo_client.MongoClient', MagicMock(return_value=mocked_client),), mock.patch(
         'pymongo.collection.Collection'
