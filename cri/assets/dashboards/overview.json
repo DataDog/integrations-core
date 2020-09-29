@@ -1,0 +1,359 @@
+{
+  "title": "CRI - Overview",
+  "description": "This dashboard provides a high-level overview of your Kubernetes images managed by a container runtime interface (e.g., Docker, Containerd, CRI-O), so you can track resource utilization for all of your images. Further reading on CRI:\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\n- [Datadog's CRI docs](https://docs.datadoghq.com/integrations/cri/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "free_text",
+        "text": "Container Runtime Interface",
+        "color": "#4d4d4d",
+        "font_size": "auto",
+        "text_align": "left"
+      },
+      "layout": {
+        "x": 3,
+        "y": 14,
+        "width": 22,
+        "height": 3
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/screenboard/integrations/kubernetes.jpg",
+        "sizing": "zoom"
+      },
+      "layout": {
+        "x": 3,
+        "y": 2,
+        "width": 22,
+        "height": 12
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "autosmooth(avg:cri.cpu.usage{*} by {image_name})",
+            "metadata": [
+              {
+                "expression": "autosmooth(avg:cri.cpu.usage{*} by {image_name})",
+                "alias_name": "CPU"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "CPU by image",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 40,
+        "y": 2,
+        "width": 47,
+        "height": 28
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "heatmap",
+        "requests": [
+          {
+            "q": "avg:cri.mem.rss{*} by {image_name}",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Memory RSS heatmap by image",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 88,
+        "y": 31,
+        "width": 47,
+        "height": 28
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "distribution",
+        "requests": [
+          {
+            "q": "avg:cri.disk.used{*} by {image_name}",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "title": "Disk used by image",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 40,
+        "y": 60,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:cri.mem.rss{*} by {image_name}",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Memory RSS by image",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 40,
+        "y": 31,
+        "width": 47,
+        "height": 28
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:cri.disk.inodes{*} by {image_name}, 10, 'max', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Top inodes used by image",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 88,
+        "y": 60,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "note",
+        "content": "DISK",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 26,
+        "y": 60,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "note",
+        "content": "MEMORY",
+        "background_color": "blue",
+        "font_size": "16",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 26,
+        "y": 31,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "note",
+        "content": "CPU",
+        "background_color": "blue",
+        "font_size": "16",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 26,
+        "y": 2,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "heatmap",
+        "requests": [
+          {
+            "q": "avg:cri.cpu.usage{*} by {image_name}",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "CPU heatmap by image",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 88,
+        "y": 2,
+        "width": 47,
+        "height": 28
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "count_not_null(avg:cri.cpu.usage{*} by {display_container_name})",
+            "aggregator": "last"
+          }
+        ],
+        "custom_links": [],
+        "title": "containers",
+        "title_size": "20",
+        "title_align": "center",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 3,
+        "y": 19,
+        "width": 22,
+        "height": 10
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "count_not_null(avg:cri.cpu.usage{*} by {image_name,image_tag})",
+            "aggregator": "last"
+          }
+        ],
+        "custom_links": [],
+        "title": "images",
+        "title_size": "20",
+        "title_align": "center",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 3,
+        "y": 31,
+        "width": 22,
+        "height": 10
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:cri.mem.rss{*} by {image_name}, 10, 'max', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Top memory consuming images",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 136,
+        "y": 31,
+        "width": 30,
+        "height": 28
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:cri.cpu.usage{*} by {image_name}, 10, 'max', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Top CPU consuming images",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 136,
+        "y": 2,
+        "width": 30,
+        "height": 28
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 247
+}
