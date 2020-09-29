@@ -54,6 +54,9 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 
 #### Datadog User creation
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Stand Alone" xxx -->
+
 Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
 ```text
@@ -77,6 +80,25 @@ GRANT SELECT ON sys.dba_tablespace_usage_metrics TO datadog;
 ```text
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Multitenant" xxx -->
+
+##### Oracle 12c or 19c
+
+Log in to the root database as an Administrator to create a `datadog` user and grant permissions:
+
+```text
+alter session set container = cdb$root;
+CREATE USER c##datadog IDENTIFIED BY password CONTAINER=ALL;
+GRANT CREATE SESSION TO c##datadog CONTAINER=ALL;
+Grant select any dictionary to c##datadog container=all;
+GRANT SELECT ON GV_$PROCESS TO c##datadog CONTAINER=ALL;
+GRANT SELECT ON gv_$sysmetric TO c##datadog CONTAINER=ALL;
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Configuration
 
