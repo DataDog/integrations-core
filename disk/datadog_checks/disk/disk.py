@@ -325,20 +325,16 @@ class Disk(AgentCheck):
                 self.log.debug('Latency metrics not collected for %s: %s', disk_name, e)
 
     def _compile_pattern_filters(self, instance):
-        file_system_exclude_extras = (
-            self.init_config.get('file_system_global_exclude')
-            or self.init_config.get('file_system_global_blacklist')
-            or self.get_default_file_system_exclude()
+        file_system_exclude_extras = self.init_config.get(
+            'file_system_global_exclude',
+            self.init_config.get('file_system_global_blacklist', self.get_default_file_system_exclude()),
         )
-        device_exclude_extras = (
-            self.init_config.get('device_global_exclude')
-            or self.init_config.get('device_global_blacklist')
-            or self.get_default_device_exclude()
+        device_exclude_extras = self.init_config.get(
+            'device_global_exclude', self.init_config.get('device_global_blacklist', self.get_default_device_exclude())
         )
-        mount_point_exclude_extras = (
-            self.init_config.get('mount_point_global_exclude')
-            or self.init_config.get('mount_point_global_blacklist')
-            or self.get_default_mount_mount_exclude()
+        mount_point_exclude_extras = self.init_config.get(
+            'mount_point_global_exclude',
+            self.init_config.get('mount_point_global_blacklist', self.get_default_mount_mount_exclude()),
         )
 
         if 'excluded_filesystems' in instance:
