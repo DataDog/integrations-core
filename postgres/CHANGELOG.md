@@ -227,7 +227,7 @@
 [17]: https://github.com/DataDog/integrations-core/pull/1452
 [18]: https://github.com/zorgz
 [19]: https://github.com/DataDog/integrations-core/pull/1538
-[20]:
+[20]: https://github.com/DataDog/integrations-core/pull/1193
 [21]: https://github.com/DataDog/integrations-core/issues/1172
 [22]: https://github.com/DataDog/integrations-core/issues/1073
 [23]: https://github.com/DataDog/integrations-core/issues/1042

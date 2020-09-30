@@ -90,8 +90,8 @@
 [2]: https://github.com/DataDog/integrations-core/pull/1945
 [3]: https://github.com/DataDog/integrations-core/pull/1727
 [4]: https://github.com/DataDog/integrations-core/issues/1130
-[5]: 
-[6]: 
+[5]: https://github.com/DataDog/integrations-core/pull/939
+[6]: https://github.com/DataDog/integrations-core/issues/805
 [7]: https://github.com/DataDog/integrations-core/issues/795
 [8]: https://github.com/DataDog/integrations-core/issues/739
 [9]: https://github.com/philipseidel

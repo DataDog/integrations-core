@@ -94,5 +94,5 @@
 [6]: https://github.com/mattjbray
 [7]: https://github.com/DataDog/integrations-core/issues/1053
 [8]: https://github.com/DataDog/integrations-core/issues/1013
-[9]: 
+[9]: https://github.com/DataDog/integrations-core/pull/1051
 [10]: https://github.com/DataDog/integrations-core/issues/559

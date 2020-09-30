@@ -123,10 +123,10 @@
 [4]: https://github.com/DataDog/integrations-core/pull/1945
 [5]: https://github.com/DataDog/integrations-core/pull/1727
 [6]: https://github.com/DataDog/integrations-core/pull/1664
-[7]: 
-[8]: 
-[9]: 
-[10]: 
+[7]: https://github.com/DataDog/integrations-core/pull/1444
+[8]: https://github.com/DataDog/integrations-core/pull/1029
+[9]: https://github.com/DataDog/integrations-core/pull/1034
+[10]: https://github.com/DataDog/integrations-core/pull/813
 [11]: https://github.com/calonso
 [12]: https://github.com/DataDog/integrations-core/pull/812
 [13]: https://github.com/DataDog/integrations-core/issues/860

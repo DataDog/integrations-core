@@ -64,4 +64,4 @@
 [2]: https://github.com/DataDog/integrations-core/pull/1727
 [3]: https://github.com/DataDog/integrations-core/pull/1745
 [4]: https://github.com/Siecje
-[5]: 
+[5]: https://github.com/DataDog/integrations-core/pull/1054

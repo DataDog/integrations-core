@@ -65,5 +65,5 @@
 [1]: https://github.com/DataDog/integrations-core/pull/2774
 [2]: https://github.com/DataDog/integrations-core/pull/1727
 [3]: https://github.com/DataDog/integrations-core/pull/1664
-[4]: 
+[4]: https://github.com/DataDog/integrations-core/pull/1444
 [5]: https://github.com/DataDog/integrations-core/issues/860

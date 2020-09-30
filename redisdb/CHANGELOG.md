@@ -140,7 +140,7 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1727
 [8]: https://github.com/DataDog/integrations-core/pull/1668
 [9]: https://github.com/DataDog/integrations-core/pull/1664
-[10]: 
+[10]: https://github.com/DataDog/integrations-core/pull/1444
 [11]: https://github.com/DataDog/integrations-core/issues/300
 [12]: https://github.com/aliva
 [13]: https://github.com/DataDog/integrations-core/issues/798
