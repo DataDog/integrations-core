@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.12.0 / 2020-09-30
+
+* [Added] Add new implementation to support Prometheus endpoint. See [#7620](https://github.com/DataDog/integrations-core/pull/7620).
+
 ## 2.11.0 / 2020-09-21
 
 * [Added] Add config spec. See [#7625](https://github.com/DataDog/integrations-core/pull/7625).
