@@ -379,5 +379,7 @@ def transform_index(src_index, index_slices):
     """
     dst_index = []  # type: List[str]
     for index_slice in index_slices:
+        if index_slice.stop > len(src_index):
+            return None
         dst_index.extend(src_index[index_slice])
     return tuple(dst_index)
