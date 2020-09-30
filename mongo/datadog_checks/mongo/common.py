@@ -36,27 +36,27 @@ def get_state_name(state):
         return 'UNKNOWN'
 
 
-class DeploymentType(object):
+class Deployment(object):
     def get_available_metrics(self):
         # TODO: Use this method to know what metrics to collect based on the deployment type.
         raise NotImplementedError
 
 
-class MongosDeploymentType(DeploymentType):
+class MongosDeployment(Deployment):
     def get_available_metrics(self):
         return None
 
 
-class ReplicaSetDeploymentType(DeploymentType):
-    def __init__(self, replset_get_status_payload):
-        self.replset_name = replset_get_status_payload['set']
-        self.replset_state = replset_get_status_payload['myState']
-        self.replset_state_name = get_state_name(replset_get_status_payload['myState']).lower()
+class ReplicaSetDeployment(Deployment):
+    def __init__(self, replset_name, replset_state):
+        self.replset_name = replset_name
+        self.replset_state = replset_state
+        self.replset_state_name = get_state_name(replset_state).lower()
 
     def get_available_metrics(self):
         return None
 
 
-class StandaloneDeploymentType(DeploymentType):
+class StandaloneDeployment(Deployment):
     def get_available_metrics(self):
         return None

@@ -4,21 +4,18 @@ from datadog_checks.base.utils.common import round_value
 from datadog_checks.mongo.collectors.base import MongoCollector
 
 
-class ReplicationInfoCollector(MongoCollector):
+class ReplicationOpLogCollector(MongoCollector):
     """Additional replication metrics regarding the operation log. Useful to check how backed up is a secondary
     compared to the primary."""
 
-    def __init__(self, check, tags):
-        super(ReplicationInfoCollector, self).__init__(check, "local", tags)
-
     def collect(self, client):
         # Fetch information analogous to Mongo's db.getReplicationInfo()
-        localdb = client[self.db_name]
+        localdb = client["local"]
 
         oplog_data = {}
 
-        for ol_collection_name in ("oplog.rs", "oplog.$main"):
-            ol_options = localdb[ol_collection_name].options()
+        for collection_name in ("oplog.rs", "oplog.$main"):
+            ol_options = localdb[collection_name].options()
             if ol_options:
                 break
 
@@ -26,10 +23,10 @@ class ReplicationInfoCollector(MongoCollector):
             try:
                 oplog_data['logSizeMB'] = round_value(ol_options['size'] / 2.0 ** 20, 2)
 
-                oplog = localdb[ol_collection_name]
+                oplog = localdb[collection_name]
 
                 oplog_data['usedSizeMB'] = round_value(
-                    localdb.command("collstats", ol_collection_name)['size'] / 2.0 ** 20, 2
+                    localdb.command("collstats", collection_name)['size'] / 2.0 ** 20, 2
                 )
 
                 op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)

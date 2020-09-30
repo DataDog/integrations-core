@@ -65,7 +65,7 @@ def test_metric_normalization(check, instance):
     """
     # Initialize check and tests
     check = check(instance)
-    collector = MongoCollector(check, None, None)
+    collector = MongoCollector(check, None)
     normalize = collector._normalize
 
     # Assert
@@ -173,7 +173,7 @@ def test_legacy_config_deprecation(check):
 
 def test_collector_submit_payload(check, aggregator):
     check = check(common.INSTANCE_BASIC)
-    collector = MongoCollector(check, 'admin', ['foo:1'])
+    collector = MongoCollector(check, ['foo:1'])
 
     metrics_to_collect = {
         'foo.bar1': GAUGE,

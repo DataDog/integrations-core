@@ -17,18 +17,23 @@ class ReplicaCollector(MongoCollector):
     """
 
     def __init__(self, check, tags, last_state):
-        super(ReplicaCollector, self).__init__(check, "admin", tags)
-        # Members' last replica set states
+        super(ReplicaCollector, self).__init__(check, tags=tags)
+        # Member's last replica set state
         self._last_state = last_state
+        self.hostname = self.extract_hostname_for_event(self.check.clean_server_name)
 
-        # Makes a reasonable hostname for a replset membership event to mention.
-        uri = urlsplit(self.check.clean_server_name)
+    @staticmethod
+    def extract_hostname_for_event(server_uri):
+        """Make a reasonable hostname for a replset membership event to mention."""
+        uri = urlsplit(server_uri)
         if '@' in uri.netloc:
-            self.hostname = uri.netloc.split('@')[1].split(':')[0]
+            hostname = uri.netloc.split('@')[1].split(':')[0]
         else:
-            self.hostname = uri.netloc.split(':')[0]
-        if self.hostname == 'localhost':
-            self.hostname = datadog_agent.get_hostname()
+            hostname = uri.netloc.split(':')[0]
+        if hostname == 'localhost':
+            hostname = datadog_agent.get_hostname()
+
+        return hostname
 
     def _report_replica_set_state(self, state, replset_name):
         """
@@ -36,19 +41,27 @@ class ReplicaCollector(MongoCollector):
         * Submit a service check.
         * Create an event on state change.
         """
-        if self._last_state == state or self._last_state == -1:
+        # Don't submit an event if the state hasn't changed or if the previous state is unset.
+        if state == self._last_state or self._last_state is None:
             return
 
-        status = (
+        state_str = (
             REPLSET_MEMBER_STATES[state][1]
             if state in REPLSET_MEMBER_STATES
             else 'Replset state %d is unknown to the Datadog agent' % state
         )
-        short_status = get_state_name(state)
-        last_short_status = get_state_name(self._last_state)
-        msg_title = "%s is %s for %s" % (self.hostname, short_status, replset_name)
+        short_state_str = get_state_name(state)
+        previous_short_state_str = get_state_name(self._last_state)
+        msg_title = "%s is %s for %s" % (self.hostname, short_state_str, replset_name)
         msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before."
-        msg = msg % (self.hostname, self.check.clean_server_name, status, short_status, replset_name, last_short_status)
+        msg = msg % (
+            self.hostname,
+            self.check.clean_server_name,
+            state_str,
+            short_state_str,
+            replset_name,
+            previous_short_state_str,
+        )
 
         self.check.event(
             {
@@ -59,8 +72,8 @@ class ReplicaCollector(MongoCollector):
                 'host': self.hostname,
                 'tags': [
                     'action:mongo_replset_member_status_change',
-                    'member_status:' + short_status,
-                    'previous_member_status:' + last_short_status,
+                    'member_status:' + short_state_str,
+                    'previous_member_status:' + previous_short_state_str,
                     'replset:' + replset_name,
                 ],
             }
@@ -71,7 +84,7 @@ class ReplicaCollector(MongoCollector):
         status = db.command('replSetGetStatus')
         result = {}
 
-        # Find nodes: master and current node (ourself)
+        # Find nodes: current node (ourself) and the primary
         current = primary = None
         for member in status.get('members'):
             if member.get('self'):

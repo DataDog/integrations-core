@@ -7,6 +7,10 @@ class DbStatCollector(MongoCollector):
     Metrics are tagged with the database name so they don't overlap with each other.
     """
 
+    def __init__(self, check, db_name, tags):
+        super(DbStatCollector, self).__init__(check, tags)
+        self.db_name = db_name
+
     def collect(self, client):
         db = client[self.db_name]
         # Submit the metric

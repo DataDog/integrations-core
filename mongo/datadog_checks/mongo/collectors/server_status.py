@@ -2,11 +2,12 @@ from datadog_checks.mongo.collectors.base import MongoCollector
 
 
 class ServerStatusCollector(MongoCollector):
-    """The main collectors, simply performs the 'serverStatus' command and forwards metrics to Datadog."""
+    """The main collector, performs the 'serverStatus' command and forwards metrics to Datadog."""
 
     def __init__(self, check, db_name, tags, tcmalloc=False):
-        super(ServerStatusCollector, self).__init__(check, db_name, tags)
+        super(ServerStatusCollector, self).__init__(check, tags)
         self.collect_tcmalloc_metrics = tcmalloc
+        self.db_name = db_name
 
     def collect(self, client):
         db = client[self.db_name]

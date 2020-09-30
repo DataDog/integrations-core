@@ -10,8 +10,9 @@ class CustomQueriesCollector(MongoCollector):
     """A collector dedicated to running cutom queries defined in the configuration."""
 
     def __init__(self, check, db_name, tags, custom_queries):
-        super(CustomQueriesCollector, self).__init__(check, db_name, tags)
+        super(CustomQueriesCollector, self).__init__(check, tags)
         self.custom_queries = custom_queries
+        self.db_name = db_name
 
     @staticmethod
     def _extract_command_from_mongo_query(mongo_query):

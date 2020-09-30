@@ -5,6 +5,6 @@ from .custom_queries import CustomQueriesCollector
 from .db_stat import DbStatCollector
 from .index_stats import IndexStatsCollector
 from .replica import ReplicaCollector
-from .replication_info import ReplicationInfoCollector
+from .replication_info import ReplicationOpLogCollector
 from .server_status import ServerStatusCollector
 from .top import TopCollector

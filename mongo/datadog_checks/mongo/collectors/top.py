@@ -9,11 +9,8 @@ class TopCollector(MongoCollector):
     section of the configuration.
     Can only be fetched from a mongod service."""
 
-    def __init__(self, check, tags):
-        super(TopCollector, self).__init__(check, "admin", tags)
-
     def collect(self, client):
-        dbtop = client[self.db_name].command('top')
+        dbtop = client["admin"].command('top')
         for ns, ns_metrics in iteritems(dbtop['totals']):
             if "." not in ns:
                 continue

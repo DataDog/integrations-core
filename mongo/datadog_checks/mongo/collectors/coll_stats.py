@@ -14,8 +14,9 @@ class CollStatsCollector(MongoCollector):
     """
 
     def __init__(self, check, db_name, tags, coll_names=None):
-        super(CollStatsCollector, self).__init__(check, db_name, tags)
+        super(CollStatsCollector, self).__init__(check, tags)
         self.coll_names = coll_names
+        self.db_name = db_name
 
     def collect(self, client):
         # Ensure that you're on the right db

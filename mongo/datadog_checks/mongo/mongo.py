@@ -18,16 +18,16 @@ from datadog_checks.mongo.collectors import (
     DbStatCollector,
     IndexStatsCollector,
     ReplicaCollector,
-    ReplicationInfoCollector,
+    ReplicationOpLogCollector,
     ServerStatusCollector,
     TopCollector,
 )
 from datadog_checks.mongo.common import (
     DEFAULT_TIMEOUT,
     SERVICE_CHECK_NAME,
-    MongosDeploymentType,
-    ReplicaSetDeploymentType,
-    StandaloneDeploymentType,
+    MongosDeployment,
+    ReplicaSetDeployment,
+    StandaloneDeployment,
 )
 
 from . import metrics
@@ -157,7 +157,7 @@ class MongoDb(AgentCheck):
         self.coll_names = self.instance.get('collections', [])
         self.custom_queries = self.instance.get("custom_queries", [])
         # By default consider that this instance is a standalone, updated on each check run.
-        self.deployment_type = StandaloneDeploymentType()
+        self.deployment_type = StandaloneDeployment()
 
     @classmethod
     def get_library_versions(cls):
@@ -227,12 +227,14 @@ class MongoDb(AgentCheck):
     def update_deployment_type(self, admindb):
         props = admindb.command("isMaster")
         if props.get("ismaster") == "isdbgrid":
-            self.deployment_type = MongosDeploymentType()
+            self.deployment_type = MongosDeployment()
         elif props.get("hosts"):
             repl_set_payload = admindb.command("replSetGetStatus")
-            self.deployment_type = ReplicaSetDeploymentType(repl_set_payload)
+            replset_name = repl_set_payload["set"]
+            replset_state = repl_set_payload["myState"]
+            self.deployment_type = ReplicaSetDeployment(replset_name, replset_state)
         else:
-            self.deployment_type = StandaloneDeploymentType()
+            self.deployment_type = StandaloneDeployment()
 
     def check(self, _):
         try:
@@ -254,7 +256,7 @@ class MongoDb(AgentCheck):
         tags = deepcopy(self.base_tags)
 
         self.update_deployment_type(cli['admin'])
-        if isinstance(self.deployment_type, ReplicaSetDeploymentType):
+        if isinstance(self.deployment_type, ReplicaSetDeployment):
             tags.extend(
                 [
                     "replset_name:{}".format(self.deployment_type.replset_name),
@@ -287,8 +289,8 @@ class MongoDb(AgentCheck):
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        if self.replica_check and isinstance(self.deployment_type, ReplicaSetDeploymentType):
-            collector = ReplicaCollector(self, tags, self._previous_state)
+        if self.replica_check and isinstance(self.deployment_type, ReplicaSetDeployment):
+            collector = ReplicaCollector(self, tags, last_state=self._previous_state)
             try:
                 collector.collect(cli)
                 self._previous_state = self.deployment_type.replset_state
@@ -303,13 +305,13 @@ class MongoDb(AgentCheck):
         dbnames = cli.list_database_names()
         self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
-        for db_n in dbnames:
-            collector = DbStatCollector(self, db_n, tags)
+        for db_name in dbnames:
+            collector = DbStatCollector(self, db_name, tags)
             collector.collect(cli)
 
         if self.collections_indexes_stats:
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
-                collector = IndexStatsCollector(self, self.db_name, tags, self.coll_names)
+                collector = IndexStatsCollector(self, self.db_name, tags, coll_names=self.coll_names)
                 collector.collect(cli)
             else:
                 msg = "'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s"
@@ -324,7 +326,7 @@ class MongoDb(AgentCheck):
                 self.log.warning('Failed to record `top` metrics %s', e)
 
         if 'local' in dbnames:  # it might not be if we are connecting through mongos
-            collector = ReplicationInfoCollector(self, tags)
+            collector = ReplicationOpLogCollector(self, tags)
             collector.collect(cli)
         else:
             self.log.debug('"local" database not in dbnames. Not collecting ReplicationInfo metrics')
@@ -337,5 +339,5 @@ class MongoDb(AgentCheck):
             self.log.warning(u"Failed to record `collection` metrics.")
             self.log.exception(e)
 
-        collector = CustomQueriesCollector(self, self.db_name, tags, self.custom_queries)
+        collector = CustomQueriesCollector(self, self.db_name, tags, custom_queries=self.custom_queries)
         collector.collect(cli)

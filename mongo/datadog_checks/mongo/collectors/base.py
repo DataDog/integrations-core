@@ -13,15 +13,13 @@ class MongoCollector(object):
     """The base collector object, can be considered abstract.
     Used by the mongo check to collect and submit metric of a certain type."""
 
-    def __init__(self, check, db_name, tags):
+    def __init__(self, check, tags):
         """
         :param check: An instance of the mongo check class. Required to access specific properties and methods exposed
                       by the AgentCheck based class.
-        :param db_name: The name of the database to use for running commands.
         :param tags: Base tags that the collector will use.
         """
         self.check = check
-        self.db_name = db_name
         self.log = self.check.log
         self.gauge = self.check.gauge
         self.base_tags = tags
