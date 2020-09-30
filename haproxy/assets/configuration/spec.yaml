@@ -7,7 +7,7 @@ files:
     - template: init_config/openmetrics
   - template: instances
     options:
-    - name: use_preview
+    - name: use_prometheus
       value:
         example: false
         type: boolean

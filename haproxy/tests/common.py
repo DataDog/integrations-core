@@ -12,6 +12,6 @@ HOST = get_docker_hostname()
 HAPROXY_LEGACY = os.getenv('HAPROXY_LEGACY')
 ENDPOINT_PROMETHEUS = 'http://{}:8404/metrics'.format(HOST)
 
-INSTANCE = {'use_preview': True, 'prometheus_url': ENDPOINT_PROMETHEUS}
+INSTANCE = {'use_prometheus': True, 'prometheus_url': ENDPOINT_PROMETHEUS}
 
 requires_new_environment = pytest.mark.skipif(HAPROXY_LEGACY != 'false', reason='Requires prometheus environment')

@@ -43,7 +43,7 @@ The check supports a newer implementation starting with HAProxy version 2 that i
 
 1. Configure your `haproxy.conf` using the [official guide][16].
 
-2. [Enable](#configuration) the setting `use_preview`.
+2. [Enable](#configuration) the setting `use_prometheus`.
 
 3. [Restart HAProxy to enable the stats endpoint][3].
 

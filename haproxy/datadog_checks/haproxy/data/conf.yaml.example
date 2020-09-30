@@ -46,12 +46,12 @@ init_config:
 instances:
 
   -
-    ## @param use_preview - boolean - optional - default: false
+    ## @param use_prometheus - boolean - optional - default: false
     ## Whether or not to preview the new version of the check supporting only HAProxy versions >=2.
     ##
     ## Prometheus-related options take effect only when this is set to `true`.
     #
-    # use_preview: false
+    # use_prometheus: false
 
     ## @param url - string - required
     ## Haproxy URL to connect to gather metrics.
