@@ -21,8 +21,6 @@ REQUEST_LIBRARY_FUNCTIONS = {
     'requests.delete',
 }
 
-SPEC_CONFIG_HTTP = {'instances/http', 'init_config/http'}
-
 
 def validate_config_http(file, check):
     """Determines if integration with http wrapper class
@@ -40,9 +38,9 @@ def validate_config_http(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for _, line in enumerate(f):
-            if 'instances/http' in line:
+            if 'instances/http' or 'instances/openmetrics' in line:
                 has_instance_http = True
-            if 'init_config/http' in line:
+            if 'init_config/http' or 'init_config/openmetrics' in line:
                 has_init_config_http = True
 
     if not has_instance_http:
