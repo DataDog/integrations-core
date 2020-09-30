@@ -45,5 +45,5 @@ Every pull request should do one thing only, for many reasons:
 
 ## Merges
 
-To keep a clean Git history we disable standard merges and use GitHub's [squash and merge][github-squash-and-merge].
+We only allow GitHub's [squash and merge][github-squash-and-merge], for 2 reasons:
 Our release tooling also relies on [squash and merge][github-squash-and-merge] in order to list changes between versions. By doing so, the resulting commit will be suffixed with the id of the PR.
