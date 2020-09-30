@@ -45,17 +45,29 @@ init_config:
 #
 instances:
 
+  -
+    ## @param use_prometheus - boolean - optional - default: false
+    ## Whether or not to preview the new version of the check supporting only HAProxy versions >=2.
+    ##
+    ## Prometheus-related options take effect only when this is set to `true`.
+    #
+    # use_prometheus: false
+
     ## @param url - string - required
     ## Haproxy URL to connect to gather metrics.
     ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
     ## or admin socket: unix:///var/run/haproxy.sock
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
-  - url: http://localhost/admin?stats
+    url: http://localhost/admin?stats
 
     ## @param status_check - boolean - optional - default: false
     ## This paramater instructs the check to send events on status changes in the backend.
     ## This is DEPRECATED in favor of the creation of a monitor on the service check status
     ## and will be removed in a future version.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # status_check: false
 
@@ -67,41 +79,55 @@ instances:
     ## Please note that this mean that if if you have queries like computing the sum of all requests being made, the
     ## result will be twice as expected. To get the correct result, you have to explicitly add some filters to the
     ## query.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collect_aggregates_only: true
 
     ## @param collect_status_metrics - boolean - optional - default: false
     ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collect_status_metrics: false
 
     ## @param collect_status_metrics_by_host - boolean - optional - default: false
     ## This parameter instructs the check to collect status metrics per host instead of per service.
     ## This only applies if `collect_status_metrics` is true.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collect_status_metrics_by_host: false
 
     ## @param collate_status_tags_per_host - boolean - optional - default: true
     ## This parameter collects `status` tags for `haproxy.count_per_status` up to one of
     ## (`available`, `unavailable`) for each discovered backend.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collate_status_tags_per_host: true
 
     ## @param count_status_by_service - boolean - optional - default: true
     ## This parameter instructs the check to tag the status counts it collects by service in addition to by host.
     ## This only applies if `collect_status_metrics` is `true`.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # count_status_by_service: true
 
     ## @param tag_service_check_by_host - boolean - optional - default: false
     ## This parameter instructs the check to tag the service check status by host on top of other tags.
     ## The default case will only tag by backend and service.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # tag_service_check_by_host: false
 
     ## @param services_include - list of strings - optional
     ## Filter metrics by services. If a tag matches an exclude rule, it won't be included
     ## unless it also matches an include rule.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # services_include:
     #   - <SERVICE_NAME_1>
@@ -110,6 +136,8 @@ instances:
     ## @param services_exclude - list of strings - optional
     ## Filter metrics by services. If a service name matches an exclude rule, it won't be included
     ## unless it also matches an include rule.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # services_exclude:
     #   - .*
@@ -117,12 +145,16 @@ instances:
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed
     ## to `haproxy_service` and disable the associated deprecation warning.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # disable_legacy_service_tag: false
 
     ## @param active_tag - boolean - optional - default: false
     ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
     ## "active" pool of connections normally used for servicing requests.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # active_tag: false
 
@@ -139,6 +171,8 @@ instances:
     ##
     ## would match service name be_edge_http_sre-prod_elk and include additional
     ## tags: ['team:sre','env:prod','app:elk']
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # tags_regex: <TAGS_REGEX>
 
@@ -152,8 +186,111 @@ instances:
     ## accurately reflect the state of the system.
     ## If this parameter is >0, no datapoints will be sent until the uptime of
     ## haproxy reaches this many seconds.
+    ##
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # startup_grace_seconds: 0
+
+    ## @param prometheus_url - string - required
+    ## The URL where your application metrics are exposed by Prometheus.
+    #
+    prometheus_url: <PROMETHEUS_URL>
+
+    ## @param prometheus_metrics_prefix - string - optional
+    ## <PREFIX> for exposed Prometheus metrics.
+    #
+    # prometheus_metrics_prefix: <PREFIX>_
+
+    ## @param health_service_check - boolean - optional - default: true
+    ## Send a service check reporting about the health of the Prometheus endpoint.
+    ## The service check is named <NAMESPACE>.prometheus.health
+    #
+    # health_service_check: true
+
+    ## @param label_to_hostname - string - optional
+    ## Override the hostname with the value of one label.
+    #
+    # label_to_hostname: <LABEL>
+
+    ## @param label_joins - mapping - optional
+    ## Allows targeting a metric to retrieve its label with a 1:1 mapping.
+    #
+    # label_joins:
+    #   target_metric:
+    #     label_to_match: <MATCHED_LABEL>
+    #     labels_to_get:
+    #     - <EXTRA_LABEL_1>
+    #     - <EXTRA_LABEL_2>
+
+    ## @param labels_mapper - mapping - optional
+    ## The label mapper allows you to rename labels.
+    ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
+    #
+    # labels_mapper:
+    #   flavor: origin
+
+    ## @param type_overrides - mapping - optional
+    ## Override a type in the Prometheus payload or type an untyped metric (ignored by default).
+    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
+    ## The "*" wildcard can be used to match multiple metric names.
+    #
+    # type_overrides:
+    #   <METRIC_NAME>: <METRIC_TYPE>
+
+    ## @param send_histograms_buckets - boolean - optional - default: true
+    ## Set send_histograms_buckets to true to send the histograms bucket.
+    #
+    # send_histograms_buckets: true
+
+    ## @param send_distribution_buckets - boolean - optional - default: false
+    ## Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
+    ##
+    ## Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
+    #
+    # send_distribution_buckets: false
+
+    ## @param send_monotonic_counter - boolean - optional - default: true
+    ## Set send_monotonic_counter to true to send counters as monotonic counter.
+    #
+    # send_monotonic_counter: true
+
+    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
+    ## If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
+    #
+    # send_distribution_counts_as_monotonic: false
+
+    ## @param send_distribution_sums_as_monotonic - boolean - optional - default: false
+    ## If set to true, sends histograms and summary sums as monotonic counters (instead of gauges).
+    #
+    # send_distribution_sums_as_monotonic: false
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to be excluded
+    #
+    # exclude_labels:
+    #   - timestamp
+
+    ## @param bearer_token_auth - boolean - optional - default: false
+    ## If set to true, adds a bearer token authentication header.
+    ## Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
+    #
+    # bearer_token_auth: false
+
+    ## @param bearer_token_path - string - optional
+    ## The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
+    ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
+    #
+    # bearer_token_path: <TOKEN_PATH>
+
+    ## @param ignore_metrics - list of strings - optional
+    ## A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+    #
+    # ignore_metrics:
+    #   - <IGNORED_METRIC_NAME>
+    #   - <PREFIX_*>
+    #   - <*_SUFFIX>
+    #   - <PREFIX_*_SUFFIX>
+    #   - <*_SUBSTRING_*>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
