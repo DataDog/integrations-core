@@ -58,7 +58,7 @@ instances:
     ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
     ## or admin socket: unix:///var/run/haproxy.sock
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     url: http://localhost/admin?stats
 
@@ -67,7 +67,7 @@ instances:
     ## This is DEPRECATED in favor of the creation of a monitor on the service check status
     ## and will be removed in a future version.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # status_check: false
 
@@ -80,14 +80,14 @@ instances:
     ## result will be twice as expected. To get the correct result, you have to explicitly add some filters to the
     ## query.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collect_aggregates_only: true
 
     ## @param collect_status_metrics - boolean - optional - default: false
     ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collect_status_metrics: false
 
@@ -95,7 +95,7 @@ instances:
     ## This parameter instructs the check to collect status metrics per host instead of per service.
     ## This only applies if `collect_status_metrics` is true.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collect_status_metrics_by_host: false
 
@@ -103,7 +103,7 @@ instances:
     ## This parameter collects `status` tags for `haproxy.count_per_status` up to one of
     ## (`available`, `unavailable`) for each discovered backend.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # collate_status_tags_per_host: true
 
@@ -111,7 +111,7 @@ instances:
     ## This parameter instructs the check to tag the status counts it collects by service in addition to by host.
     ## This only applies if `collect_status_metrics` is `true`.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # count_status_by_service: true
 
@@ -119,7 +119,7 @@ instances:
     ## This parameter instructs the check to tag the service check status by host on top of other tags.
     ## The default case will only tag by backend and service.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # tag_service_check_by_host: false
 
@@ -127,7 +127,7 @@ instances:
     ## Filter metrics by services. If a tag matches an exclude rule, it won't be included
     ## unless it also matches an include rule.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # services_include:
     #   - <SERVICE_NAME_1>
@@ -137,7 +137,7 @@ instances:
     ## Filter metrics by services. If a service name matches an exclude rule, it won't be included
     ## unless it also matches an include rule.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # services_exclude:
     #   - .*
@@ -146,7 +146,7 @@ instances:
     ## Whether or not to stop submitting the tag `service` that has been renamed
     ## to `haproxy_service` and disable the associated deprecation warning.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # disable_legacy_service_tag: false
 
@@ -154,7 +154,7 @@ instances:
     ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
     ## "active" pool of connections normally used for servicing requests.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # active_tag: false
 
@@ -172,7 +172,7 @@ instances:
     ## would match service name be_edge_http_sre-prod_elk and include additional
     ## tags: ['team:sre','env:prod','app:elk']
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # tags_regex: <TAGS_REGEX>
 
@@ -187,7 +187,7 @@ instances:
     ## If this parameter is >0, no datapoints will be sent until the uptime of
     ## haproxy reaches this many seconds.
     ##
-    ## NOTE: This only takes effect when `use_preview` is set to `false`.
+    ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
     # startup_grace_seconds: 0
 
