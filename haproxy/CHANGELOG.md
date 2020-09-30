@@ -142,7 +142,7 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1727
 [8]: https://github.com/DataDog/integrations-core/pull/1478
 [9]: https://github.com/DataDog/integrations-core/pull/1264
-[10]:
+[10]: https://github.com/DataDog/integrations-core/pull/1019
 [11]: https://github.com/DataDog/integrations-core/issues/462
 [12]: https://github.com/DataDog/integrations-core/issues/379
 [13]: https://github.com/DataDog/integrations-core/issues/281

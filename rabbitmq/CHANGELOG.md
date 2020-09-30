@@ -129,9 +129,9 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1727
 [8]: https://github.com/DataDog/integrations-core/issues/1100
 [9]: https://github.com/sylr
-[10]: 
-[11]: 
-[12]: 
+[10]: https://github.com/DataDog/integrations-core/pull/1057
+[11]: https://github.com/DataDog/integrations-core/pull/176
+[12]: https://github.com/wholroyd
 [13]: https://github.com/DataDog/integrations-core/issues/902
 [14]: https://github.com/dnavre
 [15]: https://github.com/DataDog/integrations-core/issues/909

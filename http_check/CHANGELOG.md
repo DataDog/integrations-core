@@ -212,9 +212,9 @@
 [22]: https://github.com/DataDog/integrations-core/pull/1517
 [23]: https://github.com/DataDog/integrations-core/pull/1340
 [24]: https://github.com/DataDog/integrations-core/pull/1054
-[25]: 
-[26]: 
-[27]: 
+[25]: https://github.com/DataDog/integrations-core/pull/1057
+[26]: https://github.com/DataDog/integrations-core/pull/301
+[27]: https://github.com/colinmollenhour
 [28]: https://github.com/DataDog/integrations-core/pull/905
 [29]: https://github.com/DataDog/integrations-core/issues/688
 [30]: https://github.com/xkrt

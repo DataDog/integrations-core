@@ -153,8 +153,8 @@
 [16]: https://github.com/DataDog/integrations-core/issues/1312
 [17]: https://github.com/DataDog/integrations-core/issues/1050
 [18]: https://github.com/DataDog/integrations-core/issues/1026
-[19]: 
-[20]: 
+[19]: https://github.com/DataDog/integrations-core/pull/1038
+[20]: https://github.com/DataDog/integrations-core/pull/997
 [21]: https://github.com/DataDog/integrations-core/issues/463
 [22]: https://github.com/DataDog/integrations-core/issues/893
 [23]: https://github.com/DataDog/integrations-core/issues/860

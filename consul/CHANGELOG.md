@@ -126,7 +126,7 @@
 [8]: https://github.com/DataDog/integrations-core/pull/1526
 [9]: https://github.com/TylerLubeck
 [10]: https://github.com/DataDog/integrations-core/pull/1479
-[11]: 
+[11]: https://github.com/DataDog/integrations-core/pull/1444
 [12]: https://github.com/DataDog/integrations-core/pull/876
 [13]: https://github.com/byronwolfman
 [14]: https://github.com/DataDog/integrations-core/pull/968
