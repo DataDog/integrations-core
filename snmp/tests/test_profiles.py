@@ -1655,6 +1655,10 @@ def test_chatsworth(aggregator):
     for branch in [1]:
         branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name2']
         aggregator.assert_metric(
+            'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
+        )
+
+        aggregator.assert_metric(
             'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
         )
 
