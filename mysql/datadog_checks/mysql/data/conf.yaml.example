@@ -170,14 +170,14 @@ instances:
         #
         # galera_cluster: false
 
-        ## @param extra_status_metrics - boolean - optional - default: true
+        ## @param extra_status_metrics - boolean - optional - default: false
         ## Set to `false` to disable extra status metrics.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
         # extra_status_metrics: true
 
-        ## @param extra_innodb_metrics - boolean - optional - default: true
+        ## @param extra_innodb_metrics - boolean - optional - default: false
         ## Set to `false` to disable extra InnoDB metrics.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
@@ -205,7 +205,7 @@ instances:
         #
         # schema_size_metrics: false
 
-        ## @param extra_performance_metrics - boolean - optional - default: true
+        ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance
         ## and if the version for that instance is >= 5.6.0.
         ##

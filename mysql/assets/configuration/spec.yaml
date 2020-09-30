@@ -178,6 +178,7 @@ files:
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
+                  default: false
                   example: true
 
               - name: extra_innodb_metrics
@@ -187,6 +188,7 @@ files:
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
+                  default: false
                   example: true
 
               - name: disable_innodb_metrics
@@ -233,6 +235,7 @@ files:
                   MySQL integration tile in the Datadog Web UI for further instructions.
                 value:
                   type: boolean
+                  default: false
                   example: true
 
           - template: instances/default
