@@ -590,7 +590,6 @@ metrics:
             end: 7
         tag: pdu_name
 
-
   - # Redefine the table to force the type on cpiPduBranchEnergy
     MIB: CPI-UNITY-MIB
     table:
