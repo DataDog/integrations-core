@@ -366,7 +366,7 @@ def batches(lst, size):
 
 
 def transform_index(src_index, index_slices):
-    # type: (Tuple[str, ...], List[slice]) -> Tuple[str, ...]
+    # type: (Tuple[str, ...], List[slice]) -> Union[Tuple[str, ...], None]
     """
     Transform a source index into a new index using a list of transform rules.
 
