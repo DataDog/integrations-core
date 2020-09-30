@@ -1,5 +1,9 @@
 # CHANGELOG - fluentd
 
+## 1.11.0 / 2020-09-30
+
+* [Added] Add support for additional metrics. See [#7685](https://github.com/DataDog/integrations-core/pull/7685).
+
 ## 1.10.0 / 2020-09-21
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
