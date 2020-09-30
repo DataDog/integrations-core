@@ -44,7 +44,7 @@ datadog-gitlab-runner==2.10.0
 datadog-gitlab==4.3.0
 datadog-go-expvar==1.10.2
 datadog-gunicorn==1.13.0; sys_platform != 'win32'
-datadog-haproxy==2.11.0
+datadog-haproxy==2.12.0
 datadog-harbor==1.6.0
 datadog-hazelcast==1.1.4
 datadog-hdfs-datanode==1.15.0; sys_platform != 'win32'
