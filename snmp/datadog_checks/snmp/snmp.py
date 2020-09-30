@@ -507,9 +507,7 @@ class SnmpCheck(AgentCheck):
                 new_index = transform_index(index, column_tag.index_slices)
             else:
                 new_index = index
-            self.log.debug(
-                'Processing column tag: new_index=%s old_index=%s', new_index, index
-            )
+            self.log.debug('Processing column tag: new_index=%s old_index=%s', new_index, index)
             if new_index is None:
                 continue
             try:
