@@ -219,6 +219,8 @@ class VSphereCheck(AgentCheck):
             title = 'NTNX_NC_VC_server_not_reachable'
         elif error_code == 'CollectionError':
             title = 'NTNX_NC_VC_no_data_alert'
+        elif error_code == 'ConfigError':
+            title = 'NTNX_NC_VC_failed_to_read_file'
         else:
             title = None
 
