@@ -2,8 +2,8 @@
 
 ## 4.1.0 / 2020-10-01
 
-* [Added] Adding HTTP wrapper class validator. See [#7676](https://github.com/DataDog/integrations-core/pull/7676).
-* [Fixed] adding instances/openmetrics and init_config/openmetrics for http template check. See [#7694](https://github.com/DataDog/integrations-core/pull/7694).
+* [Added] Added HTTP wrapper class validator. See [#7676](https://github.com/DataDog/integrations-core/pull/7676).
+* [Fixed] Added missing HTTP templates to existing config specs. See [#7694](https://github.com/DataDog/integrations-core/pull/7694).
 * [Fixed] Handle missing "eula" key in EULA validation. See [#7640](https://github.com/DataDog/integrations-core/pull/7640).
 * [Fixed] Check case of integration header in metadata.csv files for metadata validation. See [#7643](https://github.com/DataDog/integrations-core/pull/7643).
 
