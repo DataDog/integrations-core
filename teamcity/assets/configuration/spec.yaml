@@ -60,24 +60,18 @@ files:
     - type: file
       path: /opt/teamcity/logs/teamcity-server.log
       source: teamcity
-      service: <SERVICE>
     - type: file
       path: /opt/teamcity/logs/teamcity-activities.log
       source: teamcity
-      service: <SERVICE>
     - type: file
       path: /opt/teamcity/logs/teamcity-vcs.log
       source: teamcity
-      service: <SERVICE>
     - type: file
       path: /opt/teamcity/logs/teamcity-cleanup.log
       source: teamcity
-      service: <SERVICE>
     - type: file
       path: /opt/teamcity/logs/teamcity-notifications.log
       source: teamcity
-      service: <SERVICE>
     - type: file
       path: /opt/teamcity/logs/teamcity-ws.log
       source: teamcity
-      service: <SERVICE>

@@ -44,7 +44,7 @@ Add an item like the above to `instances` for each build configuration you want 
 
 ##### Log collection
 
-1. Configure Teamcity [logging settings][11].
+1. Configure Teamcity [logs settings][11].
 
 2. By default, Datadog's integration pipeline supports the following kind of log format:
 
@@ -60,34 +60,28 @@ Add an item like the above to `instances` for each build configuration you want 
    logs_enabled: true
    ```
 
-4. Add the following configuration block to your `teamcity.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample teamcity.d/conf.yaml][5] for all available configuration options.
+4. Add the following configuration block to your `teamcity.d/conf.yaml` file. Change the `path` parameter value based on your environment. See the [sample teamcity.d/conf.yaml][5] for all available configuration options.
 
    ```yaml
    logs:
      - type: file
        path: /opt/teamcity/logs/teamcity-server.log
        source: teamcity
-       service: <SERVICE>
      - type: file
        path: /opt/teamcity/logs/teamcity-activities.log
        source: teamcity
-       service: <SERVICE>
      - type: file
        path: /opt/teamcity/logs/teamcity-vcs.log
        source: teamcity
-       service: <SERVICE>
      - type: file
        path: /opt/teamcity/logs/teamcity-cleanup.log
        source: teamcity
-       service: <SERVICE>
      - type: file
        path: /opt/teamcity/logs/teamcity-notifications.log
        source: teamcity
-       service: <SERVICE>
      - type: file
        path: /opt/teamcity/logs/teamcity-ws.log
        source: teamcity
-       service: <SERVICE>
    ```
 
 5. [Restart the Agent][6].
@@ -111,7 +105,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "teamcity", "service": "<SERVICE_NAME>"}` |
+| `<LOG_CONFIG>` | `{"source": "teamcity"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
