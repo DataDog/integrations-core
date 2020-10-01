@@ -537,7 +537,7 @@ class MySql(AgentCheck):
                 for slave_result in cursor.fetchall():
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = (
+                    channel = to_native_string(
                         replication_channel
                         or slave_result.get('Channel_Name')
                         or slave_result.get(b'Channel_Name')
@@ -545,7 +545,7 @@ class MySql(AgentCheck):
                     )
                     for key, value in iteritems(slave_result):
                         if value is not None:
-                            replica_results[key]['channel:{0}'.format(to_native_string(channel))] = value
+                            replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
