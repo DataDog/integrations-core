@@ -14,6 +14,10 @@ steps:
   - script: ddev validate codeowners
     displayName: 'Validate codeowners'
 
+- ${{ if eq(parameters.repo, 'cire') }}:
+  - script: ddev validate http
+    displayName: 'Validate use of http wrapper'
+
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
