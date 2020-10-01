@@ -261,16 +261,16 @@ instances:
     ## The available readers are:
     ##
     ##   - type: file
-    ##     path (required): the absolute path to the file with which to read from
-    ##     pattern: a regular expression pattern with a single capture group used to find the
-    ##              token rather than using the entire file e.g.: Your secret is (.+)
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: `Your secret is (.+)`
     ##
     ## The available writers are:
     ##
     ##   - type: header
-    ##     name (required): the name of the field e.g.: Authorization
-    ##     value (required): the template value e.g.: Bearer <TOKEN>
-    ##     placeholder: the substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value (required): The template value, for example: Bearer <TOKEN>
+    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
