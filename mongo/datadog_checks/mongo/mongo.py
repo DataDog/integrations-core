@@ -157,7 +157,7 @@ class MongoDb(AgentCheck):
         self.coll_names = self.instance.get('collections', [])
         self.custom_queries = self.instance.get("custom_queries", [])
         # By default consider that this instance is a standalone, updated on each check run.
-        self.deployment_type = StandaloneDeployment()
+        self.deployment = StandaloneDeployment()
 
     @classmethod
     def get_library_versions(cls):
@@ -224,17 +224,17 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
-    def update_deployment_type(self, admindb):
+    def update_deployment(self, admindb):
         props = admindb.command("isMaster")
         if props.get("ismaster") == "isdbgrid":
-            self.deployment_type = MongosDeployment()
+            self.deployment = MongosDeployment()
         elif props.get("hosts"):
             repl_set_payload = admindb.command("replSetGetStatus")
             replset_name = repl_set_payload["set"]
             replset_state = repl_set_payload["myState"]
-            self.deployment_type = ReplicaSetDeployment(replset_name, replset_state)
+            self.deployment = ReplicaSetDeployment(replset_name, replset_state)
         else:
-            self.deployment_type = StandaloneDeployment()
+            self.deployment = StandaloneDeployment()
 
     def check(self, _):
         try:
@@ -255,12 +255,12 @@ class MongoDb(AgentCheck):
 
         tags = deepcopy(self.base_tags)
 
-        self.update_deployment_type(cli['admin'])
-        if isinstance(self.deployment_type, ReplicaSetDeployment):
+        self.update_deployment(cli['admin'])
+        if isinstance(self.deployment, ReplicaSetDeployment):
             tags.extend(
                 [
-                    "replset_name:{}".format(self.deployment_type.replset_name),
-                    "replset_state:{}".format(self.deployment_type.replset_state_name),
+                    "replset_name:{}".format(self.deployment.replset_name),
+                    "replset_state:{}".format(self.deployment.replset_state_name),
                 ]
             )
 
@@ -289,11 +289,11 @@ class MongoDb(AgentCheck):
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        if self.replica_check and isinstance(self.deployment_type, ReplicaSetDeployment):
+        if self.replica_check and isinstance(self.deployment, ReplicaSetDeployment):
             collector = ReplicaCollector(self, tags, last_state=self._previous_state)
             try:
                 collector.collect(cli)
-                self._previous_state = self.deployment_type.replset_state
+                self._previous_state = self.deployment.replset_state
             except Exception as e:
                 if "OperationFailure" in repr(e) and (
                     "not running with --replSet" in str(e) or "replSetGetStatus" in str(e)
