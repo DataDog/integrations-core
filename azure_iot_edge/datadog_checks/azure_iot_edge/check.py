@@ -48,7 +48,7 @@ class AzureIoTEdgeCheck(AgentCheck):
         try:
             host_info = json.loads(host_information)  # type: dict
         except json.JSONDecodeError as exc:
-            self.log.debug('Error decoding host information: %r', exc)
+            self.log.debug('Error decoding host information, skipping version metadata: %r', exc)
             return
 
         iot_edge_runtime_version = host_info.get('Version')
@@ -79,7 +79,7 @@ class AzureIoTEdgeCheck(AgentCheck):
 
     def _check_security_manager_health(self):
         try:
-            _ = self.http.get(self._config.security_manager_management_api_url)
+            self.http.get(self._config.security_manager_management_api_url)
         except Exception as exc:
             status = self.CRITICAL
             message = str(exc)
