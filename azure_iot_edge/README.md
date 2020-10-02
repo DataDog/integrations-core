@@ -26,6 +26,16 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
 1. Configure the **Edge Agent** runtime module as follows:
     - Image version must be `1.0.10` or above.
+    - Under "Create Options", add the following `Labels`. Edit the `com.datadoghq.ad.instances` label as appropriate. See the [sample azure_iot_edge.d/conf.yaml][5] for all available configuration options. See the documentation on [Docker Integrations Autodiscovery][6] for more information on labels-based integration configuration.
+
+        ```json
+        "Labels": {
+            "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
+            "com.datadoghq.ad.init_configs": "[{}]",
+            "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\"}]"
+        }
+        ```
+
     - Under "Environment Variables", experimental metrics must be enabled by adding these environment variables (note the double underscores):
         - `ExperimentalFeatures__Enabled`: `true`
         - `ExperimentalFeatures__EnableMetrics`: `true`
@@ -40,19 +50,15 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
     - Set the module name. For example: `datadog-agent`.
     - Set the Agent image URI. For example: `datadog/agent:7`.
     - Under "Environment Variables", configure your `DD_API_KEY`. You may also set extra Agent configuration here (see [Agent Environment Variables][4]).
-    - Under "Container Create Options", enter the following configuration based on your device OS. Edit the `com.datadoghq.ad.instances` option as appropriate. See the [sample azure_iot_edge.d/conf.yaml][5] for all available configuration options. See the documentation on [Docker Integrations Autodiscovery][6] for more information on labels-based integration configuration. **Note**: `NetworkId` must correspond to the network name set in the device `config.yaml` file.
+    - Under "Container Create Options", enter the following configuration based on your device OS. **Note**: `NetworkId` must correspond to the network name set in the device `config.yaml` file.
+
         - Linux:
             ```json
             {
                 "HostConfig": {
                     "NetworkMode": "default",
                     "Env": ["NetworkId=azure-iot-edge"],
-                    "Binds": [ "/var/run/docker.sock:/var/run/docker.sock"]
-                },
-                "Labels": {
-                    "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
-                    "com.datadoghq.ad.init_configs": "[{}]",
-                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\"}]"
+                    "Binds": ["/var/run/docker.sock:/var/run/docker.sock"]
                 }
             }
             ```
@@ -63,11 +69,6 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
                     "NetworkMode": "default",
                     "Env": ["NetworkId=nat"],
                     "Binds": ["//./pipe/iotedge_moby_engine:/./pipe/docker_engine"]
-                },
-                "Labels": {
-                    "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
-                    "com.datadoghq.ad.init_configs": "[{}]",
-                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\"}]"
                 }
             }
             ```
