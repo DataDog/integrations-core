@@ -121,7 +121,10 @@ def render_metadata_progress():
 
 
 def render_logs_progress():
-    valid_checks = sorted(get_valid_checks())
+    not_possible = {
+        'sap_hana'  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
+    }
+    valid_checks = sorted(set(get_valid_checks()).difference(not_possible))
     total_checks = len(valid_checks)
     checks_with_logs = 0
 
