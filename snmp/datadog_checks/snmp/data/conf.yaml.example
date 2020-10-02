@@ -144,7 +144,7 @@ init_config:
   #   isilon:
   #     definition_file: isilon.yaml
   #   apc-ups:
-  #     definition_file: apc-ups.yaml
+  #     definition_file: apc_ups.yaml
   #   fortinet-fortigate:
   #     definition_file: fortinet-fortigate.yaml
   #   netapp:
