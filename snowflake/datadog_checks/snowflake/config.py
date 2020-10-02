@@ -59,7 +59,7 @@ class Config(object):
             raise ConfigurationError('MFA enabled, please specify a passcode')
 
         if authenticator not in self.AUTHENTICATION_MODES:
-            raise ConfigurationError('The Authenticator method set is invalid: %s'.format(authenticator))
+            raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
 
         if authenticator == 'oauth' and token is None:
             raise ConfigurationError('If using OAuth, you must specify a token')

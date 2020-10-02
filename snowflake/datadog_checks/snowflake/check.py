@@ -86,7 +86,19 @@ class SnowflakeCheck(AgentCheck):
             return cursor.fetchall()
 
     def connect(self):
-        self.log.debug("Establishing a new connection to Snowflake.")
+        self.log.debug(
+            "Establishing a new connection to Snowflake: account=%s, user=%s, database=%s, schema=%s, warehouse=%s, "
+            "role=%s, login_timeout=%s, authenticator=%s, ocsp_response_cache_filename=%s",
+            self.config.account,
+            self.config.user,
+            self.config.database,
+            self.config.schema,
+            self.config.warehouse,
+            self.config.role,
+            self.config.login_timeout,
+            self.config.authenticator,
+            self.config.ocsp_response_cache_filename,
+        )
 
         try:
             conn = sf.connect(
@@ -104,7 +116,6 @@ class SnowflakeCheck(AgentCheck):
                 ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
                 authenticator=self.config.authenticator,
                 token=self.config.token,
-                client_session_keep_alive=True,
             )
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
@@ -113,7 +124,6 @@ class SnowflakeCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
-
 
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):
