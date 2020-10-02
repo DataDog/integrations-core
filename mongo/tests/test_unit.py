@@ -9,6 +9,9 @@ from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
+from datadog_checks.mongo.collectors import MongoCollector
+from datadog_checks.mongo.common import get_state_name
+from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
 
@@ -56,68 +59,36 @@ def test_build_metric_list(check, test_case, additional_metrics, expected_length
     assert check.log.warning.call_count == expected_warnings
 
 
-def test_metric_resolution(check, instance):
-    """
-    Resolve metric names and types.
-    """
-    check = check(instance)
-
-    metrics_to_collect = {'foobar': (GAUGE, 'barfoo'), 'foo.bar': (RATE, 'bar.foo'), 'fOoBaR': GAUGE, 'fOo.baR': RATE}
-
-    resolve_metric = check._resolve_metric
-
-    # Assert
-
-    # Priority to aliases when defined
-    assert (GAUGE, 'mongodb.barfoo') == resolve_metric('foobar', metrics_to_collect)
-    assert (RATE, 'mongodb.bar.foops') == resolve_metric('foo.bar', metrics_to_collect)
-    assert (GAUGE, 'mongodb.qux.barfoo') == resolve_metric('foobar', metrics_to_collect, prefix="qux")
-
-    #  Resolve an alias when not defined
-    assert (GAUGE, 'mongodb.foobar') == resolve_metric('fOoBaR', metrics_to_collect)
-    assert (RATE, 'mongodb.foo.barps') == resolve_metric('fOo.baR', metrics_to_collect)
-    assert (GAUGE, 'mongodb.qux.foobar') == resolve_metric('fOoBaR', metrics_to_collect, prefix="qux")
-
-
 def test_metric_normalization(check, instance):
     """
     Metric names suffixed with `.R`, `.r`, `.W`, `.w` are renamed.
     """
     # Initialize check and tests
     check = check(instance)
-    metrics_to_collect = {'foo.bar': GAUGE, 'foobar.r': GAUGE, 'foobar.R': RATE, 'foobar.w': RATE, 'foobar.W': GAUGE}
-    resolve_metric = check._resolve_metric
+    collector = MongoCollector(check, None)
+    normalize = collector._normalize
 
     # Assert
-    assert (GAUGE, 'mongodb.foo.bar') == resolve_metric('foo.bar', metrics_to_collect)
+    assert 'mongodb.foo.bar' == normalize('foo.bar', GAUGE)
 
-    assert (RATE, 'mongodb.foobar.sharedps') == resolve_metric('foobar.R', metrics_to_collect)
-    assert (GAUGE, 'mongodb.foobar.intent_shared') == resolve_metric('foobar.r', metrics_to_collect)
-    assert (RATE, 'mongodb.foobar.intent_exclusiveps') == resolve_metric('foobar.w', metrics_to_collect)
-    assert (GAUGE, 'mongodb.foobar.exclusive') == resolve_metric('foobar.W', metrics_to_collect)
+    assert 'mongodb.foobar.sharedps' == normalize('foobar.R', RATE)
+    assert 'mongodb.foobar.intent_shared' == normalize('foobar.r', GAUGE)
+    assert 'mongodb.foobar.intent_exclusiveps' == normalize('foobar.w', RATE)
+    assert 'mongodb.foobar.exclusive' == normalize('foobar.W', GAUGE)
 
 
 def test_state_translation(check, instance):
     """
     Check that resolving replset member state IDs match to names and descriptions properly.
     """
-    check = check(instance)
-    assert 'STARTUP2' == check.get_state_name(5)
-    assert 'PRIMARY' == check.get_state_name(1)
+    assert 'STARTUP2' == get_state_name(5)
+    assert 'PRIMARY' == get_state_name(1)
 
-    assert 'Starting Up' == check.get_state_description(0)
-    assert 'Recovering' == check.get_state_description(3)
-
-    # Unknown states:
-    assert 'UNKNOWN' == check.get_state_name(500)
-    unknown_desc = check.get_state_description(500)
-    assert unknown_desc.find('500') != -1
+    # Unknown state:
+    assert 'UNKNOWN' == get_state_name(500)
 
 
 def test_server_uri_sanitization(check, instance):
-    check = check(instance)
-    _parse_uri = check._parse_uri
-
     # Batch with `sanitize_username` set to False
     server_names = (
         ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
@@ -133,7 +104,7 @@ def test_server_uri_sanitization(check, instance):
     )
 
     for server, expected_clean_name in server_names:
-        _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=False)
+        _, _, _, _, clean_name, _ = parse_mongo_uri(server, sanitize_username=False)
         assert expected_clean_name == clean_name
 
     # Batch with `sanitize_username` set to True
@@ -147,7 +118,7 @@ def test_server_uri_sanitization(check, instance):
     )
 
     for server, expected_clean_name in server_names:
-        _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=True)
+        _, _, _, _, clean_name, _ = parse_mongo_uri(server, sanitize_username=True)
         assert expected_clean_name == clean_name
 
 
@@ -172,14 +143,13 @@ def test_parse_server_config(check):
     assert check.clean_server_name == (
         'mongodb://john doe:*****@localhost:27017,localhost:27018/test?replicaSet=bar!baz'
     )
-    assert check.auth_source is None
+    assert check.auth_source == 'test'
 
 
 @pytest.mark.parametrize(
     'options, is_error',
     [
         pytest.param({}, False, id='ok-none'),
-        pytest.param({'username': 'admin'}, True, id='x-password-missing'),
         pytest.param({'password': 's3kr3t'}, True, id='x-username-missing'),
         pytest.param({'username': 'admin', 'password': 's3kr3t'}, False, id='ok-both'),
     ],
@@ -201,15 +171,19 @@ def test_legacy_config_deprecation(check):
     ]
 
 
-def test_collection_metrics_names_can_be_iterated_multiple_times(check, instance):
-    check = check(instance)
-    there_are_metric_names = False
-    for _ in check.collection_metrics_names:
-        there_are_metric_names = True
-    assert there_are_metric_names, 'No collection metric names found'
+def test_collector_submit_payload(check, aggregator):
+    check = check(common.INSTANCE_BASIC)
+    collector = MongoCollector(check, ['foo:1'])
 
-    there_are_metric_names = False
-    for _ in check.collection_metrics_names:
-        there_are_metric_names = True
-        break
-    assert there_are_metric_names, 'Collection metric names have been depleted'
+    metrics_to_collect = {
+        'foo.bar1': GAUGE,
+        'foo.x.y.z': RATE,
+        'foo.R': RATE,
+    }
+    payload = {'foo': {'bar1': 1, 'x': {'y': {'z': 1}, 'y2': 1}, 'R': 1}}
+    collector._submit_payload(payload, additional_tags=['bar:1'], metrics_to_collect=metrics_to_collect)
+    tags = ['foo:1', 'bar:1']
+    aggregator.assert_metric('mongodb.foo.sharedps', 1, tags, metric_type=aggregator.RATE)
+    aggregator.assert_metric('mongodb.foo.x.y.zps', 1, tags, metric_type=aggregator.RATE)
+    aggregator.assert_metric('mongodb.foo.bar1', 1, tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_all_metrics_covered()
