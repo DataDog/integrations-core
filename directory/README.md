@@ -52,7 +52,9 @@ The Directory check does not include any events.
 
 ### Service Checks
 
-The Directory check does not include any service checks.
+**directory.exists**:<br>
+Returns `WARNING` if the Agent is unable to find or open the directory to monitor. Requires `report_missing: true` in  
+
 
 ## Troubleshooting
 

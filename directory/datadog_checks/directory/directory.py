@@ -11,6 +11,8 @@ from datadog_checks.directory.config import DirectoryConfig
 
 from .traverse import walk
 
+SERVICE_DIRECTORY_EXISTS = 'directory.exists'
+
 
 class DirectoryCheck(AgentCheck):
     """This check is for monitoring and reporting metrics on the files for a provided directory.
@@ -30,6 +32,8 @@ class DirectoryCheck(AgentCheck):
                       Useful for very large directories. default False
         `ignore_missing` - boolean, when true do not raise an exception on missing/inaccessible directories.
                            default False
+        `report_missing` - boolean, when true sends a service check reporting the missing directory.
+                           default False
     """
 
     SOURCE_TYPE_NAME = 'system'
@@ -46,11 +50,20 @@ class DirectoryCheck(AgentCheck):
                 "Either directory '{}' doesn't exist or the Agent doesn't "
                 "have permissions to access it, skipping.".format(self.config.abs_directory)
             )
-
-            if not self.config.ignore_missing:
+            # report missing directory and skip check
+            if self.config.report_missing:
+                self.log.info('service check SERVICE_DIRECTORY_EXISTS')
+                self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.WARNING, message=msg)
+            # or ignore it
+            elif self.config.ignore_missing:
+                pass
+            else:
                 raise ConfigurationError(msg)
-
+            
             self.log.warning(msg)
+
+            # return gracefully, nothing to look for
+            return
 
         self._get_stats()
 

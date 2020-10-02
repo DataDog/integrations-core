@@ -1,7 +1,5 @@
 {
-  "categories": [
-    "os & system"
-  ],
+  "categories": ["os & system"],
   "creates_events": false,
   "display_name": "Directory",
   "guid": "0c38c4ef-5266-4667-9fb1-de8f2b73708a",
@@ -14,14 +12,13 @@
   "public_title": "Datadog-Directory Integration",
   "short_description": "The Directory integration reports metrics on files for a provided directory",
   "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
+  "supported_os": ["linux", "mac_os", "windows"],
   "type": "check",
   "integration_id": "system",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",

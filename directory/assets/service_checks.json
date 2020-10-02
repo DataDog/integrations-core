@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "agent_version": "6.17.0",
+    "integration": "Directory",
+    "check": "directory.exists",
+    "statuses": ["ok", "warning"],
+    "groups": [],
+    "name": "Exists",
+    "description": "Returns `WARNING` if unable to find the directory."
+  }
+]

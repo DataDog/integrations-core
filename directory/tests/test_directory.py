@@ -299,6 +299,14 @@ def test_non_existent_directory_ignore_missing():
     check._get_stats.assert_called_once()
 
 
+def test_non_existent_directory_report_missing(aggregator):
+    config = {'directory': '/non-existent/directory', 'ignore_missing': True, 'report_missing': True}
+    check = DirectoryCheck('directory', {}, [config])
+    check._get_stats = mock.MagicMock()
+    check.check(config)
+    aggregator.assert_service_check('directory.exists', DirectoryCheck.WARNING)
+
+
 def test_no_recursive_symlink_loop(aggregator):
     with temp_directory() as tdir:
 
