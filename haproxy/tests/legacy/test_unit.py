@@ -365,66 +365,68 @@ def test_optional_tags(aggregator, check, haproxy_mock):
 
 def test_regex_tags(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
+    del config['services_exclude']
     config['tags'] = ['region:infra']
-    # OS3 service: be_edge_http_sre-production_elk-kibana
+    # OS3 service: be_edge_http_sre-production_elk-kibana/elastic
     config['tags_regex'] = r'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
     haproxy_check = check(config)
     haproxy_check.check(config)
 
-    expected_tags = [
-        'service:be_edge_http_sre-production_elk-kibana',
-        'haproxy_service:be_edge_http_sre-production_elk-kibana',
-        'type:BACKEND',
-        'instance_url:http://localhost/admin?stats',
-        'region:infra',
-        'security:edge_http',
-        'app:elk-kibana',
-        'env:production',
-        'team:sre',
-        'backend:BACKEND',
-    ]
-
-    aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
-
-    aggregator.assert_metric(
-        'haproxy.count_per_status',
-        tags=[
-            'service:be_edge_http_sre-production_elk-kibana',
-            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    for service in ['kibana', 'elastic']:
+        expected_tags = [
+            'service:be_edge_http_sre-production_elk-%s' % service,
+            'haproxy_service:be_edge_http_sre-production_elk-%s' % service,
+            'type:BACKEND',
+            'instance_url:http://localhost/admin?stats',
             'region:infra',
             'security:edge_http',
-            'app:elk-kibana',
+            'app:elk-%s' % service,
             'env:production',
             'team:sre',
-            'status:up',
-        ],
-    )
-    aggregator.assert_metric(
-        'haproxy.backend_hosts',
-        tags=[
-            'security:edge_http',
-            'team:sre',
-            'env:production',
-            'app:elk-kibana',
-            'haproxy_service:be_edge_http_sre-production_elk-kibana',
-            'region:infra',
-            'service:be_edge_http_sre-production_elk-kibana',
-            'available:true',
-        ],
-    )
+            'backend:BACKEND',
+        ]
 
-    tags = [
-        'service:be_edge_http_sre-production_elk-kibana',
-        'haproxy_service:be_edge_http_sre-production_elk-kibana',
-        'region:infra',
-        'security:edge_http',
-        'app:elk-kibana',
-        'env:production',
-        'team:sre',
-        'backend:i-1',
-    ]
-    aggregator.assert_service_check('haproxy.backend_up', tags=tags)
+        aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
+        aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-%s' % service, 1)
+
+        aggregator.assert_metric(
+            'haproxy.count_per_status',
+            tags=[
+                'service:be_edge_http_sre-production_elk-%s' % service,
+                'haproxy_service:be_edge_http_sre-production_elk-%s' % service,
+                'region:infra',
+                'security:edge_http',
+                'app:elk-%s' % service,
+                'env:production',
+                'team:sre',
+                'status:up',
+            ],
+        )
+        aggregator.assert_metric(
+            'haproxy.backend_hosts',
+            tags=[
+                'security:edge_http',
+                'team:sre',
+                'env:production',
+                'app:elk-%s' % service,
+                'haproxy_service:be_edge_http_sre-production_elk-%s' % service,
+                'region:infra',
+                'service:be_edge_http_sre-production_elk-%s' % service,
+                'available:true',
+            ],
+        )
+
+        tags = [
+            'service:be_edge_http_sre-production_elk-%s' % service,
+            'haproxy_service:be_edge_http_sre-production_elk-%s' % service,
+            'region:infra',
+            'security:edge_http',
+            'app:elk-%s' % service,
+            'env:production',
+            'team:sre',
+            'backend:i-1',
+        ]
+        aggregator.assert_service_check('haproxy.backend_up', tags=tags)
 
 
 def test_version_failure(aggregator, check, datadog_agent):
