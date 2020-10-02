@@ -8,7 +8,12 @@ from . import common
 
 pytestmark = [common.requires_legacy_environment]
 
-BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
+BASE_CONFIG = {
+    'url': 'http://localhost/admin?stats',
+    'collect_status_metrics': True,
+    'enable_service_check': True,
+    'services_exclude': ['.*-elastic']
+}
 
 
 def _assert_agg_statuses(
