@@ -24,20 +24,15 @@ class AzureIoTEdgeCheck(AgentCheck):
         scraper_config = self._edge_agent_check.get_scraper_config(self._config.edge_agent_instance)
         scraper_config['_default_metric_transformers'].update(edge_agent_metric_transformers)
 
+    @AgentCheck.metadata_entrypoint
     def _transform_version_metadata(self, metric, scraper_config):
         """
         Submit version metadata from an Edge Agent metadata metric instance.
-
-        Metadata metric look like this:
-
-        ```
-        edgeAgent_metadata{...,edge_agent_version="...",host_information="{\"...\", \"Version\": \"1.0.10~rc2\"}"}
-        ```
-
-        See: https://github.com/Azure/iotedge/blob/1.0.10-rc2/doc/BuiltInMetrics.md#edgeagent
-
-        NOTE: we want the Security Manager version, not the Edge Agent version.
         """
+        # NOTE: `metric` looks like this:
+        # edgeAgent_metadata{...,edge_agent_version="...",host_information="{\"...\", \"Version\": \"1.0.10~rc2\"}"}
+        # See: https://github.com/Azure/iotedge/blob/1.0.10-rc2/doc/BuiltInMetrics.md#edgeagent
+
         labels = metric.samples[0][OpenMetricsBaseCheck.SAMPLE_LABELS]  # type: dict
 
         host_information = labels.get('host_information')
@@ -51,12 +46,14 @@ class AzureIoTEdgeCheck(AgentCheck):
             self.log.debug('Error decoding host information, skipping version metadata: %r', exc)
             return
 
-        iot_edge_runtime_version = host_info.get('Version')
-        if iot_edge_runtime_version is None:
+        # NOTE: Security Manager and Edge Agent SemVer versions are usually the same, but this is not guaranteed.
+        # (The user can configure the Edge Agent module version in the IoT Edge web UI on the Azure portal.)
+        security_manager_version = host_info.get('Version')
+        if security_manager_version is None:
             self.log.debug('Key "Version" not found in host_information, skipping version metadata')
             return
 
-        self.set_metadata('version', iot_edge_runtime_version)
+        self.set_metadata('version', security_manager_version)
 
     def check(self, _):
         self._check_security_manager_health()
