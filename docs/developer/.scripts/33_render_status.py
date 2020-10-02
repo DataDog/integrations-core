@@ -129,6 +129,7 @@ def render_logs_progress():
 
     for check in valid_checks:
         status = None
+        has_logs = False
 
         if not is_tile_only(check):
             status = ' '
@@ -138,7 +139,9 @@ def render_logs_progress():
                 if '# logs:' in f.read():
                     status = 'X'
                     checks_with_logs += 1
-        else:
+                    has_logs = True
+
+        if not has_logs:
             readme_file = get_readme_file(check)
             if os.path.exists(readme_file):
                 with open(readme_file, 'r', encoding='utf-8') as f:
