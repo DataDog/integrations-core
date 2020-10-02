@@ -10,7 +10,7 @@ INSTANCE = {
         ['VirtualBytes', 'proc.mem.virtual', 'gauge'],
         ['PercentProcessorTime', 'proc.cpu_pct', 'gauge'],
     ],
-    'tag_by': 'Name',
+    'tag_by': 'Name, Caption',
 }
 
 INSTANCE_METRICS = ['proc.threads.count', 'proc.io.bytes_read', 'proc.mem.virtual', 'proc.cpu_pct']

@@ -18,7 +18,7 @@ def test_basic_check(mock_proc_sampler, aggregator, check):
     c.check(instance)
 
     for metric in common.INSTANCE_METRICS:
-        aggregator.assert_metric(metric, tags=['optional:tag1'], count=1)
+        aggregator.assert_metric(metric, tags=['optional:tag1', 'name:agent', 'caption:datadogagent'], count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -32,7 +32,7 @@ def test_tags(mock_proc_sampler, aggregator, check):
     c.check(instance)
 
     for metric in common.INSTANCE_METRICS:
-        aggregator.assert_metric(metric, tags=['optional:tag1', 'instance:tag2'], count=1)
+        aggregator.assert_metric(metric, tags=['optional:tag1', 'instance:tag2', 'name:agent', 'caption:datadogagent'], count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -63,7 +63,6 @@ def test_check(mock_disk_sampler, aggregator, check):
     c.check(common.WMI_CONFIG)
 
     for _, mname, _ in common.WMI_CONFIG['metrics']:
-        aggregator.assert_metric(mname, tags=["foobar"], count=1)
-        aggregator.assert_metric(mname, tags=["foobar"], count=1)
+        aggregator.assert_metric(mname, tags=["foobar", "name:C:"], count=1)
 
     aggregator.assert_all_metrics_covered()
