@@ -40,6 +40,7 @@ class Config(object):
         tags = instance.get('tags', [])
         authenticator = instance.get('authenticator', 'snowflake')
         token = instance.get('token', None)
+        client_keep_alive = instance.get('client_session_keep_alive', False)
 
         # min_collection_interval defaults to 60 minutes
         min_collection = instance.get('min_collection_interval', 3600)
@@ -81,3 +82,4 @@ class Config(object):
         self.metric_groups = metric_groups
         self.authenticator = authenticator
         self.token = token
+        self.client_keep_alive = client_keep_alive

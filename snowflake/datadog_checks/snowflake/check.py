@@ -116,6 +116,7 @@ class SnowflakeCheck(AgentCheck):
                 ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
                 authenticator=self.config.authenticator,
                 token=self.config.token,
+                client_session_keep_alive=self.config.client_keep_alive,
             )
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
