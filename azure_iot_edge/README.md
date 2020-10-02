@@ -6,6 +6,8 @@
 
 Use the Datadog-Azure IoT Edge integration to collect metrics and health status from IoT Edge devices.
 
+**Note**: this integration requires IoT Edge runtime version 1.0.10 or above.
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an IoT Edge device running on a device host.
@@ -21,35 +23,6 @@ No additional installation is needed on your device.
 It is recommended to configure the IoT Edge device so that the Agent runs as a custom module. Follow the official Microsoft documentation on [deploying Azure IoT Edge modules][3] for general information on installing and working with custom modules for Azure IoT Edge.
 
 Follow the steps below to configure the IoT Edge device, runtime modules, and the Datadog Agent to start collecting IoT Edge metrics.
-
-1. Edit your IoT Edge device `config.yaml` file:
-    - **Linux**: Make sure the `connect.management_uri` and `listen.management_uri` options point to a Unix Domain Socket (note that this is the default configuration). For example:
-
-        ```yaml
-        # /etc/iotedge/config.yaml
-
-        connect:
-            management_uri: "unix:///var/run/iotedge/mgmt.sock"
-            # ...
-
-        listen:
-            management_uri: "fd://iotedge.mgmt.socket"
-            # ...
-        ```
-
-    - **Windows**: Make sure the `connect.management_uri` and `listen.management_uri` options point to an HTTP endpoint. For example:
-
-        ```yaml
-        # /etc/iotedge/config.yaml
-
-        connect:
-            management_uri: "http://localhost:15580"
-            # ...
-
-        listen:
-            management_uri: "http://localhost:15580"
-            # ...
-        ```
 
 1. Configure the **Edge Agent** runtime module as follows:
     - Image version must be `1.0.10` or above.
@@ -74,15 +47,12 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
                 "HostConfig": {
                     "NetworkMode": "default",
                     "Env": ["NetworkId=azure-iot-edge"],
-                    "Binds": [
-                        "/var/run/docker.sock:/var/run/docker.sock",
-                        "/var/run/iotedge/mgmt.sock:/var/run/iotedge/mgmt.sock"
-                    ]
+                    "Binds": [ "/var/run/docker.sock:/var/run/docker.sock"]
                 },
                 "Labels": {
                     "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
                     "com.datadoghq.ad.init_configs": "[{}]",
-                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\", \"security_manager_management_api_url\": \"unix:///var/run/iotedge/mgmt.sock\"}]"
+                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\"}]"
                 }
             }
             ```
@@ -91,13 +61,13 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
             {
                 "HostConfig": {
                     "NetworkMode": "default",
-                    "Env": ["NetworkId=azure-iot-edge"],
-                    "Binds": ["/var/run/docker.sock:/var/run/docker.sock"]
+                    "Env": ["NetworkId=nat"],
+                    "Binds": ["//./pipe/iotedge_moby_engine:/./pipe/docker_engine"]
                 },
                 "Labels": {
                     "com.datadoghq.ad.check_names": "[\"azure_iot_edge\"]",
                     "com.datadoghq.ad.init_configs": "[{}]",
-                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\", \"security_manager_management_api_url\": \"http://host.docker.internal:15580/\"]}]"
+                    "com.datadoghq.ad.instances": "[{\"edge_hub_prometheus_url\": \"http://edgeHub:9600/metrics\", \"edge_agent_prometheus_url\": \"http://edgeAgent:9600/metrics\"}]"
                 }
             }
             ```
@@ -118,14 +88,11 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**azure.iot_edge.security_manager.can_connect**:
-Returns `CRITICAL` if the Agent is unable to reach the Security Manager management API. Returns `OK` otherwise.
-
-**azure.iot_edge.edge_agent.can_connect**:
+**azure.iot_edge.edge_agent.prometheus.health**:
 Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise.
 
-**azure.iot_edge.edge_hub.can_connect**:
-Returns `CRITICAL` if the forest state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
+**azure.iot_edge.edge_hub.prometheus.health**:
+Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise.
 
 ### Events
 

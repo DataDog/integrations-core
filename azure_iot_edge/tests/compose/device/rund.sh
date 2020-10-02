@@ -22,6 +22,8 @@ agent:
     auth: {}
 hostname: "edgehub"
 connect:
+  # Use an HTTP endpoint, because mounting Unix sockets is not supported on Docker for macOS.
+  # See: https://github.com/docker/for-mac/issues/483
   management_uri: "http://$IOT_EDGE_DEVICE_HOSTNAME:15580"
   workload_uri: "http://$IOT_EDGE_DEVICE_HOSTNAME:15581"
 listen:

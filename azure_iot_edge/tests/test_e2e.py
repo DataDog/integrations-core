@@ -22,7 +22,5 @@ def test_e2e(dd_agent_check):
         assert set(m.tags) >= set(common.E2E_TAGS)
 
     aggregator.assert_all_metrics_covered()
-
-    aggregator.assert_service_check('azure_iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.OK)
-    aggregator.assert_service_check('azure_iot_edge.edge_hub.prometheus.health', AzureIoTEdgeCheck.OK)
-    aggregator.assert_service_check('azure_iot_edge.security_manager.can_connect', AzureIoTEdgeCheck.OK)
+    aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.OK)
+    aggregator.assert_service_check('azure.iot_edge.edge_hub.prometheus.health', AzureIoTEdgeCheck.OK)

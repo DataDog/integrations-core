@@ -3,24 +3,10 @@
         "agent_version": "6.24.0",
         "integration": "Azure IoT Edge",
         "groups": [
-            "host"
-        ],
-        "check": "azure.iot_edge.security_manager.can_connect",
-        "statuses": [
-            "ok",
-            "critical"
-        ],
-        "name": "Security Manager health",
-        "description": "Returns `CRITICAL` if the Agent is unable to reach the Security Manager management API. Returns `OK` otherwise."
-    },
-    {
-        "agent_version": "6.24.0",
-        "integration": "Azure IoT Edge",
-        "groups": [
             "host",
             "endpoint"
         ],
-        "check": "azure.iot_edge.edge_agent.can_connect",
+        "check": "azure.iot_edge.edge_agent.prometheus.health",
         "statuses": [
             "ok",
             "critical"
@@ -35,7 +21,7 @@
             "host",
             "endpoint"
         ],
-        "check": "azure.iot_edge.edge_hub.can_connect",
+        "check": "azure.iot_edge.edge_hub.prometheus.health",
         "statuses": [
             "ok",
             "critical"

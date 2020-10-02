@@ -26,7 +26,7 @@ def dd_environment(e2e_instance):
     compose_file = os.path.join(common.HERE, 'compose', compose_filename)
 
     conditions = [
-        CheckDockerLogs(compose_file, r'[mgmt] .* 200 OK', wait=5),  # Verify any connectivity issues.
+        CheckDockerLogs(compose_file, r'[mgmt] .* 200 OK', wait=5),  # Verify Security Manager boots.
         CheckDockerLogs(compose_file, 'Successfully started module edgeAgent', wait=5),
         CheckDockerLogs(compose_file, 'Successfully started module edgeHub', wait=5),
         CheckDockerLogs(compose_file, 'Successfully started module SimulatedTemperatureSensor', wait=5),
@@ -74,7 +74,6 @@ def dd_environment(e2e_instance):
 def e2e_instance():
     # type: () -> Instance
     return {
-        'security_manager_management_api_url': common.E2E_SECURITY_MANAGER_MANAGEMENT_API_URL,
         'edge_hub_prometheus_url': common.E2E_EDGE_HUB_PROMETHEUS_URL,
         'edge_agent_prometheus_url': common.E2E_EDGE_AGENT_PROMETHEUS_URL,
         'tags': common.CUSTOM_TAGS,
@@ -99,7 +98,6 @@ def mock_server():
 def mock_instance():
     # type: () -> Instance
     return {
-        'security_manager_management_api_url': common.MOCK_SECURITY_MANAGER_MANAGEMENT_API_URL,
         'edge_hub_prometheus_url': common.MOCK_EDGE_HUB_PROMETHEUS_URL,
         'edge_agent_prometheus_url': common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
         'tags': common.CUSTOM_TAGS,
