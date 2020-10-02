@@ -26,6 +26,24 @@ def test_config():
         SnowflakeCheck(CHECK_NAME, {}, [account_config])
 
 
+def test_default_authentication(instance):
+    # Test default auth
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check.config.authenticator == 'snowflake'
+
+
+def test_oauth_authentication(instance):
+    # Test oauth
+    oauth_inst = copy.deepcopy(instance)
+    oauth_inst['authenticator'] = 'oauth'
+    with pytest.raises(Exception, match='If using OAuth, you must specify a token'):
+        SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+
+    oauth_inst['authenticator'] = 'testauth'
+    with pytest.raises(Exception, match='The Authenticator method set is invalid: testauth'):
+        SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+
+
 def test_default_metric_groups(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
     assert check.config.metric_groups == [
