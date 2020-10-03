@@ -4505,3 +4505,8 @@ tcp_mixer_filter.total_remote_check_calls: 0
 tcp_mixer_filter.total_remote_quota_calls: 0
 tcp_mixer_filter.total_remote_report_calls: 0
 tcp_mixer_filter.total_report_calls: 0
+wasm.envoy.wasm.runtime.null.active: 0
+wasm.envoy.wasm.runtime.null.created: 0
+wasm_vm.envoy.wasm.runtime.null.active: 0
+wasm_vm.envoy.wasm.runtime.null.cloned: 0
+wasm_vm.envoy.wasm.runtime.null.created: 0
