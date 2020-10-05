@@ -37,7 +37,13 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 
 #### Log collection
 
-Refer to the [Kubernetes Log Collection][12] documentation for further information.
+*Note:* Log collection for OpenShift follows the same principles as for Kubernetes.
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "kube_scheduler", "service": "<SERVICE_NAME>"}` |
 
 #### Restricted SCC operations
 
@@ -108,6 +114,11 @@ The OpenShift check does not include any Service Checks.
 
 Need help? Contact [Datadog support][11].
 
+
+## Further Reading
+
+See our [blog post][13] on monitoring OpenShift environments with Datadog.
+
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/kubernetes/
 [3]: https://docs.openshift.org/latest/admin_guide/manage_scc.html
@@ -120,3 +131,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[13]: https://www.datadoghq.com/blog/key-metrics-for-openshift-monitoring/
