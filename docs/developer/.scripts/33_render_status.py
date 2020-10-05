@@ -70,7 +70,9 @@ def render_dashboard_progress():
     not_possible = {
         'agent_metrics',  # Not for the end user
         'snmp',  # Too custom
+        'openmetrics', # No default metrics
         'pdh_check',  # No default metrics
+        'prometheus', # No default metrics
         'teamcity',  # No metrics
         'windows_service',  # No metrics
         'win32_event_log',  # No metrics
