@@ -244,11 +244,6 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
     assert len(aggregator._events) == 0
 
 
-def test_integration_replicaset_arbiter(instance_integration, aggregator, check):
-    # TODO: Test me, but how?
-    pass
-
-
 def test_standalone(instance_integration, aggregator, check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
