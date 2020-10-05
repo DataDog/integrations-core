@@ -1,0 +1,113 @@
+name: SAP HANA
+files:
+- name: sap_hana.yaml
+  options:
+  - template: init_config
+    options:
+      - name: global_custom_queries
+        description: |
+          See `custom_queries` defined below.
+
+           Global custom queries can be applied to all instances using the
+          `use_global_custom_queries` setting at the instance level.
+        value:
+          type: array
+          items:
+            type: object
+          example:
+            - metric_prefix: ibm_db2
+              query: <QUERY>
+              columns: <COLUMNS>
+              tags: <TAGS>
+      - template: init_config/default
+  - template: instances
+    options:
+      - name: server
+        description: The hostname used to connect to the system.
+        required: true
+        value:
+          type: string
+      - name: port
+        description: The port used to connect to the system.
+        value:
+          type: integer
+          default: 30015
+      - name: username
+        description: The database user to authenticate as.
+        required: true
+        value:
+          type: string
+      - name: password
+        description: The password of `username`.
+        required: true
+        value:
+          type: string
+      - name: use_hana_hostnames
+        description: |
+          Whether or not to use the hostnames contained in HANA's monitoring
+          views instead of the Agent hostname.
+        value:
+          type: boolean
+          default: false
+          example: false
+      - name: batch_size
+        description: The number of rows to return with each query result.
+        value:
+          type: integer
+          default: 1000
+      - name: timeout
+        description: The timeout for connecting to `server`.
+        value:
+          type: integer
+          default: 10
+      - name: use_global_custom_queries
+        description: |
+          How `global_custom_queries` should be used for this instance. There are 3 options:
+
+          1. true - `global_custom_queries` will override `custom_queries`
+          2. false - `custom_queries` will override `global_custom_queries`
+          3. extend - `global_custom_queries` will be used in addition to any `custom_queries`
+        value:
+          type: string
+          default: true
+          example: "true"
+      - name: custom_queries
+        description: |
+          Each query must have 2 fields:
+        
+          1. query - This is the SQL to execute. It can be a simple statement or a multi-line script.
+          2. columns - This is a list representing each column, ordered sequentially from left to right.
+                       The number of columns must equal the number of columns returned in the query.
+                       There are 2 required pieces of data:
+                         a. name - This is the suffix to append to `sap_hana.` in order to form
+                                   the full metric name. If `type` is `tag`, this column will
+                                   instead be considered a tag and will be applied to every
+                                   metric collected by this particular query.
+                         b. type - This is the submission method (gauge, monotonic_count, etc.).
+                                   This can also be set to `tag` to tag each metric in the row
+                                   with the name and value of the item in this column. You can
+                                   use the `count` type to perform aggregation for queries that
+                                   return multiple rows with the same or no tags.
+          3. tags (optional) - A list of tags to apply to each metric.
+
+          Notes:
+            - Use the pipe if you require a multi-line script.
+            - Columns without a name are ignored, put `- {}` for any column you wish to skip
+        value:
+          type: array
+          items:
+            type: object
+          example:
+          - query: | 
+              SELECT DATABASE_NAME,
+                      COUNT(*)
+              FROM SYS_DATABASES.M_DATA_VOLUMES
+              GROUP BY DATABASE_NAME
+            columns:
+              - name: db
+                type: tag
+              - name: data_volume.total
+                type: gauge
+            tags:
+              - test:sap_hana
+      - template: instances/default
