@@ -16,3 +16,13 @@ files:
         type: string
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/lighttpd/access.log
+        source: lighttpd
+        service: lighttpd
+      - type: file
+        path: /var/log/lighttpd/error.log
+        source: lighttpd
+        service: lighttpd
