@@ -143,7 +143,7 @@ init_config:
   #     definition_file: checkpoint-firewall.yaml
   #   isilon:
   #     definition_file: isilon.yaml
-  #   apc-ups:
+  #   apc_ups:
   #     definition_file: apc_ups.yaml
   #   fortinet-fortigate:
   #     definition_file: fortinet-fortigate.yaml
