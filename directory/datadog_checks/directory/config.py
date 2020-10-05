@@ -27,7 +27,6 @@ class DirectoryConfig(object):
         self.filegauges = is_affirmative(instance.get('filegauges', False))
         self.countonly = is_affirmative(instance.get('countonly', False))
         self.ignore_missing = is_affirmative(instance.get('ignore_missing', False))
-        self.report_missing = is_affirmative(instance.get('report_missing', False))
         self.follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
         self.stat_follow_symlinks = is_affirmative(instance.get('stat_follow_symlinks', True))
         self.tags = instance.get('tags', [])

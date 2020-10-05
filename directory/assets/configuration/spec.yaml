@@ -98,12 +98,4 @@ files:
       value:
         example: false
         type: boolean
-    - name: report_missing
-      description: |
-        When true the check sends a service check `system.disk.directory.exists` with WARNING status on
-        missing/inaccessible directories and doesn't raise an exception. When both `ignore_missing`
-        and `report_missing` are set to `true`, `ignore_missing` is discarded.
-      value:
-        example: false
-        type: boolean
     - template: instances/default

@@ -33,8 +33,6 @@ class DirectoryCheck(AgentCheck):
                       Useful for very large directories. default False
         `ignore_missing` - boolean, when true do not raise an exception on missing/inaccessible directories.
                            default False
-        `report_missing` - boolean, when true sends a service check reporting the missing directory.
-                           default False
     """
 
     SOURCE_TYPE_NAME = 'system'
@@ -51,14 +49,11 @@ class DirectoryCheck(AgentCheck):
                 "Either directory '{}' doesn't exist or the Agent doesn't "
                 "have permissions to access it, skipping.".format(self.config.abs_directory)
             )
-            # report missing directory and skip check
-            if self.config.report_missing:
-                self.log.info('service check SERVICE_DIRECTORY_EXISTS')
-                self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.WARNING, message=msg)
-            # or ignore it
-            elif self.config.ignore_missing:
-                pass
-            else:
+            # report missing directory
+            self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.WARNING, message=msg)
+
+            # raise exception if `ignore_missing` is False
+            if not self.config.ignore_missing:
                 raise CheckException(msg)
 
             self.log.warning(msg)
@@ -66,6 +61,7 @@ class DirectoryCheck(AgentCheck):
             # return gracefully, nothing to look for
             return
 
+        self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.OK)
         self._get_stats()
 
     def _get_stats(self):

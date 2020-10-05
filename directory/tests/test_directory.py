@@ -276,7 +276,7 @@ def test_file_metrics_many(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_non_existent_directory():
+def test_non_existent_directory(aggregator):
     """
     Missing or inaccessible directory coverage.
     """
@@ -284,6 +284,7 @@ def test_non_existent_directory():
     with pytest.raises(CheckException):
         dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
+        aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING)
 
 
 def test_missing_directory_config():
@@ -291,16 +292,8 @@ def test_missing_directory_config():
         DirectoryCheck('directory', {}, [{}])
 
 
-def test_non_existent_directory_ignore_missing():
+def test_non_existent_directory_ignore_missing(aggregator):
     config = {'directory': '/non-existent/directory', 'ignore_missing': True}
-    check = DirectoryCheck('directory', {}, [config])
-    check._get_stats = mock.MagicMock()
-    check.check(config)
-    check._get_stats.assert_not_called()
-
-
-def test_non_existent_directory_report_missing(aggregator):
-    config = {'directory': '/non-existent/directory', 'ignore_missing': True, 'report_missing': True}
     check = DirectoryCheck('directory', {}, [config])
     check._get_stats = mock.MagicMock()
     check.check(config)
