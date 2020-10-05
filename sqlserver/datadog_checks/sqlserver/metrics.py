@@ -373,6 +373,7 @@ class SqlOsTasks(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """
     select scheduler_id,
+           SUM(context_switches_count) as context_switches_count,
            SUM(pending_io_count) as pending_io_count,
            SUM(pending_io_byte_count) as pending_io_byte_count,
            AVG(pending_io_byte_average) as pending_io_byte_average
