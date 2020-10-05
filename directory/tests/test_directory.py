@@ -9,7 +9,7 @@ from os import mkdir
 import mock
 import pytest
 
-from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.dev.utils import create_file
 from datadog_checks.dev.utils import temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
@@ -281,7 +281,7 @@ def test_non_existent_directory():
     Missing or inaccessible directory coverage.
     """
     config = {'directory': '/non-existent/directory'}
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(CheckException):
         dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
 
@@ -296,7 +296,7 @@ def test_non_existent_directory_ignore_missing():
     check = DirectoryCheck('directory', {}, [config])
     check._get_stats = mock.MagicMock()
     check.check(config)
-    check._get_stats.assert_called_once()
+    check._get_stats.assert_not_called()
 
 
 def test_non_existent_directory_report_missing(aggregator):
@@ -304,6 +304,7 @@ def test_non_existent_directory_report_missing(aggregator):
     check = DirectoryCheck('directory', {}, [config])
     check._get_stats = mock.MagicMock()
     check.check(config)
+    check._get_stats.assert_not_called()
     aggregator.assert_service_check('directory.exists', DirectoryCheck.WARNING)
 
 

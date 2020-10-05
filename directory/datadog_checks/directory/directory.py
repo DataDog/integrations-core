@@ -6,8 +6,9 @@ from os.path import exists, join, relpath
 from time import time
 from typing import Any
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.directory.config import DirectoryConfig
+from datadog_checks.errors import CheckException
 
 from .traverse import walk
 
@@ -58,8 +59,8 @@ class DirectoryCheck(AgentCheck):
             elif self.config.ignore_missing:
                 pass
             else:
-                raise ConfigurationError(msg)
-            
+                raise CheckException(msg)
+
             self.log.warning(msg)
 
             # return gracefully, nothing to look for
