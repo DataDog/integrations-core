@@ -102,7 +102,7 @@ Resources:
               enable-ecs-log-metadata: true
           MemoryReservation: 50
 ```
-
+**Note**: You can also use a [TaskDefinition secret][37] if you do not want to expose the apiKey as a plain-text variable.
 For more information on CloudFormation templating and syntax, review the [AWS CloudFormation documentation][36].
 
 #### Create or Modify your IAM Policy
@@ -367,3 +367,4 @@ Need help? Contact [Datadog support][19].
 [34]: https://www.datadoghq.com/blog/monitor-aws-fargate
 [35]: https://aws.amazon.com/cloudformation/
 [36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
+[37]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html
