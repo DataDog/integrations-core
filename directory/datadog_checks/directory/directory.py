@@ -7,8 +7,8 @@ from time import time
 from typing import Any
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 from datadog_checks.directory.config import DirectoryConfig
-from datadog_checks.errors import CheckException
 
 from .traverse import walk
 
