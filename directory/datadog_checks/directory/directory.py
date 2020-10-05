@@ -12,7 +12,7 @@ from datadog_checks.errors import CheckException
 
 from .traverse import walk
 
-SERVICE_DIRECTORY_EXISTS = 'directory.exists'
+SERVICE_DIRECTORY_EXISTS = 'system.disk.directory.exists'
 
 
 class DirectoryCheck(AgentCheck):

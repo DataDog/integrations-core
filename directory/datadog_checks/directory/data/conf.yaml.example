@@ -94,7 +94,7 @@ instances:
     # ignore_missing: false
 
     ## @param report_missing - boolean - optional - default: false
-    ## When true the check sends a service check `directory.exists` with WARNING status on
+    ## When true the check sends a service check `system.disk.directory.exists` with WARNING status on
     ## missing/inaccessible directories and doesn't raise an exception. When both `ignore_missing`
     ## and `report_missing` are set to `true`, `ignore_missing` is discarded.
     #

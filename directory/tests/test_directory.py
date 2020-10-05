@@ -305,7 +305,7 @@ def test_non_existent_directory_report_missing(aggregator):
     check._get_stats = mock.MagicMock()
     check.check(config)
     check._get_stats.assert_not_called()
-    aggregator.assert_service_check('directory.exists', DirectoryCheck.WARNING)
+    aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING)
 
 
 def test_no_recursive_symlink_loop(aggregator):
