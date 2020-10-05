@@ -240,8 +240,12 @@ class SQLServer(AgentCheck):
                 continue
 
             if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
-                self.log.debug('Skipping custom metric %s for database %s, check instance configured for database %s',
-                               cfg['name'], cfg.get('database'), self.instance.get('database'))
+                self.log.debug(
+                    'Skipping custom metric %s for database %s, check instance configured for database %s',
+                    cfg['name'],
+                    cfg.get('database'),
+                    self.instance.get('database'),
+                )
                 continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
