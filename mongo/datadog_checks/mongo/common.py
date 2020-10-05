@@ -50,10 +50,6 @@ class Deployment(object):
         be True for one node in the cluster."""
         raise NotImplementedError
 
-    def get_available_metrics(self):
-        # TODO: Use this method to know what metrics to collect based on the deployment type.
-        raise NotImplementedError
-
 
 class MongosDeployment(Deployment):
     def is_principal(self):
@@ -61,31 +57,22 @@ class MongosDeployment(Deployment):
         # with one mongos.
         return True
 
-    def get_available_metrics(self):
-        return None
-
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, replset_get_status_payload, in_shard=False):
-        self.replset_name = replset_get_status_payload['set']
-        self.replset_state = replset_get_status_payload['myState']
-        self.replset_state_name = get_state_name(replset_get_status_payload['myState']).lower()
+    def __init__(self, replset_name, replset_state, in_shard=False):
+        self.replset_name = replset_name
+        self.replset_state = replset_state
+        self.replset_state_name = get_state_name(replset_state).lower()
         self.in_shard = in_shard
-        self.is_primary = replset_get_status_payload['myState'] == 1
+        self.is_primary = replset_state == 1
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
         return not self.in_shard and self.replset_state == 1
 
-    def get_available_metrics(self):
-        return None
-
 
 class StandaloneDeployment(Deployment):
     def is_principal(self):
         # A standalone always have full visibility.
         return True
-
-    def get_available_metrics(self):
-        return None

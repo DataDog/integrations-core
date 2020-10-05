@@ -36,9 +36,8 @@ class ReplicaCollector(MongoCollector):
 
     def _report_replica_set_states(self, members, replset_name):
         """
-        Report the member's replica set state
-        * Submit a service check.
-        * Create an event on state change.
+        Report the all members' state changes in the replica set.
+        This method only runs on the primary.
         """
 
         for member in members:

@@ -266,15 +266,18 @@ class MongoDb(AgentCheck):
     @staticmethod
     def get_deployment(admindb):
         options = admindb.command("getCmdLineOpts")['parsed']
+        in_shard = False
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 return MongosDeployment()
             elif 'clusterRole' in options['sharding']:
-                repl_set_payload = admindb.command("replSetGetStatus")
-                return ReplicaSetDeployment(repl_set_payload, in_shard=True)
-        elif 'replSetName' in options.get('replication', {}):
+                in_shard = True
+
+        if 'replSetName' in options.get('replication', {}):
             repl_set_payload = admindb.command("replSetGetStatus")
-            return ReplicaSetDeployment(repl_set_payload, in_shard=False)
+            replset_name = repl_set_payload["set"]
+            replset_state = repl_set_payload["myState"]
+            return ReplicaSetDeployment(replset_name, replset_state, in_shard=in_shard)
 
         return StandaloneDeployment()
 
