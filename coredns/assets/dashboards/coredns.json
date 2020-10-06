@@ -12,6 +12,16 @@
             "default": "*",
             "name": "deployment",
             "prefix": "kube_deployment"
+        },
+        {
+            "default": "*",
+            "name": "service",
+            "prefix": "kube_service"
+        },
+        {
+            "default": "*",
+            "name": "namespace",
+            "prefix": "kube_namespace"
         }
     ],
     "title": "CoreDNS",
@@ -75,11 +85,12 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "requests": [
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment} by {service}.as_count()",
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -89,7 +100,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment} by {service}.as_count()",
+                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -98,7 +109,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Cache hits vs misses",
                 "title_align": "left",
                 "title_size": "16",
@@ -121,12 +131,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_size.count{$cluster,$deployment} by {service}",
+                        "q": "avg:coredns.cache_size.count{$cluster,$deployment,$service,$namespace} by {service}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -135,7 +146,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Cache size",
                 "title_align": "left",
                 "title_size": "16",
@@ -158,6 +168,7 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "markers": [
                     {
@@ -169,7 +180,7 @@
                     {
                         "display_type": "area",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment} by {service}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment} by {service}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment} by {service}.as_count())",
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace} by {service}.as_count())",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -178,7 +189,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Cache hit %",
                 "title_align": "left",
                 "title_size": "16",
@@ -239,12 +249,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "sum:coredns.request_duration.seconds.sum{$cluster,$deployment}/sum:coredns.request_duration.seconds.count{$cluster,$deployment}",
+                        "q": "sum:coredns.request_duration.seconds.sum{$cluster,$deployment,$service,$namespace}/sum:coredns.request_duration.seconds.count{$cluster,$deployment,$service,$namespace}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -253,7 +264,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Average request latency",
                 "title_align": "left",
                 "title_size": "16",
@@ -333,12 +343,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "sum:coredns.forward_request_duration.seconds.sum{$cluster,$deployment}/sum:coredns.forward_request_duration.seconds.count{$cluster,$deployment}",
+                        "q": "sum:coredns.forward_request_duration.seconds.sum{$cluster,$deployment,$service,$namespace}/sum:coredns.forward_request_duration.seconds.count{$cluster,$deployment,$service,$namespace}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -347,7 +358,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Average upstream request latency",
                 "title_align": "left",
                 "title_size": "16",
@@ -370,12 +380,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.response_code_count{$cluster,$deployment} by {rcode}.as_count()",
+                        "q": "avg:coredns.response_code_count{$cluster,$deployment,$service,$namespace} by {rcode}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -384,7 +395,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Rcode count",
                 "title_align": "left",
                 "title_size": "16",
@@ -426,12 +436,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.forward_response_rcode_count{$cluster,$deployment} by {rcode}.as_count()",
+                        "q": "avg:coredns.forward_response_rcode_count{$cluster,$deployment,$service,$namespace} by {rcode}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -440,7 +451,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Rcode count upstream",
                 "title_align": "left",
                 "title_size": "16",
@@ -463,12 +473,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "max:coredns.process.cpu_seconds_total{$cluster,$deployment}.as_count()",
+                        "q": "max:coredns.process.cpu_seconds_total{$cluster,$deployment,$service,$namespace}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -477,7 +488,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "CPU Usage",
                 "title_align": "left",
                 "title_size": "16",
@@ -500,12 +510,13 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.process.max_fds{$cluster,$deployment}",
+                        "q": "avg:coredns.process.max_fds{$cluster,$deployment,$service,$namespace}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -515,7 +526,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.process.open_fds{$cluster,$deployment}",
+                        "q": "avg:coredns.process.open_fds{$cluster,$deployment,$service,$namespace}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -524,7 +535,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Open file descriptors",
                 "title_align": "left",
                 "title_size": "16",
@@ -585,11 +595,12 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:coredns.go.memstats.heap_alloc_bytes{$deployment}",
+                        "q": "avg:coredns.go.memstats.heap_alloc_bytes{$deployment,$service,$cluster,$namespace}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -598,7 +609,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Allocated heap",
                 "title_align": "left",
                 "title_size": "16",
@@ -621,11 +631,12 @@
         },
         {
             "definition": {
+                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:coredns.go.memstats.alloc_bytes{$deployment}",
+                        "q": "avg:coredns.go.memstats.alloc_bytes{$deployment,$service,$cluster,$namespace}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -634,7 +645,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Allocated bytes",
                 "title_align": "left",
                 "title_size": "16",
