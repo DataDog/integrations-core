@@ -95,12 +95,11 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "requests": [
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()",
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {type}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -110,7 +109,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()",
+                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -119,6 +118,7 @@
                     }
                 ],
                 "show_legend": false,
+                "time": {},
                 "title": "Cache hits vs misses",
                 "title_align": "left",
                 "title_size": "16",
@@ -141,13 +141,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_size.count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}",
+                        "q": "avg:coredns.cache_size.count{$cluster,$deployment,$service,$namespace,$node,$label} by {type}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -156,6 +155,7 @@
                     }
                 ],
                 "show_legend": false,
+                "time": {},
                 "title": "Cache size",
                 "title_align": "left",
                 "title_size": "16",
@@ -178,7 +178,6 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
                 "markers": [
                     {
@@ -190,7 +189,7 @@
                     {
                         "display_type": "area",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count())",
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count())",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -199,6 +198,7 @@
                     }
                 ],
                 "show_legend": false,
+                "time": {},
                 "title": "Cache hit %",
                 "title_align": "left",
                 "title_size": "16",
@@ -259,7 +259,6 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
@@ -274,6 +273,7 @@
                     }
                 ],
                 "show_legend": false,
+                "time": {},
                 "title": "Average request latency",
                 "title_align": "left",
                 "title_size": "16",
