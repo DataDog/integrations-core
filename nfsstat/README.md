@@ -68,4 +68,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network/
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
