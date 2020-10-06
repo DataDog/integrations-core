@@ -66,7 +66,20 @@ def render_config_spec_progress():
 
 
 def render_dashboard_progress():
-    valid_integrations = sorted(get_valid_integrations())
+    # Integrations that either do not emit metrics or have a too customer-specific setup to have an OOTBD
+    not_possible = {
+        'agent_metrics',  # Not for the end user
+        'snmp',  # Too custom
+        'openmetrics', # No default metrics
+        'pdh_check',  # No default metrics
+        'prometheus', # No default metrics
+        'teamcity',  # No metrics
+        'windows_service',  # No metrics
+        'win32_event_log',  # No metrics
+        'wmi_check',  # No default metrics
+        'windows_service'  # No metrics
+    }
+    valid_integrations = sorted(set(get_valid_integrations()).difference(not_possible))
     total_integrations = len(valid_integrations)
     integrations_with_dashboard = 0
 
