@@ -68,6 +68,7 @@ def test_check(mock_disk_sampler, aggregator, check):
 
     aggregator.assert_all_metrics_covered()
 
+
 def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['tag_by'] = 'Name'
