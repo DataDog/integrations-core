@@ -20,13 +20,20 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev import EnvVars
 from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci
+from datadog_checks.base.utils.headers import headers as agent_headers
 
 pytestmark = pytest.mark.http
 
 DEFAULT_OPTIONS = {
     'auth': None,
     'cert': None,
-    'headers': OrderedDict([('User-Agent', 'Datadog Agent/0.0.0')]),
+    'headers': OrderedDict(
+        [
+            ('User-Agent', 'Datadog Agent/0.0.0'),
+            ('Accept', '*/*'),
+            ('Accept-Encoding', 'gzip, deflate'),
+        ]
+    ),
     'proxies': None,
     'timeout': (10.0, 10.0),
     'verify': True,
@@ -80,12 +87,19 @@ class TestTimeout:
 
 
 class TestHeaders:
+    def test_agent_headers(self):
+        # This helper is not used by the RequestsWrapper, but some integrations may use it.
+        # So we provide a unit test for it.
+        agent_config = {}
+        headers = agent_headers(agent_config)
+        assert headers == DEFAULT_OPTIONS['headers']
+
     def test_config_default(self):
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
+        assert http.options['headers'] == DEFAULT_OPTIONS['headers']
 
     def test_config_headers(self):
         headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
@@ -108,7 +122,7 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        complete_headers = OrderedDict({'User-Agent': 'Datadog Agent/0.0.0'})
+        complete_headers = OrderedDict(DEFAULT_OPTIONS['headers'])
         complete_headers.update(headers)
         assert list(iteritems(http.options['headers'])) == list(iteritems(complete_headers))
 
@@ -117,18 +131,25 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        complete_headers = dict(DEFAULT_OPTIONS['headers'])
+        complete_headers.update({'answer': '42'})
+        assert http.options['headers'] == complete_headers
 
     def test_extra_headers_on_http_method_call(self):
         instance = {'extra_headers': {'answer': 42}}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
+        complete_headers = dict(DEFAULT_OPTIONS['headers'])
+        complete_headers.update({'answer': '42'})
+
         extra_headers = {"foo": "bar"}
         with mock.patch("requests.get") as get:
             http.get("http://example.com/hello", extra_headers=extra_headers)
 
-            expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+            expected_options = dict(complete_headers)
+            expected_options.update(extra_headers)
+
             get.assert_called_with(
                 "http://example.com/hello",
                 headers=expected_options,
@@ -140,7 +161,7 @@ class TestHeaders:
             )
 
         # make sure the original headers are not modified
-        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        assert http.options['headers'] == complete_headers
         assert extra_headers == {"foo": "bar"}
 
 
