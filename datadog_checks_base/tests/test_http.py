@@ -688,15 +688,6 @@ class TestAuthTokenHeaderWriterCreation:
         with pytest.raises(ConfigurationError, match='^The `name` setting of `auth_token` writer must be a string$'):
             RequestsWrapper(instance, init_config)
 
-    def test_value_missing(self):
-        instance = {
-            'auth_token': {'reader': {'type': 'file', 'path': '/foo'}, 'writer': {'type': 'header', 'name': 'foo'}}
-        }
-        init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^The `value` setting of `auth_token` writer is required$'):
-            RequestsWrapper(instance, init_config)
-
     def test_value_not_string(self):
         instance = {
             'auth_token': {
@@ -792,6 +783,37 @@ class TestAuthTokenReadFile:
             expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer bar'}
             with mock.patch('requests.get') as get:
                 write_file(token_file, '\nfoobar\nfoobaz\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+
+class TestAuthTokenWriteHeader:
+    def test_default_placeholder_same_as_value(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'X-Vault-Token'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'X-Vault-Token': 'foobar'}
+            with mock.patch('requests.get') as get:
+                write_file(token_file, '\nfoobar\n')
                 http.get('https://www.google.com')
 
                 get.assert_called_with(
