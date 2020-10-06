@@ -629,6 +629,8 @@ class AuthTokenFileReader(object):
 
 
 class AuthTokenHeaderWriter(object):
+    DEFAULT_PLACEHOLDER = '<TOKEN>'
+
     def __init__(self, config):
         self._name = config.get('name', '')
         if not isinstance(self._name, str):
@@ -636,13 +638,11 @@ class AuthTokenHeaderWriter(object):
         elif not self._name:
             raise ConfigurationError('The `name` setting of `auth_token` writer is required')
 
-        self._value = config.get('value', '')
+        self._value = config.get('value', self.DEFAULT_PLACEHOLDER)
         if not isinstance(self._value, str):
             raise ConfigurationError('The `value` setting of `auth_token` writer must be a string')
-        elif not self._value:
-            raise ConfigurationError('The `value` setting of `auth_token` writer is required')
 
-        self._placeholder = config.get('placeholder', '<TOKEN>')
+        self._placeholder = config.get('placeholder', self.DEFAULT_PLACEHOLDER)
         if not isinstance(self._placeholder, str):
             raise ConfigurationError('The `placeholder` setting of `auth_token` writer must be a string')
         elif not self._placeholder:
