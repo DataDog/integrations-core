@@ -284,7 +284,7 @@ def test_non_existent_directory(aggregator):
     with pytest.raises(CheckException):
         dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
-        aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING)
+    aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING)
 
 
 def test_missing_directory_config():
