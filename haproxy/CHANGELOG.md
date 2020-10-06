@@ -3,7 +3,7 @@
 ## 2.13.0 / 2020-10-06
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
-* [Added] Send bytes.in/out.total metrics with legacy check. See [#7722](https://github.com/DataDog/integrations-core/pull/7722).
+* [Added] Send bytes.in/out.total metrics to legacy implementation. See [#7722](https://github.com/DataDog/integrations-core/pull/7722).
 
 ## 2.12.0 / 2020-09-30
 
