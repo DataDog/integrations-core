@@ -73,5 +73,5 @@ def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
     instance['tag_by'] = 'Name'
     c = check(instance)
     c.check(instance)
-    get_running_wmi_sampler = datadog_checks.wmi_check.WMICheck._get_running_wmi_sampler
+    get_running_wmi_sampler = c._get_running_wmi_sampler
     assert get_running_wmi_sampler.call_args.kwargs['tag_by'] == 'Name'
