@@ -37,13 +37,19 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 
 #### Log collection
 
-*Note:* Log collection for OpenShift follows the same principles as for Kubernetes.
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "kube_scheduler", "service": "<SERVICE_NAME>"}` |
+
+
+**Note:** Log collection for OpenShift follows the same principles as for Kubernetes. Please refer to Kubernetes 
+documentation for additional information:
+- [`datadog-daemonset setup` for log collection][14]
+- [Kubernetes log collection][13] 
+- [Kubernetes Audit Log][15]
 
 #### Restricted SCC operations
 
@@ -117,7 +123,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-See our [blog post][13] on monitoring OpenShift environments with Datadog.
+See our [blog post][16] on monitoring OpenShift environments with Datadog.
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/kubernetes/
@@ -130,5 +136,8 @@ See our [blog post][13] on monitoring OpenShift environments with Datadog.
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [11]: https://docs.datadoghq.com/help/
-[12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
-[13]: https://www.datadoghq.com/blog/key-metrics-for-openshift-monitoring/
+[12]: https://docs.datadoghq.com/integrations/openshift/#log-collection
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#pagetitle
+[14]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[15]: https://docs.datadoghq.com/integrations/kubernetes_audit_logs/#pagetitle
+[16]: https://www.datadoghq.com/blog/key-metrics-for-openshift-monitoring/
