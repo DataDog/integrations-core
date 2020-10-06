@@ -117,6 +117,7 @@ files:
     - type: file
       path: /var/opt/mssql/log/errorlog
       source: sqlserver
+      encoding: utf-16-le
       service: <SERVICE_NAME>
       log_processing_rules:
       - type: multi_line

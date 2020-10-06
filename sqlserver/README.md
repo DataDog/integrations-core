@@ -86,6 +86,7 @@ _Available for Agent versions >6.0_
     ```yaml
     logs:
       - type: file
+        encoding: utf-16-le
         path: "<LOG_FILE_PATH>"
         source: sqlserver
         service: "<SERVICE_NAME>"
