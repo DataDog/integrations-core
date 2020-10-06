@@ -41,6 +41,10 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
         if metric_part in metric_mapping and num_tags >= minimum_tag_length:
             # Rebuild any built up tags whenever we encounter a known metric part.
             if tag_builder:
+                # Edge case where we hit a known metric part after a sequence of all unknown parts
+                if '|_tags_|' not in metric_mapping:
+                    raise UnknownMetric
+
                 for tags in metric_mapping['|_tags_|']:
                     if num_tags >= len(tags):
                         break
