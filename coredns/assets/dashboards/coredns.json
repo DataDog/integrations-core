@@ -22,6 +22,16 @@
             "default": "*",
             "name": "namespace",
             "prefix": "kube_namespace"
+        },
+        {
+            "default": "*",
+            "name": "node",
+            "prefix": "node"
+        },
+        {
+            "default": "*",
+            "name": "label",
+            "prefix": "label"
         }
     ],
     "title": "CoreDNS",
@@ -90,7 +100,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()",
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -100,7 +110,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()",
+                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -137,7 +147,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_size.count{$cluster,$deployment,$service,$namespace} by {service}",
+                        "q": "avg:coredns.cache_size.count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -180,7 +190,7 @@
                     {
                         "display_type": "area",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace} by {service}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace} by {service}.as_count())",
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {service}.as_count())",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -255,7 +265,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "sum:coredns.request_duration.seconds.sum{$cluster,$deployment,$service,$namespace}/sum:coredns.request_duration.seconds.count{$cluster,$deployment,$service,$namespace}",
+                        "q": "sum:coredns.request_duration.seconds.sum{$cluster,$deployment,$service,$namespace,$node,$label}/sum:coredns.request_duration.seconds.count{$cluster,$deployment,$service,$namespace,$node,$label}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -349,7 +359,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "sum:coredns.forward_request_duration.seconds.sum{$cluster,$deployment,$service,$namespace}/sum:coredns.forward_request_duration.seconds.count{$cluster,$deployment,$service,$namespace}",
+                        "q": "sum:coredns.forward_request_duration.seconds.sum{$cluster,$deployment,$service,$namespace,$node,$label}/sum:coredns.forward_request_duration.seconds.count{$cluster,$deployment,$service,$namespace,$node,$label}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -386,7 +396,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.response_code_count{$cluster,$deployment,$service,$namespace} by {rcode}.as_count()",
+                        "q": "avg:coredns.response_code_count{$cluster,$deployment,$service,$namespace,$node,$label} by {rcode}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -442,7 +452,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.forward_response_rcode_count{$cluster,$deployment,$service,$namespace} by {rcode}.as_count()",
+                        "q": "avg:coredns.forward_response_rcode_count{$cluster,$deployment,$service,$namespace,$node,$label} by {rcode}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -479,7 +489,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "max:coredns.process.cpu_seconds_total{$cluster,$deployment,$service,$namespace}.as_count()",
+                        "q": "max:coredns.process.cpu_seconds_total{$cluster,$deployment,$service,$namespace,$node,$label}.as_count()",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -516,7 +526,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.process.max_fds{$cluster,$deployment,$service,$namespace}",
+                        "q": "avg:coredns.process.max_fds{$cluster,$deployment,$service,$namespace,$node,$label}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -526,7 +536,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:coredns.process.open_fds{$cluster,$deployment,$service,$namespace}",
+                        "q": "avg:coredns.process.open_fds{$cluster,$deployment,$service,$namespace,$node,$label}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -600,7 +610,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:coredns.go.memstats.heap_alloc_bytes{$deployment,$service,$cluster,$namespace}",
+                        "q": "avg:coredns.go.memstats.heap_alloc_bytes{$deployment,$service,$cluster,$namespace,$node,$label}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -636,7 +646,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:coredns.go.memstats.alloc_bytes{$deployment,$service,$cluster,$namespace}",
+                        "q": "avg:coredns.go.memstats.alloc_bytes{$deployment,$service,$cluster,$namespace,$node,$label}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
