@@ -12,7 +12,6 @@ except ImportError:
 
 
 def _get_common_headers():
-    # Default headers from `requests.Session().headers`.
     return OrderedDict(
         (
             # Required by the HTTP spec. If missing, some websites may return junk (eg 404 responses).
