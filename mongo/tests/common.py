@@ -12,6 +12,7 @@ PORT2 = 27018
 MAX_WAIT = 150
 
 MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
+SHARD_SERVER = "mongodb://%s:%s/test" % (HOST, PORT2)
 MONGODB_VERSION = os.environ['MONGO_VERSION']
 
 ROOT = os.path.dirname(os.path.dirname(HERE))

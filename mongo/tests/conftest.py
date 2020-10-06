@@ -152,6 +152,10 @@ class InitializeDB(LazyFunction):
         cli = pymongo.mongo_client.MongoClient(
             common.MONGODB_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
         )
+        cli_shard = pymongo.mongo_client.MongoClient(
+            common.SHARD_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+        )
+        cli_shard['admin'].command("createUser", "testUser", pwd="testPass", roles=["root"])
 
         foos = []
         for i in range(70):

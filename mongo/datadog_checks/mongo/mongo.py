@@ -178,10 +178,6 @@ class MongoDb(AgentCheck):
                 collectors.append(TopCollector(self, tags))
 
         if self.deployment.is_principal():
-            if self.db_name not in all_dbs:
-                raise ConfigurationError(
-                    "Configured database {} does not exist. Available databases are {}.".format(self.db_name, all_dbs)
-                )
             if 'local' in all_dbs:
                 # Already monitored for all instances
                 all_dbs.remove('local')
