@@ -29,7 +29,7 @@ class BaseSqlServerMetric(object):
     QUERY_BASE = None
 
     # Flag to indicate if this subclass/table is available for custom queries
-    CUSTOM_QUERY = True
+    CUSTOM_QUERIES_AVAILABLE = True
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         self.cfg_instance = cfg_instance
@@ -368,7 +368,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-tasks-transact-sql
 class SqlOsTasks(BaseSqlServerMetric):
-    CUSTOM_QUERY = False
+    CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_os_tasks'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """
@@ -402,7 +402,7 @@ class SqlOsTasks(BaseSqlServerMetric):
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
 class SqlDatabaseFileStats(BaseSqlServerMetric):
-    CUSTOM_QUERY = False
+    CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.database_files'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
@@ -441,7 +441,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
 class SqlDatabaseStats(BaseSqlServerMetric):
-    CUSTOM_QUERY = False
+    CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.databases'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select * from {table}".format(table=TABLE)
@@ -469,7 +469,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 
 
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
-VALID_TABLES = set(cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERY)
+VALID_TABLES = set(cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERIES_AVAILABLE)
 TABLE_MAPPING = {
     cls.TABLE: (cls.DEFAULT_METRIC_TYPE, cls)
     for cls in BaseSqlServerMetric.__subclasses__()
