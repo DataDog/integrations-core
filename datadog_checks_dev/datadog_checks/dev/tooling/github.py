@@ -162,11 +162,13 @@ class Github:
         self.__org = org
         self.__repo = repo
         self.__retry_count = retry_count
+        self.__git_token_scopes = None
 
     def get_user(self, login):
         return self.__get_request_retry(f'{API_URL}/users/{login}')
 
     def get_team_members(self, team):
+        self.__check_git_token_scopes(['write:org', 'read:org', 'admin:org'])
         return self.__get_request_retry(f'{API_URL}/orgs/{self.__org}/teams/{team}/members')
 
     def get_reviews(self, pr_num):
@@ -195,3 +197,22 @@ class Github:
 
         response.raise_for_status()
         return response.json()
+
+    def __check_git_token_scopes(self, one_of_scopes):
+        if self.__git_token_scopes is None:
+            response = requests.get("https://api.github.com", auth=self.__auth)
+            scopes = ""
+            scope_header = "X-OAuth-Scopes"
+            if scope_header in response.headers:
+                scopes = response.headers["X-OAuth-Scopes"]
+
+            self.__git_token_scopes = set(scopes.split(", "))
+
+        for scope in one_of_scopes:
+            if scope in self.__git_token_scopes:
+                return
+        raise Exception(
+            'Make sure your GIT access token has one of the scope '
+            + ", ".join(one_of_scopes)
+            + ' at https://github.com/settings/tokens'
+        )
