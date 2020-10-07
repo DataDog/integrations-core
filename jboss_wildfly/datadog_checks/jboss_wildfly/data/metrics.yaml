@@ -45,7 +45,6 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
-      domain: jboss.as
       bean:
         - jboss.as:subsystem=transactions
       attribute:
