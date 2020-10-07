@@ -29,7 +29,7 @@ Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    ```yaml
    logs:
      - type: file
-       path: /path/to/my/directory/file.log
+       path: /var/log/messages
        source: nfsstat
    ```
 
