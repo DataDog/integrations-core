@@ -346,6 +346,7 @@ instances:
 #
 # logs:
 #   - type: file
+#     encoding: utf-16-le
 #     path: /var/log/lighttpd/access.log
 #     source: lighttpd
 #     service: lighttpd
