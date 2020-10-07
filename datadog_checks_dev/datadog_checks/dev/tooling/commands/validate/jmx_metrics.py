@@ -15,34 +15,42 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
 def jmx_metrics():
     """Validate all default JMX metrics definitions."""
-    echo_info("Validating all JMX metrics files...")
-    saved_errors = defaultdict(list)
 
+    echo_info("Validating all JMX metrics files...")
+
+    saved_errors = defaultdict(list)
     integrations = sorted(get_valid_integrations())
     for check_name in integrations:
         is_jmx = is_jmx_integration(check_name)
         if not is_jmx:
-            echo_info("Skip non jmx integration: {}".format(check_name))
+            echo_debug("Skip non jmx integration: {}".format(check_name))
             continue
 
         jmx_metrics_file, file_exists = get_jmx_metrics_file(check_name)
 
         if not file_exists:
-            echo_info(f'{check_name}... ', nl=False)
-            saved_errors[check_name].append(f'  {jmx_metrics_file} does not exist')
+            saved_errors[check_name].append(f'{jmx_metrics_file} does not exist')
             continue
 
         jmx_metrics_data = yaml.safe_load(read_file(jmx_metrics_file)).get('jmx_metrics')
 
         if jmx_metrics_data is None:
-            saved_errors[check_name].append(f'  {jmx_metrics_file} does not have jmx_metrics definition')
+            saved_errors[check_name].append(f'{jmx_metrics_file} does not have jmx_metrics definition')
             continue
         for rule in jmx_metrics_data:
             include = rule.get('include')
             exclude = rule.get('exclude')
-        #     if include and exclude:
 
-    for check_name, errors in saved_errors:
+            for rule_def in [include, exclude]:
+                if not rule_def:
+                    continue
+                domain = rule_def.get('domain')
+                if not domain:
+                    saved_errors[check_name].append(f"domain attribute missing for rule: {rule_def}")
+
+    for check_name, errors in saved_errors.items():
+        if not errors:
+            continue
         echo_failure(check_name)
         for err in errors:
             echo_failure(f"    {err}")
