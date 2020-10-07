@@ -35,20 +35,18 @@ def jmx_metrics(verbose):
             continue
         for rule in jmx_metrics_data:
             include = rule.get('include')
-            exclude = rule.get('exclude')
 
-            for rule_def in [include, exclude]:
-                if not rule_def:
-                    continue
-                domain = rule_def.get('domain')
-                beans = rule_def.get('bean')
-                if (not domain) and (not beans):
-                    # Require `domain` or `bean` to be present,
-                    # that helps JMXFetch to better scope the beans to retrieve
-                    rule_def_str = str(rule_def)
-                    if not verbose:
-                        rule_def_str = (rule_def_str[:100] + '...') if len(rule_def_str) > 100 else rule_def_str
-                    saved_errors[check_name].append(f"domain or bean attribute is missing for rule: {rule_def_str}")
+            if not include:
+                continue
+            domain = include.get('domain')
+            beans = include.get('bean')
+            if (not domain) and (not beans):
+                # Require `domain` or `bean` to be present,
+                # that helps JMXFetch to better scope the beans to retrieve
+                include_str = str(include)
+                if not verbose:
+                    include_str = (include_str[:100] + '...') if len(include_str) > 100 else include_str
+                saved_errors[check_name].append(f"domain or bean attribute is missing for rule: {include_str}")
 
     for check_name, errors in saved_errors.items():
         if not errors:
