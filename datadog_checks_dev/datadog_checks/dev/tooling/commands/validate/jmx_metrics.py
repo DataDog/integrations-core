@@ -42,7 +42,7 @@ def jmx_metrics(verbose):
                     continue
                 domain = rule_def.get('domain')
                 beans = rule_def.get('bean')
-                if (not domain) or (not beans):
+                if (not domain) and (not beans):
                     # Require `domain` or `bean` to be present,
                     # that helps JMXFetch to better scope the beans to retrieve
                     rule_def_str = str(rule_def)
