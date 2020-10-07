@@ -42,6 +42,18 @@ files:
       value:
         type: string
         example: master
+    - name: include_instance_metrics
+      description: |
+        Include server-level instance metrics.  When setting up multiple instances for
+        different databases on the same host these metrics will be duplicated unless this option is turned off.
+      value:
+        type: boolean
+        example: true
+    - name: include_task_scheduler_metrics
+      description: Include additional Task and Scheduler metrics.
+      value:
+        type: boolean
+        example: false
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -102,11 +114,6 @@ files:
         example: master
     - name: ignore_missing_database
       description: If the DB specified doesn't exist on the server then don't do the check
-      value:
-        type: boolean
-        example: false
-    - name: include_task_scheduler_metrics
-      description: Include additional Task and Scheduler metrics
       value:
         type: boolean
         example: false

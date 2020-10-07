@@ -177,8 +177,8 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
     # check a second time for io metrics to be processed
     sqlserver_check.check(instance_docker)
 
-    aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads', count=8)
-    aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes', count=8)
+    aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads')
+    aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
 
 
 @windows_ci
