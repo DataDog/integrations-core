@@ -1,6 +1,6 @@
 # CHANGELOG - vsphere
 
-## 5.7.0 / 2020-09-21
+## 5.7.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add datastore cluster tag. See [#7603](https://github.com/DataDog/integrations-core/pull/7603).
 * [Fixed] Better trace log. See [#7608](https://github.com/DataDog/integrations-core/pull/7608).
