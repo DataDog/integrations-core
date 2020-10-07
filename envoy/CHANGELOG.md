@@ -2,7 +2,7 @@
 
 ## 1.19.0 / 2020-10-07
 
-* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Added] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 * [Fixed] Update Watchdog metrics. See [#7740](https://github.com/DataDog/integrations-core/pull/7740).
 * [Fixed] Properly handle a parsing edge case. See [#7717](https://github.com/DataDog/integrations-core/pull/7717).
 
