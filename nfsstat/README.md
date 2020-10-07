@@ -18,7 +18,7 @@ Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 ### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, so to enable it in `datadog.yaml`, update this setting:
 
    ```yaml
    logs_enabled: true
