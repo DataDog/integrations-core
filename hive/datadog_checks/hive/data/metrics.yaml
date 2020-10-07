@@ -2,6 +2,7 @@
 jmx_metrics:
   # Metrics HiveServer2 related
   - include:
+      domain: metrics
       bean: metrics:name=open_operations
       attribute:
         Count:
@@ -10,6 +11,7 @@ jmx_metrics:
 
   # Session
   - include:
+      domain: metrics
       bean: metrics:name=hs2_active_sessions
       attribute:
         Value:
@@ -17,6 +19,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_avg_active_session_time
       attribute:
         Value:
@@ -24,6 +27,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_open_sessions
       attribute:
         Value:
@@ -31,6 +35,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_avg_open_session_time
       attribute:
         Value:
@@ -39,6 +44,7 @@ jmx_metrics:
 
   # Queries
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_hs2_submitted_queries
       attribute:
         Count:
@@ -46,6 +52,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_submitted_queries
       attribute:
         Max:
@@ -71,6 +78,7 @@ jmx_metrics:
           metric_type: rate
 
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_hs2_compiling_queries
       attribute:
         Count:
@@ -78,6 +86,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_compiling_queries
       attribute:
         Max:
@@ -103,6 +112,7 @@ jmx_metrics:
           metric_type: rate
 
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_hs2_executing_queries
       attribute:
         Count:
@@ -110,6 +120,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_executing_queries
       attribute:
         Max:
@@ -135,6 +146,7 @@ jmx_metrics:
           metric_type: rate
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_succeeded_queries
       attribute:
         Count:
@@ -147,6 +159,7 @@ jmx_metrics:
   # SQL operation
   # Pending
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
       attribute:
         Count:
@@ -154,6 +167,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=api_hs2_sql_operation_PENDING
       attribute:
         Max:
@@ -180,6 +194,7 @@ jmx_metrics:
 
   # Running
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
       attribute:
         Count:
@@ -187,6 +202,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=api_hs2_sql_operation_RUNNING
       attribute:
         Max:
@@ -213,6 +229,7 @@ jmx_metrics:
 
   # Completed
   - include:
+      domain: metrics
       bean: metrics:name=hs2_completed_sql_operation_CLOSED
       attribute:
         Count:
@@ -220,6 +237,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_completed_sql_operation_FINISHED
       attribute:
         Count:
@@ -228,6 +246,7 @@ jmx_metrics:
 
   # User
   - include:
+      domain: metrics
       bean: metrics:name=hs2_sql_operation_active_user
       attribute:
         Count:
@@ -237,6 +256,7 @@ jmx_metrics:
   # Operation
   # Initialized
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_hs2_operation_INITIALIZED
       attribute:
         Count:
@@ -244,6 +264,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=api_hs2_operation_INITIALIZED
       attribute:
         Max:
@@ -270,6 +291,7 @@ jmx_metrics:
 
   # Pending
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_hs2_operation_PENDING
       attribute:
         Count:
@@ -277,6 +299,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=api_hs2_operation_PENDING
       attribute:
         Max:
@@ -303,6 +326,7 @@ jmx_metrics:
 
   # Running
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_hs2_operation_RUNNING
       attribute:
         Count:
@@ -310,6 +334,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=api_hs2_operation_RUNNING
       attribute:
         Max:
@@ -336,6 +361,7 @@ jmx_metrics:
 
   # Completed
   - include:
+      domain: metrics
       bean: metrics:name=hs2_completed_operation_FINISHED
       attribute:
         Count:
@@ -343,6 +369,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=hs2_completed_operation_CLOSED
       attribute:
         Count:
@@ -351,84 +378,98 @@ jmx_metrics:
 
   # Memory
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.init
       attribute:
         Value:
           alias: hive.server.memory.heap.init
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.usage
       attribute:
         Value:
           alias: hive.server.memory.heap.usage
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.used
       attribute:
         Value:
           alias: hive.server.memory.heap.used
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.max
       attribute:
         Value:
           alias: hive.server.memory.heap.max
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.committed
       attribute:
         Value:
           alias: hive.server.memory.heap.committed
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.init
       attribute:
         Value:
           alias: hive.server.memory.non_heap.init
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.used
       attribute:
         Value:
           alias: hive.server.memory.non_heap.used
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.max
       attribute:
         Value:
           alias: hive.server.memory.non_heap.max
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.committed
       attribute:
         Value:
           alias: hive.server.memory.non_heap.committed
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.init
       attribute:
         Value:
           alias: hive.server.memory.total.init
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.usage
       attribute:
         Value:
           alias: hive.server.memory.total.usage
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.used
       attribute:
         Value:
           alias: hive.server.memory.total.used
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.max
       attribute:
         Value:
           alias: hive.server.memory.total.max
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.committed
       attribute:
         Value:
@@ -437,6 +478,7 @@ jmx_metrics:
 
   # Metrics Hive Metastore related
   - include:
+      domain: metrics
       bean: metrics:name=open_connections
       attribute:
         Count:
@@ -444,6 +486,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=create_total_count_dbs
       attribute:
         Count:
@@ -451,6 +494,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=delete_total_count_dbs
       attribute:
         Count:
@@ -458,6 +502,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=init_total_count_dbs
       attribute:
         Value:
@@ -465,6 +510,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=create_total_count_tables
       attribute:
         Count:
@@ -472,6 +518,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=delete_total_count_tables
       attribute:
         Count:
@@ -479,6 +526,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=init_total_count_tables
       attribute:
         Value:
@@ -486,6 +534,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=create_total_count_partitions
       attribute:
         Count:
@@ -493,6 +542,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=delete_total_count_partitions
       attribute:
         Count:
@@ -500,6 +550,7 @@ jmx_metrics:
           metric_type: monotonic_count
 
   - include:
+      domain: metrics
       bean: metrics:name=init_total_count_partitions
       attribute:
         Value:
@@ -507,6 +558,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: metrics
       bean: metrics:name=directsql_errors
       attribute:
         Count:
@@ -515,84 +567,98 @@ jmx_metrics:
 
   # Memory
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.init
       attribute:
         Value:
           alias: hive.metastore.memory.heap.init
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.usage
       attribute:
         Value:
           alias: hive.metastore.memory.heap.usage
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.used
       attribute:
         Value:
           alias: hive.metastore.memory.heap.used
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.max
       attribute:
         Value:
           alias: hive.metastore.memory.heap.max
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.heap.committed
       attribute:
         Value:
           alias: hive.metastore.memory.heap.committed
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.init
       attribute:
         Value:
           alias: hive.metastore.memory.non_heap.init
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.used
       attribute:
         Value:
           alias: hive.metastore.memory.non_heap.used
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.max
       attribute:
         Value:
           alias: hive.metastore.memory.non_heap.max
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.non-heap.committed
       attribute:
         Value:
           alias: hive.metastore.memory.non_heap.committed
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.init
       attribute:
         Value:
           alias: hive.metastore.memory.total.init
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.usage
       attribute:
         Value:
           alias: hive.metastore.memory.total.usage
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.used
       attribute:
         Value:
           alias: hive.metastore.memory.total.used
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.max
       attribute:
         Value:
           alias: hive.metastore.memory.total.max
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=memory.total.committed
       attribute:
         Value:
@@ -601,144 +667,168 @@ jmx_metrics:
 
   # API
   - include:
+      domain: metrics
       bean: metrics:name=api_create_table
       attribute:
         Count:
           alias: hive.metastore.api.create_table
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_create_table
       attribute:
         Count:
           alias: hive.metastore.api.create_table.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_get_table
       attribute:
         Count:
           alias: hive.metastore.api.get_table
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_get_table
       attribute:
         Count:
           alias: hive.metastore.api.get_table.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_drop_table
       attribute:
         Count:
           alias: hive.metastore.api.drop_table
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_drop_table
       attribute:
         Count:
           alias: hive.metastore.api.drop_table.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_init
       attribute:
         Count:
           alias: hive.metastore.api.init
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_init
       attribute:
         Count:
           alias: hive.metastore.api.init.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_get_all_databases
       attribute:
         Count:
           alias: hive.metastore.api.get_all_databases
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_get_all_databases
       attribute:
         Count:
           alias: hive.metastore.api.get_all_databases.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_get_database
       attribute:
         Count:
           alias: hive.metastore.api.get_database
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_get_database
       attribute:
         Count:
           alias: hive.metastore.api.get_database.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_get_all_tables
       attribute:
         Count:
           alias: hive.metastore.api.get_all_tables
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_get_all_tables
       attribute:
         Count:
           alias: hive.metastore.api.get_all_tables.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_shutdown
       attribute:
         Count:
           alias: hive.metastore.api.shutdown
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_shutdown
       attribute:
         Count:
           alias: hive.metastore.api.shutdown.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_flushCache
       attribute:
         Count:
           alias: hive.metastore.api.flushcache
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_flushCache
       attribute:
         Count:
           alias: hive.metastore.api.flushcache.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_alter_table
       attribute:
         Count:
           alias: hive.metastore.api.alter_table
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_alter_table
       attribute:
         Count:
           alias: hive.metastore.api.alter_table.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_get_all_functions
       attribute:
         Count:
           alias: hive.metastore.api.get_all_functions
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_get_all_functions
       attribute:
         Count:
           alias: hive.metastore.api.get_all_functions.active_call
           metric_type: gauge
   - include:
+      domain: metrics
       bean: metrics:name=api_get_table_req
       attribute:
         Count:
           alias: hive.metastore.api.get_table_req
           metric_type: monotonic_count
   - include:
+      domain: metrics
       bean: metrics:name=active_calls_api_get_table_req
       attribute:
         Count:
