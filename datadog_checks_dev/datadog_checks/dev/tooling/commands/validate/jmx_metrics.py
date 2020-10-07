@@ -20,7 +20,7 @@ def jmx_metrics(verbose):
     echo_info("Validating all JMX metrics files...")
 
     saved_errors = defaultdict(list)
-    integrations = sorted([check for check in get_valid_integrations() if is_jmx_integration(check)])
+    integrations = sorted(check for check in get_valid_integrations() if is_jmx_integration(check))
     for check_name in integrations:
         jmx_metrics_file, file_exists = get_jmx_metrics_file(check_name)
 
