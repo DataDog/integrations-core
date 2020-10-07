@@ -13,19 +13,15 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
-def jmx_metrics():
+@click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
+def jmx_metrics(verbose):
     """Validate all default JMX metrics definitions."""
 
     echo_info("Validating all JMX metrics files...")
 
     saved_errors = defaultdict(list)
-    integrations = sorted(get_valid_integrations())
+    integrations = sorted([check for check in get_valid_integrations() if is_jmx_integration(check)])
     for check_name in integrations:
-        is_jmx = is_jmx_integration(check_name)
-        if not is_jmx:
-            echo_debug("Skip non jmx integration: {}".format(check_name))
-            continue
-
         jmx_metrics_file, file_exists = get_jmx_metrics_file(check_name)
 
         if not file_exists:
@@ -46,16 +42,20 @@ def jmx_metrics():
                     continue
                 domain = rule_def.get('domain')
                 if not domain:
-                    saved_errors[check_name].append(f"domain attribute missing for rule: {rule_def}")
+                    rule_def_str = str(rule_def)
+                    if not verbose:
+                        rule_def_str = (rule_def_str[:100] + '...') if len(rule_def_str) > 100 else rule_def_str
+                    saved_errors[check_name].append(f"domain attribute missing for rule: {rule_def_str}")
 
     for check_name, errors in saved_errors.items():
         if not errors:
             continue
-        echo_failure(check_name)
+        echo_info(f"{check_name}:")
         for err in errors:
-            echo_failure(f"    {err}")
+            echo_failure(f"    - {err}")
 
-    echo_success(f"{len(integrations) - len(saved_errors)} valid files")
+    echo_info(f"{len(integrations)} total JMX integrations")
+    echo_success(f"{len(integrations) - len(saved_errors)} valid metrics files")
     if saved_errors:
-        echo_failure(f"{len(saved_errors)} invalid files")
+        echo_failure(f"{len(saved_errors)} invalid metrics files")
         abort()
