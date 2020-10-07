@@ -12,7 +12,8 @@ files:
           The PgBouncer stats database URL.
 
           If the password contains special characters, be sure to escape them using percent encoding.
-          See: https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding
+
+          See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
         required: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
@@ -34,7 +35,8 @@ files:
           If `database_url` is not used, set up the password to use with the `password` parameter.
 
           If the password contains special characters, be sure to escape them using percent encoding.
-          See: https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding
+
+          See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
         value:
           type: string
       - name: use_cached
