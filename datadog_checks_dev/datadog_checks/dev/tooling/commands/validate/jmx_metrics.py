@@ -7,9 +7,9 @@ import click
 import yaml
 
 from datadog_checks.dev.utils import read_file
-from ...utils import get_eula_from_manifest, get_valid_integrations, get_jmx_metrics_file, get_config_file, \
-    is_jmx_integration
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_debug
+
+from ...utils import get_jmx_metrics_file, get_valid_integrations, is_jmx_integration
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
