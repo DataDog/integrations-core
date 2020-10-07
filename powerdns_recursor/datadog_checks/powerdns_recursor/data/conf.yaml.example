@@ -45,21 +45,20 @@ init_config:
 #
 instances:
 
-  -
-    ## @param host - string - optional - default: 127.0.0.1
+    ## @param host - string - required
     ## Host running the recursor.
     #
-    # host: 127.0.0.1
+  - host: 127.0.0.1
 
-    ## @param port - integer - optional - default: 8082
+    ## @param port - integer - required
     ## Recursor web server port.
     #
-    # port: 8082
+    port: 8082
 
-    ## @param api_key - string - optional
+    ## @param api_key - string - required
     ## Recursor web server api key.
     #
-    # api_key: <API_KEY>
+    api_key: <API_KEY>
 
     ## @param version - integer - optional - default: 3
     ## Version 3 or 4 of PowerDNS Recursor to connect to.

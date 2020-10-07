@@ -9,16 +9,19 @@ files:
   - template: instances
     options:
     - name: host
+      required: true
       description: Host running the recursor.
       value:
         type: string
         example: 127.0.0.1
     - name: port
+      required: true
       description: Recursor web server port.
       value:
         type: integer
         example: 8082
     - name: api_key
+      required: true
       description: Recursor web server api key.
       value:
         type: string
