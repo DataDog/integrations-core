@@ -26,6 +26,12 @@ class Query(object):
         self.extras = None
         self.tags = None
 
+    def copy(self):
+        if self.name:
+            # Already compiled, can't be copied
+            raise ValueError("Query is already compiled and can't be copied anymore.")
+        return Query(self.query_data)
+
     def compile(self, column_transformers, extra_transformers):
         """
         This idempotent method will be called by `QueryManager.compile_queries` so you

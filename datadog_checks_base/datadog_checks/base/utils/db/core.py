@@ -46,9 +46,10 @@ class QueryManager(object):
         """
         self.check = check
         self.executor = executor
-        self.queries = queries or []
         self.tags = tags or []
         self.error_handler = error_handler
+        queries = queries or []
+        self.queries = [q.copy() for q in queries]
 
         custom_queries = list(self.check.instance.get('custom_queries', []))
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)

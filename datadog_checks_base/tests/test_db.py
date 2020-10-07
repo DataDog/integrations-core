@@ -1020,6 +1020,31 @@ class TestSubmission:
         aggregator.assert_metric('test.baz', 2, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
 
+    def test_queries_are_copied(self):
+        class MyCheck(AgentCheck):
+            pass
+
+        check1 = MyCheck('test', {}, [{}])
+        check2 = MyCheck('test', {}, [{}])
+        dummy_query = Query(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test.foo', 'type': 'gauge', 'tags': ['override:ok']},
+                    {'name': 'test.baz', 'type': 'gauge', 'raw': True},
+                ],
+                'tags': ['test:bar'],
+            }
+        )
+        query_manager1 = QueryManager(check1, mock_executor(), [dummy_query])
+        query_manager2 = QueryManager(check2, mock_executor(), [dummy_query])
+        query_manager1.compile_queries()
+        query_manager2.compile_queries()
+        assert not id(query_manager1.queries[0]) == id(
+            query_manager2.queries[0]
+        ), "QueryManager does not copy the queries"
+
     def test_query_execution_error(self, caplog, aggregator):
         class Result(object):
             def __init__(self, _):
