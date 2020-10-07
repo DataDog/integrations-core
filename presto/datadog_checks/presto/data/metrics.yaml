@@ -4,6 +4,7 @@
 
 jmx_metrics:
   - include:
+      domain: presto.execution
       bean: presto.execution:name=QueryManager
       attribute:
         AbandonedQueries.OneMinute.Count:
@@ -139,6 +140,7 @@ jmx_metrics:
         WallInputBytesRate.OneMinute.P95:
           alias: presto.execution.wall_input_bytes_rate.one_minute.p95
   - include:
+      domain: presto.execution
       bean: presto.execution.executor:name=TaskExecutor
       attribute:
         BlockedSplits:
@@ -153,6 +155,7 @@ jmx_metrics:
           alias: presto.execution.executor.waiting_splits
 
   - include:
+      domain: presto.execution
       bean: presto.execution:name=TaskManager
       attribute:
         InputDataSize.OneMinute.Count:
@@ -188,6 +191,7 @@ jmx_metrics:
         TaskNotificationExecutor.QueuedTaskCount:
           alias: presto.execution.task_notification_executor.queued_task_count
   - include:
+      domain: presto.failureDetector
       bean:
         - presto.failureDetector:name=HeartbeatFailureDetector
       attribute:
