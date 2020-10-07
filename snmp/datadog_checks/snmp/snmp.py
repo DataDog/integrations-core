@@ -40,10 +40,27 @@ from .utils import (
 
 DEFAULT_OID_BATCH_SIZE = 10
 
+_MAX_FETCH_ID = 10 ** 6
+_LAST_FETCH_ID = 0
+
 
 def reply_invalid(oid):
     # type: (Any) -> bool
     return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
+
+
+def _get_fetch_id():
+    # type: () -> int
+    """
+    Return a unique ID representing a "fetch results" operation, for logging purposes.
+
+    Note: this is distinct from the 'request-id' as defined in the SNMP protocol.
+    """
+    # Use a global variable instead of a check instance or class variable
+    # so that even different instances don't share IDs.
+    global _LAST_FETCH_ID
+    _LAST_FETCH_ID = (_LAST_FETCH_ID + 1) % _MAX_FETCH_ID
+    return _LAST_FETCH_ID
 
 
 class SnmpCheck(AgentCheck):
@@ -54,7 +71,6 @@ class SnmpCheck(AgentCheck):
     _executor = None
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
-    _MAX_REQUEST_ID = 10 ** 6
     _thread_factory = threading.Thread  # Store as an attribute for easier mocking.
 
     def __init__(self, *args, **kwargs):
@@ -75,8 +91,6 @@ class SnmpCheck(AgentCheck):
         self.profiles_by_oid = self._get_profiles_mapping()
 
         self._config = self._build_config(self.instance)
-
-        self._last_request_id = 0
 
     def _load_profiles(self):
         # type: () -> Dict[str, Dict[str, Any]]
@@ -168,12 +182,6 @@ class SnmpCheck(AgentCheck):
         else:
             return None
 
-    def _next_request_id(self):
-        # type: () -> int
-        # NOTE: prevent request ID from becoming infinitely large as time passes.
-        self._last_request_id = (self._last_request_id + 1) % self._MAX_REQUEST_ID
-        return self._last_request_id
-
     def fetch_results(
         self, config  # type: InstanceConfig
     ):
@@ -188,18 +196,18 @@ class SnmpCheck(AgentCheck):
         """
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
-        request_id = self._next_request_id()
+        fetch_id = _get_fetch_id()
 
         all_binds, error = self.fetch_oids(
             config,
             config.oid_config.scalar_oids,
             config.oid_config.next_oids,
             enforce_constraints=enforce_constraints,
-            request_id=request_id,
+            fetch_id=fetch_id,
         )
         for oid in config.oid_config.bulk_oids:
             try:
-                self.log.debug('[%d] Running SNMP command getBulk on OID %s', request_id, oid)
+                self.log.debug('[%d] Running SNMP command getBulk on OID %s', fetch_id, oid)
                 binds = snmp_bulk(
                     config,
                     oid.as_object_type(),
@@ -221,12 +229,12 @@ class SnmpCheck(AgentCheck):
             scalar_oids.append(oid)
             match = config.resolve_oid(oid)
             results[match.name][match.indexes] = value
-        self.log.debug('[%d] Raw results: %s', request_id, OIDPrinter(results, with_values=False))
+        self.log.debug('[%d] Raw results: %s', fetch_id, OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
         return results, scalar_oids, error
 
-    def fetch_oids(self, config, scalar_oids, next_oids, enforce_constraints, request_id):
+    def fetch_oids(self, config, scalar_oids, next_oids, enforce_constraints, fetch_id):
         # type: (InstanceConfig, List[OID], List[OID], bool, int) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
@@ -242,11 +250,11 @@ class SnmpCheck(AgentCheck):
         for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
             try:
                 self.log.debug(
-                    '[%d] Running SNMP command get on OIDS: %s', request_id, OIDPrinter(oids_batch, with_values=False)
+                    '[%d] Running SNMP command get on OIDS: %s', fetch_id, OIDPrinter(oids_batch, with_values=False)
                 )
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
-                self.log.debug('[%d] Returned vars: %s', request_id, OIDPrinter(var_binds, with_values=True))
+                self.log.debug('[%d] Returned vars: %s', fetch_id, OIDPrinter(var_binds, with_values=True))
 
                 missing_results = []
 
@@ -271,9 +279,7 @@ class SnmpCheck(AgentCheck):
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
                 self.log.debug(
-                    '[%d] Running SNMP command getNext on OIDS: %s',
-                    request_id,
-                    OIDPrinter(oids_batch, with_values=False),
+                    '[%d] Running SNMP command getNext on OIDS: %s', fetch_id, OIDPrinter(oids_batch, with_values=False)
                 )
                 binds = list(
                     snmp_getnext(
@@ -283,7 +289,7 @@ class SnmpCheck(AgentCheck):
                         ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
                     )
                 )
-                self.log.debug('[%d] Returned vars: %s', request_id, OIDPrinter(binds, with_values=True))
+                self.log.debug('[%d] Returned vars: %s', fetch_id, OIDPrinter(binds, with_values=True))
                 all_binds.extend(binds)
 
             except (PySnmpError, CheckException) as e:
