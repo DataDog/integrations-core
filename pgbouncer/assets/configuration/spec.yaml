@@ -11,8 +11,8 @@ files:
         description: |
           The PgBouncer stats database URL.
 
-          If the password contains special characters, be sure to escape them using
-          URL encoding (also known as percent-encoding).
+          If the password contains special characters, be sure to escape them using percent encoding.
+          See: https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding
         required: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
@@ -33,8 +33,8 @@ files:
         description: |
           If `database_url` is not used, set up the password to use with the `password` parameter.
 
-          If the password contains special characters, be sure to escape them using
-          URL encoding (also known as percent-encoding).
+          If the password contains special characters, be sure to escape them using percent encoding.
+          See: https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding
         value:
           type: string
       - name: use_cached
