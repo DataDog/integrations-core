@@ -35,17 +35,18 @@ def jmx_metrics(verbose):
             continue
         for rule in jmx_metrics_data:
             include = rule.get('include')
+            include_str = truncate_message(str(include), verbose)
+            rule_str = truncate_message(str(rule), verbose)
 
             if not include:
+                saved_errors[check_name].append(f"missing include: {rule_str}")
                 continue
+
             domain = include.get('domain')
             beans = include.get('bean')
             if (not domain) and (not beans):
                 # Require `domain` or `bean` to be present,
                 # that helps JMXFetch to better scope the beans to retrieve
-                include_str = str(include)
-                if not verbose:
-                    include_str = (include_str[:100] + '...') if len(include_str) > 100 else include_str
                 saved_errors[check_name].append(f"domain or bean attribute is missing for rule: {include_str}")
 
     for check_name, errors in saved_errors.items():
@@ -60,3 +61,9 @@ def jmx_metrics(verbose):
     if saved_errors:
         echo_failure(f"{len(saved_errors)} invalid metrics files")
         abort()
+
+
+def truncate_message(s, verbose):
+    if not verbose:
+        s = (s[:100] + '...') if len(s) > 100 else s
+    return s
