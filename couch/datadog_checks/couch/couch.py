@@ -78,7 +78,9 @@ class CouchDb(AgentCheck):
 
             try:
                 major_version = int(version.split('.')[0])
-                if major_version <= 1:
+                if major_version == 0:
+                    raise errors.BadVersionError("Unknown version {}".format(version))
+                elif major_version <= 1:
                     self.checker = CouchDB1(self)
                 else:
                     self.checker = CouchDB2(self)

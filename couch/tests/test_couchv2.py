@@ -34,6 +34,10 @@ def gauges():
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
+            if row[0] == "couchdb.couchdb.httpd.all_docs_timeouts" and common.COUCH_MAJOR_VERSION == 2:
+                # All remaining metrics are Couchv3 only
+                break
+
             if row[0] == 'metric_name':
                 # skip the header
                 continue
