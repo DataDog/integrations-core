@@ -5,7 +5,8 @@
   "categories": [
     "web",
     "network",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "PowerDNS Recursor",
