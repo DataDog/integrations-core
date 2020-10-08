@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 3.8.0 / 2020-09-04
+## 3.8.0 / 2020-09-04 / Agent 7.23.0
 
 * [Added] Add `index_transform` to support tagging using another table with different indexes. See [#7489](https://github.com/DataDog/integrations-core/pull/7489).
 * [Fixed] Validate SNMP profile hierarchy. See [#6798](https://github.com/DataDog/integrations-core/pull/6798).

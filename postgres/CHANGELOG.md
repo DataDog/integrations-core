@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 5.1.0 / 2020-09-09
+## 5.1.0 / 2020-09-09 / Agent 7.23.0
 
 * [Added] Allow customizing application name in Postgres database. See [#7528](https://github.com/DataDog/integrations-core/pull/7528).
 * [Fixed] Fix PostgreSQL connection string when using ident authentication. See [#7219](https://github.com/DataDog/integrations-core/pull/7219). Thanks [verdie-g](https://github.com/verdie-g).

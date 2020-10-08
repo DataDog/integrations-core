@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## 2.0.0 / 2020-09-21
+## 2.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add Scheduler and Task Metrics for SQL Server. See [#5840](https://github.com/DataDog/integrations-core/pull/5840).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

@@ -1,6 +1,6 @@
 # CHANGELOG - disk
 
-## 3.0.0 / 2020-09-24
+## 3.0.0 / 2020-09-24 / Agent 7.23.0
 
 * [Added] Add options for global exclusion patterns. See [#7648](https://github.com/DataDog/integrations-core/pull/7648).
 * [Changed] Ignore `/proc/sys/fs/binfmt_misc` by default. See [#7650](https://github.com/DataDog/integrations-core/pull/7650).

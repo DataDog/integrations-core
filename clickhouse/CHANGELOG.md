@@ -1,6 +1,6 @@
 # CHANGELOG - ClickHouse
 
-## 1.4.0 / 2020-09-21
+## 1.4.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config specs to clickhouse. See [#7433](https://github.com/DataDog/integrations-core/pull/7433).
 * [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
