@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+## 1.17.0 / 2020-10-08
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix building of the connection string. See [#7744](https://github.com/DataDog/integrations-core/pull/7744).
+* [Fixed] Refactor collection logic. See [#7615](https://github.com/DataDog/integrations-core/pull/7615).
+
 ## 1.16.5 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Submit collection metrics even if value is zero. See [#7606](https://github.com/DataDog/integrations-core/pull/7606).
