@@ -60,7 +60,7 @@ files:
           - deferred
     - name: config_directory
       description: |
-        The config_directory option only applies when `postqueue: true`.
+        The config_directory option applies only when `postqueue: true`.
         The config_directory is the location of the Postfix configuration directory where main.cf lives.
       value:
         type: string
