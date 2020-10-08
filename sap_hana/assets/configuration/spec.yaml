@@ -34,7 +34,6 @@ files:
           views instead of the Agent hostname.
         value:
           type: boolean
-          default: false
           example: false
       - name: batch_size
         description: The number of rows to return with each query result.
