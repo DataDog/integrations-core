@@ -366,11 +366,13 @@ def batches(lst, size):
 
 
 def transform_index(src_index, index_slices):
-    # type: (Tuple[str, ...], List[slice]) -> Tuple[str, ...]
+    # type: (Tuple[str, ...], List[slice]) -> Union[Tuple[str, ...], None]
     """
     Transform a source index into a new index using a list of transform rules.
 
     A transform rule is slice and is used to extract a subset of the source index.
+
+    To avoid erroneous slices, None is returned if slice end is out of bound.
 
     ```python
     >>> transform_index(('10', '11', '12', '13'), [slice(2, 3), slice(0, 2)])
@@ -379,5 +381,7 @@ def transform_index(src_index, index_slices):
     """
     dst_index = []  # type: List[str]
     for index_slice in index_slices:
+        if index_slice.stop > len(src_index):
+            return None
         dst_index.extend(src_index[index_slice])
     return tuple(dst_index)

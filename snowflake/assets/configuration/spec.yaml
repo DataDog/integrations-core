@@ -71,6 +71,26 @@ files:
         value:
           type: string
           example: <OCSP_RESPONSE_CACHE_FILENAME>
+      - name: authenticator
+        description: |
+          Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
+          Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+        value:
+          type: string
+          default: snowflake
+      - name: token
+        description: Token used for OAuth connection to Snowflake.
+        value:
+          type: string
+      - name: client_session_keep_alive
+        description: |
+          If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
+          even if there is no activity from the user.
+
+          By default, the connection will need to be renewed after four hours of inactivity.
+        value:
+          type: boolean
+          example: false
       - name: metric_groups
         description: |
           List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.

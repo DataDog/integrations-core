@@ -100,14 +100,14 @@ METRICS = {
     },
     'server.watchdog_mega_miss': {
         'tags': (
-            (),
+            ('thread_name', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'server.watchdog_miss': {
         'tags': (
-            (),
+            ('thread_name', ),
             (),
         ),
         'method': 'monotonic_count',
