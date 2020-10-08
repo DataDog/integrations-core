@@ -891,12 +891,19 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
 
+            # TODO: use nonlocal when we drop Python 2 support
+            counter = {'errors': 0}
+
+            def raise_error_once(*args, **kwargs):
+                counter['errors'] += 1
+                if counter['errors'] <= 1:
+                    raise Exception
+
             expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret2'}
-            with mock.patch('requests.get', side_effect=Exception) as get:
+            with mock.patch('requests.get', side_effect=raise_error_once) as get:
                 write_file(token_file, '\nsecret2\n')
 
-                with pytest.raises(Exception):
-                    http.get('https://www.google.com')
+                http.get('https://www.google.com')
 
                 get.assert_called_with(
                     'https://www.google.com',

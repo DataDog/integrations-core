@@ -339,21 +339,22 @@ class RequestsWrapper(object):
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
-            try:
-                if persist:
-                    response = getattr(self.session, method)(url, **new_options)
-                else:
-                    response = getattr(requests, method)(url, **new_options)
-            except Exception as e:
-                self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                raise e
+            if persist:
+                request_method = getattr(self.session, method)
             else:
+                request_method = getattr(requests, method)
+
+            if self.auth_token_handler:
                 try:
+                    response = request_method(url, **new_options)
                     response.raise_for_status()
                 except Exception as e:
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                    response = request_method(url, **new_options)
+            else:
+                response = request_method(url, **new_options)
 
-                return response
+            return response
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options
