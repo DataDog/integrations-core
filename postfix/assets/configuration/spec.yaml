@@ -13,7 +13,7 @@ files:
         example /etc/sudoers entry:
           dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
 
-        Redhat/CentOS/Amazon Linux flavours need to add:
+        On Redhat, CentOS, and Amazon Linux, also add:
           Defaults:dd-agent !requiretty
       value:
         type: string
