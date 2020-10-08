@@ -4,29 +4,27 @@ init_config:
 
     ## @param postfix_user - string - required
     ## The user running dd-agent must have passwordless sudo access for the find
-    ## command to run the postfix check.  Here's an example:
-    ## example /etc/sudoers entry:
+    ## command to run the postfix check.
+    ## Example /etc/sudoers entry:
     ##   dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
     ##
-    ## Redhat/CentOS/Amazon Linux flavours need to add:
+    ## On Redhat, CentOS, and Amazon Linux, also add:
     ##   Defaults:dd-agent !requiretty
     #
     postfix_user: postfix
 
     ## @param postqueue - boolean - optional - default: false
     ## Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.
-    ## Postqueue binary is ran with set-group ID privileges, so that it can connect to Postfix daemon processes.
+    ## Postqueue binary runs with set-group ID privileges, so that it can connect to Postfix daemon processes.
     ## Only `tags` keys are used from `instances` definition.
     ## Postfix has internal access controls that limit activities on the mail queue. By default,
     ## Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be
     ## configured with stricter access controls, you may need to grant the dd-agent user access to view the mail queue.
     ##
-    ## postconf -e "authorized_mailq_users = dd-agent"
+    ##   postconf -e "authorized_mailq_users = dd-agent"
     ##
+    ## authorized_mailq_users (static:anyone): List of users who are authorized to view the queue.
     ## http://www.postfix.org/postqueue.1.html
-    ##
-    ## authorized_mailq_users (static:anyone)
-    ## List of users who are authorized to view the queue.
     #
     # postqueue: false
 
@@ -55,8 +53,8 @@ instances:
       - deferred
 
     ## @param config_directory - string - optional - default: /etc/postfix
-    ## The config_directory option only applies when `postqueue: true`.
-    ## The config_directory is the location of the Postfix configuration directory where main.cf lives.
+    ## The config_directory option applies only when `postqueue: true`.
+    ## The config_directory is the location of the Postfix configuration directory that contains the main.cf file.
     #
     # config_directory: /etc/postfix
 
