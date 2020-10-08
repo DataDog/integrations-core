@@ -185,7 +185,7 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     '--move-cards',
     is_flag=True,
     help='Do not create a card for a change, but move the existing card from '
-    + '`HAVE BUGS - FIXME` or `HAVE BUGS - FIXME` to INBOX team',
+    + '`HAVE BUGS - FIXME` or `FIXED - Ready to Rebuild` to INBOX team',
 )
 @click.pass_context
 def testable(
