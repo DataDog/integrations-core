@@ -21,7 +21,7 @@ files:
     - name: postqueue
       description: |
         Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.
-        Postqueue binary is ran with set-group ID privileges, so that it can connect to Postfix daemon processes.
+        Postqueue binary runs with set-group ID privileges, so that it can connect to Postfix daemon processes.
         Only `tags` keys are used from `instances` definition.
         Postfix has internal access controls that limit activities on the mail queue. By default,
         Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be
