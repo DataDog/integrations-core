@@ -27,12 +27,10 @@ files:
         Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be
         configured with stricter access controls, you may need to grant the dd-agent user access to view the mail queue.
 
-        postconf -e "authorized_mailq_users = dd-agent"
+          postconf -e "authorized_mailq_users = dd-agent"
 
+        authorized_mailq_users (static:anyone): List of users who are authorized to view the queue.
         http://www.postfix.org/postqueue.1.html
-
-        authorized_mailq_users (static:anyone)
-        List of users who are authorized to view the queue.
       value:
         type: boolean
         example: false
