@@ -83,6 +83,7 @@ class CouchDb(AgentCheck):
                 elif major_version <= 1:
                     self.checker = CouchDB1(self)
                 else:
+                    # v2 of the CouchDB check supports versions 2 and higher of Couch
                     self.checker = CouchDB2(self)
             except Exception as e:
                 raise errors.BadVersionError("Unknown version {}: {}".format(version, e))
@@ -192,6 +193,7 @@ class CouchDB1:
 
 
 class CouchDB2:
+    """v2 of the CouchDB check. Supports all versions of Couch > 2.X, including Couch v3"""
 
     MAX_NODES_PER_CHECK = 20
 
