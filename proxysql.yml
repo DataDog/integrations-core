@@ -1,0 +1,12 @@
+init_config:
+instances:
+  - host: "proxysql"
+    port: 6032
+    username: proxy
+    password: proxy
+  - host: "proxysql"
+    port: 6032
+    username: proxy
+    password: proxy
+    tags:
+      - florian:test

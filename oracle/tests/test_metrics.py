@@ -17,7 +17,7 @@ def test_sys_metrics(aggregator, check):
     cur.fetchall.return_value = zip([0] * len(metrics.keys()), metrics.keys())
 
     check._connection = con
-    check._query_manager.queries = [queries.SystemMetrics]
+    check._query_manager.queries = [queries.SystemMetrics.copy()]
     check._query_manager.tags = ['custom_tag']
     check._query_manager.compile_queries()
     check._query_manager.execute()
@@ -40,7 +40,7 @@ def test_process_metrics(aggregator, check):
     cur.fetchall.return_value = [[program] + ([0] * len(metrics)) for program in programs]
 
     check._connection = con
-    check._query_manager.queries = [queries.ProcessMetrics]
+    check._query_manager.queries = [queries.ProcessMetrics.copy()]
     check._query_manager.tags = ['custom_tag']
     check._query_manager.compile_queries()
     check._query_manager.execute()
@@ -67,7 +67,7 @@ def test_tablespace_metrics(aggregator, check):
     con.cursor.return_value = cur
 
     check._connection = con
-    check._query_manager.queries = [queries.TableSpaceMetrics]
+    check._query_manager.queries = [queries.TableSpaceMetrics.copy()]
     check._query_manager.tags = ['custom_tag']
     check._query_manager.compile_queries()
     check._query_manager.execute()
