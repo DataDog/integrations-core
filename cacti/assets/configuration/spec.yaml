@@ -73,3 +73,8 @@ files:
               example: <RRD_WHITELIST_FILE_PATH>
               type: string
           - template: instances/tags
+      - template: logs
+        example:
+          - type: file
+            path: /opt/cacti/log/cacti.log
+            source: cacti
