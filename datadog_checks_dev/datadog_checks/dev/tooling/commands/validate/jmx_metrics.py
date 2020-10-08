@@ -6,9 +6,9 @@ from collections import defaultdict
 import click
 import yaml
 
-from datadog_checks.dev.utils import read_file
+from datadog_checks.dev.utils import file_exists, read_file
 
-from ...utils import get_jmx_metrics_file, get_valid_integrations, is_jmx_integration
+from ...utils import get_default_config_spec, get_jmx_metrics_file, get_valid_integrations, is_jmx_integration
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
@@ -22,9 +22,9 @@ def jmx_metrics(verbose):
     saved_errors = defaultdict(list)
     integrations = sorted(check for check in get_valid_integrations() if is_jmx_integration(check))
     for check_name in integrations:
-        jmx_metrics_file, file_exists = get_jmx_metrics_file(check_name)
+        jmx_metrics_file, metrics_file_exists = get_jmx_metrics_file(check_name)
 
-        if not file_exists:
+        if not metrics_file_exists:
             saved_errors[check_name].append(f'{jmx_metrics_file} does not exist')
             continue
 
@@ -48,6 +48,30 @@ def jmx_metrics(verbose):
                 # Require `domain` or `bean` to be present,
                 # that helps JMXFetch to better scope the beans to retrieve
                 saved_errors[check_name].append(f"domain or bean attribute is missing for rule: {include_str}")
+
+        spec_file = get_default_config_spec(check_name)
+        if not file_exists(spec_file):
+            saved_errors[check_name].append(f"config spec does not exist: {spec_file}")
+            continue
+
+        spec_files = yaml.safe_load(read_file(spec_file)).get('files')
+        init_config_jmx = False
+        instances_jmx = False
+        for spec_file in spec_files:
+            for base_option in spec_file.get('options', []):
+                base_template = base_option.get('template')
+                for option in base_option.get("options", []):
+                    template = option.get('template')
+                    if template == 'init_config/jmx' and base_template == 'init_config':
+                        init_config_jmx = True
+                    elif template == 'instances/jmx' and base_template == 'instances':
+                        instances_jmx = True
+
+        if not init_config_jmx:
+            saved_errors[check_name].append(f"config spec: does not use init_config/jmx template")
+
+        if not instances_jmx:
+            saved_errors[check_name].append(f"config spec: does not use init_config/jmx template")
 
     for check_name, errors in saved_errors.items():
         if not errors:
