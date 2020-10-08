@@ -110,6 +110,32 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+1. Add the `dd-agent` user to the `systemd-journal` group by running:
+   ```text
+   usermod -a -G systemd-journal dd-agent
+   ```
+
+1. Add this configuration block to your `powerdns_recursor.d/conf.yaml` file to start collecting your PowerDNS Recursor Logs:
+
+   ```yaml
+   logs:
+     - type: journald
+       source: powerdns
+   ```
+
+    See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options.
+
+1. [Restart the Agent][4].
+
 ### Events
 
 The PowerDNS Recursor check does not include any events.
