@@ -15,16 +15,14 @@ def build_connection_string(hosts, scheme, username=None, password=None, databas
     See https://docs.mongodb.com/manual/reference/connection-string/
     """
 
-    def add_default_port(host):
-        # type: (str) -> str
-        if ':' not in host:
-            return '{}:27017'.format(host)
-        return host
-
-    host = ','.join(add_default_port(host) for host in hosts)
+    host = ','.join(hosts)
     path = '/{}'.format(database) if database else '/'
     if username and password:
         netloc = '{}:{}@{}'.format(quote_plus(username), quote_plus(password), host)
+    elif username:
+        # Only makes sense when using X509 authentication. But specifying the username
+        # is not a requirement of MongoDB anymore since v3.4
+        netloc = '{}@{}'.format(quote_plus(username), host)
     else:
         netloc = host
 

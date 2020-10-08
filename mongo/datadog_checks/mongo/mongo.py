@@ -99,9 +99,6 @@ class MongoDb(AgentCheck):
             if password and not username:
                 raise ConfigurationError('`username` must be set when a `password` is specified')
 
-            if username and not password:
-                raise ConfigurationError('`password` must be set when a `username` is specified')
-
             self.server = build_connection_string(
                 hosts,
                 scheme=self.instance.get('connection_scheme', 'mongodb'),
