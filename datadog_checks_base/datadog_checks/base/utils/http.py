@@ -349,6 +349,7 @@ class RequestsWrapper(object):
                     response = request_method(url, **new_options)
                     response.raise_for_status()
                 except Exception as e:
+                    self.logger.debug(u'Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
                     response = request_method(url, **new_options)
             else:
