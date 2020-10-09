@@ -102,7 +102,8 @@ Resources:
               enable-ecs-log-metadata: true
           MemoryReservation: 50
 ```
-**Note**: You can also use a [TaskDefinition secret][37] if you do not want to expose the apiKey as a plain-text variable.
+**Note**: Use a [TaskDefinition secret][37] to avoid exposing the `apikey` in plain text.
+
 For more information on CloudFormation templating and syntax, review the [AWS CloudFormation documentation][36].
 
 #### Create or Modify your IAM Policy
