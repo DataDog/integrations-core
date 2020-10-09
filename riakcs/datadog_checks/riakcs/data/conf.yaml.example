@@ -14,22 +14,22 @@ init_config:
 instances:
 
     ## @param access_id - string - required
-    ## Enter you RiakCS access key.
+    ## The RiakCS access key.
     #
   - access_id: <ACCESS_ID>
 
     ## @param access_secret - string - required
-    ## Enter the corresponding RiakCS access secret.
+    ## The corresponding RiakCS access secret.
     #
     access_secret: <ACCESS_SECRET>
 
     ## @param is_secure - boolean - optional - default: true
-    ## Uncomment and change to false if you are not using ssl.
+    ## Use ssl to connect to instance. Disable option if not using ssl.
     #
     # is_secure: true
 
     ## @param host - string - optional - default: localhost
-    ## Hostname/IP of your RiakCS node.
+    ## Hostname or IP address of your RiakCS node.
     #
     # host: <HOST>
 
@@ -44,18 +44,22 @@ instances:
     # s3_root: <S3_ROOT>
 
     ## @param metrics - list of strings - optional
-    ## For RiackCS v2.1+, the default metrics collected by this integrations includes most S3 API metrics as
-    ## well as memory stats.
-    ## Some have been excluded though:
+    ## For RiackCS v2.1+, the default metrics collected by this integration includes S3 API metrics and memory stats, 
+    ## except for the following:
     ##
-    ##   * bucket_acl_(get|put)
-    ##   * object_acl_(get|put)
-    ##   * bucket_policy_(get|put|delete)
-    ##   * _in_(one|total)
+    ##   * bucket_acl_get
+    ##   * bucket_acl_put
+    ##   * object_acl_get
+    ##   * object_acl_put
+    ##   * bucket_policy_get
+    ##   * bucket_policy_put
+    ##   * bucket_policy_delete
+    ##   * _in_one
+    ##   * _in_total
     ##   * _time_error_*
     ##   * _time_100
     ##
-    ## Include them in the following list if you would like to collect them for your Datadog account.
+    ## Include these metrics in the following list if you would like to collect them for your Datadog account.
     ## See the complete list of metrics available: https://github.com/basho/riak_cs/wiki/Riak-cs-and-stanchion-metrics
     #
     # metrics:
