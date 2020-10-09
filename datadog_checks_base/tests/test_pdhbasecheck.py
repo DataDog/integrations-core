@@ -85,7 +85,7 @@ def test_additional_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance['additional_metrics'] = SINGLE_INSTANCE_COUNTER
 
-    c = PDHBaseCheck("testcheck", {}, {}, [instance])
+    c = PDHBaseCheck("testcheck", {}, [instance], counter_list=[])
     c.check(instance)
 
     aggregator.assert_metric("test.system.mem.available", tags=None, count=1)
