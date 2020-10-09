@@ -270,7 +270,8 @@ def get_tox_file(check_name):
 
 
 def get_metadata_file(check_name):
-    return os.path.join(get_root(), check_name, 'metadata.csv')
+    path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
+    return os.path.join(get_root(), check_name, path)
 
 
 def get_eula_from_manifest(check_name):
