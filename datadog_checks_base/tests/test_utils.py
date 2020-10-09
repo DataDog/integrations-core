@@ -170,6 +170,23 @@ class TestContainers:
         h = hash_mutable(value)  # Must not fail.
         assert isinstance(h, int)
 
+    @pytest.mark.parametrize(
+        'left, right',
+        [
+            pytest.param([1, 2], [2, 1], id='top-level'),
+            pytest.param({'x': [1, 2]}, {'x': [2, 1]}, id='nested'),
+        ],
+    )
+    def test_hash_mutable_order_irrelevant(self, left, right):
+        assert hash_mutable(left) == hash_mutable(right)
+
+    @pytest.mark.parametrize('value', ['', 0, ()])
+    def test_hash_mutable_none_is_not_just_falsy(self, value):
+        """
+        None shouldn't be treated as any other false-y value when computing hashes.
+        """
+        assert hash_mutable(['test', None]) != hash_mutable(['test', value])
+
 
 class TestBytesUnicode:
     @pytest.mark.skipif(PY3, reason="Python 3 does not support explicit bytestring with special characters")
