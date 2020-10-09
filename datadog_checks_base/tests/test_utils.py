@@ -155,23 +155,15 @@ class TestContainers:
         [
             pytest.param({'x': 'y'}, id='dict'),
             pytest.param({'x': 'y', 'z': None}, id='dict-with-none-value'),
-            pytest.param(
-                {'x': 'y', None: 't'},
-                id='dict-with-none-key',
-                marks=pytest.mark.xfail(PY3, raises=TypeError, reason='not implemented'),
-            ),
+            pytest.param({'x': 'y', None: 't'}, id='dict-with-none-key'),
             pytest.param(['x', 'y'], id='list'),
-            pytest.param(['x', None], id='list-containing-none'),
+            pytest.param(['x', 1, None], id='mixed-list'),
             pytest.param(('x', 'y'), id='tuple'),
-            pytest.param(('x', None), id='tuple-containing-none'),
+            pytest.param(('x', 1, None), id='mixed-tuple'),
             pytest.param({'x', 'y'}, id='set'),
-            pytest.param({'x', None}, id='set-containing-none'),
+            pytest.param({'x', 1, None}, id='mixed-set'),
             pytest.param({'x': ['y', 'z']}, id='dict-nest-list'),
-            pytest.param(
-                ['x', {'y': 'z'}],
-                id='list-nest-dict',
-                marks=pytest.mark.xfail(PY3, raises=TypeError, reason='not implemented'),
-            ),
+            pytest.param(['x', {'y': 'z'}], id='list-nest-dict'),
         ],
     )
     def test_hash_mutable(self, value):
