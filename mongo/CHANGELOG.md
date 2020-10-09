@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 1.16.5 / 2020-09-21
+## 1.16.5 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Submit collection metrics even if value is zero. See [#7606](https://github.com/DataDog/integrations-core/pull/7606).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

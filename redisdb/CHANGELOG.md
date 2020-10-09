@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## 3.1.1 / 2020-09-21
+## 3.1.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
 * [Fixed] Handle redis role missing. See [#7413](https://github.com/DataDog/integrations-core/pull/7413).
@@ -140,7 +140,7 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1727
 [8]: https://github.com/DataDog/integrations-core/pull/1668
 [9]: https://github.com/DataDog/integrations-core/pull/1664
-[10]: 
+[10]: https://github.com/DataDog/integrations-core/pull/1444
 [11]: https://github.com/DataDog/integrations-core/issues/300
 [12]: https://github.com/aliva
 [13]: https://github.com/DataDog/integrations-core/issues/798

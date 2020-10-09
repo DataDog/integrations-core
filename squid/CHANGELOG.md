@@ -1,6 +1,6 @@
 # CHANGELOG - Squid
 
-## 1.8.0 / 2020-09-21
+## 1.8.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config specs. See [#7482](https://github.com/DataDog/integrations-core/pull/7482).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

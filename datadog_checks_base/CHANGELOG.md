@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## 14.0.1 / 2020-09-28
+## 14.0.1 / 2020-09-28 / Agent 7.23.0
 
 * [Fixed] Normalize count metric type in `assert_metrics_using_metadata()`. See [#7666](https://github.com/DataDog/integrations-core/pull/7666).
 * [Fixed] Do not emit insecure warning log for HTTP requests. See [#7661](https://github.com/DataDog/integrations-core/pull/7661).

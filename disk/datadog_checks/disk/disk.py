@@ -65,10 +65,20 @@ class Disk(AgentCheck):
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
 
-        deprecations = {
+        deprecations_init_conf = {
             'file_system_global_blacklist': 'file_system_global_exclude',
             'device_global_blacklist': 'device_global_exclude',
             'mount_point_global_blacklist': 'mount_point_global_exclude',
+        }
+        for old_name, new_name in deprecations_init_conf.items():
+            if init_config.get(old_name):
+                self.warning(
+                    '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.',
+                    old_name,
+                    new_name,
+                )
+
+        deprecations_instance = {
             'file_system_whitelist': 'file_system_include',
             'file_system_blacklist': 'file_system_exclude',
             'device_whitelist': 'device_include',
@@ -80,8 +90,8 @@ class Disk(AgentCheck):
             'excluded_disk_re': 'device_exclude',
             'excluded_mountpoint_re': 'mount_point_exclude',
         }
-        for old_name, new_name in deprecations.items():
-            if instance.get('old_name'):
+        for old_name, new_name in deprecations_instance.items():
+            if instance.get(old_name):
                 self.warning(
                     '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.',
                     old_name,
@@ -315,20 +325,16 @@ class Disk(AgentCheck):
                 self.log.debug('Latency metrics not collected for %s: %s', disk_name, e)
 
     def _compile_pattern_filters(self, instance):
-        file_system_exclude_extras = (
-            self.init_config.get('file_system_global_exclude')
-            or self.init_config.get('file_system_global_blacklist')
-            or self.get_default_file_system_exclude()
+        file_system_exclude_extras = self.init_config.get(
+            'file_system_global_exclude',
+            self.init_config.get('file_system_global_blacklist', self.get_default_file_system_exclude()),
         )
-        device_exclude_extras = (
-            self.init_config.get('device_global_exclude')
-            or self.init_config.get('device_global_blacklist')
-            or self.get_default_device_exclude()
+        device_exclude_extras = self.init_config.get(
+            'device_global_exclude', self.init_config.get('device_global_blacklist', self.get_default_device_exclude())
         )
-        mount_point_exclude_extras = (
-            self.init_config.get('mount_point_global_exclude')
-            or self.init_config.get('mount_point_global_blacklist')
-            or self.get_default_mount_mount_exclude()
+        mount_point_exclude_extras = self.init_config.get(
+            'mount_point_global_exclude',
+            self.init_config.get('mount_point_global_blacklist', self.get_default_mount_mount_exclude()),
         )
 
         if 'excluded_filesystems' in instance:

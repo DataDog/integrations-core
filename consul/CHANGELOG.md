@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-## 1.16.0 / 2020-09-21
+## 1.16.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
 * [Added] Support prometheus endpoint. See [#7098](https://github.com/DataDog/integrations-core/pull/7098).
@@ -126,7 +126,7 @@
 [8]: https://github.com/DataDog/integrations-core/pull/1526
 [9]: https://github.com/TylerLubeck
 [10]: https://github.com/DataDog/integrations-core/pull/1479
-[11]: 
+[11]: https://github.com/DataDog/integrations-core/pull/1444
 [12]: https://github.com/DataDog/integrations-core/pull/876
 [13]: https://github.com/byronwolfman
 [14]: https://github.com/DataDog/integrations-core/pull/968

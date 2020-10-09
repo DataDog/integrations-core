@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 5.0.0 / 2020-09-21
+## 5.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
 * [Changed] Replace InsecureRequestWarning with standard logs. See [#7512](https://github.com/DataDog/integrations-core/pull/7512).
@@ -188,9 +188,9 @@
 [24]: https://github.com/DataDog/integrations-core/pull/1727
 [25]: https://github.com/DataDog/integrations-core/pull/1648
 [26]: https://github.com/DataDog/integrations-core/pull/1581
-[27]:
-[28]:
-[29]:
-[30]:
-[31]:
-[32]:
+[27]: https://github.com/DataDog/integrations-core/pull/1339
+[28]: https://github.com/DataDog/integrations-core/pull/1377
+[29]: https://github.com/DataDog/integrations-core/pull/1361
+[30]: https://github.com/DataDog/integrations-core/pull/1423
+[31]: https://github.com/DataDog/integrations-core/pull/1442
+[32]: https://github.com/DataDog/integrations-core/pull/1489

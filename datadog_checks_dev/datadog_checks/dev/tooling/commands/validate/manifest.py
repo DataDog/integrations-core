@@ -95,6 +95,10 @@ def get_manifest_schema():
                             "type": "string",
                             "description": "Relative path to the json file containing service check metadata",
                         },
+                        "metrics_metadata": {
+                            "type": "string",
+                            "description": "Relative path to the metrics metadata.csv file.",
+                        },
                         "logs": {
                             "type": "object",
                             "properties": {
@@ -251,6 +255,8 @@ def is_metric_in_metadata_file(metric, check):
     Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
     """
     metadata_file = get_metadata_file(check)
+    if not os.path.isfile(metadata_file):
+        return False
     for _, row in read_metadata_rows(metadata_file):
         if row['metric_name'] == metric:
             return True
@@ -440,6 +446,20 @@ def manifest(ctx, fix):
                     file_fixed = True
                 else:
                     display_queue.append((echo_failure, output))
+
+            # metrics_metadata
+            metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
+            metadata_file_exists = os.path.isfile(get_metadata_file(check_name))
+            if not metadata_in_manifest and metadata_file_exists:
+                # There is a metadata.csv file but no entry in the manifest.json
+                file_failures += 1
+                display_queue.append((echo_failure, '  metadata.csv exists but not defined in the manifest.json'))
+            elif metadata_in_manifest and not metadata_file_exists:
+                # There is an entry in the manifest.json file but the referenced csv file does not exist.
+                file_failures += 1
+                display_queue.append(
+                    (echo_failure, '  metrics_metadata in manifest.json references a non-existing file.')
+                )
 
             # metric_to_check
             metric_to_check = decoded.get('metric_to_check')

@@ -1,6 +1,6 @@
 # CHANGELOG - TLS
 
-## 1.6.0 / 2020-09-21
+## 1.6.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec. See [#7529](https://github.com/DataDog/integrations-core/pull/7529).
 

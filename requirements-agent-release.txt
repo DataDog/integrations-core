@@ -33,18 +33,18 @@ datadog-druid==1.5.0
 datadog-ecs-fargate==2.10.0
 datadog-eks-fargate==1.1.1
 datadog-elastic==1.20.1
-datadog-envoy==1.18.0
+datadog-envoy==1.19.0
 datadog-etcd==2.5.0
 datadog-exchange-server==1.8.0; sys_platform == 'win32'
 datadog-external-dns==1.1.0
 datadog-flink==1.2.2
-datadog-fluentd==1.10.0
+datadog-fluentd==1.11.0
 datadog-gearmand==1.7.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.10.0
 datadog-gitlab==4.3.0
 datadog-go-expvar==1.10.2
 datadog-gunicorn==1.13.0; sys_platform != 'win32'
-datadog-haproxy==2.11.0
+datadog-haproxy==2.13.0
 datadog-harbor==1.6.0
 datadog-hazelcast==1.1.4
 datadog-hdfs-datanode==1.15.0; sys_platform != 'win32'
@@ -137,6 +137,6 @@ datadog-vertica==1.7.0
 datadog-vsphere==5.7.0
 datadog-win32-event-log==2.6.1; sys_platform == 'win32'
 datadog-windows-service==2.7.0; sys_platform == 'win32'
-datadog-wmi-check==1.9.1; sys_platform == 'win32'
+datadog-wmi-check==1.9.2; sys_platform == 'win32'
 datadog-yarn==1.16.0
 datadog-zk==2.7.0; sys_platform != 'win32'

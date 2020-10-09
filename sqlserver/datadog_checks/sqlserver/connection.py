@@ -69,6 +69,8 @@ class Connection(object):
             )
             self.adoprovider = self.default_adoprovider
 
+        self.log.debug('Connection initialized.')
+
     @contextmanager
     def get_managed_cursor(self):
         cursor = self.get_cursor(self.DEFAULT_DB_KEY)
@@ -292,6 +294,7 @@ class Connection(object):
 
         if username:
             conn_str += 'User ID={};'.format(username)
+        self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'Password={};'.format(password)
         if not username and not password:

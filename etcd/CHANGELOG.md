@@ -1,6 +1,6 @@
 # CHANGELOG - etcd
 
-## 2.5.0 / 2020-09-21
+## 2.5.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add support for etcd logs. See [#7431](https://github.com/DataDog/integrations-core/pull/7431).
 
@@ -97,7 +97,7 @@
 [4]: https://github.com/DataDog/integrations-core/pull/1727
 [5]: https://github.com/DataDog/integrations-core/pull/1664
 [6]: https://github.com/DataDog/integrations-core/issues/1348
-[7]: 
+[7]: https://github.com/DataDog/integrations-core/pull/1444
 [8]: https://github.com/DataDog/integrations-core/issues/917
 [9]: https://github.com/stensonb
 [10]: https://github.com/DataDog/integrations-core/issues/860

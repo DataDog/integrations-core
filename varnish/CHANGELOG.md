@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-## 1.8.0 / 2020-09-21
+## 1.8.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec for varnish. See [#7538](https://github.com/DataDog/integrations-core/pull/7538).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
@@ -90,8 +90,8 @@
 [2]: https://github.com/DataDog/integrations-core/pull/1945
 [3]: https://github.com/DataDog/integrations-core/pull/1727
 [4]: https://github.com/DataDog/integrations-core/issues/1130
-[5]: 
-[6]: 
+[5]: https://github.com/DataDog/integrations-core/pull/939
+[6]: https://github.com/DataDog/integrations-core/issues/805
 [7]: https://github.com/DataDog/integrations-core/issues/795
 [8]: https://github.com/DataDog/integrations-core/issues/739
 [9]: https://github.com/philipseidel

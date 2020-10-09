@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_master
 
-## 1.10.0 / 2020-09-21
+## 1.10.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
 * [Added] Add config specs. See [#7379](https://github.com/DataDog/integrations-core/pull/7379).

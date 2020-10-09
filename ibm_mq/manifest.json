@@ -25,7 +25,9 @@
   "integration_id": "ibm-mq",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "IBM MQ": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
