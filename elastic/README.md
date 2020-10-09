@@ -41,7 +41,7 @@ To configure this check for an Agent running on a host:
     **Notes**:
 
       - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to `true`.
-      - [Agent-level tags][21] are not applied to hosts in a cluster that is not running the Agent. Use integration level tags in `<integration>.d/conf.yaml` to ensure **ALL** metrics have matching tags. For example:
+      - [Agent-level tags][21] are not applied to hosts in a cluster that is not running the Agent. Use integration level tags in `<integration>.d/conf.yaml` to ensure **ALL** metrics have consistent tags. For example:
 
         ```yaml
         init_config:
