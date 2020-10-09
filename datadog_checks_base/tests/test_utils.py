@@ -11,7 +11,7 @@ import pytest
 from six import PY3
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
-from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.containers import hash_mutable, iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
@@ -149,6 +149,34 @@ class TestContainers:
         ]
 
         assert len(list(iter_unique(custom_queries))) == 1
+
+    @pytest.mark.parametrize(
+        'value',
+        [
+            pytest.param({'x': 'y'}, id='dict'),
+            pytest.param({'x': 'y', 'z': None}, id='dict-with-none-value'),
+            pytest.param(
+                {'x': 'y', None: 't'},
+                id='dict-with-none-key',
+                marks=pytest.mark.xfail(PY3, raises=TypeError, reason='not implemented'),
+            ),
+            pytest.param(['x', 'y'], id='list'),
+            pytest.param(['x', None], id='list-containing-none'),
+            pytest.param(('x', 'y'), id='tuple'),
+            pytest.param(('x', None), id='tuple-containing-none'),
+            pytest.param({'x', 'y'}, id='set'),
+            pytest.param({'x', None}, id='set-containing-none'),
+            pytest.param({'x': ['y', 'z']}, id='dict-nest-list'),
+            pytest.param(
+                ['x', {'y': 'z'}],
+                id='list-nest-dict',
+                marks=pytest.mark.xfail(PY3, raises=TypeError, reason='not implemented'),
+            ),
+        ],
+    )
+    def test_hash_mutable(self, value):
+        h = hash_mutable(value)  # Must not fail.
+        assert isinstance(h, int)
 
 
 class TestBytesUnicode:
