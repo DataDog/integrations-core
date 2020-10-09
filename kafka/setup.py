@@ -56,7 +56,7 @@ setup(
     # The package we're going to ship
     packages=['datadog_checks.kafka'],
     # Run-time dependencies
-    install_requires=['datadog_checks_base>=11.0.0'],
+    install_requires=['datadog-checks-base>=11.0.0'],
     extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,

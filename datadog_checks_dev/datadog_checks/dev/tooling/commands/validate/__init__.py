@@ -11,9 +11,12 @@ from .codeowners import codeowners
 from .config import config
 from .dashboards import dashboards
 from .dep import dep
+from .eula import eula
+from .http import http
 from .imports import imports
 from .manifest import manifest
 from .metadata import metadata
+from .package import package
 from .readmes import readmes
 from .recommended_monitors import recommended_monitors
 from .saved_views import saved_views
@@ -26,10 +29,13 @@ ALL_COMMANDS = (
     config,
     dashboards,
     dep,
+    eula,
+    http,
     legacy_signature,
     imports,
     manifest,
     metadata,
+    package,
     readmes,
     recommended_monitors,
     saved_views,

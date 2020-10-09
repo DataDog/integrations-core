@@ -146,10 +146,10 @@ class WinPDHCounter(object):
         """
         path = ""
         if WinPDHCounter._use_en_counter_names:
-            '''
+            """
             In this case, we don't have any translations.  Just attempt to make the
             counter path
-            '''
+            """
             try:
                 path = win32pdh.MakeCounterPath((machine_name, self._class_name, instance_name, None, 0, counter_name))
                 self.logger.debug("Successfully created English-only path")

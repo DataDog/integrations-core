@@ -8,7 +8,8 @@ import pytest
 
 from datadog_checks.fluentd import Fluentd
 
-from .common import CHECK_NAME, EXPECTED_GAUGES, HOST, INSTANCE_WITH_PLUGIN
+from .common import CHECK_NAME, HOST, INSTANCE_WITH_PLUGIN
+from .util import _get_metrics_by_version
 
 
 def assert_basic_case(aggregator):
@@ -16,7 +17,7 @@ def assert_basic_case(aggregator):
 
     aggregator.assert_service_check('fluentd.is_ok', status=Fluentd.OK, tags=sc_tags, count=2)
 
-    for m in EXPECTED_GAUGES:
+    for m in _get_metrics_by_version():
         aggregator.assert_metric('{0}.{1}'.format(CHECK_NAME, m), tags=['plugin_id:plg1'])
 
     aggregator.assert_all_metrics_covered()

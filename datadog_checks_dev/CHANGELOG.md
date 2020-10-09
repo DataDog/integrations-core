@@ -1,5 +1,78 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 4.1.0 / 2020-10-01
+
+* [Added] Added HTTP wrapper class validator. See [#7676](https://github.com/DataDog/integrations-core/pull/7676).
+* [Fixed] Added missing HTTP templates to existing config specs. See [#7694](https://github.com/DataDog/integrations-core/pull/7694).
+* [Fixed] Handle missing "eula" key in EULA validation. See [#7640](https://github.com/DataDog/integrations-core/pull/7640).
+* [Fixed] Check case of integration header in metadata.csv files for metadata validation. See [#7643](https://github.com/DataDog/integrations-core/pull/7643).
+
+## 4.0.1 / 2020-09-21
+
+* [Fixed] Fix changed manifest validation for new integrations. See [#7623](https://github.com/DataDog/integrations-core/pull/7623).
+
+## 4.0.0 / 2020-09-16
+
+* [Changed] Use `git diff` instead of GitHub's API to detect if manifest fields changed during validation. See [#7599](https://github.com/DataDog/integrations-core/pull/7599).
+
+## 3.25.0 / 2020-09-16
+
+* [Added] Allow `ddev create` to create marketplace integration scaffolding. See [#7543](https://github.com/DataDog/integrations-core/pull/7543).
+* [Added] Remove transient dependency pin. See [#7545](https://github.com/DataDog/integrations-core/pull/7545).
+* [Added] [config specs] Support overrides for mappings when references start with a name. See [#7557](https://github.com/DataDog/integrations-core/pull/7557).
+* [Added] Add command to add Agent version to integrations CHANGELOG.md. See [#7518](https://github.com/DataDog/integrations-core/pull/7518).
+* [Fixed] Fix init_config/db config spec template. See [#7583](https://github.com/DataDog/integrations-core/pull/7583).
+* [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+
+## 3.24.0 / 2020-09-08
+
+* [Added] Add marketplace to repo choices and make -x set repo_choice. See [#7508](https://github.com/DataDog/integrations-core/pull/7508).
+* [Fixed] Pin transient dependency pyrsistent to < 0.17.0. See [#7546](https://github.com/DataDog/integrations-core/pull/7546).
+* [Fixed] Add minItems to pricing and better validation error message. See [#7514](https://github.com/DataDog/integrations-core/pull/7514).
+* [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).
+
+## 3.23.0 / 2020-09-04
+
+* [Added] Add initial validations for EULA files. See [#7473](https://github.com/DataDog/integrations-core/pull/7473).
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Added] Change old_payload warning to failure. See [#7419](https://github.com/DataDog/integrations-core/pull/7419).
+* [Added] Support service checks in recommended monitors. See [#7423](https://github.com/DataDog/integrations-core/pull/7423).
+* [Fixed] Apply overrides recursively to config specs. See [#7497](https://github.com/DataDog/integrations-core/pull/7497).
+* [Fixed] Pin style deps. See [#7485](https://github.com/DataDog/integrations-core/pull/7485).
+* [Fixed] Fix ddev create for jmx. See [#7346](https://github.com/DataDog/integrations-core/pull/7346).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
+## 3.22.0 / 2020-08-24
+
+* [Added] Auto assign card. See [#7347](https://github.com/DataDog/integrations-core/pull/7347).
+* [Added] Use author_name instead of author_info object. See [#7417](https://github.com/DataDog/integrations-core/pull/7417).
+* [Added] Update dependency tooling to support multiple version/marker combinations. See [#7391](https://github.com/DataDog/integrations-core/pull/7391).
+* [Fixed] Add security team. See [#7357](https://github.com/DataDog/integrations-core/pull/7357).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
+## 3.21.0 / 2020-08-18
+
+* [Added] Update dash export command to use newer api. See [#7365](https://github.com/DataDog/integrations-core/pull/7365).
+* [Added] Allow the validation of the newer dashboard payload in integration boards. See [#7362](https://github.com/DataDog/integrations-core/pull/7362).
+* [Added] Add new package validation for `name` field in setup.py. See [#7359](https://github.com/DataDog/integrations-core/pull/7359).
+* [Added] Add monitor validation on allowed types and more friendly error messages. See [#7356](https://github.com/DataDog/integrations-core/pull/7356).
+* [Added] Validate integration column in metrics metadata. See [#7372](https://github.com/DataDog/integrations-core/pull/7372).
+* [Added] Support updating Agent /etc/hosts in E2E envs. See [#7343](https://github.com/DataDog/integrations-core/pull/7343).
+* [Fixed] Fix intg-tools-libs entry in trello.py. See [#7335](https://github.com/DataDog/integrations-core/pull/7335).
+
+## 3.20.0 / 2020-08-11
+
+* [Added] Validate the monitor id isn't in the payload. See [#7341](https://github.com/DataDog/integrations-core/pull/7341).
+* [Fixed] ddev for extras must not rewrite line endings. See [#7344](https://github.com/DataDog/integrations-core/pull/7344).
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
+## 3.19.0 / 2020-08-07
+
+* [Added] Add show warnings option to validate metadata. See [#7310](https://github.com/DataDog/integrations-core/pull/7310).
+* [Added] Enable histogram for pytest-benchmark. See [#7301](https://github.com/DataDog/integrations-core/pull/7301).
+
 ## 3.18.1 / 2020-08-05
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).

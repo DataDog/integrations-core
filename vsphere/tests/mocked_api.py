@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime as dt
 import json
 import os
 import re
@@ -28,9 +29,10 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
+        self.server_time = dt.datetime.now()
 
-    def check_health(self):
-        return True
+    def get_current_time(self):
+        return self.server_time
 
     def get_version(self):
         about = MagicMock(
@@ -166,7 +168,10 @@ def mock_http_rest_api(method, url, *args, **kwargs):
     elif method == 'post':
         assert kwargs['headers']['Content-Type'] == 'application/json'
         if re.match(r'.*/session$', url):
-            return MockResponse({"value": "dummy-token"}, 200,)
+            return MockResponse(
+                {"value": "dummy-token"},
+                200,
+            )
         elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
             return MockResponse(
                 {

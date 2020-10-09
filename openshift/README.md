@@ -15,10 +15,10 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origin and Enterprise clusters. Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
 
 - [Restricted SCC operations](#restricted-scc-operations)
-- [Host network SCC operations](#host-network-scc-operations)
+- [Host network SCC operations](#host)
 - [Custom Datadog SCC for all features](#custom-datadog-scc-for-all-features)
 
-| Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host-network-scc-operations) | [Custom](#custom-datadog-scc-for-all-features) |
+| Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host) | [Custom](#custom-datadog-scc-for-all-features) |
 | ------------------------------ | ---------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
 | Kubernetes layer monitoring    | ✅                                       | ✅                                           | ✅                                             |
 | Kubernetes-based Autodiscovery | ✅                                       | ✅                                           | ✅                                             |
@@ -47,7 +47,7 @@ The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Dat
 
 The Agent suports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
 
-#### Host network SCC operations
+#### Host
 
 Add the `allowHostPorts` permission to the pod (either via the standard `hostnetwork` or `hostaccess` SCC, or by creating your own). In this case, you can add the relevant port bindings in your pod specs:
 

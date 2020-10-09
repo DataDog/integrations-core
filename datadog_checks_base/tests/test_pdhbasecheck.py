@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import copy
 
 import pytest
@@ -9,8 +8,9 @@ import pytest
 from .utils import requires_windows
 
 try:
-    from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
     from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
+
+    from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
 except ImportError:
     pass
 

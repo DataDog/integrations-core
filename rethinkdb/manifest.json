@@ -37,6 +37,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "rethinkdb"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -37,7 +37,7 @@ class InnoDBMetrics(object):
                 cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.log.warning(
-                "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e,
+                "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e
             )
             return {}
         except (UnicodeDecodeError, UnicodeEncodeError) as e:
@@ -126,9 +126,6 @@ class InnoDBMetrics(object):
                 results['Innodb_current_transactions'] += 1
                 if line.find('ACTIVE') > 0:
                     results['Innodb_active_transactions'] += 1
-            elif txn_seen and line.find('------- TRX HAS BEEN') == 0:
-                # ------- TRX HAS BEEN WAITING 32 SEC FOR THIS LOCK TO BE GRANTED:
-                results['Innodb_row_lock_time'] += long(row[5]) * 1000
             elif line.find('read views open inside InnoDB') > 0:
                 # 1 read views open inside InnoDB
                 results['Innodb_read_views'] = long(row[0])

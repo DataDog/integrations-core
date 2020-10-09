@@ -29,9 +29,12 @@ In your Fluentd configuration file, add a `monitor_agent` source:
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric Collection
 
@@ -141,6 +144,9 @@ Configuration example:
  </filter>
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -152,6 +158,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INTEGRATION_NAME>` | `fluentd`                                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"monitor_agent_url": "http://%%host%%:24220/api/plugins.json"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -186,7 +195,7 @@ Need help? Contact [Datadog support][16].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: http://www.rubydoc.info/gems/fluent-plugin-datadog
+[7]: https://github.com/DataDog/fluent-plugin-datadog
 [8]: https://docs.datadoghq.com/logs/processing/#edit-reserved-attributes
 [9]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines

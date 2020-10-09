@@ -64,7 +64,10 @@ class ProxysqlCheck(AgentCheck):
             if additional_group not in ADDITIONAL_METRICS_MAPPING:
                 raise ConfigurationError(
                     "There is no additional metric group called '{}' for the ProxySQL integration, it should be one "
-                    "of ({})".format(additional_group, ", ".join(ADDITIONAL_METRICS_MAPPING),)
+                    "of ({})".format(
+                        additional_group,
+                        ", ".join(ADDITIONAL_METRICS_MAPPING),
+                    )
                 )
             manager_queries.append(ADDITIONAL_METRICS_MAPPING[additional_group])
         self._connection = None

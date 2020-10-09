@@ -126,7 +126,7 @@ This validation only applies if your work introduces new external dependencies.
 ### Manifest files
 
 ```
-ddev validate manifest -i
+ddev validate manifest
 ```
 
 This validates that the manifest files contain required fields, are formatted correctly, and don't contain common errors. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file) for more detailed constraints. 

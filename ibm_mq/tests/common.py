@@ -18,12 +18,15 @@ PASSWORD = 'passw0rd'
 
 QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
+CHANNEL_SSL = 'PYMQI.SSL.SVRCONN'
+SSL_CLIENT_LABEL = 'client'
+SSL_CYPHER_SPEC = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
 
 QUEUE = 'DEV.QUEUE.1'
 
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
-MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_VERSION = int(os.environ.get('IBM_MQ_VERSION', '9'))
 MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
 MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
@@ -44,6 +47,22 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
     'collect_statistics_metrics': True,
+}
+
+INSTANCE_SSL = {
+    'channel': CHANNEL_SSL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'ssl_auth': 'yes',
+    'ssl_cipher_spec': SSL_CYPHER_SPEC,
+    'ssl_key_repository_location': '/opt/pki/keys/client',
+    'ssl_certificate_label': SSL_CLIENT_LABEL,
 }
 
 INSTANCE_METADATA = {
@@ -114,7 +133,7 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'docker_volumes': ['{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
     'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }

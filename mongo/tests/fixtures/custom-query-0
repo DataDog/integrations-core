@@ -1,0 +1,65 @@
+{
+    "cursor": {
+        "firstBatch": [
+            {
+                "_id": {
+                    "$oid": "5f620f9d52024f4dcab4718f"
+                },
+                "cust_id": "abc1",
+                "status": "A",
+                "amount": 300,
+                "elements": 10
+            },
+            {
+                "_id": {
+                    "$oid": "5f620f9d52024f4dcab4718b"
+                },
+                "cust_id": "xyz1",
+                "status": "A",
+                "amount": 100
+            },
+            {
+                "_id": {
+                    "$oid": "5f620f9d52024f4dcab4718c"
+                },
+                "cust_id": "abc1",
+                "status": "D",
+                "amount": 50,
+                "elements": 1
+            },
+            {
+                "_id": {
+                    "$oid": "5f620f9d52024f4dcab4718a"
+                },
+                "cust_id": "abc1",
+                "status": "A",
+                "amount": 50,
+                "elements": 3
+            }
+        ],
+        "id": 0,
+        "ns": "test.orders"
+    },
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600330202,
+            "i": 85
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600330205,
+                "i": 8
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    }
+}

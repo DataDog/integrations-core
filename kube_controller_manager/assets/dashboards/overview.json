@@ -1,0 +1,338 @@
+{
+  "title": "Kubernetes Controller Manager - Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "check_status",
+        "title": "Replicas up",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "kube_controller_manager.prometheus.health",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": [
+          "$scope",
+          "$cluster_name"
+        ]
+      },
+      "layout": {
+        "x": 1,
+        "y": 1,
+        "width": 15,
+        "height": 8
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "check_status",
+        "title": "Leader election",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "kube_controller_manager.leader_election.status",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": [
+          "$scope",
+          "$cluster_name"
+        ]
+      },
+      "layout": {
+        "x": 1,
+        "y": 10,
+        "width": 15,
+        "height": 8
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "max:kube_controller_manager.goroutines{$scope,$cluster_name}",
+            "aggregator": "last"
+          }
+        ],
+        "custom_links": [],
+        "title": "Active goroutines",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 1,
+        "y": 19,
+        "width": 15,
+        "height": 8
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "max:kube_controller_manager.threads{$scope,$cluster_name}",
+            "aggregator": "last"
+          }
+        ],
+        "custom_links": [],
+        "title": "Active threads",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 1,
+        "y": 28,
+        "width": 15,
+        "height": 9
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:kube_controller_manager.queue.latency.quantile{$scope,$quantile,$cluster_name} by {queue}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Processing latency per queue ($quantile)",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 18,
+        "y": 1,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:kube_controller_manager.queue.work_duration.quantile{$scope,$quantile,$cluster_name} by {queue}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Work duration per queue ($quantile)",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 18,
+        "y": 17,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "change",
+        "requests": [
+          {
+            "q": "avg:kube_controller_manager.queue.latency.quantile{$scope,$quantile,$cluster_name} by {queue}",
+            "change_type": "relative",
+            "compare_to": "hour_before",
+            "increase_good": false,
+            "order_by": "change",
+            "order_dir": "desc"
+          }
+        ],
+        "custom_links": [],
+        "title": "Latency change ($quantile), past hour",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 18,
+        "y": 33,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:kube_controller_manager.client.http.requests{$scope,$cluster_name} by {method,code}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "HTTP requests to apiserver",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 18,
+        "y": 49,
+        "width": 47,
+        "height": 23
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kube_controller_manager.queue.adds{$scope,$cluster_name} by {queue}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Work elements added per queue",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 1,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kube_controller_manager.queue.retries{$scope,$cluster_name} by {queue}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Retries per queue",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 17,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kube_controller_manager.rate_limiter.use{$scope,$cluster_name} by {limiter}",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Rate limiter uses",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 33,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kube_controller_manager.queue.depth{$scope,$cluster_name} by {queue}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Queue depth",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 49,
+        "width": 47,
+        "height": 23
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "scope",
+      "default": "*",
+      "prefix": null
+    },
+    {
+      "name": "cluster_name",
+      "default": "*",
+      "prefix": "cluster_name"
+    },
+    {
+      "name": "quantile",
+      "default": "*",
+      "prefix": "quantile"
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 30271
+}

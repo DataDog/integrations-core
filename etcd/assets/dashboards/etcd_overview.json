@@ -1,472 +1,375 @@
 {
-  "board_title": "Etcd Overview",
-  "read_only": false,
-  "author_info": {
-    "author_name": "Datadog"
-  },
-  "description": "",
-  "board_bgtype": "board_graph",
-  "created": "2019-09-30T12:31:31.471879+00:00",
-  "created_by": {
-    "disabled": false,
-    "handle": "support@datadoghq.com",
-    "name": "Datadog",
-    "is_admin": false,
-    "role": null,
-    "access_role": "st",
-    "verified": true,
-    "email": "support@datadoghq.com"
-  },
-  "new_id": "ur6-853-452",
-  "modified": "2019-09-30T13:25:21.920780+00:00",
-  "originalHeight": 80,
-  "template_variable_presets": [],
-  "template_variables": [
-    {
-      "default": "*",
-      "prefix": null,
-      "name": "scope"
-    }
-  ],
-  "isIntegration": false,
-  "disableEditing": false,
-  "originalWidth": "calc(100% - 32px)",
-  "widgets": [
-    {
-      "board_id": "ur6-853-452",
-      "sizing": "zoom",
-      "title": false,
-      "url": "/static/images/screenboard/integrations/etcd.png",
-      "margin": "",
-      "height": 15,
-      "width": 47,
-      "scaleFactor": 1,
-      "y": 0,
-      "x": 0,
-      "add_timeframe": true,
-      "type": "image",
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "tick": true,
-      "font_size": "14",
-      "title": false,
-      "refresh_every": 30000,
-      "scaleFactor": 1,
-      "tick_edge": "bottom",
-      "text_align": "left",
-      "auto_refresh": false,
-      "bgcolor": "blue",
-      "add_timeframe": true,
-      "html": "Network",
-      "type": "note",
-      "y": 0,
-      "x": 49,
-      "height": 5,
-      "tick_pos": "50%",
-      "width": 96,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "tick": true,
-      "font_size": "14",
-      "title": false,
-      "refresh_every": 30000,
-      "scaleFactor": 1,
-      "tick_edge": "bottom",
-      "text_align": "left",
-      "auto_refresh": false,
-      "bgcolor": "blue",
-      "add_timeframe": true,
-      "html": "GRPC cache",
-      "type": "note",
-      "y": 17,
-      "x": 0,
-      "height": 5,
-      "tick_pos": "50%",
-      "width": 47,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "tick": true,
-      "font_size": "14",
-      "title": false,
-      "refresh_every": 30000,
-      "scaleFactor": 1,
-      "tick_edge": "bottom",
-      "text_align": "left",
-      "auto_refresh": false,
-      "bgcolor": "blue",
-      "add_timeframe": true,
-      "html": "Disk",
-      "type": "note",
-      "y": 42,
-      "x": 0,
-      "height": 5,
-      "tick_pos": "50%",
-      "width": 47,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "system.cpu.user",
-      "title_text": "Commit / Fsync duration",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.disk.backend.commit.duration.seconds{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+    "title": "Etcd v3 - Overview",
+    "description": "This dashboard visualizes your etcd v3 cluster's activity and performance so you can ensure your configurations are synced across your hosts and containers. Further reading on etcd monitoring:\n\n- [Datadog's etcd integration docs](https://docs.datadoghq.com/integrations/etcd/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/screenboard/integrations/etcd.png",
+                "sizing": "zoom"
             },
-            "type": "line",
-            "conditional_formats": []
-          },
-          {
-            "q": "avg:etcd.disk.wal.fsync.duration.seconds{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "note",
+                "content": "Network",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
             },
-            "type": "line"
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 49,
-      "x": 0,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "system.cpu.user",
-      "title_text": "GRPC cache hits / misses",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.grpc.proxy.cache.hits.total{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 49,
+                "y": 0,
+                "width": 96,
+                "height": 5
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "note",
+                "content": "GRPC cache",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
             },
-            "type": "line",
-            "conditional_formats": []
-          },
-          {
-            "q": "avg:etcd.grpc.proxy.cache.misses.total{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "note",
+                "content": "Disk",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
             },
-            "type": "line"
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 25,
-      "x": 0,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "Timeseries",
-      "title_text": "Client received and sent bytes",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.network.client.grpc.received.bytes.total{*}.as_count()",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 0,
+                "y": 42,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.disk.backend.commit.duration.seconds{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.disk.wal.fsync.duration.seconds{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Commit / Fsync duration",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line",
-            "conditional_formats": []
-          },
-          {
-            "q": "avg:etcd.network.client.grpc.sent.bytes.total{*}.as_count()",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 0,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.grpc.proxy.cache.hits.total{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.grpc.proxy.cache.misses.total{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "GRPC cache hits / misses",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line"
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 7,
-      "x": 49,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "Timeseries",
-      "title_text": "Peer received and sent bytes",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.network.peer.received.bytes.total{$scope}.as_count()",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.network.client.grpc.received.bytes.total{*}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.network.client.grpc.sent.bytes.total{*}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Client received and sent bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line",
-            "conditional_formats": []
-          },
-          {
-            "q": "avg:etcd.network.peer.sent.bytes.total{$scope}.as_count()",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 49,
+                "y": 7,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.network.peer.received.bytes.total{$scope}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.network.peer.sent.bytes.total{$scope}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Peer received and sent bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line"
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 7,
-      "x": 98,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "font_size": "14",
-      "title": false,
-      "refresh_every": 30000,
-      "scaleFactor": 1,
-      "tick_edge": "bottom",
-      "text_align": "left",
-      "auto_refresh": false,
-      "height": 6,
-      "bgcolor": "blue",
-      "add_timeframe": true,
-      "html": "Memstats",
-      "type": "note",
-      "y": 25,
-      "x": 49,
-      "tick": true,
-      "tick_pos": "50%",
-      "width": 96,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "Timeseries",
-      "title_text": "GC time",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.go.memstats.last.gc.time.seconds{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 98,
+                "y": 7,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "note",
+                "content": "Memstats",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
             },
-            "type": "bars",
-            "conditional_formats": []
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 49,
-      "x": 49,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "Timeseries",
-      "title_text": "Allocated heap",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.go.memstats.heap.alloc.bytes{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 49,
+                "y": 25,
+                "width": 96,
+                "height": 6
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.go.memstats.last.gc.time.seconds{$scope}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "GC time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line",
-            "conditional_formats": []
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 33,
-      "x": 98,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "Timeseries",
-      "title_text": "Allocated bytes",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.go.memstats.alloc.bytes{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 49,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.go.memstats.heap.alloc.bytes{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocated heap",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line",
-            "conditional_formats": []
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 33,
-      "x": 49,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "timeseries",
-      "generated_title": "Timeseries",
-      "title_text": "Profiling bucket hash table size",
-      "height": 13,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "avg:etcd.go.memstats.buck.hash.sys.bytes{$scope}",
-            "aggregator": "avg",
-            "style": {
-              "width": "normal",
-              "palette": "dog_classic",
-              "type": "solid"
+            "layout": {
+                "x": 98,
+                "y": 33,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.go.memstats.alloc.bytes{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocated bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "type": "line",
-            "conditional_formats": []
-          }
-        ],
-        "autoscale": true
-      },
-      "width": 47,
-      "time": {},
-      "error": null,
-      "y": 49,
-      "x": 98,
-      "legend_size": "0",
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": false,
-      "isShared": false
-    }
-  ],
-  "disableCog": false,
-  "id": 64746,
-  "isShared": false
+            "layout": {
+                "x": 49,
+                "y": 33,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.go.memstats.buck.hash.sys.bytes{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Profiling bucket hash table size",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 30289
 }

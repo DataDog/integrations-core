@@ -41,7 +41,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
-        self.is_aurora = None
+        self._is_aurora = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -54,6 +54,7 @@ class PostgreSql(AgentCheck):
 
     def _clean_state(self):
         self._version = None
+        self._is_aurora = None
         self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
@@ -69,12 +70,16 @@ class PostgreSql(AgentCheck):
             raw_version = get_raw_version(self.db)
             self._version = parse_version(raw_version)
             self.set_metadata('version', raw_version)
-            self.is_aurora = is_aurora(self.db)
         return self._version
 
+    @property
+    def is_aurora(self):
+        if self._is_aurora is None:
+            self._is_aurora = is_aurora(self.db)
+        return self._is_aurora
+
     def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility
-        """
+        """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
 
         for element in yamlconfig:
@@ -127,10 +132,10 @@ class PostgreSql(AgentCheck):
 
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
-            # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignore it.
+            # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
+            self._is_aurora = None
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -229,9 +234,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self, instance_tags,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -290,10 +293,10 @@ class PostgreSql(AgentCheck):
         else:
             if self.config.host == 'localhost' and self.config.password == '':
                 # Use ident method
-                connection_string = "user=%s dbname=%s, application_name=%s" % (
+                connection_string = "user=%s dbname=%s application_name=%s" % (
                     self.config.user,
                     self.config.dbname,
-                    "datadog-agent",
+                    self.config.application_name,
                 )
                 if self.config.query_timeout:
                     connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
@@ -305,7 +308,7 @@ class PostgreSql(AgentCheck):
                     'password': self.config.password,
                     'database': self.config.dbname,
                     'sslmode': self.config.ssl_mode,
-                    'application_name': "datadog-agent",
+                    'application_name': self.config.application_name,
                 }
                 if self.config.port:
                     args['port'] = self.config.port

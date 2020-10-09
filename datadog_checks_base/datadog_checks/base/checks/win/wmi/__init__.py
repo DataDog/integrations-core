@@ -118,9 +118,7 @@ class WinWMICheck(AgentCheck):
 
         Returns: tag or TagQueryUniquenessFailure exception.
         """
-        self.log.debug(
-            u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query,
-        )
+        self.log.debug(u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query)
 
         # Extract query information
         target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
@@ -213,13 +211,11 @@ class WinWMICheck(AgentCheck):
                     extracted_metrics.append(WMIMetric(wmi_property, float(wmi_value), tags))
                 except ValueError:
                     self.log.warning(
-                        u"When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property,
+                        u"When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property
                     )
                     continue
                 except TypeError:
-                    self.log.warning(
-                        u"When extracting metrics with WMI, found a missing property '%s'", wmi_property,
-                    )
+                    self.log.warning(u"When extracting metrics with WMI, found a missing property '%s'", wmi_property)
                     continue
         return extracted_metrics
 

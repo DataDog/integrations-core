@@ -1,43 +1,47 @@
 # CHANGELOG - Aspdotnet
 
-## 1.6.0 / 2020-06-29
+## 1.6.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+
+## 1.6.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
 
-## 1.5.0 / 2020-05-17
+## 1.5.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.4.1 / 2020-04-04
+## 1.4.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update to Agent 6 signature. See [#5939](https://github.com/DataDog/integrations-core/pull/5939).
 
-## 1.4.0 / 2019-12-02
+## 1.4.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
 
-## 1.3.0 / 2019-10-11
+## 1.3.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
 
-## 1.2.1 / 2019-06-18
+## 1.2.1 / 2019-06-18 / Agent 6.13.0
 
 * [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
 
-## 1.2.0 / 2019-05-14
+## 1.2.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3486](https://github.com/DataDog/integrations-core/pull/3486).
 
-## 1.1.0 / 2019-02-18
+## 1.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Fix flake8. See [#3077](https://github.com/DataDog/integrations-core/pull/3077).
 * [Added] Support Python 3. See [#2986](https://github.com/DataDog/integrations-core/pull/2986).
 
-## 1.0.1 / 2019-01-04
+## 1.0.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Change example config from "localhost" to ".". See [#2779][1].
 
-## 1.0.0 / 2018-10-13
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] moves aspdotnet and dotnet clr metrics to their own checks. See [#884][2].
 
@@ -46,7 +50,7 @@
 * [Added] Pin pywin32 dependency. See [#2322][3].
 * [Fixed] Remove unused port config option for pdh checks. See [#2244][4].
 
-## 0.1.3 / 2018-09-04
+## 0.1.3 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 

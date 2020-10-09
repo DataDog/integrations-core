@@ -8,7 +8,13 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.utils import get_profile_definition, recursively_expand_base_profiles
+from datadog_checks.snmp.utils import (
+    _get_profile_name,
+    _is_abstract_profile,
+    _iter_default_profile_file_paths,
+    get_profile_definition,
+    recursively_expand_base_profiles,
+)
 
 from . import common
 from .metrics import (
@@ -63,6 +69,35 @@ def test_load_profiles(caplog):
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
         assert "table doesn't have a 'metric_tags' section" not in caplog.text
         caplog.clear()
+
+
+def test_profile_hierarchy():
+    """
+    * Only concrete profiles MUST inherit from '_base.yaml'.
+    * Only concrete profiles MUST define a `sysobjectid` field.
+    """
+    errors = []
+    compat_base_profiles = ['_base_cisco', '_base_cisco_voice']
+
+    for path in _iter_default_profile_file_paths():
+        name = _get_profile_name(path)
+        definition = get_profile_definition({'definition_file': path})
+        extends = definition.get('extends', [])
+        sysobjectid = definition.get('sysobjectid')
+
+        if _is_abstract_profile(name):
+            if '_base.yaml' in extends and name not in compat_base_profiles:
+                errors.append("'{}': mixin wrongly extends '_base.yaml'".format(name))
+            if sysobjectid is not None:
+                errors.append("'{}': mixin wrongly defines a `sysobjectid`".format(name))
+        else:
+            if '_base.yaml' not in extends:
+                errors.append("'{}': concrete profile must directly extend '_base.yaml'".format(name))
+            if sysobjectid is None:
+                errors.append("'{}': concrete profile must define a `sysobjectid`".format(name))
+
+    if errors:
+        pytest.fail('\n'.join(sorted(errors)))
 
 
 def run_profile_check(recording_name, profile_name=None):
@@ -267,7 +302,7 @@ def test_f5(aggregator):
         interface_tags = ['interface:{}'.format(interface)] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
             )
         for metric in IF_RATES:
             aggregator.assert_metric(
@@ -295,17 +330,13 @@ def test_f5(aggregator):
     for server in servers:
         server_tags = tags + ['server:{}'.format(server)]
         for metric in LTM_VIRTUAL_SERVER_GAUGES:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1)
         for metric in LTM_VIRTUAL_SERVER_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1
             )
         for metric in LTM_VIRTUAL_SERVER_RATES:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1)
 
     nodes = ['node1', 'node2', 'node3']
     for node in nodes:
@@ -495,9 +526,7 @@ def test_cisco_3850(aggregator):
             'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
-    )
+    aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
 
@@ -738,15 +767,13 @@ def test_cisco_nexus(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags
     )
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
-        )
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -1288,15 +1315,13 @@ def test_cisco_asa_5525(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags
     )
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
-        )
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -1614,7 +1639,7 @@ def test_chatsworth(aggregator):
         aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=line_tags, count=1)
 
     for branch in [1, 17]:
-        branch_tags = common_tags + ['branch_id:{}'.format(branch)]
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name1']
         aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduBranchMaxCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
@@ -1623,6 +1648,16 @@ def test_chatsworth(aggregator):
             'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
         )
         aggregator.assert_metric('snmp.cpiPduBranchStatus', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
+        )
+
+    for branch in [1]:
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name2']
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
+        )
+
         aggregator.assert_metric(
             'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
         )
@@ -1774,6 +1809,7 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
     )
+    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 

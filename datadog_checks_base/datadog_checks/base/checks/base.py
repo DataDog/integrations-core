@@ -37,6 +37,7 @@ from ..utils.secrets import SecretsSanitizer
 
 try:
     import datadog_agent
+
     from ..log import CheckLoggingAdapter, init_logging
 
     init_logging()
@@ -219,7 +220,7 @@ class AgentCheck(object):
                 False,
                 (
                     'DEPRECATION NOTICE: The `no_proxy` config option has been renamed '
-                    'to `skip_proxy` and will be removed in Agent version 6.13.'
+                    'to `skip_proxy` and will be removed in a future release.'
                 ),
             ),
             'service_tag': (

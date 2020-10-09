@@ -5,8 +5,11 @@ import copy
 import os
 import time
 
+import mock
 import pymongo
 import pytest
+from mock import MagicMock
+from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
@@ -80,6 +83,17 @@ def instance_custom_queries():
     ]
 
     return instance
+
+
+@pytest.fixture
+def mock_pymongo():
+    mocked_client = MockedPyMongoClient()
+
+    with mock.patch('pymongo.mongo_client.MongoClient', MagicMock(return_value=mocked_client),), mock.patch(
+        'pymongo.collection.Collection'
+    ), mock.patch('pymongo.command_cursor') as cur:
+        cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
+        yield
 
 
 @pytest.fixture

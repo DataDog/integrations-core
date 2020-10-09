@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Linkerd",
@@ -28,6 +29,7 @@
       "Linkerd - Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

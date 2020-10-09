@@ -35,6 +35,13 @@ class MyCheck(AgentCheck):
     ...
 ```
 
+Support for Unix socket is provided via [requests-unixsocket][requests-unixsocket-pypi] and allows making UDS requests on the `unix://` scheme (not supported on Windows until Python adds support for `AF_UNIX`, see [ticket][python-bpo-af-unix-win]):
+
+```python
+url = 'unix:///var/run/docker.sock'
+response = self.http.get(url)
+```
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
@@ -48,7 +55,6 @@ For complete documentation of every option, see the associated configuration tem
 
 ## Future
 
-- Support for [UNIX sockets](https://github.com/msabramo/requests-unixsocket)
 - Support for configuring cookies! Since they can be set globally, per-domain, and even per-path, the configuration may be complex
   if not thought out adequately. We'll discuss options for what that might look like. Only our `spark` and `cisco_aci` checks
   currently set cookies, and that is based on code logic, not configuration.

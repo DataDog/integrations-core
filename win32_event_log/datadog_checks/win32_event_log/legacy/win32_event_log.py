@@ -11,7 +11,12 @@ from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base.utils.timeout import TimeoutException
 
-from ..constants import EVENT_TYPE, INTEGER_PROPERTIES, SOURCE_TYPE_NAME
+EVENT_TYPE = 'win32_log_event'
+SOURCE_TYPE_NAME = 'event viewer'
+
+# Integer properties to normalize.
+# Source: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/eventlogprov/win32-ntlogevent
+INTEGER_PROPERTIES = ['EventCode', 'EventIdentifier', 'EventType', 'RecordNumber']
 
 
 class Win32EventLogWMI(WinWMICheck):
@@ -20,21 +25,45 @@ class Win32EventLogWMI(WinWMICheck):
     EXTRA_EVENT_PROPERTIES = ["InsertionStrings", "Message", "Logfile"]
     NAMESPACE = "root\\CIMV2"
     EVENT_CLASS = "Win32_NTLogEvent"
+    NEW_PARAMS = (
+        'tag_sid',
+        'interpret_messages',
+        'path',
+        'start',
+        'query',
+        'filters',
+        'included_messages',
+        'excluded_messages',
+        'domain',
+        'timeout',
+        'payload_size',
+        'bookmark_frequency',
+    )
 
     def __init__(self, name, init_config, instances):
         super(Win32EventLogWMI, self).__init__(name, init_config, instances)
         # Settings
-        self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
+        self._tag_event_id = is_affirmative(self.instance.get('tag_event_id', init_config.get('tag_event_id')))
         self._verbose = init_config.get('verbose', True)
         self._default_event_priority = init_config.get('default_event_priority', 'normal')
 
         # State
         self.last_ts = {}
 
+        self.check_initializations.append(
+            lambda: self.warning(
+                'This version of the check is deprecated and will be removed in a future release. '
+                'Set `legacy_mode` to `false` and read about the latest options, such as `query`.'
+            )
+        )
+        for new_param in self.NEW_PARAMS:
+            if new_param in self.instance:
+                self.log.warning("%s config option is ignored when running legacy mode. Please remove it", new_param)
+
     def check(self, instance):
         # Connect to the WMI provider
         host = instance.get('host', "localhost")
-        username = instance.get('username', "")
+        username = self.instance.get('user', self.instance.get('username', ''))
         password = instance.get('password', "")
         instance_tags = instance.get('tags', [])
         notify = instance.get('notify', [])
@@ -153,9 +182,9 @@ class Win32EventLogWMI(WinWMICheck):
             self.last_ts[instance_key] = datetime.utcnow()
 
     def _dt_to_wmi(self, dt):
-        ''' A wrapper around wmi.from_time to get a WMI-formatted time from a
-            time struct.
-        '''
+        """A wrapper around wmi.from_time to get a WMI-formatted time from a
+        time struct.
+        """
         return from_time(
             year=dt.year,
             month=dt.month,
@@ -268,8 +297,7 @@ class LogEvent(object):
         return False
 
     def _wmi_to_ts(self, wmi_ts):
-        ''' Convert a wmi formatted timestamp into an epoch.
-        '''
+        """Convert a wmi formatted timestamp into an epoch."""
         year, month, day, hour, minute, second, microsecond, tz = to_time(wmi_ts)
         tz_delta = timedelta(minutes=int(tz))
         if '+' in wmi_ts:
@@ -282,8 +310,7 @@ class LogEvent(object):
         return int(calendar.timegm(dt.timetuple()))
 
     def _tags(self, tags, event_code):
-        ''' Inject additional tags into the list already supplied to LogEvent.
-        '''
+        """Inject additional tags into the list already supplied to LogEvent."""
         tags_list = []
         if tags is not None:
             tags_list += list(tags)

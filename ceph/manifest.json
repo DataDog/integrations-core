@@ -36,6 +36,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ceph"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

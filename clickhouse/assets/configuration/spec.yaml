@@ -1,0 +1,93 @@
+name: ClickHouse
+files:
+- name: clickhouse.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/db
+      overrides:
+        global_custom_queries.value.example:
+          - metric_prefix: clickhouse
+            query: <QUERY>
+            columns: <COLUMNS>
+            tags: <TAGS>
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: server
+      required: true
+      description: The hostname used to connect to the system.
+      value:
+        type: string
+    - name: port
+      description: The port used to connect to the system.
+      value:
+        type: integer
+        example: 9000
+    - name: user
+      description: The database user to authenticate as.
+      value:
+          type: string
+          example: default
+    - name: password
+      description: The password of `username`.
+      value:
+        type: string
+    - name: db
+      description: The database to connect to.
+      value:
+        type: string
+        default: default
+    - name: connect_timeout
+      description: The timeout for connecting to the `server`.
+      value:
+        type: integer
+        example: 10
+    - name: read_timeout
+      description: The timeout for reading from the `server`.
+      value:
+        type: integer
+        example: 10
+    - name: compression
+      description: |
+        The compression algorithm to use. The default is no compression.
+
+        Valid values are:
+
+          - lz4
+          - lz4hc
+      value:
+        type: string
+    - name: tls_verify
+      description: Whether or not to connect securely using TLS. The server must also support this.
+      value:
+        type: boolean
+        example: False
+    - template: instances/db
+      overrides:
+        custom_queries.value.example:
+          - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:clickhouse
+    - template: instances/default
+  - template: logs
+    example:
+    - source: clickhouse
+      type: file
+      path:  /var/log/clickhouse-server/clickhouse-server.log
+      log_processing_rules:
+        - type: multi_line
+          name: log_start_with_date
+          pattern: \d{4}\.\d{2}\.\d{2}
+    - source: clickhouse
+      type: file
+      path: /var/log/clickhouse-server/clickhouse-server.err.log
+      log_processing_rules:
+        - type: multi_line
+          name: log_start_with_date
+          pattern: \d{4}\.\d{2}\.\d{2}

@@ -256,6 +256,9 @@ jobs:
     - checkName: marathon
       displayName: Marathon
       os: linux
+    - checkName: marklogic
+      displayName: MarkLogic
+      os: linux
     - checkName: mcache
       displayName: Memcached
       os: linux
@@ -354,6 +357,9 @@ jobs:
       os: linux
     - checkName: snmp
       displayName: SNMP
+      os: linux
+    - checkName: snowflake
+      displayName: Snowflake
       os: linux
     - checkName: solr
       displayName: Solr

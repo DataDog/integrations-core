@@ -146,7 +146,7 @@ class PostgresMetricsCache:
         }
 
     def get_replication_metrics(self, version, is_aurora):
-        """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
+        """Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
         Uses a dictionary to save the result for each instance
@@ -167,7 +167,7 @@ class PostgresMetricsCache:
         return metrics
 
     def get_activity_metrics(self, version):
-        """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
+        """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
         Uses a dictionnary to save the result for each instance
         """

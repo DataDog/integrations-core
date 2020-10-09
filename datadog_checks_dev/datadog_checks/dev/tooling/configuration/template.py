@@ -21,9 +21,7 @@ class ConfigTemplates(object):
 
         self.paths.append(TEMPLATES_DIR)
 
-        self.fields = {'overrides': (self.override, lambda: {})}
-
-    def load(self, template, parameters=None):
+    def load(self, template):
         path_parts = template.split('/')
         branches = path_parts.pop().split('.')
         path_parts.append(branches.pop(0))
@@ -73,36 +71,51 @@ class ConfigTemplates(object):
                     )
                 )
 
-        if parameters is None:
-            parameters = {}
-
-        for parameter, (method, default) in self.fields.items():
-            method(data, parameters.get(parameter, default()))
-
         return data
 
-    @classmethod
-    def override(cls, template, overrides):
+    @staticmethod
+    def apply_overrides(template, overrides):
+        errors = []
+
         for override, value in sorted(overrides.items()):
             root = template
             override_keys = override.split('.')
             final_key = override_keys.pop()
 
+            intermediate_error = ''
+
             # Iterate through all but the last key, attempting to find a dictionary at every step
             for i, key in enumerate(override_keys):
                 if isinstance(root, dict):
-                    root = root.setdefault(key, {})
+                    if i == 0 and root.get('name') == key:
+                        continue
+
+                    if key in root:
+                        root = root[key]
+                    else:
+                        intermediate_error = (
+                            f"Template override `{'.'.join(override_keys[:i])}` has no named mapping `{key}`"
+                        )
+                        break
                 elif isinstance(root, list):
                     for item in root:
                         if isinstance(item, dict) and item.get('name') == key:
                             root = item
                             break
                     else:
-                        raise ValueError(
+                        intermediate_error = (
                             f"Template override `{'.'.join(override_keys[:i])}` has no named mapping `{key}`"
                         )
+                        break
                 else:
-                    raise ValueError(f"Template override `{'.'.join(override_keys[:i])}` does not refer to a mapping")
+                    intermediate_error = (
+                        f"Template override `{'.'.join(override_keys[:i])}` does not refer to a mapping"
+                    )
+                    break
+
+            if intermediate_error:
+                errors.append(intermediate_error)
+                continue
 
             # Force assign the desired value to the final key
             if isinstance(root, dict):
@@ -113,14 +126,18 @@ class ConfigTemplates(object):
                         root[i] = value
                         break
                 else:
-                    raise ValueError(
-                        'Template override has no named mapping `{}`'.format(
-                            '.'.join(override_keys) if override_keys else override
-                        )
-                    )
-            else:
-                raise ValueError(
-                    'Template override `{}` does not refer to a mapping'.format(
+                    intermediate_error = 'Template override has no named mapping `{}`'.format(
                         '.'.join(override_keys) if override_keys else override
                     )
+            else:
+                intermediate_error = 'Template override `{}` does not refer to a mapping'.format(
+                    '.'.join(override_keys) if override_keys else override
                 )
+
+            if intermediate_error:
+                errors.append(intermediate_error)
+                continue
+
+            overrides.pop(override)
+
+        return errors

@@ -16,9 +16,12 @@ The Elasticsearch check is included in the [Datadog Agent][2] package. No additi
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -40,6 +43,7 @@ Follow the instructions below to configure this check for an Agent running on a 
       - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to true.
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
       - All requests to the Amazon ES configuration API must be signed. See the [AWS documentation][19] for details.
+      - The `aws` auth type relies on [boto3][20] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
 
 2. [Restart the Agent][5].
 
@@ -120,6 +124,9 @@ _Available for Agent versions >6.0_
 
 4. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
@@ -157,6 +164,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "elasticsearch", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -218,3 +228,4 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [17]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [18]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
 [19]: https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html#es-managedomains-signing-service-requests
+[20]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials

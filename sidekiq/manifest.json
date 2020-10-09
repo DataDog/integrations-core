@@ -33,6 +33,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "sidekiq"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

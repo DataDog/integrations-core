@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "nginx.",
-  "metric_to_check": "nginx.net.connections",
+  "metric_to_check": ["nginx.net.connections", "nginx.connections.active"],
   "name": "nginx",
   "process_signatures": [
     "nginx: master process"
@@ -29,7 +29,11 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
+      "[NGINX] 4xx Errors higher than usual": "assets/monitors/4xx.json",
+      "[NGINX] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+    },
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
     },
@@ -42,6 +46,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "nginx"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

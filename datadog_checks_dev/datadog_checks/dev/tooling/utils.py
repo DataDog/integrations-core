@@ -120,6 +120,17 @@ def normalize_package_name(package_name):
     return re.sub(r'[-_. ]+', '_', package_name).lower()
 
 
+def kebab_case_name(name):
+    return re.sub('[_ ]', '-', name.lower())
+
+
+def normalize_display_name(display_name):
+    normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+    normalized_integration = re.sub("_+", "_", normalized_integration)
+    normalized_integration = normalized_integration.strip("_")
+    return normalized_integration.lower()
+
+
 def string_to_toml_type(s):
     if s.isdigit():
         s = int(s)
@@ -141,6 +152,10 @@ def get_readme_file(check_name):
     return os.path.join(get_root(), check_name, 'README.md')
 
 
+def get_setup_file(check_name):
+    return os.path.join(get_root(), check_name, 'setup.py')
+
+
 def check_root():
     """Check if root has already been set."""
     existing_root = get_root()
@@ -154,25 +169,43 @@ def check_root():
     return False
 
 
-def initialize_root(config, agent=False, core=False, extras=False, here=False):
+def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False):
     """Initialize root directory based on config and options"""
     if check_root():
         return
 
-    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
+    repo_choice = (
+        'core'
+        if core
+        else 'extras'
+        if extras
+        else 'agent'
+        if agent
+        else 'marketplace'
+        if marketplace
+        else config.get('repo', 'core')
+    )
     config['repo_choice'] = repo_choice
     config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
-
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
     root = os.path.expanduser(legacy_option or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
-            repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
+            repo = (
+                'datadog-agent'
+                if repo_choice == 'agent'
+                else 'marketplace'
+                if repo_choice == 'marketplace'
+                else f'integrations-{repo_choice}'
+            )
             message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
 
         root = os.getcwd()
+        if here:
+            # Repo choices use the integration repo name without the `integrations-` prefix
+            config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
 
     set_root(root)
     return message
@@ -237,7 +270,14 @@ def get_tox_file(check_name):
 
 
 def get_metadata_file(check_name):
-    return os.path.join(get_root(), check_name, 'metadata.csv')
+    path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
+    return os.path.join(get_root(), check_name, path)
+
+
+def get_eula_from_manifest(check_name):
+    path = load_manifest(check_name).get('terms', {}).get('eula', '')
+    path = os.path.join(get_root(), check_name, *path.split('/'))
+    return path, file_exists(path)
 
 
 def get_assets_from_manifest(check_name, asset_type):
@@ -323,13 +363,15 @@ def get_config_files(check_name):
     return sorted(files)
 
 
-def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_dirs=None):
+def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_tests=True, include_dirs=None):
     """Return generator of filenames from within a given check.
 
     By default, only includes files within 'datadog_checks' and 'tests' directories, this
-    can be expanded by adding to the `include_dirs` arg.
+    can be expanded by adding to the `include_dirs` arg. 'tests' can also be removed.
     """
-    base_dirs = ['datadog_checks', 'tests']
+    base_dirs = ['datadog_checks']
+    if include_tests:
+        base_dirs.append('tests')
     if include_dirs is not None:
         base_dirs += include_dirs
 
@@ -381,6 +423,11 @@ def read_metadata_rows(metadata_file):
 
 def read_readme_file(check_name):
     for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
+        yield line_no, line
+
+
+def read_setup_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_setup_file(check_name))):
         yield line_no, line
 
 

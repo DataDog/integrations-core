@@ -50,11 +50,13 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
     ],
     # The package we're going to ship
     packages=['datadog_checks.cassandra'],
     # Run-time dependencies
-    install_requires=['datadog_checks_base'],
+    install_requires=['datadog-checks-base>=11.0.0'],
     extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,

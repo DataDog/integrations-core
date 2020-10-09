@@ -20,6 +20,7 @@ except ImportError:
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_invalid_password(aggregator, init_config, instance_docker):
+
     instance_docker['password'] = 'FOO'
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -43,18 +44,10 @@ def test_check_docker(aggregator, init_config, instance_docker):
     _assert_metrics(aggregator, expected_tags)
 
 
-@not_windows_ci
-@pytest.mark.usefixtures("dd_environment")
-def test_check_stored_procedure(aggregator, init_config, instance_docker):
-    proc = 'pyStoredProc'
-    sp_tags = "foo:bar,baz:qux"
-
-    instance_docker['stored_procedure'] = proc
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-
+def load_stored_procedure(instance, proc_name, sp_tags):
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
-        instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
+        instance['driver'], instance['host'], instance['username'], instance['password']
     )
     conn = pyodbc.connect(conn_str, timeout=30)
 
@@ -65,33 +58,42 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     sqlDropSP = "IF EXISTS (SELECT * FROM sys.objects \
                WHERE type='P' AND name='{0}') \
                DROP PROCEDURE {0}".format(
-        proc
+        proc_name
     )
     cursor.execute(sqlDropSP)
 
     # Stored Procedure Create Statement
-    sqlCreateSP = 'CREATE PROCEDURE {0} AS \
-                BEGIN \
-                    CREATE TABLE #Datadog \
-                    ( \
-                      [metric] varchar(255) not null, \
-                      [type] varchar(50) not null, \
-                      [value] float not null, \
-                      [tags] varchar(255) \
-                    ) \
-                    SET NOCOUNT ON; \
-                    INSERT INTO #Datadog (metric, type, value, tags) VALUES \
-                        ("sql.sp.testa", "gauge", 100, "{1}"), \
-                        ("sql.sp.testb", "gauge", 1, "{1}"), \
-                        ("sql.sp.testb", "gauge", 2, "{1}"); \
-                    SELECT * FROM #Datadog; \
-                END;'.format(
-        proc, sp_tags
+    # Note: the INSERT statement uses single quotes (') intentionally
+    # Double-quotes caused the odd error: "Invalid column name 'sql.sp.testa'."
+    # https://dba.stackexchange.com/a/219875
+    sqlCreateSP = """\
+    CREATE PROCEDURE {0} AS
+        BEGIN
+            CREATE TABLE #Datadog
+            (
+              [metric] varchar(255) not null,
+              [type] varchar(50) not null,
+              [value] float not null,
+              [tags] varchar(255)
+            )
+            SET NOCOUNT ON;
+            INSERT INTO #Datadog (metric, type, value, tags) VALUES
+                ('sql.sp.testa', 'gauge', 100, '{1}'),
+                ('sql.sp.testb', 'gauge', 1, '{1}'),
+                ('sql.sp.testb', 'gauge', 2, '{1}');
+            SELECT * FROM #Datadog;
+        END;
+        """.format(
+        proc_name, sp_tags
     )
     cursor.execute(sqlCreateSP)
 
-    # For debugging. Calls the stored procedure and prints the results.
-    # cursor.execute(proc)
+    # # For debugging. Calls the stored procedure and prints the results.
+    # # use call_proc for macOS
+    # call_proc = '{{CALL {}}}'.format(proc)
+    # cursor.execute(call_proc)
+    # # otherwise just execute proc directly
+    # # cursor.execute(proc)
     # rows = cursor.fetchall()
     # while rows:
     #     print(rows)
@@ -103,22 +105,80 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     cursor.commit()
     cursor.close()
 
+
+@not_windows_ci
+@pytest.mark.usefixtures("dd_environment")
+def test_check_stored_procedure(aggregator, init_config, instance_docker):
+    instance_pass = deepcopy(instance_docker)
+
+    proc = 'pyStoredProc'
+    sp_tags = "foo:bar,baz:qux"
+    instance_pass['stored_procedure'] = proc
+
+    load_stored_procedure(instance_pass, proc, sp_tags)
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_pass])
     sqlserver_check.check(instance_docker)
 
-    expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
+    expected_tags = instance_pass.get('tags', []) + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
 
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
-def test_object_name(aggregator, init_config_object_name, instance_docker):
+def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker):
+    instance_fail = deepcopy(instance_docker)
+    proc = 'pyStoredProc'
+    proc_only_fail = "select cntr_type from sys.dm_os_performance_counters where counter_name in ('FOO');"
+    sp_tags = "foo:bar,baz:qux"
+
+    instance_fail['proc_only_if'] = proc_only_fail
+    instance_fail['stored_procedure'] = proc
+
+    load_stored_procedure(instance_fail, proc, sp_tags)
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_fail])
+    sqlserver_check.check(instance_fail)
+
+    # apply a proc check that will never fail and assert that the metrics remain unchanged
+    assert len(aggregator._metrics) == 0
+
+
+@not_windows_ci
+@pytest.mark.usefixtures("dd_environment")
+def test_custom_metrics_object_name(aggregator, init_config_object_name, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     sqlserver_check.check(instance_docker)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
+
+
+@not_windows_ci
+@pytest.mark.usefixtures("dd_environment")
+def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_docker):
+    instance = deepcopy(instance_docker)
+    instance['include_task_scheduler_metrics'] = False
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance])
+    sqlserver_check.check(instance_docker)
+
+    aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)
+    aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=['optional:tag1'], count=1)
+    aggregator.assert_metric(
+        'sqlserver.MEMORYCLERK_BITMAP.virtual_memory_committed_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1
+    )
+    aggregator.assert_metric(
+        'sqlserver.MEMORYCLERK_BITMAP.virtual_memory_reserved_kb', tags=['memory_node_id:0', 'optional:tag1'], count=1
+    )
+
+    # check a second time for io metrics to be processed
+    sqlserver_check.check(instance_docker)
+
+    aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads')
+    aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
 
 
 @windows_ci
@@ -162,6 +222,6 @@ def _assert_metrics(aggregator, expected_tags):
     """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
     for mname in EXPECTED_METRICS:
-        aggregator.assert_metric(mname, count=1)
+        aggregator.assert_metric(mname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()

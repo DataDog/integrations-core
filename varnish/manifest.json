@@ -28,6 +28,9 @@
   "type": "check",
   "integration_id": "varnish",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -39,6 +42,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "varnish"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

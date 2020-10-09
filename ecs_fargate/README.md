@@ -56,14 +56,54 @@ The instructions below show you how to configure the task using the [AWS CLI too
 
 ##### AWS CLI
 
-1. Download [datadog-agent-ecs-fargate.json][8].
-2. Update the json with a **TASK_NAME** and your [Datadog API Key][5]. Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
+1. Download [datadog-agent-ecs-fargate][8]. **Note**: If you are using IE, this may download as gzip file, which contains the JSON file mentioned below.**
+2. Update the JSON with a **TASK_NAME** and your [Datadog API Key][5]. Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
 3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][7].
 4. Execute the following command to register the ECS task definition:
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
 ```
+
+##### AWS CloudFormation
+
+You can use [AWS CloudFormation][35] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task. You can then set the `Datadog` option to configure log management, like in the example below:
+
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:latest'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+
+For more information on CloudFormation templating and syntax, review the [AWS CloudFormation documentation][36].
 
 #### Create or Modify your IAM Policy
 
@@ -325,3 +365,5 @@ Need help? Contact [Datadog support][19].
 [32]: https://docs.datadoghq.com/tracing/setup/
 [33]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [34]: https://www.datadoghq.com/blog/monitor-aws-fargate
+[35]: https://aws.amazon.com/cloudformation/
+[36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html

@@ -9,19 +9,19 @@ from ....utils import read_file
 from ...utils import get_assets_from_manifest, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-REQUIRED_ATTRIBUTES = {"board_title", "description", "template_variables", "widgets"}
-DASH_ONLY_FIELDS = {"layout_type", "title", "created_at"}
-DASH_ONLY_WIDGET_FIELDS = {"definition", "layout"}
+REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
+DASHBOARD_ONLY_FIELDS = {"layout_type", "title", "created_at"}
+DASHBOARD_ONLY_WIDGET_FIELDS = {"definition", "layout"}
 
 
-def _is_dash_format(payload):
-    for field in DASH_ONLY_FIELDS:
+def _is_dashboard_format(payload):
+    for field in DASHBOARD_ONLY_FIELDS:
         if field in payload:
             return True
 
     # Also checks if any specified widget in the dashboard defines a dash only field
     for widget in payload["widgets"]:
-        for field in DASH_ONLY_WIDGET_FIELDS:
+        for field in DASHBOARD_ONLY_WIDGET_FIELDS:
             if field in widget:
                 return True
     return False
@@ -64,14 +64,10 @@ def dashboards():
                 )
 
             # Confirm the dashboard payload comes from the old API for now
-            if _is_dash_format(decoded):
+            if not _is_dashboard_format(decoded):
                 file_failed = True
                 display_queue.append(
-                    (
-                        echo_failure,
-                        f'    {dashboard_file} is using the new /dash payload format which isn\'t currently supported.'
-                        ' Please use the format from the /screen or /time API endpoints instead.',
-                    ),
+                    (echo_failure, f'    {dashboard_file} is not using the new /dashboard payload format.'),
                 )
 
             if file_failed:
@@ -81,6 +77,7 @@ def dashboards():
                 echo_failure(' FAILED')
                 for display_func, message in display_queue:
                     display_func(message)
+                display_queue = []
             else:
                 ok_checks += 1
 

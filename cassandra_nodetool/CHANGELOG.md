@@ -1,48 +1,52 @@
 # CHANGELOG - Cassandra Nodetool Check
 
-## 1.6.0 / 2020-05-17
+## 1.7.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config specs. See [#7318](https://github.com/DataDog/integrations-core/pull/7318).
+
+## 1.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Use agent 6 signature. See [#6442](https://github.com/DataDog/integrations-core/pull/6442).
 
-## 1.5.2 / 2020-04-04
+## 1.5.2 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.5.1 / 2019-12-02
+## 1.5.1 / 2019-12-02 / Agent 7.16.0
 
 * [Fixed] Remove shlex. See [#5068](https://github.com/DataDog/integrations-core/pull/5068).
 
-## 1.5.0 / 2019-05-14
+## 1.5.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3487](https://github.com/DataDog/integrations-core/pull/3487).
 * [Fixed] Check error code of nodetool command. See [#3632](https://github.com/DataDog/integrations-core/pull/3632).
 
-## 1.4.0 / 2019-03-29
+## 1.4.0 / 2019-03-29 / Agent 6.11.0
 
 * [Added] Support old nodetool output format. See [#3253](https://github.com/DataDog/integrations-core/pull/3253). Thanks [hitsumabushi](https://github.com/hitsumabushi).
 
-## 1.3.0 / 2019-02-18
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Finish Python3 Support. See [#2905](https://github.com/DataDog/integrations-core/pull/2905).
 
-## 1.2.0 / 2019-01-04
+## 1.2.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2761][1].
 
-## 1.1.0 / 2018-11-21
+## 1.1.0 / 2018-11-21 / Agent 6.8.0
 
 * [Added] Add --ssl option to cassandra_nodetool check. See [#2378][2]. Thanks [laurieodgers][3].
 
-## 1.0.0 / 2018-10-13
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] Add cassandra_nodetool check. See [#511][4].
 
-## 0.1.3 / 2018-09-04
+## 0.1.3 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][5].
 
-## 0.1.2 / 2018-06-13
+## 0.1.2 / 2018-06-13 / Agent 6.4.0
 
 * [Fixed] Convert port to a string before calling get_subprocess_output. See [#1549][6]. Thanks [jalaziz][7].
 

@@ -13,6 +13,7 @@ from pkg_resources import parse_version
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
 from .common import MYSQL_VERSION_PARSED
@@ -250,6 +251,32 @@ def test__get_server_pid():
             # the pid should be none but without errors
             assert mysql_check._get_server_pid(None) is None
             assert mysql_check.log.exception.call_count == 0
+
+
+@pytest.mark.unit
+def test_parse_get_version():
+    class MockCursor:
+        version = (b'5.5.12-log',)
+
+        def execute(self, command):
+            pass
+
+        def close(self):
+            return MockCursor()
+
+        def fetchone(self):
+            return self.version
+
+    class MockDatabase:
+        def cursor(self):
+            return MockCursor()
+
+    mocked_db = MockDatabase()
+    for mocked_db.version in [(b'5.5.12-log',), ('5.5.12-log',)]:
+        v = get_version(mocked_db)
+        assert v.version == '5.5.12'
+        assert v.flavor == 'MySQL'
+        assert v.build == 'log'
 
 
 @pytest.mark.integration

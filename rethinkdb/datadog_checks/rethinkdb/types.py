@@ -38,7 +38,8 @@ ConfigSummary = TypedDict(
 # See: https://rethinkdb.com/docs/system-stats/
 
 ClusterQueryEngine = TypedDict(
-    'ClusterQueryEngine', {'queries_per_sec': int, 'read_docs_per_sec': int, 'written_docs_per_sec': int},
+    'ClusterQueryEngine',
+    {'queries_per_sec': int, 'read_docs_per_sec': int, 'written_docs_per_sec': int},
 )
 
 ClusterStats = TypedDict('ClusterStats', {'id': Tuple[Literal['cluster']], 'query_engine': ClusterQueryEngine})
@@ -58,13 +59,15 @@ ServerQueryEngine = TypedDict(
 )
 
 ServerStats = TypedDict(
-    'ServerStats', {'id': Tuple[Literal['server'], str], 'server': str, 'query_engine': ServerQueryEngine},
+    'ServerStats',
+    {'id': Tuple[Literal['server'], str], 'server': str, 'query_engine': ServerQueryEngine},
 )
 
 TableQueryEngine = TypedDict('TableQueryEngine', {'read_docs_per_sec': int, 'written_docs_per_sec': int})
 
 TableStats = TypedDict(
-    'TableStats', {'id': Tuple[Literal['table'], str], 'table': str, 'db': str, 'query_engine': TableQueryEngine},
+    'TableStats',
+    {'id': Tuple[Literal['table'], str], 'table': str, 'db': str, 'query_engine': TableQueryEngine},
 )
 
 ReplicaQueryEngine = TypedDict(
@@ -130,7 +133,8 @@ ServerNetwork = TypedDict(
 )
 
 ServerProcess = TypedDict(
-    'ServerProcess', {'argv': List[str], 'cache_size_mb': int, 'pid': int, 'time_started': dt.datetime, 'version': str},
+    'ServerProcess',
+    {'argv': List[str], 'cache_size_mb': int, 'pid': int, 'time_started': dt.datetime, 'version': str},
 )
 
 ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})
@@ -144,7 +148,8 @@ JobSummary = TypedDict('JobSummary', {'jobs': Mapping[str, int]})
 # System current issues.
 
 CurrentIssuesSummary = TypedDict(
-    'CurrentIssuesSummary', {'issues': Mapping[str, int], 'critical_issues': Mapping[str, int]},
+    'CurrentIssuesSummary',
+    {'issues': Mapping[str, int], 'critical_issues': Mapping[str, int]},
 )
 
 

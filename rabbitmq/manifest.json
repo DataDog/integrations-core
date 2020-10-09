@@ -27,6 +27,9 @@
   "type": "check",
   "integration_id": "rabbitmq",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -36,6 +39,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "rabbitmq"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

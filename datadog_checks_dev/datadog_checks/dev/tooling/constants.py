@@ -20,6 +20,8 @@ REPO_OPTIONS_MAP = {
     '-e': 'extras',
     '--agent': 'agent',
     '-a': 'agent',
+    '--marketplace': 'marketplace',
+    '-m': 'marketplace',
     '--here': 'here',
     '-x': 'here',
 }
@@ -29,6 +31,7 @@ REPO_CHOICES = {
     'extras': 'integrations-extras',
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
+    'marketplace': 'marketplace',
 }
 
 VERSION_BUMP = {
@@ -129,3 +132,10 @@ def get_agent_changelog():
     have changed with any Datadog Agent release.
     """
     return os.path.join(get_root(), 'AGENT_CHANGELOG.md')
+
+
+def get_integration_changelog(check):
+    """
+    Return the full path to the integration changelog.
+    """
+    return os.path.join(get_root(), check, 'CHANGELOG.md')

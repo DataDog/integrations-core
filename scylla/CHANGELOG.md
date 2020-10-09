@@ -1,18 +1,22 @@
 # CHANGELOG - Scylla
 
-## 1.2.0 / 2020-06-29
+## 1.2.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
+## 1.2.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 
-## 1.1.0 / 2020-05-17
+## 1.1.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.0.3 / 2020-04-04
+## 1.0.3 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.0.2 / 2020-02-26
+## 1.0.2 / 2020-02-26 / Agent 7.18.0
 
 * [Fixed] Fix discrepancies in `batchlog_manager`, `execution_stages`, `io_queue` and `query_processor` metric group names. See [#5885](https://github.com/DataDog/integrations-core/pull/5885).
 

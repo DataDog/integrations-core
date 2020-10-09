@@ -42,6 +42,18 @@ files:
       value:
         type: string
         example: master
+    - name: include_instance_metrics
+      description: |
+        Include server-level instance metrics.  When setting up multiple instances for
+        different databases on the same host these metrics will be duplicated unless this option is turned off.
+      value:
+        type: boolean
+        example: true
+    - name: include_task_scheduler_metrics
+      description: Include additional Task and Scheduler metrics.
+      value:
+        type: boolean
+        example: false
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -81,7 +93,7 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 30
+        example: 5
     - name: stored_procedure
       description: |
         Get metrics from custom proc in MyDB but only if the database is writable
@@ -112,6 +124,7 @@ files:
     - type: file
       path: /var/opt/mssql/log/errorlog
       source: sqlserver
+      encoding: utf-16-le
       service: <SERVICE_NAME>
       log_processing_rules:
       - type: multi_line

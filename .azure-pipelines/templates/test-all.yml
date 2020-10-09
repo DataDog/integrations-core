@@ -3,12 +3,14 @@ parameters:
   repo: 'core'
   pip_cache_config: null
   run_py2_tests: true
+  coverage: true
 
 jobs:
 - ${{ each check in parameters.checks }}:
   - template: './test-single-${{ check.os }}.yml'
     parameters:
       check: ${{ check.checkName }}
+      coverage: ${{ parameters.coverage }}
       display: ${{ check.displayName }}
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}

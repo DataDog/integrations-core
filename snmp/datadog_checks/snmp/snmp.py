@@ -35,6 +35,7 @@ from .utils import (
     get_profile_definition,
     oid_pattern_specificity,
     recursively_expand_base_profiles,
+    transform_index,
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
@@ -165,7 +166,7 @@ class SnmpCheck(AgentCheck):
             return None
 
     def fetch_results(
-        self, config,  # type: InstanceConfig
+        self, config  # type: InstanceConfig
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
@@ -180,7 +181,7 @@ class SnmpCheck(AgentCheck):
         enforce_constraints = config.enforce_constraints
 
         all_binds, error = self.fetch_oids(
-            config, config.oid_config.scalar_oids, config.oid_config.next_oids, enforce_constraints=enforce_constraints,
+            config, config.oid_config.scalar_oids, config.oid_config.next_oids, enforce_constraints=enforce_constraints
         )
         for oid in config.oid_config.bulk_oids:
             try:
@@ -506,11 +507,23 @@ class SnmpCheck(AgentCheck):
 
         for column_tag in column_tags:
             raw_column_value = column_tag.column
+            self.log.trace(
+                'Processing column tag: raw_column_value=%s index_slices=%s', raw_column_value, column_tag.index_slices
+            )
+            if column_tag.index_slices:
+                new_index = transform_index(index, column_tag.index_slices)
+            else:
+                new_index = index
+            self.log.trace('Processing column tag: new_index=%s old_index=%s', new_index, index)
+            if new_index is None:
+                continue
             try:
-                column_value = results[raw_column_value][index].val
+                column_value = results[raw_column_value][new_index].val
                 column_value = to_native_string(column_value)
             except KeyError:
-                self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
+                self.log.debug(
+                    'Column `%s not present in the table, skipping this tag. index=%s', raw_column_value, new_index
+                )
                 continue
             if reply_invalid(column_value):
                 self.log.warning("Can't deduct tag from column %s", column_tag.column)

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import os
 
 import click
 
@@ -11,6 +12,8 @@ from ...utils import get_assets_from_manifest, get_valid_integrations, load_mani
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
+EXTRA_NOT_ALLOWED_FIELDS = ['id']
+ALLOWED_MONITOR_TYPES = ['metric alert', 'query alert', 'event alert', 'service check']
 
 
 @click.command(
@@ -36,6 +39,7 @@ def recommended_monitors():
             failed_checks += 1
 
         for monitor_file in monitors_relative_locations:
+            monitor_filename = os.path.basename(monitor_file)
             try:
                 decoded = json.loads(read_file(monitor_file).strip())
             except json.JSONDecodeError as e:
@@ -50,10 +54,31 @@ def recommended_monitors():
                 missing_fields = REQUIRED_ATTRIBUTES.difference(all_keys)
                 file_failed = True
                 display_queue.append(
-                    (echo_failure, f"    {monitor_file} does not contain the required fields: {missing_fields}"),
+                    (echo_failure, f"    {monitor_filename} does not contain the required fields: {missing_fields}"),
+                )
+            elif any([item for item in all_keys if item in EXTRA_NOT_ALLOWED_FIELDS]):
+                file_failed = True
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"    {monitor_filename} contains unsupported field(s). Please ensure none of the following are"
+                        f" in the file: {EXTRA_NOT_ALLOWED_FIELDS}",
+                    ),
                 )
             else:
                 # If all required keys exist, validate values
+
+                monitor_type = decoded.get('type')
+                if monitor_type not in ALLOWED_MONITOR_TYPES:
+                    file_failed = True
+                    display_queue.append(
+                        (
+                            echo_failure,
+                            f"    {monitor_filename} is of unsupported type: \"{monitor_type}\". Only"
+                            f" the following types are allowed: {ALLOWED_MONITOR_TYPES}",
+                        )
+                    )
+
                 description = decoded.get('recommended_monitor_metadata').get('description')
                 if description is not None:
                     if len(description) > 300:
@@ -61,20 +86,22 @@ def recommended_monitors():
                         display_queue.append(
                             (
                                 echo_failure,
-                                f"    {monitor_file} has a description field that is too long, must be < 300 chars",
+                                f"    {monitor_filename} has a description field that is too long, must be < 300 chars",
                             ),
                         )
 
                 result = [i for i in decoded.get('tags') if i.startswith('integration:')]
                 if len(result) < 1:
                     file_failed = True
-                    display_queue.append((echo_failure, f"    {monitor_file} must have an `integration` tag"),)
+                    display_queue.append((echo_failure, f"    {monitor_filename} must have an `integration` tag"))
 
                 display_name = manifest.get("display_name").lower()
                 monitor_name = decoded.get('name').lower()
                 if not (check_name in monitor_name or display_name in monitor_name):
                     file_failed = True
-                    display_queue.append((echo_failure, f"    {monitor_file} name must contain the integration name"),)
+                    display_queue.append(
+                        (echo_failure, f"    {monitor_filename} name must contain the integration name"),
+                    )
 
         if file_failed:
             failed_checks += 1

@@ -106,7 +106,7 @@ def config(ctx, check, sync, verbose):
                             files_failed[example_file_path] = True
                             check_display_queue.append(
                                 lambda example_file=example_file, **kwargs: echo_failure(
-                                    f'File `{example_file}` needs to be synced', **kwargs
+                                    f'File `{example_file}` is not in sync, run "ddev validate config -s"', **kwargs
                                 )
                             )
 

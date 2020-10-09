@@ -1,4 +1,5 @@
 # (C) Datadog, Inc. 2018-present
+
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -29,7 +30,9 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
-EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
+EXPECTED_METRICS = [
+    m[0] for m in SQLServer.INSTANCE_METRICS + SQLServer.TASK_SCHEDULER_METRICS + SQLServer.DATABASE_METRICS
+] + CUSTOM_METRICS
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -38,6 +41,7 @@ INSTANCE_DOCKER = {
     'username': 'sa',
     'password': 'Password123',
     'tags': ['optional:tag1'],
+    'include_task_scheduler_metrics': True,
 }
 
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
@@ -49,6 +53,7 @@ INSTANCE_SQL2017 = {
     'password': 'Password12!',
     'connector': 'odbc',
     'driver': '{ODBC Driver 17 for SQL Server}',
+    'include_task_scheduler_metrics': True,
 }
 
 INIT_CONFIG = {
@@ -85,6 +90,29 @@ INIT_CONFIG_OBJECT_NAME = {
             'instance_name': 'default',
             'object_name': 'SQLServer:Workload Group Stats',
             'tags': ['optional_tag:tag1'],
+        },
+    ]
+}
+
+# As documented here: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+INIT_CONFIG_ALT_TABLES = {
+    'custom_metrics': [
+        {
+            'name': 'sqlserver.LCK_M_S',
+            'table': 'sys.dm_os_wait_stats',
+            'counter_name': 'LCK_M_S',
+            'columns': ['max_wait_time_ms', 'signal_wait_time_ms'],
+        },
+        {
+            'name': 'sqlserver.io_file_stats',
+            'table': 'sys.dm_io_virtual_file_stats',
+            'columns': ['num_of_reads', 'num_of_writes'],
+        },
+        {
+            'name': 'sqlserver.MEMORYCLERK_BITMAP',
+            'table': 'sys.dm_os_memory_clerks',
+            'counter_name': 'MEMORYCLERK_BITMAP',
+            'columns': ['virtual_memory_reserved_kb', 'virtual_memory_committed_kb'],
         },
     ]
 }

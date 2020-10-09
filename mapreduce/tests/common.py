@@ -1,8 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import random
+import time
+from contextlib import contextmanager
 
-from datadog_checks.dev import get_docker_hostname, get_here
+import requests
+from datadog_test_libs.utils.mock_dns import mock_local
+
+from datadog_checks.dev import get_docker_hostname, get_here, run_command
 from datadog_checks.mapreduce import MapReduceCheck
 
 HERE = get_here()
@@ -11,7 +17,7 @@ HOST = get_docker_hostname()
 # ID
 APP_ID = 'application_1453738555560_0001'
 APP_NAME = 'WordCount'
-CONTAINER_NAME = "dd-test-mapreduce"
+CONTAINER_NAME = "namenode"
 JOB_ID = 'job_1453738555560_0001'
 JOB_NAME = 'WordCount'
 USER_NAME = 'vagrant'
@@ -34,6 +40,42 @@ TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
 INSTANCE_INTEGRATION = {'resourcemanager_uri': RM_URI, 'cluster_name': CLUSTER_NAME, 'collect_task_metrics': True}
+
+
+MOCKED_E2E_HOSTS = ('namenode', 'datanode', 'resourcemanager', 'nodemanager', 'historyserver')
+
+
+def setup_mapreduce():
+    # Run a job in order to get metrics from the environment
+    outputdir = 'output{}'.format(random.randrange(1, 1000000))
+    command = (
+        r'bash -c "hadoop fs -mkdir -p input ; '
+        'hdfs dfs -put -f $(find /etc/hadoop/ -type f) input && '
+        'hadoop jar opt/hadoop-3.2.1/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar grep input {} '
+        '\'dfs[a-z.]+\' &"'.format(outputdir)
+    )
+    cmd = 'docker exec {} {}'.format(CONTAINER_NAME, command)
+    run_command(cmd)
+
+    # Called in WaitFor which catches initial exceptions when containers aren't ready
+    for _ in range(15):
+        r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
+        res = r.json()
+        if res.get("apps", None) is not None and res.get("apps"):
+            return True
+
+        time.sleep(1)
+
+    # nothing started after 15 seconds
+    return False
+
+
+@contextmanager
+def mock_local_mapreduce_dns():
+    mapping = {x: ('127.0.0.1', None) for x in MOCKED_E2E_HOSTS}
+    with mock_local(mapping):
+        yield
+
 
 CLUSTER_TAG = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
