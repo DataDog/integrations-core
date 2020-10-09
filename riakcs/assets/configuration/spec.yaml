@@ -8,7 +8,7 @@ files:
   - template: instances
     options:
     - name: access_id
-      description: Enter you RiakCS access key.
+      description: The RiakCS access key.
       required: true
       value:
         type: string
