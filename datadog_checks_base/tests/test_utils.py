@@ -11,7 +11,7 @@ import pytest
 from six import PY3
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
-from datadog_checks.base.utils.containers import hash_mutable, iter_unique
+from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
@@ -149,43 +149,6 @@ class TestContainers:
         ]
 
         assert len(list(iter_unique(custom_queries))) == 1
-
-    @pytest.mark.parametrize(
-        'value',
-        [
-            pytest.param({'x': 'y'}, id='dict'),
-            pytest.param({'x': 'y', 'z': None}, id='dict-with-none-value'),
-            pytest.param({'x': 'y', None: 't'}, id='dict-with-none-key'),
-            pytest.param(['x', 'y'], id='list'),
-            pytest.param(['x', 1, None], id='mixed-list'),
-            pytest.param(('x', 'y'), id='tuple'),
-            pytest.param(('x', 1, None), id='mixed-tuple'),
-            pytest.param({'x', 'y'}, id='set'),
-            pytest.param({'x', 1, None}, id='mixed-set'),
-            pytest.param({'x': ['y', 'z']}, id='dict-nest-list'),
-            pytest.param(['x', {'y': 'z'}], id='list-nest-dict'),
-        ],
-    )
-    def test_hash_mutable(self, value):
-        h = hash_mutable(value)  # Must not fail.
-        assert isinstance(h, int)
-
-    @pytest.mark.parametrize(
-        'left, right',
-        [
-            pytest.param([1, 2], [2, 1], id='top-level'),
-            pytest.param({'x': [1, 2]}, {'x': [2, 1]}, id='nested'),
-        ],
-    )
-    def test_hash_mutable_order_irrelevant(self, left, right):
-        assert hash_mutable(left) == hash_mutable(right)
-
-    @pytest.mark.parametrize('value', ['', 0, ()])
-    def test_hash_mutable_none_is_not_just_falsy(self, value):
-        """
-        None shouldn't be treated as any other false-y value when computing hashes.
-        """
-        assert hash_mutable(['test', None]) != hash_mutable(['test', value])
 
 
 class TestBytesUnicode:
