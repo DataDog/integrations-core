@@ -442,7 +442,7 @@ def should_bypass_proxy(url, no_proxy_uris):
     parsed_uri = urlparse(url).hostname
 
     if '*' in no_proxy_uris:
-        # The only wildcard available is a single * character, which matches all hosts, and effectively disables the proxy.
+        # A single * character is supported, which matches all hosts, and effectively disables the proxy.
         # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
         return True
 
