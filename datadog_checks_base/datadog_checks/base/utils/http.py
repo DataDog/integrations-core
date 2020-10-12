@@ -463,7 +463,7 @@ def should_bypass_proxy(url, no_proxy_uris):
             if no_proxy_uri.startswith((".", "*.")):
                 # Support wildcard subdomain; treat as leading dot "."
                 # e.g. "*.example.domain" as ".example.domain"
-                dot_no_proxy_uri = no_proxy_uri.strip("*")
+                dot_no_proxy_uri = no_proxy_uri.lstrip("*")
             else:
                 # Used for matching subdomains.
                 dot_no_proxy_uri = ".{}".format(no_proxy_uri)
