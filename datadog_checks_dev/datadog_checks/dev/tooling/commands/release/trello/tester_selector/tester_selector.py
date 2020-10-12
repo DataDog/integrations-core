@@ -9,7 +9,7 @@ from .....github import Github
 from .....trello import TrelloClient
 from ....console import echo_info, echo_warning
 from .github_trello_user_matcher import GithubTrelloUserMatcher
-from .github_users import GithubUser, GithubUsers
+from .github_users import GithubUser, GithubUsers, pr_date_str_to_date
 from .tester_selector_team import TesterSelectorTeam
 from .trello_users import TrelloUser, TrelloUsers
 
@@ -90,5 +90,5 @@ class TesterSelector:
     def __get_last_user_activity(self, user: GithubUser) -> Optional[datetime]:
         last_pr_date = user.last_pr_date_str
         if last_pr_date:
-            return datetime.strptime(last_pr_date, "%Y-%m-%dT%H:%M:%SZ")
+            return pr_date_str_to_date(last_pr_date)
         return None
