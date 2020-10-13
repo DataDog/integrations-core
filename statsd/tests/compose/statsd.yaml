@@ -8,3 +8,6 @@ services:
     ports:
       - "8125:8125"
       - "8126:8126"
+    volumes:
+      - ${DD_LOG_1}:/usr/src/app/statsd.log
+    
