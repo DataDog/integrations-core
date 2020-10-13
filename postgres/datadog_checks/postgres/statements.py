@@ -319,25 +319,25 @@ class PgStatementsMixin(object):
 
             if statement_plan_sig not in seen_statement_plan_sigs:
                 seen_statement_plan_sigs.add(statement_plan_sig)
-                events.append(
-                    {
-                        'db': {
-                            'instance': row['datname'],
-                            'statement': obfuscated_statement,
-                            'query_signature': query_signature,
-                            'resource_hash': apm_resource_hash,
-                            'plan': plan,
-                            'plan_cost': plan_cost,
-                            'plan_signature': plan_signature,
-                            'debug': {
-                                'normalized_plan': normalized_plan,
-                                'obfuscated_plan': obfuscated_plan,
-                                'original_statement': original_statement,
-                            },
-                            'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
-                        }
+                event = {
+                    'db': {
+                        'instance': row['datname'],
+                        'statement': obfuscated_statement,
+                        'query_signature': query_signature,
+                        'resource_hash': apm_resource_hash,
+                        'plan': obfuscated_plan,
+                        'plan_cost': plan_cost,
+                        'plan_signature': plan_signature,
+                        'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
                     }
-                )
+                }
+                if self.config.collect_exec_plan_debug:
+                    event['db']['debug'] = {
+                        'original_plan': plan,
+                        'normalized_plan': normalized_plan,
+                        'original_statement': original_statement,
+                    }
+                events.append(event)
         statsd.histogram(
             "dd.postgres.explain_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=instance_tags
         )

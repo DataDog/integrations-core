@@ -60,6 +60,7 @@ class PostgresConfig:
         )
         self.collect_exec_plans_event_limit = instance.get('collect_exec_plans_event_limit', 100000)
         self.collect_exec_plan_function = instance.get('collect_exec_plan_function', 'public.explain_statement')
+        self.collect_exec_plan_debug = instance.get('collect_exec_plan_debug', False)
         self.custom_queries = instance.get('custom_queries', [])
         # default for both pg_stat_functions is to query the default views
         self.pg_stat_activity_function = instance.get('pg_stat_activity_function', 'pg_stat_activity')
