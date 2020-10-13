@@ -38,7 +38,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "apache": "assets/dashboards/apache_dashboard.json.json"
+      "apache": "assets/dashboards/apache_dashboard.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
