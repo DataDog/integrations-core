@@ -14,9 +14,10 @@ The [producer][doc-spec-producer]'s job is to read a specification and:
 1. Populate all unset default fields
 1. Gather and prioritize other schema for inclusion
 1. Resolve any defined templates
+1. Normalize links to embedded style
 1. Output the complete specification as JSON for arbitrary consumers
 
-This spec is dependent on other config files within an integration, the order of precedence:
+This spec is dependent on other config files within an integration check, in order of precedence:
 
 - `manifest.json`
 - `assets/service_checks.json`
@@ -35,7 +36,7 @@ Consumers may utilize specs in a number of scenarios, such as:
 
 The root of every spec is a map with 3 keys:
 
-- `name` - The display name of what the spec refers to e.g. `Postgres`, `Datadog Agent`, etc.
+- `name` - The display name of what the spec refers to e.g. `Postgres`, `Nagios`, etc.
 - `options` - Top-level [spec options](#spec-options) related to the check overall (optional)
 - `files` - A list of all [files](#files) that influence behavior
 
@@ -66,7 +67,7 @@ Every section has these possible attributes:
 - `parameters` - Mapping of extra parameters for string formatting in the `description`.
 - `prepend_text` - Text to insert in front of the description field. Useful for overrides.
 - `append_text` - Text to append after the description field. Useful for overrides.
-- `processor` - Reference to a Python function which should be invoked.  If the function returns None, the default description carries forward, otherwise the results of the function will be used for the `description`.  Used by the `data_collected/service_checks` template, for example.
+- `processor` - Reference to a Python function which should be invoked.  If the function returns `None`, the default description carries forward, otherwise the results of the function will be used for the `description`.  Used by the `data_collected/service_checks` template, for example.
 - `hidden` - Whether or not the section should be publicly exposed. It defaults to `false`.
 - `sections` - Nested sections, this will increase the `header_level` of embedded sections accordingly.
 - `template` - See [templates](#templates) below for more.
@@ -74,9 +75,9 @@ Every section has these possible attributes:
 
 #### Parameters
 
-When constructing each text section, the description field will first prepend and append values from `prepend_text` and `append_text`, respectively.  Next string formatting operations will take place by using a default set of parameters joined with amy parameters explicitly defined in the `parameter` option.
+When constructing each text section, the description field will first prepend and append values from `prepend_text` and `append_text`, respectively.  Next string formatting operations will take place by using a default set of parameters joined with any parameters explicitly defined in the `parameter` attribute.
 
-Default parameters which will be present for all sections include:
+Default parameters which will be present for all sections and passed as keyword args during string formatting include:
 
 - `name` - the formal name of the check
 - all fields from `manifest.json`
@@ -111,9 +112,9 @@ attributes via a ++period++ (dot) accessor.
 
 ```yaml
 options:
-- template: instances/http
+- template: setup/configuration
   overrides:
-    timeout.value.example: 42
+    templates.log_collection.hidden: true
 ```
 
 ## README file consumer
