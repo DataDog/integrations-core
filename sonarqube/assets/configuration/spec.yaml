@@ -1,0 +1,114 @@
+name: SonarQube
+files:
+- name: sonarqube.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+      overrides:
+        is_jmx.value.example: false
+  - template: instances
+    options:
+    - name: web_endpoint
+      description: |
+        The SonarQube web endpoint which should expose its API at `/api`.
+
+        NOTE: This only takes effect when `is_jmx` is set to `false`.
+      value:
+        type: string
+    - name: default_tag
+      description: |
+        The tag name to use for `components` by default.
+
+        NOTE: This only takes effect when `is_jmx` is set to `false`.
+      value:
+        type: string
+        example: component
+    - name: default_include
+      description: |
+        A list of regular expressions that decides what metrics to collect by default. For brevity,
+        you may elide the `sonarqube.` prefix and `.` (dot) characters are treated literally.
+
+        By default, all available metrics are collected.
+
+        NOTE: This only takes effect when `is_jmx` is set to `false`.
+      value:
+        type: array
+        items:
+          type: string
+    - name: default_exclude
+      description: |
+        A list of regular expressions that decides what metrics to exclude by default. For brevity,
+        you may elide the `sonarqube.` prefix and `.` (dot) characters are treated literally.
+
+        By default, no metrics are excluded.
+
+        NOTE: This only takes effect when `is_jmx` is set to `false`.
+      value:
+        type: array
+        items:
+          type: string
+    - name: components
+      description: |
+        The components for which metrics should be collected. Each object may override the default options.
+        For example:
+
+          components:
+            default-component:
+            some-project:
+              tag: project
+              include:
+                - issues.
+                - maintainability.
+                - security.
+              exclude:
+                - issues.(false_positive_issues|reopened_issues)
+
+        NOTE: This only takes effect when `is_jmx` is set to `false`.
+      value:
+        type: object
+        properties:
+        - name: tag
+          type: string
+        - name: include
+          type: array
+          items:
+            type: string
+        - name: exclude
+          type: array
+          items:
+            type: string
+    - template: instances/jmx
+  - template: logs
+    example:
+    - type: file
+      path: /opt/sonarqube/logs/access.log
+      source: sonarqube
+    - type: file
+      path: /opt/sonarqube/logs/ce.log
+      source: sonarqube
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}\.\d{2}\.\d{2}
+    - type: file
+      path: /opt/sonarqube/logs/es.log
+      source: sonarqube
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}\.\d{2}\.\d{2}
+    - type: file
+      path: /opt/sonarqube/logs/sonar.log
+      source: sonarqube
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}\.\d{2}\.\d{2}
+    - type: file
+      path: /opt/sonarqube/logs/web.log
+      source: sonarqube
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}\.\d{2}\.\d{2}
