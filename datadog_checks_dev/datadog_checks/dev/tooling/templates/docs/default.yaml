@@ -6,8 +6,9 @@
   description: |
     TODO: General comments
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -21,8 +22,9 @@
 
     [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -34,8 +36,9 @@
 
     [1]: https://docs.datadoghq.com/agent/
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -44,8 +47,9 @@
   header_level: 3
   description:
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -55,8 +59,9 @@
   header_level: 4
   description:
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -66,8 +71,9 @@
   header_level: 4
   description:
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -99,8 +105,9 @@
   parameters:
     check_log_conf_snippet:
     check_conf_link:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -112,8 +119,9 @@
 
     [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -121,8 +129,9 @@
   name: Data Collected
   header_level: 2
   description:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -134,8 +143,9 @@
 
     [1]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -145,20 +155,20 @@
   description: |
     {display_name} does not include any events.
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
-# TODO - how to override this automagically with values from `service_checks.json`
 - template: data_collected/service_checks
   name: Service Checks
   header_level: 3
   description: |
     The {display_name} does not include any service checks.
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
   processor: datadog_checks.dev.tooling.specs.docs.service_check_processor
   hidden: false
   sections:
@@ -171,8 +181,9 @@
 
     [1]: https://docs.datadoghq.com/help/
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
 
@@ -181,7 +192,8 @@
   header_level: 2
   description:
   parameters:
-  prepend_text: null
-  append_text: null
+  prepend_text:
+  append_text:
+  processor:
   hidden: false
   sections:
