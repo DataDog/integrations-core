@@ -28,6 +28,8 @@ from .utils import register_device_target
 
 local_logger = getLogger(__name__)
 
+SUPPORTED_DEVICE_TAGS = ['type', 'vendor']  # Example: "router", "switch", "pdu", etc.  # Example: "Cisco", "F5", etc.
+
 
 class InstanceConfig:
     """Parse and hold configuration about a single instance."""
@@ -123,6 +125,7 @@ class InstanceConfig:
 
         if ip_address:
             port = int(instance.get('port', 161))
+
             target = register_device_target(
                 ip_address,
                 port,
@@ -182,6 +185,9 @@ class InstanceConfig:
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
 
+        device_info = profile['definition'].get('device', {})
+        self.add_device_tags(device_info)
+
         # NOTE: `profile` may contain metrics and metric tags that have already been ingested in this configuration.
         # As a result, multiple copies of metrics/tags will be fetched and submitted to Datadog, which is inefficient
         # and possibly problematic.
@@ -195,6 +201,13 @@ class InstanceConfig:
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
+
+    def add_device_tags(self, tags):
+        # type: (dict) -> None
+        for device_tag in SUPPORTED_DEVICE_TAGS:
+            tag = tags.get(device_tag)
+            if tag:
+                self.tags.append('snmp_device_{}:{}'.format(device_tag, tag))
 
     @classmethod
     def get_auth_data(cls, instance):

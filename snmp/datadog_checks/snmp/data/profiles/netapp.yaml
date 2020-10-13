@@ -3,6 +3,10 @@
 extends:
   - _base.yaml
 
+device:
+  type: "storage"
+  vendor: "netapp"
+
 sysobjectid: 1.3.6.1.4.1.789.2.5
 
 metrics:

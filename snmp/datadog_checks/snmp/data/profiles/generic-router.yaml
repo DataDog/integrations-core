@@ -9,4 +9,8 @@ extends:
   - _generic-udp.yaml
   - _generic-ospf.yaml
 
+device:
+  type: "router"
+  vendor: "generic"
+
 sysobjectid: 1.3.6.1.4.*

@@ -4,7 +4,11 @@
 extends:
   - _base.yaml
   - _generic-if.yaml
-  
+
+device:
+  vendor: "meraki"
+  type: "cloud_controller"
+
 sysobjectid: 1.3.6.1.4.1.29671.*
 
 metrics:
