@@ -26,15 +26,16 @@ class _FreezeKey(object):
             # Some integrations may using freezing on structures that contain `None`, so we want to support it and
             # use the same behavior than on Python 2, i.e. `None < <anything>` must return `False`...
             if self.value is None:
-                # `None < x` -> `False`
-                return False
-            if other.value is None:
-                # `x < None` -> `True`
+                # `None < x` -> `True`
                 return True
+            if other.value is None:
+                # `x < None` -> `False`
+                return False
             # ...But we let other cases bubble through.
             raise
         else:
-            # We're on Python 2, where `a < b` never fails (returns `False` by default).
+            # We're on Python 2, where `a < b` never fails (returns `False` by default), or
+            # we're on Python 3 and values have the same type.
             return lt
 
 
