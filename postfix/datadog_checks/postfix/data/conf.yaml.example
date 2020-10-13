@@ -1,34 +1,42 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param postfix_user - string - required
-  ## The user running dd-agent must have passwordless sudo access for the find
-  ## command to run the postfix check.  Here's an example:
-  ## example /etc/sudoers entry:
-  ##   dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
-  ##
-  ## Redhat/CentOS/Amazon Linux flavours need to add:
-  ##          Defaults:dd-agent !requiretty
-  #
-  postfix_user: postfix
+    ## @param postfix_user - string - required
+    ## The user running dd-agent must have passwordless sudo access for the find
+    ## command to run the postfix check.
+    ## Example /etc/sudoers entry:
+    ##   dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+    ##
+    ## On Redhat, CentOS, and Amazon Linux, also add:
+    ##   Defaults:dd-agent !requiretty
+    #
+    postfix_user: postfix
 
-  ## @param postqueue - boolean - optional - default: false
-  ## Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.
-  ## Postqueue binary is ran with set-group ID privileges, so that it can connect to Postfix daemon processes.
-  ## Only `tags` keys are used from `instances` definition.
-  ## Postfix has internal access controls that limit activities on the mail queue. By default,
-  ## Postfix allows `anyone` to view the queue. On production systems where the Postfix installation
-  ## may be configured with stricter access controls, you may need to grant the dd-agent user access to view
-  ## the mail queue.
-  ##
-  ## postconf -e "authorized_mailq_users = dd-agent"
-  ##
-  ## http://www.postfix.org/postqueue.1.html
-  ##
-  ## authorized_mailq_users (static:anyone)
-  ## List of users who are authorized to view the queue.
-  #
-  # postqueue: false
+    ## @param postqueue - boolean - optional - default: false
+    ## Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.
+    ## Postqueue binary runs with set-group ID privileges, so that it can connect to Postfix daemon processes.
+    ## Only `tags` keys are used from `instances` definition.
+    ## Postfix has internal access controls that limit activities on the mail queue. By default,
+    ## Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be
+    ## configured with stricter access controls, you may need to grant the dd-agent user access to view the mail queue.
+    ##
+    ##   postconf -e "authorized_mailq_users = dd-agent"
+    ##
+    ## authorized_mailq_users (static:anyone): List of users who are authorized to view the queue.
+    ## http://www.postfix.org/postqueue.1.html
+    #
+    # postqueue: false
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param directory - string - required
@@ -36,7 +44,7 @@ instances:
     #
   - directory: /var/spool/postfix
 
-    ## @param queues - list of string - required
+    ## @param queues - list of strings - required
     ## List of queues to monitor.
     #
     queues:
@@ -44,34 +52,57 @@ instances:
       - active
       - deferred
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param config_directory - string - optional - default: /etc/postfix
+    ## The config_directory option applies only when `postqueue: true`.
+    ## The config_directory is the location of the Postfix configuration directory that contains the main.cf file.
+    #
+    # config_directory: /etc/postfix
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param config_directory - string - optional
-    ## The config_directory option only applies when `postqueue: true`.
-    ## The config_directory is the location of the Postfix configuration directory
-    ## where main.cf lives.
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
     #
-    # config_directory: /etc/postfix
+    # service: <SERVICE>
 
-## Log Section (Available for Agent >=6.0)
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
-## service - mandatory - Name of the service that generated the log
-## source  - mandatory - Attribute that defines which Integration sent the logs
-## tags: - optional - Add tags to the collected logs
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
 #   - type: file
 #     path: /var/log/mail.log
-#     service: <SERVICE_NAME>
 #     source: postfix
