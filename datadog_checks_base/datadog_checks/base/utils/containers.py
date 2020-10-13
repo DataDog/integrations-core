@@ -4,29 +4,60 @@
 from six import iteritems
 
 
+class _FreezeKey(object):
+    # "Why does this class exist?"
+    # To freeze and compute hashes or mutable structures, we use sorting as an intermediary step so that the
+    # order of items in the container doesn't change the final hash (a property we could call "commutativity").
+    # When items in the container are all the same type (eg a list of strings), there is no problem to this.
+    # But when the container has items of mixed types, we'd get a `TypeError` on Python 3. (Not on Python 2 though,
+    # since comparisons there default to returning `False`.)
+    # So this class was introduced to support specific comparison cases that we need to support to fulfill the needs
+    # of integrations that use these freeze/hash helpers.
+
+    def __init__(self, value):
+        self.value = value
+
+    def __lt__(self, other):
+        # type: (_FreezeKey) -> bool
+        try:
+            lt = self.value < other.value
+        except TypeError:
+            # We're on Python 3, and values are of differing types.
+            # Some integrations may using freezing on structures that contain `None`, so we want to support it and
+            # use the same behavior than on Python 2, i.e. `None < <anything>` must return `False`...
+            if self.value is None:
+                # `None < x` -> `True`
+                return True
+            if other.value is None:
+                # `x < None` -> `False`
+                return False
+            # ...But we let other cases bubble through.
+            raise
+        else:
+            # We're on Python 2, where `a < b` never fails (returns `False` by default), or
+            # we're on Python 3 and values have the same type.
+            return lt
+
+
+def _item_freeze_key(item):
+    # type: (tuple) -> tuple
+    key, value = item
+    return (_FreezeKey(key), _FreezeKey(value))
+
+
 def freeze(o):
     """
     Freezes any mutable object including dictionaries and lists for hashing.
     Accepts nested dictionaries.
     """
-
-    # NOTE: we sort items in containers so that the resulting frozen structure (and its hash) don't depend
-    # on the order of those items. In other words: `hash_mutable([1, 2]) == hash_mutable([2, 1])`.
-    # So, the sort `key` can be any function that uniquely maps a value to another.
-    # We used to use the identify function, i.e. no `key` (or `key=lambda x: x`), but this prevented freezing
-    # containers that contain `None` values, since on Python 3 those can't be compared with anything else.
-    # The `hash` built-in is a function that uniquely maps values, while being also applicable to all immutable objects.
-    # See: https://github.com/DataDog/integrations-core/pull/7763
-    key = hash
-
     if isinstance(o, (tuple, list)):
-        return tuple(sorted((freeze(e) for e in o), key=key))
+        return tuple(sorted((freeze(e) for e in o), key=_FreezeKey))
 
     if isinstance(o, dict):
-        return tuple(sorted(((k, freeze(v)) for k, v in iteritems(o)), key=key))
+        return tuple(sorted(((k, freeze(v)) for k, v in iteritems(o)), key=_item_freeze_key))
 
     if isinstance(o, (set, frozenset)):
-        return tuple(sorted((freeze(e) for e in o), key=key))
+        return tuple(sorted((freeze(e) for e in o), key=_FreezeKey))
 
     return o
 
