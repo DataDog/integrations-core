@@ -41,7 +41,7 @@ files:
           type: integer
           default: 1000
       - name: timeout
-        description: The timeout for connecting to `server`.
+        description: The timeout in seconds for connecting to `server`.
         value:
           type: integer
           default: 10
