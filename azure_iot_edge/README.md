@@ -2,11 +2,11 @@
 
 ## Overview
 
-[Azure IoT Edge][1] is a fully managed service to deploy Cloud workloads to run on Internet of Things (IoT) edge devices via standard containers.
+[Azure IoT Edge][1] is a fully managed service to deploy Cloud workloads to run on Internet of Things (IoT) Edge devices via standard containers.
 
 Use the Datadog-Azure IoT Edge integration to collect metrics and health status from IoT Edge devices.
 
-**Note**: this integration requires IoT Edge runtime version 1.0.10 or above.
+**Note**: This integration requires IoT Edge runtime version 1.0.10 or above.
 
 ## Setup
 
@@ -20,7 +20,7 @@ No additional installation is needed on your device.
 
 ### Configuration
 
-It is recommended to configure the IoT Edge device so that the Agent runs as a custom module. Follow the official Microsoft documentation on [deploying Azure IoT Edge modules][3] for general information on installing and working with custom modules for Azure IoT Edge.
+Configure the IoT Edge device so that the Agent runs as a custom module. Follow the Microsoft documentation on [deploying Azure IoT Edge modules][3] for information on installing and working with custom modules for Azure IoT Edge.
 
 Follow the steps below to configure the IoT Edge device, runtime modules, and the Datadog Agent to start collecting IoT Edge metrics.
 
@@ -36,13 +36,13 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
         }
         ```
 
-    - Under "Environment Variables", experimental metrics must be enabled by adding these environment variables (note the double underscores):
+    - Under "Environment Variables", enable experimental metrics by adding these environment variables (note the double underscores):
         - `ExperimentalFeatures__Enabled`: `true`
         - `ExperimentalFeatures__EnableMetrics`: `true`
 
 1. Configure the **Edge Hub** runtime module as follows:
     - Image version must be `1.0.10` or above.
-    - Under "Environment Variables", experimental metrics must be enabled by adding these environment variables (note the double underscores):
+    - Under "Environment Variables", enable experimental metrics by adding these environment variables (note the double underscores):
         - `ExperimentalFeatures__Enabled`: `true`
         - `ExperimentalFeatures__EnableMetrics`: `true`
 
