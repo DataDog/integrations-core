@@ -19,7 +19,7 @@ from . import common
 def check():
     if common.COUCH_MAJOR_VERSION == 1:
         return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG])
-    elif common.COUCH_MAJOR_VERSION == 2:
+    else:
         return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG_V2])
 
 
@@ -27,7 +27,7 @@ def check():
 def instance():
     if common.COUCH_MAJOR_VERSION == 1:
         return deepcopy(common.BASIC_CONFIG)
-    elif common.COUCH_MAJOR_VERSION == 2:
+    else:
         return deepcopy(common.BASIC_CONFIG_V2)
 
 
@@ -132,7 +132,7 @@ def generate_data(couch_version):
     Generate data on the couch cluster to test metrics.
     """
     # pass in authentication info for version 2
-    auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
+    auth = None if couch_version == "1" else (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
 
     # Generate a test database

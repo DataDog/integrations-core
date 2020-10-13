@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.0.0 / 2020-10-13
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Fixed] Update kafka-python to 2.0.2. See [#7718](https://github.com/DataDog/integrations-core/pull/7718).
+* [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
+
 ## 14.0.1 / 2020-09-28 / Agent 7.23.0
 
 * [Fixed] Normalize count metric type in `assert_metrics_using_metadata()`. See [#7666](https://github.com/DataDog/integrations-core/pull/7666).

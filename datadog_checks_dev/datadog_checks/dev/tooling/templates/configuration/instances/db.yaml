@@ -17,7 +17,7 @@
     2. columns - The list representing each column, ordered sequentially from left to right.
                  The number of columns must equal the number of columns returned in the query.
                  There are 2 required pieces of data:
-                   a. name - The suffix to append to `clickhouse.` to form
+                   a. name - The suffix to append to `<INTEGRATION>.` to form
                              the full metric name. If `type` is `tag`, this column is
                              considered a tag and applied to every
                              metric collected by this particular query.

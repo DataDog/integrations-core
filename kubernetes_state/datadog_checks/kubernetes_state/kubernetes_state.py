@@ -585,21 +585,23 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
 
             reason = sample[self.SAMPLE_LABELS].get('reason')
-            if reason:
+            if reason and reason.lower() in allowed_status_reasons:
                 # Filtering according to the reason here is paramount to limit cardinality
-                if reason.lower() in allowed_status_reasons:
-                    tags += self._build_tags('reason', reason, scraper_config)
-                else:
+                tags += self._build_tags('reason', reason, scraper_config)
+            else:
+                continue
+
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                if label_name == "reason":
                     continue
 
-            if 'container' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('kube_container_name', sample[self.SAMPLE_LABELS]['container'], scraper_config)
+                elif label_name == 'container':
+                    tags += self._build_tags(
+                        'kube_container_name', sample[self.SAMPLE_LABELS]['container'], scraper_config
+                    )
 
-            if 'namespace' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('namespace', sample[self.SAMPLE_LABELS]['namespace'], scraper_config)
-
-            if 'pod' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('pod', sample[self.SAMPLE_LABELS]['pod'], scraper_config)
+                else:
+                    tags += self._build_tags(label_name, label_value, scraper_config)
 
             self.gauge(
                 metric_name,
