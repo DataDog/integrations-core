@@ -9,12 +9,14 @@ files:
     options:
       - name: host
         required: true
+        display_priority: 1
         description: The host used to resolve the vCenter IP. It is either a FQDN or an IP.
         value:
           type: string
           example: <HOSTNAME>
       - name: username
         required: true
+        display_priority: 1
         description: | 
           The username of the read-only credentials to connect to vCenter
           see https://app.datadoghq.com/account/settings#integrations/vsphere
@@ -23,6 +25,7 @@ files:
           example: <USERNAME>
       - name: password 
         required: true
+        display_priority: 1
         description: | 
           The password of the read-only credentials to connect to vCenter.
           see https://app.datadoghq.com/account/settings#integrations/vsphere
@@ -31,6 +34,7 @@ files:
           example: <PASSWORD>
       - name: use_legacy_check_version
         required: true
+        display_priority: 1
         description: | 
           For backward compatibility reasons, it is possible to use a deprecated version of the vSphere 
           integration by setting this field to "true".
@@ -401,4 +405,23 @@ files:
         value:
           type: integer
           example: 1800
-      - template: instances/default  
+      - name: include_datastore_cluster_folder_tag
+        description: |
+          If a datastore is part of a datastore cluster, the tag "vsphere_datastore_cluster" indicating the datastore
+          cluster name is sent along with datastore metrics.
+          However, for compatibility reasons, this name is also sent as tag "vsphere_folder".
+          You can disable this by setting this property to false.
+          The default value is true.
+        value:
+          type: boolean
+          example: true
+      - template: instances/default
+        overrides:
+          empty_default_hostname.display_priority: 1
+          empty_default_hostname.required: true
+          empty_default_hostname.value.example: true
+          empty_default_hostname.description: |
+            The vSphere integration is a cluster-level check where metrics are usually unrelated to the host
+            on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+            (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+            running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.

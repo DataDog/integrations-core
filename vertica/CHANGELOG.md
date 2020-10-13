@@ -1,5 +1,10 @@
 # CHANGELOG - Vertica
 
+## 1.7.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config spec for Vertica. See [#7513](https://github.com/DataDog/integrations-core/pull/7513).
+* [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
+
 ## 1.6.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Improve collection of library logs for debug flares. See [#7252](https://github.com/DataDog/integrations-core/pull/7252).

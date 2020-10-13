@@ -126,6 +126,8 @@ class KafkaCheck(AgentCheck):
         self._report_highwater_offsets(self._context_limit)
         self._report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
 
+        self._collect_broker_metadata()
+
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
         kafka_connect_str = self.instance.get('kafka_connect_str')
@@ -457,6 +459,15 @@ class KafkaCheck(AgentCheck):
             'aggregation_key': aggregation_key,
         }
         self.event(event_dict)
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_broker_metadata(self):
+        version_data = [str(part) for part in self.kafka_client._client.check_version()]
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+
+        self.set_metadata(
+            'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
+        )
 
     @classmethod
     def _determine_kafka_version(cls, init_config, instance):

@@ -1,5 +1,15 @@
 # CHANGELOG - vsphere
 
+## 5.7.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add datastore cluster tag. See [#7603](https://github.com/DataDog/integrations-core/pull/7603).
+* [Fixed] Better trace log. See [#7608](https://github.com/DataDog/integrations-core/pull/7608).
+
+## 5.6.0 / 2020-09-16
+
+* [Added] Add hostname to vsphere debug metrics. See [#7580](https://github.com/DataDog/integrations-core/pull/7580).
+* [Fixed] Use server time to compute startTime. See [#7586](https://github.com/DataDog/integrations-core/pull/7586).
+
 ## 5.5.0 / 2020-09-15
 
 * [Added] Add debug logs to help support. See [#7577](https://github.com/DataDog/integrations-core/pull/7577).

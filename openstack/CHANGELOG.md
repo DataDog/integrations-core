@@ -1,5 +1,9 @@
 # CHANGELOG - openstack
 
+## 1.10.2 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 1.10.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Use agent v6 init signature. See [#6830](https://github.com/DataDog/integrations-core/pull/6830).

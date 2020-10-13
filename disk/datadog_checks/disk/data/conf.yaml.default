@@ -1,6 +1,32 @@
 ## All options defined here are available to all instances.
 #
-# init_config: {}
+init_config:
+
+    ## @param file_system_global_exclude - list of strings - optional
+    ## Instruct the check to always add these patterns to `file_system_exclude`.
+    ##
+    ## WARNING: Overriding these defaults could negatively impact your system or
+    ## the performance of the check.
+    #
+    # file_system_global_exclude:
+    #   - iso9660$
+
+    ## @param device_global_exclude - list of strings - optional
+    ## Instruct the check to always add these patterns to `device_exclude`.
+    ##
+    ## WARNING: Overriding these defaults could negatively impact your system or
+    ## the performance of the check.
+    #
+    # device_global_exclude: []
+
+    ## @param mount_point_global_exclude - list of strings - optional
+    ## Instruct the check to always add these patterns to `mount_point_exclude`.
+    ##
+    ## WARNING: Overriding these defaults could negatively impact your system or
+    ## the performance of the check.
+    #
+    # mount_point_global_exclude:
+    #   - (/host)?/proc/sys/fs/binfmt_misc$
 
 ## Every instance is scheduled independent of the others.
 #
@@ -26,18 +52,18 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param file_system_whitelist - list of strings - optional
+    ## @param file_system_include - list of strings - optional
     ## Instruct the check to only collect from matching file systems.
     ##
     ## Character casing is ignored. For convenience, the regular expressions
     ## start matching from the beginning and therefore to match anywhere you
     ## must prepend `.*`. For exact matches append `$`.
     #
-    # file_system_whitelist:
+    # file_system_include:
     #   - ext[34]$
     #   - ntfs$
 
-    ## @param file_system_blacklist - list of strings - optional
+    ## @param file_system_exclude - list of strings - optional
     ## Instruct the check to not collect from matching file systems.
     ##
     ## Character casing is ignored. For convenience, the regular expressions
@@ -47,56 +73,56 @@ instances:
     ## Devices from pseudo or memory-based file systems can be excluded by disabling the
     ## `include_all_devices` option.
     ##
-    ## When conflicts arise, this will override `file_system_whitelist`.
+    ## When conflicts arise, this will override `file_system_include`.
     #
-    # file_system_blacklist:
+    # file_system_exclude:
     #   - tmpfs$
     #   - rootfs$
     #   - autofs$
 
-    ## @param device_whitelist - list of strings - optional
+    ## @param device_include - list of strings - optional
     ## Instruct the check to only collect from matching devices.
     ##
     ## Character casing is ignored on Windows. For convenience, the regular
     ## expressions start matching from the beginning and therefore to match
     ## anywhere you must prepend `.*`. For exact matches append `$`.
     #
-    # device_whitelist:
+    # device_include:
     #   - /dev/sda[1-3]
     #   - 'C:'
 
-    ## @param device_blacklist - list of strings - optional
+    ## @param device_exclude - list of strings - optional
     ## Instruct the check to not collect from matching devices.
     ##
     ## Character casing is ignored on Windows. For convenience, the regular
     ## expressions start matching from the beginning and therefore to match
     ## anywhere you must prepend `.*`. For exact matches append `$`.
     ##
-    ## When conflicts arise, this will override `device_whitelist`.
+    ## When conflicts arise, this will override `device_include`.
     #
-    # device_blacklist:
+    # device_exclude:
     #   - /dev/sde
     #   - '[FJ]:'
 
-    ## @param mount_point_whitelist - list of strings - optional
+    ## @param mount_point_include - list of strings - optional
     ## Instruct the check to only collect from matching mount points.
     ##
     ## Character casing is ignored on Windows. For convenience, the regular
     ## expressions start matching from the beginning and therefore to match
     ## anywhere you must prepend `.*`. For exact matches append `$`.
     #
-    # mount_point_whitelist:
+    # mount_point_include:
     #   - /dev/sda[1-3]
     #   - 'C:'
 
-    ## @param mount_point_blacklist - list of strings - optional
+    ## @param mount_point_exclude - list of strings - optional
     ## Instruct the check to not collect from matching mount points.
     ##
     ## Character casing is ignored on Windows. For convenience, the regular
     ## expressions start matching from the beginning and therefore to match
     ## anywhere you must prepend `.*`. For exact matches append `$`.
     #
-    # mount_point_blacklist:
+    # mount_point_exclude:
     #   - /proc/sys/fs/binfmt_misc
     #   - /dev/sde
     #   - '[FJ]:'

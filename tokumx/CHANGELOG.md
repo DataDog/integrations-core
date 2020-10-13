@@ -1,5 +1,10 @@
 # CHANGELOG - tokumx
 
+## 2.3.2 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
 ## 2.3.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Add config specs and change signature. See [#6729](https://github.com/DataDog/integrations-core/pull/6729).

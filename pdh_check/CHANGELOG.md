@@ -1,5 +1,10 @@
 # CHANGELOG - pdh_check
 
+## 1.12.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+* [Fixed] add counterset validation in pdh check. See [#7386](https://github.com/DataDog/integrations-core/pull/7386).
+
 ## 1.12.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config spec. See [#7153](https://github.com/DataDog/integrations-core/pull/7153).

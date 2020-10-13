@@ -64,8 +64,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
-##### Log collection
+### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -91,9 +93,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 3. [Restart the Agent][6].
 
 See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### Validation
 

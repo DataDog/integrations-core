@@ -1,6 +1,6 @@
 # CHANGELOG - spark
 
-## 1.15.0 / 2020-09-03
+## 1.15.0 / 2020-09-03 / Agent 7.23.0
 
 * [Added] Add Stage and Job ID tags. See [#7459](https://github.com/DataDog/integrations-core/pull/7459).
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
@@ -111,7 +111,7 @@
 [3]: https://github.com/DataDog/integrations-core/pull/2437
 [4]: https://github.com/DataDog/integrations-core/pull/1727
 [5]: https://github.com/DataDog/integrations-core/pull/1680
-[6]: 
-[7]: 
-[8]: 
+[6]: https://github.com/DataDog/integrations-core/pull/1064
+[7]: https://github.com/DataDog/integrations-core/pull/459
+[8]: https://github.com/johnjeffers
 [9]: https://github.com/DataDog/integrations-core/issues/437

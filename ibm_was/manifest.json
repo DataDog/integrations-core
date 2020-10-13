@@ -26,10 +26,13 @@
   "integration_id": "ibm-was",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "IBM_WAS": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ibm_was"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

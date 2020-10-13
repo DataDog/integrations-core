@@ -173,21 +173,21 @@ files:
 
               - name: extra_status_metrics
                 description: |
-                  Set to `false` to disable extra status metrics.
+                  Set to `true` to enable extra status metrics.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
-                  example: true
+                  example: false
 
               - name: extra_innodb_metrics
                 description: |
-                  Set to `false` to disable extra InnoDB metrics.
+                  Set to `true` to enable extra InnoDB metrics.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
-                  example: true
+                  example: false
 
               - name: disable_innodb_metrics
                 description: |
@@ -233,7 +233,7 @@ files:
                   MySQL integration tile in the Datadog Web UI for further instructions.
                 value:
                   type: boolean
-                  example: true
+                  example: false
 
           - template: instances/default
 

@@ -30,5 +30,6 @@
     "logs": {
       "source": "nfsstat"
     }
+    "metrics_metadata": "metadata.csv"
   }
 }

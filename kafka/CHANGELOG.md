@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 2.2.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
 ## 2.2.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config specs. See [#7271](https://github.com/DataDog/integrations-core/pull/7271).

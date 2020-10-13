@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
 from collections import OrderedDict
 
 import mock
@@ -10,15 +11,16 @@ import pytest
 import requests
 import requests_kerberos
 import requests_ntlm
+import requests_unixsocket
 from aws_requests_auth import boto_utils as requests_aws
 from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
-from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_windows_ci
+from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.dev import EnvVars, TempDir
+from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci, write_file
 
 pytestmark = pytest.mark.http
 
@@ -552,6 +554,406 @@ class TestAuth:
             RequestsWrapper(instance, init_config)
 
 
+class TestAuthTokenHandlerCreation:
+    def test_not_mapping(self):
+        instance = {'auth_token': ''}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `auth_token` field must be a mapping$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_no_reader(self):
+        instance = {'auth_token': {'writer': {}}}
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `auth_token` field must define both `reader` and `writer` settings$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_no_writer(self):
+        instance = {'auth_token': {'reader': {}}}
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `auth_token` field must define both `reader` and `writer` settings$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_reader_config_not_mapping(self):
+        instance = {'auth_token': {'reader': '', 'writer': {}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `reader` settings of field `auth_token` must be a mapping$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_writer_config_not_mapping(self):
+        instance = {'auth_token': {'reader': {}, 'writer': ''}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `writer` settings of field `auth_token` must be a mapping$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_reader_type_missing(self):
+        instance = {'auth_token': {'reader': {}, 'writer': {}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The reader `type` of field `auth_token` is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_reader_type_not_string(self):
+        instance = {'auth_token': {'reader': {'type': {}}, 'writer': {}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The reader `type` of field `auth_token` must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_reader_type_unknown(self):
+        instance = {'auth_token': {'reader': {'type': 'foo'}, 'writer': {}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^Unknown `auth_token` reader type, must be one of: file$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_writer_type_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'file'}, 'writer': {}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The writer `type` of field `auth_token` is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_writer_type_not_string(self):
+        instance = {'auth_token': {'reader': {'type': 'file'}, 'writer': {'type': {}}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The writer `type` of field `auth_token` must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_writer_type_unknown(self):
+        instance = {'auth_token': {'reader': {'type': 'file'}, 'writer': {'type': 'foo'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^Unknown `auth_token` writer type, must be one of: header$'):
+            RequestsWrapper(instance, init_config)
+
+
+class TestAuthTokenFileReaderCreation:
+    def test_path_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'file'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `path` setting of `auth_token` reader is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_path_not_string(self):
+        instance = {'auth_token': {'reader': {'type': 'file', 'path': {}}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `path` setting of `auth_token` reader must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_pattern_not_string(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'file', 'path': '/foo', 'pattern': 0}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `pattern` setting of `auth_token` reader must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_pattern_no_groups(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'file', 'path': '/foo', 'pattern': 'bar'}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ValueError, match='^The pattern `bar` setting of `auth_token` reader must define exactly one group$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+
+class TestAuthTokenHeaderWriterCreation:
+    def test_name_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'file', 'path': '/foo'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `name` setting of `auth_token` writer is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_name_not_string(self):
+        instance = {'auth_token': {'reader': {'type': 'file', 'path': '/foo'}, 'writer': {'type': 'header', 'name': 0}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `name` setting of `auth_token` writer must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_value_not_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'file', 'path': '/foo'},
+                'writer': {'type': 'header', 'name': 'foo', 'value': 0},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `value` setting of `auth_token` writer must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_placeholder_not_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'file', 'path': '/foo'},
+                'writer': {'type': 'header', 'name': 'foo', 'value': 'bar', 'placeholder': 0},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `placeholder` setting of `auth_token` writer must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_placeholder_empty_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'file', 'path': '/foo'},
+                'writer': {'type': 'header', 'name': 'foo', 'value': 'bar', 'placeholder': ''},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `placeholder` setting of `auth_token` writer cannot be an empty string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_placeholder_not_in_value(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'file', 'path': '/foo'},
+                'writer': {'type': 'header', 'name': 'foo', 'value': 'bar'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError,
+            match='^The `value` setting of `auth_token` writer does not contain the placeholder string `<TOKEN>`$',
+        ):
+            RequestsWrapper(instance, init_config)
+
+
+class TestAuthTokenReadFile:
+    def test_pattern_no_match(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file, 'pattern': 'foo(.+)'},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            with mock.patch('requests.get'):
+                write_file(token_file, '\nsecret\nsecret\n')
+
+                with pytest.raises(
+                    ValueError,
+                    match='^{}$'.format(
+                        re.escape('The pattern `foo(.+)` does not match anything in file: {}'.format(token_file))
+                    ),
+                ):
+                    http.get('https://www.google.com')
+
+    def test_pattern_match(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file, 'pattern': 'foo(.+)'},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer bar'}
+            with mock.patch('requests.get') as get:
+                write_file(token_file, '\nfoobar\nfoobaz\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+
+class TestAuthTokenWriteHeader:
+    def test_default_placeholder_same_as_value(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'X-Vault-Token'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'X-Vault-Token': 'foobar'}
+            with mock.patch('requests.get') as get:
+                write_file(token_file, '\nfoobar\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+
+class TestAuthTokenFileReaderWithHeaderWriter:
+    def test_read_before_first_request(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret1'}
+            with mock.patch('requests.get') as get:
+                write_file(token_file, '\nsecret1\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+                # Should use cached token
+                write_file(token_file, '\nsecret2\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+    def test_refresh_after_connection_error(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            with mock.patch('requests.get'):
+                write_file(token_file, '\nsecret1\n')
+                http.get('https://www.google.com')
+
+            # TODO: use nonlocal when we drop Python 2 support
+            counter = {'errors': 0}
+
+            def raise_error_once(*args, **kwargs):
+                counter['errors'] += 1
+                if counter['errors'] <= 1:
+                    raise Exception
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret2'}
+            with mock.patch('requests.get', side_effect=raise_error_once) as get:
+                write_file(token_file, '\nsecret2\n')
+
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+    def test_refresh_after_bad_status_code(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            init_config = {}
+            http = RequestsWrapper(instance, init_config)
+
+            with mock.patch('requests.get'):
+                write_file(token_file, '\nsecret1\n')
+                http.get('https://www.google.com')
+
+            def error():
+                raise Exception()
+
+            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret2'}
+            with mock.patch('requests.get', return_value=mock.MagicMock(raise_for_status=error)) as get:
+                write_file(token_file, '\nsecret2\n')
+                http.get('https://www.google.com')
+
+                get.assert_called_with(
+                    'https://www.google.com',
+                    headers=expected_headers,
+                    auth=None,
+                    cert=None,
+                    proxies=None,
+                    timeout=(10.0, 10.0),
+                    verify=True,
+                )
+
+                assert http.options['headers'] == expected_headers
+
+
 class TestProxies:
     def test_config_default(self):
         instance = {}
@@ -845,6 +1247,16 @@ class TestIgnoreTLSWarning:
         else:
             raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
 
+    def test_default_no_ignore_http(self, caplog):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            http.get('http://www.google.com', verify=False)
+
+        assert sum(1 for _, level, _ in caplog.record_tuples if level == logging.WARNING) == 0
+
     def test_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {}
@@ -937,6 +1349,52 @@ class TestIgnoreTLSWarning:
                 break
         else:
             raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+
+class TestUnixDomainSocket:
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
+            pytest.param('http://example.org', False, id='non-uds-url'),
+            pytest.param('unix:///var/run/test.sock/info', True, id='unquoted'),
+            pytest.param('unix://%2Fvar%2Frun%2Ftest.sock', True, id='quoted'),
+        ],
+    )
+    def test_is_uds_url(self, value, expected):
+        # type: (str, bool) -> None
+        assert is_uds_url(value) == expected
+
+    @pytest.mark.parametrize(
+        'value, expected',
+        [
+            pytest.param('http://example.org', 'http://example.org', id='non-uds-url'),
+            pytest.param('unix:///var/run/test.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='uds-url'),
+            pytest.param('unix:///var/run/test.sock', 'unix://%2Fvar%2Frun%2Ftest.sock', id='uds-url-no-path'),
+            pytest.param(
+                'unix://%2Fvar%2Frun%2Ftest.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='already-quoted'
+            ),
+        ],
+    )
+    def test_quote_uds_url(self, value, expected):
+        # type: (str, str) -> None
+        assert quote_uds_url(value) == expected
+
+    def test_adapter_mounted(self):
+        # type: () -> None
+        http = RequestsWrapper({}, {})
+        url = 'unix:///var/run/test.sock'
+        adapter = http.session.get_adapter(url=url)
+        assert adapter is not None
+        assert isinstance(adapter, requests_unixsocket.UnixAdapter)
+
+    @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
+    def test_uds_request(self, uds_path):
+        # type: (str) -> None
+        http = RequestsWrapper({}, {})
+        url = 'unix://{}'.format(uds_path)
+        response = http.get(url)
+        assert response.status_code == 200
+        assert response.text == 'Hello, World!'
 
 
 class TestSession:

@@ -153,6 +153,8 @@ We provide an easy way to utilize [log collection][integration-log-collection] w
 
 1. When [starting](cli.md#start) the environment, pass `-e DD_LOGS_ENABLED=true` to activate the Logs Agent.
 
+1. To send logs to a custom url, pass `-e DD_LOGS_CONFIG_LOGS_DD_URL=[CUSTOM_URL]:[CUSTOM_PORT]` when [starting](cli.md#start) the environment
+
 ## Reference
 
 ::: datadog_checks.dev.docker

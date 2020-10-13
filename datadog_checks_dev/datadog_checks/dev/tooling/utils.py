@@ -270,11 +270,12 @@ def get_tox_file(check_name):
 
 
 def get_metadata_file(check_name):
-    return os.path.join(get_root(), check_name, 'metadata.csv')
+    path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
+    return os.path.join(get_root(), check_name, path)
 
 
 def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula')
+    path = load_manifest(check_name).get('terms', {}).get('eula', '')
     path = os.path.join(get_root(), check_name, *path.split('/'))
     return path, file_exists(path)
 
@@ -362,13 +363,15 @@ def get_config_files(check_name):
     return sorted(files)
 
 
-def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_dirs=None):
+def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_tests=True, include_dirs=None):
     """Return generator of filenames from within a given check.
 
     By default, only includes files within 'datadog_checks' and 'tests' directories, this
-    can be expanded by adding to the `include_dirs` arg.
+    can be expanded by adding to the `include_dirs` arg. 'tests' can also be removed.
     """
-    base_dirs = ['datadog_checks', 'tests']
+    base_dirs = ['datadog_checks']
+    if include_tests:
+        base_dirs.append('tests')
     if include_dirs is not None:
         base_dirs += include_dirs
 

@@ -1,5 +1,11 @@
 # CHANGELOG - Airflow
 
+## 1.6.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 1.5.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] airflow new metrics. See [#7112](https://github.com/DataDog/integrations-core/pull/7112).

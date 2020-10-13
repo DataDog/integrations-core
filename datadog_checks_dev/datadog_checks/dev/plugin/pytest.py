@@ -136,7 +136,7 @@ def dd_environment_runner(request):
 
 
 @pytest.fixture
-def dd_agent_check(request, aggregator):
+def dd_agent_check(request, aggregator, datadog_agent):
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
 
@@ -193,8 +193,7 @@ def dd_agent_check(request, aggregator):
                 collector = json.loads(raw_json)
             except Exception as e:
                 raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
-
-            replay_check_run(collector, aggregator)
+            replay_check_run(collector, aggregator, datadog_agent)
 
         return aggregator
 

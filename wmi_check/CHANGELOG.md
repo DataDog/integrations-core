@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.9.2 / 2020-10-06
+
+* [Fixed] Fix missing tags from tag_by. See [#7706](https://github.com/DataDog/integrations-core/pull/7706).
+
 ## 1.9.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Fix namespace default value. See [#7179](https://github.com/DataDog/integrations-core/pull/7179).

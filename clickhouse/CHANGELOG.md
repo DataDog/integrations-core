@@ -1,5 +1,11 @@
 # CHANGELOG - ClickHouse
 
+## 1.4.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config specs to clickhouse. See [#7433](https://github.com/DataDog/integrations-core/pull/7433).
+* [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 1.3.2 / 2020-07-09 / Agent 7.22.0
 
 * [Fixed] Update `can_connect` service check status on each check run. See [#7006](https://github.com/DataDog/integrations-core/pull/7006). Thanks [isaachui](https://github.com/isaachui).

@@ -4,7 +4,8 @@
   ],
   "categories": [
     "processing",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Gearman",
@@ -29,9 +30,15 @@
   "type": "check",
   "integration_id": "gearman",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "gearman"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

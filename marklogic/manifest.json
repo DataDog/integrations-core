@@ -5,6 +5,9 @@
   "name": "marklogic",
   "metric_prefix": "marklogic.",
   "metric_to_check": "marklogic.hosts.total_hosts",
+  "process_signatures": [
+    "MarkLogic"
+  ],
   "creates_events": false,
   "short_description": "Tracks metrics about MarkLogic databases, forests, hosts and servers.",
   "guid": "0c200415-731f-4b67-9b2c-d6bd1225eee1",
@@ -20,7 +23,7 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "marklogic",
   "assets": {
     "configuration": {
@@ -32,6 +35,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "marklogic"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

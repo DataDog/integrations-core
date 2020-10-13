@@ -41,6 +41,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "kafka"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

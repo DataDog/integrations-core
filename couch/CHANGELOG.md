@@ -1,5 +1,11 @@
 # CHANGELOG - couch
 
+## 3.12.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 3.11.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] couch config specs. See [#7160](https://github.com/DataDog/integrations-core/pull/7160).
@@ -117,10 +123,10 @@
 [4]: https://github.com/DataDog/integrations-core/pull/1945
 [5]: https://github.com/DataDog/integrations-core/pull/1727
 [6]: https://github.com/DataDog/integrations-core/pull/1664
-[7]: 
-[8]: 
-[9]: 
-[10]: 
+[7]: https://github.com/DataDog/integrations-core/pull/1444
+[8]: https://github.com/DataDog/integrations-core/pull/1029
+[9]: https://github.com/DataDog/integrations-core/pull/1034
+[10]: https://github.com/DataDog/integrations-core/pull/813
 [11]: https://github.com/calonso
 [12]: https://github.com/DataDog/integrations-core/pull/812
 [13]: https://github.com/DataDog/integrations-core/issues/860

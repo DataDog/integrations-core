@@ -65,6 +65,46 @@ The instructions below show you how to configure the task using the [AWS CLI too
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
 ```
 
+##### AWS CloudFormation
+
+You can use [AWS CloudFormation][35] templating to configure your Fargate containers. Use the `AWS::ECS::TaskDefinition` resource within your CloudFormation template to set the Amazon ECS task and specify `FARGATE` as the required launch type for that task. You can then set the `Datadog` option to configure log management, like in the example below:
+
+```yaml
+Resources:
+  ECSTDNJH3:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              Host: http-intake.logs.datadoghq.com
+              TLS: 'on'
+              dd_service: test-service
+              dd_source: test-source
+              provider: ecs
+              apikey: <API_KEY>
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:latest'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+
+For more information on CloudFormation templating and syntax, review the [AWS CloudFormation documentation][36].
+
 #### Create or Modify your IAM Policy
 
 Add the following permissions to your [Datadog IAM policy][9] to collect ECS Fargate metrics. For more information on ECS policies, [review the documentation on the AWS website][10].
@@ -325,3 +365,5 @@ Need help? Contact [Datadog support][19].
 [32]: https://docs.datadoghq.com/tracing/setup/
 [33]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [34]: https://www.datadoghq.com/blog/monitor-aws-fargate
+[35]: https://aws.amazon.com/cloudformation/
+[36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html

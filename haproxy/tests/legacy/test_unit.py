@@ -6,6 +6,8 @@ import mock
 
 from . import common
 
+pytestmark = [common.requires_legacy_environment]
+
 BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
 
 
@@ -423,7 +425,7 @@ def test_regex_tags(aggregator, check, haproxy_mock):
 def test_version_failure(aggregator, check, datadog_agent):
     config = copy.deepcopy(BASE_CONFIG)
     haproxy_check = check(config)
-    filepath = os.path.join(common.HERE, 'fixtures', 'mock_data')
+    filepath = os.path.join(os.path.dirname(common.HERE), 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
     with mock.patch('requests.get') as m:
