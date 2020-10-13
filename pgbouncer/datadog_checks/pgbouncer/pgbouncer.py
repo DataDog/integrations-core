@@ -5,7 +5,7 @@ import re
 
 import psycopg2 as pg
 from psycopg2 import extras as pgextras
-from six.moves.urllib.parse import urlparse, quote, unquote
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
@@ -42,9 +42,9 @@ class PgBouncer(AgentCheck):
         host = self.host
         port = self.port
         if self.database_url:
-            parsed_url = urlparse(quote(self.database_url))
-            host = unquote(parsed_url.hostname)
-            port = unquote(parsed_url.port)
+            parsed_url = urlparse(self.database_url)
+            host = parsed_url.hostname
+            port = parsed_url.port
 
         service_checks_tags = ["host:%s" % host, "port:%s" % port, "db:%s" % self.DB_NAME]
         service_checks_tags.extend(self.tags)
@@ -143,10 +143,10 @@ class PgBouncer(AgentCheck):
         if not self.database_url:
             return u'pgbouncer://%s:******@%s:%s/%s' % (self.user, self.host, self.port, self.DB_NAME)
 
-        parsed_url = urlparse(quote(self.database_url))
+        parsed_url = urlparse(self.database_url)
         if parsed_url.password:
             return self.database_url.replace(parsed_url.password, '******')
-        return unquote(self.database_url)
+        return self.database_url
 
     def check(self, instance):
         try:
