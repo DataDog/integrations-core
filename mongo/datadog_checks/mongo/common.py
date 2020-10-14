@@ -70,6 +70,7 @@ class ReplicaSetDeployment(Deployment):
         self.replset_state_name = get_state_name(replset_state).lower()
         self.in_shard = in_shard
         self.is_primary = replset_state == 1
+        self.is_secondary = replset_state == 2
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.
