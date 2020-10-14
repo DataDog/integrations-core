@@ -50,7 +50,7 @@ instances:
     ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
     ## Only available for Istio >= v1.5.
     #
-    # istiod_endpoint: http://istiod.istio-system:8080/metrics
+    # istiod_endpoint: http://istiod.istio-system:15014/metrics
 
     ## @param istio_mesh_endpoint - string - optional
     ## To enable Istio metrics you must specify the url exposing the API.
