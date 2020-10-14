@@ -94,7 +94,7 @@ airflow:
     AIRFLOW__ELASTICSEARCH__WRITE_STDOUT: "True"
 
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
-    #AIRFLOW__CLI__ENDPOINT_URL : "https://airflow.datalakefoundation.aws-dev.capgroup.com"
+    #AIRFLOW__CLI__ENDPOINT_URL : "XXXX"
     #AIRFLOW__CLI__API_CLIENT: airflow.api.client.json_client
     #AIRFLOW__WEBSERVER__BASE_URL: "http://localhost:8080"
     #AIRFLOW__WEBSERVER__WEB_SERVER_HOST: "0.0.0.0"
