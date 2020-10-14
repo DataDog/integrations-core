@@ -6,11 +6,15 @@ import os
 import re
 from contextlib import contextmanager
 from copy import deepcopy
+from datetime import datetime, timedelta
 from io import open
 from ipaddress import ip_address, ip_network
 
+import jwt
 import requests
 import requests_unixsocket
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from requests import auth as requests_auth
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
@@ -630,6 +634,62 @@ class AuthTokenFileReader(object):
             return self._token
 
 
+class DCOSAuthTokenReader(object):
+    def __init__(self, config):
+        self._login_url = config.get('login_url', '')
+        if not isinstance(self._login_url, str):
+            raise ConfigurationError('The `login_url` setting of DC/OS auth token reader must be a string')
+        elif not self._login_url:
+            raise ConfigurationError('The `login_url` setting of DC/OS auth token reader is required')
+
+        self._service_account = config.get('service_account', '')
+        if not isinstance(self._service_account, str):
+            raise ConfigurationError('The `service_account` setting of DC/OS auth token reader must be a string')
+        elif not self._service_account:
+            raise ConfigurationError('The `service_account` setting of DC/OS auth token reader is required')
+
+        self._private_key_path = config.get('private_key_path', '')
+        if not isinstance(self._private_key_path, str):
+            raise ConfigurationError('The `private_key_path` setting of DC/OS auth token reader must be a string')
+        elif not self._private_key_path:
+            raise ConfigurationError('The `private_key_path` setting of DC/OS auth token reader is required')
+
+        self._expiration = config.get('expiration', 300)  # default to 5 minutes
+        if not isinstance(self._expiration, int):
+            raise ConfigurationError('The `expiration` setting of DC/OS auth token reader must be an integer')
+
+        self._token = None
+
+    def read(self, **request):
+        if self._token is None or 'error' in request:
+            with open(self._private_key_path, 'rb') as f:
+                private_key = serialization.load_pem_private_key(f.read(), password=None, backend=default_backend())
+
+                serialized_private = private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+
+                now = datetime.utcnow()
+                exp = now + timedelta(seconds=self._expiration)
+
+                encoded = jwt.encode({'uid': self._service_account, 'exp': exp}, serialized_private, algorithm='RS256')
+
+                headers = {'Content-type': 'application/json'}
+                r = requests.post(
+                    url=self._login_url,
+                    json={'uid': self._service_account, 'token': encoded, 'exp': exp},
+                    headers=headers,
+                    verify=False,
+                )
+                r.raise_for_status()
+
+                self._token = r.json().get('token')
+
+            return self._token
+
+
 class AuthTokenHeaderWriter(object):
     DEFAULT_PLACEHOLDER = '<TOKEN>'
 
@@ -660,7 +720,10 @@ class AuthTokenHeaderWriter(object):
         request['default_options']['headers'][self._name] = self._value.replace(self._placeholder, token, 1)
 
 
-AUTH_TOKEN_READERS = {'file': AuthTokenFileReader}
+AUTH_TOKEN_READERS = {
+    'file': AuthTokenFileReader,
+    'dcos_auth': DCOSAuthTokenReader,
+}
 AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}
 
 
