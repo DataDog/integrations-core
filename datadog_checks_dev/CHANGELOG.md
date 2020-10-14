@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 4.2.0 / 2020-10-14
+
+* [Added] Validate JMX integrations metrics.yaml. See [#7733](https://github.com/DataDog/integrations-core/pull/7733).
+* [Added] Make inventories metadata testable in e2e. See [#7761](https://github.com/DataDog/integrations-core/pull/7761).
+* [Added] Validate metrics_metadata in manifest.json. See [#7746](https://github.com/DataDog/integrations-core/pull/7746).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] Check the git token scope when calling `get_team_members`. See [#7712](https://github.com/DataDog/integrations-core/pull/7712).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 4.1.0 / 2020-10-01
 
 * [Added] Added HTTP wrapper class validator. See [#7676](https://github.com/DataDog/integrations-core/pull/7676).
