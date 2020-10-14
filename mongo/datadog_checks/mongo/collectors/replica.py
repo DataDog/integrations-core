@@ -99,7 +99,7 @@ class ReplicaCollector(MongoCollector):
         for member in status.get('members', []):
             if member.get('self'):
                 current = member
-                if int(member.get('state')) == 1:
+                if int(member['state']) == 1:
                     is_primary = True
             if int(member.get('state')) == 1:
                 primary = member
