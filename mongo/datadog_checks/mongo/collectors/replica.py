@@ -96,7 +96,7 @@ class ReplicaCollector(MongoCollector):
         # Find nodes: current node (ourself) and the primary
         current = primary = None
         is_primary = False
-        for member in status.get('members'):
+        for member in status.get('members', []):
             if member.get('self'):
                 current = member
                 if int(member.get('state')) == 1:
