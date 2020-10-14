@@ -24,7 +24,7 @@ datadog:
   ## ref: https://app.datadoghq.com/account/settings#agent/kubernetes
   #
   # API US
-  apiKey: 00000000000000000000000000000000
+  apiKey: "00000000000000000000000000000000"
 
   ## @param apiKeyExistingSecret - string - optional
   ## Use existing Secret which stores API key instead of creating a new one.
