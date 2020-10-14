@@ -53,6 +53,14 @@ kubectl delete pods --all
 docker exec `docker ps | grep k8s_agent_datadog | rev | cut -d ' ' -f 1 | rev` agent dogstatsd-stats
 ```
 
+Example output:
+
+```bash
+airflow.dag.loading_duration             | dag_file:tutorial    | 10         | 2020-10-14 10:35:22.3520601 +0000 UTC
+airflow.dag.loading_duration             | dag_file:hello_world_sleep5 | 9          | 2020-10-14 10:35:22.352042 +0000 UTC
+airflow.job.start                        | job_name:schedulerjob | 1          | 2020-10-14 10:34:37.0857417 +0000 UTC
+```
+
 ### Get Datadog Agent logs
 
 ```bash
