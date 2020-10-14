@@ -36,7 +36,7 @@ class ReplicaCollector(MongoCollector):
 
     def _report_replica_set_states(self, members, replset_name):
         """
-        Report the all members' state changes in the replica set.
+        Report all the members' state changes in the replica set.
         This method only runs on the primary.
         """
 
