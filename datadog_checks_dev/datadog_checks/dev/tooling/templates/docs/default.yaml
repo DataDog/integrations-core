@@ -1,7 +1,7 @@
 # TODO: To be split into separate files
 
-- template: overview
-  name: Overview
+# filename: overview.yaml
+- name: Overview
   header_level: 2
   description: |
     TODO: General comments
@@ -12,8 +12,8 @@
   hidden: false
   sections:
 
-- template: setup
-  name: Setup
+# filename: setup.yaml
+- name: Setup
   header_level: 2
   description: |
     Follow the instructions below to install and configure this check for an Agent running on a host. For
@@ -28,8 +28,8 @@
   hidden: false
   sections:
 
-- template: setup/installation
-  name: Installation
+# filename: setup/installation.yaml
+- name: Installation
   header_level: 3
   description: |
     The {check_name} check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
@@ -42,8 +42,8 @@
   hidden: false
   sections:
 
-- template: setup/configuration
-  name: Configuration
+# filename: setup/configuration.yaml
+- name: Configuration
   header_level: 3
   description:
   parameters:
@@ -53,8 +53,8 @@
   hidden: false
   sections:
 
-- template: setup/configuration/host
-  name: Host
+# filename: setup/configuration/host.yaml
+- name: Host
   tab: Host
   header_level: 4
   description:
@@ -65,8 +65,8 @@
   hidden: false
   sections:
 
-- template: setup/configuration/containerized
-  name: Containerized
+# filename: setup/configuration/containerized.yaml
+- name: Containerized
   tab: Containerized
   header_level: 4
   description:
@@ -77,8 +77,8 @@
   hidden: false
   sections:
 
-- template: setup/configuration/log_collection
-  name: Log Collection
+# filename: setup/configuration/log_collection.yaml
+- name: Log Collection
   header_level: 4
   description: |
     _Available for Agent versions >6.0_
@@ -111,8 +111,8 @@
   hidden: false
   sections:
 
-- template: setup/validation
-  name: Validation
+# filename: setup/validation.yaml
+- name: Validation
   header_level: 3
   description: |
     [Run the Agent's status subcommand][1] and look for `{check_name}` under the Checks section.
@@ -125,8 +125,8 @@
   hidden: false
   sections:
 
-- template: data_collected
-  name: Data Collected
+# filename: data_collected.yaml
+- name: Data Collected
   header_level: 2
   description:
   prepend_text:
@@ -135,8 +135,8 @@
   hidden: false
   sections:
 
-- template: data_collected/metrics
-  name: Metrics
+# filename: data_collected/metrics.yaml
+- name: Metrics
   header_level: 3
   description: |
     See [metadata.csv][1] for a list of metrics provided by this check.
@@ -149,8 +149,8 @@
   hidden: false
   sections:
 
-- template: data_collected/events
-  name: Events
+# filename: data_collected/events.yaml
+- name: Events
   header_level: 3
   description: |
     {display_name} does not include any events.
@@ -161,8 +161,8 @@
   hidden: false
   sections:
 
-- template: data_collected/service_checks
-  name: Service Checks
+# filename: data_collected/service_checks.yaml
+- name: Service Checks
   header_level: 3
   description: |
     The {display_name} does not include any service checks.
@@ -173,8 +173,8 @@
   hidden: false
   sections:
 
-- template: troubleshooting
-  name: Overview
+# filename: troubleshooting.yaml
+- name: Overview
   header_level: 2
   description: |
     Need help? Contact [Datadog support][1].
@@ -187,8 +187,8 @@
   hidden: false
   sections:
 
-- template: further_reading
-  name: Further Reading
+# filename: further_reading.yaml
+- name: Further Reading
   header_level: 2
   description:
   parameters:
