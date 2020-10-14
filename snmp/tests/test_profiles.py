@@ -520,8 +520,14 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-    for source in range(1, 3):
-        env_tags = ['power_source:{}'.format(source)]
+    power_supplies = [
+        (1, 'Switch 1 - Power Supply B, NotExist'),
+        (1, 'Switch 2 - Power Supply B, NotExist'),
+        (2, 'Switch 1 - Power Supply A, Normal'),
+        (2, 'Switch 2 - Power Supply A, Normal'),
+    ]
+    for source, descr in power_supplies:
+        env_tags = ['power_source:{}'.format(source), 'power_status_descr:{}'.format(descr)]
         aggregator.assert_metric(
             'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
         )
@@ -766,9 +772,8 @@ def test_cisco_nexus(aggregator):
             tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags
-    )
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
@@ -1314,9 +1319,8 @@ def test_cisco_asa_5525(aggregator):
             tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags
-    )
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
