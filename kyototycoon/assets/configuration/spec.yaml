@@ -25,3 +25,20 @@ files:
 
           - template: instances/http
           - template: instances/default
+
+  - name: auto_conf.yaml
+    options:
+      - template: ad_identifiers
+        overrides:
+          value.example:
+            - kyototycoon
+      - template: init_config
+        options: []
+      - template: instances
+        options:
+        - name: report_url
+          required: true
+          description: The report URL should be a URL to the Kyoto Tycoon "report" RPC endpoint.
+          value:
+            type: string
+            example: http://%%host%%:1978/rpc/report
