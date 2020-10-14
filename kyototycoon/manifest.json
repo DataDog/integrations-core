@@ -1,6 +1,7 @@
 {
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Kyoto Tycoon",
@@ -31,7 +32,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "kyototycoon"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }
