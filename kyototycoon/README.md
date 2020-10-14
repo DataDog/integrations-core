@@ -28,7 +28,6 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 
 ##### Log collection
 
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
