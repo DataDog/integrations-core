@@ -60,7 +60,7 @@ Add an item like the above to `instances` for each build configuration you want 
    logs_enabled: true
    ```
 
-4. Add the following configuration block to your `teamcity.d/conf.yaml` file. Change the `path` parameter value based on your environment. See the [sample teamcity.d/conf.yaml][5] for all available configuration options.
+4. Uncomment the following configuration block in your `teamcity.d/conf.yaml` file. Change the `path` parameter value based on your environment. See the [sample teamcity.d/conf.yaml][5] for all available configuration options.
 
    ```yaml
    logs:
