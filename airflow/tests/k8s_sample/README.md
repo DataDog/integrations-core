@@ -10,6 +10,13 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
 ```
 
+Update:
+
+```bash
+# from current folder
+ln -s `pwd`/dags /tmp/airflow_dags
+```
+
 ## Start
 
 ```bash
@@ -35,7 +42,6 @@ helm uninstall airflow
 
 kubectl delete -f pv.yaml
 kubectl delete -f local-storage.yaml
-
 ```
 
 If the clean up hangs, you might need to:

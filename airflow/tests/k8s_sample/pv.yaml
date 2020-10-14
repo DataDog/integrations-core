@@ -25,7 +25,7 @@ spec:
   capacity:
     storage: 2Gi
   hostPath:
-    path: /Users/alexandre.yang/work/Airflow-AGENT-5078/dags
+    path: /tmp/airflow_dags
   storageClassName: standard
 ---
 kind: PersistentVolumeClaim
