@@ -10,7 +10,7 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
 ```
 
-Update:
+Sim link dags to specific absolute location, needed for `pv.yaml`:
 
 ```bash
 # from current folder
