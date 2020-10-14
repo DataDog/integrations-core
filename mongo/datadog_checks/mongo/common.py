@@ -46,8 +46,13 @@ def get_long_state_name(state):
 
 class Deployment(object):
     def is_principal(self):
-        """Whether or not this node can be used to collect data from collections. Should only
-        be True for one node in the cluster."""
+        """In each mongo cluster there should be always one 'principal' node. One node
+        that has full visibility on the user data and only one node should match the criteria.
+        This is different from the 'isMaster' property as a replica set primary in a shard is considered
+        as 'master' but is not 'principal' for the purpose of this integration.
+
+        This method is used to determine if the check will collect statistics on user database, collections
+        and indexes."""
         raise NotImplementedError
 
 
@@ -69,7 +74,7 @@ class ReplicaSetDeployment(Deployment):
     def is_principal(self):
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
-        return not self.in_shard and self.replset_state == 1
+        return not self.in_shard and self.is_primary
 
 
 class StandaloneDeployment(Deployment):

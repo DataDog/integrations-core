@@ -53,7 +53,7 @@ class ReplicaCollector(MongoCollector):
                 continue
             previous_short_state_str = get_state_name(old_state)
             short_state_str = get_state_name(status_id)
-            status_long_str = get_long_state_name(status_id)
+            long_state_str = get_long_state_name(status_id)
             node_hostname = member['name']
 
             msg_title = "{} is {} for {}".format(node_hostname, short_state_str, replset_name)
@@ -63,7 +63,7 @@ class ReplicaCollector(MongoCollector):
                     node=node_hostname,
                     id=member_id,
                     uri=self.check.clean_server_name,
-                    status=status_long_str,
+                    status=long_state_str,
                     status_short=short_state_str,
                     replset_name=replset_name,
                     old_state=previous_short_state_str,
@@ -85,7 +85,7 @@ class ReplicaCollector(MongoCollector):
             }
             if node_hostname == 'localhost':
                 # Do not submit events with a 'localhost' hostname.
-                event_payload['host'] = node_hostname
+                event_payload['host'] = self.hostname
             self.check.event(event_payload)
 
     def collect(self, client):

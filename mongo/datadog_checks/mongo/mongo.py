@@ -181,8 +181,8 @@ class MongoDb(AgentCheck):
             if 'local' in all_dbs:
                 # Already monitored for all instances
                 all_dbs.remove('local')
-            for db_n in all_dbs:
-                collectors.append(DbStatCollector(self, db_n, tags))
+            for db_name in all_dbs:
+                collectors.append(DbStatCollector(self, db_name, tags))
 
             if self.collections_indexes_stats:
                 if LooseVersion(mongo_version) >= LooseVersion("3.2"):
