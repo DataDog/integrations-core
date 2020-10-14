@@ -381,4 +381,3 @@ instances:
 #   - type: file
 #     path: /var/data/ktserver.log
 #     source: kyototycoon
-#     service: kyototycoon

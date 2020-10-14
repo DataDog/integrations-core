@@ -28,7 +28,6 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -43,10 +42,9 @@ _Available for Agent versions >6.0_
       - type: file
         path: /var/data/ktserver.log
         source: kyototycoon
-        service: "<SERVICE_NAME>"
     ```
 
-    Change the `path` and `service` parameter values based on your environment. See the [sample kyototycoon.d/conf.yaml][3] for all available configuration options.
+    Change the `path` parameter value based on your environment. See the [sample kyototycoon.d/conf.yaml][3] for all available configuration options.
 
 3. [Restart the Agent][4].
 
