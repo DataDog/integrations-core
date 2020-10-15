@@ -6,15 +6,12 @@ import os
 import re
 from contextlib import contextmanager
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import timedelta
 from io import open
 from ipaddress import ip_address, ip_network
 
-import jwt
 import requests
 import requests_unixsocket
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from requests import auth as requests_auth
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
@@ -24,6 +21,7 @@ from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .time import get_current_datetime
 
 try:
     from contextlib import ExitStack
@@ -39,6 +37,9 @@ except ImportError:
 requests_aws = None
 requests_kerberos = None
 requests_ntlm = None
+jwt = None
+default_backend = None
+serialization = None
 
 LOGGER = logging.getLogger(__file__)
 
@@ -663,6 +664,18 @@ class DCOSAuthTokenReader(object):
     def read(self, **request):
         if self._token is None or 'error' in request:
             with open(self._private_key_path, 'rb') as f:
+                global default_backend
+                if default_backend is None:
+                    from cryptography.hazmat.backends import default_backend
+
+                global serialization
+                if serialization is None:
+                    from cryptography.hazmat.primitives import serialization
+
+                global jwt
+                if jwt is None:
+                    import jwt
+
                 private_key = serialization.load_pem_private_key(f.read(), password=None, backend=default_backend())
 
                 serialized_private = private_key.private_bytes(
@@ -671,8 +684,7 @@ class DCOSAuthTokenReader(object):
                     encryption_algorithm=serialization.NoEncryption(),
                 )
 
-                now = datetime.utcnow()
-                exp = now + timedelta(seconds=self._expiration)
+                exp = get_current_datetime() + timedelta(seconds=self._expiration)
 
                 encoded = jwt.encode({'uid': self._service_account, 'exp': exp}, serialized_private, algorithm='RS256')
 
