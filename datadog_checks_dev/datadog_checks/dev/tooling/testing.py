@@ -5,7 +5,7 @@ import os
 import re
 from fnmatch import fnmatch
 
-from datadog_checks.dev.tooling.commands.console import echo_debug, abort
+from datadog_checks.dev.tooling.commands.console import abort, echo_debug
 
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
@@ -75,7 +75,6 @@ def get_tox_envs(
 
         envs_selected = envs_selected.split(',') if envs_selected else []
         envs_available = get_available_tox_envs(check, sort=sort, e2e_tests_only=e2e_tests_only)
-        echo_debug(f"Available environments: {envs_available}")
 
         if format_style:
             envs_selected[:] = [e for e in envs_available if 'format_style' in e]
@@ -104,6 +103,7 @@ def get_tox_envs(
         if tox_env_filter_re:
             envs_selected[:] = [e for e in envs_selected if not tox_env_filter_re.match(e)]
 
+        echo_debug(f"Selected environments: {envs_selected}")
         yield check, envs_selected
 
 
