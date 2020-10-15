@@ -1,5 +1,13 @@
 # CHANGELOG - sqlserver
 
+## 2.0.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add Scheduler and Task Metrics for SQL Server. See [#5840](https://github.com/DataDog/integrations-core/pull/5840).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* [Changed] SQL Server metrics refactor. See [#7551](https://github.com/DataDog/integrations-core/pull/7551).
+* [Changed] Refactor sqlserver connection class and expand test coverage. See [#7510](https://github.com/DataDog/integrations-core/pull/7510).
+* [Changed] Update sqlserver to Agent 6 single instance logic. See [#7488](https://github.com/DataDog/integrations-core/pull/7488).
+
 ## 1.18.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).

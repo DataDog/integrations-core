@@ -80,6 +80,25 @@ instances:
     #
     # ocsp_response_cache_filename: <OCSP_RESPONSE_CACHE_FILENAME>
 
+    ## @param authenticator - string - optional - default: snowflake
+    ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
+    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+    #
+    # authenticator: <AUTHENTICATOR>
+
+    ## @param token - string - optional
+    ## Token used for OAuth connection to Snowflake.
+    #
+    # token: <TOKEN>
+
+    ## @param client_session_keep_alive - boolean - optional - default: false
+    ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
+    ## even if there is no activity from the user.
+    ##
+    ## By default, the connection will need to be renewed after four hours of inactivity.
+    #
+    # client_session_keep_alive: false
+
     ## @param metric_groups - list of strings - optional
     ## List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
     ##
@@ -119,7 +138,7 @@ instances:
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `clickhouse.` to form
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
     ##                          the full metric name. If `type` is `tag`, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.

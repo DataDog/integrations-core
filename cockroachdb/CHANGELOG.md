@@ -1,5 +1,10 @@
 # CHANGELOG - CockroachDB
 
+## 1.4.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Added] Add config specs. See [#7439](https://github.com/DataDog/integrations-core/pull/7439).
+
 ## 1.3.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

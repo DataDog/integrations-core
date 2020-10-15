@@ -94,19 +94,19 @@ mongodb.mem.mapped,gauge,,mebibyte,,Amount of mapped memory by the database.,0,m
 mongodb.mem.mappedwithjournal,gauge,,mebibyte,,"The amount of mapped memory, including the memory used for journaling.",0,mongodb,memory mapped with journal
 mongodb.mem.resident,gauge,,mebibyte,,Amount of memory currently used by the database process.,0,mongodb,mem resident
 mongodb.mem.virtual,gauge,,mebibyte,,Amount of virtual memory used by the mongod process.,0,mongodb,mem virtual
-mongodb.metrics.commands.count.failed,gauge,,command,,Number of times count failed,-1,mongodb,cmd count failed
+mongodb.metrics.commands.count.failedps,gauge,,command,second,Number of times count failed,-1,mongodb,cmd count failed
 mongodb.metrics.commands.count.total,gauge,,command,,Number of times count executed,0,mongodb,cmd count executed
-mongodb.metrics.commands.createIndexes.failed,gauge,,command,,Number of times createIndexes failed,-1,mongodb,cmd createIndexes failed
-mongodb.metrics.commands.createIndexes.total,gauge,,command,,Number of times createIndexes executed,0,mongodb,cmd createIndexes executed
-mongodb.metrics.commands.delete.failed,gauge,,command,,Number of times delete failed,-1,mongodb,cmd delete failed
+mongodb.metrics.commands.createindexes.failedps,gauge,,command,second,Number of times createIndexes failed,-1,mongodb,cmd createIndexes failed
+mongodb.metrics.commands.createindexes.total,gauge,,command,,Number of times createIndexes executed,0,mongodb,cmd createIndexes executed
+mongodb.metrics.commands.delete.failedps,gauge,,command,second,Number of times delete failed,-1,mongodb,cmd delete failed
 mongodb.metrics.commands.delete.total,gauge,,command,,Number of times delete executed,0,mongodb,cmd delete executed
-mongodb.metrics.commands.eval.failed,gauge,,command,,Number of times eval failed,-1,mongodb,cmd eval failed
+mongodb.metrics.commands.eval.failedps,gauge,,command,second,Number of times eval failed,-1,mongodb,cmd eval failed
 mongodb.metrics.commands.eval.total,gauge,,command,,Number of times eval executed,0,mongodb,cmd eval executed
-mongodb.metrics.commands.findAndModify.failed,gauge,,command,,Number of times findAndModify failed,-1,mongodb,cmd findAndModify failed
-mongodb.metrics.commands.findAndModify.total,gauge,,command,,Number of times findAndModify executed,0,mongodb,cmd findAndModify executed
-mongodb.metrics.commands.insert.failed,gauge,,command,,Number of times insert failed,-1,mongodb,cmd insert failed
+mongodb.metrics.commands.findandmodify.failedps,gauge,,command,second,Number of times findAndModify failed,-1,mongodb,cmd findAndModify failed
+mongodb.metrics.commands.findandmodify.total,gauge,,command,,Number of times findAndModify executed,0,mongodb,cmd findAndModify executed
+mongodb.metrics.commands.insert.failedps,gauge,,command,second,Number of times insert failed,-1,mongodb,cmd insert failed
 mongodb.metrics.commands.insert.total,gauge,,command,,Number of times insert executed,0,mongodb,cmd insert executed
-mongodb.metrics.commands.update.failed,gauge,,command,,Number of times update failed,-1,mongodb,cmd update failed
+mongodb.metrics.commands.update.failedps,gauge,,command,second,Number of times update failed,-1,mongodb,cmd update failed
 mongodb.metrics.commands.update.total,gauge,,command,,Number of times update executed,0,mongodb,cmd update executed
 mongodb.metrics.cursor.open.notimeout,gauge,,cursor,,Number of open cursors with the option `DBQuery.Option.noTimeout` set to prevent timeout after a period of inactivity.,-1,mongodb,cursors open no timeout
 mongodb.metrics.cursor.open.pinned,gauge,,cursor,,Number of pinned open cursors.,0,mongodb,cursors open pinned
@@ -165,9 +165,13 @@ mongodb.replset.replicationlag,gauge,,second,,Delay between a write operation on
 mongodb.replset.state,gauge,,,,State of a replica that reflects its disposition within the set.,0,mongodb,replset state
 mongodb.replset.votefraction,gauge,,fraction,,Fraction of votes a server will cast in a replica set election.,0,mongodb,votes fraction
 mongodb.replset.votes,gauge,,item,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes
+mongodb.stats.avgobjsize,gauge,,byte,,The average size of each document in bytes.,0,mongodb,stats avgobjsize
+mongodb.stats.collections,gauge,,,,Contains a count of the number of collections in that database.,0,mongodb,stats collections
 mongodb.stats.datasize,gauge,,byte,,Total size of the data held in this database including the padding factor.,0,mongodb,stats datasize
+mongodb.stats.filesize,gauge,,byte,,Total size of the data held in this database including the padding factor (only available with the mmapv1 storage engine).,0,mongodb,stats filesize
 mongodb.stats.indexes,gauge,,index,,Total number of indexes across all collections in the database.,0,mongodb,stats indexes
 mongodb.stats.indexsize,gauge,,byte,,Total size of all indexes created on this database.,0,mongodb,stats indexsize
+mongodb.stats.numextents,gauge,,,,Contains a count of the number of extents in the database across all collections.,0,mongodb,stats numextents
 mongodb.stats.objects,gauge,,object,,Number of objects (documents) in the database across all collections.,0,mongodb,stats objects
 mongodb.stats.storagesize,gauge,,byte,,Total amount of space allocated to collections in this database for document storage.,0,mongodb,stats storagesize
 mongodb.uptime,gauge,,second,,Number of seconds that the mongos or mongod process has been active.,0,mongodb,uptime
@@ -180,6 +184,8 @@ mongodb.wiredtiger.cache.modified_pages_evicted,gauge,,page,,"Number of pages, t
 mongodb.wiredtiger.cache.pages_currently_held_in_cache,gauge,,page,,Number of pages currently held in the cache.,0,mongodb,pages currently held in cache
 mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps,gauge,,page,second,Number of page evicted by application threads per second.,-1,mongodb,pages evicted by application threads ps
 mongodb.wiredtiger.cache.pages_evicted_exceeding_the_in_memory_maximumps,gauge,,page,second,"Number of pages evicted because they exceeded the cache in-memory maximum, per second.",-1,mongodb,pages evicted exceeding in-memory maximum ps
+mongodb.wiredtiger.cache.pages_read_into_cache,gauge,,page,,"Number of pages read into the cache.",-1,mongodb,pages read cache
+mongodb.wiredtiger.cache.pages_written_from_cache,gauge,,page,,"Number of pages writtent from the cache",-1,mongodb,pages written cache
 mongodb.wiredtiger.cache.tracked_dirty_bytes_in_cache,gauge,,byte,,Size of the dirty data in the cache.,0,mongodb,tracked dirty bytes in cache
 mongodb.wiredtiger.cache.unmodified_pages_evicted,gauge,,page,,"Number of pages, that were not modified, evicted from the cache.",0,mongodb,cache unmodified pages evicted
 mongodb.wiredtiger.concurrenttransactions.read.available,gauge,,ticket,,Number of available read tickets (concurrent transactions) remaining.,1,mongodb,concurrent transactions read available
@@ -189,14 +195,14 @@ mongodb.wiredtiger.concurrenttransactions.write.available,gauge,,ticket,,Number 
 mongodb.wiredtiger.concurrenttransactions.write.out,gauge,,ticket,,Number of write tickets (concurrent transactions) in use.,0,mongodb,concurrent transactions write out
 mongodb.wiredtiger.concurrenttransactions.write.totaltickets,gauge,,ticket,,Total number of write tickets (concurrent transactions) available.,0,mongodb,concurrent transactions write total tickets
 mongodb.collection.size,gauge,,byte,,The total size in bytes of the data in the collection plus the size of every indexes on the mongodb.collection.,0,mongodb,size of the the collection in bytes
-mongodb.collection.avgObjSize,gauge,,byte,,The size of the average object in the collection in bytes.,0,mongodb,average object size in bytes
+mongodb.collection.avgobjsize,gauge,,byte,,The size of the average object in the collection in bytes.,0,mongodb,average object size in bytes
 mongodb.collection.count,gauge,,item,,Total number of objects in the collection.,0,mongodb,number of objects in the collection
 mongodb.collection.capped,gauge,,record,,Whether or not the collection is capped.,0,mongodb,collection cap
 mongodb.collection.max,gauge,,document,,Maximum number of documents in a capped collection.,0,mongodb,max documents in capped collection
-mongodb.collection.maxSize,gauge,,byte,,Maximum size of a capped collection in bytes.,0,mongodb,max size of capped collection
-mongodb.collection.storageSize,gauge,,byte,,Total storage space allocated to this collection for document storage.,0,mongodb,storage space of collection
+mongodb.collection.maxsize,gauge,,byte,,Maximum size of a capped collection in bytes.,0,mongodb,max size of capped collection
+mongodb.collection.storagesize,gauge,,byte,,Total storage space allocated to this collection for document storage.,0,mongodb,storage space of collection
 mongodb.collection.nindexes,gauge,,index,,Total number of indices on the collection.,0,mongodb,number of indices on collection
-mongodb.collection.indexSizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size
+mongodb.collection.indexsizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size
 mongodb.collection.indexes.accesses.ops,gauge,,event,,Number of time the index was used.,0,mongodb,index usage
 mongodb.usage.commands.countps,gauge,,command,,Number of commands per second,0,mongodb,
 mongodb.usage.commands.count,gauge,,command,,Number of commands since server start (deprecated),0,mongodb,
@@ -210,9 +216,9 @@ mongodb.usage.insert.time,gauge,,microsecond,,Total time spent performing insert
 mongodb.usage.queries.countps,gauge,,query,,Number of queries per second,0,mongodb,
 mongodb.usage.queries.count,gauge,,query,,Number of queries since server start (deprecated),0,mongodb,
 mongodb.usage.queries.time,gauge,,microsecond,,Total time spent performing queries in microseconds,-1,mongodb,
-mongodb.usage.readLock.countps,gauge,,lock,,Number of read locks per second,0,mongodb,
-mongodb.usage.readLock.count,gauge,,lock,,Number of read locks since server start (deprecated),0,mongodb,
-mongodb.usage.readLock.time,gauge,,microsecond,,Total time spent performing read locks in microseconds,-1,mongodb,
+mongodb.usage.readlock.countps,gauge,,lock,,Number of read locks per second,0,mongodb,
+mongodb.usage.readlock.count,gauge,,lock,,Number of read locks since server start (deprecated),0,mongodb,
+mongodb.usage.readlock.time,gauge,,microsecond,,Total time spent performing read locks in microseconds,-1,mongodb,
 mongodb.usage.remove.countps,gauge,,commit,,Number of removes per second,0,mongodb,
 mongodb.usage.remove.count,gauge,,commit,,Number of removes since server start (deprecated),0,mongodb,
 mongodb.usage.remove.time,gauge,,microsecond,,Total time spent performing removes in microseconds,-1,mongodb,
@@ -222,9 +228,9 @@ mongodb.usage.total.time,gauge,,microsecond,,Total time spent performing operati
 mongodb.usage.update.countps,gauge,,commit,,Number of updates per second,0,mongodb,
 mongodb.usage.update.count,gauge,,commit,,Number of updates since server start (deprecated),0,mongodb,
 mongodb.usage.update.time,gauge,,microsecond,,Total time spent performing updates in microseconds,-1,mongodb,
-mongodb.usage.writeLock.countps,gauge,,lock,,Number of write locks per second,0,mongodb,
-mongodb.usage.writeLock.count,gauge,,lock,,Number of write locks since server start (deprecated),0,mongodb,
-mongodb.usage.writeLock.time,gauge,,microsecond,,Total time spent performing write locks in microseconds,-1,mongodb,
+mongodb.usage.writelock.countps,gauge,,lock,,Number of write locks per second,0,mongodb,
+mongodb.usage.writelock.count,gauge,,lock,,Number of write locks since server start (deprecated),0,mongodb,
+mongodb.usage.writelock.time,gauge,,microsecond,,Total time spent performing write locks in microseconds,-1,mongodb,
 mongodb.tcmalloc.generic.current_allocated_bytes,gauge,,byte,,Number of bytes used by the application.,0,mongodb,
 mongodb.tcmalloc.generic.heap_size,gauge,,byte,,Bytes of system memory reserved by TCMalloc.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.aggressive_memory_decommit,gauge,,,,Status of aggressive memory decommit mode.,0,mongodb,

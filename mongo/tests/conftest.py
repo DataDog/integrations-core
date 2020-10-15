@@ -4,9 +4,13 @@
 import copy
 import os
 import time
+from contextlib import contextmanager
 
+import mock
 import pymongo
 import pytest
+from mock import MagicMock
+from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
@@ -19,7 +23,12 @@ def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(
-        compose_file, conditions=[WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5), InitializeDB()]
+        compose_file,
+        conditions=[
+            WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),
+            InitializeDB(),
+            WaitFor(create_shard_user, attempts=60, wait=5),
+        ],
     ):
         yield common.INSTANCE_BASIC
 
@@ -83,6 +92,26 @@ def instance_custom_queries():
 
 
 @pytest.fixture
+def instance_integration(instance_custom_queries):
+    instance = copy.deepcopy(instance_custom_queries)
+    instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top"]
+    instance["collections"] = ["foo", "bar"]
+    instance["collections_indexes_stats"] = True
+    return instance
+
+
+@contextmanager
+def mock_pymongo(deployment):
+    mocked_client = MockedPyMongoClient(deployment=deployment)
+
+    with mock.patch('pymongo.mongo_client.MongoClient', MagicMock(return_value=mocked_client),), mock.patch(
+        'pymongo.collection.Collection'
+    ), mock.patch('pymongo.command_cursor') as cur:
+        cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
+        yield
+
+
+@pytest.fixture
 def instance_1valid_and_1invalid_custom_queries():
     instance = copy.deepcopy(common.INSTANCE_USER)
     instance['custom_queries'] = [
@@ -118,7 +147,7 @@ def setup_sharding(compose_file):
     for i, (service, command) in enumerate(service_commands, 1):
         # Wait before router init
         if i == len(service_commands):
-            time.sleep(20)
+            time.sleep(10)
 
         run_command(['docker-compose', '-f', compose_file, 'exec', '-T', service, 'sh', '-c', command], check=True)
 
@@ -159,3 +188,10 @@ class InitializeDB(LazyFunction):
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
 
         db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': 'test'}])
+
+
+def create_shard_user():
+    cli_shard = pymongo.mongo_client.MongoClient(
+        common.SHARD_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+    )
+    cli_shard['admin'].command("createUser", "testUser", pwd="testPass", roles=["root"])

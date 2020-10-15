@@ -1,561 +1,612 @@
 {
-    "title": "Sidekiq Overview",
-    "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
-    "widgets": [
-      {
-        "id": 0,
-        "definition": {
-          "type": "image",
-          "url": "https://static.datadoghq.com/static/images/saas_logos/bot/sidekiq@2x.png",
-          "sizing": "zoom"
-        },
-        "layout": {
-          "x": 1,
-          "y": 1,
-          "width": 25,
-          "height": 7
-        }
-      },
-      {
-        "id": 1,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:sidekiq.busy{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Busy Jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 28,
-          "y": 39,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 2,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "diff(avg:sidekiq.dead{*})",
-              "display_type": "bars",
-              "style": {
-                "palette": "grey",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Dead Jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 28,
-          "y": 54,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 3,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "diff(avg:sidekiq.failed{*})",
-              "display_type": "bars",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Failed Jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 71,
-          "y": 54,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 4,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "diff(avg:sidekiq.retries{*})",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Retries",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 71,
-          "y": 39,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 5,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "diff(avg:sidekiq.processed{*})",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Processed Jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 71,
-          "y": 9,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 6,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:sidekiq.enqueued{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Enqueued Jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 28,
-          "y": 9,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 7,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:sidekiq.scheduled{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Scheduled jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 28,
-          "y": 24,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 8,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:sidekiq.jobs.perform.median{*}, avg:sidekiq.jobs.perform.avg{*}, avg:sidekiq.jobs.perform.count{*}, avg:sidekiq.jobs.perform.max{*}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Job Performance",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 1,
-          "y": 46,
-          "width": 25,
-          "height": 14
-        }
-      },
-      {
-        "id": 9,
-        "definition": {
-          "type": "note",
-          "content": "Job Status",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 71,
-          "y": 1,
-          "width": 41,
-          "height": 6
-        }
-      },
-      {
-        "id": 10,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "avg:sidekiq.processed{*}",
-              "aggregator": "last"
-            }
-          ],
-          "custom_links": [],
-          "title": "Processed",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 0
-        },
-        "layout": {
-          "x": 1,
-          "y": 61,
-          "width": 12,
-          "height": 9
-        }
-      },
-      {
-        "id": 11,
-        "definition": {
-          "type": "note",
-          "content": "Summary",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 1,
-          "y": 9,
-          "width": 25,
-          "height": 6
-        }
-      },
-      {
-        "id": 12,
-        "definition": {
-          "type": "note",
-          "content": "Queue Status",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 28,
-          "y": 1,
-          "width": 41,
-          "height": 6
-        }
-      },
-      {
-        "id": 13,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "avg:sidekiq.busy{*}",
-              "aggregator": "last"
-            }
-          ],
-          "custom_links": [],
-          "title": "Busy",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 2
-        },
-        "layout": {
-          "x": 14,
-          "y": 27,
-          "width": 12,
-          "height": 9
-        }
-      },
-      {
-        "id": 14,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "avg:sidekiq.dead{*}",
-              "aggregator": "last"
-            }
-          ],
-          "custom_links": [],
-          "title": "Dead",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 2
-        },
-        "layout": {
-          "x": 1,
-          "y": 27,
-          "width": 12,
-          "height": 9
-        }
-      },
-      {
-        "id": 15,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "avg:sidekiq.enqueued{*}",
-              "aggregator": "last"
-            }
-          ],
-          "custom_links": [],
-          "title": "Enqueued",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 2
-        },
-        "layout": {
-          "x": 14,
-          "y": 17,
-          "width": 12,
-          "height": 9
-        }
-      },
-      {
-        "id": 16,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "avg:sidekiq.scheduled{*}",
-              "aggregator": "last"
-            }
-          ],
-          "custom_links": [],
-          "title": "Scheduled",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 2
-        },
-        "layout": {
-          "x": 1,
-          "y": 17,
-          "width": 12,
-          "height": 9
-        }
-      },
-      {
-        "id": 17,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:sidekiq.jobs.success{*}.as_count()",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Successful Jobs",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false
-        },
-        "layout": {
-          "x": 71,
-          "y": 24,
-          "width": 41,
-          "height": 14
-        }
-      },
-      {
-        "id": 18,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "100*diff(avg:sidekiq.failed{*})/diff(avg:sidekiq.processed{*})",
-              "aggregator": "sum"
-            }
-          ],
-          "custom_links": [],
-          "title": "Failure Rate",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "custom_unit": "%",
-          "precision": 2
-        },
-        "layout": {
-          "x": 14,
-          "y": 61,
-          "width": 12,
-          "height": 9
-        }
-      },
-      {
-        "id": 19,
-        "definition": {
-          "type": "note",
-          "content": "Analytics",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 1,
-          "y": 38,
-          "width": 25,
-          "height": 6
-        }
-      }
-    ],
-    "template_variables": [],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30314
-  }
+	"title": "Sidekiq Overview",
+	"description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
+	"widgets": [{
+		"id": 0,
+		"definition": {
+			"type": "image",
+			"url": "https://static.datadoghq.com/static/images/saas_logos/bot/sidekiq@2x.png",
+			"sizing": "zoom"
+		},
+		"layout": {
+			"x": 0,
+			"y": 0,
+			"width": 27,
+			"height": 11
+		}
+	}, {
+		"id": 1,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "sum:sidekiq.dead{*}",
+				"display_type": "bars",
+				"style": {
+					"palette": "grey",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Dead Jobs",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 28,
+			"y": 96,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 2,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "sum:sidekiq.jobs.failure{*} by {queue,worker}.rollup(sum)",
+				"display_type": "bars",
+				"style": {
+					"palette": "warm",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Failed Jobs",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 79,
+			"y": 78,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 3,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "sum:sidekiq.retries{*}",
+				"display_type": "bars",
+				"style": {
+					"palette": "dog_classic",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Retries",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 28,
+			"y": 78,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 4,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "sum:sidekiq.jobs.count{*} by {queue,worker}",
+				"display_type": "bars",
+				"style": {
+					"palette": "dog_classic",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"scale": "log",
+				"include_zero": false
+			},
+			"title": "Total Jobs Queued (or N/A for unqueued)",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 79,
+			"y": 42,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 5,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "avg:sidekiq.enqueued{*}",
+				"display_type": "bars",
+				"style": {
+					"palette": "dog_classic",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Enqueued Jobs",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 28,
+			"y": 42,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 6,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "avg:sidekiq.scheduled{*}",
+				"display_type": "bars",
+				"style": {
+					"palette": "dog_classic",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Scheduled jobs",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 28,
+			"y": 60,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 7,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "avg:sidekiq.jobs.perform.median{*}, avg:sidekiq.jobs.perform.avg{*}, avg:sidekiq.jobs.perform.count{*}, avg:sidekiq.jobs.perform.max{*}",
+				"display_type": "area",
+				"style": {
+					"palette": "dog_classic",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Job Performance",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 79,
+			"y": 18,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 8,
+		"definition": {
+			"type": "note",
+			"content": "Job Status",
+			"background_color": "orange",
+			"font_size": "18",
+			"text_align": "center",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "bottom"
+		},
+		"layout": {
+			"x": 79,
+			"y": 36,
+			"width": 50,
+			"height": 5
+		}
+	}, {
+		"id": 9,
+		"definition": {
+			"type": "query_value",
+			"requests": [{
+				"q": "avg:sidekiq.processed{*}",
+				"aggregator": "last"
+			}],
+			"custom_links": [],
+			"title": "Processed",
+			"title_size": "16",
+			"title_align": "left",
+			"autoscale": true,
+			"precision": 0
+		},
+		"layout": {
+			"x": 105,
+			"y": 6,
+			"width": 24,
+			"height": 11
+		}
+	}, {
+		"id": 10,
+		"definition": {
+			"type": "note",
+			"content": "Summary",
+			"background_color": "vivid_orange",
+			"font_size": "18",
+			"text_align": "center",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "bottom"
+		},
+		"layout": {
+			"x": 28,
+			"y": 0,
+			"width": 50,
+			"height": 5
+		}
+	}, {
+		"id": 11,
+		"definition": {
+			"type": "note",
+			"content": "Overall Status",
+			"background_color": "orange",
+			"font_size": "18",
+			"text_align": "center",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "bottom"
+		},
+		"layout": {
+			"x": 28,
+			"y": 36,
+			"width": 50,
+			"height": 5
+		}
+	}, {
+		"id": 12,
+		"definition": {
+			"type": "query_value",
+			"requests": [{
+				"q": "avg:sidekiq.busy{*}",
+				"aggregator": "last"
+			}],
+			"custom_links": [],
+			"title": "Busy",
+			"title_size": "16",
+			"title_align": "left",
+			"autoscale": true,
+			"precision": 2
+		},
+		"layout": {
+			"x": 53,
+			"y": 6,
+			"width": 12,
+			"height": 11
+		}
+	}, {
+		"id": 13,
+		"definition": {
+			"type": "query_value",
+			"requests": [{
+				"q": "avg:sidekiq.dead{*}",
+				"aggregator": "last"
+			}],
+			"custom_links": [],
+			"title": "Dead",
+			"title_size": "16",
+			"title_align": "left",
+			"autoscale": true,
+			"precision": 2
+		},
+		"layout": {
+			"x": 66,
+			"y": 6,
+			"width": 12,
+			"height": 11
+		}
+	}, {
+		"id": 14,
+		"definition": {
+			"type": "query_value",
+			"requests": [{
+				"q": "avg:sidekiq.enqueued{*}",
+				"aggregator": "last"
+			}],
+			"custom_links": [],
+			"title": "Enqueued",
+			"title_size": "16",
+			"title_align": "left",
+			"autoscale": true,
+			"precision": 2
+		},
+		"layout": {
+			"x": 41,
+			"y": 6,
+			"width": 11,
+			"height": 11
+		}
+	}, {
+		"id": 15,
+		"definition": {
+			"type": "query_value",
+			"requests": [{
+				"q": "avg:sidekiq.scheduled{*}",
+				"aggregator": "last"
+			}],
+			"custom_links": [],
+			"title": "Scheduled",
+			"title_size": "16",
+			"title_align": "left",
+			"autoscale": true,
+			"precision": 2
+		},
+		"layout": {
+			"x": 28,
+			"y": 6,
+			"width": 12,
+			"height": 11
+		}
+	}, {
+		"id": 16,
+		"definition": {
+			"type": "timeseries",
+			"requests": [{
+				"q": "sum:sidekiq.jobs.success{*} by {worker,queue}.as_count()",
+				"display_type": "bars",
+				"style": {
+					"palette": "dog_classic",
+					"line_type": "solid",
+					"line_width": "normal"
+				}
+			}],
+			"custom_links": [],
+			"yaxis": {
+				"label": "",
+				"scale": "linear",
+				"min": "auto",
+				"max": "auto",
+				"include_zero": true
+			},
+			"title": "Successful Jobs",
+			"title_size": "16",
+			"title_align": "left",
+			"show_legend": false
+		},
+		"layout": {
+			"x": 79,
+			"y": 60,
+			"width": 50,
+			"height": 17
+		}
+	}, {
+		"id": 17,
+		"definition": {
+			"type": "query_value",
+			"requests": [{
+				"q": "100*sum:sidekiq.failed{*}/sum:sidekiq.processed{*}",
+				"aggregator": "sum"
+			}],
+			"custom_links": [],
+			"title": "Failure Rate",
+			"title_size": "16",
+			"title_align": "left",
+			"autoscale": true,
+			"custom_unit": "%",
+			"precision": 2
+		},
+		"layout": {
+			"x": 79,
+			"y": 6,
+			"width": 25,
+			"height": 11
+		}
+	}, {
+		"id": 18,
+		"definition": {
+			"type": "note",
+			"content": "Performance",
+			"background_color": "vivid_orange",
+			"font_size": "18",
+			"text_align": "center",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "bottom"
+		},
+		"layout": {
+			"x": 79,
+			"y": 0,
+			"width": 50,
+			"height": 5
+		}
+	}, {
+		"id": 19,
+		"definition": {
+			"type": "note",
+			"content": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see:\n\n* Our [official documentation](https://docs.datadoghq.com/integrations/sidekiq)\n* [Blog post](https://www.datadoghq.com/blog/monitor-sidekiq-with-datadog/) for monitoring use cases",
+			"background_color": "white",
+			"font_size": "14",
+			"text_align": "left",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "left"
+		},
+		"layout": {
+			"x": 0,
+			"y": 12,
+			"width": 27,
+			"height": 19
+		}
+	}, {
+		"id": 20,
+		"definition": {
+			"type": "note",
+			"content": "# Complete Sidekiq Visualization\n\nThis dashboard represents KPIs identified for monitoring Sidekiq -- but how does Sidekiq fit into your customers' experience with your app?\n\nSidekiq relies on [Redis](https://www.datadoghq.com/blog/monitor-redis-using-datadog/) for queueing jobs to be processed.  Redis metrics therefore represent [resource metrics](https://www.datadoghq.com/blog/monitoring-101-collecting-data/).\n\nUpstream of Sidekiq, some service is kicking off these jobs, making Sidekiq a resource for that service.  For instance, these jobs might represent customer requests, forwarded by [NGINX](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/) or [HAProxy](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/).\n\nClone this dashboard; copy and paste widgets from other out-of-the-box dashboards, and create your own with KPIs for your custom applications, to monitor the health of your infrastructure from end to end!",
+			"background_color": "white",
+			"font_size": "14",
+			"text_align": "left",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "right"
+		},
+		"layout": {
+			"x": 0,
+			"y": 32,
+			"width": 27,
+			"height": 42
+		}
+	}, {
+		"id": 21,
+		"definition": {
+			"type": "note",
+			"content": "Jobs get retried in different queues, so `jobs.retries` is only available as an aggregate.\n\nSidekiq will retry a job up to 25 times before marking it as failed. If jobs start to retry too many times, despite lack of failures, this might be the leading indicator of an outage! Are you fielding more requests, or are you under-provisioned by cpu or memory?\n\nThese are good KPIs for alerting, as they indicate the working health of the system. ",
+			"background_color": "gray",
+			"font_size": "14",
+			"text_align": "left",
+			"show_tick": true,
+			"tick_pos": "50%",
+			"tick_edge": "top"
+		},
+		"layout": {
+			"x": 79,
+			"y": 97,
+			"width": 50,
+			"height": 16
+		}
+	}, {
+		"id": 3620950827691124,
+		"definition": {
+			"type": "note",
+			"content": "- **Retry** - Job which has failed and will be retried sometime in the future\n\n\n- **Dead** - Job which will no longer be retried but is saved by Sidekiq so it can be manually retried at some point in the near future\n\n\n- **Failed** - A counter of the number of times any job was executed by Sidekiq and raised an error",
+			"background_color": "gray",
+			"font_size": "14",
+			"text_align": "left",
+			"show_tick": true,
+			"tick_pos": "50%",
+			"tick_edge": "right"
+		},
+		"layout": {
+			"x": 0,
+			"y": 76,
+			"width": 27,
+			"height": 18
+		}
+	}, {
+		"id": 173841748726966,
+		"definition": {
+			"type": "note",
+			"content": "Sidekiq Logs",
+			"background_color": "orange",
+			"font_size": "18",
+			"text_align": "center",
+			"show_tick": false,
+			"tick_pos": "50%",
+			"tick_edge": "bottom"
+		},
+		"layout": {
+			"x": 130,
+			"y": 0,
+			"width": 57,
+			"height": 5
+		}
+	}, {
+		"id": 6365732416764682,
+		"definition": {
+			"type": "log_stream",
+			"indexes": [],
+			"query": "source:sidekiq",
+			"sort": {
+				"column": "time",
+				"order": "desc"
+			},
+			"columns": ["@sidekiq.class"],
+			"show_date_column": true,
+			"show_message_column": true,
+			"message_display": "expanded-md"
+		},
+		"layout": {
+			"x": 130,
+			"y": 6,
+			"width": 57,
+			"height": 89
+		}
+	}, {
+		"id": 7307986058435538,
+		"definition": {
+			"type": "note",
+			"content": "Job performance metrics highlight the amount of time your jobs spend in a worker.\n\nIf workers are taking too long to process jobs, this could indicate bottlenecks or resource capacity issues that need to be addressed.",
+			"background_color": "gray",
+			"font_size": "14",
+			"text_align": "left",
+			"show_tick": true,
+			"tick_pos": "50%",
+			"tick_edge": "right"
+		},
+		"layout": {
+			"x": 28,
+			"y": 21,
+			"width": 49,
+			"height": 11
+		}
+	}],
+	"template_variables": [{
+		"name": "Queue",
+		"default": "*",
+		"prefix": "queue"
+	}, {
+		"name": "Worker",
+		"default": "*",
+		"prefix": "worker"
+	}],
+	"layout_type": "free",
+	"is_read_only": false,
+	"notify_list": [],
+	"id": "fyi-k7c-8uc"
+}

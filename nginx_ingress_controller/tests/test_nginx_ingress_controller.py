@@ -44,6 +44,7 @@ EXPECTED_METRICS = [
     '.nginx.mem.virtual',
     # controller metrics
     '.controller.reload.success',
+    '.controller.last.reload.success',
     '.controller.upstream.latency.count',
     '.controller.upstream.latency.sum',
     '.controller.upstream.latency.quantile',

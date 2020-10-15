@@ -1,5 +1,10 @@
 # CHANGELOG - riak
 
+## 2.1.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 2.0.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Add config specs. See [#7068](https://github.com/DataDog/integrations-core/pull/7068).
@@ -60,5 +65,5 @@
 [1]: https://github.com/DataDog/integrations-core/pull/2774
 [2]: https://github.com/DataDog/integrations-core/pull/1727
 [3]: https://github.com/DataDog/integrations-core/pull/1664
-[4]: 
+[4]: https://github.com/DataDog/integrations-core/pull/1444
 [5]: https://github.com/DataDog/integrations-core/issues/860

@@ -15,7 +15,7 @@
     "network"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "display_name": "TCP Queue Length",
   "creates_events": false,
   "integration_id": "tcp-queue-length",
@@ -23,6 +23,7 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

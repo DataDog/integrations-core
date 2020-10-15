@@ -225,6 +225,8 @@ class Varnish(AgentCheck):
             p.Parse(output, True)
         elif varnishstat_format == "json":
             json_output = json.loads(output)
+            if "counters" in json_output:
+                json_output = json_output["counters"]
             for name, metric in iteritems(json_output):
                 if not isinstance(metric, dict):  # skip 'timestamp' field
                     continue

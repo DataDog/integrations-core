@@ -310,7 +310,6 @@ COLLECTION_METRICS = {
     'collection.maxSize': GAUGE,
     'collection.storageSize': GAUGE,
     'collection.nindexes': GAUGE,
-    'collection.indexSizes': GAUGE,
 }
 
 """

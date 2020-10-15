@@ -1,5 +1,13 @@
 # CHANGELOG - TLS
 
+## 1.7.0 / 2020-10-14
+
+* [Added] Adding debug logging to tls check. See [#7664](https://github.com/DataDog/integrations-core/pull/7664).
+
+## 1.6.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config spec. See [#7529](https://github.com/DataDog/integrations-core/pull/7529).
+
 ## 1.5.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

@@ -195,7 +195,7 @@ Need help? Contact [Datadog support][16].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: http://www.rubydoc.info/gems/fluent-plugin-datadog
+[7]: https://github.com/DataDog/fluent-plugin-datadog
 [8]: https://docs.datadoghq.com/logs/processing/#edit-reserved-attributes
 [9]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines

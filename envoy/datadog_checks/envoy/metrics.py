@@ -100,14 +100,14 @@ METRICS = {
     },
     'server.watchdog_mega_miss': {
         'tags': (
-            (),
+            ('thread_name', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'server.watchdog_miss': {
         'tags': (
-            (),
+            ('thread_name', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -618,6 +618,20 @@ METRICS = {
         ),
         'method': 'gauge',
     },
+    'tcp.downstream_cx_rx_bytes_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'tcp.downstream_cx_rx_bytes_buffered': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'tcp.downstream_flow_control_paused_reading_total': {
         'tags': (
             ('stat_prefix', ),
@@ -631,6 +645,34 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'tcp.idle_timeout': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'tcp.max_downstream_connection_duration': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'tcp.upstream_flush_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'tcp.upstream_flush_active': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'gauge',
     },
     'auth.clientssl.update_success': {
         'tags': (
@@ -3136,6 +3178,38 @@ METRICS = {
     'cluster.lb_subsets_fallback_panic': {
         'tags': (
             ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http1.dropped_headers_with_underscores': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http1.metadata_not_supported_error': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http1.response_flood': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http1.requests_rejected_with_underscores_in_headers': {
+        'tags': (
+            ('cluster_name', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',

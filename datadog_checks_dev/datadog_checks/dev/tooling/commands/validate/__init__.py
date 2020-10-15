@@ -12,7 +12,9 @@ from .config import config
 from .dashboards import dashboards
 from .dep import dep
 from .eula import eula
+from .http import http
 from .imports import imports
+from .jmx_metrics import jmx_metrics
 from .manifest import manifest
 from .metadata import metadata
 from .package import package
@@ -29,6 +31,8 @@ ALL_COMMANDS = (
     dashboards,
     dep,
     eula,
+    jmx_metrics,
+    http,
     legacy_signature,
     imports,
     manifest,

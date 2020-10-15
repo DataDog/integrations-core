@@ -1,5 +1,11 @@
 # CHANGELOG - rabbitmq
 
+## 1.16.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config specs. See [#7467](https://github.com/DataDog/integrations-core/pull/7467).
+* [Fixed] Ensure basic auth encoding defaults to UTF-8. See [#7451](https://github.com/DataDog/integrations-core/pull/7451).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
 ## 1.15.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
@@ -123,9 +129,9 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1727
 [8]: https://github.com/DataDog/integrations-core/issues/1100
 [9]: https://github.com/sylr
-[10]: 
-[11]: 
-[12]: 
+[10]: https://github.com/DataDog/integrations-core/pull/1057
+[11]: https://github.com/DataDog/integrations-core/pull/176
+[12]: https://github.com/wholroyd
 [13]: https://github.com/DataDog/integrations-core/issues/902
 [14]: https://github.com/dnavre
 [15]: https://github.com/DataDog/integrations-core/issues/909

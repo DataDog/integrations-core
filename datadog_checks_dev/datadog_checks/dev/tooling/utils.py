@@ -11,6 +11,7 @@ from json.decoder import JSONDecodeError
 
 import requests
 import semver
+import yaml
 
 from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
@@ -270,12 +271,18 @@ def get_tox_file(check_name):
 
 
 def get_metadata_file(check_name):
-    return os.path.join(get_root(), check_name, 'metadata.csv')
+    path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
+    return os.path.join(get_root(), check_name, path)
 
 
 def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula')
+    path = load_manifest(check_name).get('terms', {}).get('eula', '')
     path = os.path.join(get_root(), check_name, *path.split('/'))
+    return path, file_exists(path)
+
+
+def get_jmx_metrics_file(check_name):
+    path = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'metrics.yaml')
     return path, file_exists(path)
 
 
@@ -362,13 +369,15 @@ def get_config_files(check_name):
     return sorted(files)
 
 
-def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_dirs=None):
+def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_tests=True, include_dirs=None):
     """Return generator of filenames from within a given check.
 
     By default, only includes files within 'datadog_checks' and 'tests' directories, this
-    can be expanded by adding to the `include_dirs` arg.
+    can be expanded by adding to the `include_dirs` arg. 'tests' can also be removed.
     """
-    base_dirs = ['datadog_checks', 'tests']
+    base_dirs = ['datadog_checks']
+    if include_tests:
+        base_dirs.append('tests')
     if include_dirs is not None:
         base_dirs += include_dirs
 
@@ -535,6 +544,19 @@ def has_process_signature(check):
 def is_tile_only(check):
     config_file = get_config_file(check)
     return not os.path.exists(config_file)
+
+
+def is_jmx_integration(check_name):
+    config_file = get_config_file(check_name)
+    if not file_exists(config_file):
+        return False
+    config_content = yaml.safe_load(read_file(config_file))
+    if not config_content:
+        return False
+    init_config = config_content.get('init_config', None)
+    if not init_config:
+        return False
+    return init_config.get('is_jmx', False)
 
 
 def has_dashboard(check):

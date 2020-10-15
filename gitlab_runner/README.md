@@ -55,11 +55,11 @@ See [metadata.csv][117] for a list of metrics provided by this integration.
    usermod -a -G systemd-journal dd-agent
    ```
 
-4. Add this configuration block to your `gitlab_runner.d/conf.yaml` file to start collecting your CouchDB Logs:
+4. Add this configuration block to your `gitlab_runner.d/conf.yaml` file to start collecting your Gitlab Runner Logs:
 
    ```yaml
    logs:
-     - type: jounrald
+     - type: journald
        source: gitlab-runner
    ```
 

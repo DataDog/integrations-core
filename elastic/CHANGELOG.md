@@ -1,5 +1,14 @@
 # CHANGELOG - elastic
 
+## 1.20.1 / 2020-09-28
+
+* [Fixed] Extra debug for missing metrics. See [#7673](https://github.com/DataDog/integrations-core/pull/7673).
+
+## 1.20.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
 ## 1.19.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Include Node system stats. See [#6590](https://github.com/DataDog/integrations-core/pull/6590).
@@ -144,8 +153,8 @@
 [16]: https://github.com/DataDog/integrations-core/issues/1312
 [17]: https://github.com/DataDog/integrations-core/issues/1050
 [18]: https://github.com/DataDog/integrations-core/issues/1026
-[19]: 
-[20]: 
+[19]: https://github.com/DataDog/integrations-core/pull/1038
+[20]: https://github.com/DataDog/integrations-core/pull/997
 [21]: https://github.com/DataDog/integrations-core/issues/463
 [22]: https://github.com/DataDog/integrations-core/issues/893
 [23]: https://github.com/DataDog/integrations-core/issues/860

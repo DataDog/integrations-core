@@ -28,6 +28,9 @@ class BaseSqlServerMetric(object):
     DEFAULT_METRIC_TYPE = None
     QUERY_BASE = None
 
+    # Flag to indicate if this subclass/table is available for custom queries
+    CUSTOM_QUERIES_AVAILABLE = True
+
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         self.cfg_instance = cfg_instance
         self.datadog_name = cfg_instance['name']
@@ -52,12 +55,12 @@ class BaseSqlServerMetric(object):
     def _fetch_generic_values(cls, cursor, counters_list, logger):
         if counters_list:
             placeholders = ', '.join('?' for _ in counters_list)
-            query = cls.QUERY_BASE.format(placeholders)
-            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query)
+            query = cls.QUERY_BASE.format(placeholders=placeholders)
+            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, counters_list)
             cursor.execute(query, counters_list)
         else:
             query = cls.QUERY_BASE
-            logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
             cursor.execute(query)
 
         rows = cursor.fetchall()
@@ -72,11 +75,14 @@ class BaseSqlServerMetric(object):
         raise NotImplementedError
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-performance-counters-transact-sql
 class SqlSimpleMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
     QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
-                    from sys.dm_os_performance_counters where counter_name in ({})"""
+                    from {table} where counter_name in ({{placeholders}})""".format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -108,18 +114,22 @@ class SqlFractionMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """select counter_name, cntr_type, cntr_value, instance_name, object_name
-                    from sys.dm_os_performance_counters
-                    where counter_name in ({})
-                    order by cntr_type;"""
+                    from {table}
+                    where counter_name in ({{placeholders}})
+                    order by cntr_type;""".format(
+        table=TABLE
+    )
 
     INSTANCES_QUERY = """select instance_name
-                         from sys.dm_os_performance_counters
-                         where counter_name=? and instance_name!='_Total';"""
+                         from {table}
+                         where counter_name=? and instance_name!='_Total';""".format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
         placeholders = ', '.join('?' for _ in counters_list)
-        query = cls.QUERY_BASE.format(placeholders)
+        query = cls.QUERY_BASE.format(placeholders=placeholders)
 
         logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, str(counters_list))
         cursor.execute(query, counters_list)
@@ -213,10 +223,11 @@ class SqlIncrFractionMetric(SqlFractionMetric):
         self.past_values[key] = (value, base)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-wait-stats-transact-sql
 class SqlOsWaitStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_wait_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """select * from sys.dm_os_wait_stats where wait_type in ({})"""
+    QUERY_BASE = """select * from {table} where wait_type in ({{placeholders}})""".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -239,18 +250,28 @@ class SqlOsWaitStat(BaseSqlServerMetric):
         self.report_function(metric_name, value, tags=self.tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-io-virtual-file-stats-transact-sql
 class SqlIoVirtualFileStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_io_virtual_file_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.dm_io_virtual_file_stats(null, null)"
+    QUERY_BASE = (
+        "select DB_NAME(database_id) as name, database_id, file_id, {{custom_cols}} from {table}(null, null)".format(
+            table=TABLE
+        )
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
+        # since we want the database name we need to update the SQL query at runtime with our custom columns
+        # multiple formats on a string are harmless
+        extra_cols = ', '.join(col for col in counters_list)
+        cls.QUERY_BASE = cls.QUERY_BASE.format(custom_cols=extra_cols)
         return cls._fetch_generic_values(cursor, None, logger)
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlIoVirtualFileStat, self).__init__(cfg_instance, base_name, report_function, column, logger)
         self.dbid = self.cfg_instance.get('database_id', None)
+        self.dbname = self.cfg_instance.get('database', None)
         self.fid = self.cfg_instance.get('file_id', None)
         self.pvs_vals = defaultdict(lambda: None)
 
@@ -260,14 +281,18 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
         #  but doesn't account for time differences.  This can work for some columns like `num_of_writes`, but is
         #  inaccurate for others like `io_stall_write_ms` which are not monotonically increasing.
         dbid_ndx = columns.index("database_id")
+        dbname_ndx = columns.index("name")
         fileid_ndx = columns.index("file_id")
         column_ndx = columns.index(self.column)
         for row in rows:
             dbid = row[dbid_ndx]
+            dbname = row[dbname_ndx]
             fid = row[fileid_ndx]
             value = row[column_ndx]
 
             if self.dbid and self.dbid != dbid:
+                continue
+            if self.dbname and self.dbname != dbname:
                 continue
             if self.fid and self.fid != fid:
                 continue
@@ -277,16 +302,21 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
 
             report_value = value - self.pvs_vals[dbid, fid]
             self.pvs_vals[dbid, fid] = value
-            metric_tags = ['database_id:{}'.format(str(dbid).strip()), 'file_id:{}'.format(str(fid).strip())]
+            metric_tags = [
+                'database:{}'.format(str(dbname).strip()),
+                'database_id:{}'.format(str(dbid).strip()),
+                'file_id:{}'.format(str(fid).strip()),
+            ]
             metric_tags.extend(self.tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, report_value, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-memory-clerks-transact-sql
 class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_memory_clerks'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """select * from sys.dm_os_memory_clerks where type in ({})"""
+    QUERY_BASE = """select * from {table} where type in ({{placeholders}})""".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -310,10 +340,11 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
 class SqlOsSchedulers(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_schedulers'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.dm_os_schedulers"
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -335,33 +366,110 @@ class SqlOsSchedulers(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-tasks-transact-sql
 class SqlOsTasks(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_os_tasks'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from sys.dm_os_tasks"
+    QUERY_BASE = """
+    select scheduler_id,
+           SUM(context_switches_count) as context_switches_count,
+           SUM(pending_io_count) as pending_io_count,
+           SUM(pending_io_byte_count) as pending_io_byte_count,
+           AVG(pending_io_byte_average) as pending_io_byte_average
+    from {table} group by scheduler_id;
+    """.format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns):
-        session_id_column_index = columns.index("session_id")
         scheduler_id_column_index = columns.index("scheduler_id")
         value_column_index = columns.index(self.column)
 
         for row in rows:
             column_val = row[value_column_index]
-            session_id = row[session_id_column_index]
             scheduler_id = row[scheduler_id_column_index]
 
-            metric_tags = ['session_id:{}'.format(str(session_id)), 'scheduler_id:{}'.format(str(scheduler_id))]
+            metric_tags = ['scheduler_id:{}'.format(str(scheduler_id))]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
+class SqlDatabaseFileStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.database_files'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
+
+    DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        file_id = columns.index("file_id")
+        file_type = columns.index("type")
+        file_location = columns.index("physical_name")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            column_val = row[value_column_index]
+            if self.column in ('size', 'max_size'):
+                column_val *= 8  # size reported in 8 KB pages
+
+            fileid = row[file_id]
+            filetype = self.DB_TYPE_MAP[row[file_type]]
+            location = row[file_location]
+
+            metric_tags = [
+                'database:{}'.format(str(self.instance)),
+                'file_id:{}'.format(str(fileid)),
+                'file_type:{}'.format(str(filetype)),
+                'file_location:{}'.format(str(location)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
+class SqlDatabaseStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.databases'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        database_name = columns.index("name")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            if row[database_name] != self.instance:
+                continue
+
+            column_val = row[value_column_index]
+
+            metric_tags = [
+                'database:{}'.format(str(self.instance)),
+            ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
-VALID_TABLES = set(cls.TABLE for cls in BaseSqlServerMetric.__subclasses__())
+VALID_TABLES = set(cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERIES_AVAILABLE)
 TABLE_MAPPING = {
     cls.TABLE: (cls.DEFAULT_METRIC_TYPE, cls)
     for cls in BaseSqlServerMetric.__subclasses__()

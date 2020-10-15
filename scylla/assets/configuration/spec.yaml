@@ -1,0 +1,46 @@
+name: Scylla
+files:
+- name: scylla.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: metric_groups
+      description: List of additional scylla metric groups to collect in addition to the default
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - scylla.alien
+        - scylla.batchlog_manager
+        - scylla.commitlog
+        - scylla.cql
+        - scylla.database
+        - scylla.execution_stages
+        - scylla.hints
+        - scylla.httpd
+        - scylla.io_queue
+        - scylla.lsa
+        - scylla.memory
+        - scylla.memtables
+        - scylla.query_processor
+        - scylla.scheduler
+        - scylla.sstables
+        - scylla.thrift
+        - scylla.tracing
+    - template: instances/openmetrics
+      overrides:
+        prometheus_url.value.example: http://localhost:9180/metrics
+        prometheus_url.display_priority: 1
+        send_histograms_buckets.hidden: true
+    - template: logs
+      example:
+      - type: file
+        source: scylla
+        log_processing_rules:
+        - type: multi_line
+          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+          name: new_log_start_with_date

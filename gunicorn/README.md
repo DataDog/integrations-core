@@ -38,9 +38,12 @@ See the [sample gunicorn.yaml][6] for all available configuration options.
 init_config:
 
 instances:
-  # as set
-  # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
-  # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
+    ## @param proc_name - string - required
+    ## The name of the gunicorn process. For the following gunicorn server:
+    ##
+    ## gunicorn --name <WEB_APP_NAME> <WEB_APP_CONFIG>.ini
+    ##
+    ## the name is `<WEB_APP_NAME>`
   - proc_name: <YOUR_APP_NAME>
 ```
 

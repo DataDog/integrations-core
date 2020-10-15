@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 1.6.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+
 ## 1.6.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

@@ -26,6 +26,80 @@ def test_config():
         SnowflakeCheck(CHECK_NAME, {}, [account_config])
 
 
+def test_default_authentication(instance):
+    # Test default auth
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    assert check.config.authenticator == 'snowflake'
+
+
+def test_invalid_auth(instance):
+    # Test oauth
+    oauth_inst = copy.deepcopy(instance)
+    oauth_inst['authenticator'] = 'oauth'
+    with pytest.raises(Exception, match='If using OAuth, you must specify a token'):
+        SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+
+    oauth_inst['authenticator'] = 'testauth'
+    with pytest.raises(Exception, match='The Authenticator method set is invalid: testauth'):
+        SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+
+
+def test_default_auth(instance):
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    check._conn = mock.MagicMock()
+    check._query_manager = mock.MagicMock()
+
+    with mock.patch('datadog_checks.snowflake.check.sf') as sf:
+        check.check(instance)
+        sf.connect.assert_called_with(
+            user='testuser',
+            password='pass',
+            account='test_acct.us-central1.gcp',
+            database='SNOWFLAKE',
+            schema='ACCOUNT_USAGE',
+            warehouse=None,
+            role='ACCOUNTADMIN',
+            passcode_in_password=False,
+            passcode=None,
+            client_prefetch_threads=4,
+            login_timeout=60,
+            ocsp_response_cache_filename=None,
+            authenticator='snowflake',
+            token=None,
+            client_session_keep_alive=False,
+        )
+
+
+def test_oauth_auth(instance):
+    # Test oauth
+    oauth_inst = copy.deepcopy(instance)
+    oauth_inst['authenticator'] = 'oauth'
+    oauth_inst['token'] = 'testtoken'
+
+    with mock.patch('datadog_checks.snowflake.check.sf') as sf:
+        check = SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+        check._conn = mock.MagicMock()
+        check._query_manager = mock.MagicMock()
+        check.check(oauth_inst)
+        sf.connect.assert_called_with(
+            user='testuser',
+            password='pass',
+            account='test_acct.us-central1.gcp',
+            database='SNOWFLAKE',
+            schema='ACCOUNT_USAGE',
+            warehouse=None,
+            role='ACCOUNTADMIN',
+            passcode_in_password=False,
+            passcode=None,
+            client_prefetch_threads=4,
+            login_timeout=60,
+            ocsp_response_cache_filename=None,
+            authenticator='oauth',
+            token='testtoken',
+            client_session_keep_alive=False,
+        )
+
+
 def test_default_metric_groups(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
     assert check.config.metric_groups == [

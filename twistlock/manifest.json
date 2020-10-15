@@ -28,10 +28,13 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Twistlock": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "twistlock"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }
