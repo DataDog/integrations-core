@@ -1,6 +1,6 @@
 # Airflow with KubernetesExecutor
 
-This is a sample/lab Kubernetes setup with Datadog Agent and Airflow using KubernetesExecutor.
+This is a sample/lab Kubernetes setup with the Datadog Agent and Airflow using KubernetesExecutor.
  
 ## Setup
 
@@ -10,7 +10,7 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
 ```
 
-Sim link dags to specific absolute location, needed for `pv.yaml`:
+Sim link dags to the specific absolute location, needed for `pv.yaml`:
 
 ```bash
 # from current folder
