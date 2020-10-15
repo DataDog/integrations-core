@@ -20,6 +20,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
 from datadog_checks.dev.utils import ON_WINDOWS, read_file, running_on_windows_ci, write_file
 
@@ -918,6 +919,7 @@ class TestAuthTokenDCOS:
         priv_key_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dcos', 'private-key.pem')
         pub_key_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dcos', 'public-key.pem')
 
+        exp = 3600
         instance = {
             'auth_token': {
                 'reader': {
@@ -925,7 +927,7 @@ class TestAuthTokenDCOS:
                     'login_url': 'https://leader.mesos/acs/api/v1/auth/login',
                     'service_account': 'datadog_agent',
                     'private_key_path': priv_key_path,
-                    'expiration': 3600,
+                    'expiration': exp,
                 },
                 'writer': {'type': 'header', 'name': 'Authorization', 'value': 'token=<TOKEN>'},
             }
@@ -940,7 +942,8 @@ class TestAuthTokenDCOS:
                 public_key = read_file(pub_key_path)
                 decoded = jwt.decode(json['token'], public_key, algorithms='RS256')
                 assert decoded['uid'] == 'datadog_agent'
-                assert decoded['exp'] is not None
+                assert isinstance(decoded['exp'], int)
+                assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
 
                 return MockResponse({'token': 'auth-token'}, 200)
             return MockResponse(None, 404)
