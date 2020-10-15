@@ -26,6 +26,27 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 
 2. [Restart the Agent][4].
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `kyototycoon.d/conf.yaml` file to start collecting Kyoto Tycoon logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /var/data/ktserver.log
+        source: kyototycoon
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample kyototycoon.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][4].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `kyototycoon` under the Checks section.

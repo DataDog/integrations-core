@@ -1,6 +1,8 @@
 import json
 import os
 
+import pytest
+
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import HERE
@@ -116,7 +118,6 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     replica_tags = ['replset_name:mongo-mongodb-sharded-shard-0', 'replset_state:secondary']
     metrics_categories = [
         'default',
-        'custom-queries',
         'oplog',
         'replset-secondary',
         'top',
@@ -211,7 +212,11 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check)
     )
 
 
-def test_integration_replicaset_secondary(instance_integration, aggregator, check):
+@pytest.mark.parametrize('collect_custom_queries', [True, False])
+def test_integration_replicaset_secondary(instance_integration, aggregator, check, collect_custom_queries):
+    if collect_custom_queries:
+        for query in instance_integration['custom_queries']:
+            query['run_on_secondary'] = True
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
@@ -221,13 +226,15 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
     replica_tags = ['replset_name:replset', 'replset_state:secondary']
     metrics_categories = [
         'default',
-        'custom-queries',
         'oplog',
         'replset-secondary',
         'top',
         'dbstats-local',
         'fsynclock',
     ]
+    if collect_custom_queries:
+        metrics_categories.append('custom-queries')
+
     _assert_metrics(aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()

@@ -26,6 +26,12 @@ files:
           - template: instances/http
           - template: instances/default
 
+      - template: logs
+        example:
+        - type: file
+          path: /var/data/ktserver.log
+          source: kyototycoon
+
   - name: auto_conf.yaml
     options:
       - template: ad_identifiers
