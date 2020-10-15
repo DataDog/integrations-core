@@ -11,7 +11,7 @@ from .commands.console import (
     echo_waiting,
     echo_warning,
     set_color,
-    set_debug,
+    set_debug, echo_info,
 )
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
 from .constants import get_root
