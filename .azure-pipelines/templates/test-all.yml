@@ -10,6 +10,7 @@ jobs:
   - template: './test-single-${{ check.os }}.yml'
     parameters:
       check: ${{ check.checkName }}
+      job_name: ${{ check.job_name }}
       coverage: ${{ parameters.coverage }}
       display: ${{ check.displayName }}
       repo: ${{ parameters.repo }}
