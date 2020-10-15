@@ -190,8 +190,25 @@ class MongoDb(AgentCheck):
                     self.log.error(msg, mongo_version)
             collectors.append(CollStatsCollector(self, self.db_name, tags, coll_names=self.coll_names))
 
-        # TODO: Is it the right place for custom queries?
-        collectors.append(CustomQueriesCollector(self, self.db_name, tags, self.custom_queries))
+        # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
+        # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
+        # stated in the configuration of the query.
+        is_secondary = isinstance(self.deployment, ReplicaSetDeployment) and self.deployment.is_secondary
+        queries = self.custom_queries
+        if is_secondary:
+            # On a secondary node, only collect the custom queries that define the 'run_on_secondary' parameter.
+            queries = [q for q in self.custom_queries if is_affirmative(q.get('run_on_secondary', False))]
+            missing_queries = len(self.custom_queries) - len(queries)
+            if missing_queries:
+                self.log.debug(
+                    "{} custom queries defined in the configuration won't be run because the mongod node is a "
+                    "secondary and the queries don't specify 'run_on_secondary: true' in the configuration. "
+                    "Custom queries are only run on mongos, primaries on standalone by default to prevent "
+                    "duplicated information."
+                )
+
+        collectors.append(CustomQueriesCollector(self, self.db_name, tags, queries))
+
         collectors.append(ServerStatusCollector(self, self.db_name, tags, tcmalloc=self.collect_tcmalloc_metrics))
         self.collectors = collectors
 
