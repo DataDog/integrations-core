@@ -5,7 +5,7 @@ import os
 import re
 from fnmatch import fnmatch
 
-from datadog_checks.dev.tooling.commands.console import abort, echo_debug
+from .commands.console import abort, echo_debug
 
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
