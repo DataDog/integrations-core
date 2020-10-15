@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.1.0 / 2020-10-15
+
+* [Added] Support Windows. See [#7781](https://github.com/DataDog/integrations-core/pull/7781).
+* [Added] Add support for hashing sequences containing None on Python 3. See [#7779](https://github.com/DataDog/integrations-core/pull/7779).
+* [Fixed] Fix `AttributeError` when using `additional_metrics` and counter `inst_name` is null. See [#7752](https://github.com/DataDog/integrations-core/pull/7752).
+
 ## 15.0.0 / 2020-10-13
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
