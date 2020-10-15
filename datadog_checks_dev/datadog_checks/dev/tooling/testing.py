@@ -68,7 +68,7 @@ def get_tox_envs(
             echo_debug(f"`{check}` is not testable, skipping")
             continue
         if changed_only and check not in changed_checks:
-            echo_debug(f"`{check}` is does not have changes, skipping")
+            echo_debug(f"`{check}` does not have changes, skipping")
             continue
         else:
             checks_seen.add(check)
