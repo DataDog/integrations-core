@@ -31,10 +31,19 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
    ```yaml
    logs:
      - type: file
-       path: /path/to/my/directory/file.log
+       path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\CommonDiagnosticsLog\\*"
+       source: exchange-server
+     - type: file
+       path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\ThrottlingService\\*"
+       source: exchange-server
+     - type: file
+       path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\Hub\\Connectivity\\*"
        source: exchange-server
    ```
-
+    *Note*: Currently the only logs supported are CommonDiagnosticsLog, ThrottlingService, and Connectivity logs
+    due to Exchange Server outputting many different types of logs.
+    Please send a request for other logs to support.
+    
    Change the `path` parameter value and configure it for your environment.
    See the [sample exchange_server.d/conf.yaml][6] for all available configuration options.
 
