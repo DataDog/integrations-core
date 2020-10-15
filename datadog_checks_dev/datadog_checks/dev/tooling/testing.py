@@ -64,10 +64,10 @@ def get_tox_envs(
         if check in checks_seen:
             echo_debug(f"`{check}` already evaluated, skipping")
             continue
-        if check not in testable_checks:
+        elif check not in testable_checks:
             echo_debug(f"`{check}` is not testable, skipping")
             continue
-        if changed_only and check not in changed_checks:
+        elif changed_only and check not in changed_checks:
             echo_debug(f"`{check}` does not have changes, skipping")
             continue
         else:
@@ -119,7 +119,7 @@ def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=Fal
         output = run_command(tox_command, capture='out')
 
     if output.code != 0:
-        abort(output.stderr + '\n' + output.stdout)
+        abort(output.stdout + '\n' + output.stderr)
 
     env_list = [e.strip() for e in output.stdout.splitlines()]
 
