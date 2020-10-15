@@ -6,7 +6,6 @@ import os
 import re
 from contextlib import contextmanager
 from copy import deepcopy
-from datetime import timedelta
 from io import open
 from ipaddress import ip_address, ip_network
 
@@ -21,7 +20,7 @@ from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
-from .time import get_current_datetime
+from .time import get_timestamp
 
 try:
     from contextlib import ExitStack
@@ -684,7 +683,7 @@ class DCOSAuthTokenReader(object):
                     encryption_algorithm=serialization.NoEncryption(),
                 )
 
-                exp = get_current_datetime() + timedelta(seconds=self._expiration)
+                exp = int(get_timestamp() + self._expiration)
 
                 encoded = jwt.encode({'uid': self._service_account, 'exp': exp}, serialized_private, algorithm='RS256')
 
