@@ -108,8 +108,8 @@ QueryHistory = {
     'name': 'warehouse_load.metrics',
     'query': (
         'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
-        'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED) '
-        'AVG(BYTES_SPILLED_TO_LOCAL_STORAGE), AVG(BYTES_SPILLED_TO_REMOTE_STORAGE)'
+        'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED), '
+        'AVG(BYTES_SPILLED_TO_LOCAL_STORAGE), AVG(BYTES_SPILLED_TO_REMOTE_STORAGE) '
         'from QUERY_HISTORY where start_time >= date_trunc(day, current_date) '
         'group by 1, 2, 3, 4;'
     ),
