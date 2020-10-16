@@ -47,11 +47,11 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: C:\Program Files\Microsoft\Exchange Server\V15\TransportRoles\Logs\CommonDiagnosticsLog\*
+#     path: C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\CommonDiagnosticsLog\\*
 #     source: exchange-server
 #   - type: file
-#     path: C:\Program Files\Microsoft\Exchange Server\V15\TransportRoles\Logs\ThrottlingService\*
+#     path: C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\ThrottlingService\\*
 #     source: exchange-server
 #   - type: file
-#     path: C:\Program Files\Microsoft\Exchange Server\V15\TransportRoles\Logs\Hub\Connectivity\*
+#     path: C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\Hub\\Connectivity\\*
 #     source: exchange-server
