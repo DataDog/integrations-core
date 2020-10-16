@@ -114,6 +114,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         profile_memory = False
         echo_warning('No API key is set; collecting metrics about memory usage will be disabled.')
 
+    if not (ctx.obj['repo_choice'] == 'core' and ctx.obj.get('repo') == 'core' and dev):
+        echo_warning(f'Be sure to run environment with --dev for extras or custom integrations.')
+
     echo_waiting(f'Setting up environment `{env}`... ', nl=False)
     config, metadata, error = start_environment(check, env)
 
