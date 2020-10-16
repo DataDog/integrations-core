@@ -11,7 +11,7 @@ files:
         service_check_prefix.description: Service check prefix to use.
     - name: custom_jar_paths
       description: |
-        When using JBoss default JMX implementation, the client JAR which allows connecting to it.
+        These are the client JARs which allow connecting to the JBoss default JMX implementation.
         See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
       value:
         type: array
