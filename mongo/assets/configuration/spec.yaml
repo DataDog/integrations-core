@@ -153,6 +153,8 @@ files:
           properties:
             - name: metric_prefix
               type: string
+            - name: database
+              type: string
             - name: query
               type: string
             - name: fields
@@ -171,6 +173,7 @@ files:
         example:
           - metric_prefix: mongo
             query: <MONGO_COMMAND_QUERY>
+            database: <MONGO_DATABASE>
             fields:
               - field_name: <FIELD_NAME>
                 name: <METRIC_SUFFIX>

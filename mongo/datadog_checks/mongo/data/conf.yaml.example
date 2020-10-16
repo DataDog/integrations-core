@@ -145,6 +145,7 @@ instances:
     # custom_queries:
     #   - metric_prefix: mongo
     #     query: <MONGO_COMMAND_QUERY>
+    #     database: <MONGO_DATABASE>
     #     fields:
     #     - field_name: <FIELD_NAME>
     #       name: <METRIC_SUFFIX>

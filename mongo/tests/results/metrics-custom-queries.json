@@ -87,7 +87,7 @@
         "value": 375.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
-            "db:test",
+            "db:test2",
             "tag1:val1",
             "tag2:val2",
             "collection:orders",
@@ -100,7 +100,7 @@
         "value": 125.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
-            "db:test",
+            "db:test2",
             "tag1:val1",
             "tag2:val2",
             "collection:orders",
