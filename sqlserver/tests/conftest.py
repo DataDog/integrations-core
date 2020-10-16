@@ -68,7 +68,11 @@ def dd_environment():
         pyodbc.connect(conn, timeout=30)
 
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        # docker-compose for non-HA SQL instance
+        # compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+
+        # docker-compose for HA SQL instance
+        compose_file=os.path.join(HERE, 'compose-ha', 'docker-compose.yaml'),
         conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
         mount_logs=True,
     ):
