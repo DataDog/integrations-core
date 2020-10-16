@@ -22,6 +22,9 @@ from datadog_checks.mongo.collectors import (
     ServerStatusCollector,
     TopCollector,
 )
+from datadog_checks.mongo.collectors.conn_pool_stats import ConnPoolStatsCollector
+from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
+from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import (
     DEFAULT_TIMEOUT,
     SERVICE_CHECK_NAME,
@@ -161,14 +164,24 @@ class MongoDb(AgentCheck):
 
     def refresh_collectors(self, mongo_version, all_dbs, tags):
         collectors = []
+
+        if self.deployment.use_shards:
+            collectors.append(ConnPoolStatsCollector(self, tags))
+
         if isinstance(self.deployment, ReplicaSetDeployment):
             if self.replica_check:
                 collectors.append(ReplicaCollector(self, tags))
             collectors.append(ReplicationOpLogCollector(self, tags))
 
-        if not isinstance(self.deployment, MongosDeployment):
-            # The local database contains different information on each node.
-            # But is only available for mongod instances.
+        if isinstance(self.deployment, MongosDeployment):
+            if 'jumbo_chunks' in self.additional_metrics:
+                collectors.append(JumboStatsCollector(self, tags))
+
+            if LooseVersion(mongo_version) >= LooseVersion("3.6"):
+                collectors.append(SessionStatsCollector(self, tags))
+        else:
+            # Some commands are not available on mongos. Also the 'local' database is
+            # different on each node and its statistics should be fetched on any mongod node.
             collectors.append(DbStatCollector(self, "local", tags))
             collectors.append(FsyncLockCollector(self, self.db_name, tags))
             if 'top' in self.additional_metrics:
@@ -185,9 +198,11 @@ class MongoDb(AgentCheck):
                 if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                     collectors.append(IndexStatsCollector(self, self.db_name, tags, self.coll_names))
                 else:
-                    msg = "'collections_indexes_stats' is only available starting from mongo 3.2: "
-                    "your mongo version is %s"
-                    self.log.error(msg, mongo_version)
+                    self.log.debug(
+                        "'collections_indexes_stats' is only available starting from mongo 3.2: "
+                        "your mongo version is %s",
+                        mongo_version,
+                    )
             collectors.append(CollStatsCollector(self, self.db_name, tags, coll_names=self.coll_names))
 
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.

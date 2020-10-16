@@ -45,6 +45,9 @@ def get_long_state_name(state):
 
 
 class Deployment(object):
+    def __init__(self):
+        self.use_shards = False
+
     def is_principal(self):
         """In each mongo cluster there should be always one 'principal' node. One node
         that has full visibility on the user data and only one node should match the criteria.
@@ -57,6 +60,10 @@ class Deployment(object):
 
 
 class MongosDeployment(Deployment):
+    def __init__(self):
+        super(MongosDeployment, self).__init__()
+        self.use_shards = True
+
     def is_principal(self):
         # A mongos has full visibility on the data, Datadog agents should only communicate
         # with one mongos.
@@ -65,17 +72,18 @@ class MongosDeployment(Deployment):
 
 class ReplicaSetDeployment(Deployment):
     def __init__(self, replset_name, replset_state, in_shard=False):
+        super(ReplicaSetDeployment, self).__init__()
         self.replset_name = replset_name
         self.replset_state = replset_state
         self.replset_state_name = get_state_name(replset_state).lower()
-        self.in_shard = in_shard
+        self.use_shards = in_shard
         self.is_primary = replset_state == 1
         self.is_secondary = replset_state == 2
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
-        return not self.in_shard and self.is_primary
+        return not self.use_shards and self.is_primary
 
 
 class StandaloneDeployment(Deployment):

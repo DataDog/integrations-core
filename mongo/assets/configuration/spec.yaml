@@ -113,12 +113,13 @@ files:
           * `tcmalloc` -  TCMalloc memory allocator
           * `top` - Usage statistics for each collection
           * `collection` - Metrics of the specified collections
+          * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
       value:
         type: array
         items:
           type: string
         example:
-          [metrics.commands, tcmalloc, top, collection]
+          [metrics.commands, tcmalloc, top, collection, jumbo_chunks]
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
