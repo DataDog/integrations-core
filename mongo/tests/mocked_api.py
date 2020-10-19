@@ -30,7 +30,6 @@ class MockedDB(object):
     def __init__(self, db_name, deployment):
         self._db_name = db_name
         self.current_op = lambda: self.command("current_op")
-        self._query_count = 0
         self.deployment = deployment
 
     def __getitem__(self, coll_name):
@@ -50,8 +49,7 @@ class MockedDB(object):
             filename += "-{}".format(self.deployment)
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.
-            filename = "custom-query-{}".format(self._query_count)
-            self._query_count += 1
+            filename = "custom-query-{}".format(command)
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 
@@ -64,5 +62,10 @@ class MockedPyMongoClient(object):
         with open(os.path.join(HERE, "fixtures", "list_database_names"), 'r') as f:
             self.list_database_names = MagicMock(return_value=json.load(f))
 
+        self.db_cache = {}
+
     def __getitem__(self, db_name):
-        return MockedDB(db_name, self.deployment)
+        if db_name not in self.db_cache:
+            self.db_cache[db_name] = MockedDB(db_name, self.deployment)
+
+        return self.db_cache[db_name]

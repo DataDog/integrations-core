@@ -65,6 +65,7 @@ def instance_custom_queries():
         },
         {
             'query': {'count': 'foo', 'query': {'1': {'$type': 16}}},
+            'database': 'test',
             'metric_prefix': 'dd.custom.mongo.count',
             'tags': ['tag1:val1', 'tag2:val2'],
             'count_type': 'gauge',
@@ -79,6 +80,7 @@ def instance_custom_queries():
                 ],
                 'cursor': {},
             },
+            'database': 'test2',
             'fields': [
                 {'field_name': 'total', 'name': 'total', 'type': 'count'},
                 {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
@@ -178,16 +180,16 @@ class InitializeDB(LazyFunction):
             {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
         ]
 
-        db = cli['test']
-        db.foo.insert_many(foos)
-        db.bar.insert_many(bars)
-        db.orders.insert_many(orders)
+        for db_name in ['test', 'test2']:
+            db = cli[db_name]
+            db.foo.insert_many(foos)
+            db.bar.insert_many(bars)
+            db.orders.insert_many(orders)
+            db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': db_name}])
 
         auth_db = cli['authDB']
         auth_db.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
-
-        db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': 'test'}])
 
 
 def create_shard_user():
