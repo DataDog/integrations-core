@@ -98,7 +98,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                 metric_tags = list(self.tags)
 
                 if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
-                    instance_name == self.instance and (not self.object_name or object_name == self.object_name)
+                        instance_name == self.instance and (not self.object_name or object_name == self.object_name)
                 ):
                     matched = True
 
@@ -171,7 +171,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
                 continue
 
             if (self.instance != ALL_INSTANCES and inst != self.instance) or (
-                self.object_name and object_name != self.object_name
+                    self.object_name and object_name != self.object_name
             ):
                 done_instances.append(inst)
                 continue
@@ -371,7 +371,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
 class SqlAvailabilityGroups(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_availability_group_states'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE ='select * \
+    QUERY_BASE = 'select * \
     from {table} as dhdrcs \
     inner join sys.availability_groups as ag \
     on ag.group_id = dhdrcs.group_id'.format(table=TABLE)
@@ -399,7 +399,36 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)  # using 123 temporarily
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-replicas-transact-sql?view=sql-server-ver15
+class SqlAvailabilityReplicas(BaseSqlServerMetric):
+    TABLE = 'sys.availability_replicas'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = 'SELECT * FROM {table}'.format(table=TABLE)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+
+        failover_mode_desc_index = columns.index('failover_mode_desc')
+        availability_mode_desc_index = columns.index('availability_mode_desc')
+
+        for row in rows:
+            column_val = row[value_column_index]
+            failover_mode_desc = row[failover_mode_desc_index]
+            availability_mode_desc = row[availability_mode_desc_index]
+            metric_tags = [
+                'failover_mode_desc:{}'.format(str(failover_mode_desc)),
+                'availability_mode_desc:{}'.format(str(availability_mode_desc)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
