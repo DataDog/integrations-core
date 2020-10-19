@@ -29,7 +29,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_private_key_password': None,
     'tls_validate_hostname': True,
-    'tls_load_default_certs': True
+    'tls_load_default_certs': True,
 }
 
 
@@ -54,7 +54,7 @@ class TlsContextWrapper(object):
             field = data.get('name')
 
             if field.startswith(UNIQUE_FIELD_PREFIX):
-                standard_field_name = field[len(UNIQUE_FIELD_PREFIX):]
+                standard_field_name = field[len(UNIQUE_FIELD_PREFIX) :]
             else:
                 standard_field_name = field
 

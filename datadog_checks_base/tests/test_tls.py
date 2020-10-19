@@ -6,11 +6,11 @@ import ssl
 from ssl import SSLContext
 
 import pytest
-from datadog_checks.dev import TempDir
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tls import TlsContextWrapper
+from datadog_checks.dev import TempDir
 
 
 class TestCheckAttribute:
@@ -94,27 +94,18 @@ class TestRemapper:
 
 class TestHigherPriorityRemapper:
     def test_verify_no_remapper(self):
-        instance = {
-            'tls_verify': False,
-            '_tls_context_tls_verify': True
-        }
+        instance = {'tls_verify': False, '_tls_context_tls_verify': True}
         tls = TlsContextWrapper(instance)
         assert tls.config['tls_verify'] is True
 
     def test_verify_remapper(self):
-        instance = {
-            'disable_tls_validation': True,
-            '_tls_context_tls_verify': True
-        }
+        instance = {'disable_tls_validation': True, '_tls_context_tls_verify': True}
         remapper = {'disable_tls_validation': {'name': 'tls_verify', 'invert': True}}
         tls = TlsContextWrapper(instance, remapper)
         assert tls.config['tls_verify'] is True
 
     def test_verify_remapper_to_higher_priority(self):
-        instance = {
-            'disable_tls_validation': True,
-            'tls_verify': True
-        }
+        instance = {'disable_tls_validation': True, 'tls_verify': True}
         remapper = {'disable_tls_validation': {'name': '_tls_context_tls_verify', 'invert': True}}
         tls = TlsContextWrapper(instance, remapper)
         assert tls.config['tls_verify'] is False
