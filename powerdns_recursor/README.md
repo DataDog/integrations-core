@@ -97,6 +97,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":8082, "api_key":"<POWERDNS_API_KEY>", "version": 3}` |
 
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "powerdns"}`                  |
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -158,3 +166,5 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
+
