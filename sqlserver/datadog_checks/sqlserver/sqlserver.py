@@ -61,54 +61,62 @@ class SQLServer(AgentCheck):
     # Default performance table metrics - Database Instance level
     # datadog metric name, counter name, instance name
     INSTANCE_METRICS = [
-        # SQLServer:General Statistics
-        ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
-        # SQLServer:Locks
-        ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
-        # SQLServer:Access Methods
-        ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
-        # SQLServer:Plan Cache
-        ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
-        ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
-        # SQLServer:Databases
-        ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
-        ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
-        ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
-        ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
-        ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
-        ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
-        ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
-        # SQLServer:Memory Manager
-        ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
-        ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
-        # SQLServer:Buffer Manager
-        ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
-        ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.buffer.page_reads', 'Page reads/sec', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.buffer.page_writes', 'Page writes/sec', ''),  # LARGE_RAWCOUNT
-        ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
-        # SQLServer:SQL Statistics
-        ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', ''),
-        ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', ''),
-        ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', ''),
-        ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
-        ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
-        ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+        # # SQLServer:General Statistics
+        # ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
+        # ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
+        # # SQLServer:Locks
+        # ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
+        # # SQLServer:Access Methods
+        # ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
+        # # SQLServer:Plan Cache
+        # ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
+        # ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+        # # SQLServer:Databases
+        # ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
+        # ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
+        # ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
+        # ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
+        # ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
+        # ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
+        # ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
+        # # SQLServer:Memory Manager
+        # ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
+        # ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
+        # # SQLServer:Buffer Manager
+        # ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
+        # ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
+        # ('sqlserver.buffer.page_reads', 'Page reads/sec', ''),  # LARGE_RAWCOUNT
+        # ('sqlserver.buffer.page_writes', 'Page writes/sec', ''),  # LARGE_RAWCOUNT
+        # ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
+        # # SQLServer:SQL Statistics
+        # ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', ''),
+        # ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', ''),
+        # ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', ''),
+        # ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
+        # ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
+        # ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+    ]
+
+    # AlwaysOn metrics
+    ALWAYSON_METRICS = [
+        ('sqlserver.ha.ag.health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
+        ('sqlserver.ha.replica.sync.state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+        ('sqlserver.ha.replica.failover.mode', 'sys.availability_replicas', 'failover_mode'),
+
     ]
 
     # Non-performance table metrics - can be database specific
     # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
-        ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
-        ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),
-        ('sqlserver.scheduler.active_workers_count', 'sys.dm_os_schedulers', 'active_workers_count'),
-        ('sqlserver.scheduler.runnable_tasks_count', 'sys.dm_os_schedulers', 'runnable_tasks_count'),
-        ('sqlserver.scheduler.work_queue_count', 'sys.dm_os_schedulers', 'work_queue_count'),
-        ('sqlserver.task.context_switches_count', 'sys.dm_os_tasks', 'context_switches_count'),
-        ('sqlserver.task.pending_io_count', 'sys.dm_os_tasks', 'pending_io_count'),
-        ('sqlserver.task.pending_io_byte_count', 'sys.dm_os_tasks', 'pending_io_byte_count'),
-        ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
+        # ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
+        # ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),
+        # ('sqlserver.scheduler.active_workers_count', 'sys.dm_os_schedulers', 'active_workers_count'),
+        # ('sqlserver.scheduler.runnable_tasks_count', 'sys.dm_os_schedulers', 'runnable_tasks_count'),
+        # ('sqlserver.scheduler.work_queue_count', 'sys.dm_os_schedulers', 'work_queue_count'),
+        # ('sqlserver.task.context_switches_count', 'sys.dm_os_tasks', 'context_switches_count'),
+        # ('sqlserver.task.pending_io_count', 'sys.dm_os_tasks', 'pending_io_count'),
+        # ('sqlserver.task.pending_io_byte_count', 'sys.dm_os_tasks', 'pending_io_byte_count'),
+        # ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
     ]
 
     # Non-performance table metrics
@@ -120,9 +128,9 @@ class SQLServer(AgentCheck):
     #   0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending,
     #   4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary
     DATABASE_METRICS = [
-        ('sqlserver.database.files.size', 'sys.database_files', 'size'),
-        ('sqlserver.database.files.state', 'sys.database_files', 'state'),
-        ('sqlserver.database.state', 'sys.databases', 'state'),
+        # ('sqlserver.database.files.size', 'sys.database_files', 'size'),
+        # ('sqlserver.database.files.state', 'sys.database_files', 'state'),
+        # ('sqlserver.database.state', 'sys.databases', 'state'),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -220,6 +228,12 @@ class SQLServer(AgentCheck):
             cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
             metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
+        # Load AlwaysOn metrics
+        for name, table, column in self.ALWAYSON_METRICS:
+            db_name = 'master'
+            cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
+            metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
@@ -227,52 +241,52 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
-        for cfg in custom_metrics:
-            sql_type = None
-            base_name = None
-
-            custom_tags = tags + cfg.get('tags', [])
-            cfg['tags'] = custom_tags
-
-            db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
-            if db_table not in VALID_TABLES:
-                self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
-                continue
-
-            if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
-                self.log.debug(
-                    'Skipping custom metric %s for database %s, check instance configured for database %s',
-                    cfg['name'],
-                    cfg.get('database'),
-                    self.instance.get('database'),
-                )
-                continue
-
-            if db_table == DEFAULT_PERFORMANCE_TABLE:
-                user_type = cfg.get('type')
-                if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-                sql_type = None
-                try:
-                    if user_type is None:
-                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
-                except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
-                    continue
-
-                metrics_to_collect.append(
-                    self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
-                    )
-                )
-
-            else:
-                for column in cfg['columns']:
-                    metrics_to_collect.append(
-                        self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
-                        )
-                    )
+        # for cfg in custom_metrics:
+        #     sql_type = None
+        #     base_name = None
+        #
+        #     custom_tags = tags + cfg.get('tags', [])
+        #     cfg['tags'] = custom_tags
+        #
+        #     db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
+        #     if db_table not in VALID_TABLES:
+        #         self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
+        #         continue
+        #
+        #     if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
+        #         self.log.debug(
+        #             'Skipping custom metric %s for database %s, check instance configured for database %s',
+        #             cfg['name'],
+        #             cfg.get('database'),
+        #             self.instance.get('database'),
+        #         )
+        #         continue
+        #
+        #     if db_table == DEFAULT_PERFORMANCE_TABLE:
+        #         user_type = cfg.get('type')
+        #         if user_type is not None and user_type not in VALID_METRIC_TYPES:
+        #             self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
+        #         sql_type = None
+        #         try:
+        #             if user_type is None:
+        #                 sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+        #         except Exception:
+        #             self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
+        #             continue
+        #
+        #         metrics_to_collect.append(
+        #             self.typed_metric(
+        #                 cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+        #             )
+        #         )
+        #
+        #     else:
+        #         for column in cfg['columns']:
+        #             metrics_to_collect.append(
+        #                 self.typed_metric(
+        #                     cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+        #                 )
+        #             )
 
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)
@@ -378,6 +392,7 @@ class SQLServer(AgentCheck):
                         instance_results[cls] = None, None
                     else:
                         rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
+                        self.log.info("fetch_all_values metric for rows: " + str(rows) + " and cols: " + str(cols))
                         instance_results[cls] = rows, cols
 
                 # Using the cached data, extract and report individual metrics

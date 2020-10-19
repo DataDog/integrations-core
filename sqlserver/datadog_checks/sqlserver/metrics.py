@@ -340,6 +340,68 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+class SqlDbReplicaStates(BaseSqlServerMetric):
+    TABLE = 'sys.dm_hadr_database_replica_states'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = "select * from {table}".format(table=TABLE)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+        sync_state_desc_index = columns.index('synchronization_state_desc')
+        replica_id_index = columns.index('replica_id')
+
+        for row in rows:
+            column_val = row[value_column_index]
+            sync_state_desc = row[sync_state_desc_index]
+            replica_id = row[replica_id_index]
+
+            metric_tags = [
+                'synchronization_state_desc:{}'.format(str(sync_state_desc)),
+                'replica_id:{}'.format(str(replica_id)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+class SqlAvailabilityGroups(BaseSqlServerMetric):
+    TABLE = 'sys.dm_hadr_availability_group_states'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE ='select * \
+    from {table} as dhdrcs \
+    inner join sys.availability_groups as ag \
+    on ag.group_id = dhdrcs.group_id'.format(table=TABLE)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+
+        sync_health_desc_index = columns.index('synchronization_health_desc')
+        primary_recovery_health_index = columns.index('primary_recovery_health_desc')
+        secondary_recovery_health_index = columns.index('secondary_recovery_health_desc')
+
+        for row in rows:
+            column_val = row[value_column_index]  # this would be true or false
+            sync_health_desc = row[sync_health_desc_index]
+            primary_recovery_health = row[primary_recovery_health_index]
+            secondary_recovery_health = row[secondary_recovery_health_index]
+            metric_tags = [
+                'synchronization_health_desc:{}'.format(str(sync_health_desc)),
+                'primary_recovery_health:{}'.format(str(primary_recovery_health)),
+                'secondary_recovery_health:{}'.format(str(secondary_recovery_health)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)  # using 123 temporarily
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
 class SqlOsSchedulers(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_schedulers'
@@ -417,6 +479,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         file_id = columns.index("file_id")
         file_type = columns.index("type")
         file_location = columns.index("physical_name")
+        db_files_state_desc_index = columns.index("state_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -427,12 +490,14 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             fileid = row[file_id]
             filetype = self.DB_TYPE_MAP[row[file_type]]
             location = row[file_location]
+            db_files_state_desc = row[db_files_state_desc_index]
 
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
+                'database_files_state_desc:{}'.format(str(db_files_state_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -452,6 +517,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 
     def fetch_metric(self, rows, columns):
         database_name = columns.index("name")
+        db_state_desc_index = columns.index("state_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -459,9 +525,10 @@ class SqlDatabaseStats(BaseSqlServerMetric):
                 continue
 
             column_val = row[value_column_index]
-
+            db_state_desc = row[db_state_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'database_state_desc:{}'.format(str(db_state_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
