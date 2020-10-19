@@ -31,7 +31,10 @@ def test_integration_mongos(instance_integration, aggregator, check):
     with mock_pymongo("mongos"):
         mongos_check.check(None)
 
-    _assert_metrics(aggregator, ['default', 'custom-queries', 'dbstats', 'indexes-stats', 'collection'])
+    _assert_metrics(
+        aggregator,
+        ['default', 'custom-queries', 'dbstats', 'indexes-stats', 'collection', 'connection-pool', 'jumbo', 'sessions'],
+    )
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -55,7 +58,16 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         mongo_check.check(None)
 
     replica_tags = ['replset_name:mongo-mongodb-sharded-shard-0', 'replset_state:primary']
-    metrics_categories = ['default', 'custom-queries', 'oplog', 'replset-primary', 'top', 'dbstats-local', 'fsynclock']
+    metrics_categories = [
+        'default',
+        'custom-queries',
+        'oplog',
+        'replset-primary',
+        'top',
+        'connection-pool',
+        'dbstats-local',
+        'fsynclock',
+    ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -123,6 +135,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         'top',
         'dbstats-local',
         'fsynclock',
+        'connection-pool',
     ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
 

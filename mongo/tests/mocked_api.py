@@ -21,6 +21,12 @@ class MockedCollection(object):
             limit = MagicMock(limit=MagicMock(side_effect=itertools.cycle([val1, val2])))
             sort = MagicMock(sort=MagicMock(return_value=limit))
             self.find = MagicMock(return_value=sort)
+        elif coll_name == 'system.sessions':
+            with open(os.path.join(HERE, "fixtures", "system.sessions"), 'r') as f:
+                content = json.load(f, object_hook=json_util.object_hook)
+                self.aggregate = MagicMock(return_value=iter([content]))
+        elif coll_name == 'chunks':
+            self.count_documents = MagicMock(side_effect=[100, 5])
         else:
             with open(os.path.join(HERE, "fixtures", "indexStats-{}".format(coll_name)), 'r') as f:
                 self.aggregate = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
