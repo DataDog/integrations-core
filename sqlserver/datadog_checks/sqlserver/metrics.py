@@ -340,6 +340,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'
     DEFAULT_METRIC_TYPE = 'gauge'
@@ -368,6 +369,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
 class SqlAvailabilityGroups(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_availability_group_states'
     DEFAULT_METRIC_TYPE = 'gauge'
