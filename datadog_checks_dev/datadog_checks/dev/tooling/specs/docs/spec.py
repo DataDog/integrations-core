@@ -1,13 +1,30 @@
-# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+from collections import namedtuple
+
 from ..utils import default_option_example, normalize_source_name
+
+
+Validation = namedtuple('Validation', 'key, type, required, default, children')
 
 
 def spec_validator(spec, loader):
     if not isinstance(spec, dict):
         loader.errors.append(f'{loader.source}: {loader.spec_type} specifications must be a mapping object')
         return
+
+    validations = [
+        Validation('name', str, True, None, None),
+        Validation('version', str, False, None),
+        Validation('options', str, False, 'valid_options'),
+        Validation('files', list, True, None),
+    ]
+
+    valid_options = [
+        Validation('autodiscovery', bool, False, False, None)
+    ]
 
     if 'name' not in spec:
         loader.errors.append(
@@ -210,26 +227,17 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('hidden', False)
-        if not isinstance(option['hidden'], bool):
+        if option_name in option_names_origin:
             loader.errors.append(
-                '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
-                    loader.source, file_name, sections_display, option_name
+                '{}, {}, {}option #{}: Option name `{}` already used by option #{}'.format(
+                    loader.source,
+                    file_name,
+                    sections_display,
+                    option_index,
+                    option_name,
+                    option_names_origin[option_name],
                 )
             )
-
-        if option_name in option_names_origin:
-            if not option['hidden']:
-                loader.errors.append(
-                    '{}, {}, {}option #{}: Option name `{}` already used by option #{}'.format(
-                        loader.source,
-                        file_name,
-                        sections_display,
-                        option_index,
-                        option_name,
-                        option_names_origin[option_name],
-                    )
-                )
         else:
             option_names_origin[option_name] = option_index
 
@@ -253,6 +261,14 @@ def options_validator(options, loader, file_name, *sections):
         if not isinstance(option['required'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `required` must be true or false'.format(
+                    loader.source, file_name, sections_display, option_name
+                )
+            )
+
+        option.setdefault('hidden', False)
+        if not isinstance(option['hidden'], bool):
+            loader.errors.append(
+                '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
