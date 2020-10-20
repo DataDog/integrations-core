@@ -183,7 +183,7 @@ class OpenMetricsScraperMixin(object):
 
         # Ignore metrics based on tags
         config['ignore_metrics_by_label'] = instance.get('ignore_metrics_by_label',
-                                                         default_instance.get('ignore_metrics_by_label', []))
+                                                         default_instance.get('ignore_metrics_by_label', {}))
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -394,6 +394,21 @@ class OpenMetricsScraperMixin(object):
         check run, such as when polling an external resource like the Kubelet.
         """
         self._http_handlers.clear()
+
+    def _ignore_metrics_by_label(self, scraper_config, metric_name, sample):
+        ignore_metrics_by_label = scraper_config['ignore_metrics_by_label']
+        sample_labels = sample[self.SAMPLE_LABELS]
+        for label_key, label_values in ignore_metrics_by_label.items():
+            if label_values is None:
+                if label_key in sample_labels:
+                    self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
+                    return True
+            else:
+                for val in label_values:
+                    if label_key in sample_labels and sample_labels[label_key] == val:
+                        self.log.debug("Skipping metric %s due to label %s value matching: %s", metric_name, label_key, val)
+                        return True
+        return False
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -764,6 +779,9 @@ class OpenMetricsScraperMixin(object):
         if metric.type in ["gauge", "counter", "rate"]:
             metric_name_with_namespace = self._metric_name_with_namespace(metric_name, scraper_config)
             for sample in metric.samples:
+                if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
+                    continue
+
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
                     self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
