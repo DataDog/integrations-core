@@ -191,10 +191,10 @@ def test_family_tagging_with_named_groups(aggregator, check):
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
     for mname in metrics.E_METRICS:
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family_first_group:first_group', count=2)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family_first_group:test', count=2)
 
     for mname in metrics.Q_METRICS:
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue_family_first_group:first_group', count=6)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue_family_first_group:test', count=6)
     # Overview attributes
     for mname in metrics.OVERVIEW_METRICS_TOTALS:
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)

@@ -360,7 +360,7 @@ class RabbitMQ(AgentCheck):
                     if len(named_groups_dict) > 0:
                         for key in named_groups_dict:
                             key_name = object_tag_name + "_" + key
-                            data_line[key] = key
+                            data_line[key] = named_groups_dict[key]
                             TAGS_MAP[object_type][key] = key_name
                     else:                        
                         data_line[object_tag_name] = match.groups()[0]                        
