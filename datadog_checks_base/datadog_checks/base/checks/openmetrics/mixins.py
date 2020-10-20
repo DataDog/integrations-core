@@ -638,9 +638,10 @@ class OpenMetricsScraperMixin(object):
         ignore_metrics_by_label = scraper_config['ignore_metrics_by_label']
         sample_labels = sample[self.SAMPLE_LABELS]
         for label_key, label_values in ignore_metrics_by_label.items():
-            if label_values is None and label_key in sample_labels:
-                self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
-                return True
+            if label_values is None:
+                if label_key in sample_labels:
+                    self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
+                    return True
             else:
                 for val in label_values:
                     if label_key in sample_labels and sample_labels[label_key] == val:

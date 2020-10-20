@@ -1705,6 +1705,61 @@ def test_ignore_metrics_multiple_wildcards(
         aggregator.assert_all_metrics_covered()
 
 
+def test_gauge_with_ignore_label_key(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    """ submitting metrics that contain labels should result in tags on the gauge call """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
+    )
+    ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['ignore_metrics_by_label'] = {'worker': None}
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    check.log.debug.assert_called_with('Skipping metric %s due to label key matching: %s', 'process.vm.bytes', 'worker')
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
+
+
+def test_metrics_with_ignore_label_value(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+):
+    """
+    Test that metrics that matched an ignored label values is properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['metrics'] = [
+        {
+            # Ignore counter by label values 'system': ['auth', 'recursive']
+            'skydns_skydns_dns_error_count_total': 'skydns.dns.error.count',
+            # Ignore counter by label key 'cache'
+            'skydns_skydns_dns_cachemiss_count_total': 'skydns.dns.cache_missed',
+            # Expected metric
+            'go_memstats_mspan_inuse_bytes': 'go_memstats.mspan.inuse_bytes',
+        }
+    ]
+    instance['ignore_metrics_by_label'] = {'system': ['auth', 'recursive'], 'cache': None}
+    config = check.create_scraper_configuration(instance)
+    expected_tags = ['cause:nxdomain']
+    mock_response = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    )
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check.process(config)
+
+        # Make sure metrics are ignored
+        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:auth'])
+        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:recursive'])
+        aggregator.assert_metric('prometheus.skydns.dns.cache_missed', count=0)
+        # Make sure we don't ignore other metrics
+        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=1, tags=expected_tags + ['system:reverse'])
+        aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=1)
+
+        aggregator.assert_all_metrics_covered()
+
+
 def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
     """
     Test that a matched metric is properly collected.
