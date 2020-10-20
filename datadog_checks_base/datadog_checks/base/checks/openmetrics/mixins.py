@@ -395,21 +395,6 @@ class OpenMetricsScraperMixin(object):
         """
         self._http_handlers.clear()
 
-    def _ignore_metrics_by_label(self, scraper_config, metric_name, sample):
-        ignore_metrics_by_label = scraper_config['ignore_metrics_by_label']
-        sample_labels = sample[self.SAMPLE_LABELS]
-        for label_key, label_values in ignore_metrics_by_label.items():
-            if label_values is None:
-                if label_key in sample_labels:
-                    self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
-                    return True
-            else:
-                for val in label_values:
-                    if label_key in sample_labels and sample_labels[label_key] == val:
-                        self.log.debug("Skipping metric %s due to label %s value matching: %s", metric_name, label_key, val)
-                        return True
-        return False
-
     def parse_metric_family(self, response, scraper_config):
         """
         Parse the MetricFamily from a valid `requests.Response` object to provide a MetricFamily object.
@@ -649,6 +634,20 @@ class OpenMetricsScraperMixin(object):
                     if mapping_key in label_mapping and mapping_value in label_mapping[mapping_key]:
                         sample_labels.update(label_mapping[mapping_key][mapping_value])
 
+    def _ignore_metrics_by_label(self, scraper_config, metric_name, sample):
+        ignore_metrics_by_label = scraper_config['ignore_metrics_by_label']
+        sample_labels = sample[self.SAMPLE_LABELS]
+        for label_key, label_values in ignore_metrics_by_label.items():
+            if label_values is None and label_key in sample_labels:
+                self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
+                return True
+            else:
+                for val in label_values:
+                    if label_key in sample_labels and sample_labels[label_key] == val:
+                        self.log.debug("Skipping metric %s due to label %s value matching: %s", metric_name, label_key, val)
+                        return True
+        return False
+
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
         Handle a Prometheus metric according to the following flow:
@@ -834,6 +833,8 @@ class OpenMetricsScraperMixin(object):
             if not self._is_value_valid(val):
                 self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
+            if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
+                continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
@@ -887,6 +888,8 @@ class OpenMetricsScraperMixin(object):
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
                 self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                continue
+            if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
