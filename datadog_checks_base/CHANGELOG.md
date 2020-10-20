@@ -3,7 +3,7 @@
 ## 15.1.0 / 2020-10-20
 
 * [Added] Implements token reader for DC/OS Auth JWT token retrieval with login. See [#7785](https://github.com/DataDog/integrations-core/pull/7785).
-* [Added] Support Windows. See [#7781](https://github.com/DataDog/integrations-core/pull/7781).
+* [Added] Make kafka_consumer (kazoo lib) available for Windows. See [#7781](https://github.com/DataDog/integrations-core/pull/7781).
 * [Added] Add support for hashing sequences containing None on Python 3. See [#7779](https://github.com/DataDog/integrations-core/pull/7779).
 * [Fixed] Fix `AttributeError` when using `additional_metrics` and counter `inst_name` is null. See [#7752](https://github.com/DataDog/integrations-core/pull/7752).
 
