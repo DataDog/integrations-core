@@ -498,14 +498,14 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
         is_local_index = columns.index('is_local')
 
         for row in rows:
+            is_local = row[is_local_index]
+            if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
+
             column_val = row[value_column_index]
             sync_state_desc = row[sync_state_desc_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
-            is_local = row[is_local_index]
-
-            if self.cfg_instance.get('only_emit_local') and not is_local:
-                continue
 
             metric_tags = [
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
@@ -578,13 +578,20 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
         failover_mode_desc_index = columns.index('failover_mode_desc')
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
+        is_local_index = columns.index('is_local')
 
         for row in rows:
+            is_local = row[is_local_index]
+            if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
+
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
             is_primary_replica = row[is_primary_replica_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
+
+
             metric_tags = [
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
