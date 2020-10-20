@@ -648,6 +648,8 @@ class OpenMetricsScraperMixin(object):
                 if label_key in sample_labels:
                     self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
                     return True
+            elif len(label_values) == 0:
+                self.log.debug("Skipping filter label %s with an empty values list, did you mean to use '*' wildcard?", label_key)
             else:
                 for val in label_values:
                     if label_key in sample_labels and sample_labels[label_key] == val:

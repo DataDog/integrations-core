@@ -1761,6 +1761,24 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, tags=['worker:worker_2', 'node:bar'])
 
 
+def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    """ submitting metrics that contain labels should result in tags on the gauge call """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
+    )
+    ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
+    ref_gauge.add_metric(['worker_2', 'bar'], 1009345.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': []}
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+
+    check.log.debug.assert_called_with(
+        "Skipping filter label %s with an empty values list, did you mean to use '*' wildcard?", 'worker'
+    )
+
+
 def test_metrics_with_ignore_label_value(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
 ):
