@@ -157,6 +157,8 @@ def test_query_metrics(dd_run_check, aggregator, instance):
             Decimal('0.000000'),
             Decimal('0.000000'),
             Decimal('0.000000'),
+            Decimal('0.000000'),
+            Decimal('0.000000'),
         ),
     ]
 
@@ -172,6 +174,8 @@ def test_query_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric('snowflake.query.bytes_scanned', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.bytes_written', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('snowflake.query.bytes_deleted', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.bytes_spilled.local', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.query.bytes_spilled.remote', value=0, count=1, tags=expected_tags)
 
 
 def test_version_metadata(dd_run_check, instance, datadog_agent):
