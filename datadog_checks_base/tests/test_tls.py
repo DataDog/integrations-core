@@ -169,9 +169,9 @@ class TestTLSContext:
     def test_ca_cert_expand_user(self):
         instance = {'tls_ca_cert': '~/foo'}
         check = AgentCheck('test', {}, [instance])
-        with patch('ssl.SSLContext'), patch('os.path.expanduser') as mock_expand:
+        with patch('ssl.SSLContext'), patch('os.path') as mock_path:
             check.get_tls_context()
-            mock_expand.assert_called_with('~/foo')
+            mock_path.expanduser.assert_called_with('~/foo')
 
     def test_client_cert_no_key_no_pass(self):
         instance = {'tls_cert': 'foo'}
