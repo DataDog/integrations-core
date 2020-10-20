@@ -199,7 +199,7 @@ class Vault(OpenMetricsBaseCheck):
             dynamic_tags.append('cluster_name:{}'.format(cluster_name))
 
         replication_mode = health_data.get('replication_dr_mode')
-        if 'disabled' not in replication_mode:
+        if 'secondary' in replication_mode:
             self._replication_dr_mode = True
             self.log.debug("Detected vault in replication DR mode, skipping Prometheus metric collection.")
 
