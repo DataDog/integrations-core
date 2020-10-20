@@ -101,9 +101,9 @@ class SQLServer(AgentCheck):
     # datadog metric name, sql table, column name, tag
     ALWAYSON_METRICS = [
         # ('sqlserver.ha.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
-        # ('sqlserver.ha.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
-        # ('sqlserver.ha.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
-        ('sqlserver.ha.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+        ('sqlserver.ha.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
+        ('sqlserver.ha.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
+        # ('sqlserver.ha.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
         # ('sqlserver.ha.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
         # ('sqlserver.ha.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
 

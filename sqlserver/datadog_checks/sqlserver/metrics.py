@@ -495,12 +495,17 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
         sync_state_desc_index = columns.index('synchronization_state_desc')
         resource_group_id_index = columns.index('resource_group_id')
         replica_server_name_index = columns.index('replica_server_name')
+        is_local_index = columns.index('is_local')
 
         for row in rows:
             column_val = row[value_column_index]
             sync_state_desc = row[sync_state_desc_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
+            is_local = row[is_local_index]
+
+            if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
 
             metric_tags = [
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
@@ -511,7 +516,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
             metric_name = '{}'.format(self.datadog_name)
 
             selected_ag = self.cfg_instance.get('availability_group')
-            if not selected_ag or selected_ag == str(resource_group_id):
+            if selected_ag is None or selected_ag == str(resource_group_id):
                 self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -533,25 +538,19 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 
         resource_group_id_index = columns.index('resource_group_id')
         sync_health_desc_index = columns.index('synchronization_health_desc')
-        primary_recovery_health_index = columns.index('primary_recovery_health_desc')
-        secondary_recovery_health_index = columns.index('secondary_recovery_health_desc')
 
         for row in rows:
             resource_group_id = row[resource_group_id_index]
             column_val = row[value_column_index]
             sync_health_desc = row[sync_health_desc_index]
-            primary_recovery_health = row[primary_recovery_health_index]
-            secondary_recovery_health = row[secondary_recovery_health_index]
             metric_tags = [
                 'availability_group:{}'.format(str(resource_group_id)),
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
-                'primary_recovery_health:{}'.format(str(primary_recovery_health)),
-                'secondary_recovery_health:{}'.format(str(secondary_recovery_health)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             selected_ag = self.cfg_instance.get('availability_group')
-            if not selected_ag or selected_ag == str(resource_group_id):
+            if selected_ag is None or selected_ag == str(resource_group_id):
                 self.report_function(metric_name, column_val, tags=metric_tags)
 
 
@@ -596,7 +595,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             selected_ag = self.cfg_instance.get('availability_group')
-            if not selected_ag or selected_ag == str(resource_group_id):
+            if selected_ag is None or selected_ag == str(resource_group_id):
                 self.report_function(metric_name, column_val, tags=metric_tags)
 
 
