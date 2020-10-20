@@ -481,7 +481,10 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                  from \
                  {table} as dhdrs  \
                  inner join sys.availability_groups as ag on  \
-                 ag.group_id = dhdrs.group_id".format(table=TABLE)
+                 ag.group_id = dhdrs.group_id \
+                 inner join sys.availability_replicas as ar \
+                 on dhdrs.replica_id = ar.replica_id" \
+        .format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -491,17 +494,17 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
         resource_group_id_index = columns.index('resource_group_id')
-        replica_id_index = columns.index('replica_id')
+        replica_server_name_index = columns.index('replica_server_name')
 
         for row in rows:
             column_val = row[value_column_index]
             sync_state_desc = row[sync_state_desc_index]
-            replica_id = row[replica_id_index]
+            replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
 
             metric_tags = [
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
-                'replica_id:{}'.format(str(replica_id)),
+                'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
             ]
             metric_tags.extend(self.tags)
