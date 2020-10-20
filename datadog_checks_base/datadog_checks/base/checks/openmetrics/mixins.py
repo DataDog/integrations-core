@@ -182,8 +182,9 @@ class OpenMetricsScraperMixin(object):
             config['_ignored_re'] = compile('|'.join(ignored_patterns))
 
         # Ignore metrics based on tags
-        config['ignore_metrics_by_label'] = instance.get('ignore_metrics_by_label',
-                                                         default_instance.get('ignore_metrics_by_label', {}))
+        config['ignore_metrics_by_label'] = instance.get(
+            'ignore_metrics_by_label', default_instance.get('ignore_metrics_by_label', {})
+        )
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -645,7 +646,9 @@ class OpenMetricsScraperMixin(object):
             else:
                 for val in label_values:
                     if label_key in sample_labels and sample_labels[label_key] == val:
-                        self.log.debug("Skipping metric %s due to label %s value matching: %s", metric_name, label_key, val)
+                        self.log.debug(
+                            "Skipping metric %s due to label %s value matching: %s", metric_name, label_key, val
+                        )
                         return True
         return False
 
