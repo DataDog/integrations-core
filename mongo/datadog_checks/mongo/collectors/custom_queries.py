@@ -32,9 +32,11 @@ class CustomQueriesCollector(MongoCollector):
             raise ValueError('Metric type {} is not one of {}.'.format(method_name, ALLOWED_CUSTOM_METRICS_TYPES))
         return getattr(self.check, method_name)
 
-    def _collect_custom_metrics_for_query(self, db, raw_query):
+    def _collect_custom_metrics_for_query(self, client, raw_query):
         """Validates the raw_query object, executes the mongo query then submits the metrics to Datadog"""
-        tags = self.base_tags + ["db:{}".format(self.db_name)]
+        db_name = raw_query.get('database', self.db_name)
+        db = client[db_name]
+        tags = self.base_tags + ["db:{}".format(db_name)]
         metric_prefix = raw_query.get('metric_prefix')
         if not metric_prefix:  # no cov
             raise ValueError("Custom query field `metric_prefix` is required")
@@ -127,10 +129,9 @@ class CustomQueriesCollector(MongoCollector):
                 submit_method(metric_name, metric_value, tags=query_tags)
 
     def collect(self, client):
-        db = client[self.db_name]
         for raw_query in self.custom_queries:
             try:
-                self._collect_custom_metrics_for_query(db, raw_query)
+                self._collect_custom_metrics_for_query(client, raw_query)
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
                 self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)

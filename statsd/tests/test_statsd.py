@@ -41,7 +41,9 @@ def instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'), log_patterns=['server is up']):
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'), log_patterns=['server is up'], mount_logs=True
+    ):
         yield DEFAULT_INSTANCE
 
 

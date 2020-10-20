@@ -29,6 +29,8 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
 
 #### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
 
+**Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][13].
+
 1. Install the [Airflow StatsD plugin][1].
 
    ```shell
@@ -294,3 +296,4 @@ Need help? Contact [Datadog support][7].
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
 [12]: https://docs.datadoghq.com/agent/guide/ad_identifiers/
+[13]: https://github.com/apache/airflow/issues/11514

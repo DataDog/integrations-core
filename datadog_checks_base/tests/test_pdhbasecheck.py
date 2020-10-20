@@ -80,6 +80,18 @@ def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture
 
 
 @requires_windows
+def test_additional_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
+    instance = copy.deepcopy(DEFAULT_INSTANCE)
+    instance['additional_metrics'] = SINGLE_INSTANCE_COUNTER
+
+    c = PDHBaseCheck("testcheck", {}, [instance], counter_list=[])
+    c.check(instance)
+
+    aggregator.assert_metric("test.system.mem.available", tags=None, count=1)
+
+
+@requires_windows
 def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
     initialize_pdh_tests()
     instance = DEFAULT_INSTANCE

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import win32wnet
 from six import iteritems
@@ -212,4 +212,11 @@ class PDHBaseCheck(AgentCheck):
 
     @classmethod
     def _no_instance(cls, inst_name):
-        return inst_name.lower() == 'none' or len(inst_name) == 0 or inst_name == '*' or inst_name.lower() == 'all'
+        # type: (Optional[str]) -> bool
+        return (
+            inst_name is None
+            or inst_name.lower() == 'none'
+            or len(inst_name) == 0
+            or inst_name == '*'
+            or inst_name.lower() == 'all'
+        )
