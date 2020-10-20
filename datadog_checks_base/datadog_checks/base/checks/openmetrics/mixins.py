@@ -639,6 +639,11 @@ class OpenMetricsScraperMixin(object):
         ignore_metrics_by_label = scraper_config['ignore_metrics_by_labels']
         sample_labels = sample[self.SAMPLE_LABELS]
         for label_key, label_values in ignore_metrics_by_label.items():
+            # Wildcard * means all metrics with label_key will be ignored
+            if '*' in label_values:
+                self.log.debug("Detected wildcard for label %s", label_key)
+                label_values = None
+
             if label_values is None:
                 if label_key in sample_labels:
                     self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
