@@ -344,8 +344,11 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from {table}".format(table=TABLE)
-
+    QUERY_BASE = "select *  \
+                 from \
+                 {table} as dhdrs  \
+                 inner join sys.availability_groups as ag on  \
+                 ag.group_id = dhdrs.group_id".format(table=TABLE)
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
         return cls._fetch_generic_values(cursor, None, logger)
@@ -353,16 +356,19 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
+        group_id_index = columns.index('resource_group_id')
         replica_id_index = columns.index('replica_id')
 
         for row in rows:
             column_val = row[value_column_index]
             sync_state_desc = row[sync_state_desc_index]
             replica_id = row[replica_id_index]
+            group_id = row[group_id_index]
 
             metric_tags = [
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
                 'replica_id:{}'.format(str(replica_id)),
+                'availability_group:{}'.format(str(group_id)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -385,19 +391,22 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
 
+        resource_group_id_index = columns.index('resource_group_id')
         sync_health_desc_index = columns.index('synchronization_health_desc')
         primary_recovery_health_index = columns.index('primary_recovery_health_desc')
         secondary_recovery_health_index = columns.index('secondary_recovery_health_desc')
 
         for row in rows:
+            resource_group_id = row[resource_group_id_index]
             column_val = row[value_column_index]  # this would be true or false
             sync_health_desc = row[sync_health_desc_index]
             primary_recovery_health = row[primary_recovery_health_index]
             secondary_recovery_health = row[secondary_recovery_health_index]
             metric_tags = [
+                'availability_group:{}'.format(str(resource_group_id)),
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
-                'primary_recovery_health:{}'.format(str(primary_recovery_health)),
-                'secondary_recovery_health:{}'.format(str(secondary_recovery_health)),
+                # 'primary_recovery_health:{}'.format(str(primary_recovery_health)),
+                # 'secondary_recovery_health:{}'.format(str(secondary_recovery_health)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -408,7 +417,12 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 class SqlAvailabilityReplicas(BaseSqlServerMetric):
     TABLE = 'sys.availability_replicas'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = 'SELECT * FROM {table}'.format(table=TABLE)
+    QUERY_BASE = 'SELECT * FROM {table} as ar \
+                    inner join sys.dm_hadr_database_replica_cluster_states as dhdrcs \
+                    on ar.replica_id = dhdrcs.replica_id \
+                    inner join sys.dm_hadr_database_replica_states as dhdrs \
+                    on ar.replica_id = dhdrs.replica_id' \
+        .format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -417,16 +431,23 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
 
+        is_primary_replica_index = columns.index('is_primary_replica')
         failover_mode_desc_index = columns.index('failover_mode_desc')
-        availability_mode_desc_index = columns.index('availability_mode_desc')
+        replica_id_index = columns.index('replica_id')
+        group_id_index = columns.index('group_id')
 
         for row in rows:
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
-            availability_mode_desc = row[availability_mode_desc_index]
+            is_primary_replica = row[is_primary_replica_index]
+            replica_id = row[replica_id_index]
+            group_id = row[group_id_index]
             metric_tags = [
+                'replica_id:{}'.format(str(replica_id)),
+                'availability_group_id:{}'.format(str(group_id)),
+                'is_primary_replica:{}'.format(str(is_primary_replica)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
-                'availability_mode_desc:{}'.format(str(availability_mode_desc)),
+
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)

@@ -98,10 +98,14 @@ class SQLServer(AgentCheck):
     ]
 
     # AlwaysOn metrics
+    # datadog metric name, sql table, column name, tag
     ALWAYSON_METRICS = [
-        ('sqlserver.ha.ag.health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
-        ('sqlserver.ha.replica.sync.state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
-        ('sqlserver.ha.replica.failover.mode', 'sys.availability_replicas', 'failover_mode'),
+        # ('sqlserver.ha.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
+        # ('sqlserver.ha.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
+        # ('sqlserver.ha.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
+        ('sqlserver.ha.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+        # ('sqlserver.ha.replica.failover.mode', 'sys.availability_replicas', 'failover_mode'),
+        # ('sqlserver.ha.replica.failover.readiness', 'sys.availability_replicas', 'is_failover_ready'),
 
     ]
 
@@ -229,13 +233,26 @@ class SQLServer(AgentCheck):
             metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
-        for name, table, column in self.ALWAYSON_METRICS:
-            db_name = 'master'
-            cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
-            metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        if is_affirmative(self.instance.get('include_ha_metrics', True)):
+            for name, table, column in self.ALWAYSON_METRICS:
+                db_name = 'master'
+                cfg = {
+                    'name': name,
+                    'table': table,
+                    'column': column,
+                    'instance_name': db_name,
+                    'tags': tags,
+                    'availability_group': self.instance.get('availability_group'),
+                    'database': self.instance.get('database'),
+                }
+                metrics_to_collect.append(
+                    self.typed_metric(
+                        cfg_inst=cfg, table=table, column=column
+                    )
+                )
 
         # Load metrics from scheduler and task tables, if enabled
-        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
+        if is_affirmative(self.instance.get('include_task_scheduler_metrics', True)):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
