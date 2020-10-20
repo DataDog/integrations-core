@@ -149,6 +149,22 @@
       - <*_SUFFIX>
       - <PREFIX_*_SUFFIX>
       - <*_SUBSTRING_*>
+- name: ignore_metrics_by_labels
+  description: A mapping of labels where metrics with matching labels are ignored.
 
+  value:
+    type: array
+    items:
+      type: object
+      properties:
+        - name: key
+          type: string
+        - name: label
+          type: array
+          items:
+            type: string
+      example:
+        <KEY_1>: [<LABEL_1>, <LABEL_2>]
+        <KEY_2>: *
 - template: instances/http
 - template: instances/default
