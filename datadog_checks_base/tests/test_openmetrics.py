@@ -1713,7 +1713,7 @@ def test_gauge_with_ignore_label_key(aggregator, mocked_prometheus_check, mocked
     ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
 
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['ignore_metrics_by_label'] = {'worker': None}
+    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': None}
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
     check.log.debug.assert_called_with('Skipping metric %s due to label key matching: %s', 'process.vm.bytes', 'worker')
@@ -1729,7 +1729,7 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
     ref_gauge.add_metric(['worker_2', 'bar'], 1009345.0)
 
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['ignore_metrics_by_label'] = {'worker': ['worker_1']}
+    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': ['worker_1']}
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
 
@@ -1761,7 +1761,7 @@ def test_metrics_with_ignore_label_value(
             'go_memstats_mspan_inuse_bytes': 'go_memstats.mspan.inuse_bytes',
         }
     ]
-    instance['ignore_metrics_by_label'] = {'system': ['auth', 'recursive'], 'cache': None}
+    instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': None}
     config = check.create_scraper_configuration(instance)
     expected_tags = ['cause:nxdomain']
     mock_response = mock.MagicMock(

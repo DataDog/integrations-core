@@ -181,9 +181,9 @@ class OpenMetricsScraperMixin(object):
         if ignored_patterns:
             config['_ignored_re'] = compile('|'.join(ignored_patterns))
 
-        # Ignore metrics based on tags
-        config['ignore_metrics_by_label'] = instance.get(
-            'ignore_metrics_by_label', default_instance.get('ignore_metrics_by_label', {})
+        # Ignore metrics based on label keys or specific label values
+        config['ignore_metrics_by_labels'] = instance.get(
+            'ignore_metrics_by_labels', default_instance.get('ignore_metrics_by_labels', {})
         )
 
         # If you want to send the buckets as tagged values when dealing with histograms,
@@ -636,7 +636,7 @@ class OpenMetricsScraperMixin(object):
                         sample_labels.update(label_mapping[mapping_key][mapping_value])
 
     def _ignore_metrics_by_label(self, scraper_config, metric_name, sample):
-        ignore_metrics_by_label = scraper_config['ignore_metrics_by_label']
+        ignore_metrics_by_label = scraper_config['ignore_metrics_by_labels']
         sample_labels = sample[self.SAMPLE_LABELS]
         for label_key, label_values in ignore_metrics_by_label.items():
             if label_values is None:
