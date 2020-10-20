@@ -349,6 +349,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                  {table} as dhdrs  \
                  inner join sys.availability_groups as ag on  \
                  ag.group_id = dhdrs.group_id".format(table=TABLE)
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
         return cls._fetch_generic_values(cursor, None, logger)
@@ -356,23 +357,26 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
-        group_id_index = columns.index('resource_group_id')
+        resource_group_id_index = columns.index('resource_group_id')
         replica_id_index = columns.index('replica_id')
 
         for row in rows:
             column_val = row[value_column_index]
             sync_state_desc = row[sync_state_desc_index]
             replica_id = row[replica_id_index]
-            group_id = row[group_id_index]
+            resource_group_id = row[resource_group_id_index]
 
             metric_tags = [
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
                 'replica_id:{}'.format(str(replica_id)),
-                'availability_group:{}'.format(str(group_id)),
+                'availability_group:{}'.format(str(resource_group_id)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
+
+            selected_ag = self.cfg_instance.get('availability_group')
+            if not selected_ag or selected_ag == str(resource_group_id):
+                self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
@@ -410,7 +414,9 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
+            selected_ag = self.cfg_instance.get('availability_group')
+            if not selected_ag or selected_ag == str(resource_group_id):
+                self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-replicas-transact-sql?view=sql-server-ver15
@@ -453,7 +459,9 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
+            selected_ag = self.cfg_instance.get('availability_group')
+            if not selected_ag or selected_ag == str(resource_group_id):
+                self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
