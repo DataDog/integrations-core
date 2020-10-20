@@ -140,9 +140,9 @@ class TestTLSContext:
 
     def test_no_ca_certs_default(self):
         check = AgentCheck('test', {}, [{}])
-        context = check.get_tls_context()
-        # Loads agent default ca certs from /opt/datadog-agent/embedded/ssl/cert.pem
-        assert len(context.get_ca_certs()) > 100
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context()  # type: MagicMock
+            context.load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
 
     def test_no_ca_certs_no_default(self):
         instance = {'tls_load_default_certs': False}
