@@ -641,20 +641,22 @@ class OpenMetricsScraperMixin(object):
         for label_key, label_values in ignore_metrics_by_label.items():
             # Wildcard * means all metrics with label_key will be ignored
             if label_values is not None and '*' in label_values:
-                self.log.debug("Detected wildcard for label %s", label_key)
+                self.log.debug("Detected wildcard for label `%s`", label_key)
                 label_values = None
 
             if label_values is None:
                 if label_key in sample_labels:
-                    self.log.debug("Skipping metric %s due to label key matching: %s", metric_name, label_key)
+                    self.log.debug("Skipping metric `%s` due to label key matching: %s", metric_name, label_key)
                     return True
             elif len(label_values) == 0:
-                self.log.debug("Skipping filter label %s with an empty values list, did you mean to use '*' wildcard?", label_key)
+                self.log.warning(
+                    "Skipping filter label `%s` with an empty values list, did you mean to use '*' wildcard?", label_key
+                )
             else:
                 for val in label_values:
                     if label_key in sample_labels and sample_labels[label_key] == val:
                         self.log.debug(
-                            "Skipping metric %s due to label %s value matching: %s", metric_name, label_key, val
+                            "Skipping metric `%s` due to label %s value matching: %s", metric_name, label_key, val
                         )
                         return True
         return False

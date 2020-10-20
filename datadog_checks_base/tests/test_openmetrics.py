@@ -66,6 +66,7 @@ def mocked_prometheus_check():
     check = OpenMetricsBaseCheck('prometheus_check', {}, {})
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
+    check.log.warning = mock.MagicMock()
     return check
 
 
@@ -1716,7 +1717,9 @@ def test_gauge_with_ignore_label_key(aggregator, mocked_prometheus_check, mocked
     mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': None}
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
-    check.log.debug.assert_called_with('Skipping metric %s due to label key matching: %s', 'process.vm.bytes', 'worker')
+    check.log.debug.assert_called_with(
+        'Skipping metric `%s` due to label key matching: %s', 'process.vm.bytes', 'worker'
+    )
     aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
 
 
@@ -1732,7 +1735,9 @@ def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, m
     mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': '*'}
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
-    check.log.debug.assert_called_with('Skipping metric %s due to label key matching: %s', 'process.vm.bytes', 'worker')
+    check.log.debug.assert_called_with(
+        'Skipping metric `%s` due to label key matching: %s', 'process.vm.bytes', 'worker'
+    )
     # Ignored metric
     aggregator.assert_metric('prometheus.process.vm.bytes', count=0, tags=['worker:worker_1', 'node:foo'])
     aggregator.assert_metric('prometheus.process.vm.bytes', count=0, tags=['worker:worker_2', 'node:bar'])
@@ -1752,7 +1757,7 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
 
     check.log.debug.assert_called_with(
-        'Skipping metric %s due to label %s value matching: %s', 'process.vm.bytes', 'worker', 'worker_1'
+        'Skipping metric `%s` due to label %s value matching: %s', 'process.vm.bytes', 'worker', 'worker_1'
     )
     # Ignored metric
     aggregator.assert_metric('prometheus.process.vm.bytes', count=0, tags=['worker:worker_1', 'node:foo'])
@@ -1766,16 +1771,14 @@ def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_che
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
     )
-    ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
     ref_gauge.add_metric(['worker_2', 'bar'], 1009345.0)
 
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': []}
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
-
-    check.log.debug.assert_called_with(
-        "Skipping filter label %s with an empty values list, did you mean to use '*' wildcard?", 'worker'
+    check.log.warning.assert_called_with(
+        "Skipping filter label `%s` with an empty values list, did you mean to use '*' wildcard?", 'worker'
     )
 
 
