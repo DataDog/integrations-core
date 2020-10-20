@@ -5,10 +5,9 @@ import os
 import re
 from fnmatch import fnmatch
 
-from .commands.console import abort, echo_debug
-
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
+from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
