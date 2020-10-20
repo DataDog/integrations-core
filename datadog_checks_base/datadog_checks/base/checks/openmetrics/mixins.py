@@ -640,7 +640,7 @@ class OpenMetricsScraperMixin(object):
         sample_labels = sample[self.SAMPLE_LABELS]
         for label_key, label_values in ignore_metrics_by_label.items():
             # Wildcard * means all metrics with label_key will be ignored
-            if '*' in label_values:
+            if label_values is not None and '*' in label_values:
                 self.log.debug("Detected wildcard for label %s", label_key)
                 label_values = None
 
