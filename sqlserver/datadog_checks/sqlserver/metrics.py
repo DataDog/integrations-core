@@ -398,15 +398,15 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 
         for row in rows:
             resource_group_id = row[resource_group_id_index]
-            column_val = row[value_column_index]  # this would be true or false
+            column_val = row[value_column_index]
             sync_health_desc = row[sync_health_desc_index]
             primary_recovery_health = row[primary_recovery_health_index]
             secondary_recovery_health = row[secondary_recovery_health_index]
             metric_tags = [
                 'availability_group:{}'.format(str(resource_group_id)),
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
-                # 'primary_recovery_health:{}'.format(str(primary_recovery_health)),
-                # 'secondary_recovery_health:{}'.format(str(secondary_recovery_health)),
+                'primary_recovery_health:{}'.format(str(primary_recovery_health)),
+                'secondary_recovery_health:{}'.format(str(secondary_recovery_health)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -421,7 +421,9 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                     inner join sys.dm_hadr_database_replica_cluster_states as dhdrcs \
                     on ar.replica_id = dhdrcs.replica_id \
                     inner join sys.dm_hadr_database_replica_states as dhdrs \
-                    on ar.replica_id = dhdrs.replica_id' \
+                    on ar.replica_id = dhdrs.replica_id \
+                    inner join sys.availability_groups as ag \
+                    on ag.group_id = ar.group_id' \
         .format(table=TABLE)
 
     @classmethod
@@ -433,18 +435,18 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
         is_primary_replica_index = columns.index('is_primary_replica')
         failover_mode_desc_index = columns.index('failover_mode_desc')
-        replica_id_index = columns.index('replica_id')
-        group_id_index = columns.index('group_id')
+        replica_server_name_index = columns.index('replica_server_name')
+        resource_group_id_index = columns.index('resource_group_id')
 
         for row in rows:
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
             is_primary_replica = row[is_primary_replica_index]
-            replica_id = row[replica_id_index]
-            group_id = row[group_id_index]
+            replica_server_name = row[replica_server_name_index]
+            resource_group_id = row[resource_group_id_index]
             metric_tags = [
-                'replica_id:{}'.format(str(replica_id)),
-                'availability_group_id:{}'.format(str(group_id)),
+                'replica_server_name:{}'.format(str(replica_server_name)),
+                'availability_group:{}'.format(str(resource_group_id)),
                 'is_primary_replica:{}'.format(str(is_primary_replica)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
 
