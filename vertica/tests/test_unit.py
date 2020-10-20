@@ -35,7 +35,7 @@ def test_ssl_config_ok(aggregator):
     check = VerticaCheck('vertica', {}, [instance])
 
     with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
-        with mock.patch('datadog_checks.vertica.vertica.ssl') as ssl:
+        with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
             vertica.connect.return_value = mock.MagicMock()
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
@@ -44,10 +44,10 @@ def test_ssl_config_ok(aggregator):
 
             assert tls_context.verify_mode == ssl.CERT_REQUIRED
             assert tls_context.check_hostname is True
-            tls_context.load_verify_locations.assert_called_with(None, CERTIFICATE_DIR, None)
-            tls_context.load_cert_chain.assert_called_with(cert, keyfile=private_key)
+            tls_context.load_verify_locations.assert_called_with(cafile=None, capath=CERTIFICATE_DIR, cadata=None)
+            tls_context.load_cert_chain.assert_called_with(cert, keyfile=private_key, password=None)
 
-            assert check._connection is not None
+        assert check._connection is not None
 
     aggregator.assert_service_check("vertica.can_connect", status=AgentCheck.OK, tags=['db:abc', 'foo:bar'])
 
