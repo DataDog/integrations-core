@@ -99,14 +99,19 @@ class SQLServer(AgentCheck):
 
     # AlwaysOn metrics
     # datadog metric name, sql table, column name, tag
-    ALWAYSON_METRICS = [
-        # ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
-        # ('sqlserver.ao.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
-        # ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
+    AO_METRICS = [
+        ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
         ('sqlserver.ao.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
-        # ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
-        # ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
+        ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
+        ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
+    ]
 
+    AO_METRICS_PRIMARY = [
+        ('sqlserver.ao.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
+    ]
+
+    AO_METRICS_SECONDARY = [
+        ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
     ]
 
     # Non-performance table metrics - can be database specific
@@ -234,7 +239,7 @@ class SQLServer(AgentCheck):
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            for name, table, column in self.ALWAYSON_METRICS:
+            for name, table, column in self.AO_METRICS + self.AO_METRICS_PRIMARY + self.AO_METRICS_SECONDARY:
                 db_name = 'master'
                 cfg = {
                     'name': name,
@@ -258,52 +263,52 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
-        # for cfg in custom_metrics:
-        #     sql_type = None
-        #     base_name = None
-        #
-        #     custom_tags = tags + cfg.get('tags', [])
-        #     cfg['tags'] = custom_tags
-        #
-        #     db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
-        #     if db_table not in VALID_TABLES:
-        #         self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
-        #         continue
-        #
-        #     if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
-        #         self.log.debug(
-        #             'Skipping custom metric %s for database %s, check instance configured for database %s',
-        #             cfg['name'],
-        #             cfg.get('database'),
-        #             self.instance.get('database'),
-        #         )
-        #         continue
-        #
-        #     if db_table == DEFAULT_PERFORMANCE_TABLE:
-        #         user_type = cfg.get('type')
-        #         if user_type is not None and user_type not in VALID_METRIC_TYPES:
-        #             self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-        #         sql_type = None
-        #         try:
-        #             if user_type is None:
-        #                 sql_type, base_name = self.get_sql_type(cfg['counter_name'])
-        #         except Exception:
-        #             self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
-        #             continue
-        #
-        #         metrics_to_collect.append(
-        #             self.typed_metric(
-        #                 cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
-        #             )
-        #         )
-        #
-        #     else:
-        #         for column in cfg['columns']:
-        #             metrics_to_collect.append(
-        #                 self.typed_metric(
-        #                     cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
-        #                 )
-        #             )
+        for cfg in custom_metrics:
+            sql_type = None
+            base_name = None
+
+            custom_tags = tags + cfg.get('tags', [])
+            cfg['tags'] = custom_tags
+
+            db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
+            if db_table not in VALID_TABLES:
+                self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
+                continue
+
+            if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
+                self.log.debug(
+                    'Skipping custom metric %s for database %s, check instance configured for database %s',
+                    cfg['name'],
+                    cfg.get('database'),
+                    self.instance.get('database'),
+                )
+                continue
+
+            if db_table == DEFAULT_PERFORMANCE_TABLE:
+                user_type = cfg.get('type')
+                if user_type is not None and user_type not in VALID_METRIC_TYPES:
+                    self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
+                sql_type = None
+                try:
+                    if user_type is None:
+                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+                except Exception:
+                    self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
+                    continue
+
+                metrics_to_collect.append(
+                    self.typed_metric(
+                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+                    )
+                )
+
+            else:
+                for column in cfg['columns']:
+                    metrics_to_collect.append(
+                        self.typed_metric(
+                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+                        )
+                    )
 
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)
