@@ -114,6 +114,7 @@ class InstanceConfig:
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
 
         ip_address = instance.get('ip_address')
+        self.check_name = instance.get('check_name')
         network_address = instance.get('network_address')
 
         if not ip_address and not network_address:

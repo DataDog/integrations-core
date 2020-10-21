@@ -55,15 +55,19 @@ def dd_environment():
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if AUTODISCOVERY_TYPE == 'agent':
-                instance_config = {}
+                config = {}
                 new_e2e_metadata['docker_volumes'] = [
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
                 ]
             else:
-                instance_config = generate_container_instance_config(
-                    SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
-                )
-            yield instance_config, new_e2e_metadata
+                profiles = ['f5'] * 20
+                config = {'instances': []}
+                for i, p in enumerate(profiles):
+                    instance_config = generate_container_instance_config([])
+                    instance_config['community_string'] = p
+                    instance_config['check_name'] = "{}-{}".format(p, i)
+                    config['instances'].append(instance_config)
+            yield config, new_e2e_metadata
 
 
 @pytest.fixture

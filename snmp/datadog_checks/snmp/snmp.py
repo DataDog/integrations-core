@@ -11,6 +11,7 @@ import threading
 import weakref
 from collections import defaultdict
 from concurrent import futures
+from time import perf_counter
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from six import iteritems
@@ -336,6 +337,7 @@ class SnmpCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
+        t1_start = perf_counter()
         config = self._config
         if config.ip_network:
             if self._thread is None:
@@ -356,7 +358,11 @@ class SnmpCheck(AgentCheck):
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
+            tags = config.device.tags + ["check_name:{}".format(config.check_name)]
+            tags.extend(config.tags)
             self._check_device(config)
+        t1_stop = perf_counter()
+        self.gauge('snmp.check_run_duration', t1_stop-t1_start, tags=tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
