@@ -14,6 +14,8 @@ class TrelloClient:
     CARDS_ENDPOINT = API_URL + '/1/cards'
     MEMBERSHIP_ENDPOINT = API_URL + '/1/boards/ICjijxr4/memberships'
     MEMBER_ENPOINT = API_URL + '/1/members'
+    HAVE_BUG_FIXE_ME_COLUMN = '58f0c271cbf2d534bd626916'
+    FIXED_READY_TO_REBUILD_COLUMN = '5d5a8a50ca7a0189ae8ac5ac'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -73,10 +75,11 @@ class TrelloClient:
         }
         self.progress_columns = {
             '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
-            '58f0c271cbf2d534bd626916': 'Issues Found',  # HAVE BUGS
-            '5d5a8a50ca7a0189ae8ac5ac': 'Awaiting Build',  # WAITING
+            self.HAVE_BUG_FIXE_ME_COLUMN: 'Issues Found',  # HAVE BUGS
+            self.FIXED_READY_TO_REBUILD_COLUMN: 'Awaiting Build',  # WAITING
             '5dfb4eef503607473af708ab': 'Done',
         }
+
         self.__check_map_consistency(self.team_list_map, self.label_team_map, self.label_map)
 
     def __check_map_consistency(self, team_list_map, label_team_map, label_map):
@@ -190,3 +193,32 @@ class TrelloClient:
                 raise e
 
         return membership.json()
+
+    def get_list(self, list_id):
+        return self.__request(self.API_URL + f'/1/lists/{list_id}/cards')
+
+    def get_attachments(self, card_id):
+        return self.__request(self.API_URL + f'/1/cards/{card_id}/attachments')
+
+    def get_actions(self, card_id):
+        return self.__request(self.API_URL + f'/1/cards/{card_id}/actions')
+
+    def move_card(self, card_id, id_list):
+        return self.__request(self.API_URL + f'/1/cards/{card_id}?idList={id_list}', requests.put)
+
+    def add_comment(self, card_id, comment):
+        return self.__request(self.API_URL + f'/1/cards/{card_id}/actions/comments?text={comment}', requests.post)
+
+    def __request(self, url, action=requests.get):
+        response = action(url, params=self.auth)
+        response.raise_for_status()
+        return response.json()
+
+    def get_team_name_from_id_label(self, id_label):
+        for team_name, current_id_label in self.label_map.items():
+            if current_id_label == id_label:
+                return team_name
+        return None
+
+    def get_id_list_from_team_name(self, team_name):
+        return self.team_list_map[team_name]
