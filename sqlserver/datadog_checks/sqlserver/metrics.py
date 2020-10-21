@@ -499,13 +499,18 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
 
         for row in rows:
             is_local = row[is_local_index]
+            resource_group_id = row[resource_group_id_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
             if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
+
+            elif selected_ag and selected_ag != resource_group_id:
                 continue
 
             column_val = row[value_column_index]
             sync_state_desc = row[sync_state_desc_index]
             replica_server_name = row[replica_server_name_index]
-            resource_group_id = row[resource_group_id_index]
 
             metric_tags = [
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
@@ -515,9 +520,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
 
-            selected_ag = self.cfg_instance.get('availability_group')
-            if selected_ag is None or selected_ag == str(resource_group_id):
-                self.report_function(metric_name, column_val, tags=metric_tags)
+            self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
@@ -541,6 +544,11 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 
         for row in rows:
             resource_group_id = row[resource_group_id_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
+            if selected_ag and selected_ag != resource_group_id:
+                continue
+
             column_val = row[value_column_index]
             sync_health_desc = row[sync_health_desc_index]
             metric_tags = [
@@ -550,8 +558,8 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             selected_ag = self.cfg_instance.get('availability_group')
-            if selected_ag is None or selected_ag == str(resource_group_id):
-                self.report_function(metric_name, column_val, tags=metric_tags)
+
+            self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-replicas-transact-sql?view=sql-server-ver15
@@ -582,7 +590,13 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
         for row in rows:
             is_local = row[is_local_index]
+            resource_group_id = row[resource_group_id_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
             if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
+
+            elif selected_ag and selected_ag != resource_group_id:
                 continue
 
             column_val = row[value_column_index]
@@ -590,7 +604,6 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             is_primary_replica = row[is_primary_replica_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
-
 
             metric_tags = [
                 'replica_server_name:{}'.format(str(replica_server_name)),
@@ -602,8 +615,8 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             selected_ag = self.cfg_instance.get('availability_group')
-            if selected_ag is None or selected_ag == str(resource_group_id):
-                self.report_function(metric_name, column_val, tags=metric_tags)
+
+            self.report_function(metric_name, column_val, tags=metric_tags)
 
 
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
