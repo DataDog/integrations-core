@@ -21,6 +21,7 @@ except ImportError:
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_invalid_password(aggregator, init_config, instance_docker):
+
     instance_docker['password'] = 'FOO'
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -148,6 +149,7 @@ def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_custom_metrics_object_name(aggregator, init_config_object_name, instance_docker):
+
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     sqlserver_check.check(instance_docker)
 

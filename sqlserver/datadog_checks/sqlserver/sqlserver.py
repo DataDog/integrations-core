@@ -61,40 +61,40 @@ class SQLServer(AgentCheck):
     # Default performance table metrics - Database Instance level
     # datadog metric name, counter name, instance name
     INSTANCE_METRICS = [
-        # # SQLServer:General Statistics
-        # ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
-        # ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
-        # # SQLServer:Locks
-        # ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
-        # # SQLServer:Access Methods
-        # ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
-        # # SQLServer:Plan Cache
-        # ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
-        # ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
-        # # SQLServer:Databases
-        # ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
-        # ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
-        # ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
-        # ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
-        # ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
-        # ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
-        # ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
-        # # SQLServer:Memory Manager
-        # ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
-        # ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
-        # # SQLServer:Buffer Manager
-        # ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
-        # ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
-        # ('sqlserver.buffer.page_reads', 'Page reads/sec', ''),  # LARGE_RAWCOUNT
-        # ('sqlserver.buffer.page_writes', 'Page writes/sec', ''),  # LARGE_RAWCOUNT
-        # ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
-        # # SQLServer:SQL Statistics
-        # ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', ''),
-        # ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', ''),
-        # ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', ''),
-        # ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
-        # ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
-        # ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+        # SQLServer:General Statistics
+        ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
+        # SQLServer:Locks
+        ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
+        # SQLServer:Access Methods
+        ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
+        # SQLServer:Plan Cache
+        ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
+        ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+        # SQLServer:Databases
+        ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
+        ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
+        ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
+        ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
+        ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
+        ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
+        ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
+        # SQLServer:Memory Manager
+        ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
+        ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
+        # SQLServer:Buffer Manager
+        ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
+        ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.buffer.page_reads', 'Page reads/sec', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.buffer.page_writes', 'Page writes/sec', ''),  # LARGE_RAWCOUNT
+        ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
+        # SQLServer:SQL Statistics
+        ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', ''),
+        ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', ''),
+        ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', ''),
+        ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
+        ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
+        ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
     ]
 
     # AlwaysOn metrics
@@ -117,15 +117,15 @@ class SQLServer(AgentCheck):
     # Non-performance table metrics - can be database specific
     # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
-        # ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
-        # ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),
-        # ('sqlserver.scheduler.active_workers_count', 'sys.dm_os_schedulers', 'active_workers_count'),
-        # ('sqlserver.scheduler.runnable_tasks_count', 'sys.dm_os_schedulers', 'runnable_tasks_count'),
-        # ('sqlserver.scheduler.work_queue_count', 'sys.dm_os_schedulers', 'work_queue_count'),
-        # ('sqlserver.task.context_switches_count', 'sys.dm_os_tasks', 'context_switches_count'),
-        # ('sqlserver.task.pending_io_count', 'sys.dm_os_tasks', 'pending_io_count'),
-        # ('sqlserver.task.pending_io_byte_count', 'sys.dm_os_tasks', 'pending_io_byte_count'),
-        # ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
+        ('sqlserver.scheduler.current_tasks_count', 'sys.dm_os_schedulers', 'current_tasks_count'),
+        ('sqlserver.scheduler.current_workers_count', 'sys.dm_os_schedulers', 'current_workers_count'),
+        ('sqlserver.scheduler.active_workers_count', 'sys.dm_os_schedulers', 'active_workers_count'),
+        ('sqlserver.scheduler.runnable_tasks_count', 'sys.dm_os_schedulers', 'runnable_tasks_count'),
+        ('sqlserver.scheduler.work_queue_count', 'sys.dm_os_schedulers', 'work_queue_count'),
+        ('sqlserver.task.context_switches_count', 'sys.dm_os_tasks', 'context_switches_count'),
+        ('sqlserver.task.pending_io_count', 'sys.dm_os_tasks', 'pending_io_count'),
+        ('sqlserver.task.pending_io_byte_count', 'sys.dm_os_tasks', 'pending_io_byte_count'),
+        ('sqlserver.task.pending_io_byte_average', 'sys.dm_os_tasks', 'pending_io_byte_average'),
     ]
 
     # Non-performance table metrics
@@ -137,9 +137,9 @@ class SQLServer(AgentCheck):
     #   0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending,
     #   4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary
     DATABASE_METRICS = [
-        # ('sqlserver.database.files.size', 'sys.database_files', 'size'),
-        # ('sqlserver.database.files.state', 'sys.database_files', 'state'),
-        # ('sqlserver.database.state', 'sys.databases', 'state'),
+        ('sqlserver.database.files.size', 'sys.database_files', 'size'),
+        ('sqlserver.database.files.state', 'sys.database_files', 'state'),
+        ('sqlserver.database.state', 'sys.databases', 'state'),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -257,7 +257,7 @@ class SQLServer(AgentCheck):
                 )
 
         # Load metrics from scheduler and task tables, if enabled
-        if is_affirmative(self.instance.get('include_task_scheduler_metrics', True)):
+        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))

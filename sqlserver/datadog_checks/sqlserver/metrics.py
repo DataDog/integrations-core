@@ -98,7 +98,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                 metric_tags = list(self.tags)
 
                 if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
-                        instance_name == self.instance and (not self.object_name or object_name == self.object_name)
+                    instance_name == self.instance and (not self.object_name or object_name == self.object_name)
                 ):
                     matched = True
 
@@ -171,7 +171,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
                 continue
 
             if (self.instance != ALL_INSTANCES and inst != self.instance) or (
-                    self.object_name and object_name != self.object_name
+                self.object_name and object_name != self.object_name
             ):
                 done_instances.append(inst)
                 continue
