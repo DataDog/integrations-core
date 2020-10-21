@@ -312,9 +312,9 @@ class AgentCheck(object):
     def get_tls_context(self, refresh=False):
         # type: (bool) -> ssl.SSLContext
         """
-        Provides logic to yield consistent network behavior based on user configuration.
+        Creates and cache an SSLContext instance based on user configuration.
 
-        Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
+        Since: Agent 7.24
         """
         if not hasattr(self, '_tls_context_wrapper'):
             self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER)
