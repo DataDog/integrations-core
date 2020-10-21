@@ -69,7 +69,8 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'fsynclock',
     ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
-
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(aggregator, ['replset-lag-from-primary-in-shard'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -174,6 +175,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check)
         'collection',
     ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
