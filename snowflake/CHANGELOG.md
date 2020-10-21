@@ -1,5 +1,8 @@
 # CHANGELOG - Snowflake
 
+## 2.1.0 / 2020-10-21
+
+
 ## 2.0.1 / 2020-10-21
 
 * [Added] Add bytes_spilled metrics. See [#7810](https://github.com/DataDog/integrations-core/pull/7810).
