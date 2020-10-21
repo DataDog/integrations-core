@@ -81,7 +81,7 @@ class Vault(OpenMetricsBaseCheck):
         self._refreshing_token = False
 
         # Detect if Vault is in replication mode
-        self._replication_dr_mode = False
+        self._replication_dr_secondary_mode = False
 
         # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
         # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
@@ -200,8 +200,8 @@ class Vault(OpenMetricsBaseCheck):
 
         replication_mode = health_data.get('replication_dr_mode')
         if 'secondary' in replication_mode:
-            self._replication_dr_mode = True
-            self.log.debug("Detected vault in replication DR mode, skipping Prometheus metric collection.")
+            self._replication_dr_secondary_mode = True
+            self.log.debug("Detected vault in replication DR secondary mode, skipping Prometheus metric collection.")
 
         vault_version = health_data.get('version')
         if vault_version:

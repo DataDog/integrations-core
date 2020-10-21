@@ -285,7 +285,7 @@ class TestVault:
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             run_check(c)
-            c.log.debug("Detected vault in replication DR mode, skipping Prometheus metric collection.")
+            c.log.debug.assert_called_with("Detected vault in replication DR secondary mode, skipping Prometheus metric collection.")
         aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
         aggregator.assert_all_metrics_covered()
