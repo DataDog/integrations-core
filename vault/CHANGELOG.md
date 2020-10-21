@@ -2,7 +2,7 @@
 
 ## 2.9.0 / 2020-10-21
 
-* [Added] Skip collecting prometheus metrics when in replication dr mode. See [#7825](https://github.com/DataDog/integrations-core/pull/7825).
+* [Added] Detect replication DR secondary mode and skip Prometheus metric collection. See [#7825](https://github.com/DataDog/integrations-core/pull/7825).
 
 ## 2.8.0 / 2020-10-13
 
