@@ -1,5 +1,11 @@
 # CHANGELOG - Snowflake
 
+## 2.0.1 / 2020-10-21
+
+* [Added] Add bytes_spilled metrics. See [#7810](https://github.com/DataDog/integrations-core/pull/7810).
+* [Added] Add bytes_spilled metrics. See [#7810](https://github.com/DataDog/integrations-core/pull/7810).
+* [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
+
 ## 2.0.0 / 2020-10-13
 
 * [Added] Add OAuth authentication option and use new connection on check run. See [#7703](https://github.com/DataDog/integrations-core/pull/7703).
