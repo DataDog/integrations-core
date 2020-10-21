@@ -1706,23 +1706,6 @@ def test_ignore_metrics_multiple_wildcards(
         aggregator.assert_all_metrics_covered()
 
 
-def test_gauge_with_ignore_label_key(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
-    ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
-    )
-    ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
-
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': None}
-    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
-    check.log.debug.assert_called_with(
-        'Skipping metric `%s` due to label key matching: %s', 'process.vm.bytes', 'worker'
-    )
-    aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
-
-
 def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ submitting metrics that contain labels should result in tags on the gauge call """
     ref_gauge = GaugeMetricFamily(
@@ -1746,10 +1729,11 @@ def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, m
 def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ submitting metrics that contain labels should result in tags on the gauge call """
     ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node', 'worker_name']
     )
-    ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
-    ref_gauge.add_metric(['worker_2', 'bar'], 1009345.0)
+    ref_gauge.add_metric(['worker_1', 'foo', 'joe'], 54927360.0)
+    ref_gauge.add_metric(['worker_2', 'bar', 'tom'], 1009345.0)
+    ref_gauge.add_metric(['worker_3', 'bar', 'worker_1'], 45000.0)
 
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': ['worker_1']}
@@ -1760,10 +1744,17 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
         'Skipping metric `%s` due to label %s value matching: %s', 'process.vm.bytes', 'worker', 'worker_1'
     )
     # Ignored metric
-    aggregator.assert_metric('prometheus.process.vm.bytes', count=0, tags=['worker:worker_1', 'node:foo'])
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes', count=0, tags=['worker:worker_1', 'node:foo', 'worker_name:joe']
+    )
 
     # Not ignored metric
-    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, tags=['worker:worker_2', 'node:bar'])
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes', count=1, tags=['worker:worker_2', 'node:bar', 'worker_name:tom']
+    )
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes', count=1, tags=['worker:worker_3', 'node:bar', 'worker_name:worker_1']
+    )
 
 
 def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -1782,7 +1773,7 @@ def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_che
     )
 
 
-def test_metrics_with_ignore_label_value(
+def test_metrics_with_ignore_label_values(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
 ):
     """
@@ -1800,7 +1791,7 @@ def test_metrics_with_ignore_label_value(
             'go_memstats_mspan_inuse_bytes': 'go_memstats.mspan.inuse_bytes',
         }
     ]
-    instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': None}
+    instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': ['*']}
     config = check.create_scraper_configuration(instance)
     expected_tags = ['cause:nxdomain']
     mock_response = mock.MagicMock(
