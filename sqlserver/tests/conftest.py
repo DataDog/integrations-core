@@ -20,6 +20,8 @@ from .common import (
     INSTANCE_E2E,
     INSTANCE_SQL2017,
     get_local_driver,
+    INSTANCE_AO_DOCKER_PRIMARY,
+    INSTANCE_AO_DOCKER_SECONDARY,
 )
 
 try:
@@ -56,6 +58,16 @@ def instance_docker():
 @pytest.fixture
 def instance_e2e():
     return deepcopy(INSTANCE_E2E)
+
+
+@pytest.fixture
+def instance_ao_docker_primary():
+    return deepcopy(INSTANCE_AO_DOCKER_PRIMARY)
+
+
+@pytest.fixture
+def instance_ao_docker_secondary():
+    return deepcopy(INSTANCE_AO_DOCKER_SECONDARY)
 
 
 @pytest.fixture(scope='session')

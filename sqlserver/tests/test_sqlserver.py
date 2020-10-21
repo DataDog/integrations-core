@@ -8,8 +8,9 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
-from .common import CHECK_NAME, EXPECTED_METRICS, LOCAL_SERVER
-from .utils import not_windows_ci, windows_ci
+from .common import CHECK_NAME, EXPECTED_METRICS, LOCAL_SERVER, EXPECTED_AO_METRICS_PRIMARY, \
+    EXPECTED_AO_METRICS_SECONDARY
+from .utils import not_windows_ci, windows_ci, always_on
 
 try:
     import pyodbc
@@ -20,7 +21,6 @@ except ImportError:
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_invalid_password(aggregator, init_config, instance_docker):
-
     instance_docker['password'] = 'FOO'
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -148,7 +148,6 @@ def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_custom_metrics_object_name(aggregator, init_config_object_name, instance_docker):
-
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     sqlserver_check.check(instance_docker)
 
@@ -199,6 +198,28 @@ def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovide
     sqlserver_check.check(instance)
     expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     _assert_metrics(aggregator, expected_tags)
+
+
+@not_windows_ci
+@always_on
+@pytest.mark.e2e
+def test_check_ao_e2e_primary(dd_agent_check, init_config, instance_ao_docker_primary):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]}, rate=True)
+
+    for mname in EXPECTED_AO_METRICS_PRIMARY:
+        aggregator.assert_metric(mname)
+    aggregator.assert_metric('sqlserver.ao.secondary_replica_health', count=0)
+
+
+@not_windows_ci
+@always_on
+@pytest.mark.e2e
+def test_check_ao_e2e_secondary(dd_agent_check, init_config, instance_ao_docker_secondary):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_secondary]}, rate=True)
+
+    for mname in EXPECTED_AO_METRICS_SECONDARY:
+        aggregator.assert_metric(mname)
+    aggregator.assert_metric('sqlserver.ao.primary_replica_health', count=0)
 
 
 @pytest.mark.e2e
