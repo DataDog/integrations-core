@@ -103,7 +103,7 @@ class Vault(OpenMetricsBaseCheck):
             for submit_function in submission_queue:
                 submit_function(tags=tags)
 
-        if self._client_token or self._no_token or not self._replication_dr_mode:
+        if self._client_token or self._no_token or not self._replication_dr_secondary_mode:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
                 self.process(self._scraper_config)
