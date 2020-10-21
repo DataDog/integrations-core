@@ -38,13 +38,13 @@ instances:
     #
     # database: master
 
-    ## @param include_ha_metrics - boolean - optional - default: false
-    ## Include AlwaysOn high availability metrics.
+    ## @param include_ao_metrics - boolean - optional - default: false
+    ## Include AlwaysOn availability group metrics.
     #
-    # include_ha_metrics: false
+    # include_ao_metrics: false
 
     ## @param availability_group - string - optional
-    ## You can specify an availability group when `include_ha_metrics`
+    ## You can specify an availability group when `include_ao_metrics`
     ## is enabled to monitor a specific availability group.
     ## If no availability group is specified, then all availability
     ## groups on the current replica will output metrics.

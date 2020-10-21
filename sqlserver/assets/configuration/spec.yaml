@@ -42,15 +42,15 @@ files:
       value:
         type: string
         example: master
-    - name: include_ha_metrics
+    - name: include_ao_metrics
       description: |
-        Include AlwaysOn high availability metrics.
+        Include AlwaysOn availability group metrics.
       value:
         type: boolean
         example: false
     - name: availability_group
       description: |
-        You can specify an availability group when `include_ha_metrics`
+        You can specify an availability group when `include_ao_metrics`
         is enabled to monitor a specific availability group.
         If no availability group is specified, then all availability
         groups on the current replica will output metrics.
