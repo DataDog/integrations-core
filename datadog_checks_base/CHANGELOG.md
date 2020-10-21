@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.2.0 / 2020-10-21
+
+* [Added] Add type checking on PDHBaseCheck. See [#7817](https://github.com/DataDog/integrations-core/pull/7817).
+
 ## 15.1.0 / 2020-10-20
 
 * [Added] Implements token reader for DC/OS Auth JWT token retrieval with login. See [#7785](https://github.com/DataDog/integrations-core/pull/7785).
