@@ -1741,7 +1741,7 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
 
     check.log.debug.assert_called_with(
-        'Skipping metric `%s` due to label %s value matching: %s', 'process.vm.bytes', 'worker', 'worker_1'
+        'Skipping metric `%s` due to label `%s` value matching: %s', 'process.vm.bytes', 'worker', 'worker_1'
     )
     # Ignored metric
     aggregator.assert_metric(
