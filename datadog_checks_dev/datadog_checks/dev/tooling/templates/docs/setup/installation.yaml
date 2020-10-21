@@ -1,0 +1,14 @@
+name: Installation
+header_level: 3
+description: |
+  The {check_name} check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
+
+  [1]: https://docs.datadoghq.com/agent/
+parameters:
+prepend_text:
+append_text:
+processor:
+hidden: false
+sections:
+
+

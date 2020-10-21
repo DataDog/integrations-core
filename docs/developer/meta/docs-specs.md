@@ -40,6 +40,7 @@ Consumers may utilize specs in a number of scenarios, such as:
 The root of every spec is a map with 3 keys:
 
 - `name` - The display name of what the spec refers to e.g. `Postgres`, `Nagios`, etc.
+- `version` - The released version of what the spec refers to
 - `options` - Top-level [spec options](#spec-options) related to the check overall (optional)
 - `files` - A list of all [files](#files) that influence behavior
 

@@ -1,7 +1,7 @@
 name: RethinkDB
 files:
   - name: README.md
-    options:
+    sections:
       - template: overview
         overrides:
           description: |
