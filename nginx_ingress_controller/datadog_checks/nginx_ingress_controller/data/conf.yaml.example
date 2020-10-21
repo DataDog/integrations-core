@@ -162,7 +162,8 @@ instances:
     #   <KEY_1>:
     #   - <LABEL_1>
     #   - <LABEL_2>
-    #   <KEY_2>: '*'
+    #   <KEY_2>:
+    #   - '*'
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
