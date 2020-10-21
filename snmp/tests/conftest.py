@@ -60,7 +60,7 @@ def dd_environment():
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
                 ]
             else:
-                profiles = ['f5'] * 20
+                profiles = ['f5'] * 200
                 config = {'instances': []}
                 for i, p in enumerate(profiles):
                     instance_config = generate_container_instance_config([])
