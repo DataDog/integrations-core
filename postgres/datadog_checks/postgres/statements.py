@@ -8,11 +8,9 @@ import logging
 
 import psycopg2
 import psycopg2.extras
-from datadog import statsd
 
-from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature, submit_exec_plan_events
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter
 
 try:
     import datadog_agent
