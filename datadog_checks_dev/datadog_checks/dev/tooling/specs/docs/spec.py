@@ -23,8 +23,13 @@ def _validate(obj, items, loader, MISSING, INVALID):
             if v.default is not None:
                 obj[v.key] = v.default
 
-        if v.children:
-            _validate(obj[v.key], v.children, loader, MISSING, INVALID)
+        if v.children and obj[v.key]:
+            # handle recursive elements which may be passed as strings
+            if v.children == 'self':
+                children = items
+            else:
+                children = v.children
+            _validate(obj[v.key], children, loader, MISSING, INVALID)
 
 
 def spec_validator(spec, loader):
@@ -105,9 +110,6 @@ def section_validator(sections, loader, file_name, *prev_sections):
     if sections_display:
         sections_display += ', '
 
-    MISSING = '{loader.source}, {file_name}, {sections_display}section #{section_index}: Every section must contain a `{key}` attribute'
-    INVALID = '{loader.source}, {file_name}, {sections_display}section #{section_index}: Attribute `{key}` must be a {type}'
-
     validations = [
         Validation(key='name'),
         Validation(key='header_level', type=int),
@@ -118,7 +120,7 @@ def section_validator(sections, loader, file_name, *prev_sections):
         Validation(key='append_text', type=str, required=False),
         Validation(key='processor', type=str, required=False),
         Validation(key='hidden', type=bool, required=False, default=False),
-        Validation(key='sections', type=dict, required=False, children='validations'),  # XXX will this work??
+        Validation(key='sections', type=dict, required=False, children='self'),  # XXX will this work??
         Validation(key='overrides', type=list, required=False),
     ]
 
@@ -192,6 +194,9 @@ def section_validator(sections, loader, file_name, *prev_sections):
 
         if not templates_resolved:
             continue
+
+        MISSING = f'{loader.source}, {file_name}, {sections_display}section #{section_index}: Every section must contain a `{{key}}` attribute'
+        INVALID = f'{loader.source}, {file_name}, {sections_display}section #{section_index}: Attribute `{{key}}` must be a {{type}}'
 
         # now validate the expanded section object
         _validate(section, validations, loader, MISSING, INVALID)
