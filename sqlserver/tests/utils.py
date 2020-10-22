@@ -10,7 +10,6 @@ from datadog_checks.dev.utils import running_on_windows_ci
 windows_ci = pytest.mark.skipif(not running_on_windows_ci(), reason='Test can only be run on Windows CI')
 not_windows_ci = pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 
-# create an annotation for always_on detect env variable
 always_on = pytest.mark.skipif(
     os.environ["COMPOSE_FOLDER"] == 'compose', reason='Test can only be run on AlwaysOn SQLServer instances'
 )

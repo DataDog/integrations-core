@@ -101,7 +101,7 @@ def dd_environment():
         conditions += [
             CheckDockerLogs(
                 compose_file,
-                'Always On Availability Groups connection with ' 'primary database established for secondary database',
+                'Always On Availability Groups connection with primary database established for secondary database',
             )
         ]
 
