@@ -111,7 +111,7 @@ class PostgresStatementMetrics(object):
         )
         self._pg_stat_statements_query_columns = sorted(list(set(desired_columns) & self._pg_stat_statements_columns))
 
-    def _collect_per_statement_metrics(self, instance, db, instance_tags):
+    def collect_per_statement_metrics(self, instance, db, instance_tags):
         if not self.config.deep_database_monitoring:
             return
 
