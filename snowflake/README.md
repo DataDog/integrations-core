@@ -5,7 +5,7 @@
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
 This integration monitors credit, billing, and storage usage, query history, and more.
 
-**NOTE**: Metrics are collected via queries to Snowflake. Queries from the integration are billable by Snowflake.
+**NOTE**: Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.
 
 ## Setup
 
@@ -16,7 +16,8 @@ Follow the instructions below to install and configure this check for an Agent r
 The Snowflake check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-**Note**: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
+> #### Note
+> Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
 
 ### Configuration
 
