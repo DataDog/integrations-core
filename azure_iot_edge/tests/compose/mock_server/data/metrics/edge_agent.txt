@@ -1,0 +1,123 @@
+# HELP edgeAgent_used_cpu_percent Percent of cpu used by all processes
+# TYPE edgeAgent_used_cpu_percent summary
+edgeAgent_used_cpu_percent_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True"} 4.755497455596924
+edgeAgent_used_cpu_percent_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True"} 1
+edgeAgent_used_cpu_percent{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True",quantile="0.5"} 4.755497455596924
+edgeAgent_used_cpu_percent{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True",quantile="0.9"} 4.755497455596924
+edgeAgent_used_cpu_percent{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True",quantile="0.95"} 4.755497455596924
+edgeAgent_used_cpu_percent{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True",quantile="0.99"} 4.755497455596924
+edgeAgent_used_cpu_percent{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True",quantile="0.999"} 4.755497455596924
+edgeAgent_used_cpu_percent{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True",quantile="0.9999"} 4.755497455596924
+# HELP edgeAgent_total_disk_write_bytes The amount of bytes written to disk
+# TYPE edgeAgent_total_disk_write_bytes gauge
+edgeAgent_total_disk_write_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 0
+edgeAgent_total_disk_write_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 0
+edgeAgent_total_disk_write_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 0
+# HELP edgeAgent_used_memory_bytes Amount of RAM used by all processes
+# TYPE edgeAgent_used_memory_bytes gauge
+edgeAgent_used_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 51757056
+edgeAgent_used_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 120741888
+edgeAgent_used_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 23482368
+edgeAgent_used_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True"} 854896000
+# HELP edgeAgent_iotedged_uptime_seconds How long iotedged has been running
+# TYPE edgeAgent_iotedged_uptime_seconds gauge
+edgeAgent_iotedged_uptime_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 68
+# HELP edgeAgent_total_disk_read_bytes The amount of bytes read from the disk
+# TYPE edgeAgent_total_disk_read_bytes gauge
+edgeAgent_total_disk_read_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 0
+edgeAgent_total_disk_read_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 0
+edgeAgent_total_disk_read_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 0
+# HELP edgeAgent_total_disk_space_bytes Size of the disk
+# TYPE edgeAgent_total_disk_space_bytes gauge
+edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 1073741824
+edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 1073741824
+edgeAgent_total_disk_space_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 1073741824
+# HELP edgeAgent_created_pids_total The number of processes or threads the container has created
+# TYPE edgeAgent_created_pids_total gauge
+edgeAgent_created_pids_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 19
+edgeAgent_created_pids_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 31
+edgeAgent_created_pids_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 14
+# HELP edgeAgent_total_time_expected_running_seconds The amount of time the module was specified in the deployment
+# TYPE edgeAgent_total_time_expected_running_seconds gauge
+edgeAgent_total_time_expected_running_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 128.385844
+edgeAgent_total_time_expected_running_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 121.1709888
+edgeAgent_total_time_expected_running_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 121.1710063
+# HELP edgeAgent_unsuccessful_iothub_syncs_total The amount of times edgeAgent failed to sync with iotHub
+# TYPE edgeAgent_unsuccessful_iothub_syncs_total counter
+edgeAgent_unsuccessful_iothub_syncs_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 0
+# HELP edgeAgent_total_time_running_correctly_seconds The amount of time the module was specified in the deployment and was in the running state
+# TYPE edgeAgent_total_time_running_correctly_seconds gauge
+edgeAgent_total_time_running_correctly_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 128.385844
+edgeAgent_total_time_running_correctly_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 121.1709888
+edgeAgent_total_time_running_correctly_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 121.1710063
+# HELP edgeAgent_command_latency_seconds Command sent to module
+# TYPE edgeAgent_command_latency_seconds summary
+edgeAgent_command_latency_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True"} 6.69E-05
+edgeAgent_command_latency_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True"} 2
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True",quantile="0.5"} 9.9E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True",quantile="0.9"} 9.9E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True",quantile="0.95"} 9.9E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True",quantile="0.99"} 9.9E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True",quantile="0.999"} 9.9E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="wrap",ms_telemetry="True",quantile="0.9999"} 9.9E-06
+edgeAgent_command_latency_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True"} 0.00018889999999999998
+edgeAgent_command_latency_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True"} 2
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True",quantile="0.5"} 9.5E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True",quantile="0.9"} 9.5E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True",quantile="0.95"} 9.5E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True",quantile="0.99"} 9.5E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True",quantile="0.999"} 9.5E-06
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="start",ms_telemetry="True",quantile="0.9999"} 9.5E-06
+edgeAgent_command_latency_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True"} 0.005762300000000001
+edgeAgent_command_latency_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True"} 2
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True",quantile="0.5"} 0.0001628
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True",quantile="0.9"} 0.0001628
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True",quantile="0.95"} 0.0001628
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True",quantile="0.99"} 0.0001628
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True",quantile="0.999"} 0.0001628
+edgeAgent_command_latency_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",command="create",ms_telemetry="True",quantile="0.9999"} 0.0001628
+# HELP edgeAgent_iothub_syncs_total The amount of times edgeAgent attempted to sync with iotHub, both successful and unsuccessful
+# TYPE edgeAgent_iothub_syncs_total counter
+edgeAgent_iothub_syncs_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 3
+# HELP edgeAgent_host_uptime_seconds How long the host has been on
+# TYPE edgeAgent_host_uptime_seconds gauge
+edgeAgent_host_uptime_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 186906
+# HELP edgeAgent_total_memory_bytes RAM available
+# TYPE edgeAgent_total_memory_bytes gauge
+edgeAgent_total_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 6239551488
+edgeAgent_total_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 6239551488
+edgeAgent_total_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 6239551488
+edgeAgent_total_memory_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="host",ms_telemetry="True"} 6093312000
+# HELP edgeAgent_available_disk_space_bytes Amount of space left on the disk
+# TYPE edgeAgent_available_disk_space_bytes gauge
+# HELP edgeAgent_deployment_time_seconds The amount of time it took to complete a new deployment
+# TYPE edgeAgent_deployment_time_seconds summary
+edgeAgent_deployment_time_seconds_sum{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 1.6210579
+edgeAgent_deployment_time_seconds_count{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True"} 1
+edgeAgent_deployment_time_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True",quantile="0.5"} 1.6210579
+edgeAgent_deployment_time_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True",quantile="0.9"} 1.6210579
+edgeAgent_deployment_time_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True",quantile="0.95"} 1.6210579
+edgeAgent_deployment_time_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True",quantile="0.99"} 1.6210579
+edgeAgent_deployment_time_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True",quantile="0.999"} 1.6210579
+edgeAgent_deployment_time_seconds{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",ms_telemetry="True",quantile="0.9999"} 1.6210579
+# HELP edgeAgent_total_network_out_bytes The amount of bytes sent to network
+# TYPE edgeAgent_total_network_out_bytes gauge
+edgeAgent_total_network_out_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 1271886
+edgeAgent_total_network_out_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 125374
+edgeAgent_total_network_out_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 14988
+# HELP edgeAgent_total_network_in_bytes The amount of bytes recieved from the network
+# TYPE edgeAgent_total_network_in_bytes gauge
+edgeAgent_total_network_in_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeAgent",ms_telemetry="True"} 542908
+edgeAgent_total_network_in_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",ms_telemetry="True"} 107530
+edgeAgent_total_network_in_bytes{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",ms_telemetry="False"} 16517
+# HELP edgeAgent_module_start_total Command sent to module
+# TYPE edgeAgent_module_start_total counter
+edgeAgent_module_start_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",module_version="1.0",ms_telemetry="True"} 2
+edgeAgent_module_start_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",module_version="",ms_telemetry="True"} 2
+# HELP edgeAgent_metadata General metadata about the device. The value is always 0, information is encoded in the tags.
+# TYPE edgeAgent_metadata gauge
+edgeAgent_metadata{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",edge_agent_version="1.0.10-rc2.34217022 (029016ef1bf82dec749161d95c6b73aa5ee9baf1)",experimental_features="{\"Enabled\":true,\"DisableCloudSubscriptions\":false}",host_information="{\"OperatingSystemType\":\"linux\",\"Architecture\":\"x86_64\",\"Version\":\"1.0.10~rc2\",\"ServerVersion\":\"19.03.12\",\"KernelVersion\":\"4.19.76-linuxkit\",\"OperatingSystem\":\"Docker Desktop\",\"NumCpus\":4}",ms_telemetry="True"} 0
+# HELP edgeAgent_module_stop_total Command sent to module
+# TYPE edgeAgent_module_stop_total counter
+edgeAgent_module_stop_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="SimulatedTemperatureSensor",module_version="1.0",ms_telemetry="True"} 0
+edgeAgent_module_stop_total{iothub="iot-edge-dev-hub.azure-devices.net",edge_device="testEdgeDevice",instance_number="c2c90030-2df4-4c92-98cb-deaa9ef05cac",module_name="edgeHub",module_version="",ms_telemetry="True"} 0

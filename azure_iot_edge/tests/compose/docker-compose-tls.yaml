@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  iot-edge-device:
+    build:
+      context: ./device
+      args:
+        - LIBIOTHSM_STD_URL=${E2E_LIBIOTHSM_STD_URL}
+        - IOTEDGE_URL=${E2E_IOTEDGE_URL}
+    container_name: iot-edge-device
+    hostname: edgehub
+    ports:
+      - "15580:15580" # Required for IoT Edge inter-container communications.
+      - "15581:15581" # Required for IoT Edge inter-container communications.
+    environment:
+      - IOT_EDGE_AGENT_IMAGE=${E2E_IMAGE}
+      - IOT_EDGE_DEVICE_CONNECTION_STRING=${E2E_IOT_EDGE_CONNSTR}
+      - IOT_EDGE_NETWORK=iot-edge-network
+      - IOT_EDGE_TLS_ENABLED=true
+      - IOT_EDGE_TRUSTED_CA_CERTS=/private/root.cert.pem
+      - IOT_EDGE_DEVICE_CA_CERT=/private/device.cert.pem
+      - IOT_EDGE_DEVICE_CA_PK=/private/device.key.pem
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${E2E_IOT_EDGE_ROOT_CA_CERT}:/private/root.cert.pem
+      - ${E2E_IOT_EDGE_DEVICE_CA_CERT}:/private/device.cert.pem
+      - ${E2E_IOT_EDGE_DEVICE_CA_PK}:/private/device.key.pem
+    networks:
+      - iot-edge-network
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "azure.iot_edge", "service": "azure_iot_edge_dev"}]'
+
+networks:
+  iot-edge-network:
+    external: true

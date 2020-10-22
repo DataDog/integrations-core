@@ -51,6 +51,10 @@ coverage:
         target: 75
         flags:
         - apache
+      Azure IoT Edge:
+        target: 75
+        flags:
+        - azure_iot_edge
       Btrfs:
         target: 75
         flags:
@@ -565,6 +569,11 @@ flags:
     paths:
     - aspdotnet/datadog_checks/aspdotnet
     - aspdotnet/tests
+  azure_iot_edge:
+    carryforward: true
+    paths:
+    - azure_iot_edge/datadog_checks/azure_iot_edge
+    - azure_iot_edge/tests
   btrfs:
     carryforward: true
     paths:

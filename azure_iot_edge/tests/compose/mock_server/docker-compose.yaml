@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  iot-edge-mock:
+    image: caddy:2.1.1-alpine
+    container_name: iot-edge-mock
+    volumes:
+      - ./data/:/usr/share/caddy/
+    ports:
+      - ${MOCK_SERVER_PORT}:80
