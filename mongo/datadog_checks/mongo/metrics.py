@@ -348,4 +348,5 @@ AVAILABLE_METRICS = {
     'tcmalloc': TCMALLOC_METRICS,
     'top': TOP_METRICS,
     'collection': COLLECTION_METRICS,
+    'jumbo_chunks': {},
 }
