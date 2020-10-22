@@ -16,6 +16,29 @@ The NFSstat check is included in the [Datadog Agent][2] package, so you don't ne
 
 Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, so to enable it in `datadog.yaml`, update this setting:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `nfsstat.d/conf.yaml` file to start collecting your NFSstat Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/messages
+       source: nfsstat
+   ```
+
+   Change the `path` parameter value and configure it for your environment.
+   See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][9].
+
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `nfsstat` under the Checks section.
@@ -45,3 +68,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network/
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent

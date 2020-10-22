@@ -13,11 +13,15 @@ class ReplicationOpLogCollector(MongoCollector):
         localdb = client["local"]
 
         oplog_data = {}
-
-        for collection_name in ("oplog.rs", "oplog.$main"):
-            ol_options = localdb[collection_name].options()
-            if ol_options:
-                break
+        try:
+            for collection_name in ("oplog.rs", "oplog.$main"):
+                ol_options = localdb[collection_name].options()
+                if ol_options:
+                    break
+        except pymongo.errors.OperationFailure as e:
+            # In theory this error should only happen when connected to mongos.
+            self.log.debug("Unable to collect oplog metrics from replica set member. Error is: %s", e)
+            return
 
         if ol_options:
             try:

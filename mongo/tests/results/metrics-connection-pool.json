@@ -1,0 +1,42 @@
+[
+    {
+        "name": "mongodb.connection_pool.numclientconnections",
+        "type": 0,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.connection_pool.totalcreatedps",
+        "type": 1,
+        "value": 692.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.connection_pool.totalavailable",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.connection_pool.numascopedconnections",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.connection_pool.totalrefreshing",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    }
+]

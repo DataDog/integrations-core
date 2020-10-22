@@ -3,6 +3,7 @@ jmx_metrics:
 
   # Gauges
   - include:
+      domain: metrics
       exclude_tags:
         - name
       attribute:
@@ -96,6 +97,7 @@ jmx_metrics:
 
   # Counters
   - include:
+      domain: metrics
       exclude_tags:
         - name
       attribute:
@@ -162,6 +164,7 @@ jmx_metrics:
 
   # Histograms
   - include:
+      domain: metrics
       exclude_tags:
         - name
       attribute:

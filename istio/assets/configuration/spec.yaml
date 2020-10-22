@@ -13,7 +13,7 @@ files:
             Only available for Istio >= v1.5.
           value:
             default: null
-            example: http://istiod.istio-system:8080/metrics
+            example: http://istiod.istio-system:15014/metrics
             type: string
         - name: istio_mesh_endpoint
           description: |

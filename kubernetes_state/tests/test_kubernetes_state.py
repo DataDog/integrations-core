@@ -183,6 +183,11 @@ JOINED_METRICS = {
         'label_addonmanager_kubernetes_io_mode:reconcile',
         'deployment:kube-dns',
     ],
+    NAMESPACE
+    + '.container.status_report.count.waiting': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'pod:registry-creds-hq249',
+    ],
 }
 
 HOSTNAMES = {
@@ -552,9 +557,10 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
 def test_join_custom_labels(aggregator, instance, check):
     instance['label_joins'] = {
         'kube_deployment_labels': {
-            'label_to_match': 'deployment',
+            'labels_to_match': ['deployment'],
             'labels_to_get': ['label_addonmanager_kubernetes_io_mode'],
-        }
+        },
+        'kube_pod_labels': {'labels_to_match': ['pod'], 'labels_to_get': ['label_addonmanager_kubernetes_io_mode']},
     }
 
     endpoint = instance['kube_state_url']

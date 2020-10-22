@@ -6,6 +6,7 @@ import os
 import re
 from collections import OrderedDict
 
+import jwt
 import mock
 import pytest
 import requests
@@ -19,8 +20,9 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
-from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci, write_file
+from datadog_checks.dev.utils import ON_WINDOWS, read_file, running_on_windows_ci, write_file
 
 pytestmark = pytest.mark.http
 
@@ -612,7 +614,9 @@ class TestAuthTokenHandlerCreation:
         instance = {'auth_token': {'reader': {'type': 'foo'}, 'writer': {}}}
         init_config = {}
 
-        with pytest.raises(ConfigurationError, match='^Unknown `auth_token` reader type, must be one of: file$'):
+        with pytest.raises(
+            ConfigurationError, match='^Unknown `auth_token` reader type, must be one of: dcos_auth, file$'
+        ):
             RequestsWrapper(instance, init_config)
 
     def test_writer_type_missing(self):
@@ -669,6 +673,107 @@ class TestAuthTokenFileReaderCreation:
 
         with pytest.raises(
             ValueError, match='^The pattern `bar` setting of `auth_token` reader must define exactly one group$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+
+class TestAuthTokenDCOSReaderCreation:
+    def test_login_url_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'dcos_auth'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `login_url` setting of DC/OS auth token reader is required$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_login_url_not_string(self):
+        instance = {'auth_token': {'reader': {'type': 'dcos_auth', 'login_url': {}}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `login_url` setting of DC/OS auth token reader must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_service_account_missing(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'dcos_auth', 'login_url': 'https://example.com'},
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `service_account` setting of DC/OS auth token reader is required$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_service_account_not_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'dcos_auth', 'login_url': 'https://example.com', 'service_account': {}},
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `service_account` setting of DC/OS auth token reader must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_private_key_path_missing(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'dcos_auth', 'login_url': 'https://example.com', 'service_account': 'datadog_agent'},
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `private_key_path` setting of DC/OS auth token reader is required$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_private_key_path_not_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {
+                    'type': 'dcos_auth',
+                    'login_url': 'https://example.com',
+                    'service_account': 'datadog_agent',
+                    'private_key_path': {},
+                },
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `private_key_path` setting of DC/OS auth token reader must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_expiration_not_integer(self):
+        instance = {
+            'auth_token': {
+                'reader': {
+                    'type': 'dcos_auth',
+                    'login_url': 'https://example.com',
+                    'service_account': 'datadog_agent',
+                    'private_key_path': 'private-key.pem',
+                    'expiration': {},
+                },
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `expiration` setting of DC/OS auth token reader must be an integer$'
         ):
             RequestsWrapper(instance, init_config)
 
@@ -796,6 +901,62 @@ class TestAuthTokenReadFile:
                 )
 
                 assert http.options['headers'] == expected_headers
+
+
+class TestAuthTokenDCOS:
+    def test_token_auth(self):
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+
+            def json(self):
+                return self.json_data
+
+            def raise_for_status(self):
+                return True
+
+        priv_key_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dcos', 'private-key.pem')
+        pub_key_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dcos', 'public-key.pem')
+
+        exp = 3600
+        instance = {
+            'auth_token': {
+                'reader': {
+                    'type': 'dcos_auth',
+                    'login_url': 'https://leader.mesos/acs/api/v1/auth/login',
+                    'service_account': 'datadog_agent',
+                    'private_key_path': priv_key_path,
+                    'expiration': exp,
+                },
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'token=<TOKEN>'},
+            }
+        }
+        init_config = {}
+
+        def login(*args, **kwargs):
+            if kwargs['url'] == 'https://leader.mesos/acs/api/v1/auth/login':
+                json = kwargs['json']
+                assert json['uid'] == 'datadog_agent'
+
+                public_key = read_file(pub_key_path)
+                decoded = jwt.decode(json['token'], public_key, algorithms='RS256')
+                assert decoded['uid'] == 'datadog_agent'
+                assert isinstance(decoded['exp'], int)
+                assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
+
+                return MockResponse({'token': 'auth-token'}, 200)
+            return MockResponse(None, 404)
+
+        def auth(*args, **kwargs):
+            if args[0] == 'https://leader.mesos/service/some-service':
+                assert kwargs['headers']['Authorization'] == 'token=auth-token'
+                return MockResponse({}, 200)
+            return MockResponse(None, 404)
+
+        http = RequestsWrapper(instance, init_config)
+        with mock.patch('requests.post', side_effect=login), mock.patch('requests.get', side_effect=auth):
+            http.get('https://leader.mesos/service/some-service')
 
 
 class TestAuthTokenWriteHeader:

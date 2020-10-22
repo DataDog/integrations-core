@@ -76,7 +76,7 @@ files:
     - name: include_content
       description: |
         The include_content parameter will instruct the check
-        to include the first 200 characters of the HTTP response body
+        to include the first 500 characters of the HTTP response body
         in notifications sent by this plugin. This is best used with
         "healthcheck"-type URLs, where the body contains a brief, human-
         readable summary of failure reasons in the case of errors.

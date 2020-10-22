@@ -1,5 +1,18 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.1.0 / 2020-10-20
+
+* [Added] Implements token reader for DC/OS Auth JWT token retrieval with login. See [#7785](https://github.com/DataDog/integrations-core/pull/7785).
+* [Added] Make kafka_consumer (kazoo lib) available for Windows. See [#7781](https://github.com/DataDog/integrations-core/pull/7781).
+* [Added] Add support for hashing sequences containing None on Python 3. See [#7779](https://github.com/DataDog/integrations-core/pull/7779).
+* [Fixed] Fix `AttributeError` when using `additional_metrics` and counter `inst_name` is null. See [#7752](https://github.com/DataDog/integrations-core/pull/7752).
+
+## 15.0.0 / 2020-10-13
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Fixed] Update kafka-python to 2.0.2. See [#7718](https://github.com/DataDog/integrations-core/pull/7718).
+* [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
+
 ## 14.0.1 / 2020-09-28 / Agent 7.23.0
 
 * [Fixed] Normalize count metric type in `assert_metrics_using_metadata()`. See [#7666](https://github.com/DataDog/integrations-core/pull/7666).

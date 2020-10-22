@@ -48,6 +48,13 @@ init_config:
     #
     # service: <SERVICE>
 
+    ## @param custom_jar_paths - list of strings - optional
+    ## These are the client JARs which allow connecting to the JBoss default JMX implementation.
+    ## See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
+    #
+    # custom_jar_paths:
+    #   - /path/to/jboss-cli-client.jar
+
 ## Every instance is scheduled independent of the others.
 #
 instances:
