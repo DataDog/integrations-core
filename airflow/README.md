@@ -286,7 +286,6 @@ Tips for Kubernetes installations:
 
 - Customize the Airflow configuration with [pod annotations][14].
 - When modifying `airflow.cfg`, `statsd_host` should be set to the IP address of the Kubernetes node.
-- Use the environment variable `DD_DOGSTATSD_MAPPER_PROFILE` in your helm or daemonset to set `dogstatsd_mapper_profiles` in your `datadog.yaml`.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
