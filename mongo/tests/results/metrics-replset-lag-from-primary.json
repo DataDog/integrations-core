@@ -1,6 +1,6 @@
 [
     {
-        "name": "mongodb.replset.lag_from_primary",
+        "name": "mongodb.replset.optime_lag",
         "type": 0,
         "value": 0.0,
         "tags": [
@@ -11,7 +11,7 @@
         ]
     },
     {
-        "name": "mongodb.replset.lag_from_primary",
+        "name": "mongodb.replset.optime_lag",
         "type": 0,
         "value": 100.0,
         "tags": [
@@ -22,7 +22,7 @@
         ]
     },
     {
-        "name": "mongodb.replset.lag_from_primary",
+        "name": "mongodb.replset.optime_lag",
         "type": 0,
         "value": 5.0,
         "tags": [

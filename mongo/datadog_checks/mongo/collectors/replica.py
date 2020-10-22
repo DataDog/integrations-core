@@ -140,6 +140,6 @@ class ReplicaCollector(MongoCollector):
                         'replset_name:{}'.format(replset_name),
                         'replset_state:{}'.format(get_state_name(member.get('state')).lower()),
                     ]
-                    self.gauge('mongodb.replset.lag_from_primary', lag.total_seconds(), tags)
+                    self.gauge('mongodb.replset.optime_lag', lag.total_seconds(), tags)
 
         self.check.last_states_by_server = {member['_id']: member['state'] for member in status['members']}
