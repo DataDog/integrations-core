@@ -46,7 +46,7 @@ The `custom_queries` option has the following options:
 
 
 ##### Notes
-- At least one items in defined `columns` should be a metric type (`gauge`, `count`, `rate`, etc).
+- At least one item in defined `columns` should be a metric type (`gauge`, `count`, `rate`, etc).
 - The number of items in columns must equal the number of columns returned in the query.
 - The order in which the items in `columns` are defined must be in the same order returned in the query
 
