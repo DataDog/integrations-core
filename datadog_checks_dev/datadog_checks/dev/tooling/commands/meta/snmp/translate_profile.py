@@ -19,7 +19,9 @@ def fetch_mib(mib):
 
     target_directory = os.path.dirname(pysnmp_mibs.__file__)
 
-    reader = HttpReader('mibs.snmplabs.com', 80, '/asn1/@mib@')
+    # As mibs.snmplabs.com is down, use a copy
+    # https://github.com/etingof/pysnmp/issues/376
+    reader = HttpReader('raw.githubusercontent.com', 80, '/projx/snmp-mibs/master/@mib@')
     mibCompiler = MibCompiler(SmiStarParser(), PySnmpCodeGen(), PyFileWriter(target_directory))
 
     mibCompiler.addSources(reader)
