@@ -160,7 +160,6 @@ def test_cisco_voice(aggregator):
     tags = [
         'snmp_profile:cisco_icm',
         'snmp_host:test',
-        'snmp_device_type:voice',
         'snmp_device_vendor:cisco',
     ] + common.CHECK_TAGS
 
@@ -295,7 +294,6 @@ def test_f5(aggregator):
         'snmp_profile:' + profile,
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
         'snmp_device_vendor:f5',
-        'snmp_device_type:firewall',
     ]
     tags += common.CHECK_TAGS
 
@@ -396,9 +394,7 @@ def test_f5(aggregator):
 def test_router(aggregator):
     profile = "generic-router"
     run_profile_check('network', profile)
-    common_tags = (
-        common.CHECK_TAGS + ['snmp_profile:' + profile] + ['snmp_device_type:router', 'snmp_device_vendor:generic']
-    )
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'snmp_device_vendor:generic']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -453,7 +449,6 @@ def test_f5_router(aggregator):
     common_tags = [
         'snmp_profile:router',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-        'snmp_device_type:router',
         'snmp_device_vendor:generic',
     ]
     common_tags.extend(common.CHECK_TAGS)
@@ -490,7 +485,6 @@ def test_cisco_3850(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_host:Cat-3850-4th-Floor.companyname.local',
         'snmp_profile:' + profile,
-        'snmp_device_type:switch',
         'snmp_device_vendor:cisco',
     ]
 
@@ -605,7 +599,6 @@ def test_meraki_cloud_controller(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:meraki-cloud-controller',
         'snmp_host:dashboard.meraki.com',
-        'snmp_device_type:cloud_controller',
         'snmp_device_vendor:meraki',
     ]
 
@@ -643,7 +636,7 @@ def test_idrac(aggregator):
     run_profile_check('idrac')
 
     interfaces = ['eth0', 'en1']
-    common_tags = common.CHECK_TAGS + ['snmp_profile:idrac', 'snmp_device_vendor:dell', 'snmp_device_type:controller']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:idrac', 'snmp_device_vendor:dell']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -746,7 +739,6 @@ def test_cisco_nexus(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_host:Nexus-eu1.companyname.managed',
         'snmp_profile:' + profile,
-        'snmp_device_type:switch',
         'snmp_device_vendor:cisco',
     ]
 
@@ -864,7 +856,6 @@ def test_dell_poweredge(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:dell-poweredge',
         'snmp_device_vendor:dell',
-        'snmp_device_type:server',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -1005,7 +996,7 @@ def test_hp_ilo4(aggregator):
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'snmp_device_type:server', 'snmp_device_vendor:hp']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'snmp_device_vendor:hp']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1056,7 +1047,7 @@ def test_hp_ilo4(aggregator):
 def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant', 'snmp_device_type:server', 'snmp_device_vendor:hp']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant', 'snmp_device_vendor:hp']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1240,7 +1231,6 @@ def test_palo_alto(aggregator):
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
-        'snmp_device_type:gateway',
         'snmp_device_vendor:paloaltonetworks',
     ]
 
@@ -1292,7 +1282,6 @@ def test_cisco_asa_5525(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
         'snmp_host:kept',
-        'snmp_device_type:firewall',
         'snmp_device_vendor:cisco',
     ]
 
@@ -1431,7 +1420,6 @@ def test_cisco_csr(aggregator):
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:cisco-csr1000v',
-        'snmp_device_type:router',
         'snmp_device_vendor:cisco',
     ]
 
@@ -1454,7 +1442,6 @@ def test_checkpoint_firewall(aggregator):
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:checkpoint-firewall',
-        'snmp_device_type:firewall',
         'snmp_device_vendor:checkpoint',
     ]
 
@@ -1519,7 +1506,7 @@ def test_checkpoint_firewall(aggregator):
 def test_arista(aggregator):
     run_profile_check('arista')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'snmp_device_type:router', 'snmp_device_vendor:arista']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'snmp_device_vendor:arista']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1560,7 +1547,7 @@ def test_arista(aggregator):
 def test_aruba(aggregator):
     run_profile_check('aruba')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba', 'snmp_device_type:controller', 'snmp_device_vendor:aruba']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba', 'snmp_device_vendor:aruba']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1630,11 +1617,7 @@ def test_chatsworth(aggregator):
         'legacy_pdu_name:legacy-name1',
         'legacy_pdu_version:1.2.3',
     ]
-    common_tags = (
-        common.CHECK_TAGS
-        + legacy_global_tags
-        + ['snmp_profile:' + profile, 'snmp_device_vendor:chatsworth', 'snmp_device_type:pdu']
-    )
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:' + profile, 'snmp_device_vendor:chatsworth']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1751,7 +1734,6 @@ def test_isilon(aggregator):
         'node_name:node1',
         'node_type:1',
         'snmp_device_vendor:dell',
-        'snmp_device_type:storage',
     ]
 
     cluster_rates = [
@@ -1828,7 +1810,6 @@ def test_apc_ups(aggregator):
         'serial_num:test_serial',
         'ups_name:testIdentName',
         'snmp_device_vendor:apc',
-        'snmp_device_type:ups',
     ]
 
     tags = common.CHECK_TAGS + profile_tags
@@ -1884,7 +1865,6 @@ def test_fortinet_fortigate(aggregator):
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:fortinet-fortigate',
-        'snmp_device_type:firewall',
         'snmp_device_vendor:fortinet',
     ]
 
@@ -1979,7 +1959,6 @@ def test_netapp(aggregator):
     profile_tags = [
         'snmp_profile:netapp',
         'snmp_host:example-datacenter.company',
-        'snmp_device_type:storage',
         'snmp_device_vendor:netapp',
     ]
 
@@ -2088,7 +2067,6 @@ def test_cisco_catalyst(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_host:catalyst-6000.example',
         'snmp_profile:cisco-catalyst',
-        'snmp_device_type:switch',
         'snmp_device_vendor:cisco',
     ]
 

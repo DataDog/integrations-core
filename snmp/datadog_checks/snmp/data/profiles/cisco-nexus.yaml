@@ -5,7 +5,6 @@ extends:
   - _cisco-generic.yaml
 
 device:
-  type: "switch"
   vendor: "cisco"
 
 

@@ -6,7 +6,6 @@ extends:
   - _intel-lan-adapters.yaml
 
 device:
-  type: "controller"
   vendor: "dell"
 
 sysobjectid: 1.3.6.1.4.1.674.10892.*

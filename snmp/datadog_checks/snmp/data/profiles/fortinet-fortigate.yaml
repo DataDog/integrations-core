@@ -4,7 +4,6 @@ extends:
   - _generic-if.yaml
 
 device:
-  type: "firewall"
   vendor: "fortinet"
 
 sysobjectid: 1.3.6.1.4.1.12356.101.1.*

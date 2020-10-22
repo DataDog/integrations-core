@@ -28,7 +28,7 @@ from .utils import register_device_target
 
 local_logger = getLogger(__name__)
 
-SUPPORTED_DEVICE_TAGS = ['type', 'vendor']  # Example: "router", "switch", "pdu", etc.  # Example: "Cisco", "F5", etc.
+SUPPORTED_DEVICE_TAGS = ['vendor']  # Example: "Cisco", "F5", etc.
 
 
 class InstanceConfig:

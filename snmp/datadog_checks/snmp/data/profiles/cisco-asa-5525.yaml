@@ -10,7 +10,6 @@ sysobjectid: 1.3.6.1.4.1.9.1.1408
 # 5555 1.3.6.1.4.1.9.1.1410
 
 device:
-  type: "firewall"
   vendor: "cisco"
 
 metrics:

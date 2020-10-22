@@ -8,7 +8,6 @@ extends:
   - _hp-compaq-health.yaml
 
 device:
-  type: "server"
   vendor: "hp"
 
 sysobjectid: 1.3.6.1.4.1.232.9.4.10
