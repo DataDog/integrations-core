@@ -8,8 +8,8 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
-
 from datadog_checks.dev.conditions import CheckDockerLogs
+
 from .common import (
     DOCKER_SERVER,
     FULL_E2E_CONFIG,
@@ -93,12 +93,21 @@ def dd_environment():
         pyodbc.connect(conn, timeout=30)
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
+    conditions = [
+        WaitFor(sqlserver, wait=3, attempts=10),
+    ]
+
+    if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
+        conditions += [
+            CheckDockerLogs(
+                compose_file,
+                'Always On Availability Groups connection with ' 'primary database established for secondary database',
+            )
+        ]
+
     with docker_run(
         compose_file=compose_file,
-        conditions=[
-            WaitFor(sqlserver, wait=3, attempts=10),
-            CheckDockerLogs(compose_file, 'Always On Availability Groups connection with primary database established for secondary database')
-        ],
+        conditions=conditions,
         mount_logs=True,
     ):
         yield FULL_E2E_CONFIG
