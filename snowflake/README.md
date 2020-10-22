@@ -7,9 +7,14 @@ This integration monitors credit, billing, and storage usage, query history, and
 
 ---
 **NOTE**
+
 Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.
 
 ---
+
+<div class="warning">
+<em>here be dragons</em>
+</div>
 
 ## Setup
 
