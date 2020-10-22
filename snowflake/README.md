@@ -5,15 +5,7 @@
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
 This integration monitors credit, billing, and storage usage, query history, and more.
 
----
-**NOTE**
-
-Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.
-
----
-
-<div class="warning">
-<em>here be dragons</em>
+<div class="alert alert-info">**NOTE**: Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.
 </div>
 
 ## Setup
