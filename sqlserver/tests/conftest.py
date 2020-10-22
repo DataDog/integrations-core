@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
 
+from datadog_checks.dev.conditions import CheckDockerLogs
 from .common import (
     DOCKER_SERVER,
     FULL_E2E_CONFIG,
@@ -91,9 +92,13 @@ def dd_environment():
         conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
         pyodbc.connect(conn, timeout=30)
 
+    compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
     with docker_run(
-        compose_file=os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml'),
-        conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
+        compose_file=compose_file,
+        conditions=[
+            WaitFor(sqlserver, wait=3, attempts=10),
+            CheckDockerLogs(compose_file, 'Always On Availability Groups connection with primary database established for secondary database')
+        ],
         mount_logs=True,
     ):
         yield FULL_E2E_CONFIG
