@@ -211,7 +211,7 @@ def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovide
 @always_on
 @pytest.mark.e2e
 def test_check_ao_e2e_primary(dd_agent_check, init_config, instance_ao_docker_primary):
-    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]}, rate=True)
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]})
 
     for mname in EXPECTED_AO_METRICS_PRIMARY:
         aggregator.assert_metric(mname)
@@ -221,8 +221,29 @@ def test_check_ao_e2e_primary(dd_agent_check, init_config, instance_ao_docker_pr
 @not_windows_ci
 @always_on
 @pytest.mark.e2e
+def test_check_ao_e2e_primary_local_only(dd_agent_check, init_config, instance_ao_docker_primary_local_only):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary_local_only]})
+
+    for mname in EXPECTED_AO_METRICS_PRIMARY:
+        aggregator.assert_metric(mname, count=1)
+    aggregator.assert_metric('sqlserver.ao.secondary_replica_health', count=0)
+
+
+@not_windows_ci
+@always_on
+@pytest.mark.e2e
+def test_check_ao_e2e_primary_non_exist_ag(dd_agent_check, init_config, instance_ao_docker_primary_non_existing_ag):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary_non_existing_ag]})
+
+    for mname in EXPECTED_AO_METRICS_PRIMARY:
+        aggregator.assert_metric(mname, count=0)
+
+
+@not_windows_ci
+@always_on
+@pytest.mark.e2e
 def test_check_ao_e2e_secondary(dd_agent_check, init_config, instance_ao_docker_secondary):
-    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_secondary]}, rate=True)
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_secondary]})
 
     for mname in EXPECTED_AO_METRICS_SECONDARY:
         aggregator.assert_metric(mname)

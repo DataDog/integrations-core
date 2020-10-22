@@ -34,9 +34,9 @@ EXPECTED_METRICS = [
     m[0] for m in SQLServer.INSTANCE_METRICS + SQLServer.TASK_SCHEDULER_METRICS + SQLServer.DATABASE_METRICS
 ] + CUSTOM_METRICS
 
-EXPECTED_AO_METRICS_PRIMARY = EXPECTED_METRICS + [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_PRIMARY]
+EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_PRIMARY]
 
-EXPECTED_AO_METRICS_SECONDARY = EXPECTED_METRICS + [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_SECONDARY]
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -56,7 +56,28 @@ INSTANCE_AO_DOCKER_PRIMARY = {
     'password': 'Password123',
     'tags': ['optional:tag1'],
     'include_ao_metrics': True,
-    'only_emit_local': False,
+}
+
+INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG = {
+    'host': '{},1433'.format(HOST),
+    'connector': 'odbc',
+    'driver': 'FreeTDS',
+    'username': 'sa',
+    'password': 'Password123',
+    'tags': ['optional:tag1'],
+    'include_ao_metrics': True,
+    'availability_group' : 'AG2', # this AG doesn't exist in the setup
+}
+
+INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY = {
+    'host': '{},1433'.format(HOST),
+    'connector': 'odbc',
+    'driver': 'FreeTDS',
+    'username': 'sa',
+    'password': 'Password123',
+    'tags': ['optional:tag1'],
+    'include_ao_metrics': True,
+    'only_emit_local': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {

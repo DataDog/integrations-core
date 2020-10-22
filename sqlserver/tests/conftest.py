@@ -22,6 +22,8 @@ from .common import (
     INSTANCE_E2E,
     INSTANCE_SQL2017,
     get_local_driver,
+    INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY,
+    INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG,
 )
 
 try:
@@ -66,6 +68,16 @@ def instance_ao_docker_primary():
 
 
 @pytest.fixture
+def instance_ao_docker_primary_local_only():
+    return deepcopy(INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY)
+
+
+@pytest.fixture
+def instance_ao_docker_primary_non_existing_ag():
+    return deepcopy(INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG)
+
+
+@pytest.fixture
 def instance_ao_docker_secondary():
     return deepcopy(INSTANCE_AO_DOCKER_SECONDARY)
 
@@ -80,8 +92,8 @@ def dd_environment():
         pyodbc.connect(conn, timeout=30)
 
     with docker_run(
-        compose_file=os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml'),
-        conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
-        mount_logs=True,
+            compose_file=os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml'),
+            conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
+            mount_logs=True,
     ):
         yield FULL_E2E_CONFIG
