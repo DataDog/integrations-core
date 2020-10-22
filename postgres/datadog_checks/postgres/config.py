@@ -45,7 +45,6 @@ class PostgresConfig:
         else:
             self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
 
-        # Support a custom view when datadog user has insufficient privilege to see queries
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
@@ -61,6 +60,7 @@ class PostgresConfig:
 
         # Deep Database monitoring adds additional telemetry for statement metrics
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
         self.escape_query_commas_hack = is_affirmative(instance.get('escape_query_commas_hack', True))
         self.statement_metric_limits = instance.get('statement_metric_limits', None)
