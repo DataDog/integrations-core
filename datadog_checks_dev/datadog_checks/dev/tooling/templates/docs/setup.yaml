@@ -6,11 +6,5 @@ description: |
   instructions.
 
   [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-parameters:
-prepend_text:
-append_text:
-processor:
-hidden: false
-sections:
 
 

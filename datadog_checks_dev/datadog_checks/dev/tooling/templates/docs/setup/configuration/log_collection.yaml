@@ -25,9 +25,3 @@ description: |
 parameters:
   check_log_conf_snippet:
   check_conf_link:
-prepend_text:
-append_text:
-processor:
-hidden: false
-sections:
-

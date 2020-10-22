@@ -1,10 +1,4 @@
 name: Further Reading
 header_level: 2
 description:
-parameters:
-prepend_text:
-append_text:
-processor:
-hidden: false
-sections:
 

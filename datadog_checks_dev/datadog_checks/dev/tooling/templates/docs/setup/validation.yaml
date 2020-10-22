@@ -4,10 +4,4 @@ description: |
   [Run the Agent's status subcommand][1] and look for `{check_name}` under the Checks section.
 
   [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-parameters:
-prepend_text:
-append_text:
-processor:
-hidden: false
-sections:
 

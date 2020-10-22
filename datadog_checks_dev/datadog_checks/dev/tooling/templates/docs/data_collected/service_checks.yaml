@@ -2,10 +2,4 @@ name: Service Checks
 header_level: 3
 description: |
   The {display_name} does not include any service checks.
-parameters:
-prepend_text:
-append_text:
-processor: datadog_checks.dev.tooling.specs.docs.service_check_processor
-hidden: false
-sections:
 

@@ -14,11 +14,12 @@ files:
             **Note**: this integration is compatible with RethinkDB **version 2.3.6 and above**.
 
             [1]: https://rethinkdb.com
+          parameters:
+            value1: foo
       - template: setup
       - template: setup/installation
       - template: setup/configuration
         overrides:
-          tab: false
           description: |
             1. If using RethinkDB 2.4+, add a `datadog-agent` user with read-only permissions on the `rethinkdb`
             database. You can use the following ReQL commands, and refer to [Permissions and user accounts][4] for

@@ -7,6 +7,15 @@ from collections import namedtuple
 from ..utils import default_option_example, normalize_source_name
 
 
+# Simple validation tuple, with some interesting caveats:
+# 
+# `key` - name of value in the object
+# `type` - must be a builtin object - e.g. int, str, list, dict.
+# `required` - whether the key must be present
+# `default` - if False, then key will be initialized via the `type`.  Note that for `bool` types,
+#     this initializes to `False`.
+# `children` - if this item can have sub-elements, and how to validate them.  Can be an explicit
+#     list of other Validation objects, or the special `self` indicating recursive validation.
 Validation = namedtuple('Validation', 'key, type, required, default, children', defaults=(str, True, None, None))
 
 
@@ -22,6 +31,9 @@ def _validate(obj, items, loader, MISSING, INVALID):
         else:
             if v.default is not None:
                 obj[v.key] = v.default
+            else:
+                # initialize as empty builtin type
+                obj[v.key] = v.type()
 
         if v.children and obj[v.key]:
             # handle recursive elements which may be passed as strings
@@ -41,12 +53,12 @@ def spec_validator(spec, loader):
     INVALID = '{loader.source}: The top-level `{key}` attribute must be a {type}'
 
     valid_options = [
-        Validation(key='autodiscovery', type=bool, required=False, default=False, children=None)
+        Validation(key='autodiscovery', type=bool, required=False)
     ]
     validations = [
         Validation(key='name', type=str),
         Validation(key='version', type=str, required=False),
-        Validation(key='options', type=str, required=False, default={}, children=valid_options),
+        Validation(key='options', type=dict, required=False, children=valid_options),
         Validation(key='files', type=list),
     ]
 
@@ -119,8 +131,8 @@ def section_validator(sections, loader, file_name, *prev_sections):
         Validation(key='prepend_text', type=str, required=False),
         Validation(key='append_text', type=str, required=False),
         Validation(key='processor', type=str, required=False),
-        Validation(key='hidden', type=bool, required=False, default=False),
-        Validation(key='sections', type=dict, required=False, children='self'),  # XXX will this work??
+        Validation(key='hidden', type=bool, required=False),
+        Validation(key='sections', type=list, required=False, children='self'),
         Validation(key='overrides', type=list, required=False),
     ]
 
