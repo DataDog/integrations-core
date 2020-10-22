@@ -16,6 +16,7 @@ class StatementMetrics:
 
     These tables are monotonically increasing.
     """
+
     def __init__(self, log):
         self.log = log
         self.previous_statements = dict()
@@ -41,7 +42,8 @@ class StatementMetrics:
                     'Collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
                     row_key,
                     row,
-                    new_cache[row_key])
+                    new_cache[row_key],
+                )
             new_cache[row_key] = row
             prev = self.previous_statements.get(row_key)
             if prev is None:
@@ -103,7 +105,7 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
             sort_key = lambda row: (row[metric], row[tiebreaker_metric])
         sorted_rows = sorted(rows, key=sort_key)
 
-        top = sorted_rows[len(sorted_rows)-top_k:]
+        top = sorted_rows[len(sorted_rows) - top_k :]
         bottom = sorted_rows[:bottom_k]
         for row in top:
             limited[key(row)] = row
