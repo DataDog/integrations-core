@@ -64,6 +64,9 @@ class DatadogAgentStub(object):
     def read_persistent_cache(self, key):
         return self._cache.get(key, '')
 
+    def obfuscate_sql(self, *args, **kwargs):
+        return ''
+
 
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
