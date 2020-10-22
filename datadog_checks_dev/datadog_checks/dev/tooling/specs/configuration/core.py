@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .spec import spec_validator
+from ....utils import get_parent_dir, path_join
 from ..core import BaseSpec
 from ..templates import BaseTemplate
-from ....utils import get_parent_dir, path_join
+from .spec import spec_validator
 
 
 class ConfigTemplates(BaseTemplate):

@@ -4,11 +4,8 @@
 
 from collections import namedtuple
 
-from ..utils import default_option_example, normalize_source_name
-
-
 # Simple validation tuple, with some interesting caveats:
-# 
+#
 # `key` - name of value in the object
 # `type` - must be a builtin object - e.g. int, str, list, dict.
 # `required` - whether the key must be present
@@ -52,16 +49,13 @@ def spec_validator(spec, loader):
     MISSING = '{loader.source}: {loader.spec_type} specifications must include a top-level `{key}` attribute.'
     INVALID = '{loader.source}: The top-level `{key}` attribute must be a {type}'
 
-    valid_options = [
-        Validation(key='autodiscovery', type=bool, required=False)
-    ]
+    valid_options = [Validation(key='autodiscovery', type=bool, required=False)]
     validations = [
         Validation(key='name', type=str),
         Validation(key='version', type=str, required=False),
         Validation(key='options', type=dict, required=False, children=valid_options),
         Validation(key='files', type=list),
     ]
-
 
     _validate(spec, validations, loader, MISSING, INVALID)
 
@@ -207,8 +201,14 @@ def section_validator(sections, loader, file_name, *prev_sections):
         if not templates_resolved:
             continue
 
-        MISSING = f'{loader.source}, {file_name}, {sections_display}section #{section_index}: Every section must contain a `{{key}}` attribute'
-        INVALID = f'{loader.source}, {file_name}, {sections_display}section #{section_index}: Attribute `{{key}}` must be a {{type}}'
+        MISSING = (
+            f'{loader.source}, {file_name}, {sections_display}section #{section_index}: '
+            'Every section must contain a `{{key}}` attribute'
+        )
+        INVALID = (
+            f'{loader.source}, {file_name}, {sections_display}section #{section_index}: '
+            'Attribute `{{key}}` must be a {{type}}'
+        )
 
         # now validate the expanded section object
         _validate(section, validations, loader, MISSING, INVALID)
@@ -249,4 +249,3 @@ def section_validator(sections, loader, file_name, *prev_sections):
             loader.errors.append(
                 f'{loader.source}, {file_name}, {sections_display}section #{section_index}: {error_message}'
             )
-
