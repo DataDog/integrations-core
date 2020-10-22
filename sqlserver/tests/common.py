@@ -66,7 +66,7 @@ INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG = {
     'password': 'Password123',
     'tags': ['optional:tag1'],
     'include_ao_metrics': True,
-    'availability_group' : 'AG2', # this AG doesn't exist in the setup
+    'availability_group': 'AG2',  # this AG doesn't exist in the setup
 }
 
 INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY = {

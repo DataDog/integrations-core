@@ -17,13 +17,13 @@ from .common import (
     INIT_CONFIG_ALT_TABLES,
     INIT_CONFIG_OBJECT_NAME,
     INSTANCE_AO_DOCKER_PRIMARY,
+    INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY,
+    INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG,
     INSTANCE_AO_DOCKER_SECONDARY,
     INSTANCE_DOCKER,
     INSTANCE_E2E,
     INSTANCE_SQL2017,
     get_local_driver,
-    INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY,
-    INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG,
 )
 
 try:
@@ -92,8 +92,8 @@ def dd_environment():
         pyodbc.connect(conn, timeout=30)
 
     with docker_run(
-            compose_file=os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml'),
-            conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
-            mount_logs=True,
+        compose_file=os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml'),
+        conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
+        mount_logs=True,
     ):
         yield FULL_E2E_CONFIG
