@@ -250,11 +250,7 @@ class SQLServer(AgentCheck):
                     'availability_group': self.instance.get('availability_group'),
                     'only_emit_local': self.instance.get('only_emit_local'),
                 }
-                metrics_to_collect.append(
-                    self.typed_metric(
-                        cfg_inst=cfg, table=table, column=column
-                    )
-                )
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):

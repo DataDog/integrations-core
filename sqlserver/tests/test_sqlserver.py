@@ -8,9 +8,14 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
-from .common import CHECK_NAME, EXPECTED_METRICS, LOCAL_SERVER, EXPECTED_AO_METRICS_PRIMARY, \
-    EXPECTED_AO_METRICS_SECONDARY
-from .utils import not_windows_ci, windows_ci, always_on
+from .common import (
+    CHECK_NAME,
+    EXPECTED_AO_METRICS_PRIMARY,
+    EXPECTED_AO_METRICS_SECONDARY,
+    EXPECTED_METRICS,
+    LOCAL_SERVER,
+)
+from .utils import always_on, not_windows_ci, windows_ci
 
 try:
     import pyodbc
