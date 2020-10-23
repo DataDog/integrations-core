@@ -1,0 +1,90 @@
+{
+    "argv": [
+        "/opt/bitnami/mongodb/bin/mongod",
+        "--config=/opt/bitnami/mongodb/conf/mongodb.conf"
+    ],
+    "parsed": {
+        "config": "/opt/bitnami/mongodb/conf/mongodb.conf",
+        "net": {
+            "bindIp": "*",
+            "ipv6": false,
+            "port": 27017,
+            "unixDomainSocket": {
+                "enabled": true,
+                "pathPrefix": "/opt/bitnami/mongodb/tmp"
+            }
+        },
+        "processManagement": {
+            "fork": false,
+            "pidFilePath": "/opt/bitnami/mongodb/tmp/mongodb.pid"
+        },
+        "replication": {
+            "enableMajorityReadConcern": true,
+            "replSetName": "mongo-mongodb-sharded-configsvr"
+        },
+        "security": {
+            "authorization": "disabled",
+            "keyFile": "/opt/bitnami/mongodb/conf/keyfile"
+        },
+        "setParameter": {
+            "enableLocalhostAuthBypass": "true"
+        },
+        "sharding": {
+            "clusterRole": "configsvr"
+        },
+        "storage": {
+            "dbPath": "/bitnami/mongodb/data/db",
+            "directoryPerDB": false,
+            "journal": {
+                "enabled": true
+            }
+        },
+        "systemLog": {
+            "destination": "file",
+            "logAppend": true,
+            "logRotate": "reopen",
+            "path": "/opt/bitnami/mongodb/logs/mongodb.log",
+            "quiet": false,
+            "verbosity": 0
+        }
+    },
+    "ok": 1.0,
+    "$gleStats": {
+        "lastOpTime": {
+            "$timestamp": {
+                "t": 0,
+                "i": 0
+            }
+        },
+        "electionId": {
+            "$oid": "7fffffff0000000000000027"
+        }
+    },
+    "lastCommittedOpTime": {
+        "$timestamp": {
+            "t": 1603377015,
+            "i": 1
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1603377016,
+                "i": 25
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "nm5rJMKtA96bAdvD1MYxSousluk=",
+                "$type": "00"
+            },
+            "keyId": 6857852638906548233
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1603377015,
+            "i": 1
+        }
+    }
+}
