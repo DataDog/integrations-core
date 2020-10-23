@@ -21,7 +21,7 @@ class StatementMetrics:
     """
 
     def __init__(self):
-        self.previous_statements = dict()
+        self.previous_statements = {}
 
     def compute_derivative_rows(self, rows, metrics, key):
         """
@@ -29,14 +29,19 @@ class StatementMetrics:
         statement cache so should only be called once per check run.
 
         - **rows** (_List[dict]_) - rows from current check run
-        - **previous** (_List[dict]_) - rows from the previous check run
         - **metrics** (_List[str]_) - the metrics to compute for each row
         - **key** (_callable_) - function for an ID which uniquely identifies a row across runs
         """
         result = []
         new_cache = {}
         metrics = set(metrics)
-        dropped_metrics = set()
+        if len(rows) > 0:
+            dropped_metrics = metrics - set(rows[0].keys())
+            if dropped_metrics:
+                logger.warning(
+                    'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
+                )
+
         for row in rows:
             row_key = key(row)
             if row_key in new_cache:
@@ -51,10 +56,9 @@ class StatementMetrics:
             if prev is None:
                 continue
             metric_columns = metrics & set(row.keys())
-            dropped_metrics.update(metrics - metric_columns)
             if any([row[k] - prev[k] < 0 for k in metric_columns]):
                 # The table was truncated or stats reset; begin tracking again from this point
-                continue
+                break
             if all([row[k] - prev[k] == 0 for k in metric_columns]):
                 # No metrics to report; query did not run
                 continue
@@ -64,8 +68,6 @@ class StatementMetrics:
             result.append(derived)
 
         self.previous_statements = new_cache
-        if dropped_metrics:
-            logger.warning('Some metrics not available from table: %s', ','.join(m for m in dropped_metrics))
         return result
 
 
@@ -102,11 +104,15 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
         # the same values (like 0), then there will be more overlap in selected rows
         # over time
         if tiebreaker_reverse:
+
             def sort_key(row):
                 return (row[metric], -row[tiebreaker_metric])
+
         else:
+
             def sort_key(row):
                 return (row[metric], row[tiebreaker_metric])
+
         sorted_rows = sorted(rows, key=sort_key)
 
         top = sorted_rows[len(sorted_rows) - top_k :]

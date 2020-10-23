@@ -59,7 +59,7 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
     'query': 'query',
 }
 
-DEFAULT_METRIC_LIMITS = {k: (100000, 100000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
+DEFAULT_METRIC_LIMITS = {k: (10000, 10000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
 
 
 class PostgresStatementMetrics(object):
@@ -82,45 +82,30 @@ class PostgresStatementMetrics(object):
             logger.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
-    def init_pg_stat_statements_columns(self, db):
+    def _get_pg_stat_statements_columns(self, db):
         """
-        Load and cache the list of the columns available under the `pg_stat_statements` table. This must be
-        queried because version is not a reliable way to determine the available columns on `pg_stat_statements`.
-        The database can be upgraded without upgrading extensions, even when the extension is included by default.
+        Load the list of the columns available under the `pg_stat_statements` table. This must be queried because
+        version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
+        be upgraded without upgrading extensions, even when the extension is included by default.
         """
-        if self._pg_stat_statements_columns is not None and self._pg_stat_statements_query_columns is not None:
-            return
-
         query = """
             SELECT column_name
             FROM information_schema.columns
             WHERE table_schema = 'public'
             AND table_name = 'pg_stat_statements';
             """
-        cursor = db.cursor()
-        columns = self._execute_query(cursor, query)
-        self._pg_stat_statements_columns = frozenset(column[0] for column in columns)
-
-        # Given all of the available columns, determine the columns that will actually be used to query
-        desired_columns = (
-            list(PG_STAT_STATEMENTS_METRIC_COLUMNS.keys())
-            + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
-            + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
-        )
-        self._pg_stat_statements_query_columns = sorted(list(set(desired_columns) & self._pg_stat_statements_columns))
+        columns = self._execute_query(db.cursor(), query)
+        return [column[0] for column in columns]
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
-        if not self.config.deep_database_monitoring:
-            return
-
         try:
             self.__collect_per_statement_metrics(db, instance_tags)
         except Exception:
             logger.exception('Unable to collect statement metrics due to an error')
 
     def __collect_per_statement_metrics(self, instance, db, instance_tags):
-        self.init_pg_stat_statements_columns(db)
-        missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - self._pg_stat_statements_columns
+        available_columns = self._get_pg_stat_statements_columns(db)
+        missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - set(available_columns)
         if len(missing_columns) > 0:
             logger.warning(
                 'Unable to collect statement metrics because required fields are unavailable: %s',
@@ -128,12 +113,16 @@ class PostgresStatementMetrics(object):
             )
             return
 
-        cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        desired_columns = (
+            list(PG_STAT_STATEMENTS_METRIC_COLUMNS.keys())
+            + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
+            + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
+        )
 
         rows = self._execute_query(
-            cursor,
+            db.cursor(cursor_factory=psycopg2.extras.DictCursor),
             STATEMENTS_QUERY.format(
-                cols=', '.join(self._pg_stat_statements_query_columns),
+                cols=', '.join(set(desired_columns) & set(available_columns)),
                 pg_stat_statements_view=self.config.pg_stat_statements_view,
             ),
         )

@@ -10,4 +10,6 @@ def compute_sql_signature(normalized_query):
     """
     if not normalized_query:
         return None
+    # Note: please be cautious when changing this function as some features rely on this
+    # hash matching the APM resource hash generated on our backend.
     return format(mmh3.hash64(normalized_query, signed=False)[0], 'x')
