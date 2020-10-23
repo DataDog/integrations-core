@@ -28,7 +28,7 @@ from .utils import register_device_target
 
 local_logger = getLogger(__name__)
 
-SUPPORTED_DEVICE_TAGS = ['vendor']  # Example: "Cisco", "F5", etc.
+SUPPORTED_DEVICE_TAGS = ['vendor']
 
 
 class InstanceConfig:
@@ -185,8 +185,8 @@ class InstanceConfig:
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
 
-        device_info = profile['definition'].get('device', {})
-        self.add_device_tags(device_info)
+        device = profile['definition'].get('device', {})
+        self.add_device_tags(device)
 
         # NOTE: `profile` may contain metrics and metric tags that have already been ingested in this configuration.
         # As a result, multiple copies of metrics/tags will be fetched and submitted to Datadog, which is inefficient
@@ -202,10 +202,10 @@ class InstanceConfig:
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
 
-    def add_device_tags(self, tags):
+    def add_device_tags(self, device):
         # type: (dict) -> None
         for device_tag in SUPPORTED_DEVICE_TAGS:
-            tag = tags.get(device_tag)
+            tag = device.get(device_tag)
             if tag:
                 self.tags.append('snmp_device_{}:{}'.format(device_tag, tag))
 
