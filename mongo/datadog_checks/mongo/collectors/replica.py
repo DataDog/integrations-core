@@ -131,4 +131,15 @@ class ReplicaCollector(MongoCollector):
             replset_name = status['set']
             self._report_replica_set_states(status['members'], replset_name)
 
+            # Compute a lag time
+            for member in status.get('members', []):
+                if 'optimeDate' in primary and 'optimeDate' in member:
+                    lag = primary['optimeDate'] - member['optimeDate']
+                    tags = self.check.base_tags + [
+                        'member:{}'.format(member.get('name', 'unknown')),
+                        'replset_name:{}'.format(replset_name),
+                        'replset_state:{}'.format(get_state_name(member.get('state')).lower()),
+                    ]
+                    self.gauge('mongodb.replset.optime_lag', lag.total_seconds(), tags)
+
         self.check.last_states_by_server = {member['_id']: member['state'] for member in status['members']}
