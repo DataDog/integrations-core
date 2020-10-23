@@ -1,6 +1,6 @@
-name: Couchbase
+name: etcd
 files:
-- name: couchbase.yaml
+- name: etcd.yaml
   options:
   - template: init_config
     options:
@@ -10,7 +10,7 @@ files:
       - name: use_preview
         description: Whether or not the preview the new version of the check supporting only ETCD 3+
         value:
-          type: string
+          type: boolean
           example: true
       - template: instances/openmetrics
         overrides:
@@ -46,9 +46,9 @@ files:
     options:
     - name: prometheus_url
       description: |
-      Prometheus endpoint of your etcd instance.
+        Prometheus endpoint of your etcd instance.
 
-      Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
+        Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
       required: true
       value:
         example: http://%%host%%:2379/metrics
