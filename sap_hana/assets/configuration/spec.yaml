@@ -1,0 +1,49 @@
+name: SAP HANA
+files:
+- name: sap_hana.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/db
+      - template: init_config/default
+  - template: instances
+    options:
+      - name: server
+        description: The hostname used to connect to the system.
+        required: true
+        value:
+          type: string
+      - name: port
+        description: The port used to connect to the system.
+        value:
+          type: integer
+          default: 30015
+      - name: username
+        description: The database user to authenticate as.
+        required: true
+        value:
+          type: string
+      - name: password
+        description: The password of `username`.
+        required: true
+        value:
+          type: string
+      - name: use_hana_hostnames
+        description: |
+          Whether or not to use the hostnames contained in HANA's monitoring
+          views instead of the Agent hostname.
+        value:
+          type: boolean
+          example: false
+      - name: batch_size
+        description: The number of rows to return with each query result.
+        value:
+          type: integer
+          default: 1000
+      - name: timeout
+        description: The timeout in seconds for connecting to `server`.
+        value:
+          type: integer
+          default: 10
+      - template: instances/db
+      - template: instances/default
