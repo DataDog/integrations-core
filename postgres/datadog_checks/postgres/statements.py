@@ -2,8 +2,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import json
-import time
 import logging
 
 import psycopg2
@@ -70,7 +68,7 @@ class PostgresStatementMetrics(object):
     def __init__(self, config):
         self.config = config
         # Cache results of monotonic pg_stat_statements to compare to previous collection
-        self._state = StatementMetrics(logger)
+        self._state = StatementMetrics()
 
         # Available columns will be queried once and cached as the source of truth.
         self._pg_stat_statements_columns = None
@@ -81,7 +79,7 @@ class PostgresStatementMetrics(object):
             cursor.execute(query)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-            logger.warning('Statement-level metrics are unavailable: {}'.format(e))
+            logger.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
     def init_pg_stat_statements_columns(self, db):
@@ -117,17 +115,16 @@ class PostgresStatementMetrics(object):
 
         try:
             self.__collect_per_statement_metrics(db, instance_tags)
-        except:
-            self.log.exception('Unable to collect statement metrics due to an error')
+        except Exception:
+            logger.exception('Unable to collect statement metrics due to an error')
 
     def __collect_per_statement_metrics(self, instance, db, instance_tags):
         self.init_pg_stat_statements_columns(db)
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - self._pg_stat_statements_columns
         if len(missing_columns) > 0:
             logger.warning(
-                'Unable to collect statement metrics because required fields are unavailable: {}'.format(
-                    ', '.join(list(missing_columns))
-                )
+                'Unable to collect statement metrics because required fields are unavailable: %s',
+                ', '.join(list(missing_columns)),
             )
             return
 
@@ -158,7 +155,7 @@ class PostgresStatementMetrics(object):
             try:
                 normalized_query = datadog_agent.obfuscate_sql(row['query'])
             except Exception as e:
-                logger.warn("Failed to obfuscate query '%s': %s", row['query'], e)
+                logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
             # The APM resource hash will use the same query signature because the grouped query is close
