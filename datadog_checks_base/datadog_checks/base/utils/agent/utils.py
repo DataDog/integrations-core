@@ -8,14 +8,10 @@ LOGGER = logging.getLogger(__file__)
 
 def should_profile_memory(datadog_agent, check_name):
     tracemalloc_include = datadog_agent.get_config('tracemalloc_include') or datadog_agent.get_config('tracemalloc_whitelist') or ''
-    if tracemalloc_include:
-        tracemalloc_include = [check.strip() for check in tracemalloc_include.split(',')]
-        tracemalloc_include = [check for check in tracemalloc_include if check]
+    tracemalloc_include = [check.strip() for check in tracemalloc_include.split(',') if check]
 
     tracemalloc_exclude = datadog_agent.get_config('tracemalloc_exclude') or datadog_agent.get_config('tracemalloc_blacklist') or ''
-    if tracemalloc_exclude:
-        tracemalloc_exclude = [check.strip() for check in tracemalloc_exclude.split(',')]
-        tracemalloc_exclude = [check for check in tracemalloc_exclude if check]
+    tracemalloc_exclude = [check.strip() for check in tracemalloc_exclude.split(',') if check]
 
     if datadog_agent.get_config('tracemalloc_include') and datadog_agent.get_config('tracemalloc_whitelist'):
         LOGGER.warning('Found both tracemalloc_include and tracemalloc_whitelist, only tracemalloc_include will be used')
