@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class StatementMetrics:
@@ -17,8 +20,7 @@ class StatementMetrics:
     These tables are monotonically increasing.
     """
 
-    def __init__(self, log):
-        self.log = log
+    def __init__(self):
         self.previous_statements = dict()
 
     def compute_derivative_rows(self, rows, metrics, key):
@@ -38,7 +40,7 @@ class StatementMetrics:
         for row in rows:
             row_key = key(row)
             if row_key in new_cache:
-                self.log.debug(
+                logger.debug(
                     'Collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
                     row_key,
                     row,
@@ -63,7 +65,7 @@ class StatementMetrics:
 
         self.previous_statements = new_cache
         if dropped_metrics:
-            self.log.warning('Some metrics not available from table: %s', ','.join(m for m in dropped_metrics))
+            logger.warning('Some metrics not available from table: %s', ','.join(m for m in dropped_metrics))
         return result
 
 
@@ -100,9 +102,11 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
         # the same values (like 0), then there will be more overlap in selected rows
         # over time
         if tiebreaker_reverse:
-            sort_key = lambda row: (row[metric], -row[tiebreaker_metric])
+            def sort_key(row):
+                return (row[metric], -row[tiebreaker_metric])
         else:
-            sort_key = lambda row: (row[metric], row[tiebreaker_metric])
+            def sort_key(row):
+                return (row[metric], row[tiebreaker_metric])
         sorted_rows = sorted(rows, key=sort_key)
 
         top = sorted_rows[len(sorted_rows) - top_k :]
