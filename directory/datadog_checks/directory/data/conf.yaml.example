@@ -5,11 +5,84 @@ init_config:
     ## @param directory - string - required
     ## The directory to monitor.
     ##
-    ## On Windows, please make sure you escape back-slashes. Otherwise, the YAML parser will fail
-    ## For example:
-    ## directory: "C:\\Users\\foo\\Downloads"
+    ## On Windows, please make sure you escape back-slashes.
+    ## Otherwise, the YAML parser will fail (e.g "C:\\Users\\foo\\Downloads").
     #
     directory: <DIRECTORY>
+
+    ## @param name - string - optional
+    ## Tag metrics with a specified name.
+    #
+    # name: <DIRECTORY>
+
+    ## @param dirtagname - string - optional
+    ## The name of the key for the tag used for the directory, the value is the value of the `name` option.
+    ## The resulting tag aattached is "<dirtagname>:<name>".
+    #
+    # dirtagname: <DIRECTORY_TAG_KEY>
+
+    ## @param filetagname - string - optional
+    ## The name of the key for the tag used for each file, the value is the filename.
+    ## The resulting tag is "<filetagname>:<filename>". The option is only used when filegauges is enabled
+    ## and if the directory contains 20 files or less (including sub-directories).
+    #
+    # filetagname: <TAG_KEY_FILENAME>
+
+    ## @param filegauges - boolean - optional - default: false
+    ## When enabled, stats are an individual gauge per file (max. 20 files!) and not a histogram of the whole directory.
+    #
+    # filegauges: false
+
+    ## @param pattern - string - optional - default: *
+    ## The `fnmatch` pattern to use when reading the `directory`'s files.
+    ## The pattern is matched against the files' absolute paths and relative paths in `directory`.
+    #
+    # pattern: '*'
+
+    ## @param exclude_dirs - list of strings - optional
+    ## A list fo regular expressions used to blacklist directory names. For example, node_modules or vendor.
+    #
+    # exclude_dirs:
+    #   - ^__pycache__$
+    #   - ^build$
+    #   - ^node_modules$
+    #   - ^vendor$
+
+    ## @param dirs_patterns_full - boolean - optional - default: false
+    ## Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
+    ## When enabled, this option allows you to specify the absolute path.
+    ## This ensures multiple directories with the same name aren't all excluded.
+    ##
+    ## Otherwise, this option excludes any directory in the traversal with the provided name.
+    #
+    # dirs_patterns_full: false
+
+    ## @param recursive - boolean - optional - default: false
+    ## When enabled, the stats recurse into directories.
+    #
+    # recursive: false
+
+    ## @param follow_symlinks - boolean - optional - default: true
+    ## Follow symlinks when traversing directories.
+    ## When the option `recursive` is enabled, setting this option to `false` helps avoid symlink loops.
+    #
+    # follow_symlinks: true
+
+    ## @param stat_follow_symlinks - boolean - optional - default: true
+    ## When enabled, the stats are gathered for the files the symlinks are pointing to.
+    ## Otherwise, the stats are gathered for the symlinks themselves.
+    #
+    # stat_follow_symlinks: true
+
+    ## @param countonly - boolean - optional - default: false
+    ## When enabled, the stats only count the number of files matching the pattern.
+    #
+    # countonly: false
+
+    ## @param ignore_missing - boolean - optional - default: false
+    ## When enabled, the check does not raise an exception on missing or inaccessible directories.
+    #
+    # ignore_missing: false
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.

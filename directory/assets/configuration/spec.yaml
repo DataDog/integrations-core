@@ -8,7 +8,8 @@ files:
       description: |
         The directory to monitor.
 
-        On Windows, please make sure you escape back-slashes. Otherwise, the YAML parser will fail (e.g "C:\\Users\\foo\\Downloads").
+        On Windows, please make sure you escape back-slashes.
+        Otherwise, the YAML parser will fail (e.g "C:\\Users\\foo\\Downloads").
       value:
         type: string
       required: true
@@ -27,7 +28,8 @@ files:
     - name: filetagname
       description: |
         The name of the key for the tag used for each file, the value is the filename.
-        The resulting tag is "<filetagname>:<filename>". Only used if filegauges is set to `true` and if the directory contains 20 files or less (including sub-directories).
+        The resulting tag is "<filetagname>:<filename>". The option is only used when filegauges is enabled
+        and if the directory contains 20 files or less (including sub-directories).
       value:
         type: string
         example: <TAG_KEY_FILENAME>
@@ -42,7 +44,7 @@ files:
         The pattern is matched against the files' absolute paths and relative paths in `directory`.
       value:
         type: string
-        example: *
+        example: '*'
     - name: exclude_dirs
       description: A list fo regular expressions used to blacklist directory names. For example, node_modules or vendor.
       value:
@@ -57,8 +59,10 @@ files:
     - name: dirs_patterns_full
       description: |
         Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
-        Setting this option to `false` excludes any directory in the traversal with the provided name.
-        Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories with the same name aren't all excluded.
+        When enabled, this option allows you to specify the absolute path.
+        This ensures multiple directories with the same name aren't all excluded.
+
+        Otherwise, this option excludes any directory in the traversal with the provided name.
       value:
         type: boolean
         example: false
