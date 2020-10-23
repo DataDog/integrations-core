@@ -150,8 +150,7 @@ class PostgresStatementMetrics(object):
             # The APM resource hash will use the same query signature because the grouped query is close
             # enough to the raw query that they will intersect frequently.
             query_signature = compute_sql_signature(normalized_query)
-            apm_resource_hash = query_signature
-            tags = ['query_signature:' + query_signature, 'resource_hash:' + apm_resource_hash] + instance_tags
+            tags = ['query_signature:' + query_signature, 'resource_hash:' + query_signature] + instance_tags
             for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
                 if column not in row:
                     continue
