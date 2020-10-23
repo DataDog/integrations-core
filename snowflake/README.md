@@ -18,6 +18,14 @@ No additional installation is needed on your server.
 
 **Note**: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
 
+<div class="alert alert-warning">For users configuring the integration with Agent `v7.23.0`, upgrade the integration version to `2.1.0` to take advantaged of latest features.
+You can upgrade the integration with the following [command][12]:
+
+```text
+datadog-agent integration install datadog-snowflake==2.1.0
+```
+</div>
+
 ### Configuration
 
 1. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
@@ -130,3 +138,4 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
 [11]: https://docs.datadoghq.com/metrics/summary/
+[12]: https://docs.datadoghq.com/agent/guide/integration-management/#install
