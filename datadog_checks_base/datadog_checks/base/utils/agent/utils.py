@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
+LOGGER = logging.getLogger(__file__)
 
 
 def should_profile_memory(datadog_agent, check_name):
@@ -13,6 +16,12 @@ def should_profile_memory(datadog_agent, check_name):
     if tracemalloc_exclude:
         tracemalloc_exclude = [check.strip() for check in tracemalloc_exclude.split(',')]
         tracemalloc_exclude = [check for check in tracemalloc_exclude if check]
+
+    if datadog_agent.get_config('tracemalloc_include') and datadog_agent.get_config('tracemalloc_whitelist'):
+        LOGGER.warning('Found both tracemalloc_include and tracemalloc_whitelist, only tracemalloc_include will be used')
+
+    if  datadog_agent.get_config('tracemalloc_exclude') and datadog_agent.get_config('tracemalloc_blacklist'):
+        LOGGER.warning('Found both tracemalloc_exclude and tracemalloc_blacklist, only tracemalloc_exclude will be used')
 
     return check_name not in tracemalloc_exclude and (
         check_name in tracemalloc_include if tracemalloc_include else True
