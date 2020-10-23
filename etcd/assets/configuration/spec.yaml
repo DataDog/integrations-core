@@ -14,7 +14,7 @@ files:
           example: true
       - template: instances/openmetrics
         overrides:
-          prometheus_url.example: http://localhost:2379/metrics
+          prometheus_url.value.example: http://localhost:2379/metrics
       - name: leader_tag
         description: Enable to tag metrics with `is_leader:true` or `is_leader:false`.
         value:
