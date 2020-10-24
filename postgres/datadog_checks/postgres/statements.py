@@ -74,9 +74,9 @@ class PostgresStatementMetrics(object):
         self._pg_stat_statements_columns = None
         self._pg_stat_statements_query_columns = None
 
-    def _execute_query(self, cursor, query):
+    def _execute_query(self, cursor, query, params=()):
         try:
-            cursor.execute(query)
+            cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             logger.warning('Statement-level metrics are unavailable: %s', e)
@@ -99,8 +99,9 @@ class PostgresStatementMetrics(object):
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
         try:
-            self.__collect_per_statement_metrics(db, instance_tags)
+            self.__collect_per_statement_metrics(instance, db, instance_tags)
         except Exception:
+            db.rollback()
             logger.exception('Unable to collect statement metrics due to an error')
 
     def __collect_per_statement_metrics(self, instance, db, instance_tags):
@@ -118,13 +119,14 @@ class PostgresStatementMetrics(object):
             + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
             + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         )
-
+        query_columns = list(set(desired_columns) & set(available_columns)) + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         rows = self._execute_query(
             db.cursor(cursor_factory=psycopg2.extras.DictCursor),
             STATEMENTS_QUERY.format(
-                cols=', '.join(set(desired_columns) & set(available_columns)),
+                cols=', '.join(query_columns),
                 pg_stat_statements_view=self.config.pg_stat_statements_view,
             ),
+            params=(self.config.dbname,),
         )
         if not rows:
             return
@@ -143,6 +145,9 @@ class PostgresStatementMetrics(object):
         for row in rows:
             try:
                 normalized_query = datadog_agent.obfuscate_sql(row['query'])
+                if not normalized_query:
+                    logger.warning("Query obfuscation resulted in empty query '%s': %s", row['query'], e)
+                    continue
             except Exception as e:
                 logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
