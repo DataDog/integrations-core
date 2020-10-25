@@ -70,10 +70,6 @@ class PostgresStatementMetrics(object):
         # Cache results of monotonic pg_stat_statements to compare to previous collection
         self._state = StatementMetrics()
 
-        # Available columns will be queried once and cached as the source of truth.
-        self._pg_stat_statements_columns = None
-        self._pg_stat_statements_query_columns = None
-
     def _execute_query(self, cursor, query, params=()):
         try:
             cursor.execute(query, params)
