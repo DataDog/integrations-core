@@ -9,7 +9,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
 from .util import (
@@ -51,7 +50,6 @@ class PostgreSql(AgentCheck):
             )
         self.config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self.config)
-        self.statement_metrics = PostgresStatementMetrics(self.config)
         self._clean_state()
 
     def _clean_state(self):
@@ -414,10 +412,6 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags))
 
-    def _collect_per_statement_metrics(self, tags):
-        if self.db and self.config.deep_database_monitoring:
-            self.statement_metrics.collect_per_statement_metrics(self, self.db, tags)
-
     def check(self, _):
         tags = copy.copy(self.config.tags)
         # Collect metrics
@@ -429,7 +423,6 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s", str(self.version))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            self._collect_per_statement_metrics(tags)
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()
