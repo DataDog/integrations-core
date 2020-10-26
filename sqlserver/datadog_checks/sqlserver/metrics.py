@@ -477,15 +477,11 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select *  \
-                 from \
-                 {table} as dhdrs  \
-                 inner join sys.availability_groups as ag on  \
-                 ag.group_id = dhdrs.group_id \
-                 inner join sys.availability_replicas as ar \
-                 on dhdrs.replica_id = ar.replica_id".format(
-        table=TABLE
-    )
+    QUERY_BASE = "select * from {table} as dhdrs \
+                 inner join sys.availability_groups as ag \
+                 on ag.group_id = dhdrs.group_id \
+                 inner join sys.availability_replicas as ar  \
+                 on dhdrs.replica_id = ar.replica_id".format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -528,12 +524,9 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
 class SqlAvailabilityGroups(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_availability_group_states'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = 'select * \
-    from {table} as dhdrcs \
-    inner join sys.availability_groups as ag \
-    on ag.group_id = dhdrcs.group_id'.format(
-        table=TABLE
-    )
+    QUERY_BASE = 'select * from {table} as dhdrcs \
+                    inner join sys.availability_groups as ag \
+                    on ag.group_id = dhdrcs.group_id'.format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -560,7 +553,6 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
-            selected_ag = self.cfg_instance.get('availability_group')
 
             self.report_function(metric_name, column_val, tags=metric_tags)
 
@@ -569,15 +561,13 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
 class SqlAvailabilityReplicas(BaseSqlServerMetric):
     TABLE = 'sys.availability_replicas'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = 'SELECT * FROM {table} as ar \
+    QUERY_BASE = 'select * from {table} as ar \
                     inner join sys.dm_hadr_database_replica_cluster_states as dhdrcs \
                     on ar.replica_id = dhdrcs.replica_id \
                     inner join sys.dm_hadr_database_replica_states as dhdrs \
                     on ar.replica_id = dhdrs.replica_id \
                     inner join sys.availability_groups as ag \
-                    on ag.group_id = ar.group_id'.format(
-        table=TABLE
-    )
+                    on ag.group_id = ar.group_id'.format(table=TABLE)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -617,7 +607,6 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
-            selected_ag = self.cfg_instance.get('availability_group')
 
             self.report_function(metric_name, column_val, tags=metric_tags)
 

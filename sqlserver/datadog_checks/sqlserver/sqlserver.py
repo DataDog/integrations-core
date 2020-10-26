@@ -247,8 +247,8 @@ class SQLServer(AgentCheck):
                     'column': column,
                     'instance_name': db_name,
                     'tags': tags,
-                    'availability_group': self.instance.get('availability_group'),
-                    'only_emit_local': self.instance.get('only_emit_local'),
+                    'availability_group': self.instance.get('availability_group', None),
+                    'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
