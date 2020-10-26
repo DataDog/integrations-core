@@ -63,7 +63,6 @@ class PostgresConfig:
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
-        self.escape_query_commas_hack = is_affirmative(instance.get('escape_query_commas_hack', True))
         self.statement_metric_limits = instance.get('statement_metric_limits', None)
 
     def _build_tags(self, custom_tags):

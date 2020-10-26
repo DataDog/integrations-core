@@ -173,8 +173,7 @@ class PostgresStatementMetrics(object):
         """Normalize the query value to be used as a tag"""
         # Truncate to metrics tag limit
         query = query.strip()[:200]
-        if self.config.escape_query_commas_hack:
-            # Substitute commas in the query with unicode commas. Temp hack to
-            # work around the bugs in arbitrary tag values on the backend.
-            query = query.replace(', ', '，').replace(',', '，')
+        # Substitute commas in the query with unicode commas. Temp hack to
+        # work around the bugs in arbitrary tag values on the backend.
+        query = query.replace(', ', '，').replace(',', '，')
         return query
