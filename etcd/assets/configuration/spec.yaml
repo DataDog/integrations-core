@@ -8,7 +8,7 @@ files:
   - template: instances
     options:
       - name: use_preview
-        description: Whether or not the preview the new version of the check supporting only ETCD 3+
+        description: Whether or not to preview the new version of the check supporting only ETCD 3+
         value:
           type: boolean
           example: true
