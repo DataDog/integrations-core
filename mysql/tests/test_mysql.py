@@ -13,8 +13,7 @@ from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.mysql import MySql
-from datadog_checks.mysql import statements
+from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
