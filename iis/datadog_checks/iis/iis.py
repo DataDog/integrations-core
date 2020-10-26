@@ -5,6 +5,8 @@ from six import iteritems
 
 from datadog_checks.base import PDHBaseCheck
 
+APP_POOL_METRICS_PREFIX = 'iis.app_pool.'
+
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
     # Network
@@ -34,9 +36,9 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "CGI Requests/sec", "iis.requests.cgi", "gauge"],
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
     # Application Pools
-    ["APP_POOL_WAS", None, "Current Application Pool State", "iis.app_pool.state", "gauge"],
-    ["APP_POOL_WAS", None, "Current Application Pool Uptime", "iis.app_pool.uptime", "gauge"],
-    ["APP_POOL_WAS", None, "Total Application Pool Recycles", "iis.app_pool.recycle.count", "monotonic_count"],
+    ["APP_POOL_WAS", None, "Current Application Pool State", APP_POOL_METRICS_PREFIX + "state", "gauge"],
+    ["APP_POOL_WAS", None, "Current Application Pool Uptime", APP_POOL_METRICS_PREFIX + "uptime", "gauge"],
+    ["APP_POOL_WAS", None, "Total Application Pool Recycles", APP_POOL_METRICS_PREFIX + "recycle.count", "monotonic_count"],
 ]
 
 TOTAL_INSTANCE = '_Total'
@@ -69,10 +71,12 @@ class IIS(PDHBaseCheck):
                 continue
 
             try:
-                if counter._class_name == 'Web Service':
-                    self.collect_sites(dd_name, metric_func, counter, counter_values)
-                elif counter._class_name == 'APP_POOL_WAS':
+                # Don't use counter._class_name == APP_POOL_WAS as the condition as the class name
+                # can be localized.
+                if dd_name.startswith(APP_POOL_METRICS_PREFIX):
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
+                else:
+                    self.collect_sites(dd_name, metric_func, counter, counter_values)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
