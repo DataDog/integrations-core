@@ -107,6 +107,9 @@ class TestStatementMetrics:
         assert 2 == len(sm.compute_derivative_rows(rows4, metrics, key=key))
 
     def test_apply_row_limits(self):
+        def assert_any_order(a, b):
+            assert sorted(a, key=lambda row: row['_']) == sorted(b, key=lambda row: row['_'])
+
         rows = [
             {'_': 0, 'count': 2, 'time': 1000},
             {'_': 1, 'count': 20, 'time': 5000},
@@ -121,16 +124,17 @@ class TestStatementMetrics:
             {'_': 10, 'count': 80, 'time': 800},
             {'_': 11, 'count': 110, 'time': 7000},
         ]
-
-        assert [] == apply_row_limits(rows, {'count': (0, 0), 'time': (0, 0)}, 'count', True, key=lambda row: row['_'])
+        assert_any_order(
+            [], apply_row_limits(rows, {'count': (0, 0), 'time': (0, 0)}, 'count', True, key=lambda row: row['_'])
+        )
 
         expected = [
             {'_': 3, 'count': 180, 'time': 8000},
             {'_': 4, 'count': 0, 'time': 10},  # The bottom 1 row for both 'count' and 'time'
             {'_': 2, 'count': 20, 'time': 8000},
         ]
-        assert expected == apply_row_limits(
-            rows, {'count': (1, 1), 'time': (1, 1)}, 'count', True, key=lambda row: row['_']
+        assert_any_order(
+            expected, apply_row_limits(rows, {'count': (1, 1), 'time': (1, 1)}, 'count', True, key=lambda row: row['_'])
         )
 
         expected = [
@@ -144,19 +148,21 @@ class TestStatementMetrics:
             {'_': 2, 'count': 20, 'time': 8000},
             {'_': 8, 'count': 40, 'time': 100},
         ]
-        assert expected == apply_row_limits(
-            rows, {'count': (5, 2), 'time': (2, 2)}, 'count', True, key=lambda row: row['_']
+        assert_any_order(
+            expected, apply_row_limits(rows, {'count': (5, 2), 'time': (2, 2)}, 'count', True, key=lambda row: row['_'])
         )
 
-        assert rows == sorted(
+        assert_any_order(
+            rows,
             apply_row_limits(rows, {'count': (6, 6), 'time': (0, 0)}, 'time', False, key=lambda row: row['_']),
-            key=lambda row: row['_'],
         )
-        assert rows == sorted(
+
+        assert_any_order(
+            rows,
             apply_row_limits(rows, {'count': (0, 0), 'time': (4, 8)}, 'time', False, key=lambda row: row['_']),
-            key=lambda row: row['_'],
         )
-        assert rows == sorted(
+
+        assert_any_order(
+            rows,
             apply_row_limits(rows, {'count': (20, 20), 'time': (12, 5)}, 'time', False, key=lambda row: row['_']),
-            key=lambda row: row['_'],
         )
