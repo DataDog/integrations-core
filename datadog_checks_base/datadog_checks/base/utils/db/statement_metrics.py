@@ -34,6 +34,7 @@ class StatementMetrics:
         """
         result = []
         new_cache = {}
+        negative_result_found = False
         metrics = set(metrics)
         if len(rows) > 0:
             dropped_metrics = metrics - set(rows[0].keys())
@@ -58,7 +59,8 @@ class StatementMetrics:
             metric_columns = metrics & set(row.keys())
             if any([row[k] - prev[k] < 0 for k in metric_columns]):
                 # The table was truncated or stats reset; begin tracking again from this point
-                break
+                negative_result_found = True
+                continue
             if all([row[k] - prev[k] == 0 for k in metric_columns]):
                 # No metrics to report; query did not run
                 continue
@@ -66,6 +68,8 @@ class StatementMetrics:
             result.append(derived)
 
         self.previous_statements = new_cache
+        if negative_result_found:
+            return []
         return result
 
 

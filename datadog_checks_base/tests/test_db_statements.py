@@ -94,12 +94,17 @@ class TestStatementMetrics:
         ]
         # Simulate a stats reset by decreasing one of the metrics rather than increasing
         rows3 = [
-            add_to_dict(rows1[0], {'count': -1, 'time': 0, 'errors': 15}),
-            add_to_dict(rows1[1], {'count': 1, 'time': 15, 'errors': 0}),
+            add_to_dict(rows2[1], {'count': 1, 'time': 15, 'errors': 0}),
+            add_to_dict(rows2[0], {'count': -1, 'time': 0, 'errors': 15}),
+        ]
+        rows4 = [
+            add_to_dict(rows3[1], {'count': 1, 'time': 1, 'errors': 0}),
+            add_to_dict(rows3[0], {'count': 1, 'time': 1, 'errors': 1}),
         ]
         assert [] == sm.compute_derivative_rows(rows1, metrics, key=key)
         assert 2 == len(sm.compute_derivative_rows(rows2, metrics, key=key))
         assert [] == sm.compute_derivative_rows(rows3, metrics, key=key)
+        assert 2 == len(sm.compute_derivative_rows(rows4, metrics, key=key))
 
     def test_apply_row_limits(self):
         rows = [
