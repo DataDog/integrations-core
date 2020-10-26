@@ -63,8 +63,6 @@ class StatementMetrics:
                 # No metrics to report; query did not run
                 continue
             derived = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
-            # Add the original monotonic counts for debugging
-            derived.update({'monotonic_' + k: row[k] for k in row.keys()})
             result.append(derived)
 
         self.previous_statements = new_cache
@@ -88,7 +86,7 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
             >>>     'rows_sent': (100, 0),
             >>> }
     - **tiebreaker_metric** (_str_) - metric used to resolve ties, intended to increase row overlap in different metrics
-    - **tiebreaker_reverse** (_bool_) - whether the tiebreaker metric should in reverse order (descending)
+    - **tiebreaker_reverse** (_bool_) - whether the tiebreaker metric should be in reverse order (descending)
     - **key** (_callable_) - function for an ID which uniquely identifies a row
     """
     if len(rows) == 0:
