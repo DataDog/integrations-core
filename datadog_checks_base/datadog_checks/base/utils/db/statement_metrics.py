@@ -21,7 +21,7 @@ class StatementMetrics:
     """
 
     def __init__(self):
-        self.previous_statements = {}
+        self._previous_statements = {}
 
     def compute_derivative_rows(self, rows, metrics, key):
         """
@@ -53,7 +53,7 @@ class StatementMetrics:
                     new_cache[row_key],
                 )
             new_cache[row_key] = row
-            prev = self.previous_statements.get(row_key)
+            prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
             metric_columns = metrics & set(row.keys())
@@ -67,7 +67,7 @@ class StatementMetrics:
             derived = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
             result.append(derived)
 
-        self.previous_statements = new_cache
+        self._previous_statements = new_cache
         if negative_result_found:
             return []
         return result
