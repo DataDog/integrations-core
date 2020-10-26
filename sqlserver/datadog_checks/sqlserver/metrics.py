@@ -481,7 +481,9 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                  inner join sys.availability_groups as ag \
                  on ag.group_id = dhdrs.group_id \
                  inner join sys.availability_replicas as ar  \
-                 on dhdrs.replica_id = ar.replica_id".format(table=TABLE)
+                 on dhdrs.replica_id = ar.replica_id".format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -526,7 +528,9 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = 'select * from {table} as dhdrcs \
                     inner join sys.availability_groups as ag \
-                    on ag.group_id = dhdrcs.group_id'.format(table=TABLE)
+                    on ag.group_id = dhdrcs.group_id'.format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -567,7 +571,9 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                     inner join sys.dm_hadr_database_replica_states as dhdrs \
                     on ar.replica_id = dhdrs.replica_id \
                     inner join sys.availability_groups as ag \
-                    on ag.group_id = ar.group_id'.format(table=TABLE)
+                    on ag.group_id = ar.group_id'.format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
