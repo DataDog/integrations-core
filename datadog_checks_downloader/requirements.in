@@ -2,7 +2,7 @@
 # At the time of writing (Jan 30 2020), this was the latest version of these
 # libraries.
 #
-tuf==0.14.0
+tuf==0.15.0
 in-toto==0.5.0
 #
 # Make sure TUF and in-toto use the same version of this library, which they
