@@ -18,6 +18,8 @@ a) Set Vault [`unauthenticated_metrics_access`][14] configuration to `true`.
 
 This will allow unauthenticated access to the `/v1/sys/metrics` endpoint.
 
+**Note**: The `/sys/metrics` endpoint requires Vault v1.1.0 or higher to collect metrics.
+
 b) Use a Vault client token.
 
 Below is an example using JWT auth method, but you can also use other [auth methods][15].
