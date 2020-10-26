@@ -21,7 +21,7 @@ files:
     - name: dirtagname
       description: |
         The name of the key for the tag used for the directory, the value is the value of the `name` option.
-        The resulting tag attached is "<dirtagname>:<name>".
+        The resulting tag attached is "<DIRECTORY_TAG_KEY>:<DIRECTORY>".
       value:
         type: string
         example: <DIRECTORY_TAG_KEY>
