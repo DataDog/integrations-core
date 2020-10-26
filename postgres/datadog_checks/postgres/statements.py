@@ -115,7 +115,9 @@ class PostgresStatementMetrics(object):
             + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
             + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         )
-        query_columns = list(set(desired_columns) & set(available_columns)) + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
+        query_columns = list(
+            set(desired_columns) & set(available_columns) + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
+        )
         rows = self._execute_query(
             db.cursor(cursor_factory=psycopg2.extras.DictCursor),
             STATEMENTS_QUERY.format(
@@ -142,7 +144,7 @@ class PostgresStatementMetrics(object):
             try:
                 normalized_query = datadog_agent.obfuscate_sql(row['query'])
                 if not normalized_query:
-                    logger.warning("Query obfuscation resulted in empty query '%s': %s", row['query'], e)
+                    logger.warning("Query obfuscation resulted in empty query '%s'", row['query'])
                     continue
             except Exception as e:
                 logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
