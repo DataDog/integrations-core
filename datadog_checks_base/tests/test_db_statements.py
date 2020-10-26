@@ -76,6 +76,31 @@ class TestStatementMetrics:
         # No changes should produce no rows
         assert [] == sm.compute_derivative_rows(rows2, metrics, key=key)
 
+    def test_compute_derivative_rows_stats_reset(self):
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query'], row['db'], row['user'])
+
+        metrics = ['count', 'time']
+
+        rows1 = [
+            {'count': 13, 'time': 2005, 'errors': 1, 'query': 'COMMIT', 'db': 'puppies', 'user': 'dog'},
+            {'count': 25, 'time': 105, 'errors': 0, 'query': 'ROLLBACK', 'db': 'puppies', 'user': 'dog'},
+        ]
+        rows2 = [
+            add_to_dict(rows1[0], {'count': 0, 'time': 1, 'errors': 15}),
+            add_to_dict(rows1[1], {'count': 1, 'time': 15, 'errors': 0}),
+        ]
+        # Simulate a stats reset by decreasing one of the metrics rather than increasing
+        rows3 = [
+            add_to_dict(rows1[0], {'count': -1, 'time': 0, 'errors': 15}),
+            add_to_dict(rows1[1], {'count': 1, 'time': 15, 'errors': 0}),
+        ]
+        assert [] == sm.compute_derivative_rows(rows1, metrics, key=key)
+        assert 2 == len(sm.compute_derivative_rows(rows2, metrics, key=key))
+        assert [] == sm.compute_derivative_rows(rows3, metrics, key=key)
+
     def test_apply_row_limits(self):
         rows = [
             {'_': 0, 'count': 2, 'time': 1000},
