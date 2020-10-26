@@ -48,11 +48,11 @@ class MySQLStatementMetrics(object):
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
         try:
-            self.__collect_per_statement_metrics(instance, db, instance_tags)
+            self._collect_per_statement_metrics(instance, db, instance_tags)
         except Exception:
             logger.exception('Unable to collect statement metrics due to an error')
 
-    def __collect_per_statement_metrics(self, instance, db, instance_tags):
+    def _collect_per_statement_metrics(self, instance, db, instance_tags):
         def keyfunc(row):
             return (row['schema'], row['digest'])
 
