@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "tcp_queue.",
-  "metric_to_check": "tcp_queue.rqueue.size",
+  "metric_to_check": "tcp_queue.read_buffer_max_fill_rate",
   "name": "tcp_queue_length",
   "short_description": "Track the size of the TCP buffers with Datadog.",
   "guid": "0468b098-43bd-4157-8a01-14065cfdcb7b",

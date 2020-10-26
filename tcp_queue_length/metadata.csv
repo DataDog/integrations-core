@@ -1,8 +1,3 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-tcp_queue.rqueue.size,gauge,,byte,,TCP receive buffer size,0,tcp_queue_length,rqueue_size
-tcp_queue.rqueue.min,gauge,,byte,,TCP receive queue minimum size,0,tcp_queue_length,rqueue_min
-tcp_queue.rqueue.max,gauge,,byte,,TCP receive queue maximum size,0,tcp_queue_length,rqueue_max
-tcp_queue.wqueue.size,gauge,,byte,,TCP send buffer size,0,tcp_queue_length,wqueue_size
-tcp_queue.wqueue.min,gauge,,byte,,TCP send queue minimum size,0,tcp_queue_length,wqueue_min
-tcp_queue.wqueue.max,gauge,,byte,,TCP send queue maximum size,0,tcp_queue_length,wqueue_max
-tcp_queue.nb_contexts,gauge,,connection,,Total number of connections,0,tcp_queue_length,nb_contexts
+tcp_queue.read_buffer_max_fill_rate,gauge,,percent,,Maximum fill rate of the fuller read buffer,0,tcp_queue_length,rbuf_max_fill
+tcp_queue.write_buffer_max_fill_rate,gauge,,percent,,Maximum fill rate of the fuller write buffer,0,tcp_queue_length,wbuf_max_fill
