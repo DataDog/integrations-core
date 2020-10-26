@@ -95,12 +95,12 @@ class PostgresStatementMetrics(object):
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
         try:
-            self.__collect_per_statement_metrics(instance, db, instance_tags)
+            self._collect_per_statement_metrics(instance, db, instance_tags)
         except Exception:
             db.rollback()
             logger.exception('Unable to collect statement metrics due to an error')
 
-    def __collect_per_statement_metrics(self, instance, db, instance_tags):
+    def _collect_per_statement_metrics(self, instance, db, instance_tags):
         available_columns = self._get_pg_stat_statements_columns(db)
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - set(available_columns)
         if len(missing_columns) > 0:
