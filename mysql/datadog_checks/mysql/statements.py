@@ -3,11 +3,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import logging
 from contextlib import closing
 
 import pymysql
 
+from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
@@ -15,9 +15,6 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
-
-logger = logging.getLogger(__name__)
 
 
 STATEMENT_METRICS = {
@@ -44,14 +41,15 @@ class MySQLStatementMetrics(object):
 
     def __init__(self, config):
         self.config = config
+        self.log = get_check_logger()
         self._state = StatementMetrics()
 
     def collect_per_statement_metrics(self, db):
         try:
             return self._collect_per_statement_metrics(db)
         except Exception:
+            self.log.exception('Unable to collect statement metrics due to an error')
             return []
-            logger.exception('Unable to collect statement metrics due to an error')
 
     def _collect_per_statement_metrics(self, db):
         metrics = []
@@ -81,7 +79,7 @@ class MySQLStatementMetrics(object):
             try:
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
             except Exception as e:
-                logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
             tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
             tags.append('query:' + self._normalize_query_tag(obfuscated_statement))
@@ -144,7 +142,7 @@ class MySQLStatementMetrics(object):
 
                 rows = cursor.fetchall()
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            logger.warning("Statement summary metrics are unavailable at this time: %s", e)
+            self.log.warning("Statement summary metrics are unavailable at this time: %s", e)
             return []
 
         return rows
