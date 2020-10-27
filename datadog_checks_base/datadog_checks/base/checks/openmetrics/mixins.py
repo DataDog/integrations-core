@@ -640,7 +640,7 @@ class OpenMetricsScraperMixin(object):
         sample_labels = sample[self.SAMPLE_LABELS]
         for label_key, label_values in ignore_metrics_by_label.items():
             if not label_values:
-                self.log.warning(
+                self.log.debug(
                     "Skipping filter label `%s` with an empty values list, did you mean to use '*' wildcard?", label_key
                 )
             elif '*' in label_values:
