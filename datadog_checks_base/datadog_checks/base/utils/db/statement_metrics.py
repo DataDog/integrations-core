@@ -28,9 +28,15 @@ class StatementMetrics:
         """
         Compute the first derivative of column-based metrics for a given set of rows. This function
         takes the difference of the previous check run's values and the current check run's values
-        to produce the total counts in the time elapsed between check runs.
+        to produce a new set of rows whose values represent the total counts in the time elapsed
+        between check runs.
 
-        This function also resets the statement cache so it should only be called once per check run.
+        This differs from `AgentCheck.monotonic_count` in that state for the entire row is kept,
+        regardless of whether or not the tags used to uniquely identify the row are submitted as
+        metric tags. There is also custom logic around stats resets to discard all rows when a
+        negative value is found, rather than just the single metric of that row/column.
+
+        This function resets the statement cache so it should only be called once per check run.
 
         - **rows** (_List[dict]_) - rows from current check run
         - **metrics** (_List[str]_) - the metrics to compute for each row
@@ -114,8 +120,8 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
     The reason for this custom limit function on metrics is to guarantee that metric `top()` functions show the true
     top and true bottom K, even if some limits are applied to drop less interesting queries that fall in the middle.
 
-    Longer Explanation
-    ------------------
+    Longer Explanation of the Algorithm
+    -----------------------------------
 
     Simply taking the top K and bottom K of all metrics is insufficient. For instance, for K=2 you might have rows
     with values:
@@ -170,13 +176,24 @@ def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse,
     - **rows** (_List[dict]_) - rows with columns as metrics
     - **metric_limits** (_Dict[str,Tuple[int,int]]_) - dict of the top k and bottom k limits for each metric
             ex:
-            >>> metrics = {
+            >>> metric_limits = {
             >>>     'count': (200, 50),
             >>>     'time': (200, 100),
             >>>     'lock_time': (50, 50),
             >>>     ...
             >>>     'rows_sent': (100, 0),
             >>> }
+
+            The first item in each tuple guarantees the top K rows will be chosen for this metric. The second item
+            guarantees the bottom K rows will also be chosen. Both of these numbers are configurable because you
+            may want to keep the top 100 slowest queries, but are only interested in the top 10 fastest queries.
+            That configuration would look like:
+
+            >>> metric_limits = {
+            >>>     'time': (100, 10),  # Top 100, bottom 10
+            >>>     ...
+            >>> }
+
     - **tiebreaker_metric** (_str_) - metric used to resolve ties, intended to increase row overlap in different metrics
     - **tiebreaker_reverse** (_bool_) - whether the tiebreaker metric should be in reverse order (descending)
     - **key** (_callable_) - function for an ID which uniquely identifies a row
