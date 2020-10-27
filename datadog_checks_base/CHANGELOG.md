@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.2.0 / 2020-10-27
+
+* [Added] Add database statement-level metrics utils. See [#7837](https://github.com/DataDog/integrations-core/pull/7837).
+* [Added] Tracemalloc: Rename white/blacklist to include/exclude. See [#7626](https://github.com/DataDog/integrations-core/pull/7626).
+* [Added] Add a TLSContextWrapper to the base class. See [#7812](https://github.com/DataDog/integrations-core/pull/7812).
+* [Added] Add type checking on PDHBaseCheck. See [#7817](https://github.com/DataDog/integrations-core/pull/7817).
+
 ## 15.1.0 / 2020-10-20
 
 * [Added] Implements token reader for DC/OS Auth JWT token retrieval with login. See [#7785](https://github.com/DataDog/integrations-core/pull/7785).
