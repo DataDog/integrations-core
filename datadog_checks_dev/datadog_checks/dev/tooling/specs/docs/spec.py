@@ -2,7 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 from collections import namedtuple
+from string import Formatter
+
+from ...utils import load_manifest, load_service_checks
 
 # Simple validation tuple, with some interesting caveats:
 #
@@ -133,6 +137,11 @@ def section_validator(sections, loader, file_name, *prev_sections):
     overrides = {}
     override_errors = []
 
+    # load base parameters once
+    base_params = load_manifest(loader.source)
+    base_params['check_name'] = base_params['integration_id']
+    base_params['service_checks'] = load_service_checks(loader.source)
+
     section_names_origin = {}
     for section_index, section in enumerate(sections, 1):
         if not isinstance(section, dict):
@@ -227,6 +236,22 @@ def section_validator(sections, loader, file_name, *prev_sections):
             )
         else:
             section_names_origin[section_name] = section_index
+
+        # perform parameter expansion on the description text
+        # first check if there are any fields to be replaced
+        description = section['description']
+        if len(list(Formatter().parse(description))) > 1:
+            params = copy.deepcopy(section['parameters'])
+            if params:
+                # perform parameter expansion for any parameter values
+                for k, v in params.items():
+                    if v is not None:
+                        params[k] = v.format(**base_params)
+                params.update(base_params)
+            else:
+                params = base_params
+
+            section['description'] = description.format(**params)
 
         if 'sections' in section:
             nested_sections = section['sections']
