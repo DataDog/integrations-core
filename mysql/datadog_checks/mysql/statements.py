@@ -61,7 +61,7 @@ class MySQLStatementMetrics(object):
         rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
         rows = apply_row_limits(
             rows,
-            self.config.options.get('query_metric_limits', DEFAULT_STATEMENT_METRIC_LIMITS),
+            DEFAULT_STATEMENT_METRIC_LIMITS,
             'count',
             True,
             key=keyfunc,
