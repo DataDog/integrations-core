@@ -208,11 +208,11 @@ def test_complex_config_replica(aggregator, instance_complex):
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_metrics(aggregator, instance_complex):
     QUERY = 'select * from information_schema.processlist'
-    QUERY_DIGEST_TEXT = 'SELECT * FROM information_schema.processlist'
+    QUERY_DIGEST_TEXT = 'SELECT * FROM `information_schema` . `processlist`'
     # The query signature should match the query and consistency of this tag has product impact. Do not change
     # the query signature for this test unless you know what you're doing. The query digest is determined by
     # mysql and varies across versions.
-    QUERY_SIGNATURE = 'daad54371910af37'
+    QUERY_SIGNATURE = '8cd0f2b4343decc'
     if environ.get('MYSQL_FLAVOR') == 'mariadb':
         QUERY_DIGEST = '5d343195f2d7adf4388d42755311c3e3'
     elif environ.get('MYSQL_VERSION') == '5.6':
@@ -222,7 +222,7 @@ def test_statement_metrics(aggregator, instance_complex):
     else:
         # 8.0+
         QUERY_DIGEST = '6817a67871eb7edddad5b7836c93330aa3c98801ac759eed1bea6db1a34579c4'
-        QUERY_SIGNATURE = '4a086f63b2b0fa2a'
+        QUERY_SIGNATURE = '9d73cb71644af0a2'
 
     config = copy.deepcopy(instance_complex)
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])

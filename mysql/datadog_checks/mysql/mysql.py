@@ -352,7 +352,7 @@ class MySql(AgentCheck):
 
     def _collect_statement_metrics(self, db, tags):
         tags = self.service_check_tags + tags
-        metrics = self._statement_metrics.collect_per_statement_metrics(self, db)
+        metrics = self._statement_metrics.collect_per_statement_metrics(db)
         for metric_name, metric_value, metric_tags in metrics:
             self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
 
