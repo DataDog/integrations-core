@@ -239,7 +239,7 @@ def test_statement_metrics(aggregator, instance_complex):
     # Run the query and check a second time so statement metrics are computed from the previous run
     run_query(QUERY)
     mysql_check.check(config)
-    for name in statements.METRICS.values():
+    for name in statements.STATEMENT_METRICS.values():
         aggregator.assert_metric(
             name,
             tags=tags.SC_TAGS

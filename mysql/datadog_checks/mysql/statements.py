@@ -20,7 +20,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-METRICS = {
+STATEMENT_METRICS = {
     'count': 'mysql.queries.count',
     'errors': 'mysql.queries.errors',
     'time': 'mysql.queries.time',
@@ -34,7 +34,7 @@ METRICS = {
     'rows_examined': 'mysql.queries.rows_examined',
 }
 
-DEFAULT_METRIC_LIMITS = {k: (10000, 10000) for k in METRICS.keys()}
+DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
 
 
 class MySQLStatementMetrics(object):
@@ -58,9 +58,13 @@ class MySQLStatementMetrics(object):
 
         monotonic_rows = self._query_summary_per_statement(db)
         monotonic_rows = self._merge_duplicate_rows(monotonic_rows, key=keyfunc)
-        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS.keys(), key=keyfunc)
+        rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
         rows = apply_row_limits(
-            rows, self.config.options.get('query_metric_limits', DEFAULT_METRIC_LIMITS), 'count', True, key=keyfunc
+            rows,
+            self.config.options.get('query_metric_limits', DEFAULT_STATEMENT_METRIC_LIMITS),
+            'count',
+            True,
+            key=keyfunc,
         )
 
         for row in rows:
@@ -79,7 +83,7 @@ class MySQLStatementMetrics(object):
             tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
             tags.append('query:' + self._normalize_query_tag(obfuscated_statement))
 
-            for col, name in METRICS.items():
+            for col, name in STATEMENT_METRICS.items():
                 value = row[col]
                 instance.count(name, value, tags=tags)
 
@@ -94,7 +98,7 @@ class MySQLStatementMetrics(object):
         for row in rows:
             k = key(row)
             if k in merged:
-                for m in METRICS:
+                for m in STATEMENT_METRICS:
                     merged[k][m] += row[m]
             else:
                 merged[k] = copy.copy(row)
