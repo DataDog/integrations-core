@@ -6,11 +6,12 @@ The AgentCheck base class in base.py contains the logic that all Checks inherit.
 
 In addition to the integrations inheriting from AgentCheck, other classes that inherit from AgentCheck include:
 
-- PDHBaseCheck
-- PrometheusCheck
-- KubeLeaderElectionBaseCheck
+- [PDHBaseCheck](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/win/winpdh_base.py)
+- [OpenMetricsBaseCheck](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/base_check.py)
+- [GenericPrometheusCheck](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/prometheus/base_check.py)
+- [PrometheusCheck](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/prometheus/prometheus_base.py)
+- [KubeLeaderElectionBaseCheck](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/kube_leader/base_check.py)
 
-(diagram of agentcheck with other checks here)
 
 ## Getting Started
 In each Check, Datadog looks for `__version__` and a subclass of AgentCheck at the root of every package.
@@ -62,15 +63,14 @@ include link to the app for each
 The list of what is collected from your system by each integration. More information on metrics can be found [here.](https://docs.datadoghq.com/developers/metrics/types/) You can find the metrics for each integration in that integrations metadata.csv file. You can also set up [custom metrics](https://docs.datadoghq.com/developers/metrics/), so if the integration doesn’t offer a metric out of the box, you can usually add it.
 
 #### Gauge
-The GAUGE metric submission type represents a snapshot of events in one time interval. This representative snapshot value is the last value submitted to the Agent during a time interval. A GAUGE can be used to take a measure of something reporting continuously—like the available disk space or memory used.
+The gauge metric submission type represents a snapshot of events in one time interval. This representative snapshot value is the last value submitted to the Agent during a time interval. A gauge can be used to take a measure of something reporting continuously—like the available disk space or memory used.
 
 More information on this can be found in the API docs [here.](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.gauge)
 
 #### Count
-The COUNT metric submission type represents the total number of event occurrences in one time interval. A COUNT can be used to track the total number of connections made to a database or the total number of requests to an endpoint. This number of events can accumulate or decrease over time—it is not monotonically increasing.
+The count metric submission type represents the total number of event occurrences in one time interval. A count can be used to track the total number of connections made to a database or the total number of requests to an endpoint. This number of events can accumulate or decrease over time—it is not monotonically increasing.
 
 More information on this can be found in the API docs [here.](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.count)
-
 
 #### Monotonic Count
 Similar to Count, Monotonic Count represents the total number of event occurrences in one time interval, however this value can ONLY increment.
@@ -78,17 +78,17 @@ Similar to Count, Monotonic Count represents the total number of event occurrenc
 More information on this can be found in the API docs [here.](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.monotonic_count)
 
 #### Rate
-The RATE metric submission type represents the total number of event occurrences per second in one time interval. A RATE can be used to track how often something is happening—like the frequency of connections made to a database or the flow of requests made to an endpoint.
+The rate metric submission type represents the total number of event occurrences per second in one time interval. A rate can be used to track how often something is happening—like the frequency of connections made to a database or the flow of requests made to an endpoint.
 
 More information on this can be found in the API docs [here.](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.rate)
 
 #### Histogram
-The HISTOGRAM metric submission type represents the statistical distribution of a set of values calculated Agent-side in one time interval. Datadog’s HISTOGRAM metric type is an extension of the StatsD timing metric type: the Agent aggregates the values that are sent in a defined time interval and produces different metrics which represent the set of values.
+The histogram metric submission type represents the statistical distribution of a set of values calculated Agent-side in one time interval. Datadog’s histogram metric type is an extension of the StatsD timing metric type: the Agent aggregates the values that are sent in a defined time interval and produces different metrics which represent the set of values.
 
 More information on this can be found in the API docs [here.](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.histogram)
 
 #### Historate
-Similar to the Histogram metric, the Historate represents statistical distribution over one time interval, although this is based on rate metrics.
+Similar to the histogram metric, the historate represents statistical distribution over one time interval, although this is based on rate metrics.
 
 More information on this can be found in the API docs [here.](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.historate)
 
@@ -115,7 +115,7 @@ class AwesomeCheck(AgentCheck):
 ```
 This is an optional addition, but it makes submissions easier since it prefixes every metric with the `__NAMESPACE__` automatically. In this case it would append `awesome.` to each metric submitted to Datadog.
 
-If you wish to ignore the namespace for any reason, you can append optional bool `raw` to each submission:
+If you wish to ignore the namespace for any reason, you can append optional bool `raw=True` to each submission:
 ```python
 ...
 
@@ -123,7 +123,7 @@ self.gauge('test', 1.23, tags=['foo:bar'], raw=True)
 
 ...
 ```
-We submitted a gauge metric named `awesome.test` with a value of `1.23` tagged by `foo:bar` with no namespace.
+We submitted a gauge metric named `awesome.test` with a value of `1.23` tagged by `foo:bar` ignoring the namespace.
 
 ## Check Initializations
 In the AgentCheck class, there is a useful property called `check_initializations`, which we use to execute functions that are called once before the first check run.
@@ -146,3 +146,20 @@ class AirflowCheck(AgentCheck):
 ...
 ```
 
+Before the first Airflow check is ran, `self._parse_config` will be executed in `base.py`'s `run()` function:
+```python
+# base.py
+
+    def run(self):
+        # type: () -> str
+        try:
+            while self.check_initializations:
+                initialization = self.check_initializations.popleft()
+                try:
+                    initialization()
+                except Exception:
+                    self.check_initializations.appendleft(initialization)
+                    raise
+    ...
+
+```
