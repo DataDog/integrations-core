@@ -63,8 +63,8 @@ class MySQLStatementMetrics(object):
         rows = apply_row_limits(
             rows,
             DEFAULT_STATEMENT_METRIC_LIMITS,
-            'count',
-            True,
+            tiebreaker_metric='count',
+            tiebreaker_reverse=True,
             key=keyfunc,
         )
 
