@@ -7,6 +7,7 @@ import logging
 import psycopg2
 import psycopg2.extras
 
+from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
@@ -14,9 +15,6 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
-
-logger = logging.getLogger(__name__)
 
 
 STATEMENTS_QUERY = """
@@ -67,7 +65,7 @@ class PostgresStatementMetrics(object):
 
     def __init__(self, config):
         self.config = config
-        # Cache results of monotonic pg_stat_statements to compare to previous collection
+        self.log = get_check_logger()
         self._state = StatementMetrics()
 
     def _execute_query(self, cursor, query, params=()):
@@ -75,7 +73,7 @@ class PostgresStatementMetrics(object):
             cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-            logger.warning('Statement-level metrics are unavailable: %s', e)
+            self.log.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
     def _get_pg_stat_statements_columns(self, db):
@@ -98,13 +96,13 @@ class PostgresStatementMetrics(object):
             self._collect_per_statement_metrics(instance, db, instance_tags)
         except Exception:
             db.rollback()
-            logger.exception('Unable to collect statement metrics due to an error')
+            self.log.exception('Unable to collect statement metrics due to an error')
 
     def _collect_per_statement_metrics(self, instance, db, instance_tags):
         available_columns = self._get_pg_stat_statements_columns(db)
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - set(available_columns)
         if len(missing_columns) > 0:
-            logger.warning(
+            self.log.warning(
                 'Unable to collect statement metrics because required fields are unavailable: %s',
                 ', '.join(list(missing_columns)),
             )
@@ -144,10 +142,12 @@ class PostgresStatementMetrics(object):
             try:
                 normalized_query = datadog_agent.obfuscate_sql(row['query'])
                 if not normalized_query:
-                    logger.warning("Query obfuscation resulted in empty query '%s'", row['query'])
+                    self.log.warning("Query obfuscation resulted in empty query '%s'", row['query'])
                     continue
             except Exception as e:
-                logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                # If query obfuscation fails, it is acceptable to log the raw query here because the
+                # pg_stat_statements table contains no parameters in the raw queries.
+                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
             # The APM resource hash will use the same query signature because the grouped query is close
