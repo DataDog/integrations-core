@@ -2,13 +2,24 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
+instances:
+
     ## @param directory - string - required
     ## The directory to monitor.
     ##
     ## On Windows, please make sure you escape back-slashes.
     ## Otherwise, the YAML parser will fail (e.g "C:\\Users\\foo\\Downloads").
     #
-    directory: <DIRECTORY>
+  - directory: <DIRECTORY>
 
     ## @param name - string - optional
     ## Tag metrics with a specified name.
@@ -84,18 +95,6 @@ init_config:
     #
     # ignore_missing: false
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
-## Every instance is scheduled independent of the others.
-#
-instances:
-
-  -
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
