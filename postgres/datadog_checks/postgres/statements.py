@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import unicode_literals
+
 import psycopg2
 import psycopg2.extras
 
@@ -116,7 +118,7 @@ class PostgresStatementMetrics(object):
             + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         )
         query_columns = list(
-            set(desired_columns) & set(available_columns) + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
+            set(desired_columns) & set(available_columns) | set(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         )
         rows = self._execute_query(
             db.cursor(cursor_factory=psycopg2.extras.DictCursor),

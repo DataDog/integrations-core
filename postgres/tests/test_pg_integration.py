@@ -255,7 +255,6 @@ def test_statement_metrics(aggregator, integration_check, pg_instance):
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:datadog_test',
-        'db:datadog_test',
         'user:datadog',
         'query:{}'.format(QUERY),
         'query_signature:{}'.format(QUERY_SIGNATURE),
