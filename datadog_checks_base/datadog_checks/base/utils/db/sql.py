@@ -4,6 +4,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+from typing import Optional
+
 import mmh3
 
 from datadog_checks.base.utils.serialization import json, sort_keys_kwargs
@@ -15,6 +17,7 @@ ARABIC_DECIMAL_SEPARATOR = '，'
 
 
 def compute_sql_signature(normalized_query):
+    # type: (str) -> Optional[str]
     """
     Given an already obfuscated & normalized SQL query, generate its 64-bit hex signature.
     """
@@ -22,10 +25,11 @@ def compute_sql_signature(normalized_query):
         return None
     # Note: please be cautious when changing this function as some features rely on this
     # hash matching the APM resource hash generated on our backend.
-    return format(mmh3.hash64(normalized_query, signed=False)[0], 'x')
+    return format(mmh3.hash64(normalized_query, signed=False)[0], str('x'))
 
 
 def normalize_query_tag(query):
+    # type: (str) -> str
     """
     Normalize the SQL query value to be used as a tag on metrics.
 
@@ -40,7 +44,9 @@ def normalize_query_tag(query):
     For Datadog employees, more background on "Arbitrary Tag Values":
     https://docs.google.com/document/d/1LQWw6ZiQZW18lknsBAZFMrba8BQ5yOmaWoEC7J1nLxU
     """
-    query = query.replace(', ', '{} '.format(ARABIC_DECIMAL_SEPARATOR)).replace(',', ARABIC_DECIMAL_SEPARATOR)
+    query = query.replace(', ', '{} '.format(ARABIC_DECIMAL_SEPARATOR)).replace(  # type: ignore
+        ',', ARABIC_DECIMAL_SEPARATOR
+    )
     return query
 
 

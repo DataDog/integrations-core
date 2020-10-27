@@ -2,8 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from typing import Any, Callable, Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
+
+
+# Complex Types
+Row = Dict[str, Any]
+RowKey = tuple
+RowKeyFunction = Callable[[Row], RowKey]
+MetricLimits = Dict[str, Tuple[int, int]]
 
 
 class StatementMetrics:
@@ -25,6 +33,7 @@ class StatementMetrics:
         self._previous_statements = {}
 
     def compute_derivative_rows(self, rows, metrics, key):
+        # type: (List[Row], List[str], RowKeyFunction) -> List[Row]
         """
         Compute the first derivative of column-based metrics for a given set of rows. This function
         takes the difference of the previous check run's values and the current check run's values
@@ -43,12 +52,12 @@ class StatementMetrics:
         - **key** (_callable_) - function for an ID which uniquely identifies a row across runs
         """
         result = []
-        new_cache = {}
+        new_cache = {}  # type: Dict[RowKey, Row]
         metrics = set(metrics)
 
         rows = _merge_duplicate_rows(rows, metrics, key)
         if len(rows) > 0:
-            dropped_metrics = metrics - set(rows[0].keys())
+            dropped_metrics = set(metrics) - set(rows[0].keys())
             if dropped_metrics:
                 logger.warning(
                     'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
@@ -72,7 +81,7 @@ class StatementMetrics:
             if prev is None:
                 continue
 
-            metric_columns = metrics & set(row.keys())
+            metric_columns = set(metrics) & set(row.keys())
 
             # Take the diff of all metric values between the current row and the previous run's row.
             # There are a couple of edge cases to be aware of:
@@ -134,6 +143,7 @@ def _merge_duplicate_rows(rows, metrics, key):
 
 
 def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse, key):
+    # type: (List[Row], MetricLimits, str, bool, RowKeyFunction) -> List[Row]
     """
     Given a list of query rows, apply limits ensuring that the top K and bottom K of each metric (columns)
     are present. To increase the overlap of rows across metics with the same values (such as 0), the tiebreaker metric
