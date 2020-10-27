@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -8,7 +7,7 @@ from contextlib import closing
 import pymysql
 
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
 try:
@@ -74,15 +73,13 @@ class MySQLStatementMetrics(object):
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
 
-            # Remove backticks from identifiers as they will be replaced by spaces in obfuscation
-            row['query'] = self._normalize_digest_text(row['query'])
             try:
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
             tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
-            tags.append('query:' + self._normalize_query_tag(obfuscated_statement))
+            tags.append('query:' + normalize_query_tag(obfuscated_statement))
 
             for col, name in STATEMENT_METRICS.items():
                 value = row[col]
@@ -146,20 +143,3 @@ class MySQLStatementMetrics(object):
             return []
 
         return rows
-
-    @staticmethod
-    def _normalize_digest_text(query):
-        """
-        Cleans the digest query for obfuscation by stripping the backticks from identifiers.
-        Digest text like "`schema` . `table`" are normalized to "schema.table" as well.
-        """
-        return query.replace('` . `', '.').replace('`', '')
-
-    def _normalize_query_tag(self, query):
-        """Normalize the query value to be used as a tag"""
-        # Truncate to metrics tag limit
-        query = query.strip()[:200]
-        # Substitute commas in the query with unicode commas. Temp hack to
-        # work around the bugs in arbitrary tag values on the backend.
-        query = query.replace(', ', '，').replace(',', '，')
-        return query
