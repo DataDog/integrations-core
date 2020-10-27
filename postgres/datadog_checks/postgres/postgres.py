@@ -415,8 +415,9 @@ class PostgreSql(AgentCheck):
                             getattr(self, method)(metric, value, tags=set(query_tags))
 
     def _collect_per_statement_metrics(self, tags):
-        if self.db and self.config.deep_database_monitoring:
-            self.statement_metrics.collect_per_statement_metrics(self, self.db, tags)
+        metrics = self.statement_metrics.collect_per_statement_metrics(self.db)
+        for metric_name, metric_value, metrics_tags in metrics:
+            self.count(metric_name, metric_value, tags=list(set(metrics_tags + tags)))
 
     def check(self, _):
         tags = copy.copy(self.config.tags)
@@ -429,7 +430,8 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s", str(self.version))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            self._collect_per_statement_metrics(tags)
+            if self.config.deep_database_monitoring:
+                self._collect_per_statement_metrics(tags)
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()

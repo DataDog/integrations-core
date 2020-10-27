@@ -91,14 +91,17 @@ class PostgresStatementMetrics(object):
         columns = self._execute_query(db.cursor(), query)
         return [column[0] for column in columns]
 
-    def collect_per_statement_metrics(self, instance, db, instance_tags):
+    def collect_per_statement_metrics(self, db):
         try:
-            self._collect_per_statement_metrics(instance, db, instance_tags)
+            return self._collect_per_statement_metrics(db)
         except Exception:
             db.rollback()
             self.log.exception('Unable to collect statement metrics due to an error')
+            return []
 
-    def _collect_per_statement_metrics(self, instance, db, instance_tags):
+    def _collect_per_statement_metrics(self, db):
+        metrics = []
+
         available_columns = self._get_pg_stat_statements_columns(db)
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - set(available_columns)
         if len(missing_columns) > 0:
@@ -106,7 +109,7 @@ class PostgresStatementMetrics(object):
                 'Unable to collect statement metrics because required fields are unavailable: %s',
                 ', '.join(list(missing_columns)),
             )
-            return
+            return metrics
 
         desired_columns = (
             list(PG_STAT_STATEMENTS_METRIC_COLUMNS.keys())
@@ -125,7 +128,7 @@ class PostgresStatementMetrics(object):
             params=(self.config.dbname,),
         )
         if not rows:
-            return
+            return metrics
 
         def row_keyfunc(row):
             # old versions of pg_stat_statements don't have a query ID so fall back to the query string itself
@@ -158,7 +161,7 @@ class PostgresStatementMetrics(object):
             # preserves most of the original query, so we tag the `resource_hash` with the same value as the
             # `query_signature`. The `resource_hash` tag should match the *actual* APM resource hash most of
             # the time, but not always. So this is a best-effort approach to link these metrics to APM metrics.
-            tags = ['query_signature:' + query_signature, 'resource_hash:' + query_signature] + instance_tags
+            tags = ['query_signature:' + query_signature, 'resource_hash:' + query_signature]
 
             for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
                 if column not in row:
@@ -176,7 +179,9 @@ class PostgresStatementMetrics(object):
                     # All "Deep Database Monitoring" timing metrics are in nanoseconds
                     # Postgres tracks pg_stat* timing stats in milliseconds
                     value = milliseconds_to_nanoseconds(value)
-                instance.count(metric_name, value, tags=tags)
+                metrics.append((metric_name, value, tags))
+
+        return metrics
 
     def _normalize_query_tag(self, query):
         """Normalize the query value to be used as a tag"""
