@@ -66,7 +66,6 @@ def mocked_prometheus_check():
     check = OpenMetricsBaseCheck('prometheus_check', {}, {})
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
-    check.log.warning = mock.MagicMock()
     return check
 
 
@@ -1768,7 +1767,7 @@ def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_che
     mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': []}
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
-    check.log.warning.assert_called_with(
+    check.log.debug.assert_called_with(
         "Skipping filter label `%s` with an empty values list, did you mean to use '*' wildcard?", 'worker'
     )
 
