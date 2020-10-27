@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 from contextlib import closing
+from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
 
@@ -10,10 +11,19 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
+from .config import MySQLConfig
+
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+
+PyMysqlRow = Dict[str, Any]
+Row = Dict[str, Any]
+RowKey = Tuple[Any]
+RowKeyFunction = Callable[[PyMysqlRow], RowKey]
+Metric = Tuple[str, int, List[str]]
 
 
 STATEMENT_METRICS = {
@@ -39,11 +49,13 @@ class MySQLStatementMetrics(object):
     """
 
     def __init__(self, config):
+        # type: (MySQLConfig) -> None
         self.config = config
         self.log = get_check_logger()
         self._state = StatementMetrics()
 
     def collect_per_statement_metrics(self, db):
+        # type: (pymysql.connections.Connection) -> List[Metric]
         try:
             return self._collect_per_statement_metrics(db)
         except Exception:
@@ -51,6 +63,7 @@ class MySQLStatementMetrics(object):
             return []
 
     def _collect_per_statement_metrics(self, db):
+        # type: (pymysql.connections.Connection) -> List[Metric]
         metrics = []
 
         def keyfunc(row):
@@ -89,11 +102,12 @@ class MySQLStatementMetrics(object):
 
     @staticmethod
     def _merge_duplicate_rows(rows, key):
+        # type: (List[PyMysqlRow], RowKeyFunction) -> List[PyMysqlRow]
         """
         Merges the metrics from duplicate rows because the (schema, digest) identifier may not be
         unique, see: https://bugs.mysql.com/bug.php?id=79533
         """
-        merged = {}
+        merged = {}  # type: Dict[RowKey, PyMysqlRow]
 
         for row in rows:
             k = key(row)
@@ -106,6 +120,7 @@ class MySQLStatementMetrics(object):
         return list(merged.values())
 
     def _query_summary_per_statement(self, db):
+        # type: (pymysql.connections.Connection) -> List[PyMysqlRow]
         """
         Collects per-statement metrics from performance schema. Because the statement sums are
         cumulative, the results of the previous run are stored and subtracted from the current
@@ -133,13 +148,14 @@ class MySQLStatementMetrics(object):
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
+        rows = []  # type: List[PyMysqlRow]
+
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 cursor.execute(sql_statement_summary)
 
-                rows = cursor.fetchall()
+                rows = cursor.fetchall() or []  # type: ignore
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.log.warning("Statement summary metrics are unavailable at this time: %s", e)
-            return []
 
         return rows
