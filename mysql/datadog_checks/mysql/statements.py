@@ -46,13 +46,16 @@ class MySQLStatementMetrics(object):
         self.config = config
         self._state = StatementMetrics()
 
-    def collect_per_statement_metrics(self, instance, db, instance_tags):
+    def collect_per_statement_metrics(self, db):
         try:
-            self._collect_per_statement_metrics(instance, db, instance_tags)
+            return self._collect_per_statement_metrics(db)
         except Exception:
+            return []
             logger.exception('Unable to collect statement metrics due to an error')
 
-    def _collect_per_statement_metrics(self, instance, db, instance_tags):
+    def _collect_per_statement_metrics(self, db):
+        metrics = []
+
         def keyfunc(row):
             return (row['schema'], row['digest'])
 
@@ -68,7 +71,7 @@ class MySQLStatementMetrics(object):
         )
 
         for row in rows:
-            tags = list(instance_tags)
+            tags = []
             tags.append('digest:' + row['digest'])
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
@@ -85,7 +88,9 @@ class MySQLStatementMetrics(object):
 
             for col, name in STATEMENT_METRICS.items():
                 value = row[col]
-                instance.count(name, value, tags=tags)
+                metrics.append((name, value, tags))
+
+        return metrics
 
     @staticmethod
     def _merge_duplicate_rows(rows, key):
