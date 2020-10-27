@@ -7,6 +7,8 @@ parameters:
     default: null
   - name: run_py2_tests
     default: true
+  - name: install_vcpython27
+    default: false
 
 steps:
 # Install the Python version with which to use globally last as
@@ -22,6 +24,10 @@ steps:
   inputs:
     versionSpec: '3.8'
   displayName: 'Use Python 3.8'
+
+- ${{ if eq(parameters.install_vcpython27, 'true') }}:
+  - script: choco install vcpython27 --yes
+    displayName: Install vcpython27
 
 - ${{ if parameters.pip_cache_config }}:
   # Notes on caching...
