@@ -47,7 +47,7 @@ instances:
 
   -
     ## @param use_preview - boolean - optional - default: true
-    ## Whether or not the preview to new version of the check supporting only ETCD 3+
+    ## Whether or not to preview the new version of the check supporting only ETCD 3+
     #
     # use_preview: true
 
