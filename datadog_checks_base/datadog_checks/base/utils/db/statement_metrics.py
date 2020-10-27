@@ -17,7 +17,8 @@ class StatementMetrics:
         - SQL Server: sys.dm_exec_query_stats
         - DB2: mon_db_summary
 
-    These tables are monotonically increasing.
+    These tables are monotonically increasing, so the metrics are computed from the difference
+    in values between check runs.
     """
 
     def __init__(self):
@@ -25,8 +26,11 @@ class StatementMetrics:
 
     def compute_derivative_rows(self, rows, metrics, key):
         """
-        Compute the first derivative of column-based metrics for a given set of rows. This also resets the
-        statement cache so should only be called once per check run.
+        Compute the first derivative of column-based metrics for a given set of rows. This function
+        takes the difference of the previous check run's values and the current check run's values
+        to produce the total counts in the time elapsed between check runs.
+
+        This function also resets the statement cache so it should only be called once per check run.
 
         - **rows** (_List[dict]_) - rows from current check run
         - **metrics** (_List[str]_) - the metrics to compute for each row
@@ -36,6 +40,7 @@ class StatementMetrics:
         new_cache = {}
         negative_result_found = False
         metrics = set(metrics)
+
         if len(rows) > 0:
             dropped_metrics = metrics - set(rows[0].keys())
             if dropped_metrics:
@@ -52,32 +57,115 @@ class StatementMetrics:
                     row,
                     new_cache[row_key],
                 )
+
+            # Set the row on the new cache to be checked the next run. This should happen for every row, regardless of
+            # whether a metric is submitted for the row during this run or not.
             new_cache[row_key] = row
+
+            # If a stats reset has happened, all other logic can be skipped since the previous check run's values are
+            # invalidated.
+            if negative_result_found:
+                continue
+
             prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
+
             metric_columns = metrics & set(row.keys())
-            if any([row[k] - prev[k] < 0 for k in metric_columns]):
-                # The table was truncated or stats reset; begin tracking again from this point
+
+            # Take the diff of all metric values between the current row and the previous run's row.
+            # There are a couple of edge cases to be aware of:
+            #
+            # 1. Table truncation or stats reset: Because the table values are always increasing, a negative value
+            #    suggests truncation or a stats reset. In this case, all rows from the previous run must be discarded.
+            #    Tracking should start over with the current run's values.
+            #
+            # 2. No changes since the previous run: There is no need to store metrics of 0, since that is implied by
+            #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
+            #    avoids having to send a lot of unnecessary metrics.
+
+            diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
+
+            # Check for negative values, but only in the columns used for metrics
+            if any(diffed_row[k] < 0 for k in metric_columns):
                 negative_result_found = True
                 continue
-            if all([row[k] - prev[k] == 0 for k in metric_columns]):
-                # No metrics to report; query did not run
+
+            # No changes to the query; no metric needed
+            if all(diffed_row[k] == 0 for k in metric_columns):
                 continue
-            derived = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
-            result.append(derived)
+
+            result.append(diffed_row)
 
         self._previous_statements = new_cache
+
         if negative_result_found:
             return []
+
         return result
 
 
 def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse, key):
     """
-    Given a list of query rows, apply limits ensuring that the top k and bottom k of each metric (columns)
+    Given a list of query rows, apply limits ensuring that the top K and bottom K of each metric (columns)
     are present. To increase the overlap of rows across metics with the same values (such as 0), the tiebreaker metric
     is used as a second sort dimension.
+
+    The reason for this custom limit function on metrics is to guarantee that metric `top()` functions show the true
+    top and true bottom K, even if some limits are applied to drop less interesting queries that fall in the middle.
+
+    Longer Explanation
+    ------------------
+
+    Simply taking the top K and bottom K of all metrics is insufficient. For instance, for K=2 you might have rows
+    with values:
+
+        | query               | count      | time        | errors      |
+        | --------------------|------------|-------------|-------------|
+        | select * from dogs  | 1 (bottom) | 10 (top)    |  1 (top)    |
+        | delete from dogs    | 2 (bottom) |  8 (top)    |  0 (top)    |
+        | commit              | 3          |  7          |  0 (bottom) |
+        | rollback            | 4          |  3          |  0 (bottom) |
+        | select now()        | 5 (top)    |  2 (bottom) |  0          |
+        | begin               | 6 (top)    |  2 (bottom) |  0          |
+
+    If you only take the top 2 and bottom 2 values of each column and submit those metrics, then each query is
+    missing a lot of metrics:
+
+        | query               | count      | time        | errors      |
+        | --------------------|------------|-------------|-------------|
+        | select * from dogs  | 1          | 10          |  1          |
+        | delete from dogs    | 2          |  8          |  0          |
+        | commit              |            |             |  0          |
+        | rollback            |            |             |  0          |
+        | select now()        | 5          |  2          |             |
+        | begin               | 6          |  2          |             |
+
+    This is fine for showing only one metric, but if the user copies the query tag to find our more information,
+    that query should have all of the metrics because it is an "interesting" query.
+
+    To solve that, you can submit all metrics for all rows with at least on metric submitted, but then the worst-case
+    for total cardinality is:
+
+        (top K + bottom K) * metric count
+
+    Note that this only applies to one check run and a completely different set of "tied" metrics can be submitted on
+    the next check run. Since a large number of rows will have value '0', a tiebreaker is used to bias the selected
+    rows to rows already picked in the top K / bottom K for the tiebreaker.
+
+
+        | query               | count      | time        | errors      |
+        | --------------------|------------|-------------|-------------|
+        | select * from dogs  | 1          | 10          |  1          |
+        | delete from dogs    | 2          |  8          |  0          |
+        | commit              |            |             |             |
+        | rollback            |            |             |             |
+        | select now()        | 5          |  2          |  0          | <-- biased toward top K count
+        | begin               | 6          |  2          |  0          | <-- biased toward top K count
+
+    The queries `commit` and `rollback` were not interesting to keep; they were only selected because they have error
+    counts 0 (but so do the other queries). So we use the `count` as a tiebreaker to instead choose queries which are
+    interesting because they have higher execution counts.
 
     - **rows** (_List[dict]_) - rows with columns as metrics
     - **metric_limits** (_Dict[str,Tuple[int,int]]_) - dict of the top k and bottom k limits for each metric
