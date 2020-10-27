@@ -141,7 +141,7 @@ class PostgresStatementMetrics(object):
             try:
                 normalized_query = datadog_agent.obfuscate_sql(row['query'])
                 if not normalized_query:
-                    self.log.warning("Query obfuscation resulted in empty query '%s'", row['query'])
+                    self.log.warning("Obfuscation of query '%s' resulted in empty query", row['query'])
                     continue
             except Exception as e:
                 # If query obfuscation fails, it is acceptable to log the raw query here because the
