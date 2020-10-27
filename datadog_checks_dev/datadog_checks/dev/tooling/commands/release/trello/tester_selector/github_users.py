@@ -10,6 +10,8 @@ from .....github import Github
 from ....console import echo_info
 from .cache import Cache
 
+PR_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
 
 class GithubUser:
     def __init__(self, data: Dict[str, object]):
@@ -67,9 +69,6 @@ class GithubUsers:
             if latest_date is None or date > latest_date:
                 return date
         return latest_date
-
-
-PR_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def pr_date_str_to_date(date_str: str) -> datetime:
