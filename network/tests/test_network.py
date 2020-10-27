@@ -370,5 +370,5 @@ def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggrega
         check._get_net_proc_base_location = lambda x: "/something/proc"
         check.check(instance)
         get_subprocess_output.assert_called_with(
-            ["sh", "-c", "ss --numeric --udp --all --ipv6 | wc -l"], check.log, env={'PROC_ROOT': "/something/proc"}
+            ["sh", "-c", "ss --numeric --tcp --all --ipv6"], check.log, env={'PROC_ROOT': "/something/proc"}
         )
