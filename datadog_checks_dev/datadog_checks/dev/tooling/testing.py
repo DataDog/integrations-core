@@ -7,6 +7,7 @@ from fnmatch import fnmatch
 
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
+from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
@@ -57,8 +58,16 @@ def get_tox_envs(
 
     for check in checks:
         check, _, envs_selected = check.partition(':')
+        echo_debug(f"Getting tox envs for `{check}:{envs_selected}`")
 
-        if check in checks_seen or check not in testable_checks or (changed_only and check not in changed_checks):
+        if check in checks_seen:
+            echo_debug(f"`{check}` already evaluated, skipping")
+            continue
+        elif check not in testable_checks:
+            echo_debug(f"`{check}` is not testable, skipping")
+            continue
+        elif changed_only and check not in changed_checks:
+            echo_debug(f"`{check}` does not have changes, skipping")
             continue
         else:
             checks_seen.add(check)
@@ -93,6 +102,7 @@ def get_tox_envs(
         if tox_env_filter_re:
             envs_selected[:] = [e for e in envs_selected if not tox_env_filter_re.match(e)]
 
+        echo_debug(f"Selected environments: {envs_selected}")
         yield check, envs_selected
 
 
@@ -105,9 +115,12 @@ def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=Fal
         tox_command = 'tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
-        output = run_command(tox_command, capture='out').stdout
+        output = run_command(tox_command, capture='out')
 
-    env_list = [e.strip() for e in output.splitlines()]
+    if output.code != 0:
+        abort(f'STDOUT: {output.stdout}\nSTDERR: {output.stderr}')
+
+    env_list = [e.strip() for e in output.stdout.splitlines()]
 
     if e2e_tests_only:
         envs = []

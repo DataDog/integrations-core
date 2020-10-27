@@ -35,6 +35,7 @@ Add one of the configuration blocks below to your `istio.d/conf.yaml` file to st
     
    To monitor Istio mesh metrics, continue to use `istio_mesh_endpoint`. Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].
    
+   **NOTE**: Be sure to enable [V1 Telemetry][18] for Istio `v1.6` or higher to collect mesh metrics.
    
 2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
     ```yaml
@@ -145,3 +146,4 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
+[18]: https://istio.io/latest/docs/tasks/observability/mixer/metrics/collecting-metrics/#before-you-begin

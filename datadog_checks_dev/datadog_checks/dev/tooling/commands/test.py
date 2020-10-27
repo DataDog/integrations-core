@@ -12,7 +12,7 @@ from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_o
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ..utils import complete_testable_checks
-from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
 def display_envs(check_envs):
@@ -134,6 +134,7 @@ def test(
     for check, envs in check_envs:
         # Many checks don't have benchmark envs, etc.
         if not envs:
+            echo_debug(f"No envs found for: `{check}`")
             continue
 
         # This is for ensuring proper spacing between output of multiple checks' tests.
@@ -226,6 +227,6 @@ def test(
     if not tests_ran:
         if format_style:
             echo_warning('Code formatting is not enabled!')
-            echo_info('To enabled it, put `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')
+            echo_info('To enable it, set `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')
         else:
             echo_info('Nothing to test!')

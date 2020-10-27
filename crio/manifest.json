@@ -23,6 +23,9 @@
   "integration_id": "cri-o",
   "assets": {
     "monitors": {},
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "crio": "assets/dashboards/overview.json"
     },

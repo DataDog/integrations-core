@@ -186,6 +186,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check):
         'fsynclock',
     ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
+    _assert_metrics(aggregator, ['replset-lag-from-primary-configsvr'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
