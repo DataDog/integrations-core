@@ -117,9 +117,7 @@ class PostgresStatementMetrics(object):
             + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
             + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
         )
-        query_columns = list(
-            set(desired_columns) & set(available_columns) | set(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
-        )
+        query_columns = list(set(desired_columns) & set(available_columns) | set(PG_STAT_STATEMENTS_TAG_COLUMNS.keys()))
         rows = self._execute_query(
             db.cursor(cursor_factory=psycopg2.extras.DictCursor),
             STATEMENTS_QUERY.format(
