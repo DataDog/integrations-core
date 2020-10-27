@@ -2,14 +2,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import logging
-
 import psycopg2
 import psycopg2.extras
 
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
+
+from .util import milliseconds_to_nanoseconds
 
 try:
     import datadog_agent
@@ -57,7 +57,7 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
     'query': 'query',
 }
 
-DEFAULT_METRIC_LIMITS = {k: (10000, 10000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
+DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
 
 
 class PostgresStatementMetrics(object):
@@ -133,10 +133,9 @@ class PostgresStatementMetrics(object):
             return (queryid, row['datname'], row['rolname'])
 
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
-        metric_limits = (
-            self.config.statement_metric_limits if self.config.statement_metric_limits else DEFAULT_METRIC_LIMITS
+        rows = apply_row_limits(
+            rows, DEFAULT_STATEMENT_METRIC_LIMITS, tiebreaker_metric='calls', tiebreaker_reverse=True, key=row_keyfunc
         )
-        rows = apply_row_limits(rows, metric_limits, 'calls', True, key=row_keyfunc)
 
         for row in rows:
             try:
@@ -150,10 +149,17 @@ class PostgresStatementMetrics(object):
                 self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
-            # The APM resource hash will use the same query signature because the grouped query is close
-            # enough to the raw query that they will intersect frequently.
             query_signature = compute_sql_signature(normalized_query)
+
+            # All "Deep Database Monitoring" statement-level metrics are tagged with a `query_signature`
+            # which uniquely identifies the normalized query family. Where possible, this hash should
+            # match the hash of APM "resources" (https://docs.datadoghq.com/tracing/visualization/resource/)
+            # when the resource is a SQL query. Postgres' query normalization in the `pg_stat_statements` table
+            # preserves most of the original query, so we tag the `resource_hash` with the same value as the
+            # `query_signature`. The `resource_hash` tag should match the *actual* APM resource hash most of
+            # the time, but not always. So this is a best-effort approach to link these metrics to APM metrics.
             tags = ['query_signature:' + query_signature, 'resource_hash:' + query_signature] + instance_tags
+
             for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
                 if column not in row:
                     continue
@@ -167,8 +173,9 @@ class PostgresStatementMetrics(object):
                     continue
                 value = row[column]
                 if column == 'total_time':
-                    # convert milliseconds to nanoseconds
-                    value = value * 1000000
+                    # All "Deep Database Monitoring" timing metrics are in nanoseconds
+                    # Postgres tracks pg_stat* timing stats in milliseconds
+                    value = milliseconds_to_nanoseconds(value)
                 instance.count(metric_name, value, tags=tags)
 
     def _normalize_query_tag(self, query):
