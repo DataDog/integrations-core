@@ -75,7 +75,7 @@ class WinPDHCounter(object):
 
     @property
     def localized_class_name(self):
-        return self._counter_name
+        return self._class_name
 
     @property
     def english_class_name(self):
@@ -83,7 +83,7 @@ class WinPDHCounter(object):
 
     def get_single_value(self):
         if not self.is_single_instance():
-            raise ValueError('counter is not single instance %s %s' % (self._class_name, self._counter_name))
+            raise ValueError('counter is not single instance %s %s' % (self.localized_class_name, self._counter_name))
 
         vals = self.get_all_values()
         return vals[SINGLE_INSTANCE_KEY]
@@ -161,7 +161,7 @@ class WinPDHCounter(object):
             """
             try:
                 path = win32pdh.MakeCounterPath(
-                    (machine_name, self._class_name, instance_name, None, 0, en_counter_name)
+                    (machine_name, self.localized_class_name, instance_name, None, 0, en_counter_name)
                 )
                 self.logger.debug("Successfully created English-only path")
             except Exception as e:  # noqa: E722
@@ -190,7 +190,7 @@ class WinPDHCounter(object):
 
             # see if we can create a counter
             try:
-                path = win32pdh.MakeCounterPath((machine_name, self._class_name, instance_name, None, 0, c))
+                path = win32pdh.MakeCounterPath((machine_name, self.localized_class_name, instance_name, None, 0, c))
                 break
             except:  # noqa: E722
                 try:
@@ -201,7 +201,7 @@ class WinPDHCounter(object):
 
     def collect_counters(self):
         counters, instances = win32pdh.EnumObjectItems(
-            None, self._machine_name, self._class_name, win32pdh.PERF_DETAIL_WIZARD
+            None, self._machine_name, self.localized_class_name, win32pdh.PERF_DETAIL_WIZARD
         )
         if self._instance_name is None and len(instances) > 0:
             all_instances = set()
@@ -217,7 +217,7 @@ class WinPDHCounter(object):
                         self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
                     self.logger.fatal(
-                        "Failed to create counter.  No instances of %s\\%s" % (self._class_name, self._counter_name)
+                        "Failed to create counter.  No instances of %s\\%s" % (self.localized_class_name, self._counter_name)
                     )
 
             expired_instances = set(self.counterdict) - all_instances
@@ -230,13 +230,13 @@ class WinPDHCounter(object):
                 if len(instances) <= 0:
                     self.logger.error(
                         "%s doesn't seem to be a multi-instance counter, but asked for specific instance %s",
-                        self._class_name,
+                        self.localized_class_name,
                         self._instance_name,
                     )
-                    raise AttributeError("%s is not a multi-instance counter" % self._class_name)
+                    raise AttributeError("%s is not a multi-instance counter" % self.localized_class_name)
                 if self._instance_name not in instances:
-                    self.logger.error("%s is not a counter instance in %s", self._instance_name, self._class_name)
-                    raise AttributeError("%s is not an instance of %s" % (self._instance_name, self._class_name))
+                    self.logger.error("%s is not a counter instance in %s", self._instance_name, self.localized_class_name)
+                    raise AttributeError("%s is not an instance of %s" % (self._instance_name, self.localized_class_name))
 
             path = self._make_counter_path(self._machine_name, self._counter_name, self._instance_name, counters)
             if not path:
@@ -251,7 +251,7 @@ class WinPDHCounter(object):
                         self.counterdict[SINGLE_INSTANCE_KEY] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
                     self.logger.fatal(
-                        "Failed to create counter.  No instances of %s\\%s" % (self._class_name, self._counter_name)
+                        "Failed to create counter.  No instances of %s\\%s" % (self.localized_class_name, self._counter_name)
                     )
                     raise
                 self._is_single_instance = True
