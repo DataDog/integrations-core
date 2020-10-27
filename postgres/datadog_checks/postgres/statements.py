@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -6,7 +5,7 @@ import psycopg2
 import psycopg2.extras
 
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
 from .util import milliseconds_to_nanoseconds
@@ -168,7 +167,7 @@ class PostgresStatementMetrics(object):
                     continue
                 value = row[column]
                 if column == 'query':
-                    value = self._normalize_query_tag(value)
+                    value = normalize_query_tag(value)
                 tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
 
             for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
@@ -182,12 +181,3 @@ class PostgresStatementMetrics(object):
                 metrics.append((metric_name, value, tags))
 
         return metrics
-
-    def _normalize_query_tag(self, query):
-        """Normalize the query value to be used as a tag"""
-        # Truncate to metrics tag limit
-        query = query.strip()[:200]
-        # Substitute commas in the query with unicode commas. Temp hack to
-        # work around the bugs in arbitrary tag values on the backend.
-        query = query.replace(', ', '，').replace(',', '，')
-        return query
