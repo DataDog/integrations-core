@@ -5,6 +5,7 @@
 from six import PY2, PY3, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -58,6 +59,11 @@ class PostgresConfig:
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
 
+        # Deep Database monitoring adds additional telemetry for statement metrics
+        self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        # Support a custom view when datadog user has insufficient privilege to see queries
+        self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
+
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
@@ -75,6 +81,10 @@ class PostgresConfig:
 
         # preset tags to the database name
         tags.extend(["db:%s" % self.dbname])
+
+        rds_tags = rds_parse_tags_from_endpoint(self.host)
+        if rds_tags:
+            tags.extend(rds_tags)
         return tags
 
     def _get_service_check_tags(self):
