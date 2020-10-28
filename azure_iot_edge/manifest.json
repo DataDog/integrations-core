@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Azure IoT Edge Integration",
   "categories": [
-    "azure"
+    "azure",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
