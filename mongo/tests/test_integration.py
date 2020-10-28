@@ -34,6 +34,7 @@ def test_integration_mongos(instance_integration, aggregator, check):
     _assert_metrics(
         aggregator,
         ['default', 'custom-queries', 'dbstats', 'indexes-stats', 'collection', 'connection-pool', 'jumbo', 'sessions'],
+        ['sharding_cluster_role:mongos'],
     )
 
     aggregator.assert_all_metrics_covered()
@@ -57,7 +58,11 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
     with mock_pymongo("replica-primary-in-shard"):
         mongo_check.check(None)
 
-    replica_tags = ['replset_name:mongo-mongodb-sharded-shard-0', 'replset_state:primary']
+    replica_tags = [
+        'replset_name:mongo-mongodb-sharded-shard-0',
+        'replset_state:primary',
+        'sharding_cluster_role:shardsvr',
+    ]
     metrics_categories = [
         'default',
         'custom-queries',
@@ -69,7 +74,8 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'fsynclock',
     ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
-
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(aggregator, ['replset-lag-from-primary-in-shard'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -127,7 +133,123 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     with mock_pymongo("replica-secondary-in-shard"):
         mongo_check.check(None)
 
-    replica_tags = ['replset_name:mongo-mongodb-sharded-shard-0', 'replset_state:secondary']
+    replica_tags = [
+        'replset_name:mongo-mongodb-sharded-shard-0',
+        'replset_state:secondary',
+        'sharding_cluster_role:shardsvr',
+    ]
+    metrics_categories = [
+        'default',
+        'oplog',
+        'replset-secondary',
+        'top',
+        'dbstats-local',
+        'fsynclock',
+        'connection-pool',
+    ]
+    _assert_metrics(aggregator, metrics_categories, replica_tags)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_metric_type=False,
+    )
+    assert len(aggregator._events) == 0
+
+
+def test_integration_configsvr_primary(instance_integration, aggregator, check):
+    mongo_check = check(instance_integration)
+    mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
+
+    with mock_pymongo("configsvr-primary"):
+        mongo_check.check(None)
+
+    replica_tags = [
+        'replset_name:mongo-mongodb-sharded-configsvr',
+        'replset_state:primary',
+        'sharding_cluster_role:configsvr',
+    ]
+    metrics_categories = [
+        'default',
+        'custom-queries',
+        'oplog',
+        'replset-primary',
+        'top',
+        'connection-pool',
+        'dbstats-local',
+        'fsynclock',
+    ]
+    _assert_metrics(aggregator, metrics_categories, replica_tags)
+    _assert_metrics(aggregator, ['replset-lag-from-primary-configsvr'])
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_metric_type=False,
+    )
+    assert len(aggregator._events) == 3
+    aggregator.assert_event(
+        "MongoDB mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017 "
+        "(_id: 0, mongodb://testUser2:*****@localhost:27017/test) just reported as Primary (PRIMARY) for "
+        "mongo-mongodb-sharded-configsvr; it was SECONDARY before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:PRIMARY',
+            'previous_member_status:SECONDARY',
+            'replset:mongo-mongodb-sharded-configsvr',
+        ],
+        count=1,
+    )
+    aggregator.assert_event(
+        "MongoDB mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017 "
+        "(_id: 1, mongodb://testUser2:*****@localhost:27017/test) just reported as Secondary (SECONDARY) for "
+        "mongo-mongodb-sharded-configsvr; it was PRIMARY before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:SECONDARY',
+            'previous_member_status:PRIMARY',
+            'replset:mongo-mongodb-sharded-configsvr',
+        ],
+        count=1,
+    )
+    aggregator.assert_event(
+        "MongoDB mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017 "
+        "(_id: 2, mongodb://testUser2:*****@localhost:27017/test) just reported as Secondary (SECONDARY) for "
+        "mongo-mongodb-sharded-configsvr; it was ARBITER before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:SECONDARY',
+            'previous_member_status:ARBITER',
+            'replset:mongo-mongodb-sharded-configsvr',
+        ],
+        count=1,
+    )
+
+
+def test_integration_configsvr_secondary(instance_integration, aggregator, check):
+    mongo_check = check(instance_integration)
+    mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
+
+    with mock_pymongo("configsvr-secondary"):
+        mongo_check.check(None)
+
+    replica_tags = [
+        'replset_name:mongo-mongodb-sharded-configsvr',
+        'replset_state:secondary',
+        'sharding_cluster_role:configsvr',
+    ]
     metrics_categories = [
         'default',
         'oplog',
@@ -174,6 +296,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check)
         'collection',
     ]
     _assert_metrics(aggregator, metrics_categories, replica_tags)
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(

@@ -65,6 +65,7 @@ setup(
             'requirements.in',
             exclude=[
                 'kubernetes',
+                'mmh3',
                 'orjson',
                 'pysocks',
                 'requests-kerberos',
@@ -74,6 +75,7 @@ setup(
                 'pyjwt',
             ],
         ),
+        'db': get_requirements('requirements.in', only=['mmh3']),
         'http': get_requirements(
             'requirements.in',
             only=[

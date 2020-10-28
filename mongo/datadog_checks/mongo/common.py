@@ -71,12 +71,13 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, replset_name, replset_state, in_shard=False):
+    def __init__(self, replset_name, replset_state, cluster_role=None):
         super(ReplicaSetDeployment, self).__init__()
         self.replset_name = replset_name
         self.replset_state = replset_state
         self.replset_state_name = get_state_name(replset_state).lower()
-        self.use_shards = in_shard
+        self.use_shards = cluster_role is not None
+        self.cluster_role = cluster_role
         self.is_primary = replset_state == 1
         self.is_secondary = replset_state == 2
 

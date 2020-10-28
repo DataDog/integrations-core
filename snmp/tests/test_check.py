@@ -1123,6 +1123,23 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
 
 
 @pytest.mark.parametrize(
+    'init_config, instance_extra, expected_interval',
+    [
+        pytest.param({}, {}, 0, id='none'),
+        pytest.param({}, {'refresh_oids_cache_interval': 3600}, 3600, id='instance_config'),
+        pytest.param({'refresh_oids_cache_interval': 3600}, {}, 3600, id='init_config'),
+        pytest.param({'refresh_oids_cache_interval': 0}, {'refresh_oids_cache_interval': 3600}, 3600, id='both'),
+    ],
+)
+def test_oids_cache_configs(init_config, instance_extra, expected_interval):
+    instance = common.generate_instance_config(common.TABULAR_OBJECTS)
+    instance.update(instance_extra)
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    assert check._config.oid_config._refresh_interval_sec == expected_interval
+
+
+@pytest.mark.parametrize(
     "config, has_next_bulk_oids",
     [
         pytest.param({}, True, id='disabled_config_default'),

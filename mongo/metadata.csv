@@ -161,7 +161,8 @@ mongodb.oplog.logsizemb,gauge,,mebibyte,,Total size of the oplog.,0,mongodb,oplo
 mongodb.oplog.timediff,gauge,,second,,Oplog window: difference between the first and last operation in the oplog.,1,mongodb,oplog timediff
 mongodb.oplog.usedsizemb,gauge,,mebibyte,,Total amount of space used by the oplog.,0,mongodb,oplog used size mb
 mongodb.replset.health,gauge,,,,Member health value of the replica set: conveys if the member is up (i.e. 1) or down (i.e. 0).,1,mongodb,replset health
-mongodb.replset.replicationlag,gauge,,second,,Delay between a write operation on the primary and its copy to a secondary.,-1,mongodb,replication lag
+mongodb.replset.replicationlag,gauge,,second,,"Delay between a write operation on the primary and its copy to a secondary. Computed on each node and tagged by 'host', but may not be representative of cluster health. Negative values do not indicate that the secondary is ahead of the primary. To use a more up-to-date metric, use mongodb.replset.optime_lag instead.",-1,mongodb,replication lag
+mongodb.replset.optime_lag,gauge,,second,,Delay between a write operation on the primary and its copy to a secondary. Computed only on primary and tagged by 'member'.,-1,mongodb,replication lag
 mongodb.replset.state,gauge,,,,State of a replica that reflects its disposition within the set.,0,mongodb,replset state
 mongodb.replset.votefraction,gauge,,fraction,,Fraction of votes a server will cast in a replica set election.,0,mongodb,votes fraction
 mongodb.replset.votes,gauge,,item,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes

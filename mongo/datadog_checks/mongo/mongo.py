@@ -293,18 +293,18 @@ class MongoDb(AgentCheck):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         options = admindb.command("getCmdLineOpts")['parsed']
-        in_shard = False
+        cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 return MongosDeployment()
             elif 'clusterRole' in options['sharding']:
-                in_shard = True
+                cluster_role = options['sharding']['clusterRole']
 
         if 'replSetName' in options.get('replication', {}):
             repl_set_payload = admindb.command("replSetGetStatus")
             replset_name = repl_set_payload["set"]
             replset_state = repl_set_payload["myState"]
-            return ReplicaSetDeployment(replset_name, replset_state, in_shard=in_shard)
+            return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
 
         return StandaloneDeployment()
 
@@ -345,6 +345,11 @@ class MongoDb(AgentCheck):
                     "replset_state:{}".format(self.deployment.replset_state_name),
                 ]
             )
+            if self.deployment.use_shards:
+                tags.append('sharding_cluster_role:{}'.format(self.deployment.cluster_role))
+        elif isinstance(self.deployment, MongosDeployment):
+            tags.append('sharding_cluster_role:mongos')
+
         dbnames = cli.list_database_names()
         self.gauge('mongodb.dbs', len(dbnames), tags=tags)
         self.refresh_collectors(mongo_version, dbnames, tags)

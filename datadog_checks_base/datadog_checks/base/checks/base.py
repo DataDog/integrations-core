@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
-from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
 from six import binary_type, iteritems, text_type
@@ -34,6 +34,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.tls import TlsContextWrapper
 
 try:
     import datadog_agent
@@ -62,6 +63,8 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
 
     monkey_patch_pyyaml()
 
+if TYPE_CHECKING:
+    import ssl
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
@@ -102,6 +105,9 @@ class AgentCheck(object):
 
     # Used by `self.http` for an instance of RequestsWrapper
     HTTP_CONFIG_REMAPPER = None
+
+    # Used by `create_tls_context` for an instance of RequestsWrapper
+    TLS_CONFIG_REMAPPER = None
 
     # Used by `self.set_metadata` for an instance of MetadataManager
     #
@@ -302,6 +308,21 @@ class AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    def get_tls_context(self, refresh=False):
+        # type: (bool) -> ssl.SSLContext
+        """
+        Creates and cache an SSLContext instance based on user configuration.
+
+        Since: Agent 7.24
+        """
+        if not hasattr(self, '_tls_context_wrapper'):
+            self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER)
+
+        if refresh:
+            self._tls_context_wrapper.refresh_tls_context()
+
+        return self._tls_context_wrapper.tls_context
 
     @property
     def metadata_manager(self):

@@ -65,6 +65,7 @@ class InstanceConfig:
         instance,  # type: dict
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
+        refresh_oids_cache_interval=DEFAULT_REFRESH_OIDS_CACHE_INTERVAL,  # type: int
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
         loader=None,  # type: MIBLoader
@@ -161,7 +162,7 @@ class InstanceConfig:
         if tag_oids:
             scalar_oids.extend(tag_oids)
 
-        refresh_interval_sec = instance.get('refresh_oids_cache_interval', self.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
+        refresh_interval_sec = instance.get('refresh_oids_cache_interval', refresh_oids_cache_interval)
         self.oid_config = OIDConfig(refresh_interval_sec)
         self.oid_config.add_parsed_oids(scalar_oids=scalar_oids, next_oids=next_oids, bulk_oids=bulk_oids)
 
