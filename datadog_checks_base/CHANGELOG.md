@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.4.0 / 2020-10-28
+
+* [Added] Filter metrics by label keys and values. See [#7822](https://github.com/DataDog/integrations-core/pull/7822).
+* [Security] Upgrade `cryptography` dependency. See [#7869](https://github.com/DataDog/integrations-core/pull/7869).
+* [Security] Update TUF, in-toto and securesystemslib. See [#7844](https://github.com/DataDog/integrations-core/pull/7844).
+
 ## 15.3.0 / 2020-10-28
 
 * [Added] [http] Support wildcard subdomain and single wildcard in proxies. See [#7767](https://github.com/DataDog/integrations-core/pull/7767).
