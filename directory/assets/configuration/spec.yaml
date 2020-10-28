@@ -9,8 +9,8 @@ files:
     options:
     - name: directory
       description: |
-        The directory to monitor. On windows, please make sure you escape back-slashes otherwise the YAML
-        parser fails (eg. - directory: "C:\\Users\\foo\\Downloads").
+        The directory to monitor. On windows, escape back-slashes; otherwise the YAML
+        parser fails (for example, - directory: "C:\\Users\\foo\\Downloads").
       required: true
       value:
         example: <DIRECTORY_PATH>
@@ -31,12 +31,12 @@ files:
       description: |
         The name of the key for the tag used for each file, the value is the filename.
         The resulting tag is "<filetagname>:<filename>". Only used if filegauges is set to true and if the directory
-        contains 20 files or less (including sub-directories).
+        contains 20 or fewer files (including files in sub-directories).
       value:
         example: <TAG_KEY_FILENAME>
         type: string
     - name: filegauges
-      description: When true stats are an individual gauge per file (max. 20 files!) and not a histogram of the whole directory.
+      description: When true stats are an individual gauge per file (max. 20 files) and not a histogram of the whole directory.
       value:
         example: false
         type: boolean
@@ -49,8 +49,8 @@ files:
         type: string
     - name: exclude_dirs
       description: |
-        a list of regular expressions used to blacklist directory names.
-        e.g. node_modules, vendor
+        a list of regular expressions used to exclude directories.
+        For example: node_modules, vendor
       value:
         example:
           - ^__pycache__$
@@ -62,7 +62,7 @@ files:
           type: string
     - name: dirs_patterns_full
       description: |
-        Make exclude_dirs patterns operate on the full directory path (may be slightly slower)
+        Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
         Setting this option to `false` excludes any directory in the traversal with the provided name.
         Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories 
         with the same name aren't all excluded.
@@ -70,7 +70,7 @@ files:
         example: false
         type: boolean
     - name: recursive
-      description: When true the stats recurse into directories.
+      description: When true, the stats recurse into directories.
       value:
         example: false
         type: boolean
@@ -94,7 +94,7 @@ files:
         example: false
         type: boolean
     - name: ignore_missing
-      description: When true the check does not raise an exception on missing/inaccessible directories.
+      description: When true the check does not raise an exception on missing or inaccessible directories.
       value:
         example: false
         type: boolean
