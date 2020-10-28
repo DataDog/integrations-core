@@ -6,10 +6,13 @@ from os.path import exists, join, relpath
 from time import time
 from typing import Any
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 from datadog_checks.directory.config import DirectoryConfig
 
 from .traverse import walk
+
+SERVICE_DIRECTORY_EXISTS = 'system.disk.directory.exists'
 
 
 class DirectoryCheck(AgentCheck):
@@ -46,12 +49,19 @@ class DirectoryCheck(AgentCheck):
                 "Either directory '{}' doesn't exist or the Agent doesn't "
                 "have permissions to access it, skipping.".format(self.config.abs_directory)
             )
+            # report missing directory
+            self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.WARNING, message=msg)
 
+            # raise exception if `ignore_missing` is False
             if not self.config.ignore_missing:
-                raise ConfigurationError(msg)
+                raise CheckException(msg)
 
             self.log.warning(msg)
 
+            # return gracefully, nothing to look for
+            return
+
+        self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.OK)
         self._get_stats()
 
     def _get_stats(self):

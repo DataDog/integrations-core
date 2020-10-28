@@ -52,7 +52,9 @@ The Directory check does not include any events.
 
 ### Service Checks
 
-The Directory check does not include any service checks.
+**system.disk.directory.exists**:
+Returns `WARNING` if the Agent is unable to find or access the directory to monitor, `OK` otherwise.
+
 
 ## Troubleshooting
 
