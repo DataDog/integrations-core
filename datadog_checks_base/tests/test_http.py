@@ -1261,13 +1261,26 @@ class TestProxies:
         http.get('http://nginx')
 
     @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_single_wildcard(self, socks5_proxy):
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar,*'}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        http.get('http://www.example.org')
+        http.get('http://www.example.com')
+        http.get('http://127.0.0.9')
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_no_proxy_domain(self, socks5_proxy):
-        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,example.com,9'}}
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'}}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         # no_proxy match: .google.com
         http.get('http://www.google.com')
+
+        # no_proxy match: *.example.org
+        http.get('http://www.example.org')
 
         # no_proxy match: example.com
         http.get('http://www.example.com')
