@@ -239,8 +239,7 @@ class MongoDb(AgentCheck):
 
         # Additional metrics metrics
         for option in self.additional_metrics:
-            additional_metrics = metrics.AVAILABLE_METRICS.get(option)
-            if not additional_metrics:
+            if option not in metrics.AVAILABLE_METRICS:
                 if option in metrics.DEFAULT_METRICS:
                     self.log.warning(
                         u"`%s` option is deprecated. The corresponding metrics are collected by default.", option
@@ -250,7 +249,7 @@ class MongoDb(AgentCheck):
                         u"Failed to extend the list of metrics to collect: unrecognized `%s` option", option
                     )
                 continue
-
+            additional_metrics = metrics.AVAILABLE_METRICS[option]
             self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
