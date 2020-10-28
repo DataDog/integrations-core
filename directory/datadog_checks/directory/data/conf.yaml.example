@@ -14,8 +14,8 @@ init_config:
 instances:
 
     ## @param directory - string - required
-    ## The directory to monitor. On windows, please make sure you escape back-slashes otherwise the YAML
-    ## parser fails (eg. - directory: "C:\\Users\\foo\\Downloads").
+    ## The directory to monitor. On windows, escape back-slashes; otherwise the YAML
+    ## parser fails (for example, - directory: "C:\\Users\\foo\\Downloads").
     #
   - directory: <DIRECTORY_PATH>
 
@@ -33,12 +33,12 @@ instances:
     ## @param filetagname - string - optional
     ## The name of the key for the tag used for each file, the value is the filename.
     ## The resulting tag is "<filetagname>:<filename>". Only used if filegauges is set to true and if the directory
-    ## contains 20 files or less (including sub-directories).
+    ## contains 20 or fewer files (including files in sub-directories).
     #
     # filetagname: <TAG_KEY_FILENAME>
 
     ## @param filegauges - boolean - optional - default: false
-    ## When true stats are an individual gauge per file (max. 20 files!) and not a histogram of the whole directory.
+    ## When true stats are an individual gauge per file (max. 20 files) and not a histogram of the whole directory.
     #
     # filegauges: false
 
@@ -49,8 +49,8 @@ instances:
     # pattern: '*'
 
     ## @param exclude_dirs - list of strings - optional
-    ## a list of regular expressions used to blacklist directory names.
-    ## e.g. node_modules, vendor
+    ## a list of regular expressions used to exclude directories.
+    ## For example: node_modules, vendor
     #
     # exclude_dirs:
     #   - ^__pycache__$
@@ -59,7 +59,7 @@ instances:
     #   - ^vendor$
 
     ## @param dirs_patterns_full - boolean - optional - default: false
-    ## Make exclude_dirs patterns operate on the full directory path (may be slightly slower)
+    ## Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
     ## Setting this option to `false` excludes any directory in the traversal with the provided name.
     ## Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories 
     ## with the same name aren't all excluded.
@@ -67,7 +67,7 @@ instances:
     # dirs_patterns_full: false
 
     ## @param recursive - boolean - optional - default: false
-    ## When true the stats recurse into directories.
+    ## When true, the stats recurse into directories.
     #
     # recursive: false
 
@@ -89,7 +89,7 @@ instances:
     # countonly: false
 
     ## @param ignore_missing - boolean - optional - default: false
-    ## When true the check does not raise an exception on missing/inaccessible directories.
+    ## When true the check does not raise an exception on missing or inaccessible directories.
     #
     # ignore_missing: false
 
