@@ -19,7 +19,6 @@ REQUEST_LIBRARY_FUNCTIONS = {
     'requests.put',
     'requests.patch',
     'requests.delete',
-    'requests.options',
 }
 
 
