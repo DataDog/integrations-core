@@ -1,6 +1,7 @@
 {
   "categories": [
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Exchange Server",
@@ -20,12 +21,17 @@
   "type": "check",
   "integration_id": "exchange-server",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Exchange Server Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "exchange-server"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

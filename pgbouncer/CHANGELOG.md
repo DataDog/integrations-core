@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 1.11.0 / 2020-09-21
+## 1.11.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec. See [#7589](https://github.com/DataDog/integrations-core/pull/7589).
 * [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).

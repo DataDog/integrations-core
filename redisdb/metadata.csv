@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 redis.active_defrag.running,gauge,,,,Whether active defragmentation is running or not.,0,redis,active defrag running
-redis.active_defrag.hits,gauge,,operation,,Number of value reallocations performed by active the defragmentation process.,1,redis,active defrag hits
+redis.active_defrag.hits,gauge,,operation,,Number of value reallocations performed by the active defragmentation process.,1,redis,active defrag hits
 redis.active_defrag.misses,gauge,,operation,,Number of aborted value reallocations started by the active defragmentation process.,1,redis,active defrag misses
 redis.active_defrag.key_hits,gauge,,key,,Number of keys that were actively defragmented.,1,redis,active defrag key hits
 redis.active_defrag.key_misses,gauge,,key,,Number of keys that were skipped by.,1,redis,active defrag key misses

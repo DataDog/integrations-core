@@ -49,6 +49,28 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `statsd.d/conf.yaml` file to start collecting your Supervisord Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: statsd
+   ```
+
+   Change the `path` parameter value and configure it for your environment. 
+   See the [sample statsd.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][4].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `statsd` under the Checks section.

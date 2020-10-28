@@ -110,7 +110,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/kubernetes/
-[3]: https://docs.openshift.org/latest/admin_guide/manage_scc.html
+[3]: https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html
 [4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/
 [5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#configure-rbac-permissions
 [6]: https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/agent-kubelet-only.yaml

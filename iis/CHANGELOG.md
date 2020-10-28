@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.10.1 / 2020-08-19
+## 2.10.1 / 2020-08-19 / Agent 7.23.0
 
 * [Fixed] Add debug lines on skipped metrics. See [#7394](https://github.com/DataDog/integrations-core/pull/7394).
 

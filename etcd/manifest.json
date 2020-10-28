@@ -32,6 +32,9 @@
   "type": "check",
   "integration_id": "etcd",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Etcd Overview": "assets/dashboards/etcd_overview.json"

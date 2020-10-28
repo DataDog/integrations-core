@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-## 1.16.0 / 2020-09-21
+## 1.16.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config specs. See [#7467](https://github.com/DataDog/integrations-core/pull/7467).
 * [Fixed] Ensure basic auth encoding defaults to UTF-8. See [#7451](https://github.com/DataDog/integrations-core/pull/7451).

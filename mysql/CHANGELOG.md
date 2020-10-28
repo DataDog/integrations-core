@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 2.0.3 / 2020-09-21
+## 2.0.3 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
 * [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).

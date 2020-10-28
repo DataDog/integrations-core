@@ -1,0 +1,350 @@
+name: Win32
+files:
+- name: win32_event_log.yaml
+  options:
+  - template: init_config
+    options:
+    - name: tag_event_id
+      description: This instructs the check to add an `event_id` tag to events.
+      value:
+        type: boolean
+        example: false
+    - name: tag_sid
+      description: |
+        This instructs the check to add an `sid` tag to events in the form
+        `<DOMAIN>\<USER>`, such as `NT AUTHORITY\SYSTEM`.
+      value:
+        type: boolean
+        example: false
+    - name: event_priority
+      description: |
+        Set priority level in event stream for all events created by the check.
+        Options available are `low` or `normal`.
+      value:
+        type: string
+        example: normal
+    - name: interpret_messages
+      description: |
+        Whether or not to interpret event messages for unknown sources or sources that have not been registered
+        properly. This fallback mechanism is a best-effort approach and may not yield the exact message.
+
+        For more information about registering sources, see:
+        https://docs.microsoft.com/en-us/windows/win32/eventlog/event-sources
+      value:
+        type: boolean
+        example: true
+    - name: default_event_priority
+      description: |
+        Set priority level in event stream for all events created by the check.
+        Options available are `low` or `normal`.
+
+        This has no effect if `legacy_mode` is set to `false`. Use `event_priority` instead.
+      value:
+        type: string
+        example: normal
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: path
+      description: |
+        The check will subscribe to the path for events. It can be one of the following:
+
+          - the name of an Admin or Operational channel (you cannot subscribe to Analytic or Debug channels)
+          - the full path to a log file, usually ending in .evt, .evtx, or .etl
+
+        The path is required if `legacy_mode` is set to `false`.
+      value:
+        type: string
+    - name: start
+      description: |
+        The point at which to start the event subscription.
+
+        There are two choices:
+
+          - now: Subscribe to only future events that match the query criteria.
+          - oldest: Subscribe to all existing and future events that match the query criteria.
+
+        A bookmark will be periodically updated on the filesystem to resume the subscription
+        upon Agent restarts. The frequency with which the bookmark is updated can be controlled
+        with the `bookmark_frequency` option.
+      value:
+        type: string
+        example: now
+    - name: query
+      description: |
+        A raw XPath or structured XML query used to filter events.
+
+          /\ WARNING /\
+          Queries translate to XML and therefore are case-sensitive.
+
+        For detailed documentation, see the following resources:
+
+          - Examples > https://docs.microsoft.com/en-us/windows/win32/wes/consuming-events
+          - Event Schema > https://docs.microsoft.com/en-us/windows/win32/wes/eventschema-schema
+          - Query Schema > https://docs.microsoft.com/en-us/windows/win32/wes/queryschema-schema
+           - System > https://docs.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
+
+        This overrides any selected `filters`.
+      value:
+        type: string
+    - name: filters
+      description: |
+        A mapping of properties to allowed values. Every filter (equivalent to the `and` operator)
+        must match any value (equivalent to the `or` operator). This option is a convenience for
+        a `query` that is relatively basic.
+
+        The following properties are supported:
+
+          - source > a.k.a. provider name https://docs.microsoft.com/en-us/windows/win32/eventlog/event-sources
+          - type > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
+          - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
+
+        For advanced and more granular filtering, define a `query`.
+
+        If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
+      value:
+        type: object
+        example:
+          source:
+           - Microsoft-Windows-Ntfs
+           - Service Control Manager
+          type:
+           - Error
+           - Warning
+          id:
+           - 9000
+    - name: included_messages
+      description: |
+        This instructs the check to only capture events with messages that match at least one of the
+        provided patterns. Every pattern is considered a regular expression.
+      value:
+        type: array
+        items:
+          type: string
+    - name: excluded_messages
+      description: |
+        This instructs the check to ignore events with messages that match at least one of the
+        provided patterns. Every pattern is considered a regular expression.
+
+        This takes precedence over `included_messages`.
+      value:
+        type: array
+        items:
+          type: string
+    - name: interpret_messages
+      description: |
+        Whether or not to interpret event messages for unknown sources or sources
+        that have not been registered properly. This fallback mechanism is a
+        best-effort approach and may not yield the exact message.
+
+        For more information about registering sources, see:
+        https://docs.microsoft.com/en-us/windows/win32/eventlog/event-sources
+
+        This overrides `interpret_messages` in `init_config`.
+      value:
+        type: boolean
+        example: true
+    - name: tag_event_id
+      description: |
+        This instructs the check to add an `event_id` tag to events.
+
+        This overrides `tag_event_id` in `init_config`.
+      value:
+        type: boolean
+        example: false
+    - name: tag_sid
+      description: |
+        This instructs the check to add an `sid` tag to events in the form
+        `<DOMAIN>\<USER>`, such as `NT AUTHORITY\SYSTEM`.
+      value:
+        type: boolean
+        example: false
+    - name: event_priority
+      description: |
+        Set priority level in event stream for all events created by the instance.
+        Options available are `low` or `normal`.
+
+        This overrides `event_priority` in `init_config`.
+      value:
+        type: string
+        example: normal
+    - name: auth_type
+      description: |
+        The type of authentication to use. The available types are:
+
+          - default
+          - negotiate
+          - kerberos
+          - ntlm
+
+        For more information, see:
+        https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_rpc_login_flags
+      value:
+        type: string
+        example: default
+    - name: server
+      description: |
+        The name of the remote computer to connect to.
+
+        If this is not selected or set to `localhost`, a connection to the
+        local machine will be established instead.
+      value:
+        type: string
+        example: localhost
+    - name: user
+      description: |
+        The user name to use to connect to the remote computer.
+
+        If this, `password`, and `domain` are all unselected, then the credentials
+        of the current user will be used.
+      value:
+        type: string
+    - name: password
+      description: |
+        The password for the user account.
+
+        If this, `user`, and `domain` are all unselected, then the credentials
+        of the current user will be used.
+      value:
+        type: string
+    - name: domain
+      description: |
+        The domain to which the user account belongs.
+
+        If this, `user`, and `password` are all unselected, then the credentials
+        of the current user will be used.
+      value:
+        type: string
+    - name: timeout
+      description: The number of seconds to wait for new event signals.
+      value:
+        type: number
+        example: 5
+    - name: payload_size
+      description: |
+        The number of events to request at a time.
+
+        This is useful when connecting to remote machines with the `server` option.
+      value:
+        type: integer
+        example: 10
+    - name: bookmark_frequency
+      description: |
+        How often to save the last seen event as a factor of the number of seen events.
+        By default, the value of `payload_size` will be used.
+
+        This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
+      value:
+        type: integer
+        default: <PAYLOAD_SIZE>
+    - name: legacy_mode
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+           /\ WARNING /\
+        This mode, by nature of the underlying technology, is significantly more resource intensive.
+
+        Setting this option to `false` is only supported on Agent versions 7 and above.
+      enabled: true
+      value:
+        type: boolean
+        default: true
+        example: false
+    - name: host
+      description: |
+        By default, the local machine's event logs are captured. To capture a remote
+        machine's event logs, specify the machine name (DCOM has to be enabled on
+        the remote machine).
+
+        Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: string
+        example: <REMOTE_HOSNAME>
+        default: localhost
+    - name: log_file
+      description: |
+        The `log_file` filter instructs the check to only capture events
+        that belong to one of the specified LogFiles (Application, System, Setup, Security,
+        or application-specific LogFile).
+
+        Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: array
+        items:
+          type: string
+    - name: source_name
+      description: |
+        The `source_name` filter instructs the check to only capture events
+        that come from one of the specified SourceNames.
+
+        Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: array
+        items:
+          type: string
+    - name: type
+      description: |
+        The `type` filter instructs the check to only capture events
+        that have one of the specified Types.
+        Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
+
+        Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - information
+        default: information
+    - name: event_id
+      description: |
+        The `event_id` filter instructs the check to only capture events
+        that have one of the specified EventCodes.
+        The event ID can be found through http://www.eventid.net/ and viewed in the
+        Windows Event Viewer.
+
+        Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: array
+        items:
+          type: string
+    - name: message_filters
+      description: |
+        The `message_filters` filter instructs the check to only capture
+        events which Message field matches all of the specified filters.
+        Use % as a wildcard. See http://msdn.microsoft.com/en-us/library/aa392263(v=vs.85).aspx
+        for more on the format for LIKE queries.
+
+        NOTE: Any filter that starts with "-" is NOT a query, e.g.: '-%success%'
+        searches for events without 'success' in the message.
+
+         Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: array
+        items:
+          type:
+            string
+    - name: event_format
+      description: |
+        The `event_format` parameter instructs the check to generate
+        Datadog's event bodies with the specified list of event properties.
+        If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
+        Available values are: Logfile, SourceName, EventCode, Message, InsertionStrings, TimeGenerated, Type
+
+        Note: This is only used when `legacy_mode` is set to `true`.
+      value:
+        type: array
+        items:
+          type: string
+        default: Message
+        example:
+          - Message
+    - template: instances/default
+  - template: logs
+    example:
+      - type: windows_event
+        channel_path: <CHANNEL_1>
+        source: <CHANNEL_1>
+      - type: windows_event
+        channel_path: <CHANNEL_2>
+        source: <CHANNEL_2>

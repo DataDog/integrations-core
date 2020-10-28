@@ -19,6 +19,8 @@ class Config(object):
         'snowflake.logins',
     ]
 
+    AUTHENTICATION_MODES = ['snowflake', 'oauth']
+
     def __init__(self, instance=None):
         if instance is None:
             instance = {}
@@ -36,6 +38,9 @@ class Config(object):
         login_timeout = instance.get('login_timeout', 60)
         ocsp_response_cache_filename = instance.get('ocsp_response_cache_filename')
         tags = instance.get('tags', [])
+        authenticator = instance.get('authenticator', 'snowflake')
+        token = instance.get('token', None)
+        client_keep_alive = instance.get('client_session_keep_alive', False)
 
         # min_collection_interval defaults to 60 minutes
         min_collection = instance.get('min_collection_interval', 3600)
@@ -54,6 +59,12 @@ class Config(object):
         if is_affirmative(passcode_in_password) and passcode is None:
             raise ConfigurationError('MFA enabled, please specify a passcode')
 
+        if authenticator not in self.AUTHENTICATION_MODES:
+            raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
+
+        if authenticator == 'oauth' and token is None:
+            raise ConfigurationError('If using OAuth, you must specify a token')
+
         self.account = account  # type: str
         self.user = user  # type: str
         self.password = password  # type: str
@@ -69,3 +80,6 @@ class Config(object):
         self.tags = tags  # type: List[str]
         self.min_collection = min_collection
         self.metric_groups = metric_groups
+        self.authenticator = authenticator
+        self.token = token
+        self.client_keep_alive = client_keep_alive

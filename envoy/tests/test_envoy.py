@@ -26,7 +26,7 @@ def test_success(aggregator):
     for metric in METRICS:
         metrics_collected += len(aggregator.metrics(METRIC_PREFIX + metric))
 
-    assert metrics_collected >= 250
+    assert metrics_collected >= 445
 
 
 @pytest.mark.unit
@@ -43,7 +43,7 @@ def test_success_fixture(aggregator):
 
     num_metrics = len(response('multiple_services').content.decode().splitlines())
     num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
-    assert 4412 <= metrics_collected == num_metrics
+    assert 4481 <= metrics_collected == num_metrics
 
 
 @pytest.mark.unit

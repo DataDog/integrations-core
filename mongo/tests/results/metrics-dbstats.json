@@ -1,0 +1,242 @@
+[
+  {
+        "name": "mongodb.stats.avgobjsize",
+        "type": 0,
+        "value": 27.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.avgobjsize",
+        "type": 0,
+        "value": 111.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.avgobjsize",
+        "type": 0,
+        "value": 100.70992366412214,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.datasize",
+        "type": 0,
+        "value": 8708.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.datasize",
+        "type": 0,
+        "value": 666.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.datasize",
+        "type": 0,
+        "value": 13302.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.filesize",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.filesize",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.filesize",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexes",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexes",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexes",
+        "type": 0,
+        "value": 17.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexsize",
+        "type": 0,
+        "value": 49152.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexsize",
+        "type": 0,
+        "value": 98304.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexsize",
+        "type": 0,
+        "value": 311296.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.numextents",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.numextents",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.numextents",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.objects",
+        "type": 0,
+        "value": 316.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.objects",
+        "type": 0,
+        "value": 6.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.objects",
+        "type": 0,
+        "value": 131.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.stats.storagesize",
+        "type": 0,
+        "value": 49152.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:test",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.stats.storagesize",
+        "type": 0,
+        "value": 98304.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:admin",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.stats.storagesize",
+        "type": 0,
+        "value": 212992.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:config",
+            "db:config"
+        ]
+    }
+]

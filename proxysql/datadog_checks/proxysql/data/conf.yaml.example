@@ -61,7 +61,7 @@ instances:
 
     ## @param additional_metrics - list of strings - optional
     ## List of additional metrics to collect in addition to the global ones.
-    ## Learn more about thest metrics at:
+    ## Learn more about these metrics at:
     ## https://github.com/sysown/proxysql/wiki/STATS-(statistics)
     #
     # additional_metrics:

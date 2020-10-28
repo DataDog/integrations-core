@@ -29,7 +29,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "statsd"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

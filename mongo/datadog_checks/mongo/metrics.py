@@ -22,6 +22,11 @@ BASE_METRICS = {
     "connections.available": GAUGE,
     "connections.current": GAUGE,
     "connections.totalCreated": GAUGE,
+    "connection_pool.numClientConnections": GAUGE,
+    "connection_pool.numAScopedConnections": GAUGE,
+    "connection_pool.totalCreated": RATE,
+    "connection_pool.totalAvailable": GAUGE,
+    "connection_pool.totalRefreshing": GAUGE,
     "cursors.timedOut": GAUGE,  # < 2.6
     "cursors.totalOpen": GAUGE,  # < 2.6
     "extra_info.heap_usage_bytes": RATE,
@@ -123,6 +128,7 @@ BASE_METRICS = {
     "stats.numExtents": GAUGE,
     "stats.objects": GAUGE,
     "stats.storageSize": GAUGE,
+    "sessions.count": GAUGE,
     "uptime": GAUGE,
 }
 
@@ -342,4 +348,5 @@ AVAILABLE_METRICS = {
     'tcmalloc': TCMALLOC_METRICS,
     'top': TOP_METRICS,
     'collection': COLLECTION_METRICS,
+    'jumbo_chunks': {},
 }

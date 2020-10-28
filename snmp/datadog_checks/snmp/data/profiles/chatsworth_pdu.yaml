@@ -570,6 +570,17 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.2
           name: cpiPduBranchId
+      # Since MacAddress index might have 2 index format and length
+      # we use 2 rules to match the pdu_name tag
+      # more info here: https://github.com/DataDog/integrations-core/pull/7688
+      - column:
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
+          name: cpiPduName
+        table: cpiPduTable
+        index_transform:
+          - start: 1
+            end: 13
+        tag: pdu_name
       - column:
           OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
           name: cpiPduName
@@ -594,6 +605,17 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.2
           name: cpiPduBranchId
+      # Since MacAddress index might have 2 index format and length
+      # we use 2 rules to match the pdu_name tag
+      # more info here: https://github.com/DataDog/integrations-core/pull/7688
+      - column:
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
+          name: cpiPduName
+        table: cpiPduTable
+        index_transform:
+          - start: 1
+            end: 13
+        tag: pdu_name
       - column:
           OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
           name: cpiPduName

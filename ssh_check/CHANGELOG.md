@@ -1,6 +1,6 @@
 # CHANGELOG - ssh_check
 
-## 1.11.3 / 2020-09-24
+## 1.11.3 / 2020-09-24 / Agent 7.23.0
 
 * [Fixed] Add integration test for ssh keypair and make code more accurate. See [#7655](https://github.com/DataDog/integrations-core/pull/7655).
 

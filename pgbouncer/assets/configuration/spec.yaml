@@ -8,7 +8,12 @@ files:
   - template: instances
     options:
       - name: database_url
-        description: "`database_url` parameter should point to PgBouncer stats database url"
+        description: |
+          The PgBouncer stats database URL.
+
+          If the password contains special characters, be sure to escape them using percent encoding.
+
+          See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
         required: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
@@ -26,7 +31,8 @@ files:
         value:
           type: string
       - name: password
-        description: If `database_url` is not used, set up the password to use with the `password` parameter.
+        description: |
+          If `database_url` is not used, set up the password to use with the `password` parameter.
         value:
           type: string
       - name: use_cached

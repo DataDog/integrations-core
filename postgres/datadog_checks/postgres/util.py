@@ -22,6 +22,11 @@ class PartialFormatter(string.Formatter):
             return string.Formatter.get_value(self, key, args, kwargs)
 
 
+def milliseconds_to_nanoseconds(value):
+    """Convert from ms to ns (used for pg_stat* conversion to metrics with units in ns)"""
+    return value * 1000000
+
+
 def get_schema_field(descriptors):
     """Return column containg the schema name for that query."""
     for column, name in descriptors:

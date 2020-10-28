@@ -1,43 +1,53 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param tag_event_id - boolean - optional - default: false
-  ## This instructs the check to add an `event_id` tag to events.
-  #
-  # tag_event_id: false
+    ## @param tag_event_id - boolean - optional - default: false
+    ## This instructs the check to add an `event_id` tag to events.
+    #
+    # tag_event_id: false
 
-  ## @param tag_sid - boolean - optional - default: false
-  ## This instructs the check to add an `sid` tag to events in the form
-  ## `<DOMAIN>\<USER>`, such as `NT AUTHORITY\SYSTEM`.
-  #
-  # tag_sid: false
+    ## @param tag_sid - boolean - optional - default: false
+    ## This instructs the check to add an `sid` tag to events in the form
+    ## `<DOMAIN>\<USER>`, such as `NT AUTHORITY\SYSTEM`.
+    #
+    # tag_sid: false
 
-  ## @param event_priority - string - optional - default: normal
-  ## Set priority level in event stream for all events created by the check.
-  ## Options available are `low` or `normal`.
-  #
-  # event_priority: normal
+    ## @param event_priority - string - optional - default: normal
+    ## Set priority level in event stream for all events created by the check.
+    ## Options available are `low` or `normal`.
+    #
+    # event_priority: normal
 
-  ## @param interpret_messages - boolean - optional - default: true
-  ## Whether or not to interpret event messages for unknown sources or sources that have not been registered
-  ## properly. This fallback mechanism is a best-effort approach and may not yield the exact message.
-  ##
-  ## For more information about registering sources, see:
-  ## https://docs.microsoft.com/en-us/windows/win32/eventlog/event-sources
-  #
-  # interpret_messages: true
+    ## @param interpret_messages - boolean - optional - default: true
+    ## Whether or not to interpret event messages for unknown sources or sources that have not been registered
+    ## properly. This fallback mechanism is a best-effort approach and may not yield the exact message.
+    ##
+    ## For more information about registering sources, see:
+    ## https://docs.microsoft.com/en-us/windows/win32/eventlog/event-sources
+    #
+    # interpret_messages: true
 
-  ## @param default_event_priority - string - optional - default: normal
-  ## Set priority level in event stream for all events created by the check.
-  ## Options available are `low` or `normal`.
-  ##
-  ## This has no effect if `legacy_mode` is set to `false`. Use `event_priority` instead.
-  #
-  # default_event_priority: normal
+    ## @param default_event_priority - string - optional - default: normal
+    ## Set priority level in event stream for all events created by the check.
+    ## Options available are `low` or `normal`.
+    ##
+    ## This has no effect if `legacy_mode` is set to `false`. Use `event_priority` instead.
+    #
+    # default_event_priority: normal
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
   -
-
     ## @param path - string - optional
     ## The check will subscribe to the path for events. It can be one of the following:
     ##
@@ -73,13 +83,13 @@ instances:
     ##   - Examples > https://docs.microsoft.com/en-us/windows/win32/wes/consuming-events
     ##   - Event Schema > https://docs.microsoft.com/en-us/windows/win32/wes/eventschema-schema
     ##   - Query Schema > https://docs.microsoft.com/en-us/windows/win32/wes/queryschema-schema
-    ##     - System > https://docs.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
+    ##    - System > https://docs.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
     ##
     ## This overrides any selected `filters`.
     #
     # query: <QUERY>
 
-    ## @param filters - object - optional
+    ## @param filters - mapping - optional
     ## A mapping of properties to allowed values. Every filter (equivalent to the `and` operator)
     ## must match any value (equivalent to the `or` operator). This option is a convenience for
     ## a `query` that is relatively basic.
@@ -108,9 +118,7 @@ instances:
     ## This instructs the check to only capture events with messages that match at least one of the
     ## provided patterns. Every pattern is considered a regular expression.
     #
-    # included_messages:
-    #   - <PATTERN_1>
-    #   - <PATTERN_2>
+    # included_messages: []
 
     ## @param excluded_messages - list of strings - optional
     ## This instructs the check to ignore events with messages that match at least one of the
@@ -118,9 +126,7 @@ instances:
     ##
     ## This takes precedence over `included_messages`.
     #
-    # excluded_messages:
-    #   - <PATTERN_1>
-    #   - <PATTERN_2>
+    # excluded_messages: []
 
     ## @param interpret_messages - boolean - optional - default: true
     ## Whether or not to interpret event messages for unknown sources or sources
@@ -200,7 +206,7 @@ instances:
     #
     # domain: <DOMAIN>
 
-    ## @param timeout - float - optional - default: 5
+    ## @param timeout - number - optional - default: 5
     ## The number of seconds to wait for new event signals.
     #
     # timeout: 5
@@ -223,21 +229,12 @@ instances:
     ## @param legacy_mode - boolean - optional - default: true
     ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
     ##
-    ##   /\ WARNING /\
-    ##   This mode, by nature of the underlying technology, is significantly more resource intensive.
+    ##    /\ WARNING /\
+    ## This mode, by nature of the underlying technology, is significantly more resource intensive.
     ##
     ## Setting this option to `false` is only supported on Agent versions 7 and above.
     #
     legacy_mode: false
-
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
 
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote
@@ -248,10 +245,6 @@ instances:
     #
     # host: <REMOTE_HOSNAME>
 
-    ## FILTERS
-    ## When running legacy_mode least one filter is required:
-    ## `log_file`, `source_name`, `type`, `event_id`, `message_filters`
-
     ## @param log_file - list of strings - optional
     ## The `log_file` filter instructs the check to only capture events
     ## that belong to one of the specified LogFiles (Application, System, Setup, Security,
@@ -259,8 +252,7 @@ instances:
     ##
     ## Note: This is only used when `legacy_mode` is set to `true`.
     #
-    # log_file:
-    #   - <LOG_FILE>
+    # log_file: []
 
     ## @param source_name - list of strings - optional
     ## The `source_name` filter instructs the check to only capture events
@@ -268,8 +260,7 @@ instances:
     ##
     ## Note: This is only used when `legacy_mode` is set to `true`.
     #
-    # source_name:
-    #   - <SOURCE_NAME>
+    # source_name: []
 
     ## @param type - list of strings - optional - default: information
     ## The `type` filter instructs the check to only capture events
@@ -289,8 +280,7 @@ instances:
     ##
     ## Note: This is only used when `legacy_mode` is set to `true`.
     #
-    # event_id:
-    #   - <EVENT_ID>
+    # event_id: []
 
     ## @param message_filters - list of strings - optional
     ## The `message_filters` filter instructs the check to only capture
@@ -301,10 +291,9 @@ instances:
     ## NOTE: Any filter that starts with "-" is NOT a query, e.g.: '-%success%'
     ## searches for events without 'success' in the message.
     ##
-    ## Note: This is only used when `legacy_mode` is set to `true`.
+    ##  Note: This is only used when `legacy_mode` is set to `true`.
     #
-    # message_filters:
-    #   - <MESSAGE_FILTER>
+    # message_filters: []
 
     ## @param event_format - list of strings - optional - default: Message
     ## The `event_format` parameter instructs the check to generate
@@ -317,13 +306,47 @@ instances:
     # event_format:
     #   - Message
 
-## Log Section (Available for Agent >=6.0)
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file and channel_path if windows_event
-## service - mandatory - Name of the service owning the log
-## source  - mandatory - Attribute that defines which integration is sending the logs
-## tags: - optional - Add tags to each logs collected
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
@@ -331,9 +354,6 @@ instances:
 #   - type: windows_event
 #     channel_path: <CHANNEL_1>
 #     source: <CHANNEL_1>
-#     service: <SERVICE_NAME>
-#
 #   - type: windows_event
 #     channel_path: <CHANNEL_2>
 #     source: <CHANNEL_2>
-#     service: <SERVICE_NAME>
