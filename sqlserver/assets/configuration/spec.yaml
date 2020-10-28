@@ -64,6 +64,11 @@ files:
       value:
         type: boolean
         example: false
+    - name: ao_database
+      description: |
+        AlwaysOn metrics will only be emitted for the selected `ao_database`.
+      value:
+        type: string
     - name: include_instance_metrics
       description: |
         Include server-level instance metrics.  When setting up multiple instances for

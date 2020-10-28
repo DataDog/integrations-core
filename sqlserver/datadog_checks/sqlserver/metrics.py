@@ -587,16 +587,21 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
         is_local_index = columns.index('is_local')
+        database_name_index = columns.index('database_name')
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            database_name = row[database_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
-
+            selected_database = self.cfg_instance.get('ao_database')
             if self.cfg_instance.get('only_emit_local') and not is_local:
                 continue
 
             elif selected_ag and selected_ag != resource_group_id:
+                continue
+
+            elif selected_database and selected_database != database_name:
                 continue
 
             column_val = row[value_column_index]
