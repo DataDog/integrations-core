@@ -24,6 +24,9 @@
   "type": "check",
   "integration_id": "linkerd",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Linkerd - Overview": "assets/dashboards/overview.json"

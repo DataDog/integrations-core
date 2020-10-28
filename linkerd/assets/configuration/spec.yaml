@@ -1,0 +1,12 @@
+name: Linkerd
+files:
+- name: linkerd.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        prometheus_url.value.example: http://localhost:9990/admin/metrics/prometheus
