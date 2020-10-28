@@ -97,6 +97,23 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
     ]
 
+    # AlwaysOn metrics
+    # datadog metric name, sql table, column name, tag
+    AO_METRICS = [
+        ('sqlserver.ao.ag_sync_health', 'sys.dm_hadr_availability_group_states', 'synchronization_health'),
+        ('sqlserver.ao.replica_sync_state', 'sys.dm_hadr_database_replica_states', 'synchronization_state'),
+        ('sqlserver.ao.replica_failover_mode', 'sys.availability_replicas', 'failover_mode'),
+        ('sqlserver.ao.replica_failover_readiness', 'sys.availability_replicas', 'is_failover_ready'),
+    ]
+
+    AO_METRICS_PRIMARY = [
+        ('sqlserver.ao.primary_replica_health', 'sys.dm_hadr_availability_group_states', 'primary_recovery_health'),
+    ]
+
+    AO_METRICS_SECONDARY = [
+        ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
+    ]
+
     # Non-performance table metrics - can be database specific
     # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
@@ -219,6 +236,21 @@ class SQLServer(AgentCheck):
             db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
             cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
             metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        # Load AlwaysOn metrics
+        if is_affirmative(self.instance.get('include_ao_metrics', False)):
+            for name, table, column in self.AO_METRICS + self.AO_METRICS_PRIMARY + self.AO_METRICS_SECONDARY:
+                db_name = 'master'
+                cfg = {
+                    'name': name,
+                    'table': table,
+                    'column': column,
+                    'instance_name': db_name,
+                    'tags': tags,
+                    'availability_group': self.instance.get('availability_group', None),
+                    'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
+                }
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):

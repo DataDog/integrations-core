@@ -417,6 +417,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         file_id = columns.index("file_id")
         file_type = columns.index("type")
         file_location = columns.index("physical_name")
+        db_files_state_desc_index = columns.index("state_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -427,12 +428,14 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             fileid = row[file_id]
             filetype = self.DB_TYPE_MAP[row[file_type]]
             location = row[file_location]
+            db_files_state_desc = row[db_files_state_desc_index]
 
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
                 'file_id:{}'.format(str(fileid)),
                 'file_type:{}'.format(str(filetype)),
                 'file_location:{}'.format(str(location)),
+                'database_files_state_desc:{}'.format(str(db_files_state_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -452,6 +455,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 
     def fetch_metric(self, rows, columns):
         database_name = columns.index("name")
+        db_state_desc_index = columns.index("state_desc")
         value_column_index = columns.index(self.column)
 
         for row in rows:
@@ -459,12 +463,157 @@ class SqlDatabaseStats(BaseSqlServerMetric):
                 continue
 
             column_val = row[value_column_index]
-
+            db_state_desc = row[db_state_desc_index]
             metric_tags = [
                 'database:{}'.format(str(self.instance)),
+                'database_state_desc:{}'.format(str(db_state_desc)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
+class SqlDbReplicaStates(BaseSqlServerMetric):
+    TABLE = 'sys.dm_hadr_database_replica_states'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """select * from {table} as dhdrs
+                 inner join sys.availability_groups as ag
+                 on ag.group_id = dhdrs.group_id
+                 inner join sys.availability_replicas as ar
+                 on dhdrs.replica_id = ar.replica_id""".format(
+        table=TABLE
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+        sync_state_desc_index = columns.index('synchronization_state_desc')
+        resource_group_id_index = columns.index('resource_group_id')
+        replica_server_name_index = columns.index('replica_server_name')
+        is_local_index = columns.index('is_local')
+
+        for row in rows:
+            is_local = row[is_local_index]
+            resource_group_id = row[resource_group_id_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
+            if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
+
+            elif selected_ag and selected_ag != resource_group_id:
+                continue
+
+            column_val = row[value_column_index]
+            sync_state_desc = row[sync_state_desc_index]
+            replica_server_name = row[replica_server_name_index]
+
+            metric_tags = [
+                'synchronization_state_desc:{}'.format(str(sync_state_desc)),
+                'replica_server_name:{}'.format(str(replica_server_name)),
+                'availability_group:{}'.format(str(resource_group_id)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
+class SqlAvailabilityGroups(BaseSqlServerMetric):
+    TABLE = 'sys.dm_hadr_availability_group_states'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """select * from {table} as dhdrcs
+                    inner join sys.availability_groups as ag
+                    on ag.group_id = dhdrcs.group_id""".format(
+        table=TABLE
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+
+        resource_group_id_index = columns.index('resource_group_id')
+        sync_health_desc_index = columns.index('synchronization_health_desc')
+
+        for row in rows:
+            resource_group_id = row[resource_group_id_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
+            if selected_ag and selected_ag != resource_group_id:
+                continue
+
+            column_val = row[value_column_index]
+            sync_health_desc = row[sync_health_desc_index]
+            metric_tags = [
+                'availability_group:{}'.format(str(resource_group_id)),
+                'synchronization_health_desc:{}'.format(str(sync_health_desc)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-replicas-transact-sql?view=sql-server-ver15
+class SqlAvailabilityReplicas(BaseSqlServerMetric):
+    TABLE = 'sys.availability_replicas'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """select * from {table} as ar
+                    inner join sys.dm_hadr_database_replica_cluster_states as dhdrcs
+                    on ar.replica_id = dhdrcs.replica_id
+                    inner join sys.dm_hadr_database_replica_states as dhdrs
+                    on ar.replica_id = dhdrs.replica_id
+                    inner join sys.availability_groups as ag
+                    on ag.group_id = ar.group_id""".format(
+        table=TABLE
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+
+        is_primary_replica_index = columns.index('is_primary_replica')
+        failover_mode_desc_index = columns.index('failover_mode_desc')
+        replica_server_name_index = columns.index('replica_server_name')
+        resource_group_id_index = columns.index('resource_group_id')
+        is_local_index = columns.index('is_local')
+
+        for row in rows:
+            is_local = row[is_local_index]
+            resource_group_id = row[resource_group_id_index]
+            selected_ag = self.cfg_instance.get('availability_group')
+
+            if self.cfg_instance.get('only_emit_local') and not is_local:
+                continue
+
+            elif selected_ag and selected_ag != resource_group_id:
+                continue
+
+            column_val = row[value_column_index]
+            failover_mode_desc = row[failover_mode_desc_index]
+            is_primary_replica = row[is_primary_replica_index]
+            replica_server_name = row[replica_server_name_index]
+            resource_group_id = row[resource_group_id_index]
+
+            metric_tags = [
+                'replica_server_name:{}'.format(str(replica_server_name)),
+                'availability_group:{}'.format(str(resource_group_id)),
+                'is_primary_replica:{}'.format(str(is_primary_replica)),
+                'failover_mode_desc:{}'.format(str(failover_mode_desc)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 

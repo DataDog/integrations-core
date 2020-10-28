@@ -38,6 +38,26 @@ instances:
     #
     # database: master
 
+    ## @param include_ao_metrics - boolean - optional - default: false
+    ## Include AlwaysOn availability group metrics.
+    #
+    # include_ao_metrics: false
+
+    ## @param availability_group - string - optional
+    ## You can specify an availability group when `include_ao_metrics`
+    ## is enabled to monitor a specific availability group.
+    ## If no availability group is specified, then all availability
+    ## groups on the current replica will output metrics.
+    #
+    # availability_group: <AVAILABILITY_GROUP>
+
+    ## @param only_emit_local - boolean - optional - default: false
+    ## Primary replicas may emit metrics for remote secondary replicas
+    ## in the same availability group. If this option is set to true,
+    ## the primary replica will only emit information local to itself.
+    #
+    # only_emit_local: false
+
     ## @param include_instance_metrics - boolean - optional - default: true
     ## Include server-level instance metrics.  When setting up multiple instances for
     ## different databases on the same host these metrics will be duplicated unless this option is turned off.
