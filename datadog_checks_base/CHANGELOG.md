@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.3.0 / 2020-10-28
+
+* [Added] Support '*' (match all) in OpenMetrics labels_to_match - allows to apply labels to all timeseries. See [#7769](https://github.com/DataDog/integrations-core/pull/7769).
+
 ## 15.2.0 / 2020-10-27
 
 * [Added] Add database statement-level metrics utils. See [#7837](https://github.com/DataDog/integrations-core/pull/7837).
