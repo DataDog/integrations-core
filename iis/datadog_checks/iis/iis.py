@@ -69,9 +69,9 @@ class IIS(PDHBaseCheck):
                 continue
 
             try:
-                if counter._class_name == 'Web Service':
+                if counter.english_class_name == 'Web Service':
                     self.collect_sites(dd_name, metric_func, counter, counter_values)
-                elif counter._class_name == 'APP_POOL_WAS':
+                elif counter.english_class_name == 'APP_POOL_WAS':
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
 
             except Exception as e:
