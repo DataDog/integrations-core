@@ -1,14 +1,33 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+sqlserver.access.page_splits,gauge,,operation,second,The number of page splits per second.,-1,sql_server,page splits
 sqlserver.buffer.cache_hit_ratio,gauge,,fraction,,The ratio of data pages found and read from the buffer cache over all data page requests.,1,sql_server,buff hit ratio
+sqlserver.buffer.checkpoint_pages,gauge,,page,second,The number of pages flushed to disk per second by a checkpoint or other operation that require all dirty pages to be flushed.,-1,sql_server,checkpoint pages
 sqlserver.buffer.page_life_expectancy,gauge,,second,,Duration that a page resides in the buffer pool.,1,sql_server,buff page life expectancy
+sqlserver.buffer.page_reads,gauge,,page,,Indicates the number of physical database page reads that are issued per second. This statistic displays the total number of physical page reads across all databases.,-1,sql_server,buff page reads
+sqlserver.buffer.page_writes,gauge,,page,,Indicates the number of physical database page writes that are issued per second.,-1,sql_server,buff page writes
 sqlserver.stats.batch_requests,gauge,,request,second,The number of batch requests per second.,1,sql_server,batch requests
 sqlserver.stats.sql_compilations,gauge,,operation,second,The number of SQL compilations per second.,0,sql_server,sql compils
 sqlserver.stats.sql_recompilations,gauge,,operation,second,The number of SQL re-compilations per second.,-1,sql_server,sql recompils
 sqlserver.stats.connections,gauge,,connection,,The number of user connections.,0,sql_server,conns
 sqlserver.stats.lock_waits,gauge,,lock,second,The number of times per second that SQL Server is unable to retain a lock right away for a resource.,-1,sql_server,lock waits
-sqlserver.access.page_splits,gauge,,operation,second,The number of page splits per second.,-1,sql_server,page splits
 sqlserver.stats.procs_blocked,gauge,,process,,The number of processes blocked.,-1,sql_server,procs blocked
-sqlserver.buffer.checkpoint_pages,gauge,,page,second,The number of pages flushed to disk per second by a checkpoint or other operation that require all dirty pages to be flushed.,-1,sql_server,checkpoint pages
+sqlserver.stats.auto_param_attempts,gauge,,attempt,,Number of auto-parameterization attempts per second.,-1,sql_server,stats auto param
+sqlserver.stats.failed_auto_param_attempts,gauge,,attempt,,Number of failed auto-parameterization attempts per second.,-1,sql_server,stats failed auto param
+sqlserver.stats.safe_auto_param_attempts,gauge,,attempt,,Number of safe auto-parameterization attempts per second.,0,sql_server,stats safe auto param
+sqlserver.cache.object_counts,gauge,,object,,Number of cache objects in the cache.,0,sql_server,cache obj counts
+sqlserver.cache.pages,gauge,,object,,Number of 8-kilobyte (KB) pages used by cache objects.,0,sql_server,cache pages
+sqlserver.database.backup_restore_throughput,gauge,,,,Read/write throughput for backup and restore operations of a database per second.,0,sql_server,database restore throughput
+sqlserver.database.log_bytes_flushed,gauge,,byte,,Total number of log bytes flushed.,0,sql_server,database log byte flushed
+sqlserver.database.log_flushes,gauge,,flush,,Number of log flushes per second.,0,sql_server,database log flushes
+sqlserver.database.log_flush_wait,gauge,,millisecond,,"Total wait time (in milliseconds) to flush the log. On an Always On secondary database, this value indicates the wait time for log records to be hardened to disk.",-1,sql_server,database log flush wait time
+sqlserver.database.transactions,gauge,,transaction,,Number of transactions started for the SQL Server instance per second.,0,sql_server,database trans
+sqlserver.database.write_transactions,gauge,,transaction,,"Number of transactions that wrote to all databases on the SQL Server instance and committed, in the last second.",0,sql_server,database trans write
+sqlserver.database.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary",0,sql_server,database state
+sqlserver.database.files.size,gauge,,kibibyte,,Current size of the database file,0,sql_server,database file size
+sqlserver.database.files.status,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
+sqlserver.database.active_transactions,gauge,,transaction,,Number of active transactions across all databases on the SQL Server instance.,0,sql_server,database trans active
+sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending
+sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total
 sqlserver.scheduler.current_tasks_count,gauge,,task,,Number of current tasks that are associated with this scheduler.,0,sql_server,task count
 sqlserver.scheduler.current_workers_count,gauge,,worker,,Number of workers that are associated with this scheduler.,0,sql_server,worker count
 sqlserver.scheduler.active_workers_count,gauge,,worker,,"Number of workers that are active. An active worker is never preemptive, must have an associated task, and is either running, runnable, or suspended.",0,sql_server,active worker

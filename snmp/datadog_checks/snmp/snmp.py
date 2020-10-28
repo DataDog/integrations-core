@@ -86,6 +86,9 @@ class SnmpCheck(AgentCheck):
         self.optimize_mib_memory_usage = is_affirmative(self.init_config.get('optimize_mib_memory_usage', False))
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
+        self.refresh_oids_cache_interval = int(
+            self.init_config.get('refresh_oids_cache_interval', InstanceConfig.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
+        )
 
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
@@ -149,6 +152,7 @@ class SnmpCheck(AgentCheck):
             instance,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
+            refresh_oids_cache_interval=self.refresh_oids_cache_interval,
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
             loader=loader,

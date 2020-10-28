@@ -92,14 +92,19 @@ def format_config(config):
     return config
 
 
-def replay_check_run(agent_collector, stub_aggregator):
+def replay_check_run(agent_collector, stub_aggregator, stub_agent):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
+        inventories = collector.get('inventories')
         runner = collector.get('runner', {})
         check_id = runner.get('CheckID', '')
         check_name = runner.get('CheckName', '')
 
+        if inventories:
+            for metadata in inventories.values():
+                for meta_key, meta_val in metadata.items():
+                    stub_agent.set_check_metadata(check_name, meta_key, meta_val)
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
                 raw_metric_type = data['type']

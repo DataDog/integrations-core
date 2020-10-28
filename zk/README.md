@@ -14,7 +14,7 @@ The Zookeeper check is included in the [Datadog Agent][3] package, so you don't 
 
 ### Configuration
 
-#### Zookeepr whitelist
+#### Zookeeper whitelist
 
 As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][7]) that whitelists [four letter word commands][8]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 

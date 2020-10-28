@@ -1,4 +1,5 @@
 # (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from codecs import open
@@ -27,7 +28,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
 
 setup(
     name='datadog-lighttpd',

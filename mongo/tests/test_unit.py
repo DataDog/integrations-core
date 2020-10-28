@@ -135,14 +135,30 @@ def test_parse_server_config(check):
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
     check = check(instance)
-    assert check.server == 'mongodb://john+doe:p%40ss%5Cword@localhost:27017,localhost:27018/test?replicaSet=bar%21baz'
+    assert check.server == 'mongodb://john+doe:p%40ss%5Cword@localhost,localhost:27018/test?replicaSet=bar%21baz'
     assert check.username == 'john doe'
     assert check.password == 'p@ss\\word'
     assert check.db_name == 'test'
     assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
-    assert check.clean_server_name == (
-        'mongodb://john doe:*****@localhost:27017,localhost:27018/test?replicaSet=bar!baz'
-    )
+    assert check.clean_server_name == ('mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz')
+    assert check.auth_source == 'test'
+
+
+def test_username_no_password(check):
+    """Configuring the check with a username and without a password should be allowed in order to support
+    x509 connection string for MongoDB < 3.4"""
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'username': 'john doe',  # Space
+        'database': 'test',
+        'options': {'replicaSet': 'bar!baz'},  # Special character
+    }
+    check = check(instance)
+    assert check.server == 'mongodb://john+doe@localhost,localhost:27018/test?replicaSet=bar%21baz'
+    assert check.username == 'john doe'
+    assert check.db_name == 'test'
+    assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
+    assert check.clean_server_name == ('mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz')
     assert check.auth_source == 'test'
 
 

@@ -1757,6 +1757,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
+        'kube_global_labels': {'label_to_match': '*', 'labels_to_get': ['*']},
+        'kube_local_labels': {'labels_to_match': ['*'], 'labels_to_get': ['foo']},
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
         'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
         'kube_deployment_labels': {
@@ -1786,6 +1788,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:event-exporter-v0.1.7-958884745-qgnbw',
             'namespace:kube-system',
             'condition:true',
@@ -1801,6 +1805,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-6dj58',
             'namespace:kube-system',
             'condition:true',
@@ -1818,6 +1824,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-z348z',
             'namespace:kube-system',
             'condition:true',
@@ -1835,6 +1843,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:heapster-v1.4.3-2027615481-lmjm5',
             'namespace:kube-system',
             'condition:true',
@@ -1850,6 +1860,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-lvrmx',
             'namespace:kube-system',
             'condition:true',
@@ -1864,6 +1876,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-x0tjx',
             'namespace:kube-system',
             'condition:true',
@@ -1878,6 +1892,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-autoscaler-97162954-mf6d3',
             'namespace:kube-system',
             'condition:true',
@@ -1892,6 +1908,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-proxy-gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'namespace:kube-system',
             'condition:true',
@@ -1906,6 +1924,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:ungaged-panther-kube-state-metrics-3918010230-64xwc',
             'namespace:default',
             'condition:true',
@@ -1921,6 +1941,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:event-exporter-v0.1.7-958884745-qgnbw',
             'namespace:kube-system',
             'condition:true',
@@ -1936,6 +1958,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-6dj58',
             'namespace:kube-system',
             'condition:true',
@@ -1953,6 +1977,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-z348z',
             'namespace:kube-system',
             'condition:true',
@@ -1970,6 +1996,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:heapster-v1.4.3-2027615481-lmjm5',
             'namespace:kube-system',
             'condition:true',
@@ -1985,6 +2013,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-lvrmx',
             'namespace:kube-system',
             'condition:true',
@@ -1999,6 +2029,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-x0tjx',
             'namespace:kube-system',
             'condition:true',
@@ -2013,6 +2045,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:event-exporter-v0.1.7',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
@@ -2025,6 +2059,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:heapster-v1.4.3',
             'label_k8s_app:heapster',
@@ -2037,6 +2073,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         2.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:kube-dns',
             'label_kubernetes_io_cluster_service:true',
@@ -2049,6 +2087,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:kube-dns-autoscaler',
             'label_kubernetes_io_cluster_service:true',
@@ -2061,6 +2101,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:kubernetes-dashboard',
             'label_kubernetes_io_cluster_service:true',
@@ -2073,6 +2115,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:l7-default-backend',
             'label_k8s_app:glbc',
@@ -2082,12 +2126,15 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         count=1,
     )
     aggregator.assert_metric(
-        'ksm.deploy.replicas.available', 1.0, tags=['namespace:kube-system', 'deployment:tiller-deploy'], count=1
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=['leader:true', 'foo:bar', 'namespace:kube-system', 'deployment:tiller-deploy'],
+        count=1,
     )
     aggregator.assert_metric(
         'ksm.deploy.replicas.available',
         1.0,
-        tags=['namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
+        tags=['leader:true', 'foo:bar', 'namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
         count=1,
     )
 

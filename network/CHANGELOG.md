@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 1.18.1 / 2020-09-28
+## 1.18.1 / 2020-09-28 / Agent 7.23.0
 
 * [Fixed] Fix procfs_path retrieval in network check. See [#7652](https://github.com/DataDog/integrations-core/pull/7652).
 

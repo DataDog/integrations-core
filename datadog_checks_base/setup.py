@@ -63,11 +63,30 @@ setup(
     extras_require={
         'deps': get_requirements(
             'requirements.in',
-            exclude=['kubernetes', 'orjson', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
+            exclude=[
+                'kubernetes',
+                'mmh3',
+                'orjson',
+                'pysocks',
+                'requests-kerberos',
+                'requests_ntlm',
+                'win-inet-pton',
+                'cryptography',
+                'pyjwt',
+            ],
         ),
+        'db': get_requirements('requirements.in', only=['mmh3']),
         'http': get_requirements(
             'requirements.in',
-            only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'requests-unixsocket', 'win-inet-pton'],
+            only=[
+                'pysocks',
+                'requests-kerberos',
+                'requests_ntlm',
+                'requests-unixsocket',
+                'win-inet-pton',
+                'cryptography',
+                'pyjwt',
+            ],
         ),
         'json': get_requirements('requirements.in', only=['orjson']),
         'kube': get_requirements('requirements.in', only=['kubernetes']),

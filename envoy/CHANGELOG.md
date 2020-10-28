@@ -1,6 +1,12 @@
 # CHANGELOG - Envoy
 
-## 1.18.0 / 2020-09-21
+## 1.19.0 / 2020-10-07
+
+* [Added] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Update Watchdog metrics. See [#7740](https://github.com/DataDog/integrations-core/pull/7740).
+* [Fixed] Properly handle a parsing edge case. See [#7717](https://github.com/DataDog/integrations-core/pull/7717).
+
+## 1.18.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
 * [Fixed] Do not render null defaults for config spec example consumer. See [#7503](https://github.com/DataDog/integrations-core/pull/7503).

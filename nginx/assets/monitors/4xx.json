@@ -13,7 +13,7 @@
 		"new_host_delay": 300,
 		"require_full_window": false,
 		"notify_no_data": false,
-		"renotify_interval": "0",
+		"renotify_interval": 0,
 		"escalation_message": "",
 		"no_data_timeframe": null,
 		"include_tags": true,

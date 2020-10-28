@@ -26,3 +26,8 @@ files:
               type: integer
               example: 10
           - template: instances/default
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/statsd/statsd.log
+            source: statsd

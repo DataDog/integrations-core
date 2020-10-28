@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_scheduler
 
-## 1.5.0 / 2020-09-21
+## 1.5.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add kube_scheduler config spec. See [#7614](https://github.com/DataDog/integrations-core/pull/7614).
 

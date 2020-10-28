@@ -1,6 +1,6 @@
 # CHANGELOG - Aspdotnet
 
-## 1.6.1 / 2020-09-21
+## 1.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
 

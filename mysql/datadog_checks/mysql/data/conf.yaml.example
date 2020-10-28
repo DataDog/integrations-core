@@ -100,7 +100,7 @@ instances:
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `clickhouse.` to form
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
     ##                          the full metric name. If `type` is `tag`, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
@@ -223,6 +223,14 @@ instances:
         ## MySQL integration tile in the Datadog Web UI for further instructions.
         #
         # extra_performance_metrics: false
+
+    ## @param deep_database_monitoring - boolean - optional - default: false
+    ## Set to `true` to enable the BETA features for Deep Database Monitoring.
+    ##
+    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+    ## success manager or Datadog support.
+    #
+    # deep_database_monitoring: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

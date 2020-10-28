@@ -142,7 +142,17 @@ def test_metric(aggregator, instance_basic, dd_run_check, additional_metrics, ex
 def test_metadata(datadog_agent, dd_run_check, instance_basic):
     check = get_check(instance_basic)
     dd_run_check(check)
+    _assert_metadata(datadog_agent)
 
+
+def _assert_all_metrics(aggregator):
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def _assert_metadata(datadog_agent, check_id=''):
     raw_version = PROXYSQL_VERSION
     major, minor = raw_version.split('.')[:2]
     version_metadata = {
@@ -152,14 +162,7 @@ def test_metadata(datadog_agent, dd_run_check, instance_basic):
         'version.patch': mock.ANY,
         'version.raw': mock.ANY,
     }
-    datadog_agent.assert_metadata('', version_metadata)
-
-
-def _assert_all_metrics(aggregator):
-    for metric in ALL_METRICS:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
+    datadog_agent.assert_metadata(check_id, version_metadata)
 
 
 @pytest.mark.integration
@@ -179,6 +182,7 @@ def test_all_metrics_stats_user(aggregator, instance_stats_user, dd_run_check):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_e2e(dd_agent_check, datadog_agent):
     aggregator = dd_agent_check(rate=True)
+    _assert_metadata(datadog_agent, check_id='proxysql')
     _assert_all_metrics(aggregator)

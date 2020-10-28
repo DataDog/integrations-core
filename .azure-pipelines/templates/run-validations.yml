@@ -52,6 +52,9 @@ steps:
 - script: ddev validate package
   displayName: 'Validate package'
 
+- script: ddev validate jmx-metrics
+  displayName: 'Validate JMX integrations metrics.yaml'
+
 - ${{ if eq(parameters.repo, 'marketplace') }}:
   - script: ddev validate eula
     displayName: 'Validate EULA files'

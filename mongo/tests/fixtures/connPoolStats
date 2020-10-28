@@ -1,0 +1,218 @@
+{
+    "numClientConnections": 4,
+    "numAScopedConnections": 0,
+    "totalInUse": 0,
+    "totalAvailable": 3,
+    "totalCreated": 692,
+    "totalRefreshing": 0,
+    "pools": {
+        "NetworkInterfaceTL-ShardRegistry": {
+            "poolInUse": 0,
+            "poolAvailable": 3,
+            "poolCreated": 692,
+            "poolRefreshing": 0,
+            "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017": {
+                "inUse": 0,
+                "available": 1,
+                "created": 655,
+                "refreshing": 0
+            },
+            "mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017": {
+                "inUse": 0,
+                "available": 1,
+                "created": 19,
+                "refreshing": 0
+            },
+            "mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017": {
+                "inUse": 0,
+                "available": 1,
+                "created": 18,
+                "refreshing": 0
+            }
+        }
+    },
+    "hosts": {
+        "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017": {
+            "inUse": 0,
+            "available": 1,
+            "created": 655,
+            "refreshing": 0
+        },
+        "mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017": {
+            "inUse": 0,
+            "available": 1,
+            "created": 19,
+            "refreshing": 0
+        },
+        "mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017": {
+            "inUse": 0,
+            "available": 1,
+            "created": 18,
+            "refreshing": 0
+        }
+    },
+    "replicaSets": {
+        "mongo-mongodb-sharded-shard-2": {
+            "hosts": [
+                {
+                    "addr": "mongo-mongodb-sharded-shard2-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": true,
+                    "hidden": false,
+                    "secondary": false,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard2-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard2-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                }
+            ]
+        },
+        "mongo-mongodb-sharded-shard-3": {
+            "hosts": [
+                {
+                    "addr": "mongo-mongodb-sharded-shard3-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": true,
+                    "hidden": false,
+                    "secondary": false,
+                    "pingTimeMillis": 0
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard3-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard3-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                }
+            ]
+        },
+        "mongo-mongodb-sharded-configsvr": {
+            "hosts": [
+                {
+                    "addr": "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": true,
+                    "hidden": false,
+                    "secondary": false,
+                    "pingTimeMillis": 0
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 2
+                }
+            ]
+        },
+        "mongo-mongodb-sharded-shard-0": {
+            "hosts": [
+                {
+                    "addr": "mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": true,
+                    "hidden": false,
+                    "secondary": false,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                }
+            ]
+        },
+        "mongo-mongodb-sharded-shard-1": {
+            "hosts": [
+                {
+                    "addr": "mongo-mongodb-sharded-shard1-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": true,
+                    "hidden": false,
+                    "secondary": false,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard1-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                },
+                {
+                    "addr": "mongo-mongodb-sharded-shard1-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+                    "ok": true,
+                    "ismaster": false,
+                    "hidden": false,
+                    "secondary": true,
+                    "pingTimeMillis": 1
+                }
+            ]
+        }
+    },
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1602494440,
+            "i": 2
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1602494440,
+                "i": 2
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "BPrrQ7Zx3j20XDq+jNr25NKR6f8=",
+                "$type": "00"
+            },
+            "keyId": 6857852638906548233
+        }
+    }
+}

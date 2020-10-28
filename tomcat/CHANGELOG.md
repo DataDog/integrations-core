@@ -1,6 +1,6 @@
 # CHANGELOG - tomcat
 
-## 1.3.3 / 2020-09-21
+## 1.3.3 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
 

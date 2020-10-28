@@ -50,3 +50,5 @@ snowflake.replication.credits_used.avg,gauge,,unit,,Average number of credits us
 snowflake.replication.credits_used.sum,gauge,,unit,,Total number of credits used for database replication.,0,snowflake,replication credits sum
 snowflake.replication.bytes_transferred.avg,gauge,,byte,,Average number of bytes transferred for database replication.,0,snowflake,replication bytes avg
 snowflake.replication.bytes_transferred.sum,gauge,,byte,,Total number of bytes transferred for database replication.,0,snowflake,replication bytes sum
+snowflake.query.bytes_spilled.local,gauge,,byte,,Avg volume of data spilled to local disk.,0,snowflake,bytes spilled local
+snowflake.query.bytes_spilled.remote,gauge,,byte,,Avg volume of data spilled to remote disk.,0,snowflake,bytes spilled remote

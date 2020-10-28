@@ -9,6 +9,16 @@ files:
         service_check_prefix.required: true
         service_check_prefix.value.example: jboss
         service_check_prefix.description: Service check prefix to use.
+    - name: custom_jar_paths
+      description: |
+        These are the client JARs which allow connecting to the JBoss default JMX implementation.
+        See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - /path/to/jboss-cli-client.jar
   - template: instances
     options:
     - template: instances/jmx
@@ -23,6 +33,7 @@ files:
         jmx_url.display_priority: 10
         host.required: false
         port.required: false
+
   - template: logs
     example:
     - type: file

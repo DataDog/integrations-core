@@ -8,10 +8,10 @@ from decimal import ROUND_HALF_DOWN
 
 import mock
 import pytest
-from six import PY3
+from six import PY2, PY3
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
-from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.containers import hash_mutable, iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
@@ -149,6 +149,58 @@ class TestContainers:
         ]
 
         assert len(list(iter_unique(custom_queries))) == 1
+
+    @pytest.mark.parametrize(
+        'value',
+        [
+            pytest.param({'x': 'y'}, id='dict'),
+            pytest.param({'x': 'y', 'z': None}, id='dict-with-none-value'),
+            pytest.param({'x': 'y', None: 't'}, id='dict-with-none-key'),
+            pytest.param({'x': ['y', 'z'], 't': 'u'}, id='dict-nest-list'),
+            pytest.param(['x', 'y'], id='list'),
+            pytest.param(['x', None], id='list-with-none'),
+            pytest.param(('x', None), id='tuple-with-none'),
+            pytest.param({'x', None}, id='set-with-none'),
+        ],
+    )
+    def test_hash_mutable(self, value):
+        h = hash_mutable(value)
+        assert isinstance(h, int)
+
+    @pytest.mark.skipif(
+        PY2,
+        reason="In Python 2, a < b when a and b are of different types returns `False` (does not raise `TypeError`)",
+    )
+    @pytest.mark.parametrize(
+        'value',
+        [
+            pytest.param(['x', 1], id='mixed-list'),
+            pytest.param(['x', [1, 2, 3]], id='mixed-list-nested-1'),
+            pytest.param(['x', {'y': 'z'}], id='mixed-list-nested-2'),
+            pytest.param(('x', 1), id='mixed-tuple'),
+            pytest.param({'x', 1}, id='mixed-set'),
+            pytest.param({'x': 1, 2: 'y'}, id='mixed-dict-keys'),
+        ],
+    )
+    def test_hash_mutable_unsupported_mixed_type(self, value):
+        """
+        Hashing mixed type containers is not supported, mostly because we haven't needed to add support for it yet.
+        """
+        with pytest.raises(TypeError):
+            hash_mutable(value)
+
+    @pytest.mark.parametrize(
+        'left, right',
+        [
+            pytest.param([1, 2], [2, 1], id='top-level'),
+            pytest.param({'x': [1, 2]}, {'x': [2, 1]}, id='nested'),
+        ],
+    )
+    def test_hash_mutable_commutative(self, left, right):
+        """
+        hash_mutable() is expected to return the same hash regardless of the order of items in the container.
+        """
+        assert hash_mutable(left) == hash_mutable(right)
 
 
 class TestBytesUnicode:

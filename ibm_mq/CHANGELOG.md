@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 3.9.0 / 2020-09-21
+## 3.9.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Support Certificate Label and login/password for SSL conf. See [#7202](https://github.com/DataDog/integrations-core/pull/7202).
 * [Fixed] Raise exception on connection error. See [#7563](https://github.com/DataDog/integrations-core/pull/7563).

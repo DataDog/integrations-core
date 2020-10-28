@@ -14,7 +14,11 @@ init_config:
 instances:
 
     ## @param database_url - string - required
-    ## `database_url` parameter should point to PgBouncer stats database url
+    ## The PgBouncer stats database URL.
+    ##
+    ## If the password contains special characters, be sure to escape them using percent encoding.
+    ##
+    ## See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
     #
   - database_url: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
 
