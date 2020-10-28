@@ -58,6 +58,11 @@ instances:
     #
     # only_emit_local: false
 
+    ## @param ao_database - string - optional
+    ## AlwaysOn metrics will only be emitted for the selected `ao_database`.
+    #
+    # ao_database: <AO_DATABASE>
+
     ## @param include_instance_metrics - boolean - optional - default: true
     ## Include server-level instance metrics.  When setting up multiple instances for
     ## different databases on the same host these metrics will be duplicated unless this option is turned off.
