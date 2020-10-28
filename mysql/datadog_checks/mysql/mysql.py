@@ -43,6 +43,7 @@ from .queries import (
     SQL_QUERY_SCHEMA_SIZE,
     SQL_WORKER_THREADS,
 )
+from .statements import MySQLStatementMetrics
 from .version_utils import get_version
 
 try:
@@ -72,6 +73,7 @@ class MySql(AgentCheck):
         self._conn = None
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.config.tags)
+        self._statement_metrics = MySQLStatementMetrics(self.config)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self.config.configuration_checks)
@@ -106,6 +108,8 @@ class MySql(AgentCheck):
                     db, self.config.tags, self.config.options, self.config.queries, self.config.max_custom_queries
                 )
                 self._collect_system_metrics(self.config.host, db, self.config.tags)
+                if self.config.deep_database_monitoring:
+                    self._collect_statement_metrics(db, self.config.tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -345,6 +349,12 @@ class MySql(AgentCheck):
 
             if len(queries) > max_custom_queries:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest.", max_custom_queries)
+
+    def _collect_statement_metrics(self, db, tags):
+        tags = self.service_check_tags + tags
+        metrics = self._statement_metrics.collect_per_statement_metrics(db)
+        for metric_name, metric_value, metric_tags in metrics:
+            self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves

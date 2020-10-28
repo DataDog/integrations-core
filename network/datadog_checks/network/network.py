@@ -333,6 +333,12 @@ class Network(AgentCheck):
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
+                    cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                    for (state, recvq, sendq) in self._parse_queues("ss", output):
+                        self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                        self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
+
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
@@ -353,6 +359,11 @@ class Network(AgentCheck):
                 metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
+
+                for (state, recvq, sendq) in self._parse_queues("netstat", output):
+                    self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                    self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
+
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection states.")
 
@@ -854,3 +865,25 @@ class Network(AgentCheck):
         protocol = self.PSUTIL_TYPE_MAPPING.get(conn.type, '')
         family = self.PSUTIL_FAMILY_MAPPING.get(conn.family, '')
         return '{}{}'.format(protocol, family)
+
+    def _parse_queues(self, tool, ss_output):
+        """
+        for each line of `ss_output`, returns a triplet with:
+        * a connection state (`established`, `listening`)
+        * the receive queue size
+        * the send queue size
+        """
+        for line in ss_output.splitlines():
+            fields = line.split()
+
+            if len(fields) < (6 if tool == "netstat" else 3):
+                continue
+
+            state_column = 0 if tool == "ss" else 5
+
+            try:
+                state = self.tcp_states[tool][fields[state_column]]
+            except KeyError:
+                continue
+
+            yield (state, fields[1], fields[2])
