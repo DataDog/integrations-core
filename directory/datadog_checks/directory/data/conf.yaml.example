@@ -21,18 +21,18 @@ instances:
     #
   - directory: <DIRECTORY>
 
-    ## @param name - string - optional
+    ## @param name - string - optional - default: <DIRECTORY>
     ## Tag metrics with a specified name.
     #
     # name: <DIRECTORY>
 
-    ## @param dirtagname - string - optional
+    ## @param dirtagname - string - optional - default: <DIRECTORY_TAG_KEY>
     ## The name of the key for the tag used for the directory, the value is the value of the `name` option.
     ## The resulting tag attached is "<DIRECTORY_TAG_KEY>:<DIRECTORY>".
     #
     # dirtagname: <DIRECTORY_TAG_KEY>
 
-    ## @param filetagname - string - optional
+    ## @param filetagname - string - optional - default: <TAG_KEY_FILENAME>
     ## The name of the key for the tag used for each file, the value is the filename.
     ## The resulting tag is "<filetagname>:<filename>". The option is only used when `filegauges` is enabled
     ## and if the directory contains 20 files or less (including sub-directories).

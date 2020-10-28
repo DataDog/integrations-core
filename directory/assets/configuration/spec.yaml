@@ -21,6 +21,7 @@ files:
       value:
         type: string
         example: <DIRECTORY>
+        default: <DIRECTORY>
     - name: dirtagname
       description: |
         The name of the key for the tag used for the directory, the value is the value of the `name` option.
@@ -28,6 +29,7 @@ files:
       value:
         type: string
         example: <DIRECTORY_TAG_KEY>
+        default: <DIRECTORY_TAG_KEY>
     - name: filetagname
       description: |
         The name of the key for the tag used for each file, the value is the filename.
@@ -36,6 +38,7 @@ files:
       value:
         type: string
         example: <TAG_KEY_FILENAME>
+        default: <TAG_KEY_FILENAME>
     - name: filegauges
       description: When enabled, stats are an individual gauge per file (max. 20 files!) and not a histogram of the whole directory.
       value:
