@@ -167,5 +167,3 @@ class AirflowCheck(AgentCheck):
 ...
 
 ```
-
-Before the first Airflow check runs, `self._parse_config` will execute in `base.py`'s `run()` function:
