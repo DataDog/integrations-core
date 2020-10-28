@@ -72,6 +72,31 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param ssl - boolean - optional - default: false
+    ## Enable SSL on Zookeeper
+    #
+    # ssl: false
+
+    ## @param private_key - string - optional
+    ## private key
+    #
+    # private_key: <PRIVATE_KEY>
+
+    ## @param ca_cert - string - optional
+    ## ca_cert
+    #
+    # ca_cert: <CA_CERT>
+
+    ## @param cert - string - optional
+    ## cert
+    #
+    # cert: <CERT>
+
+    ## @param password - string - optional
+    ## password of key
+    #
+    # password: <PASSWORD>
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)

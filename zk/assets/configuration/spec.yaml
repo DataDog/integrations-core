@@ -48,6 +48,38 @@ files:
               type: boolean
 
           - template: instances/default
+          - name: ssl
+            description: |
+              Enable SSL on Zookeeper
+            value:
+              type: boolean
+              example: false
+              default: false
+
+
+          - name: private_key
+            description: |
+              private key
+            value:
+              type: string
+
+          - name: ca_cert
+            description: |
+              ca_cert
+            value:
+              type: string
+
+          - name: cert
+            description: |
+              cert
+            value:
+              type: string
+
+          - name: password
+            description: |
+              password of key
+            value:
+              type: string
 
       - template: logs
         example:
