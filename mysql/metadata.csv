@@ -179,3 +179,14 @@ mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cach
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th
 mysql.performance.query_run_time.avg,gauge,,microsecond,,Avg query response time per schema.,0,mysql,mysql response time avg
 mysql.binlog.disk_use,gauge,,byte,,Total binary log file size.,0,mysql,mysql binlog disk
+mysql.queries.count,count,,query,,The total count of executed queries per query per schema.,0,mysql,mysql queries count
+mysql.queries.errors,count,,error,,The total count of queries run with an error per query per schema.,0,mysql,mysql query errors
+mysql.queries.time,count,,nanosecond,,The total query execution time per query per schema.,0,mysql,mysql queries total time
+mysql.queries.select_scan,count,,,,The total count of full table scans on the first table per query per schema.,0,mysql,mysql queries select scan
+mysql.queries.select_full_join,count,,,,The total count of full table scans on a joined table per query per schema.,0,mysql,mysql queries select full join
+mysql.queries.no_index_used,count,,query,,The total count of queries which do not use an index per query per schema.,0,mysql,mysql queries no index used
+mysql.queries.no_good_index_used,count,,query,,The total count of queries which used a sub-optimal index per query per schema.,0,mysql,mysql queries no good index used
+mysql.queries.lock_time,count,,nanosecond,,The total time spent waiting on locks per query per schema.,0,mysql,mysql queries lock time
+mysql.queries.rows_affected,count,,row,,The number of rows mutated per query per schema.,0,mysql,mysql queries rows affected
+mysql.queries.rows_sent,count,,row,,The number of rows sent per query per schema.,0,mysql,mysql queries rows sent
+mysql.queries.rows_examined,count,,row,,The number of rows examined per query per schema.,0,mysql,mysql queries rows examined

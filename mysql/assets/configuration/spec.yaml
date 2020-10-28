@@ -235,6 +235,18 @@ files:
                   type: boolean
                   example: false
 
+          - name: deep_database_monitoring
+            description: |
+              Set to `true` to enable the BETA features for Deep Database Monitoring.
+
+              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+              success manager or Datadog support.
+            enabled: false
+            value:
+              type: boolean
+              example: true
+              default: false
+
           - template: instances/default
 
       - template: logs
