@@ -72,42 +72,42 @@ This list enumerates what is collected from your system by each integration. For
 #### Gauge
 The gauge metric submission type represents a snapshot of events in one time interval. This representative snapshot value is the last value submitted to the Agent during a time interval. A gauge can be used to take a measure of something reporting continuously—like the available disk space or memory used.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.gauge)
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.gauge)
 
 #### Count
 The count metric submission type represents the total number of event occurrences in one time interval. A count can be used to track the total number of connections made to a database or the total number of requests to an endpoint. This number of events can increase or decrease over time—it is not monotonically increasing.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.count).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.count).
 
 #### Monotonic Count
 Similar to Count, Monotonic Count represents the total number of event occurrences in one time interval. However, this value can ONLY increment.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.monotonic_count).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.monotonic_count).
 
 #### Rate
 The rate metric submission type represents the total number of event occurrences per second in one time interval. A rate can be used to track how often something is happening—like the frequency of connections made to a database or the flow of requests made to an endpoint.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.rate).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.rate).
 
 #### Histogram
 The histogram metric submission type represents the statistical distribution of a set of values calculated Agent-side in one time interval. Datadog’s histogram metric type is an extension of the StatsD timing metric type: the Agent aggregates the values that are sent in a defined time interval and produces different metrics which represent the set of values.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.histogram).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.histogram).
 
 #### Historate
 Similar to the histogram metric, the historate represents statistical distribution over one time interval, although this is based on rate metrics.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.historate).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.historate).
 
 ### Service Checks
 Service checks are a type of monitor used to track the uptime status of the service. For more information, see the [Service checks](https://docs.datadoghq.com/developers/service_checks/) guide.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.service_check).
 
 ### Events
 Events are informational messages about your system that are consumed by [the events stream](https://app.datadoghq.com/event/stream) so that you can build monitors on them.
 
-For more information, see the [API documentation](https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.event).
+For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.event).
 
 ## Namespacing
 
