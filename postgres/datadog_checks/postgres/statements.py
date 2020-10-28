@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from __future__ import unicode_literals
+from typing import Any, Dict, List, Tuple, Union
 
 import psycopg2
 import psycopg2.extras
@@ -10,6 +10,7 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
+from .config import PostgresConfig
 from .util import milliseconds_to_nanoseconds
 
 try:
@@ -61,15 +62,23 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
 DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
 
 
+Cursor = Union[psycopg2.cursor.Cursor, psycopg2.extras.DictCursor]
+TupleRow = Tuple[Any, ...]
+DictRow = Dict[str, Any]
+Metric = Tuple[str, int, List[str]]
+
+
 class PostgresStatementMetrics(object):
     """Collects telemetry for SQL statements"""
 
     def __init__(self, config):
+        # type: (PostgresConfig) -> None
         self.config = config
         self.log = get_check_logger()
         self._state = StatementMetrics()
 
     def _execute_query(self, cursor, query, params=()):
+        # type: (Cursor, str, Tuple) -> List[Any]
         try:
             cursor.execute(query, params)
             return cursor.fetchall()
@@ -78,6 +87,7 @@ class PostgresStatementMetrics(object):
             return []
 
     def _get_pg_stat_statements_columns(self, db):
+        # type: (psycopg2.connection) -> List[str]
         """
         Load the list of the columns available under the `pg_stat_statements` table. This must be queried because
         version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
@@ -89,10 +99,11 @@ class PostgresStatementMetrics(object):
             WHERE table_schema = 'public'
             AND table_name = 'pg_stat_statements';
             """
-        columns = self._execute_query(db.cursor(), query)
+        columns = self._execute_query(db.cursor(), query)  # type: List[TupleRow]
         return [column[0] for column in columns]
 
     def collect_per_statement_metrics(self, db):
+        # type: (psycopg2.connection) -> List[Metric]
         try:
             return self._collect_per_statement_metrics(db)
         except Exception:
@@ -101,7 +112,8 @@ class PostgresStatementMetrics(object):
             return []
 
     def _collect_per_statement_metrics(self, db):
-        metrics = []
+        # type: (psycopg2.connection) -> List[Metric]
+        metrics = []  # type: List[Metric]
 
         available_columns = self._get_pg_stat_statements_columns(db)
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - set(available_columns)
