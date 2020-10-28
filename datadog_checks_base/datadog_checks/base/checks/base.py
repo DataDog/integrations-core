@@ -686,7 +686,7 @@ class AgentCheck(object):
 
     def write_persistent_cache(self, key, value):
         """
-        It stores `value` in a persistent cache for this check instance.
+        Store `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
             - `%ProgramData%\Datadog\run` on Windows.
             - `/opt/datadog-agent/run` everywhere else.
