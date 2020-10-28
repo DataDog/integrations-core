@@ -11,7 +11,6 @@ parameters:
   pip_cache_config: null
   run_py2_tests: true  # Whether or not to run python2 tests
   coverage: true
-  install_vcpython27: false
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
@@ -34,7 +33,6 @@ jobs:
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
       run_py2_tests: ${{ parameters.run_py2_tests }}
-      install_vcpython27: ${{ parameters.install_vcpython27 }}
 
   - template: './set-up-integrations.yml'
     parameters:
