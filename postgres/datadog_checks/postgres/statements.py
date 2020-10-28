@@ -62,7 +62,7 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
 DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
 
 
-Cursor = Union[psycopg2.extensions.cursor, psycopg2.extras.DictCursor]
+Cursor = Union[psycopg2.cursor.Cursor, psycopg2.extras.DictCursor]
 TupleRow = Tuple[Any, ...]
 DictRow = Dict[str, Any]
 Metric = Tuple[str, int, List[str]]
@@ -180,7 +180,7 @@ class PostgresStatementMetrics(object):
                 value = row[column]
                 if column == 'query':
                     value = normalize_query_tag(value)
-                tags.append(u'{tag_name}:{value}'.format(tag_name=tag_name, value=value))
+                tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
 
             for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
                 if column not in row:
