@@ -48,8 +48,8 @@ METRICS = {
     "slim": ("gauge", "session.limit"),
     "spct": ("gauge", "session.pct"),  # Calculated as: (scur/slim)*100
     "stot": ("rate", "session.rate"),
-    "bin": ("rate", "bytes.in_rate"),
-    "bout": ("rate", "bytes.out_rate"),
+    "bin": [("rate", "bytes.in_rate"), ("gauge", "bytes.in.total")],
+    "bout": [("rate", "bytes.out_rate"), ("gauge", "bytes.out.total")],
     "dreq": ("rate", "denied.req_rate"),
     "dresp": ("rate", "denied.resp_rate"),
     "ereq": ("rate", "errors.req_rate"),

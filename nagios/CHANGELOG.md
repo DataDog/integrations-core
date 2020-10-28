@@ -1,6 +1,6 @@
 # CHANGELOG - nagios
 
-## 1.6.2 / 2020-09-04
+## 1.6.2 / 2020-09-04 / Agent 7.23.0
 
 * [Fixed] Fix tailer on missing file. See [#7447](https://github.com/DataDog/integrations-core/pull/7447).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

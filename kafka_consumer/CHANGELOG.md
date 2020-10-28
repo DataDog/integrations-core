@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.6.1 / 2020-09-21
+## 2.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] lazy initialisation of kafka_consumer client. See [#7432](https://github.com/DataDog/integrations-core/pull/7432).
 

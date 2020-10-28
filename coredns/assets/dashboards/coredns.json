@@ -1,0 +1,693 @@
+{
+    "author_name": "Datadog",
+    "description": "## CoreDNS\n\n Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits/misses.\n\n- [Official Integration Documentation](https://docs.datadoghq.com/integrations/coredns/)\n- [Monitor CoreDNS with Datadog](https://www.datadoghq.com/blog/monitor-coredns-with-datadog/)\n- [Debugging DNS in Kubernetes](https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/#check-for-errors-in-the-dns-pod)",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "cluster",
+            "prefix": "cluster_name"
+        },
+        {
+            "default": "*",
+            "name": "deployment",
+            "prefix": "kube_deployment"
+        },
+        {
+            "default": "*",
+            "name": "service",
+            "prefix": "kube_service"
+        },
+        {
+            "default": "*",
+            "name": "namespace",
+            "prefix": "kube_namespace"
+        },
+        {
+            "default": "*",
+            "name": "node",
+            "prefix": "node"
+        },
+        {
+            "default": "*",
+            "name": "label",
+            "prefix": "label"
+        }
+    ],
+    "title": "CoreDNS",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "With this dashboard, you can monitor CoreDNS in real time to visualize and monitor DNS failures and cache hits/misses.\n\n- [CoreDNS Integration Docs](https://docs.datadoghq.com/integrations/coredns/)\n- [Monitor CoreDNS with Datadog](https://www.datadoghq.com/blog/monitor-coredns-with-datadog/)\n- [Debugging DNS in Kubernetes](https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/#check-for-errors-in-the-dns-pod)",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2993467858169680,
+            "layout": {
+                "height": 20,
+                "width": 21,
+                "x": 1,
+                "y": 10
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Cache",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5182544530274736,
+            "layout": {
+                "height": 7,
+                "width": 73,
+                "x": 23,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Resource Usage",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1950886999791838,
+            "layout": {
+                "height": 7,
+                "width": 36,
+                "x": 97,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {type}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Cache hits vs misses",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4385058827074764,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 23,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.cache_size.count{$cluster,$deployment,$service,$namespace,$node,$label} by {type}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Cache size",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2642720154100436,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 60,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 0"
+                    }
+                ],
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count())",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Cache hit %",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 6972048120655176,
+            "layout": {
+                "height": 17,
+                "width": 73,
+                "x": 23,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The higher the hit ratio, the better.\n\nIf this is low, even while overall traffic is high, you should consider raising the TTL value in the CoreDNS cache plugin configuration to keep records cached longer.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8962466439948960,
+            "layout": {
+                "height": 18,
+                "width": 20,
+                "x": 1,
+                "y": 32
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# DNS  Latency",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7653316578764360,
+            "layout": {
+                "height": 7,
+                "width": 73,
+                "x": 23,
+                "y": 45
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "sum:coredns.request_duration.seconds.sum{$cluster,$deployment,$service,$namespace,$node,$label}/sum:coredns.request_duration.seconds.count{$cluster,$deployment,$service,$namespace,$node,$label}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Average request latency",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 320646088800770,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 23,
+                "y": 60
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "## Request",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7154635078804736,
+            "layout": {
+                "height": 6,
+                "width": 73,
+                "x": 23,
+                "y": 53
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "## Response",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8811567668706262,
+            "layout": {
+                "height": 6,
+                "width": 73,
+                "x": 23,
+                "y": 78
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If CoreDNS is slow to resolve requests, your users could encounter poor performance even if your backend services are all responding quickly.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8884649942795060,
+            "layout": {
+                "height": 14,
+                "width": 20,
+                "x": 1,
+                "y": 61
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "sum:coredns.forward_request_duration.seconds.sum{$cluster,$deployment,$service,$namespace,$node,$label}/sum:coredns.forward_request_duration.seconds.count{$cluster,$deployment,$service,$namespace,$node,$label}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Average upstream request latency",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8307784193837618,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 60,
+                "y": 60
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.response_code_count{$cluster,$deployment,$service,$namespace,$node,$label} by {rcode}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Rcode count",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 6283620524667266,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 23,
+                "y": 85
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "When CoreDNS encounters an error, it returns an rcode\u2014a standard DNS error code. \n\nErrors like NXDomain and FormErr can reveal a problem with the requests CoreDNS is receiving, while a ServFail error could indicate an issue with the function of the CoreDNS server itself. ",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4153567937349976,
+            "layout": {
+                "height": 24,
+                "width": 20,
+                "x": 1,
+                "y": 78
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.forward_response_rcode_count{$cluster,$deployment,$service,$namespace,$node,$label} by {rcode}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Rcode count upstream",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2946292513197126,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 60,
+                "y": 85
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "max:coredns.process.cpu_seconds_total{$cluster,$deployment,$service,$namespace,$node,$label}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU Usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4819651649379774,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 97,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.process.max_fds{$cluster,$deployment,$service,$namespace,$node,$label}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:coredns.process.open_fds{$cluster,$deployment,$service,$namespace,$node,$label}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Open file descriptors",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 6561279154409372,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 97,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": " If your graphs show you\u2019re running out of file descriptors, you may need to modify your server configuration to increase the available limit. ",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1793713913921152,
+            "layout": {
+                "height": 17,
+                "width": 19,
+                "x": 135,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "# Memstats",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7071690097375304,
+            "layout": {
+                "height": 6,
+                "width": 36,
+                "x": 97,
+                "y": 45
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:coredns.go.memstats.heap_alloc_bytes{$deployment,$service,$cluster,$namespace,$node,$label}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Allocated heap",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2992189629210958,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 97,
+                "y": 70
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:coredns.go.memstats.alloc_bytes{$deployment,$service,$cluster,$namespace,$node,$label}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Allocated bytes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5864860325804238,
+            "layout": {
+                "height": 17,
+                "width": 36,
+                "x": 97,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/coredns@2x.png"
+            },
+            "id": 1444014659939910,
+            "layout": {
+                "height": 8,
+                "width": 21,
+                "x": 1,
+                "y": 1
+            }
+        }
+    ]
+}

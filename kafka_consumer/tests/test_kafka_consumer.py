@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
+
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -95,3 +97,19 @@ def test_no_partitions(aggregator, kafka_instance):
     kafka_consumer_check.check(kafka_instance)
 
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
+
+
+@pytest.mark.skipif(os.environ.get('KAFKA_VERSION', '').startswith('0.9'), reason='Old Kafka version')
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata(datadog_agent, kafka_instance):
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+    kafka_consumer_check.check_id = 'test:123'
+
+    version_data = [str(part) for part in kafka_consumer_check.kafka_client._client.check_version()]
+    version_parts = {'version.{}'.format(name): part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+    version_parts['version.scheme'] = 'semver'
+    version_parts['version.raw'] = '.'.join(version_data)
+
+    kafka_consumer_check.check(kafka_instance)
+    datadog_agent.assert_metadata('test:123', version_parts)

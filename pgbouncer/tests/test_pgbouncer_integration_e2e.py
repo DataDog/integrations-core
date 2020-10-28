@@ -45,6 +45,27 @@ def test_check(instance, aggregator, datadog_agent):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_check_with_url(instance_with_url, aggregator, datadog_agent):
+    # run the check
+    check = PgBouncer('pgbouncer', {}, [instance_with_url])
+    check.check_id = 'test:123'
+    check.check(instance_with_url)
+
+    env_version = common.get_version_from_env()
+    assert_metric_coverage(env_version, aggregator)
+
+    version_metadata = {
+        'version.raw': str(env_version),
+        'version.scheme': 'semver',
+        'version.major': str(env_version.major),
+        'version.minor': str(env_version.minor),
+        'version.patch': str(env_version.micro),
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
+
+
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check, instance):
     # run the check

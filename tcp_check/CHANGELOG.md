@@ -1,6 +1,6 @@
 # CHANGELOG - tcp_check
 
-## 2.6.0 / 2020-09-21
+## 2.6.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec. See [#7531](https://github.com/DataDog/integrations-core/pull/7531).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

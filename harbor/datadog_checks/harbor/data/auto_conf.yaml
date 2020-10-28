@@ -1,9 +1,19 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - nginx-photon
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independent of the others.
+#
 instances:
+
     ## @param url - string - required
     ## The Harbor HTTP url.
     #
@@ -14,10 +24,9 @@ instances:
     ## Note: Some metrics and service checks requires an admin account to be collected.
     ## This includes chartmuseum.status, replication registries data, volume information.
     #
-    username: <USER_ID>
+    username: <USERNAME>
 
     ## @param password - string - required
     ## The password used together with the username for authentication against the Harbor API.
     #
-    password: <USER_PASSWORD>
-
+    password: <PASSWORD>

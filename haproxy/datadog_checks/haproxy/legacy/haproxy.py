@@ -590,15 +590,21 @@ class HAProxyCheckLegacy(AgentCheck):
 
         for key, value in data.items():
             if METRICS.get(key):
-                suffix = METRICS[key][1]
-                name = "haproxy.%s.%s" % (back_or_front.lower(), suffix)
-                try:
-                    if METRICS[key][0] == 'rate':
-                        self.rate(name, float(value), tags=tags)
-                    else:
-                        self.gauge(name, float(value), tags=tags)
-                except ValueError:
-                    pass
+                if isinstance(METRICS[key], list):
+                    for metric_tuple in METRICS[key]:
+                        self._submit_metric_tuple(metric_tuple[0], metric_tuple[1], back_or_front, value, tags)
+                else:
+                    self._submit_metric_tuple(METRICS[key][0], METRICS[key][1], back_or_front, value, tags)
+
+    def _submit_metric_tuple(self, metric_type, suffix, back_or_front, value, tags):
+        name = "haproxy.%s.%s" % (back_or_front.lower(), suffix)
+        try:
+            if metric_type == 'rate':
+                self.rate(name, float(value), tags=tags)
+            else:
+                self.gauge(name, float(value), tags=tags)
+        except ValueError:
+            pass
 
     def _process_stick_table_metrics(self, data, services_incl_filter=None, services_excl_filter=None):
         """

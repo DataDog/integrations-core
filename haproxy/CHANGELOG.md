@@ -1,10 +1,15 @@
 # CHANGELOG - haproxy
 
+## 2.13.0 / 2020-10-06
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Added] Send bytes.in/out.total metrics to legacy implementation. See [#7722](https://github.com/DataDog/integrations-core/pull/7722).
+
 ## 2.12.0 / 2020-09-30
 
 * [Added] Add new implementation to support Prometheus endpoint. See [#7620](https://github.com/DataDog/integrations-core/pull/7620).
 
-## 2.11.0 / 2020-09-21
+## 2.11.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec. See [#7625](https://github.com/DataDog/integrations-core/pull/7625).
 * [Added] Refactor check to support new implementation. See [#7587](https://github.com/DataDog/integrations-core/pull/7587).

@@ -1,6 +1,6 @@
 # CHANGELOG - Cloud Foundry API
 
-## 1.0.0 / 2020-09-21
+## 1.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add integration for Cloud Foundry API. See [#6832](https://github.com/DataDog/integrations-core/pull/6832).
 

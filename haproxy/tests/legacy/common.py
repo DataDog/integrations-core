@@ -118,6 +118,8 @@ FRONTEND_CHECK = [
     ('haproxy.frontend.session.pct', ['1', '0']),
     ('haproxy.frontend.requests.rate', ['1', '4']),
     ('haproxy.frontend.connections.rate', ['1', '7']),
+    ('haproxy.frontend.bytes.in.total', ['1', '0']),
+    ('haproxy.frontend.bytes.out.total', ['1', '0']),
     # rates
     ('haproxy.frontend.bytes.in_rate', ['1', '0']),
     ('haproxy.frontend.bytes.out_rate', ['1', '0']),
@@ -145,6 +147,8 @@ BACKEND_CHECK = [
     ('haproxy.backend.response.time', ['1', '5']),
     ('haproxy.backend.session.time', ['1', '5']),
     ('haproxy.backend.uptime', ['1', '7']),
+    ('haproxy.backend.bytes.in.total', ['1', '0']),
+    ('haproxy.backend.bytes.out.total', ['1', '0']),
     # rates
     ('haproxy.backend.bytes.in_rate', ['1', '0']),
     ('haproxy.backend.bytes.out_rate', ['1', '0']),

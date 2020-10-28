@@ -29,6 +29,22 @@ init_config:
   #
   # optimize_mib_memory_usage: false
 
+  ## @param refresh_oids_cache_interval - integer - optional - default: 0
+  ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
+  ## the cache is refreshed.
+  ## This option works best when `oid_batch_size` is set to 128 or 256.
+  ## This is useful to improve performance when fetching metrics from large tables.
+  ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
+  ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
+  ## The caching is disabled if the interval is set to `0` (default).
+  ##
+  ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
+  ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
+  ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+  ##         the OIDs will be refreshed only according to the refresh interval.
+  #
+  # refresh_oids_cache_interval: 3600
+
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
@@ -378,6 +394,7 @@ instances:
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
     ## the cache is refreshed.
+    ## This option works best when `oid_batch_size` is set to 128 or 256.
     ## This is useful to improve performance when fetching metrics from large tables.
     ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
     ## using batched GET queries, as opposed to one GETNEXT query per row in the table.

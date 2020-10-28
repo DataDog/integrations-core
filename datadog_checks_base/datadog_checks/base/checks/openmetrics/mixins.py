@@ -131,7 +131,7 @@ class OpenMetricsScraperMixin(object):
         # a target metric to all metric matching the label, example:
         # self.label_joins = {
         #     'kube_pod_info': {
-        #         'label_to_match': 'pod',
+        #         'labels_to_match': ['pod'],
         #         'labels_to_get': ['node', 'host_ip']
         #     }
         # }
@@ -142,7 +142,10 @@ class OpenMetricsScraperMixin(object):
         # label value, example:
         # self._label_mapping = {
         #     'pod': {
-        #         'dd-agent-9s1l1': [("node","yolo"),("host_ip","yey")]
+        #         'dd-agent-9s1l1': {
+        #             "node": "yolo",
+        #             "host_ip": "yey"
+        #         }
         #     }
         # }
         config['_label_mapping'] = {}
@@ -556,6 +559,7 @@ class OpenMetricsScraperMixin(object):
 
         labels_to_get = scraper_config['label_joins'][metric.name]['labels_to_get']
         get_all = '*' in labels_to_get
+        match_all = mapping_key == '*'
         for sample in metric.samples:
             # metadata-only metrics that are used for label joins are always equal to 1
             # this is required for metrics where all combinations of a state are sent
@@ -567,7 +571,7 @@ class OpenMetricsScraperMixin(object):
             sample_labels = sample[self.SAMPLE_LABELS]
             sample_labels_keys = sample_labels.keys()
 
-            if matching_labels.issubset(sample_labels_keys):
+            if match_all or matching_labels.issubset(sample_labels_keys):
                 label_dict = dict()
 
                 if get_all:
@@ -580,7 +584,10 @@ class OpenMetricsScraperMixin(object):
                         if label_name in sample_labels:
                             label_dict[label_name] = sample_labels[label_name]
 
-                mapping_value = ','.join([sample_labels[l] for l in matching_labels])
+                if match_all:
+                    mapping_value = '*'
+                else:
+                    mapping_value = ','.join([sample_labels[l] for l in matching_labels])
 
                 scraper_config['_label_mapping'].setdefault(mapping_key, {}).setdefault(mapping_value, {}).update(
                     label_dict
@@ -602,6 +609,14 @@ class OpenMetricsScraperMixin(object):
         for sample in metric.samples:
             sample_labels = sample[self.SAMPLE_LABELS]
             sample_labels_keys = sample_labels.keys()
+
+            # Match with wildcard label
+            # Label names are [a-zA-Z0-9_]*, so no risk of collision
+            if '*' in singles:
+                active_label_mapping.setdefault('*', {})['*'] = True
+
+                if '*' in label_mapping and '*' in label_mapping['*']:
+                    sample_labels.update(label_mapping['*']['*'])
 
             # Match with single labels
             matching_single_labels = singles.intersection(sample_labels_keys)

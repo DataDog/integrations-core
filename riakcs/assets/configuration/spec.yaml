@@ -1,0 +1,65 @@
+name: Riak CS
+files:
+- name: riakcs.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: access_id
+      description: The RiakCS access key.
+      required: true
+      value:
+        type: string
+    - name: access_secret
+      description: The corresponding RiakCS access secret.
+      required: true
+      value:
+        type: string
+    - name: is_secure
+      description: Use ssl to connect to instance. Disable option if not using ssl.
+      value:
+        type: boolean
+        example: true
+    - name: host
+      description: Hostname or IP address of your RiakCS node.
+      value:
+        type: string
+        default: localhost
+    - name: port
+      description: Port used by your RiakCS node.
+      value:
+        type: integer
+        default: 8080
+    - name: s3_root
+      description: The S3 hostname.
+      value:
+        type: string
+        default: s3.amazonaws.com
+    - name: metrics
+      description: |
+        For RiackCS v2.1+, the default metrics collected by this integration includes S3 API metrics and memory stats, 
+        except for the following:
+      
+          * bucket_acl_get
+          * bucket_acl_put
+          * object_acl_get
+          * object_acl_put
+          * bucket_policy_get
+          * bucket_policy_put
+          * bucket_policy_delete
+          * _in_one
+          * _in_total
+          * _time_error_*
+          * _time_100
+      
+        Include these metrics in the following list if you would like to collect them for your Datadog account.
+        See the complete list of metrics available: https://github.com/basho/riak_cs/wiki/Riak-cs-and-stanchion-metrics
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - <METRIC_NAME>
+    - template: instances/default

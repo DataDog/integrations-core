@@ -66,7 +66,20 @@ def render_config_spec_progress():
 
 
 def render_dashboard_progress():
-    valid_integrations = sorted(get_valid_integrations())
+    # Integrations that either do not emit metrics or have a too customer-specific setup to have an OOTBD
+    not_possible = {
+        'agent_metrics',  # Not for the end user
+        'snmp',  # Too custom
+        'openmetrics', # No default metrics
+        'pdh_check',  # No default metrics
+        'prometheus', # No default metrics
+        'teamcity',  # No metrics
+        'windows_service',  # No metrics
+        'win32_event_log',  # No metrics
+        'wmi_check',  # No default metrics
+        'windows_service'  # No metrics
+    }
+    valid_integrations = sorted(set(get_valid_integrations()).difference(not_possible))
     total_integrations = len(valid_integrations)
     integrations_with_dashboard = 0
 
@@ -121,7 +134,10 @@ def render_metadata_progress():
 
 
 def render_logs_progress():
-    valid_checks = sorted(get_valid_checks())
+    not_possible = {
+        'sap_hana'  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
+    }
+    valid_checks = sorted(set(get_valid_checks()).difference(not_possible))
     total_checks = len(valid_checks)
     checks_with_logs = 0
 
@@ -129,8 +145,10 @@ def render_logs_progress():
 
     for check in valid_checks:
         status = None
+        has_logs = False
+        tile_only = is_tile_only(check)
 
-        if not is_tile_only(check):
+        if not tile_only:
             status = ' '
             config_file = get_config_file(check)
 
@@ -138,14 +156,16 @@ def render_logs_progress():
                 if '# logs:' in f.read():
                     status = 'X'
                     checks_with_logs += 1
-        else:
+                    has_logs = True
+
+        if not has_logs:
             readme_file = get_readme_file(check)
             if os.path.exists(readme_file):
                 with open(readme_file, 'r', encoding='utf-8') as f:
                     if '# Log collection' in f.read():
                         status = 'X'
                         checks_with_logs += 1
-            if status != 'X':
+            if status != 'X' and tile_only:
                 total_checks -= 1  # we cannot really add log collection to tile only integrations
 
         if status is not None:

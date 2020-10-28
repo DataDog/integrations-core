@@ -1,6 +1,6 @@
 # CHANGELOG - Nfsstat
 
-## 1.6.1 / 2020-09-21
+## 1.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
 

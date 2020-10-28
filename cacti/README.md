@@ -123,6 +123,27 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `cacti.d/conf.yaml` file to start collecting your Cacti logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /opt/cacti/log/cacti.log
+        source: cacti
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample cacti.d/conf.yaml][2] for all available configuration options.
+
+3. [Restart the Agent][3].
+
 ### Events
 
 The Cacti check does not include any events.

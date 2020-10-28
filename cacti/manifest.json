@@ -1,6 +1,7 @@
 {
   "categories": [
-    "monitoring"
+    "monitoring",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Cacti",
@@ -26,7 +27,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "cacti"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

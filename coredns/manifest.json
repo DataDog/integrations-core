@@ -28,7 +28,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "CoreDNS": "assets/dashboards/coredns.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "coredns"

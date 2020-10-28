@@ -69,6 +69,9 @@ class SnmpCheck(AgentCheck):
         self.optimize_mib_memory_usage = is_affirmative(self.init_config.get('optimize_mib_memory_usage', False))
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
+        self.refresh_oids_cache_interval = int(
+            self.init_config.get('refresh_oids_cache_interval', InstanceConfig.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
+        )
 
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
@@ -132,6 +135,7 @@ class SnmpCheck(AgentCheck):
             instance,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
+            refresh_oids_cache_interval=self.refresh_oids_cache_interval,
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
             loader=loader,
@@ -500,15 +504,20 @@ class SnmpCheck(AgentCheck):
 
         for column_tag in column_tags:
             raw_column_value = column_tag.column
-
+            self.log.trace(
+                'Processing column tag: raw_column_value=%s index_slices=%s', raw_column_value, column_tag.index_slices
+            )
             if column_tag.index_slices:
                 new_index = transform_index(index, column_tag.index_slices)
             else:
                 new_index = index
+            self.log.trace('Processing column tag: new_index=%s old_index=%s', new_index, index)
+            if new_index is None:
+                continue
             try:
                 column_value = results[raw_column_value][new_index]
             except KeyError:
-                self.log.warning(
+                self.log.debug(
                     'Column `%s not present in the table, skipping this tag. index=%s', raw_column_value, new_index
                 )
                 continue

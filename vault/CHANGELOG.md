@@ -1,6 +1,16 @@
 # CHANGELOG - Vault
 
-## 2.7.0 / 2020-09-21
+## 2.9.0 / 2020-10-21
+
+* [Added] Detect replication DR secondary mode and skip Prometheus metric collection. See [#7825](https://github.com/DataDog/integrations-core/pull/7825).
+
+## 2.8.0 / 2020-10-13
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix vault raft storage metric name. See [#6622](https://github.com/DataDog/integrations-core/pull/6622). Thanks [tgermain](https://github.com/tgermain).
+
+## 2.7.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

@@ -1,6 +1,6 @@
 # CHANGELOG - win32_event_log
 
-## 2.6.1 / 2020-09-21
+## 2.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
 * [Fixed] Make it easier to configure legacy vs new options. See [#7406](https://github.com/DataDog/integrations-core/pull/7406).
