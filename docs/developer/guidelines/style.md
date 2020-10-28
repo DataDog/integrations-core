@@ -57,8 +57,8 @@ dd_mypy_args = <FLAGS> --py2 datadog_checks/ tests/
 
 The `dd_mypy_args` defines the [mypy command line option][mypy-command-line] for this specific integration. `--py2` is here to make sure the integration is Python2.7 compatible. Here are some useful flags you can add:
 
-- `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
-- `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
+- `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations. (By default this is allowed for maximum flexibility.)
+- `--follow-imports=silent`: Prevent `mypy` from erroring when importing modules that aren't annotated. Useful when doing partial type checking (i.e. only annotating some modules instead of the entire package).
 
 The `datadog_checks/ tests/` arguments represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking).
 
