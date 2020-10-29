@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+
 import markdown
 from markdown.blockprocessors import ReferenceProcessor
 
@@ -55,8 +56,10 @@ class DocsSpec(BaseSpec):
         matches = MATCH_REF.findall(p)
         if len(matches) != len(refs):
             # attach validation error
-            err = (f'In file #{fidx}, section #{sidx}: found {len(matches)} reference links, '
-                   f'but extracted {len(refs)} references.')
+            err = (
+                f'In file #{fidx}, section #{sidx}: found {len(matches)} reference links, '
+                f'but extracted {len(refs)} references.'
+            )
             self.errors.append(err)
             return text
 

@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from io import StringIO
 
-import yaml
-
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
 TAB_SECTION_START = '<!-- xxx tabs xxx -->'
