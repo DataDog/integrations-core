@@ -25,7 +25,7 @@ from .check import AwesomeCheck
 
 __all__ = ['__version__', 'AwesomeCheck']
 
-Note that Datadog looks for `__version__` in `__about__.py`. This is the default location for all integrations, but it does not necessarily need to be put there. If no `__version__` is found, it will default to `0.0.0`.
+Note that the Agent looks for `__version__` in `__init__.py`. This is the default location for all integrations, but it does not necessarily need to be put there. If no `__version__` is found, it will default to `0.0.0`.
 
 The version is used in the Agent's status output:
 
