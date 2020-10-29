@@ -21,6 +21,8 @@ STANDARD_FIELDS = [
     'send_distribution_buckets',
     'send_monotonic_counter',
     'send_monotonic_with_gauge',
+    'send_distribution_counts',
+    'send_distribution_sums',
     'send_distribution_counts_as_monotonic',
     'send_distribution_sums_as_monotonic',
     'exclude_labels',

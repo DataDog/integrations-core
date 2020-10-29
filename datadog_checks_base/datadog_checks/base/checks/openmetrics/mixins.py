@@ -221,6 +221,16 @@ class OpenMetricsScraperMixin(object):
             instance.get('send_monotonic_with_gauge', default_instance.get('send_monotonic_with_gauge', False))
         )
 
+        # Send count metrics for histograms alongside datadog distribution metrics
+        config['send_distribution_counts'] = is_affirmative(
+            instance.get('send_distribution_counts', default_instance.get('send_distribution_counts', False))
+        )
+
+        # Send sum metrics for histograms alongside datadog distribution metrics
+        config['send_distribution_sums'] = is_affirmative(
+            instance.get('send_distribution_sums', default_instance.get('send_distribution_sums', False))
+        )
+
         config['send_distribution_counts_as_monotonic'] = is_affirmative(
             instance.get(
                 'send_distribution_counts_as_monotonic',
@@ -917,7 +927,8 @@ class OpenMetricsScraperMixin(object):
             if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
-            if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
+            if sample[self.SAMPLE_NAME].endswith("_sum") and \
+                    (not scraper_config['send_distribution_buckets'] or scraper_config['send_distribution_sums']):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self._submit_distribution_count(
                     scraper_config['send_distribution_sums_as_monotonic'],
@@ -927,9 +938,10 @@ class OpenMetricsScraperMixin(object):
                     tags=tags,
                     hostname=custom_hostname,
                 )
-            elif sample[self.SAMPLE_NAME].endswith("_count") and not scraper_config['send_distribution_buckets']:
+            elif sample[self.SAMPLE_NAME].endswith("_count") and \
+                    (not scraper_config['send_distribution_buckets'] or scraper_config['send_distribution_counts']):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
-                if scraper_config['send_histograms_buckets']:
+                if scraper_config['send_histograms_buckets'] and not scraper_config['send_distribution_buckets']:
                     tags.append("upper_bound:none")
                 self._submit_distribution_count(
                     scraper_config['send_distribution_counts_as_monotonic'],

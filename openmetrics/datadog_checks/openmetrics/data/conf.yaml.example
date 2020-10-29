@@ -122,6 +122,20 @@ instances:
     #
     # send_monotonic_counter: true
 
+    ## @param send_distribution_counts - boolean - optional - default: false
+    ## If set to true, sends histograms counters when also sending Datadog distribution metrics.
+    ## Only relevant if send_distribution_buckets is set also to true - counters are always sent if not using
+    ## distribution metrics
+    #
+    # send_distribution_counts: false
+
+    ## @param send_distribution_sums - boolean - optional - default: false
+    ## If set to true, sends histograms sums when also sending Datadog distribution metrics.
+    ## Only relevant if send_distribution_buckets is set also to true - sums are always sent if not using distribution
+    ## metrics
+    #
+    # send_distribution_sums: false
+
     ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
     ## If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
     #
