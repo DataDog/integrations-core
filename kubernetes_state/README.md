@@ -34,27 +34,22 @@ The Kubernetes-state check does not include any events.
 ### Service Checks
 
 **kubernetes_state.node.ready**:<br>
-
 Returns `CRITICAL` if a cluster node is not ready.
 Returns `OK` otherwise.
 
 **kubernetes_state.node.out_of_disk**:<br>
-
 Returns `CRITICAL` if a cluster node is out of disk space.
 Returns `OK` otherwise.
 
 **kubernetes_state.node.disk_pressure**:<br>
-
 Returns `CRITICAL` if a cluster node is in a disk pressure state.
 Returns `OK` otherwise.
 
 **kubernetes_state.node.memory_pressure**:<br>
-
 Returns `CRITICAL` if a cluster node is in a memory pressure state.
 Returns `OK` otherwise.
 
 **kubernetes_state.node.network_unavailable**:<br>
-
 Returns `CRITICAL` if a cluster node is in a network unavailable state.
 Returns `OK` otherwise.
 

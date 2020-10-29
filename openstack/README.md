@@ -132,23 +132,18 @@ The OpenStack check does not include any events.
 ### Service Checks
 
 **openstack.neutron.api.up**:<br>
-
 Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
 
 **openstack.nova.api.up**:<br>
-
 Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
 
 **openstack.keystone.api.up**:<br>
-
 Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
 
 **openstack.nova.hypervisor.up**:<br>
-
 Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
 
 **openstack.neutron.network.up**:<br>
-
 Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
 
 ## Troubleshooting

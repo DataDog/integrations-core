@@ -70,11 +70,9 @@ The SSH Check does not include any events.
 ### Service Checks
 
 **ssh.can_connect**:<br>
-
 Returns `CRITICAL` if the Agent cannot open an SSH session, otherwise `OK`.
 
 **sftp.can_connect**:<br>
-
 Returns `CRITICAL` if the Agent cannot open an SFTP session, otherwise `OK`.
 
 ## Troubleshooting

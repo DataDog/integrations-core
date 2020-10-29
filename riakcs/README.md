@@ -67,7 +67,6 @@ The RiackCS check does not include any events.
 ### Service Checks
 
 **riakcs.can_connect**:
-
 Returns `CRITICAL` if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise `OK`.
 
 ## Troubleshooting

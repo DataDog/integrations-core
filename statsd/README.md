@@ -88,11 +88,9 @@ The StatsD check does not include any events.
 ### Service Checks
 
 **statsd.is_up**:<br>
-
 Returns `CRITICAL` if the StatsD server does not respond to the Agent's health status request, otherwise `OK`.
 
 **statsd.can_connect**:<br>
-
 Returns `CRITICAL` if the Agent cannot collect metrics about StatsD, otherwise `OK`.
 
 ## Troubleshooting

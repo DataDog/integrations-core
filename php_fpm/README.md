@@ -139,9 +139,7 @@ The PHP-FPM check does not include any events.
 ### Service Checks
 
 **php_fpm.can_ping**:<br>
-Returns `CRITICAL` if the Agent is unable to get a pong from the PHP-FPM ping URL.
-
-Returns CRITICAL if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise OK.
+Returns `CRITICAL` if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise `OK`.
 
 ## Troubleshooting
 

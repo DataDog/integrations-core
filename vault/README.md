@@ -198,15 +198,12 @@ This event fires when the cluster leader changes.
 ### Service Checks
 
 **vault.can_connect**:<br>
-
 Returns `CRITICAL` if the Agent cannot connect to Vault, otherwise `OK`.
 
 **vault.unsealed**:<br>
-
 Returns `CRITICAL` if Vault is sealed, otherwise `OK`.
 
 **vault.initialized**:<br>
-
 Returns `CRITICAL` if Vault is not yet initialized, otherwise `OK`.
 
 **vault.prometheus.health**:<br>

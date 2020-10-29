@@ -113,7 +113,6 @@ The Mcache check does not include any events.
 ### Service Checks
 
 **memcache.can_connect**:<br>
-
 Returns `CRITICAL` if the Agent cannot connect to memcache to collect metrics, otherwise `OK`.
 
 ## Troubleshooting

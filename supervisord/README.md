@@ -134,11 +134,9 @@ The Supervisor check does not include any events.
 ### Service Checks
 
 **supervisord.can_connect**:<br>
-
 Returns `CRITICAL` if the Agent cannot connect to the HTTP server or UNIX socket you configured, otherwise `OK`.
 
 **supervisord.process.status**:<br>
-
 The Agent submits this service check for all child processes of supervisord (if neither `proc_names` nor `proc_regex` is configured) OR a set of child processes (those configured in `proc_names` and/or `proc_regex`), tagging each service check with `supervisord_process:<process_name>`.
 
 This table shows the `supervisord.process.status` that results from each supervisord status:

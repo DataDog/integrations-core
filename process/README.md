@@ -72,7 +72,6 @@ The Process Check does not include any events.
 ### Service Checks
 
 **process.up**:<br>
-
 The Agent submits this service check for each instance in `process.yaml`, tagging each with `process:<name>`.
 
 For an instance with no `thresholds` specified, the service check has a status of either CRITICAL (zero processes running) or OK (at least one process running).

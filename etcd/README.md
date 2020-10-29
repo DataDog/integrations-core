@@ -100,7 +100,6 @@ The Etcd check does not include any events.
 Returns `CRITICAL` if the Agent cannot collect metrics from your Etcd API endpoint.
 
 **etcd.healthy**:<br>
-
 Returns `CRITICAL` if a member node is not healthy. Returns 'Unknown' if the Agent can't reach the `/health` endpoint, or if the health status is missing.
 
 ## Troubleshooting

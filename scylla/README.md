@@ -62,7 +62,6 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 ### Service Checks
 
 **scylla.prometheus.health**:<br>
-
 Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ### Events
