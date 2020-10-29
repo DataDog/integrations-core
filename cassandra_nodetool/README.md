@@ -47,7 +47,7 @@ The Cassandra_nodetool check does not include any events.
 
 ### Service Checks
 
-**cassandra.nodetool.node_up**:
+**cassandra.nodetool.node_up**:<br>
 The agent sends this service check for each node of the monitored cluster. Returns CRITICAL if the node is down, otherwise OK.
 
 ## Troubleshooting

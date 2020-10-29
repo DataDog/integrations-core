@@ -71,7 +71,7 @@ The Process Check does not include any events.
 
 ### Service Checks
 
-**process.up**:
+**process.up**:<br>
 
 The Agent submits this service check for each instance in `process.yaml`, tagging each with `process:<name>`.
 
@@ -90,9 +90,9 @@ instances:
 
 The Agent submits a `process.up` tagged `process:my_worker_process` whose status is:
 
-- CRITICAL when there are less than 1 or more than 7 worker processes
-- WARNING when there are 1, 2, 6, or 7 worker processes
-- OK when there are 3, 4, or 5 worker processes
+- `CRITICAL` when there are less than 1 or more than 7 worker processes
+- `WARNING` when there are 1, 2, 6, or 7 worker processes
+- `OK` when there are 3, 4, or 5 worker processes
 
 ## Troubleshooting
 

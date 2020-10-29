@@ -63,9 +63,9 @@ The Twemproxy check does not include any events.
 
 ### Service Checks
 
-`twemproxy.can_connect`:
+**twemproxy.can_connect**:<br>
 
-Returns CRITICAL if the Agent cannot connect to the Twemproxy stats endpoint to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to the Twemproxy stats endpoint to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

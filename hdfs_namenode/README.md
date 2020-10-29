@@ -117,7 +117,7 @@ The HDFS-namenode check does not include any events.
 ### Service Checks
 
 **hdfs.namenode.jmx.can_connect**:<br>
-Returns `Critical` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
+Returns `CRITICAL` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
 ## Troubleshooting
 

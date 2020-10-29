@@ -111,12 +111,10 @@ See [metadata.csv][11] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**druid.process.can_connect**:
-
+**druid.process.can_connect**:<br>
 Returns `CRITICAL` if the check cannot connect to Druid process. Returns `OK` otherwise.
 
-**druid.process.health**:
-
+**druid.process.health**:<br>
 Returns `CRITICAL` if Druid process is not healthy. Returns `OK` otherwise.
 
 ### Events

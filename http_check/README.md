@@ -76,7 +76,7 @@ The HTTP check does not include any events.
 
 To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][10] page, not 'Integration'.
 
-**`http.can_connect`**:
+**`http.can_connect`**:<br>
 
 Returns `DOWN` when any of the following occur:
 
@@ -88,7 +88,7 @@ Returns `DOWN` when any of the following occur:
 
 Otherwise, returns `UP`.
 
-**`http.ssl_cert`**:
+**`http.ssl_cert`**:<br>
 
 The check returns:
 

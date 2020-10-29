@@ -76,9 +76,9 @@ The TCP check does not include any events.
 
 ### Service Checks
 
-**`tcp.can_connect`**:
+**tcp.can_connect**:<br>
 
-Returns DOWN if the Agent cannot connect to the configured `host` and `port`, otherwise UP.
+Returns `CRITICAL` if the Agent cannot connect to the configured `host` and `port`, otherwise `OK`.
 
 To create alert conditions on this service check in Datadog, click **Network** on the [Create Monitor][9] page, not **Integration**.
 

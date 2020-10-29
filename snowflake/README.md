@@ -117,7 +117,8 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-`snowflake.can_connect`: Returns `CRITICAL` if the Agent cannot authenticate and connect to Snowflake, `OK` otherwise.
+**snowflake.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot authenticate and connect to Snowflake, `OK` otherwise.
 
 ### Events
 

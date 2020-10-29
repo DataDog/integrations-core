@@ -315,7 +315,7 @@ The Oracle Database check does not include any events.
 
 ### Service Checks
 
-**oracle.can_connect**
+**oracle.can_connect**:<br>
 Verifies the database is available and accepting connections.
 
 ## Troubleshooting

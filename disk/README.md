@@ -31,7 +31,7 @@ The Disk check does not include any events.
 
 ### Service Checks
 
-**`disk.read_write`**:
+**disk.read_write**:<br>
 Returns `CRITICAL` if filesystem is in read-only mode.
 
 ## Troubleshooting

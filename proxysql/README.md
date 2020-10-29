@@ -98,9 +98,13 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-`proxysql.can_connect`: Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`. This service check is tagged by `server` and `port`
+**proxysql.can_connect**:<br>
 
-`proxysql.backend.status`: Returns `CRITICAL` if ProxySQL considers the backend host as SHUNNED or OFFLINE_HARD. Returns `WARNING` if the backend host is `OFFLINE_SOFT`. Returns `OK` otherwise. This service check is tagged by `hostgroup`, `srv_host` and `srv_port`.
+Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`. This service check is tagged by `server` and `port`
+
+**proxysql.backend.status**:<br>
+
+Returns `CRITICAL` if ProxySQL considers the backend host as SHUNNED or OFFLINE_HARD. Returns `WARNING` if the backend host is `OFFLINE_SOFT`. Returns `OK` otherwise. This service check is tagged by `hostgroup`, `srv_host` and `srv_port`.
 
 ### Events
 

@@ -32,9 +32,9 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-`kube_controller_manager.prometheus.health`:
+**kube_controller_manager.prometheus.health**:<br>
 
-Returns CRITICAL if the Agent cannot reach the metrics endpoints.
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 ### Events
 

@@ -79,18 +79,15 @@ The Couchbase check emits an event to Datadog each time the cluster rebalances.
 
 ### Service Checks
 
-- `couchbase.can_connect`:
-
+**couchbase.can_connect**:<br>
 Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
 
-- `couchbase.by_node.cluster_membership`:
-
+**couchbase.by_node.cluster_membership**:<br>
 Returns `Critical` if the node failed over.
 Returns `Warning` if the node is added to the cluster but is waiting for a rebalance.
 Returns `Ok` otherwise.
 
-- `couchbase.by_node.health`:
-
+**couchbase.by_node.health**:<br>
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 
 ## Troubleshooting

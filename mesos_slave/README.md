@@ -124,11 +124,11 @@ The Mesos-slave check does not include any events.
 
 ### Service Check
 
-`mesos_slave.can_connect`:
+**mesos_slave.can_connect**:<br>
 
-Returns CRITICAL if the Agent cannot connect to the Mesos slave metrics endpoint, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to the Mesos slave metrics endpoint, otherwise `OK`.
 
-`<executor_task_name>.ok`:
+**<executor_task_name>.ok**:<br>
 
 The mesos_slave check creates a service check for each executor task, giving it one of the following statuses:
 

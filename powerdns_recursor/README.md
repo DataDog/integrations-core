@@ -116,9 +116,9 @@ The PowerDNS Recursor check does not include any events.
 
 ### Service Checks
 
-**`powerdns.recursor.can_connect`**:
+**powerdns.recursor.can_connect**:<br>
 
-Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
+Returns `CRITICAL` if the Agent is unable to connect to the recursor's statistics API, otherwise `OK`.
 
 ## Troubleshooting
 

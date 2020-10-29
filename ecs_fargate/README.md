@@ -342,7 +342,7 @@ The ECS Fargate check does not include any events.
 
 ### Service Checks
 
-**fargate_check**
+**fargate_check**:<br>
 Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
 
 ## Troubleshooting

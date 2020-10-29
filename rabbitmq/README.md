@@ -148,9 +148,11 @@ If you require an increase in the number of exchanges, queues, or nodes, contact
 ### Service Checks
 
 **rabbitmq.aliveness**:<br>
+
 The Agent submits this service check for all vhosts (if `vhosts` is not configured) OR a subset of vhosts (those configured in `vhosts`). Each service check is tagged with `vhost:<vhost_name>`. Returns `CRITICAL` if the aliveness check failed, otherwise returns `OK`.
 
 **rabbitmq.status**:<br>
+
 Returns `CRITICAL` if the Agent cannot connect to RabbitMQ to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
