@@ -312,6 +312,9 @@ class RequestsWrapper(object):
     def delete(self, url, **options):
         return self._request('delete', url, options)
 
+    def options_method(self, url, **options):
+        return self._request('options', url, options)
+
     def _request(self, method, url, options):
         if self.log_requests:
             self.logger.debug(u'Sending %s request to %s', method.upper(), url)
