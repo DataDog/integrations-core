@@ -309,6 +309,15 @@ class Network(AgentCheck):
                 # Try using `ss` for increased performance over `netstat`
                 ss_env = {"PROC_ROOT": net_proc_base_location}
 
+                # By providing the environment variables in ss_env, the PATH will be overriden. In CentOS,
+                # datadog-agent PATH is "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", while sh PATH
+                # will be '/usr/local/bin:/usr/bin'. In CentOS, ss is located in /sbin and /usr/sbin, not
+                # in the sh PATH, which will result in network metric collection failure.
+                #
+                # The line below will set sh PATH explicitly as the datadog-agent PATH to fix that issue.
+                if "PATH" in os.environ:
+                    ss_env["PATH"] = os.environ["PATH"]
+
                 metrics = self._get_metrics()
                 for ip_version in ['4', '6']:
                     # Call `ss` for each IP version because there's no built-in way of distinguishing
