@@ -23,12 +23,9 @@ from .check import AwesomeCheck
 __all__ = ['__version__', 'AwesomeCheck']
 ```
 
-Note that the Agent looks for `__version__` in `__init__.py`. This is the default location for all integrations, but it does not necessarily need to be put there. If no `__version__` is found, it will default to `0.0.0`.
 
-The version is used in the Agent's status output:
-
+The version is used in the Agent's status output (if no `__version__` is found, it will default to `0.0.0`):
 ```
-
 =========
 Collector
 =========
@@ -49,7 +46,6 @@ Collector
       Last Successful Execution Date : 2020-10-26 19:09:22.000000 UTC
 
 ...
-
 ```
 
 ## Checks
@@ -113,7 +109,6 @@ For more information, see the [API documentation](api.md#datadog_checks.base.che
 Within every integration, you can specify the value of `__NAMESPACE__`:
 
 ```python
-
 from datadog_checks.base import AgentCheck
 
 
@@ -121,7 +116,6 @@ class AwesomeCheck(AgentCheck):
     __NAMESPACE__ = 'awesome'
 
 ...
-
 ```
 
 This is an optional addition, but it makes submissions easier since it prefixes every metric with the `__NAMESPACE__` automatically. In this case it would append `awesome.` to each metric submitted to Datadog.
@@ -129,22 +123,19 @@ This is an optional addition, but it makes submissions easier since it prefixes 
 If you wish to ignore the namespace for any reason, you can append an optional Boolean `raw=True` to each submission:
 
 ```python
-
 self.gauge('test', 1.23, tags=['foo:bar'], raw=True)
 
 ...
-
 ```
 
 You submitted a gauge metric named `test` with a value of `1.23` tagged by `foo:bar` ignoring the namespace.
 
 ## Check Initializations
 
-In the AgentCheck class, there is a useful property called `check_initializations`, which you can use to execute functions that are called once before the first check executes.
+In the AgentCheck class, there is a useful property called `check_initializations`, which you can use to execute functions that are called once before the first check run.
 You can fill up `check_initializations` with instructions in the `__init__` function of an integration. For example, you could use it to parse configuration information before running a check. Listed below is an example with Airflow:
 
 ```python
-
 class AirflowCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AirflowCheck, self).__init__(name, init_config, instances)
@@ -159,5 +150,4 @@ class AirflowCheck(AgentCheck):
         self.check_initializations.append(self._parse_config)
 
 ...
-
 ```
