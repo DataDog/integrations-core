@@ -324,6 +324,11 @@ def get_default_config_spec(check_name):
     return os.path.join(get_root(), check_name, 'assets', 'configuration', 'spec.yaml')
 
 
+def get_docs_spec(check_name):
+    path = load_manifest(check_name).get('assets', {}).get('docs', {}).get('spec', '')
+    return os.path.join(get_root(), check_name, *path.split('/'))
+
+
 def get_assets_directory(check_name):
     return os.path.join(get_root(), check_name, 'assets')
 
@@ -337,6 +342,10 @@ def get_data_directory(check_name):
 
 def get_check_directory(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name)
+
+
+def get_check_package_directory(check_name):
+    return os.path.join(get_root(), check_name)
 
 
 def get_test_directory(check_name):
