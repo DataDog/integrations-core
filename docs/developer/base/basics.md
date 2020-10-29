@@ -20,16 +20,10 @@ The Datadog Agent looks for `__version__` and a subclass of `AgentCheck` at the 
 Below is an example of the `__init__.py` file for a hypothetical `Awesome` Check:
 
 ```python
-
-# (C) Datadog, Inc. 2020-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
 from .check import AwesomeCheck
 
 __all__ = ['__version__', 'AwesomeCheck']
-
-```
 
 Note that Datadog looks for `__version__` in `__about__.py`. This is the default location for all integrations, but it does not necessarily need to be put there. If no `__version__` is found, it will default to `0.0.0`.
 
