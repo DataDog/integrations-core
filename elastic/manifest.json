@@ -35,7 +35,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "Elasticsearch - Overview": "assets/dashboards/overview.json"
+      "elasticsearch": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
