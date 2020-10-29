@@ -541,6 +541,16 @@ def has_process_signature(check):
     return len(manifest.get('process_signatures', [])) > 0
 
 
+def has_agent_8_check_signature(check):
+    for path, _, files in os.walk(get_check_directory(check)):
+        for fn in files:
+            if fn.endswith('.py'):
+                with open(os.path.join(path, fn)) as check_file:
+                    if 'check(self, instance):' in check_file.read():
+                        return False
+    return True
+
+
 def is_tile_only(check):
     config_file = get_config_file(check)
     return not os.path.exists(config_file)

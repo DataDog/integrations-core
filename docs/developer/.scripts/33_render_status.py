@@ -7,6 +7,7 @@ from datadog_checks.dev.tooling.utils import (
     get_readme_file,
     get_valid_checks,
     get_valid_integrations,
+    has_agent_8_check_signature,
     has_dashboard,
     has_e2e,
     has_process_signature,
@@ -31,6 +32,7 @@ def patch(lines):
         render_logs_progress,
         render_e2e_progress,
         render_process_signatures_progress,
+        render_check_signatures_progress,
     ):
         new_lines.extend(renderer())
         new_lines.append('')
@@ -214,6 +216,27 @@ def render_process_signatures_progress():
         lines.append(f'    - [{status}] {check}')
 
     percent = checks_with_ps / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    return lines
+
+
+def render_check_signatures_progress():
+    exclude = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}
+    valid_checks = sorted([c for c in get_valid_checks() if c not in exclude])
+    total_checks = len(valid_checks)
+    checks_with_cs = 0
+
+    lines = ['## Agent 8 check signatures', '', None, '', '??? check "Completed"']
+    for check in valid_checks:
+        if has_agent_8_check_signature(check):
+            status = 'X'
+            checks_with_cs += 1
+        else:
+            status = ' '
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_cs / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     return lines
