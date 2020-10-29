@@ -10,6 +10,8 @@ from .....github import Github
 from ....console import echo_info
 from .cache import Cache
 
+PR_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
 
 class GithubUser:
     def __init__(self, data: Dict[str, object]):
@@ -52,8 +54,22 @@ class GithubUsers:
     def get_last_pr_date(self, login: str) -> Optional[str]:
         last_prs = self.__github.get_last_prs(login)
         last_prs_items = last_prs['items']
-        if len(last_prs_items) == 0:
-            return None
-        last_pr = last_prs_items[0]
-        created_at = last_pr['created_at']
-        return created_at
+        latest_date = None
+        for pr in last_prs_items:
+            latest_date = self.__get_max_date(pr['created_at'], latest_date)
+            latest_date = self.__get_max_date(pr['closed_at'], latest_date)
+            latest_date = self.__get_max_date(pr['updated_at'], latest_date)
+        if latest_date:
+            return datetime.strftime(latest_date, PR_DATE_FORMAT)
+        return None
+
+    def __get_max_date(self, date_str: Optional[str], latest_date: Optional[datetime]) -> Optional[datetime]:
+        if date_str is not None:
+            date = pr_date_str_to_date(date_str)
+            if latest_date is None or date > latest_date:
+                return date
+        return latest_date
+
+
+def pr_date_str_to_date(date_str: str) -> datetime:
+    return datetime.strptime(date_str, PR_DATE_FORMAT)
