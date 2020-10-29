@@ -44,6 +44,7 @@ files:
         example: pong
     - name: use_fastcgi
       description: Communicate directly with PHP-FPM using FastCGI
+      required: true
       value:
         type: boolean
         default: false

@@ -74,7 +74,7 @@ instances:
     #
     ping_reply: pong
 
-    ## @param use_fastcgi - boolean - optional - default: false
+    ## @param use_fastcgi - boolean - required - default: false
     ## Communicate directly with PHP-FPM using FastCGI
     #
     # use_fastcgi: false
