@@ -59,7 +59,7 @@ instances:
     # only_emit_local: false
 
     ## @param ao_database - string - optional
-    ## AlwaysOn metrics will only be emitted for the selected `ao_database`.
+    ## AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
     #
     # ao_database: <AO_DATABASE>
 
