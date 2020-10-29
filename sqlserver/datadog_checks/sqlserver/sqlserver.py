@@ -247,6 +247,7 @@ class SQLServer(AgentCheck):
                     'column': column,
                     'instance_name': db_name,
                     'tags': tags,
+                    'ao_database': self.instance.get('ao_database', None),
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
                 }
