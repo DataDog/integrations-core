@@ -545,9 +545,8 @@ def has_agent_8_check_signature(check):
     for path, _, files in os.walk(get_check_directory(check)):
         for fn in files:
             if fn.endswith('.py'):
-                with open(os.path.join(path, fn)) as check_file:
-                    if 'check(self, instance):' in check_file.read():
-                        return False
+                if 'def check(self, instance):' in read_file(os.path.join(path, fn)):
+                    return False
     return True
 
 
