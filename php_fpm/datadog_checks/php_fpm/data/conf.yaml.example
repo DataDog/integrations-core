@@ -74,10 +74,10 @@ instances:
     #
     ping_reply: pong
 
-    ## @param use_fastcgi - boolean - required - default: false
+    ## @param use_fastcgi - boolean - required
     ## Communicate directly with PHP-FPM using FastCGI
     #
-    # use_fastcgi: false
+    use_fastcgi: false
 
     ## @param http_host - string - optional
     ## If your FPM pool is only accessible via a specific HTTP vhost, you can
