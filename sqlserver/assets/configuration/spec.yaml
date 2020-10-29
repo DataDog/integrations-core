@@ -42,6 +42,28 @@ files:
       value:
         type: string
         example: master
+    - name: include_ao_metrics
+      description: |
+        Include AlwaysOn availability group metrics.
+      value:
+        type: boolean
+        example: false
+    - name: availability_group
+      description: |
+        You can specify an availability group when `include_ao_metrics`
+        is enabled to monitor a specific availability group.
+        If no availability group is specified, then all availability
+        groups on the current replica will output metrics.
+      value:
+        type: string
+    - name: only_emit_local
+      description: |
+        Primary replicas may emit metrics for remote secondary replicas
+        in the same availability group. If this option is set to true,
+        the primary replica will only emit information local to itself.
+      value:
+        type: boolean
+        example: false
     - name: include_instance_metrics
       description: |
         Include server-level instance metrics.  When setting up multiple instances for

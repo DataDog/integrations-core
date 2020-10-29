@@ -1924,6 +1924,38 @@ class TestAPI:
             http.delete('https://www.google.com', persist=True, auth=options['auth'])
             http.session.delete.assert_called_once_with('https://www.google.com', **options)
 
+    def test_options(self):
+        http = RequestsWrapper({}, {})
+
+        with mock.patch('requests.options'):
+            http.options_method('https://www.google.com')
+            requests.options.assert_called_once_with('https://www.google.com', **http.options)
+
+    def test_options_session(self):
+        http = RequestsWrapper({'persist_connections': True}, {})
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+            http.options_method('https://www.google.com')
+            http.session.options.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
+
+    def test_options_option_override(self):
+        http = RequestsWrapper({}, {})
+        options = http.options.copy()
+        options['auth'] = ('user', 'pass')
+
+        with mock.patch('requests.options'):
+            http.options_method('https://www.google.com', auth=options['auth'])
+            requests.options.assert_called_once_with('https://www.google.com', **options)
+
+    def test_options_session_option_override(self):
+        http = RequestsWrapper({}, {})
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
+            http.options_method('https://www.google.com', persist=True, auth=options['auth'])
+            http.session.options.assert_called_once_with('https://www.google.com', **options)
+
 
 class TestIntegration:
     def test_session_timeout(self):
