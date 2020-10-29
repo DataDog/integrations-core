@@ -42,7 +42,7 @@ def write_section(section, writer):
     description = section['description']
 
     writer.write(header)
-    writer.write('\n')
+    writer.write('\n\n')
     writer.write(description)
     writer.write('\n')
 

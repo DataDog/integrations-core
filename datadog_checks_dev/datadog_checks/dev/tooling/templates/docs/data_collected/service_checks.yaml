@@ -2,4 +2,3 @@ name: Service Checks
 header_level: 3
 description: |
   The {display_name} does not include any service checks.
-
