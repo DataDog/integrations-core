@@ -46,12 +46,12 @@ class TwistlockCheck(AgentCheck):
         if instances:
             self.config = Config(instances[0])
 
-    def check(self, instance):
-        if 'url' not in instance:
+    def check(self, _):
+        if 'url' not in self.instance:
             raise Exception('Instance missing "url" value.')
 
         if not self.config:
-            self.config = Config(instance)
+            self.config = Config(self.instance)
 
         if not self.config.username or not self.config.password:
             raise Exception('The Twistlock check requires both a username and a password')

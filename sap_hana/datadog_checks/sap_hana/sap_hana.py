@@ -65,7 +65,7 @@ class SapHanaCheck(AgentCheck):
         # Save master database hostname to act as the default if `use_hana_hostnames` is true
         self._master_hostname = None
 
-    def check(self, instance):
+    def check(self, _):
         if self._conn is None:
             connection = self.get_connection()
             if connection is None:

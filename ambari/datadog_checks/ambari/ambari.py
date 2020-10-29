@@ -23,10 +23,10 @@ METRICS_FIELD = "metrics"
 
 
 class AmbariCheck(AgentCheck):
-    def check(self, instance):
-        base_url = instance.get("url", "")
-        base_tags = instance.get("tags", [])
-        whitelisted_services = instance.get("services", [])
+    def check(self, _):
+        base_url = self.instance.get("url", "")
+        base_tags = self.instance.get("tags", [])
+        whitelisted_services = self.instance.get("services", [])
 
         clusters = self.get_clusters(base_url, base_tags)
         self.get_host_metrics(base_url, clusters, base_tags)

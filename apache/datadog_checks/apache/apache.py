@@ -43,12 +43,12 @@ class Apache(AgentCheck):
         super(Apache, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-    def check(self, instance):
-        if 'apache_status_url' not in instance:
+    def check(self, _):
+        if 'apache_status_url' not in self.instance:
             raise Exception("Missing 'apache_status_url' in Apache config")
 
-        url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-        tags = instance.get('tags', [])
+        url = self.assumed_url.get(self.instance['apache_status_url'], self.instance['apache_status_url'])
+        tags = self.instance.get('tags', [])
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
@@ -108,15 +108,15 @@ class Apache(AgentCheck):
                     self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url']) is None and url[-5:] != '?auto':
-                self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
+            if self.assumed_url.get(self.instance['apache_status_url']) is None and url[-5:] != '?auto':
+                self.assumed_url[self.instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
-                self.check(instance)
+                self.check(self.instance)
                 return
             else:
                 raise Exception(
                     ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
-                    % instance['apache_status_url']
+                    % self.instance['apache_status_url']
                 )
 
         if not version_submitted:

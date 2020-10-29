@@ -64,13 +64,13 @@ class Lighttpd(AgentCheck):
         super(Lighttpd, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-    def check(self, instance):
-        if 'lighttpd_status_url' not in instance:
+    def check(self, _):
+        if 'lighttpd_status_url' not in self.instance:
             raise Exception("Missing 'lighttpd_status_url' variable in Lighttpd config")
 
-        url = self.assumed_url.get(instance['lighttpd_status_url'], instance['lighttpd_status_url'])
+        url = self.assumed_url.get(self.instance['lighttpd_status_url'], self.instance['lighttpd_status_url'])
 
-        tags = instance.get('tags', [])
+        tags = self.instance.get('tags', [])
 
         self.log.debug("Connecting to %s", url)
 
@@ -132,14 +132,17 @@ class Lighttpd(AgentCheck):
 
         if metric_count == 0:
             url_suffix = self.URL_SUFFIX_PER_VERSION[server_version]
-            if self.assumed_url.get(instance['lighttpd_status_url']) is None and url[-len(url_suffix) :] != url_suffix:
-                self.assumed_url[instance['lighttpd_status_url']] = '%s%s' % (url, url_suffix)
+            if (
+                self.assumed_url.get(self.instance['lighttpd_status_url']) is None
+                and url[-len(url_suffix) :] != url_suffix
+            ):
+                self.assumed_url[self.instance['lighttpd_status_url']] = '%s%s' % (url, url_suffix)
                 self.warning("Assuming url was not correct. Trying to add %s suffix to the url", url_suffix)
-                self.check(instance)
+                self.check(self.instance)
             else:
                 raise Exception(
-                    "No metrics were fetched for this instance. Make sure "
-                    "that %s is the proper url." % instance['lighttpd_status_url']
+                    "No metrics were fetched for this self.instance. Make sure "
+                    "that %s is the proper url." % self.instance['lighttpd_status_url']
                 )
 
     def _get_server_version(self, headers):

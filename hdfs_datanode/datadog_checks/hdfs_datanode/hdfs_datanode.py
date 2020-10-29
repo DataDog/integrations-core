@@ -40,14 +40,14 @@ class HDFSDataNode(AgentCheck):
         'NumBlocksFailedToUnCache': ('hdfs.datanode.num_blocks_failed_to_uncache', GAUGE),
     }
 
-    def check(self, instance):
-        jmx_address = instance.get('hdfs_datanode_jmx_uri')
+    def check(self, _):
+        jmx_address = self.instance.get('hdfs_datanode_jmx_uri')
 
         if jmx_address is None:
             raise Exception("The JMX URL must be specified in the instance configuration")
 
         # Set up tags
-        tags = instance.get('tags', [])
+        tags = self.instance.get('tags', [])
         tags.append("datanode_url:{}".format(jmx_address))
         tags = list(set(tags))
 

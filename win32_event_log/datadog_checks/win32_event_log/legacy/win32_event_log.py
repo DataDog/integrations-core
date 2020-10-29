@@ -60,24 +60,24 @@ class Win32EventLogWMI(WinWMICheck):
             if new_param in self.instance:
                 self.log.warning("%s config option is ignored when running legacy mode. Please remove it", new_param)
 
-    def check(self, instance):
+    def check(self, _):
         # Connect to the WMI provider
-        host = instance.get('host', "localhost")
+        host = self.instance.get('host', "localhost")
         username = self.instance.get('user', self.instance.get('username', ''))
-        password = instance.get('password', "")
-        instance_tags = instance.get('tags', [])
-        notify = instance.get('notify', [])
-        event_priority = instance.get('event_priority', self._default_event_priority)
+        password = self.instance.get('password', "")
+        instance_tags = self.instance.get('tags', [])
+        notify = self.instance.get('notify', [])
+        event_priority = self.instance.get('event_priority', self._default_event_priority)
         if (event_priority.lower() != 'normal') and (event_priority.lower() != 'low'):
             event_priority = 'normal'
 
-        user = instance.get('user')
-        ltypes = instance.get('type', [])
-        source_names = instance.get('source_name', [])
-        log_files = instance.get('log_file', [])
-        event_ids = instance.get('event_id', [])
-        event_format = instance.get('event_format')
-        message_filters = instance.get('message_filters', [])
+        user = self.instance.get('user')
+        ltypes = self.instance.get('type', [])
+        source_names = self.instance.get('source_name', [])
+        log_files = self.instance.get('log_file', [])
+        event_ids = self.instance.get('event_id', [])
+        event_format = self.instance.get('event_format')
+        message_filters = self.instance.get('message_filters', [])
 
         if not (source_names or event_ids or message_filters or log_files or ltypes):
             raise ConfigurationError(
@@ -85,7 +85,7 @@ class Win32EventLogWMI(WinWMICheck):
                 'source_name, event_id, message_filters, log_file, type'
             )
 
-        instance_hash = hash_mutable(instance)
+        instance_hash = hash_mutable(self.instance)
         instance_key = self._get_instance_key(host, self.NAMESPACE, self.EVENT_CLASS, instance_hash)
 
         # Store the last timestamp by instance

@@ -8,8 +8,8 @@ from datadog_checks.base import AgentCheck
 
 
 class SystemCore(AgentCheck):
-    def check(self, instance):
-        instance_tags = instance.get('tags', [])
+    def check(self, _):
+        instance_tags = self.instance.get('tags', [])
 
         cpu_times = psutil.cpu_times(percpu=True)
         self.gauge('system.core.count', len(cpu_times), tags=instance_tags)

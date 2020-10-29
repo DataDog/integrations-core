@@ -113,14 +113,14 @@ class MesosSlave(AgentCheck):
             )
             self.http.options['timeout'] = (timeout, timeout)
 
-    def check(self, instance):
-        if 'url' not in instance:
+    def check(self, _):
+        if 'url' not in self.instance:
             raise ConfigurationError('Mesos instance missing "url" value.')
 
-        url = instance['url']
-        tags = list(instance.get('tags', []))
-        tasks = instance.get('tasks', [])
-        master_port = instance.get("master_port", DEFAULT_MASTER_PORT)
+        url = self.instance['url']
+        tags = list(self.instance.get('tags', []))
+        tasks = self.instance.get('tasks', [])
+        master_port = self.instance.get("master_port", DEFAULT_MASTER_PORT)
 
         self._process_state_info(url, tasks, master_port, tags)
         self._process_stats_info(url, tags)

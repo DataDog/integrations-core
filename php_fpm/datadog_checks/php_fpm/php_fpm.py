@@ -74,14 +74,14 @@ class PHPFPMCheck(AgentCheck):
         if 'http_host' in self.instance:
             self.http.options['headers']['Host'] = self.instance['http_host']
 
-    def check(self, instance):
-        status_url = instance.get('status_url')
-        ping_url = instance.get('ping_url')
-        use_fastcgi = is_affirmative(instance.get('use_fastcgi', False))
-        ping_reply = instance.get('ping_reply')
+    def check(self, _):
+        status_url = self.instance.get('status_url')
+        ping_url = self.instance.get('ping_url')
+        use_fastcgi = is_affirmative(self.instance.get('use_fastcgi', False))
+        ping_reply = self.instance.get('ping_reply')
 
-        tags = instance.get('tags', [])
-        http_host = instance.get('http_host')
+        tags = self.instance.get('tags', [])
+        http_host = self.instance.get('http_host')
 
         if status_url is None and ping_url is None:
             raise BadConfigError("No status_url or ping_url specified for this instance")

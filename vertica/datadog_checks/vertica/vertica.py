@@ -45,7 +45,9 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
-        self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
+        self._client_lib_log_level = self.instance.get(
+            'client_lib_log_level', self._get_default_client_lib_log_level()
+        )
 
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
@@ -99,7 +101,7 @@ class VerticaCheck(AgentCheck):
         # Default to no library logs, since they're too verbose even at the INFO level.
         return None
 
-    def check(self, instance):
+    def check(self, _):
         if self._connection is None:
             connection = self.get_connection()
             if connection is None:

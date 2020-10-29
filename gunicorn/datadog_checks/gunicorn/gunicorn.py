@@ -40,17 +40,17 @@ class GUnicornCheck(AgentCheck):
     def get_library_versions(self):
         return {"psutil": psutil.__version__}
 
-    def check(self, instance):
+    def check(self, _):
         """ Collect metrics for the given gunicorn instance. """
-        self.log.debug("Running instance: %s", instance)
-        custom_tags = instance.get('tags', [])
+        self.log.debug("Running instance: %s", self.instance)
+        custom_tags = self.instance.get('tags', [])
 
         # Validate the config.
-        if not instance or self.PROC_NAME not in instance:
+        if not self.instance or self.PROC_NAME not in self.instance:
             raise GUnicornCheckError("instance must specify: %s" % self.PROC_NAME)
 
         # Load the gunicorn master procedure.
-        proc_name = instance.get(self.PROC_NAME)
+        proc_name = self.instance.get(self.PROC_NAME)
         master_procs = self._get_master_proc_by_name(proc_name, custom_tags)
 
         # Fetch the worker procs and count their states.

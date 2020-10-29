@@ -162,7 +162,9 @@ class YarnCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(YarnCheck, self).__init__(*args, **kwargs)
-        application_status_mapping = self.instance.get('application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING)
+        application_status_mapping = self.instance.get(
+            'application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING
+        )
         try:
             self.application_status_mapping = {
                 k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()
@@ -170,12 +172,12 @@ class YarnCheck(AgentCheck):
         except AttributeError as e:
             raise ConfigurationError("Invalid mapping: {}".format(e))
 
-    def check(self, instance):
+    def check(self, _):
 
         # Get properties from conf file
-        rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
-        app_tags = instance.get('application_tags', {})
-        queue_blacklist = instance.get('queue_blacklist', [])
+        rm_address = self.instance.get('resourcemanager_uri', DEFAULT_RM_URI)
+        app_tags = self.instance.get('application_tags', {})
+        queue_blacklist = self.instance.get('queue_blacklist', [])
 
         if type(app_tags) is not dict:
             self.log.error("application_tags is incorrect: %s is not a dictionary", app_tags)
@@ -191,11 +193,11 @@ class YarnCheck(AgentCheck):
         app_tags['app_name'] = 'name'
 
         # Get additional tags from the conf file
-        custom_tags = instance.get('tags', [])
+        custom_tags = self.instance.get('tags', [])
         tags = list(set(custom_tags))
 
         # Get the cluster name from the conf file
-        cluster_name = instance.get('cluster_name')
+        cluster_name = self.instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
                 "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
@@ -207,7 +209,7 @@ class YarnCheck(AgentCheck):
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
-        if is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
+        if is_affirmative(self.instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
             self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)

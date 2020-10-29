@@ -24,7 +24,7 @@ class EksFargateCheck(AgentCheck):
             self.tags.append("virtual_node:" + virtual_node)
             self.tags.extend(instances[0].get('tags', []))
 
-    def check(self, instance):
+    def check(self, _):
 
         # Only submit the heartbeat metric for fargate virtual nodes.
         if self.fargate_mode:

@@ -105,7 +105,7 @@ class RethinkDBCheck(AgentCheck):
 
         self.set_metadata('version', version)
 
-    def check(self, instance):
+    def check(self, _):
         # type: (Any) -> None
         with self.connect_submitting_service_checks() as conn:
             for metric in self.collect_metrics(conn):

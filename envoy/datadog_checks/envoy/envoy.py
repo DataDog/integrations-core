@@ -43,10 +43,10 @@ class Envoy(AgentCheck):
 
         self.caching_metrics = None
 
-    def check(self, instance):
-        custom_tags = instance.get('tags', [])
+    def check(self, _):
+        custom_tags = self.instance.get('tags', [])
         try:
-            stats_url = instance['stats_url']
+            stats_url = self.instance['stats_url']
         except KeyError:
             msg = 'Envoy configuration setting `stats_url` is required'
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
@@ -54,7 +54,7 @@ class Envoy(AgentCheck):
             return
 
         if self.caching_metrics is None:
-            self.caching_metrics = instance.get('cache_metrics', True)
+            self.caching_metrics = self.instance.get('cache_metrics', True)
 
         self._collect_metadata(stats_url)
 

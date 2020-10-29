@@ -44,13 +44,13 @@ class KyotoTycoonCheck(AgentCheck):
         'cnt_remove_misses': 'ops.del.total',
     }
 
-    def check(self, instance):
-        url = instance.get('report_url')
+    def check(self, _):
+        url = self.instance.get('report_url')
         if not url:
             raise Exception('Invalid Kyoto Tycoon report url %r' % url)
 
-        tags = instance.get('tags', [])
-        name = instance.get('name')
+        tags = self.instance.get('tags', [])
+        name = self.instance.get('name')
         service_check_tags = []
         service_check_tags.extend(tags)
 

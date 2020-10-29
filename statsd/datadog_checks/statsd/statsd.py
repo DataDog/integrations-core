@@ -17,11 +17,11 @@ BAD_ENDER = re.compile(b"^ERROR\n$", re.MULTILINE)
 
 
 class StatsCheck(AgentCheck):
-    def check(self, instance):
-        host = instance.get("host", "localhost")
-        port = instance.get("port", 8126)
-        timeout = float(instance.get('timeout', 10))
-        tags = instance.get("tags", [])
+    def check(self, _):
+        host = self.instance.get("host", "localhost")
+        port = self.instance.get("port", 8126)
+        timeout = float(self.instance.get('timeout', 10))
+        tags = self.instance.get("tags", [])
         tags = ["host:{0}".format(host), "port:{0}".format(port)] + tags
 
         # Is it up?

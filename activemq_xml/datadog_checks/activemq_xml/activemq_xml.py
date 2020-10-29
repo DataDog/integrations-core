@@ -26,16 +26,16 @@ MAX_ELEMENTS = 300
 
 
 class ActiveMQXML(AgentCheck):
-    def check(self, instance):
-        url = instance.get("url")
-        custom_tags = instance.get('tags', [])
-        max_queues = int(instance.get("max_queues", MAX_ELEMENTS))
-        max_topics = int(instance.get("max_topics", MAX_ELEMENTS))
-        max_subscribers = int(instance.get("max_subscribers", MAX_ELEMENTS))
-        detailed_queues = instance.get("detailed_queues", [])
-        detailed_topics = instance.get("detailed_topics", [])
-        detailed_subscribers = instance.get("detailed_subscribers", [])
-        suppress_errors = _is_affirmative(instance.get("suppress_errors", False))
+    def check(self, _):
+        url = self.instance.get("url")
+        custom_tags = self.instance.get('tags', [])
+        max_queues = int(self.instance.get("max_queues", MAX_ELEMENTS))
+        max_topics = int(self.instance.get("max_topics", MAX_ELEMENTS))
+        max_subscribers = int(self.instance.get("max_subscribers", MAX_ELEMENTS))
+        detailed_queues = self.instance.get("detailed_queues", [])
+        detailed_topics = self.instance.get("detailed_topics", [])
+        detailed_subscribers = self.instance.get("detailed_subscribers", [])
+        suppress_errors = _is_affirmative(self.instance.get("suppress_errors", False))
 
         tags = custom_tags + ["url:{0}".format(url)]
 

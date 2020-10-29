@@ -126,9 +126,9 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             default_namespace="kube_scheduler",
         )
 
-    def check(self, instance):
+    def check(self, _):
         # Get the configuration for this specific instance
-        scraper_config = self.get_scraper_config(instance)
+        scraper_config = self.get_scraper_config(self.instance)
         # Set up metric_transformers
         transformers = {}
         for metric_from, metric_to in TRANSFORM_VALUE_HISTOGRAMS.items():
@@ -138,7 +138,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
         self.process(scraper_config, metric_transformers=transformers)
         # Check the leader-election status
-        if is_affirmative(instance.get('leader_election', True)):
+        if is_affirmative(self.instance.get('leader_election', True)):
             leader_config = self.LEADER_ELECTION_CONFIG
-            leader_config["tags"] = instance.get("tags", [])
+            leader_config["tags"] = self.instance.get("tags", [])
             self.check_election_status(leader_config)

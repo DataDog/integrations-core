@@ -123,16 +123,16 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             default_namespace="kube_controller_manager",
         )
 
-    def check(self, instance):
+    def check(self, _):
         # Get the configuration for this specific instance
-        scraper_config = self.get_scraper_config(instance)
+        scraper_config = self.get_scraper_config(self.instance)
 
         # Populate the metric transformers dict
         transformers = {}
-        limiters = self.DEFAUT_RATE_LIMITERS + instance.get("extra_limiters", [])
+        limiters = self.DEFAUT_RATE_LIMITERS + self.instance.get("extra_limiters", [])
         for limiter in limiters:
             transformers[limiter + "_rate_limiter_use"] = self.rate_limiter_use
-        queues = self.DEFAULT_QUEUES + instance.get("extra_queues", [])
+        queues = self.DEFAULT_QUEUES + self.instance.get("extra_queues", [])
         for queue in queues:
             for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
                 transformers[queue + metric] = func
@@ -141,16 +141,16 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         for metric_name in self.WORKQUEUE_METRICS_RENAMING:
             transformers[metric_name] = self.workqueue_transformer
 
-        self.ignore_deprecated_metrics = instance.get("ignore_deprecated", self.DEFAULT_IGNORE_DEPRECATED)
+        self.ignore_deprecated_metrics = self.instance.get("ignore_deprecated", self.DEFAULT_IGNORE_DEPRECATED)
         if self.ignore_deprecated_metrics:
             self._filter_metric = self._ignore_deprecated_metric
 
         self.process(scraper_config, metric_transformers=transformers)
 
         # Check the leader-election status
-        if is_affirmative(instance.get('leader_election', True)):
+        if is_affirmative(self.instance.get('leader_election', True)):
             leader_config = self.LEADER_ELECTION_CONFIG
-            leader_config["tags"] = instance.get("tags", [])
+            leader_config["tags"] = self.instance.get("tags", [])
             self.check_election_status(leader_config)
 
     def _ignore_deprecated_metric(self, metric, scraper_config):

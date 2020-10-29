@@ -244,12 +244,12 @@ class Memcache(AgentCheck):
 
         return metric, tags, value
 
-    def check(self, instance):
-        socket = instance.get('socket')
-        server = instance.get('url')
-        options = instance.get('options', {})
-        username = instance.get('username')
-        password = instance.get('password')
+    def check(self, _):
+        socket = self.instance.get('socket')
+        server = self.instance.get('url')
+        options = self.instance.get('options', {})
+        username = self.instance.get('username')
+        password = self.instance.get('password')
 
         if not server and not socket:
             raise InvalidConfigError('Either "url" or "socket" must be configured')
@@ -259,9 +259,9 @@ class Memcache(AgentCheck):
             port = socket
             connection_server = "{}".format(port)
         else:
-            port = int(instance.get('port', self.DEFAULT_PORT))
+            port = int(self.instance.get('port', self.DEFAULT_PORT))
             connection_server = "{}:{}".format(server, port)
-        custom_tags = instance.get('tags') or []
+        custom_tags = self.instance.get('tags') or []
 
         tags = ["url:{0}:{1}".format(server, port)] + custom_tags
         service_check_tags = ["host:%s" % server, "port:%s" % port] + custom_tags

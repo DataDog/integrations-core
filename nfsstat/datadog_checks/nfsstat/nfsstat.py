@@ -32,11 +32,11 @@ class NfsStatCheck(AgentCheck):
                 )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
 
-    def check(self, instance):
+    def check(self, _):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
         all_devices = []
         this_device = []
-        custom_tags = instance.get("tags", [])
+        custom_tags = self.instance.get("tags", [])
         stats = stat_out.splitlines()
 
         if 'No NFS mount point' in stats[0]:
