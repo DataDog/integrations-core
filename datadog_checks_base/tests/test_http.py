@@ -19,6 +19,7 @@ from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
@@ -29,7 +30,13 @@ pytestmark = pytest.mark.http
 DEFAULT_OPTIONS = {
     'auth': None,
     'cert': None,
-    'headers': OrderedDict([('User-Agent', 'Datadog Agent/0.0.0')]),
+    'headers': OrderedDict(
+        [
+            ('User-Agent', 'Datadog Agent/0.0.0'),
+            ('Accept', '*/*'),
+            ('Accept-Encoding', 'gzip, deflate'),
+        ]
+    ),
     'proxies': None,
     'timeout': (10.0, 10.0),
     'verify': True,
@@ -83,12 +90,19 @@ class TestTimeout:
 
 
 class TestHeaders:
+    def test_agent_headers(self):
+        # This helper is not used by the RequestsWrapper, but some integrations may use it.
+        # So we provide a unit test for it.
+        agent_config = {}
+        headers = agent_headers(agent_config)
+        assert headers == DEFAULT_OPTIONS['headers']
+
     def test_config_default(self):
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
+        assert http.options['headers'] == DEFAULT_OPTIONS['headers']
 
     def test_config_headers(self):
         headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
@@ -111,7 +125,7 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        complete_headers = OrderedDict({'User-Agent': 'Datadog Agent/0.0.0'})
+        complete_headers = OrderedDict(DEFAULT_OPTIONS['headers'])
         complete_headers.update(headers)
         assert list(iteritems(http.options['headers'])) == list(iteritems(complete_headers))
 
@@ -120,18 +134,25 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        complete_headers = dict(DEFAULT_OPTIONS['headers'])
+        complete_headers.update({'answer': '42'})
+        assert http.options['headers'] == complete_headers
 
     def test_extra_headers_on_http_method_call(self):
         instance = {'extra_headers': {'answer': 42}}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
+        complete_headers = dict(DEFAULT_OPTIONS['headers'])
+        complete_headers.update({'answer': '42'})
+
         extra_headers = {"foo": "bar"}
         with mock.patch("requests.get") as get:
             http.get("http://example.com/hello", extra_headers=extra_headers)
 
-            expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+            expected_options = dict(complete_headers)
+            expected_options.update(extra_headers)
+
             get.assert_called_with(
                 "http://example.com/hello",
                 headers=expected_options,
@@ -143,7 +164,7 @@ class TestHeaders:
             )
 
         # make sure the original headers are not modified
-        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        assert http.options['headers'] == complete_headers
         assert extra_headers == {"foo": "bar"}
 
 
@@ -885,7 +906,8 @@ class TestAuthTokenReadFile:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer bar'}
+            expected_headers = {'Authorization': 'Bearer bar'}
+            expected_headers.update(DEFAULT_OPTIONS['headers'])
             with mock.patch('requests.get') as get:
                 write_file(token_file, '\nfoobar\nfoobaz\n')
                 http.get('https://www.google.com')
@@ -972,7 +994,8 @@ class TestAuthTokenWriteHeader:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'X-Vault-Token': 'foobar'}
+            expected_headers = {'X-Vault-Token': 'foobar'}
+            expected_headers.update(DEFAULT_OPTIONS['headers'])
             with mock.patch('requests.get') as get:
                 write_file(token_file, '\nfoobar\n')
                 http.get('https://www.google.com')
@@ -1003,7 +1026,8 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret1'}
+            expected_headers = {'Authorization': 'Bearer secret1'}
+            expected_headers.update(DEFAULT_OPTIONS['headers'])
             with mock.patch('requests.get') as get:
                 write_file(token_file, '\nsecret1\n')
                 http.get('https://www.google.com')
@@ -1060,7 +1084,8 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 if counter['errors'] <= 1:
                     raise Exception
 
-            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret2'}
+            expected_headers = {'Authorization': 'Bearer secret2'}
+            expected_headers.update(DEFAULT_OPTIONS['headers'])
             with mock.patch('requests.get', side_effect=raise_error_once) as get:
                 write_file(token_file, '\nsecret2\n')
 
@@ -1097,7 +1122,8 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             def error():
                 raise Exception()
 
-            expected_headers = {'User-Agent': 'Datadog Agent/0.0.0', 'Authorization': 'Bearer secret2'}
+            expected_headers = {'Authorization': 'Bearer secret2'}
+            expected_headers.update(DEFAULT_OPTIONS['headers'])
             with mock.patch('requests.get', return_value=mock.MagicMock(raise_for_status=error)) as get:
                 write_file(token_file, '\nsecret2\n')
                 http.get('https://www.google.com')
