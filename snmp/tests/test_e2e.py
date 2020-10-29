@@ -65,7 +65,6 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     # === network profile ===
     common_tags = [
         'snmp_profile:generic-router',
-        'snmp_device_vendor:generic',
         'snmp_device:{}'.format(snmp_device),
         'autodiscovery_subnet:{}.0/29'.format(subnet_prefix),
     ]
@@ -104,7 +103,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
-        'snmp_device_vendor:apc',
+        'device_vendor:apc',
     ]
     metrics = [
         'upsAdvBatteryNumOfBadBattPacks',

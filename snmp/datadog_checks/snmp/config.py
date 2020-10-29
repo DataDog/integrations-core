@@ -208,7 +208,7 @@ class InstanceConfig:
         for device_tag in SUPPORTED_DEVICE_TAGS:
             tag = device.get(device_tag)
             if tag:
-                self.tags.append('snmp_device_{}:{}'.format(device_tag, tag))
+                self.tags.append('device_{}:{}'.format(device_tag, tag))
 
     @classmethod
     def get_auth_data(cls, instance):

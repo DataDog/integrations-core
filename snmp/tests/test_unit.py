@@ -522,7 +522,6 @@ def test_discovery_tags():
         'test:check',
         'snmp_profile:generic-router',
         'autodiscovery_subnet:192.168.0.0/29',
-        'snmp_device_vendor:generic',
     }
 
 
