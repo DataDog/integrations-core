@@ -66,7 +66,7 @@ files:
         example: false
     - name: ao_database
       description: |
-        AlwaysOn metrics will only be emitted for the selected `ao_database`.
+        AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
       value:
         type: string
     - name: include_instance_metrics
