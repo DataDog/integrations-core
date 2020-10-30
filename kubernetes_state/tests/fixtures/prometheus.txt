@@ -225,6 +225,9 @@ kube_namespace_status_phase{namespace="test",phase="Terminating"} 0
 # HELP kube_node_created Unix creation timestamp
 # TYPE kube_node_created gauge
 kube_node_created{node="minikube"} 1.508406442e+09
+# HELP kube_pod_info Information about pod.
+# TYPE kube_pod_info gauge
+kube_pod_info{namespace="default",pod="datadog-brl4p",host_ip="10.132.0.75",pod_ip="10.16.1.11",uid="b6fb4273-2dd6-4edb-9a23-7642bb121806",created_by_kind="DaemonSet",created_by_name="datadog",priority_class=""} 1
 # HELP kube_node_info Information about a cluster node.
 # TYPE kube_node_info gauge
 kube_node_info{container_runtime_version="docker://1.12.6",kernel_version="4.9.13",kubelet_version="v1.8.0",kubeproxy_version="v1.8.0",node="minikube",os_image="Buildroot 2017.02",provider_id=""} 1

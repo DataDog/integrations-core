@@ -55,6 +55,7 @@ METRICS = [
     NAMESPACE + '.pdb.pods_healthy',
     NAMESPACE + '.pdb.pods_total',
     # pods
+    NAMESPACE + '.pod.count',
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
     NAMESPACE + '.pod.status_phase',
@@ -141,6 +142,11 @@ TAGS = {
         'phase:unknown',
         'namespace:default',
         'namespace:kube-system',
+    ],
+    NAMESPACE
+    + '.pod.count': [
+        'uid:b6fb4273-2dd6-4edb-9a23-7642bb121806',
+        'created_by_kind:daemonset'
     ],
     NAMESPACE
     + '.container.status_report.count.waiting': [
@@ -365,6 +371,8 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     )
 
     for metric in METRICS:
+        if metric == NAMESPACE + '.pod.count':
+            print("yeah")
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
         for tag in TAGS.get(metric, []):
             aggregator.assert_metric_has_tag(metric, tag)
