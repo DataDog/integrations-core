@@ -325,8 +325,9 @@ class RabbitMQ(AgentCheck):
                     explicit_filters.remove(name)
                     continue
 
-                match_found = self._append_match_lines(regex_filters, name,
-                    tag_families, data_line, object_type, matching_lines)
+                match_found = self._append_match_lines(
+                    regex_filters, name, tag_families, data_line, object_type, matching_lines
+                )
 
                 if match_found:
                     continue
@@ -339,16 +340,17 @@ class RabbitMQ(AgentCheck):
                     matching_lines.append(data_line)
                     explicit_filters.remove(absolute_name)
                     continue
-                
-                match_found = self._append_match_lines(regex_filters, absolute_name,
-                    tag_families, data_line, object_type, matching_lines)
+
+                match_found = self._append_match_lines(
+                    regex_filters, absolute_name, tag_families, data_line, object_type, matching_lines
+                )
                 if match_found:
                     continue
             return matching_lines
         return data
 
     def _append_match_lines(self, regex_filters, name, tag_families, data_line, object_type, matching_lines):
-        result = False        
+        result = False
         object_tag_name = "queue_family"
         if object_type == EXCHANGE_TYPE:
             object_tag_name = "exchange_family"
@@ -362,8 +364,8 @@ class RabbitMQ(AgentCheck):
                             key_name = object_tag_name + "_" + key
                             data_line[key] = named_groups_dict[key]
                             TAGS_MAP[object_type][key] = key_name
-                    else:                        
-                        data_line[object_tag_name] = match.groups()[0]                        
+                    else:
+                        data_line[object_tag_name] = match.groups()[0]
                 matching_lines.append(data_line)
                 result = True
                 break
@@ -516,7 +518,7 @@ class RabbitMQ(AgentCheck):
 
         # a list of queues/nodes is specified. We process only those
         data = self._filter_list(
-            data, explicit_filters, regex_filters, object_type, instance.get("tag_families", False)                
+            data, explicit_filters, regex_filters, object_type, instance.get("tag_families", False)
         )
 
         # if no filters are specified, check everything according to the limits

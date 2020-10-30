@@ -178,6 +178,7 @@ def test_family_tagging(aggregator, check):
 
     aggregator.assert_all_metrics_covered()
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_family_tagging_with_named_groups(aggregator, check):
@@ -210,6 +211,7 @@ def test_family_tagging_with_named_groups(aggregator, check):
     aggregator.assert_service_check('rabbitmq.status', status=RabbitMQ.OK)
 
     aggregator.assert_all_metrics_covered()
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
