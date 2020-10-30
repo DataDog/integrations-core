@@ -63,7 +63,7 @@ class Win32EventLogWMI(WinWMICheck):
     def check(self, instance):
         # Connect to the WMI provider
         host = instance.get('host', "localhost")
-        username = instance.get('user', instance.get('username', ''))
+        username = self.instance.get('user', self.instance.get('username', ''))
         password = instance.get('password', "")
         instance_tags = instance.get('tags', [])
         notify = instance.get('notify', [])
