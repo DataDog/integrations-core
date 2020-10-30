@@ -27,9 +27,7 @@ def dd_environment():
         if common.IS_PRE_2_9:
             # Activate JMX through 'control.sh' and functions made available to 'ignite.sh'.
             functions_sh = os.path.join(common.HERE, 'compose', 'functions.sh')
-            docker_volumes.append(
-                '{}:/opt/ignite/apache-ignite/bin/include/functions.sh'.format(functions_sh)
-            )
+            docker_volumes.append('{}:/opt/ignite/apache-ignite/bin/include/functions.sh'.format(functions_sh))
             conditions.append(WaitFor(control_sh_activate))
         else:
             # On 2.9.0 and above, the Ignite Docker image calls the JVM directly,

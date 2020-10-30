@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+
 from pkg_resources import parse_version
 
 from datadog_checks.dev import get_here
