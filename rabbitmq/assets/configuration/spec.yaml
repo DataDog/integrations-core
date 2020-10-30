@@ -59,7 +59,10 @@ files:
         the metrics are collected on all the queues by default.
         If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
         If you have `tag_families` enabled, the first captured group in the regex
-        is used as the queue_family tag.
+        is used as the queue_family tag if no named group is specified.
+        If you have named groups the tag names will be the named groups in regex.
+        If you use multiplies groups and not all are named, the tags are going to be
+        used only on the groups that contains names.
       value:
         type: array
         items:
@@ -75,6 +78,9 @@ files:
         the metrics are collected on all the queues by default.
         If you have `tag_families` enabled, the first captured group in the regex
         is used as the queue_family tag.
+        If you have named groups the tag names will be the named groups in regex.
+        If you use multiplies groups and not all have are named, the tags are going to be
+        used only on the groups that contains names.
       value:
         type: array
         items:
