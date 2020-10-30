@@ -31,15 +31,15 @@ class WindowsService(AgentCheck):
         7: AgentCheck.WARNING,
     }
 
-    def check(self, _):
-        services = set(self.instance.get('services', []))
-        custom_tags = self.instance.get('tags', [])
+    def check(self, instance):
+        services = set(instance.get('services', []))
+        custom_tags = instance.get('tags', [])
 
         if not services:
             raise ValueError('No services defined in configuration.')
 
         # Old-style WMI wildcards
-        if 'host' in self.instance:
+        if 'host' in instance:
             services = set(service.replace('%', '.*') for service in services)
 
         service_patterns = {service: re.compile(service, SERVICE_PATTERN_FLAGS) for service in services}
@@ -73,7 +73,7 @@ class WindowsService(AgentCheck):
             tags = ['windows_service:{}'.format(short_name)]
             tags.extend(custom_tags)
 
-            if not self.instance.get('disable_legacy_service_tag', False):
+            if not instance.get('disable_legacy_service_tag', False):
                 self._log_deprecation('service_tag', 'windows_service')
                 tags.append('service:{}'.format(short_name))
 
@@ -87,7 +87,7 @@ class WindowsService(AgentCheck):
                 tags = ['windows_service:{}'.format(service)]
                 tags.extend(custom_tags)
 
-                if not self.instance.get('disable_legacy_service_tag', False):
+                if not instance.get('disable_legacy_service_tag', False):
                     self._log_deprecation('service_tag', 'windows_service')
                     tags.append('service:{}'.format(service))
 

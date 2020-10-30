@@ -85,11 +85,11 @@ class Varnish(AgentCheck):
             else:
                 self._current_str = data
 
-    def check(self, _):
+    def check(self, instance):
         # Not configured? Not a problem.
-        if self.instance.get("varnishstat", None) is None:
+        if instance.get("varnishstat", None) is None:
             raise Exception("varnishstat is not configured")
-        custom_tags = self.instance.get('tags', [])
+        custom_tags = instance.get('tags', [])
         if custom_tags is None:
             custom_tags = []
         else:
@@ -102,9 +102,9 @@ class Varnish(AgentCheck):
         # discovery feature. This change allows for passing in additional parameters to
         # the script (i.e. %%host%%) so that the command is properly formatted and the
         # desired container is queried.
-        varnishstat_path = self.instance.get('varnishstat', '').split()
-        name = self.instance.get('name')
-        metrics_filter = self.instance.get("metrics_filter", [])
+        varnishstat_path = instance.get('varnishstat', '').split()
+        name = instance.get('name')
+        metrics_filter = instance.get("metrics_filter", [])
         if not isinstance(metrics_filter, list):
             raise Exception("The parameter 'metrics_filter' must be a list")
 
@@ -126,7 +126,7 @@ class Varnish(AgentCheck):
         self._parse_varnishstat(output, varnishstat_format, tags)
 
         # Parse service checks from varnishadm.
-        if self.instance.get("varnishadm", None):
+        if instance.get("varnishadm", None):
             # Split the varnishadm command so that additional arguments can be passed in
             # In order to support monitoring a Varnish instance which is running as a Docker
             # container we need to wrap commands (varnishstat, varnishadm) with scripts which
@@ -135,11 +135,11 @@ class Varnish(AgentCheck):
             # discovery feature. This change allows for passing in additional parameters to
             # the script (i.e. %%host%%) so that the command is properly formatted and the
             # desired container is queried.
-            varnishadm_path = self.instance.get('varnishadm', '').split()
-            secretfile_path = self.instance.get('secretfile', '/etc/varnish/secret')
+            varnishadm_path = instance.get('varnishadm', '').split()
+            secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
-            daemon_host = self.instance.get('daemon_host', 'localhost')
-            daemon_port = self.instance.get('daemon_port', '6082')
+            daemon_host = instance.get('daemon_host', 'localhost')
+            daemon_port = instance.get('daemon_port', '6082')
 
             cmd = []
             if geteuid() != 0:

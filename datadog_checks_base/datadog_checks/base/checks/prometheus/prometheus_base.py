@@ -29,7 +29,7 @@ class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 
-    def check(self, _):
+    def check(self, instance):
         """
         check should take care of getting the url and other params
         from the instance and using the utils to process messages and submit metrics.

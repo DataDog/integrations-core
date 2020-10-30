@@ -97,7 +97,7 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
             default_namespace=self.KUBE_METRICS_SERVER_NAMESPACE,
         )
 
-    def check(self, _):
+    def check(self, instance):
         # Get the configuration for this specific instance
-        scraper_config = self.get_scraper_config(self.instance)
+        scraper_config = self.get_scraper_config(instance)
         self.process(scraper_config)

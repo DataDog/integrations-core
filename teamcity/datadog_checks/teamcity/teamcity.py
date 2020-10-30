@@ -95,12 +95,12 @@ class TeamCityCheck(AgentCheck):
         server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
         return server
 
-    def check(self, _):
-        instance_name = self.instance.get("name")
+    def check(self, instance):
+        instance_name = instance.get("name")
         if instance_name is None:
             raise Exception("Each instance must have a unique name")
 
-        server = self.instance.get("server")
+        server = instance.get("server")
         if server is None:
             raise Exception("Each instance must have a server")
 
@@ -108,14 +108,14 @@ class TeamCityCheck(AgentCheck):
         #   fall back to http:// if no scheme present (allows for backwards compatibility).
         server = self._normalize_server_url(server)
 
-        build_conf = self.instance.get("build_configuration")
+        build_conf = instance.get("build_configuration")
         if build_conf is None:
             raise Exception("Each instance must have a build configuration")
 
-        host = self.instance.get("host_affected") or self.hostname
-        tags = self.instance.get("tags")
-        is_deployment = _is_affirmative(self.instance.get("is_deployment", False))
-        basic_http_authentication = _is_affirmative(self.instance.get("basic_http_authentication", False))
+        host = instance.get("host_affected") or self.hostname
+        tags = instance.get("tags")
+        is_deployment = _is_affirmative(instance.get("is_deployment", False))
+        basic_http_authentication = _is_affirmative(instance.get("basic_http_authentication", False))
 
         self._initialize_if_required(instance_name, server, build_conf, basic_http_authentication)
 

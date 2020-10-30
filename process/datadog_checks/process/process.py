@@ -379,17 +379,17 @@ class ProcessCheck(AgentCheck):
 
         return children_pids
 
-    def check(self, _):
-        name = self.instance.get('name', None)
-        tags = self.instance.get('tags', [])
-        exact_match = _is_affirmative(self.instance.get('exact_match', True))
-        search_string = self.instance.get('search_string', None)
-        ignore_ad = _is_affirmative(self.instance.get('ignore_denied_access', True))
-        pid = self.instance.get('pid')
-        pid_file = self.instance.get('pid_file')
-        collect_children = _is_affirmative(self.instance.get('collect_children', False))
-        user = self.instance.get('user', False)
-        try_sudo = self.instance.get('try_sudo', False)
+    def check(self, instance):
+        name = instance.get('name', None)
+        tags = instance.get('tags', [])
+        exact_match = _is_affirmative(instance.get('exact_match', True))
+        search_string = instance.get('search_string', None)
+        ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
+        pid = instance.get('pid')
+        pid_file = instance.get('pid_file')
+        collect_children = _is_affirmative(instance.get('collect_children', False))
+        user = instance.get('user', False)
+        try_sudo = instance.get('try_sudo', False)
 
         if self._conflicting_procfs:
             self.warning(
@@ -474,7 +474,7 @@ class ProcessCheck(AgentCheck):
             if vals:
                 self.rate('system.processes.{}'.format(mname), sum(vals), tags=tags)
 
-        self._process_service_check(name, len(pids), self.instance.get('thresholds', None), tags)
+        self._process_service_check(name, len(pids), instance.get('thresholds', None), tags)
 
     def _get_pid_set(self, pid):
         try:

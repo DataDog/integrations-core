@@ -49,8 +49,8 @@ class ESCheck(AgentCheck):
                 'default': urlparse(self.instance['url']).hostname,
             }
 
-    def check(self, _):
-        config = from_instance(self.instance)
+    def check(self, instance):
+        config = from_instance(instance)
         admin_forwarder = config.admin_forwarder
 
         # Check ES version for this instance and define parameters
