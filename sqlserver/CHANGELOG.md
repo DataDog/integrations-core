@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## 2.1.0 / 2020-10-30
+
+* [Added] Add AlwaysOn metrics for SQLServer. See [#7824](https://github.com/DataDog/integrations-core/pull/7824).
+* [Added] Support additional performance metrics . See [#7667](https://github.com/DataDog/integrations-core/pull/7667).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 2.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add Scheduler and Task Metrics for SQL Server. See [#5840](https://github.com/DataDog/integrations-core/pull/5840).
