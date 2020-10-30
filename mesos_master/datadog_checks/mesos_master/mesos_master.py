@@ -241,12 +241,12 @@ class MesosMaster(AgentCheck):
 
         return state_metrics
 
-    def check(self, _):
-        if 'url' not in self.instance:
+    def check(self, instance):
+        if 'url' not in instance:
             raise Exception('Mesos instance missing "url" value.')
 
-        url = self.instance['url']
-        instance_tags = self.instance.get('tags', [])
+        url = instance['url']
+        instance_tags = instance.get('tags', [])
         if instance_tags is None:
             instance_tags = []
 
