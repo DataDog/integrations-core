@@ -18,7 +18,7 @@ No additional installation is needed on your server.
 
 **Note**: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
 
-<div class="alert alert-warning">For users configuring the integration with Agent v7.23.0, upgrade the integration version to 2.1.0 to take advantage of latest features.
+<div class="alert alert-warning">For users configuring the integration with Agent <code>v7.23.0</code>, upgrade the integration version to <code>2.1.0</code> to take advantage of latest features.
 You can upgrade the integration with the following <a href=https://docs.datadoghq.com/agent/guide/integration-management/#install>command</a>:<br>
 
 ```text
