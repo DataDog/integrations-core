@@ -62,7 +62,8 @@ datadog-agent integration install datadog-snowflake==2.1.0
     ```
 
     <div class="alert alert-info">By default, the <code>min_collection_interval</code> is 1 hour. 
-    Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.</div>
+    Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.<br>
+    <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 
 2. [Restart the Agent][4].
 
