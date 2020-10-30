@@ -103,7 +103,7 @@ If you see failures regarding formatting or missing parameters, see our [config 
 ddev validate dashboards
 ```
 
-This validates that dashboards are formatted correctly. This means that they need to be proper JSON and generated from Datadog's `/screen` [API](https://docs.datadoghq.com/dashboards/guide/screenboard-api-doc/?tab=python).
+This validates that dashboards are formatted correctly. This means that they need to be proper JSON and generated from Datadog's `/dashboard` [API](https://docs.datadoghq.com/api/v1/dashboards/).
 
 !!! tip 
     If you see a failure regarding use of the screen endpoint, consider using our dashboard [utility command](../ddev/cli.md#export) to generate your dashboard payload.
