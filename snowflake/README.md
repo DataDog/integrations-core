@@ -32,6 +32,37 @@ datadog-agent integration install datadog-snowflake==2.1.0
 
     **Note**: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
+    
+    ```yaml
+        ## @param account - string - required
+        ## Name of your account (provided by Snowflake), including the platform and region if applicable.
+        ## For more information on Snowflake account names,
+        ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+        #
+      - account: <ACCOUNT>
+    
+        ## @param user - string - required
+        ## Login name for the user.
+        #
+        user: <USER>
+    
+        ## @param password - string - required
+        ## Password for the user
+        #
+        password: <PASSWORD>
+   
+        ## @param min_collection_interval - number - optional - default: 3600
+        ## This changes the collection interval of the check. For more information, see:
+        ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+        ##
+        ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
+        ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+        #
+        # min_collection_interval: 3600
+    ```
+
+    <div class="alert alert-info">By default, the <code>min_collection_interval</code> is 1 hour. 
+    Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.</div>
 
 2. [Restart the Agent][4].
 
