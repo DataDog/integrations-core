@@ -103,6 +103,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
+        'device_vendor:apc',
     ]
     metrics = [
         'upsAdvBatteryNumOfBadBattPacks',
