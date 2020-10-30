@@ -2,7 +2,7 @@
 
 ## 15.5.0 / 2020-10-30
 
-* [Added] adds support for OPTIONS method. See [#7804](https://github.com/DataDog/integrations-core/pull/7804).
+* [Added] Adds support for OPTIONS method. See [#7804](https://github.com/DataDog/integrations-core/pull/7804).
 * [Fixed] Add missing default HTTP headers: Accept, Accept-Encoding. See [#7725](https://github.com/DataDog/integrations-core/pull/7725).
 
 ## 15.4.0 / 2020-10-28
