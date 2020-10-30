@@ -90,9 +90,8 @@ The Gearmand check does not include any events.
 
 ### Service Checks
 
-`gearman.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
+**gearman.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Gearman to collect metrics.
 
 ## Troubleshooting
 

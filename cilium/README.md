@@ -112,7 +112,8 @@ See [metadata.csv][7] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-`cilium.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+**cilium.prometheus.health**:<br>
+ Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ### Events
 

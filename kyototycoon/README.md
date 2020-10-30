@@ -63,9 +63,8 @@ The KyotoTycoon check does not include any events.
 
 ### Service Checks
 
-`kyototycoon.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to KyotoTycoon to collect metrics, otherwise OK.
+**kyototycoon.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to KyotoTycoon to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

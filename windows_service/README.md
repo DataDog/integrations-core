@@ -77,7 +77,7 @@ The Windows Service check does not include any events.
 
 ### Service Checks
 
-**windows_service.state**:
+**windows_service.state**:<br>
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
 
 | Windows status   | windows_service.state |

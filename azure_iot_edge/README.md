@@ -113,10 +113,10 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**azure.iot_edge.edge_agent.prometheus.health**:
+**azure.iot_edge.edge_agent.prometheus.health**:<br>
 Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise.
 
-**azure.iot_edge.edge_hub.prometheus.health**:
+**azure.iot_edge.edge_hub.prometheus.health**:<br>
 Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise.
 
 ### Events

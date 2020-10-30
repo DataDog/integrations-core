@@ -87,8 +87,8 @@ Simply follow the examples present in the [default configuration][4].
 
 ### Service Checks
 
-`linkerd.prometheus.health`:
-Returns CRITICAL if the Agent fails to connect to the prometheus endpoint, otherwise returns UP.
+**linkerd.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent fails to connect to the prometheus endpoint, otherwise returns `OK`.
 
 ## Troubleshooting
 

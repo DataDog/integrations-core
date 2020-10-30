@@ -93,9 +93,8 @@ The Lighttpd check does not include any events.
 
 ### Service Checks
 
-`- lighttpd.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, otherwise OK.
+**lighttpd.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to lighttpd to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

@@ -63,7 +63,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 ### Service Checks
 
 **vcenter.can_connect**:<br>
-Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to vCenter to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 
