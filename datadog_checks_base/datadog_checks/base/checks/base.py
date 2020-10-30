@@ -415,8 +415,10 @@ class AgentCheck(object):
             self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
         )
 
-    def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (int, str, float, Sequence[str], str, str, bool) -> None
+    def _submit_metric(
+        self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
+    ):
+        # type: (int, str, float, Sequence[str], str, str, bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -447,7 +449,9 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname)
+        aggregator.submit_metric(
+            self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname, flush_first_value
+        )
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -483,8 +487,10 @@ class AgentCheck(object):
             aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, Sequence[str], str, str, bool) -> None
+    def monotonic_count(
+        self, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
+    ):
+        # type: (str, float, Sequence[str], str, str, bool, bool) -> None
         """Sample an increasing counter metric.
 
         - **name** (_str_) - the name of the metric
@@ -494,9 +500,17 @@ class AgentCheck(object):
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        - **flush_first_value** (_bool_) - whether to sample the first value
         """
         self._submit_metric(
-            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+            aggregator.MONOTONIC_COUNT,
+            name,
+            value,
+            tags=tags,
+            hostname=hostname,
+            device_name=device_name,
+            raw=raw,
+            flush_first_value=flush_first_value,
         )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
