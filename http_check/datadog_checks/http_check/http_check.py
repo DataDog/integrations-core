@@ -118,9 +118,11 @@ class HTTPCheck(AgentCheck):
                 self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
 
             if method.upper() == 'OPTIONS':
-                method = 'options_method'
+                http_method = 'options_method'
+            else:
+                http_method = method.lower()
 
-            r = getattr(self.http, method.lower())(
+            r = getattr(self.http, http_method)(
                 addr,
                 persist=True,
                 allow_redirects=allow_redirects,
