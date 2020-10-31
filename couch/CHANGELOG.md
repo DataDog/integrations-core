@@ -1,5 +1,11 @@
 # CHANGELOG - couch
 
+## 3.13.0 / 2020-10-31
+
+* [Added] Support couch v3. See [#7570](https://github.com/DataDog/integrations-core/pull/7570).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 3.12.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
