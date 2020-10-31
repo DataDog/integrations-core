@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 4.0.0 / 2020-10-31
+
+* [Changed] disk check: rename whitelist/blacklist to include/exclude. See [#7627](https://github.com/DataDog/integrations-core/pull/7627).
+
 ## 3.0.0 / 2020-09-24 / Agent 7.23.0
 
 * [Added] Add options for global exclusion patterns. See [#7648](https://github.com/DataDog/integrations-core/pull/7648).
