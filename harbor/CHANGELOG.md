@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.7.0 / 2020-10-31
+
+* [Added] Add config spec. See [#7845](https://github.com/DataDog/integrations-core/pull/7845).
+
 ## 1.6.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
