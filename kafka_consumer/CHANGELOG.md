@@ -1,5 +1,11 @@
 # CHANGELOG - kafka_consumer
 
+## 2.7.0 / 2020-10-31
+
+* [Added] Support Windows. See [#7781](https://github.com/DataDog/integrations-core/pull/7781).
+* [Added] Collect version metadata. See [#6556](https://github.com/DataDog/integrations-core/pull/6556).
+* [Fixed] Update kafka-python to 2.0.2. See [#7718](https://github.com/DataDog/integrations-core/pull/7718).
+
 ## 2.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] lazy initialisation of kafka_consumer client. See [#7432](https://github.com/DataDog/integrations-core/pull/7432).
