@@ -1,5 +1,10 @@
 # CHANGELOG - powerdns_recursor
 
+## 1.8.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] Add config spec. See [#7742](https://github.com/DataDog/integrations-core/pull/7742).
+
 ## 1.7.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
