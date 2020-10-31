@@ -1,5 +1,9 @@
 # CHANGELOG - zk
 
+## 2.8.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 2.7.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Use config specs. See [#6950](https://github.com/DataDog/integrations-core/pull/6950).
