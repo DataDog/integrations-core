@@ -1,5 +1,11 @@
 # CHANGELOG - Scylla
 
+## 1.3.0 / 2020-10-31
+
+* [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] Add config spec. See [#7735](https://github.com/DataDog/integrations-core/pull/7735).
+
 ## 1.2.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
