@@ -117,10 +117,9 @@ class HTTPCheck(AgentCheck):
             if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
                 self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
 
-            if method.upper() == 'OPTIONS':
+            http_method = method.lower()
+            if http_method == 'options':
                 http_method = 'options_method'
-            else:
-                http_method = method.lower()
 
             r = getattr(self.http, http_method)(
                 addr,
