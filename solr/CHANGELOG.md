@@ -1,5 +1,9 @@
 # CHANGELOG - solr
 
+## 1.6.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 1.5.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
