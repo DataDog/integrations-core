@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.14.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 1.13.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
