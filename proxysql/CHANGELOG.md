@@ -1,5 +1,11 @@
 # CHANGELOG - ProxySQL
 
+## 2.0.0 / 2020-10-31
+
+* [Added] Make inventories metadata testable in e2e. See [#7761](https://github.com/DataDog/integrations-core/pull/7761).
+* [Fixed] Fix config typo. See [#7843](https://github.com/DataDog/integrations-core/pull/7843).
+* [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
+
 ## 1.2.2 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
