@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.8.0 / 2020-10-31
+
+* [Added] Add log support. See [#7699](https://github.com/DataDog/integrations-core/pull/7699).
+
 ## 1.7.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
