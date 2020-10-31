@@ -5,7 +5,7 @@
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
 This integration monitors credit, billing, and storage usage, query history, and more.
 
-<div class="alert alert-info"><b>NOTE</b>: Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</div>
+<div class="alert alert-info"><bold>NOTE: Metrics are collected via queries to Snowflake. Queries made by the Datadog integration are billable by Snowflake.</bold></div>
 
 ## Setup
 
@@ -18,8 +18,8 @@ No additional installation is needed on your server.
 
 **Note**: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
 
-<div class="alert alert-warning">For users configuring the integration with Agent `v7.23.0`, upgrade the integration version to `2.1.0` to take advantaged of latest features.
-You can upgrade the integration with the following [command](https://docs.datadoghq.com/agent/guide/integration-management/#install):
+<div class="alert alert-warning">For users configuring the integration with Agent <code>v7.23.0</code>, upgrade the integration version to <code>2.1.0</code> to take advantage of latest features.
+You can upgrade the integration with the following <a href=https://docs.datadoghq.com/agent/guide/integration-management/#install>command</a>:<br>
 
 ```text
 datadog-agent integration install datadog-snowflake==2.1.0
@@ -32,6 +32,38 @@ datadog-agent integration install datadog-snowflake==2.1.0
 
     **Note**: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
+    
+    ```yaml
+        ## @param account - string - required
+        ## Name of your account (provided by Snowflake), including the platform and region if applicable.
+        ## For more information on Snowflake account names,
+        ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+        #
+      - account: <ACCOUNT>
+    
+        ## @param user - string - required
+        ## Login name for the user.
+        #
+        user: <USER>
+    
+        ## @param password - string - required
+        ## Password for the user
+        #
+        password: <PASSWORD>
+   
+        ## @param min_collection_interval - number - optional - default: 3600
+        ## This changes the collection interval of the check. For more information, see:
+        ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+        ##
+        ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
+        ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+        #
+        # min_collection_interval: 3600
+    ```
+
+    <div class="alert alert-info">By default, the <code>min_collection_interval</code> is 1 hour. 
+    Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.<br>
+    <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 
 2. [Restart the Agent][4].
 
