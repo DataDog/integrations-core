@@ -106,7 +106,7 @@ datadog-process==1.16.0
 datadog-prometheus==3.3.0
 datadog-proxysql==2.0.0
 datadog-rabbitmq==1.17.0
-datadog-redisdb==3.1.1
+datadog-redisdb==3.2.0
 datadog-rethinkdb==1.2.2
 datadog-riak==2.1.0
 datadog-riakcs==2.3.0
