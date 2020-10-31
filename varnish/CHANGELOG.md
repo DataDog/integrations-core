@@ -1,5 +1,10 @@
 # CHANGELOG - varnish
 
+## 1.9.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] varnish: fix parsing of varnishstat 6.5 JSON output. See [#7731](https://github.com/DataDog/integrations-core/pull/7731). Thanks [vcabbage](https://github.com/vcabbage).
+
 ## 1.8.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec for varnish. See [#7538](https://github.com/DataDog/integrations-core/pull/7538).
