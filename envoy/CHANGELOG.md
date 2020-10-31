@@ -1,5 +1,10 @@
 # CHANGELOG - Envoy
 
+## 1.20.0 / 2020-10-31
+
+* [Added] Add newly documented metrics. See [#7765](https://github.com/DataDog/integrations-core/pull/7765).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+
 ## 1.19.0 / 2020-10-07
 
 * [Added] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
