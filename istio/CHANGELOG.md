@@ -1,5 +1,11 @@
 # CHANGELOG - istio
 
+## 3.7.0 / 2020-10-31
+
+* [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Fixed] Update default port. See [#7796](https://github.com/DataDog/integrations-core/pull/7796).
+
 ## 3.6.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
