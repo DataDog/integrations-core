@@ -1,5 +1,9 @@
 # CHANGELOG - HiveMQ
 
+## 1.2.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 1.1.2 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
@@ -23,4 +27,3 @@
 ## 1.0.0 / 2020-05-14
 
 * [Added] Add HiveMQ integration. See [#6600](https://github.com/DataDog/integrations-core/pull/6600).
-

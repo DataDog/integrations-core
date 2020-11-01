@@ -1,5 +1,10 @@
 # CHANGELOG - Crio
 
+## 1.5.0 / 2020-10-31
+
+* [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
+* [Added] Add config specs. See [#7848](https://github.com/DataDog/integrations-core/pull/7848).
+
 ## 1.4.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

@@ -1,5 +1,9 @@
 # CHANGELOG - teamcity
 
+## 1.11.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+
 ## 1.10.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec. See [#7530](https://github.com/DataDog/integrations-core/pull/7530).

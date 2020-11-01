@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.21.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 1.20.1 / 2020-09-28
 
 * [Fixed] Extra debug for missing metrics. See [#7673](https://github.com/DataDog/integrations-core/pull/7673).

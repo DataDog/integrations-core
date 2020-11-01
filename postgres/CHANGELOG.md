@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 5.2.0 / 2020-10-31
+
+* [Added] Support postgres statement-level metrics for deep database monitoring. See [#7852](https://github.com/DataDog/integrations-core/pull/7852).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix noisy log when not running on Aurora. See [#7542](https://github.com/DataDog/integrations-core/pull/7542). Thanks [lucasviecelli](https://github.com/lucasviecelli).
+
 ## 5.1.0 / 2020-09-09 / Agent 7.23.0
 
 * [Added] Allow customizing application name in Postgres database. See [#7528](https://github.com/DataDog/integrations-core/pull/7528).

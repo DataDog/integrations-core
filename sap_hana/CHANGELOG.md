@@ -1,5 +1,9 @@
 # CHANGELOG - SAP HANA
 
+## 1.3.0 / 2020-10-31
+
+* [Added] Add config spec. See [#7715](https://github.com/DataDog/integrations-core/pull/7715).
+
 ## 1.2.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
@@ -11,4 +15,3 @@
 ## 1.0.0 / 2019-11-11 / Agent 7.16.1
 
 * [Added] Add SAP HANA integration. See [#4502](https://github.com/DataDog/integrations-core/pull/4502).
-

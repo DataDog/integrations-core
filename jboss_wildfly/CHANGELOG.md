@@ -1,5 +1,10 @@
 # CHANGELOG - JBoss/WildFly
 
+## 1.4.0 / 2020-10-31
+
+* [Added] Add missing custom_jar_paths option to config. See [#7809](https://github.com/DataDog/integrations-core/pull/7809).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 1.3.3 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
@@ -38,4 +43,3 @@
 ## 1.0.0 / 2019-03-29 / Agent 6.11.0
 
 * [Added] JBoss/WildFly JMX Integration. See [#3320](https://github.com/DataDog/integrations-core/pull/3320).
-

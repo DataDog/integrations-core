@@ -1,5 +1,9 @@
 # CHANGELOG - TLS
 
+## 1.8.0 / 2020-10-31
+
+* [Security] Upgrade `cryptography` dependency. See [#7869](https://github.com/DataDog/integrations-core/pull/7869).
+
 ## 1.7.0 / 2020-10-14
 
 * [Added] Adding debug logging to tls check. See [#7664](https://github.com/DataDog/integrations-core/pull/7664).

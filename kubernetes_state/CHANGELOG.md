@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 5.6.0 / 2020-10-31
+
+* [Added] add labels from `self.SAMPLE_LABELS` to container status metrics. See [#7602](https://github.com/DataDog/integrations-core/pull/7602). Thanks [jfmyers9](https://github.com/jfmyers9).
+
 ## 5.5.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

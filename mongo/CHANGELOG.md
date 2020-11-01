@@ -1,5 +1,18 @@
 # CHANGELOG - mongo
 
+## 2.0.0 / 2020-10-31
+
+* [Added] New replication lag metric collected from the primary. See [#7828](https://github.com/DataDog/integrations-core/pull/7828).
+* [Added] Add the shard cluster role as a tag. See [#7834](https://github.com/DataDog/integrations-core/pull/7834).
+* [Added] Add new metrics for mongos. See [#7770](https://github.com/DataDog/integrations-core/pull/7770).
+* [Added] Allow specifying a different database in custom queries. See [#7808](https://github.com/DataDog/integrations-core/pull/7808).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix warning when adding 'jumbo_chunks' metrics. See [#7833](https://github.com/DataDog/integrations-core/pull/7833).
+* [Fixed] Fix building of the connection string. See [#7744](https://github.com/DataDog/integrations-core/pull/7744).
+* [Fixed] Refactor collection logic. See [#7615](https://github.com/DataDog/integrations-core/pull/7615).
+* [Changed] Stop collecting custom queries from secondaries by default. See [#7794](https://github.com/DataDog/integrations-core/pull/7794).
+* [Changed] Collect only the metrics that make sense based on the type of mongo instance. See [#7713](https://github.com/DataDog/integrations-core/pull/7713).
+
 ## 1.16.5 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Submit collection metrics even if value is zero. See [#7606](https://github.com/DataDog/integrations-core/pull/7606).

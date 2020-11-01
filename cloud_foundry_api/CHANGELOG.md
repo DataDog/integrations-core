@@ -1,5 +1,9 @@
 # CHANGELOG - Cloud Foundry API
 
+## 1.1.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+
 ## 1.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add integration for Cloud Foundry API. See [#6832](https://github.com/DataDog/integrations-core/pull/6832).

@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.6.0 / 2020-10-31
+
+* [Added] Sample the first value of monotonic counts for Open Metrics checks. See [#7904](https://github.com/DataDog/integrations-core/pull/7904).
+* [Added] Support `flush_first_value` flag for monotonic counts. See [#7901](https://github.com/DataDog/integrations-core/pull/7901).
+* [Fixed] Change metadata errors log level. See [#7897](https://github.com/DataDog/integrations-core/pull/7897).
+
 ## 15.5.0 / 2020-10-30
 
 * [Added] Adds support for OPTIONS method. See [#7804](https://github.com/DataDog/integrations-core/pull/7804).

@@ -1,5 +1,11 @@
 # CHANGELOG - http_check
 
+## 4.12.0 / 2020-10-31
+
+* [Added] Add support for OPTIONS method. See [#7894](https://github.com/DataDog/integrations-core/pull/7894).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Security] Upgrade `cryptography` dependency. See [#7869](https://github.com/DataDog/integrations-core/pull/7869).
+
 ## 4.11.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).

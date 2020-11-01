@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.9.0 / 2020-10-31
+
+* [Added] Add a service check for missing directories. See [#7714](https://github.com/DataDog/integrations-core/pull/7714).
+
 ## 1.8.0 / 2020-06-24 / Agent 7.21.0
 
 * [Added] Add option to not follow symlinks for stat. See [#6960](https://github.com/DataDog/integrations-core/pull/6960).

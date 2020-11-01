@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 5.7.1 / 2020-10-31
+
+* [Fixed] Re-add empty_default_hostname to configuration by default. See [#7732](https://github.com/DataDog/integrations-core/pull/7732).
+
 ## 5.7.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add datastore cluster tag. See [#7603](https://github.com/DataDog/integrations-core/pull/7603).

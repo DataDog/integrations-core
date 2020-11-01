@@ -1,5 +1,10 @@
 # CHANGELOG - kyototycoon
 
+## 1.12.0 / 2020-10-31
+
+* [Added] Add logs support. See [#7791](https://github.com/DataDog/integrations-core/pull/7791).
+* [Added] Add config spec. See [#7790](https://github.com/DataDog/integrations-core/pull/7790).
+
 ## 1.11.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).

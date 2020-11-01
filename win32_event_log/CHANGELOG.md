@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.7.0 / 2020-10-31
+
+* [Added] Add config specs. See [#7856](https://github.com/DataDog/integrations-core/pull/7856).
+
 ## 2.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

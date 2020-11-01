@@ -1,5 +1,10 @@
 # CHANGELOG - gearmand
 
+## 1.8.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Added] Add log integration. See [#7616](https://github.com/DataDog/integrations-core/pull/7616).
+
 ## 1.7.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config spec. See [#7612](https://github.com/DataDog/integrations-core/pull/7612).

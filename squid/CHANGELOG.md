@@ -1,5 +1,11 @@
 # CHANGELOG - Squid
 
+## 1.9.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix version collection. See [#7898](https://github.com/DataDog/integrations-core/pull/7898).
+
 ## 1.8.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config specs. See [#7482](https://github.com/DataDog/integrations-core/pull/7482).

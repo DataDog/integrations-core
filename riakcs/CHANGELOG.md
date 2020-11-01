@@ -1,5 +1,9 @@
 # CHANGELOG - riakcs
 
+## 2.4.0 / 2020-10-31
+
+* [Added] Add config spec. See [#7753](https://github.com/DataDog/integrations-core/pull/7753).
+
 ## 2.3.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

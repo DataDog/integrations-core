@@ -1,5 +1,9 @@
 # CHANGELOG - Linkerd
 
+## 2.6.0 / 2020-10-31
+
+* [Added] Add configuration spec. See [#7872](https://github.com/DataDog/integrations-core/pull/7872).
+
 ## 2.5.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

@@ -1,5 +1,12 @@
 # CHANGELOG - mysql
 
+## 2.1.0 / 2020-10-31
+
+* [Added] Support MySQL statement-level metrics for deep database monitoring. See [#7851](https://github.com/DataDog/integrations-core/pull/7851).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix config spec default values. See [#7687](https://github.com/DataDog/integrations-core/pull/7687).
+* [Security] Upgrade `cryptography` dependency. See [#7869](https://github.com/DataDog/integrations-core/pull/7869).
+
 ## 2.0.3 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Use database config template in existing specs. See [#7548](https://github.com/DataDog/integrations-core/pull/7548).
