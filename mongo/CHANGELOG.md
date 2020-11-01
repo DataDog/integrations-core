@@ -2,7 +2,6 @@
 
 ## 2.0.0 / 2020-10-31
 
-* [Added] Fix warning when adding 'jumbo_chunks' metrics (step 2). See [#7864](https://github.com/DataDog/integrations-core/pull/7864).
 * [Added] New replication lag metric collected from the primary. See [#7828](https://github.com/DataDog/integrations-core/pull/7828).
 * [Added] Add the shard cluster role as a tag. See [#7834](https://github.com/DataDog/integrations-core/pull/7834).
 * [Added] Add new metrics for mongos. See [#7770](https://github.com/DataDog/integrations-core/pull/7770).

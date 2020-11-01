@@ -4,7 +4,7 @@
 
 * [Added] Support postgres statement-level metrics for deep database monitoring. See [#7852](https://github.com/DataDog/integrations-core/pull/7852).
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
-* [Fixed] When postgres is not an aurora it is giving error in the execution of agent. See [#7542](https://github.com/DataDog/integrations-core/pull/7542). Thanks [lucasviecelli](https://github.com/lucasviecelli).
+* [Fixed] Fix noisy log when not running on Aurora. See [#7542](https://github.com/DataDog/integrations-core/pull/7542). Thanks [lucasviecelli](https://github.com/lucasviecelli).
 
 ## 5.1.0 / 2020-09-09 / Agent 7.23.0
 

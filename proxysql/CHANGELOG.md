@@ -2,7 +2,6 @@
 
 ## 2.0.0 / 2020-10-31
 
-* [Added] Make inventories metadata testable in e2e. See [#7761](https://github.com/DataDog/integrations-core/pull/7761).
 * [Fixed] Fix config typo. See [#7843](https://github.com/DataDog/integrations-core/pull/7843).
 * [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
 
@@ -25,4 +24,3 @@
 ## 1.0.0 / 2020-04-03 / Agent 7.19.0
 
 * [Added] New Integration ProxySQL. See [#6144](https://github.com/DataDog/integrations-core/pull/6144).
-

@@ -2,7 +2,7 @@
 
 ## 1.19.0 / 2020-10-31
 
-* [Added] [network] Collect receive and send queue metrics. See [#7861](https://github.com/DataDog/integrations-core/pull/7861).
+* [Added] Collect receive and send queue metrics. See [#7861](https://github.com/DataDog/integrations-core/pull/7861).
 * [Added] Collect connection state metrics on BSD/OSX. See [#7659](https://github.com/DataDog/integrations-core/pull/7659).
 * [Fixed] Fix network metric collection failure on CentOS. See [#7883](https://github.com/DataDog/integrations-core/pull/7883).
 

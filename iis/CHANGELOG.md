@@ -2,7 +2,7 @@
 
 ## 2.10.2 / 2020-10-31
 
-* [Fixed] Fix iis metrics collection on non-english systems. See [#7875](https://github.com/DataDog/integrations-core/pull/7875).
+* [Fixed] Fix metrics collection on non-english systems. See [#7875](https://github.com/DataDog/integrations-core/pull/7875).
 
 ## 2.10.1 / 2020-08-19 / Agent 7.23.0
 
