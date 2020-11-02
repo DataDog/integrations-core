@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-
 from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.kubernetes_state import KubernetesState
 
@@ -27,6 +26,7 @@ METRICS = [
     NAMESPACE + '.node.gpu.cards_allocatable',
     NAMESPACE + '.nodes.by_condition',
     # deployments
+    NAMESPACE + '.deployment.count',
     NAMESPACE + '.deployment.replicas',
     NAMESPACE + '.deployment.replicas_available',
     NAMESPACE + '.deployment.replicas_unavailable',
@@ -74,6 +74,7 @@ METRICS = [
     NAMESPACE + '.container.gpu.request',
     NAMESPACE + '.container.gpu.limit',
     # replicasets
+    NAMESPACE + '.replicaset.count',
     NAMESPACE + '.replicaset.replicas',
     NAMESPACE + '.replicaset.fully_labeled_replicas',
     NAMESPACE + '.replicaset.replicas_ready',
@@ -102,6 +103,8 @@ METRICS = [
     # services
     NAMESPACE + '.service.count',
     # jobs
+    # filterable by owner_name and owner_kind
+    NAMESPACE + '.job.count',
     NAMESPACE + '.job.failed',
     NAMESPACE + '.job.succeeded',
     # vpa
@@ -110,6 +113,8 @@ METRICS = [
     NAMESPACE + '.vpa.uncapped_target',
     NAMESPACE + '.vpa.upperbound',
     NAMESPACE + '.vpa.update_mode',
+    # namespaces
+    NAMESPACE + '.namespace.count',
 ]
 
 TAGS = {
@@ -147,6 +152,21 @@ TAGS = {
     + '.pod.count': [
         'uid:b6fb4273-2dd6-4edb-9a23-7642bb121806',
         'created_by_kind:daemonset'
+    ],
+    NAMESPACE
+    + '.replicaset.count': [
+        'owner_kind:deployment',
+        'owner_name:metrics-server-v0.3.6'
+    ],
+    NAMESPACE
+    + '.namespace.count': [
+        'phase:active',
+        'phase:Terminating'
+    ],
+    NAMESPACE
+    + '.deployment.count': [
+        'phase:active',
+        'phase:Terminating'
     ],
     NAMESPACE
     + '.container.status_report.count.waiting': [
@@ -373,6 +393,8 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     for metric in METRICS:
         if metric == NAMESPACE + '.pod.count':
             print("yeah")
+        if metric == NAMESPACE + '.replicaset.count':
+            print("test")
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
         for tag in TAGS.get(metric, []):
             aggregator.assert_metric_has_tag(metric, tag)

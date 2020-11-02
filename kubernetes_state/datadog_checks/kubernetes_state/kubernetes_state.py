@@ -7,12 +7,11 @@ import time
 from collections import Counter, defaultdict
 from copy import deepcopy
 
-from six import iteritems
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_string
+from six import iteritems
 
 try:
     # this module is only available in agent 6
@@ -21,7 +20,6 @@ except ImportError:
 
     def get_clustername():
         return ""
-
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -94,6 +92,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'allowed_labels': ['storageclass', 'phase'],
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
+            # is a count by namespace and phase <Active|Terminating>
+            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['namespace', 'phase']},
+            'kube_replicaset_owner': {'metric_name': 'replicaset.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
+            'kube_job_owner': {'metric_name': 'replicaset.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -116,6 +118,10 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_limitrange': self.kube_limitrange,
             'kube_persistentvolume_status_phase': self.count_objects_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
+            'kube_namespace_status_phase': self.count_objects_by_tags,
+            'kube_deployment_status_condition': self.kube_deployment_count,
+            'kube_replicaset_owner': self.count_objects_by_tags,
+            'kube_job_owner': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -288,7 +294,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicaset_created',
                     'kube_replicationcontroller_created',
                     'kube_resourcequota_created',
-                    'kube_replicaset_owner',
                     'kube_service_created',
                     'kube_service_info',
                     'kube_service_labels',
@@ -874,9 +879,25 @@ class KubernetesState(OpenMetricsBaseCheck):
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
+    #  TODO: check maybe other tag/label?
+    def kube_deployment_count(self, metric, scraper_config):
+        """
+        Count deployments by using the name as a unique identifier
+        """
+        metric_name = "{}.{}".format(scraper_config['namespace'], "kube.deployment.count")
+        count = 0
+        deployments = set()
+        for sample in metric.samples:
+            deployment = sample[sample[self.SAMPLE_LABELS]]['deployment']
+            if deployment not in deployments:
+                count += 1
+                deployments.add(deployment)
+        tags = scraper_config['custom_tags']
+        self.gauge(metric_name, count, tags=list(tags))
+
     def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
         """
-        Build a list of formated tags from `label_name` parameter. It also depend of the
+        Build a list of formatted tags from `label_name` parameter. It also depend of the
         check configuration ('keep_ksm_labels' parameter)
         """
         tags = []
