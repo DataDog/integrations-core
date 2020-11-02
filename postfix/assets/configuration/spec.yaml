@@ -6,7 +6,6 @@ files:
     options:
     - name: postfix_user
       required: true
-      enabled: true
       description: |
         The user running dd-agent must have passwordless sudo access for the find
         command to run the postfix check.
@@ -39,14 +38,12 @@ files:
     options:
     - name: directory
       required: true
-      enabled: true
       description: Path to the postfix directory.
       value:
         example: /var/spool/postfix
         type: string
     - name: queues
       required: true
-      enabled: true
       description: List of queues to monitor.
       value:
         type: array
