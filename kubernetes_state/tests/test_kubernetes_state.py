@@ -5,6 +5,7 @@ import os
 
 import mock
 import pytest
+
 from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.kubernetes_state import KubernetesState
 
@@ -147,32 +148,11 @@ TAGS = {
         'namespace:default',
         'namespace:kube-system',
     ],
-    NAMESPACE
-    + '.pod.count': [
-        'uid:b6fb4273-2dd6-4edb-9a23-7642bb121806',
-        'created_by_kind:daemonset'
-    ],
-    NAMESPACE
-    + '.deployment.count': [
-        'condition:progressing',
-        'condition:available',
-        'status:true'
-    ],
-    NAMESPACE
-    + '.replicaset.count': [
-        'owner_kind:deployment',
-        'owner_name:metrics-server-v0.3.6'
-    ],
-    NAMESPACE
-    + '.namespace.count': [
-        'phase:active',
-        'phase:terminating'
-    ],
-    NAMESPACE
-    + '.job.count': [
-        'owner_kind:cronjob',
-        'owner_name:a-cronjob'
-    ],
+    NAMESPACE + '.pod.count': ['uid:b6fb4273-2dd6-4edb-9a23-7642bb121806', 'created_by_kind:daemonset'],
+    NAMESPACE + '.deployment.count': ['condition:progressing', 'condition:available', 'status:true'],
+    NAMESPACE + '.replicaset.count': ['owner_kind:deployment', 'owner_name:metrics-server-v0.3.6'],
+    NAMESPACE + '.namespace.count': ['phase:active', 'phase:terminating'],
+    NAMESPACE + '.job.count': ['owner_kind:cronjob', 'owner_name:a-cronjob'],
     NAMESPACE
     + '.container.status_report.count.waiting': [
         'reason:containercreating',

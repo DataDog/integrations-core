@@ -98,12 +98,12 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
             'kube_replicaset_owner': {
                 'metric_name': 'replicaset.count',
-                'allowed_labels': ['namespace', 'owner_name', 'owner_kind']
+                'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
             },
             'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
             'kube_deployment_status_condition': {
                 'metric_name': 'deployment.count',
-                'allowed_labels': ['namespace', 'condition', 'status']
+                'allowed_labels': ['namespace', 'condition', 'status'],
             },
         }
 
