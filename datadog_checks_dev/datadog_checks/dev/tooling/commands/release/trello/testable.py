@@ -296,7 +296,7 @@ def testable(
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
     github_teams = trello.label_github_team_map.values()
-    testerSelector = create_tester_selector(trello, github_teams, user_config, APP_DIR)
+    testerSelector = create_tester_selector(trello, repo, github_teams, user_config, APP_DIR)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:
