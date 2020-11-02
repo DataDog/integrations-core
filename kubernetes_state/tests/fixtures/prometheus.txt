@@ -135,12 +135,6 @@ kube_deployment_status_condition{namespace="default",deployment="redis-master",c
 kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="true"} 1
 kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="false"} 0
 kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="unknown"} 0
-# HELP kube_namespace_status_phase kubernetes namespace status phase.
-# TYPE kube_namespace_status_phase gauge
-kube_namespace_status_phase{namespace="default",phase="Active"} 0
-kube_namespace_status_phase{namespace="default",phase="Terminating"} 1
-kube_namespace_status_phase{namespace="kube-node-lease",phase="Active"} 1
-kube_namespace_status_phase{namespace="kube-node-lease",phase="Terminating"} 0
 # HELP kube_replicaset_owner Information about the ReplicaSet's owner.
 # TYPE kube_replicaset_owner gauge
 kube_replicaset_owner{namespace="kube-system",replicaset="l7-default-backend-678889f899",owner_kind="Deployment",owner_name="l7-default-backend",owner_is_controller="true"} 1

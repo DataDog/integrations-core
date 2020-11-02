@@ -93,9 +93,9 @@ class KubernetesState(OpenMetricsBaseCheck):
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
             # is a count by namespace and phase <Active|Terminating>
-            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['namespace', 'phase']},
+            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
             'kube_replicaset_owner': {'metric_name': 'replicaset.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
-            'kube_job_owner': {'metric_name': 'replicaset.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
+            'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -119,7 +119,6 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_persistentvolume_status_phase': self.count_objects_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
             'kube_namespace_status_phase': self.count_objects_by_tags,
-            'kube_deployment_status_condition': self.kube_deployment_count,
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
         }
@@ -316,8 +315,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_statefulset_metadata_generation',
                     'kube_statefulset_status_observed_generation',
                     'kube_hpa_metadata_generation',
-                    # kube_node_status_phase and kube_namespace_status_phase have no use case as a service check
-                    'kube_namespace_status_phase',
+                    # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
                     # These CronJob and Job metrics need use cases to determine how do implement
                     'kube_cronjob_status_active',
@@ -878,22 +876,6 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
-
-    #  TODO: check maybe other tag/label?
-    def kube_deployment_count(self, metric, scraper_config):
-        """
-        Count deployments by using the name as a unique identifier
-        """
-        metric_name = "{}.{}".format(scraper_config['namespace'], "kube.deployment.count")
-        count = 0
-        deployments = set()
-        for sample in metric.samples:
-            deployment = sample[sample[self.SAMPLE_LABELS]]['deployment']
-            if deployment not in deployments:
-                count += 1
-                deployments.add(deployment)
-        tags = scraper_config['custom_tags']
-        self.gauge(metric_name, count, tags=list(tags))
 
     def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
         """
