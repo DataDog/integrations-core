@@ -26,6 +26,7 @@ METRICS = [
     NAMESPACE + '.node.gpu.cards_allocatable',
     NAMESPACE + '.nodes.by_condition',
     # deployments
+    NAMESPACE + '.deployment.count',
     NAMESPACE + '.deployment.replicas',
     NAMESPACE + '.deployment.replicas_available',
     NAMESPACE + '.deployment.replicas_unavailable',
@@ -150,6 +151,12 @@ TAGS = {
     + '.pod.count': [
         'uid:b6fb4273-2dd6-4edb-9a23-7642bb121806',
         'created_by_kind:daemonset'
+    ],
+    NAMESPACE
+    + '.deployment.count': [
+        'condition:progressing',
+        'condition:available',
+        'status:true'
     ],
     NAMESPACE
     + '.replicaset.count': [

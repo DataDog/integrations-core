@@ -7,11 +7,12 @@ import time
 from collections import Counter, defaultdict
 from copy import deepcopy
 
+from six import iteritems
+
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_string
-from six import iteritems
 
 try:
     # this module is only available in agent 6
@@ -20,6 +21,7 @@ except ImportError:
 
     def get_clustername():
         return ""
+
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -94,8 +96,15 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
             # is a count by namespace and phase <Active|Terminating>
             'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
-            'kube_replicaset_owner': {'metric_name': 'replicaset.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
+            'kube_replicaset_owner': {
+                'metric_name': 'replicaset.count',
+                'allowed_labels': ['namespace', 'owner_name', 'owner_kind']
+            },
             'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
+            'kube_deployment_status_condition': {
+                'metric_name': 'deployment.count',
+                'allowed_labels': ['namespace', 'condition', 'status']
+            },
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -121,6 +130,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_namespace_status_phase': self.count_objects_by_tags,
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
+            # to get overall count is to filter by Available
+            'kube_deployment_status_condition': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
