@@ -256,10 +256,11 @@ def testable(
     if repo == 'integrations-core':
         options = {
             '1': 'Integrations',
-            '2': 'Containers',
-            '3': 'Core',
-            '4': 'Platform',
-            '5': 'Tools and Libraries',
+            '2': 'Infra Integrations',
+            '3': 'Containers',
+            '4': 'Core',
+            '5': 'Platform',
+            '6': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -273,7 +274,8 @@ def testable(
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
-            '9': 'Tools and Libraries',
+            '9': 'Infra Integrations',
+            '10': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
