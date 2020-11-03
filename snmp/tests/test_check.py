@@ -646,7 +646,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
     caplog.at_level(logging.WARNING)
     devices_not_matched = [
-        {'community_string': '3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
+        {'community_string': 'cisco-3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
     ]
     for device in devices_not_matched:
         instance = common.generate_instance_config([])

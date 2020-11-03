@@ -392,7 +392,7 @@ def test_f5(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     profile = "generic-router"
-    run_profile_check('generic-router', profile)
+    run_profile_check(profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -477,7 +477,7 @@ def test_f5_router(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_3850(aggregator):
     profile = "cisco-3850"
-    run_profile_check('3850', profile)
+    run_profile_check(profile)
     # We're not covering all interfaces
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
     common_tags = common.CHECK_TAGS + [
