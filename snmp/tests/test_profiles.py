@@ -1275,7 +1275,7 @@ def test_palo_alto(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_asa_5525(aggregator):
     profile = "cisco-asa-5525"
-    run_profile_check('cisco_asa_5525', profile)
+    run_profile_check(profile)
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
