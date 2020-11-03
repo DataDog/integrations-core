@@ -1606,7 +1606,7 @@ def test_aruba(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
     profile = "chatsworth_pdu"
-    run_profile_check('chatsworth', profile)
+    run_profile_check(profile)
 
     # Legacy global tags are applied to all metrics
     legacy_global_tags = [
