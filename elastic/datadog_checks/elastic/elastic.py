@@ -52,7 +52,7 @@ class ESCheck(AgentCheck):
     def check(self, instance):
         config = from_instance(instance)
         admin_forwarder = config.admin_forwarder
-        jvm_rate = instance.get('submit_gc_collector_as_rate', False)
+        jvm_rate = instance.get('gc_collectors_as_rate', False)
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
