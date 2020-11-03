@@ -246,7 +246,7 @@ def test_cisco_voice(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
     profile = "f5-big-ip"
-    run_profile_check('f5', profile)
+    run_profile_check('f5-big-ip', profile)
 
     gauges = [
         'sysStatMemoryTotal',
