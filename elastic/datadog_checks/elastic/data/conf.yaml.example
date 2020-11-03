@@ -104,6 +104,11 @@ instances:
     #
     # admin_forwarder: false
 
+    ## @param gc_collector_as_rate - boolean - optional - default: false
+    ## Submit `jvm.gc.collectors` metrics as rate.
+    #
+    # gc_collector_as_rate: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
