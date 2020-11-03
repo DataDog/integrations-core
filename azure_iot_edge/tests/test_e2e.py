@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Callable
 
+import copy
 import pytest
+import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -23,4 +25,24 @@ def test_e2e(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.OK)
+    aggregator.assert_service_check('azure.iot_edge.edge_hub.prometheus.health', AzureIoTEdgeCheck.OK)
+
+
+@pytest.mark.e2e
+def test_bad_url_e2e(e2e_instance, dd_agent_check):
+    """
+    When giving a wrong url to `edge_hub_prometheus_url`, the redirection might cause SSL exception
+    Example: http://localhost:9601/metri -> https://localhost/metri
+    """
+    bad_url_hub_instance = copy.deepcopy(e2e_instance)
+    bad_url_hub_instance['edge_hub_prometheus_url'] = bad_url_hub_instance['edge_hub_prometheus_url'][:-2]
+
+    bad_url_agent_instance = copy.deepcopy(e2e_instance)
+    bad_url_agent_instance['edge_agent_prometheus_url'] = bad_url_hub_instance['edge_agent_prometheus_url'][:-2]
+
+    with pytest.raises(Exception):
+        dd_agent_check(bad_url_hub_instance, rate=True)
+
+    aggregator = dd_agent_check(bad_url_agent_instance, rate=True)
+    aggregator.assert_service_check('azure.iot_edge.edge_agent.prometheus.health', AzureIoTEdgeCheck.CRITICAL)
     aggregator.assert_service_check('azure.iot_edge.edge_hub.prometheus.health', AzureIoTEdgeCheck.OK)
