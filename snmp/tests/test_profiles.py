@@ -933,7 +933,7 @@ def test_dell_poweredge(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_hp_ilo4(aggregator):
     profile = "hp-ilo4"
-    run_profile_check('hp_ilo4', profile)
+    run_profile_check(profile)
 
     status_gauges = [
         'cpqHeCritLogCondition',
