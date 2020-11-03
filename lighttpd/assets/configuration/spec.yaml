@@ -19,12 +19,10 @@ files:
   - template: logs
     example:
       - type: file
-        encoding: utf-16-le
         path: /var/log/lighttpd/access.log
         source: lighttpd
         service: lighttpd
       - type: file
-        encoding: utf-16-le
         path: /var/log/lighttpd/error.log
         source: lighttpd
         service: lighttpd
