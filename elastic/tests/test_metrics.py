@@ -65,6 +65,28 @@ def test_stats_for_version():
     metrics = stats_for_version([7, 2, 0])
     assert len(metrics) == 177
 
+@pytest.mark.unit
+def test_stats_for_version_rate():
+    # v0.90
+    metrics = stats_for_version([0, 90, 0], True)
+    assert len(metrics) == 133
+
+    # v0.90.5
+    metrics = stats_for_version([0, 90, 5], True)
+    assert len(metrics) == 134
+
+    # v0.90.10
+    metrics = stats_for_version([0, 90, 10], True)
+    assert len(metrics) == 136
+
+    # v1
+    metrics = stats_for_version([1, 0, 0], True)
+    assert len(metrics) == 144
+
+    # v1.3.0
+    metrics = stats_for_version([1, 3, 0], True)
+    assert len(metrics) == 146
+
 
 @pytest.mark.unit
 def test_pshard_stats_for_version():

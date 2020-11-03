@@ -106,6 +106,7 @@ instances:
 
     ## @param gc_collectors_as_rate - boolean - optional - default: false
     ## Submit `jvm.gc.collectors` metrics as rate.
+    ## Note: Only for ES versions 0.9.10 or higher.
     #
     # gc_collectors_as_rate: false
 
