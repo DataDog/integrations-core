@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Snowflake\n\nThe Snowflake overview dashboard provides a high-level view of your Snowflake warehouse and monitor storage usage, credit billing, and user metrics.\n\n\n- [Snowflake Integration docs](https://docs.datadoghq.com/integrations/snowflake/)\n- [Snowflake custom queries docs](https://docs.datadoghq.com/integrations/snowflake/#snowflake-custom-queries)",
+    "description": "## Snowflake Integration\n\nThe Snowflake overview dashboard provides a high-level view of your Snowflake warehouse and provides insight into storage usage, credit billing, and user metrics.\n\nFor more information on setup and use-cases, check out the following:\n\n- [Snowflake integration docs](https://docs.datadoghq.com/integrations/snowflake/)\n- [How to setup custom queries](https://docs.datadoghq.com/integrations/snowflake/#snowflake-custom-queries)\n- [Blog post on Snowflake monitoring use-cases](https://www.datadoghq.com/blog/snowflake-monitoring-datadog/)",
     "layout_type": "free",
     "template_variables": [
         {
@@ -14,7 +14,7 @@
             "prefix": "account"
         }
     ],
-    "title": "Snowflake",
+    "title": "Snowflake Overview (dhruv)",
     "widgets": [
         {
             "definition": {
@@ -64,7 +64,7 @@
                 "height": 24,
                 "width": 70,
                 "x": 30,
-                "y": 94
+                "y": 119
             }
         },
         {
@@ -83,13 +83,13 @@
                 "height": 5,
                 "width": 70,
                 "x": 30,
-                "y": 88
+                "y": 113
             }
         },
         {
             "definition": {
                 "background_color": "vivid_blue",
-                "content": "Credit billing",
+                "content": "Billing and Credit Usage",
                 "font_size": "18",
                 "show_tick": false,
                 "text_align": "center",
@@ -108,11 +108,19 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "custom_fg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.billing.total_credit.avg{$account}"
                     }
                 ],
@@ -132,8 +140,8 @@
         {
             "definition": {
                 "background_color": "white",
-                "content": "With this dashboard, you can get a high-level view of your Snowflake warehouse and monitor storage usage, credit billing, and user metrics.\n\n**Note**: By default, the integration minimum collection interval is 1 hour, setting the global dashboard time selector to **Past 1 Hour** or less may result in sparse graphs.\n\nSnowflake `ACCOUNT_USAGE` views have a [known latency](https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency) of 45 minutes to 3 hours.",
-                "font_size": "16",
+                "content": "Using this dashboard, you can get a high-level view of your Snowflake warehouse and monitor storage usage, credit billing, and query metrics.\n\n**Note**: By default, the integration minimum collection interval is 1 hour, setting the global dashboard time selector to **past 1 Hour or less may result in sparse graphs**.\n\nSnowflake `ACCOUNT_USAGE` views have a [known latency](https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency) of 45 minutes to 3 hours.\n\nFor more information on setup and use-cases, check out the following:\n\n- [Snowflake integration docs](https://docs.datadoghq.com/integrations/snowflake/)\n- [How to setup custom queries](https://docs.datadoghq.com/integrations/snowflake/#snowflake-custom-queries)\n- [Blog post on Snowflake monitoring use-cases](https://www.datadoghq.com/blog/snowflake-monitoring-datadog/)",
+                "font_size": "14",
                 "show_tick": false,
                 "text_align": "left",
                 "tick_edge": "left",
@@ -142,7 +150,7 @@
             },
             "id": 5466166763253712,
             "layout": {
-                "height": 32,
+                "height": 36,
                 "width": 27,
                 "x": 1,
                 "y": 9
@@ -151,11 +159,19 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "custom_fg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.billing.cloud_service.avg{$account}"
                     }
                 ],
@@ -175,11 +191,18 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.billing.virtual_warehouse.avg{$account}"
                     }
                 ],
@@ -236,27 +259,36 @@
         },
         {
             "definition": {
-                "custom_links": [],
+                "has_search_bar": "always",
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "alias": "Virtual warehouse",
+                        "alias": "Compute",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
                         "q": "avg:snowflake.billing.warehouse.virtual_warehouse.avg{$warehouse,$account} by {warehouse}"
                     },
                     {
                         "aggregator": "avg",
-                        "alias": "cloud service",
+                        "alias": "Cloud Services",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
                         "q": "avg:snowflake.billing.warehouse.cloud_service.avg{$warehouse,$account} by {warehouse}"
                     },
                     {
                         "aggregator": "avg",
                         "alias": "Total",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
                         "limit": 50,
                         "order": "desc",
                         "q": "avg:snowflake.billing.warehouse.total_credit.avg{$warehouse,$account} by {warehouse}"
                     }
                 ],
-                "title": "Credit billing by warehouse",
+                "title": "Credits used by warehouse",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_table"
@@ -310,11 +342,18 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.storage.storage_bytes.total{$account}"
                     }
                 ],
@@ -334,11 +373,18 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.storage.storage_bytes.total{$account}"
                     }
                 ],
@@ -358,11 +404,18 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.storage.failsafe_bytes.total{$account}"
                     }
                 ],
@@ -414,7 +467,7 @@
                 "height": 5,
                 "width": 70,
                 "x": 102,
-                "y": 91
+                "y": 110
             }
         },
         {
@@ -449,7 +502,7 @@
                 "height": 27,
                 "width": 70,
                 "x": 102,
-                "y": 97
+                "y": 116
             }
         },
         {
@@ -473,17 +526,16 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
-                        "display_type": "line",
+                        "display_type": "area",
                         "on_right_yaxis": false,
                         "q": "avg:snowflake.query.execution_time{$warehouse,$account}, avg:snowflake.query.compilation_time{$warehouse,$account}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
-                            "palette": "dog_classic"
+                            "palette": "cool"
                         }
                     }
                 ],
@@ -505,22 +557,21 @@
                 "height": 18,
                 "width": 34,
                 "x": 138,
-                "y": 53
+                "y": 58
             }
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
                 "requests": [
                     {
-                        "display_type": "line",
+                        "display_type": "area",
                         "on_right_yaxis": false,
                         "q": "avg:snowflake.query.executed{$warehouse,$account}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
-                            "palette": "dog_classic"
+                            "palette": "cool"
                         }
                     }
                 ],
@@ -542,17 +593,25 @@
                 "height": 18,
                 "width": 34,
                 "x": 102,
-                "y": 53
+                "y": 58
             }
         },
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "custom_fg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.query.bytes_scanned{$warehouse,$account}"
                     }
                 ],
@@ -566,17 +625,24 @@
                 "height": 13,
                 "width": 22,
                 "x": 102,
-                "y": 39
+                "y": 44
             }
         },
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.query.bytes_written{$warehouse,$account}"
                     }
                 ],
@@ -590,17 +656,24 @@
                 "height": 13,
                 "width": 22,
                 "x": 126,
-                "y": 39
+                "y": 44
             }
         },
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "custom_bg_color": "#14a0ea",
+                                "palette": "custom_bg",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:snowflake.query.bytes_deleted{$warehouse,$account}"
                     }
                 ],
@@ -614,7 +687,7 @@
                 "height": 13,
                 "width": 22,
                 "x": 150,
-                "y": 39
+                "y": 44
             }
         },
         {
@@ -636,7 +709,7 @@
             },
             "id": 7513259344861700,
             "layout": {
-                "height": 25,
+                "height": 30,
                 "width": 70,
                 "x": 102,
                 "y": 13
@@ -646,7 +719,7 @@
             "definition": {
                 "background_color": "gray",
                 "content": "Monitor hourly average credits billed per service across your entire Snowflake account or per warehouse. Values are calculated by day.",
-                "font_size": "16",
+                "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
                 "tick_edge": "right",
@@ -655,17 +728,17 @@
             },
             "id": 2069100823249938,
             "layout": {
-                "height": 15,
+                "height": 11,
                 "width": 27,
                 "x": 1,
-                "y": 43
+                "y": 48
             }
         },
         {
             "definition": {
                 "background_color": "gray",
                 "content": "Observe login attempts over time. If there are increased failed attempts, there may be misconfiguration issues or user errors.",
-                "font_size": "16",
+                "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
                 "tick_edge": "right",
@@ -677,14 +750,14 @@
                 "height": 13,
                 "width": 27,
                 "x": 1,
-                "y": 97
+                "y": 124
             }
         },
         {
             "definition": {
                 "background_color": "gray",
-                "content": "Monitor the types of queries run by warehouse, database, schema and its loads.\n\nAs well as the rate of queries per hour and compare execution vs compilation time.",
-                "font_size": "16",
+                "content": "This table shows the types of queries run by warehouse, database, schema and its loads.\n\nSort by the number of bytes scanned to identify the top query types performing the most IO operations.",
+                "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
                 "tick_edge": "left",
@@ -693,17 +766,17 @@
             },
             "id": 2341814810952518,
             "layout": {
-                "height": 19,
+                "height": 17,
                 "width": 27,
                 "x": 174,
-                "y": 17
+                "y": 20
             }
         },
         {
             "definition": {
                 "background_color": "gray",
-                "content": "Observe queries that were blocked or queued by reason per warehouse.",
-                "font_size": "16",
+                "content": "Observe queries that were blocked or queued by reason per warehouse.\n\nLarge numbers of blocked/queued queries could be an indicator about your warehouse size and the amount of workload placed on the warehouse.\n\nIf queries are spending a long time in queue, options include:\n\n- Dedicating a warehouse to these large complex running queries\n\n- Utilize Snowflake\u2019s multi-clustering warehouse feature to allow more parallel execution of the queries",
+                "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
                 "tick_edge": "left",
@@ -712,10 +785,10 @@
             },
             "id": 2943110546631750,
             "layout": {
-                "height": 12,
+                "height": 29,
                 "width": 27,
                 "x": 174,
-                "y": 104
+                "y": 114
             }
         },
         {
@@ -723,18 +796,17 @@
                 "legend_size": "0",
                 "requests": [
                     {
-                        "display_type": "line",
+                        "display_type": "area",
                         "on_right_yaxis": false,
                         "q": "avg:snowflake.query.bytes_spilled.local{$warehouse,$account} by {schema}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
-                            "palette": "dog_classic"
+                            "palette": "cool"
                         }
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Average bytes spilled to local storage",
                 "title_align": "left",
                 "title_size": "16",
@@ -751,8 +823,8 @@
             "layout": {
                 "height": 18,
                 "width": 34,
-                "x": 102,
-                "y": 72
+                "x": 66,
+                "y": 94
             }
         },
         {
@@ -760,18 +832,17 @@
                 "legend_size": "0",
                 "requests": [
                     {
-                        "display_type": "line",
+                        "display_type": "area",
                         "on_right_yaxis": false,
                         "q": "avg:snowflake.query.bytes_spilled.remote{$warehouse,$account} by {schema}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
-                            "palette": "dog_classic"
+                            "palette": "cool"
                         }
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Average bytes spilled to remote storage",
                 "title_align": "left",
                 "title_size": "16",
@@ -788,27 +859,109 @@
             "layout": {
                 "height": 18,
                 "width": 34,
-                "x": 138,
-                "y": 72
+                "x": 30,
+                "y": 94
+            }
+        },
+        {
+            "definition": {
+                "color_by_groups": [
+                    "warehouse",
+                    "database",
+                    "schema"
+                ],
+                "requests": {
+                    "x": {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.query.compilation_time{$warehouse,$account} by {query_type, warehouse, database, schema}"
+                    },
+                    "y": {
+                        "aggregator": "avg",
+                        "q": "avg:snowflake.query.execution_time{$warehouse,$account} by {query_type, warehouse, database, schema}"
+                    }
+                },
+                "title": "Query execution vs compilation time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "scatterplot",
+                "xaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5676285570284178,
+            "layout": {
+                "height": 32,
+                "width": 70,
+                "x": 102,
+                "y": 77
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Disk Spilling",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3039960082279558,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 30,
+                "y": 88
             }
         },
         {
             "definition": {
                 "background_color": "gray",
-                "content": "Local storage refers to the local disk cache. Data spilled to disk occurs when Snowflake cannot fit a query operation in memory which can slow down query execution.\n\nRemote storage is used when local storage is not sufficient and is significantly slower local storage.\n\nOptimize your queries by reducing the number of rows to process or you may consider using a bigger warehouse to increase total available memory and parallelism.",
-                "font_size": "16",
+                "content": "Data spilled to disk occurs when Snowflake cannot fit a query operation in memory which can significantly slow down query execution.\n\nOptimize your queries by either reducing the number of rows to process or consider using a larger warehouse (increased total available memory and parallelism).\n\n- Local storage: refers to the local disk cache \n- Remote storage: used when local storage is not sufficient and is significantly slower local storage",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2726605149886742,
+            "layout": {
+                "height": 30,
+                "width": 27,
+                "x": 1,
+                "y": 88
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If a query is spending more time compiling than executing, it may be time to review the complexity of the query.\n\nIf a query is overly complex, the Snowflake query compiler needs to spend more time sorting through the query logic.\u00a0\n",
+                "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
                 "tick_edge": "left",
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 2036957586597962,
+            "id": 91857514018494,
             "layout": {
-                "height": 30,
+                "height": 18,
                 "width": 27,
                 "x": 174,
-                "y": 66
+                "y": 76
             }
         }
     ]
