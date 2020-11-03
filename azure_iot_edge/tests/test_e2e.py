@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from typing import Callable
 
-import copy
 import pytest
-import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
