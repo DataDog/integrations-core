@@ -730,7 +730,7 @@ def test_idrac(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_nexus(aggregator):
     profile = "cisco-nexus"
-    run_profile_check('cisco-nexus', profile)
+    run_profile_check(profile)
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
