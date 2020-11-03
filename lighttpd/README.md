@@ -66,7 +66,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
    ```yaml
    logs:
      - type: file
-       encoding: utf-16-le
        path: /path/to/my/directory/file.log
        source: lighttpd
    ```
