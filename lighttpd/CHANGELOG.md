@@ -1,5 +1,9 @@
 # CHANGELOG - lighttpd
 
+## 1.13.1 / 2020-11-03
+
+* [Fixed] Remove default `encoding` example in logs config. See [#7916](https://github.com/DataDog/integrations-core/pull/7916).
+
 ## 1.13.0 / 2020-10-31
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
