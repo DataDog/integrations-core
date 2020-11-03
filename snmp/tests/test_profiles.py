@@ -1225,7 +1225,7 @@ def test_generic_host_resources(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_palo_alto(aggregator):
     profile = "palo-alto"
-    run_profile_check('pan-common', profile)
+    run_profile_check(profile)
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
