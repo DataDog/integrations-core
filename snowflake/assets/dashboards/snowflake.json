@@ -112,18 +112,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "custom_fg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.billing.total_credit.avg{$account}"
                     }
                 ],
+                "time": {},
                 "title": "Overall credit",
                 "title_align": "left",
                 "title_size": "16",
@@ -163,18 +155,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "custom_fg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.billing.cloud_service.avg{$account}"
                     }
                 ],
+                "time": {},
                 "title": "Cloud service credits",
                 "title_align": "left",
                 "title_size": "16",
@@ -195,17 +179,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.billing.virtual_warehouse.avg{$account}"
                     }
                 ],
+                "time": {},
                 "title": "Virtual warehouse credits",
                 "title_align": "left",
                 "title_size": "16",
@@ -346,17 +323,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.storage.storage_bytes.total{$account}"
                     }
                 ],
+                "time": {},
                 "title": "Total storage bytes",
                 "title_align": "left",
                 "title_size": "16",
@@ -377,17 +347,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.storage.storage_bytes.total{$account}"
                     }
                 ],
+                "time": {},
                 "title": "Total stage bytes",
                 "title_align": "left",
                 "title_size": "16",
@@ -408,17 +371,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.storage.failsafe_bytes.total{$account}"
                     }
                 ],
+                "time": {},
                 "title": "Total failsafe bytes",
                 "title_align": "left",
                 "title_size": "16",
@@ -603,18 +559,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "custom_fg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.query.bytes_scanned{$warehouse,$account}"
                     }
                 ],
+                "time": {},
                 "title": "Average bytes scanned",
                 "title_align": "left",
                 "title_size": "16",
@@ -635,17 +583,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.query.bytes_written{$warehouse,$account}"
                     }
                 ],
+                "time": {},
                 "title": "Average bytes written",
                 "title_align": "left",
                 "title_size": "16",
@@ -666,17 +607,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "custom_bg_color": "#14a0ea",
-                                "palette": "custom_bg",
-                                "value": 0
-                            }
-                        ],
                         "q": "avg:snowflake.query.bytes_deleted{$warehouse,$account}"
                     }
                 ],
+                "time": {},
                 "title": "Average bytes deleted",
                 "title_align": "left",
                 "title_size": "16",
