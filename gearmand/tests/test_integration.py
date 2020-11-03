@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.gearmand import Gearman
+from datadog_checks.base.constants import ServiceCheck
 
 from . import common
 
@@ -15,7 +15,7 @@ def test_service_check_broken(check, aggregator):
     with pytest.raises(Exception):
         check.check(common.BAD_INSTANCE)
 
-    aggregator.assert_service_check('gearman.can_connect', status=Gearman.CRITICAL, tags=tags, count=1)
+    aggregator.assert_service_check('gearman.can_connect', status=ServiceCheck.CRITICAL, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 
