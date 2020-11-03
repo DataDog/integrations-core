@@ -392,7 +392,7 @@ def test_f5(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     profile = "generic-router"
-    run_profile_check('network', profile)
+    run_profile_check('generic-router', profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
