@@ -27,7 +27,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Snowflake": "assets/dashboards/snowflake.json"
+    },
     "monitors": {
       "Snowflake failed logins": "assets/recommended_monitors/snowflake_failed_logins.json"
     },
