@@ -245,8 +245,7 @@ def test_cisco_voice(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
-    profile = "f5-big-ip"
-    run_profile_check('f5-big-ip', profile)
+    run_profile_check('f5-big-ip')
 
     gauges = [
         'sysStatMemoryTotal',
@@ -438,7 +437,7 @@ def test_router(aggregator):
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
-    instance['community_string'] = 'f5'
+    instance['community_string'] = 'f5-big-ip'
     instance['enforce_mib_constraints'] = False
 
     init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
