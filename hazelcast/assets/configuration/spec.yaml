@@ -37,6 +37,9 @@ files:
     - template: instances/http
       overrides:
         password.name: http_password
+        password.description: |
+          The password to use if services are behind basic or NTLM auth.
+          Renamed to `http_password` from `password` to be compatible with JMX's config options.
   - template: logs
     example:
     - type: file

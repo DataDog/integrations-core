@@ -294,6 +294,7 @@ instances:
 
     ## @param http_password - string - optional
     ## The password to use if services are behind basic or NTLM auth.
+    ## Renamed to `http_password` from `password` to be compatible with JMX's config options.
     #
     # http_password: <HTTP_PASSWORD>
 
