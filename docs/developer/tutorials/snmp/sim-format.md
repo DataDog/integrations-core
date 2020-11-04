@@ -15,7 +15,7 @@ Lines must be formatted as follows:
 <OID>|<type>|<value>
 ```
 
-For the list of supported types, see the [`snmpsim` simulation data file format](http://snmplabs.com/snmpsim/managing-simulation-data.html#file-format) documentation.
+For the list of supported types, see the [`snmpsim` simulation data file format](https://github.com/etingof/snmpsim/blob/69751eb81381ce1fe89bc1cd1154f9daaa5b697b/docs/source/documentation/managing-simulation-data.rst#file-format) documentation.
 
 !!! warning
     Due to a limitation of `snmpsim`, contents of `.snmprec` files must be **sorted in lexicographic order**.
