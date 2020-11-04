@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.9.1 / 2020-11-04
+
+* [Fixed] Fix secondary mode detection logic. See [#7926](https://github.com/DataDog/integrations-core/pull/7926).
+
 ## 2.9.0 / 2020-10-21
 
 * [Added] Detect replication DR secondary mode and skip Prometheus metric collection. See [#7825](https://github.com/DataDog/integrations-core/pull/7825).
