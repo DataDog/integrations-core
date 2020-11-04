@@ -202,6 +202,8 @@ class Vault(OpenMetricsBaseCheck):
         if replication_mode == 'secondary':
             self._replication_dr_secondary_mode = True
             self.log.debug("Detected vault in replication DR secondary mode, skipping Prometheus metric collection.")
+        else:
+            self._replication_dr_secondary_mode = False
 
         vault_version = health_data.get('version')
         if vault_version:
