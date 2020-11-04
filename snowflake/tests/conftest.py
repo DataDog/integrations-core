@@ -20,6 +20,6 @@ def dd_environment(instance):
     yield instance
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def instance():
     return INSTANCE
