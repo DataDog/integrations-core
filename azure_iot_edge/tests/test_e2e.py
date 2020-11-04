@@ -5,6 +5,7 @@ import copy
 from typing import Callable
 
 import pytest
+import requests
 
 from datadog_checks.azure_iot_edge import AzureIoTEdgeCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -39,7 +40,7 @@ def test_bad_url_e2e(e2e_instance, dd_agent_check):
     bad_url_agent_instance = copy.deepcopy(e2e_instance)
     bad_url_agent_instance['edge_agent_prometheus_url'] = bad_url_hub_instance['edge_agent_prometheus_url'][:-2]
 
-    with pytest.raises(Exception):
+    with pytest.raises(requests.exceptions.SSLError):
         dd_agent_check(bad_url_hub_instance, rate=True)
 
     aggregator = dd_agent_check(bad_url_agent_instance, rate=True)
