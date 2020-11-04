@@ -116,10 +116,10 @@ instances:
     #
     # user: <USER>
 
-    ## @param jmx_password - string - optional
+    ## @param password - string - optional
     ## Password to use when connecting to JMX.
     #
-    # jmx_password: <JMX_PASSWORD>
+    # password: <PASSWORD>
 
     ## @param process_name_regex - string - optional
     ## Instead of using a host and port, the Agent can connect using the attach API.
