@@ -1,0 +1,34 @@
+{
+  "display_name": "VoltDB",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "voltdb",
+  "metric_prefix": "voltdb.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "15abd7c6-1845-405a-8627-f83be1e48b11",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "VoltDB",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "voltdb",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}

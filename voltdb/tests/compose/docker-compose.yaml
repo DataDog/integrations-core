@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  voltdb1:
+    image: voltdb/voltdb-community:8.4.2
+    container_name: voltdb1
+    environment:
+      - HOST_COUNT=3
+      - HOSTS=voltdb1,voltdb2,voltdb3
+    ports:
+      - ${VOLTDB_API_PORT}:8080  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
+
+  voltdb2:
+    image: voltdb/voltdb-community:8.4.2
+    container_name: voltdb2
+    environment:
+      - HOST_COUNT=3
+      - HOSTS=voltdb1,voltdb2,voltdb3
+
+  voltdb3:
+    image: voltdb/voltdb-community:8.4.2
+    container_name: voltdb3
+    environment:
+      - HOST_COUNT=3
+      - HOSTS=voltdb1,voltdb2,voltdb3
