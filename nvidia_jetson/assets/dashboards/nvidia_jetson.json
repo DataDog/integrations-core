@@ -1,0 +1,473 @@
+{
+    "author_name": "Datadog",
+    "description": "",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        }
+    ],
+    "title": "Nvidia Jetson",
+    "widgets": [
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.cpu.usage{$host} by {cpu,host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU Usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5918515679916644,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "autoscale": false,
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "max:nvidia.jetson.cpu.total_count{$host}"
+                    }
+                ],
+                "time": {},
+                "title": "Core count",
+                "type": "query_value"
+            },
+            "id": 961311556852482,
+            "layout": {
+                "height": 1,
+                "width": 1,
+                "x": 4,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.cpu.freq{$host} by {cpu,host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.gpu.freq{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.emc.freq{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU, GPU & EMC Frequency",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8883392429325306,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 5,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "autoscale": false,
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "max:nvidia.jetson.cpu.inactive_count{$host}"
+                    }
+                ],
+                "time": {},
+                "title": "Inactive cores",
+                "type": "query_value"
+            },
+            "id": 4745595686562064,
+            "layout": {
+                "height": 1,
+                "width": 1,
+                "x": 4,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:nvidia.jetson.gpu.usage{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "GPU Usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "max": "100",
+                    "min": "0"
+                }
+            },
+            "id": 7618422537363026,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 0,
+                "y": 2
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.mem.total{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.mem.used{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Memory Usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5958849651062042,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 4,
+                "y": 2
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:nvidia.jetson.temp{$host} by {zone,host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Temperature Zones",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7007166456093876,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 8,
+                "y": 2
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:nvidia.jetson.emc.usage{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Memory Controller Usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3715685582426456,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 0,
+                "y": 4
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.swap.total{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.swap.cached{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.swap.used{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Swap Usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8231226131735112,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 4,
+                "y": 4
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.vdd.average{$host} by {probe,host}/1000",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Average power usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3584361921859274,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 8,
+                "y": 4
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Number of free blocks",
+                        "cell_display_mode": [
+                            "number"
+                        ],
+                        "limit": 10,
+                        "order": "desc",
+                        "q": "top(avg:nvidia.jetson.mem.n_lfb{$host} by {host}, 10, 'mean', 'desc')"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Largest free block",
+                        "cell_display_mode": [
+                            "number"
+                        ],
+                        "q": "top(avg:nvidia.jetson.mem.lfb{$host} by {host}, 10, 'mean', 'desc')"
+                    }
+                ],
+                "title": "Largest free memory block per host",
+                "type": "query_table"
+            },
+            "id": 743229523155656,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 0,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.iram.total{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:nvidia.jetson.iram.used{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "IRAM Usage",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1617838839011792,
+            "layout": {
+                "height": 2,
+                "width": 4,
+                "x": 4,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:nvidia.jetson.iram.lfb{$host}"
+                    }
+                ],
+                "title": "Largest IRAM free block",
+                "type": "query_value"
+            },
+            "id": 2743306043181106,
+            "layout": {
+                "height": 1,
+                "width": 1,
+                "x": 8,
+                "y": 6
+            }
+        }
+    ]
+}
