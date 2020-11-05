@@ -48,6 +48,7 @@ INSTANCE_FILTERS = {
     'resource_filters': [
         {'resource_type': 'forest', 'pattern': '^S[a-z]*'},  # Match Security and Schemas
         {'resource_type': 'forest', 'pattern': '^Sch*', 'include': False},  # Unmatch Schemas
+        {'resource_type': 'database', 'pattern': '^Doc'}, # Match Documents
         {'resource_type': 'server', 'pattern': 'Admin', 'group': 'Default'},
     ],
 }
