@@ -1,13 +1,13 @@
-# SNMP Tools
+# Tools
 
-## Using `tcpdump` for troubleshooting
+## Using `tcpdump` with SNMP
 
 `tcpdump` can help visualize the exact request/response content of SNMP `GET`/`GETNEXT`/etc calls.
 
 In a shell run `tcpdump`:
 
 ```
-tcpdump -vv -nni lo0 -T snmp host localhost and port 1161
+tcpdump -vv -nni lo0 -T snmp host localhost and port 161
 ```
 
 - `-nn`:  turn off host and protocol name resolution (to avoid generating DNS packets)
@@ -21,10 +21,10 @@ In another separate shell run `snmpwalk` or `snmpget`:
 snmpwalk -O n -v2c -c <COMMUNITY_STRING> localhost:1161 1.3.6.1.2.1.1.2.0
 ```
 
-Once `snmpwalk` is run we should get results like this from `tcpdump`:
+Once `snmpwalk` has been run we should get results like this from `tcpdump`:
 
 ```
-tcpdump -vv -nni lo0 -T snmp host localhost and port 1161
+tcpdump -vv -nni lo0 -T snmp host localhost and port 161
 tcpdump: listening on lo0, link-type NULL (BSD loopback), capture size 262144 bytes
 17:25:43.639639 IP (tos 0x0, ttl 64, id 29570, offset 0, flags [none], proto UDP (17), length 76, bad cksum 0 (->91d)!)
     127.0.0.1.59540 > 127.0.0.1.1161:  { SNMPv2c C="cisco-nexus" { GetRequest(28) R=1921760388  .1.3.6.1.2.1.1.2.0 } }
