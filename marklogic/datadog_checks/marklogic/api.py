@@ -12,6 +12,10 @@ class MarkLogicApi(object):
     def __init__(self, http, api_url):
         # type: (RequestsWrapper, str) -> None
         self._http = http
+
+        # Remove a possible trailing '/', added by BASE_ENDPOINT
+        if api_url[-1] == '/':
+            api_url = api_url[:-1]
         self._base_url = api_url + BASE_ENDPOINT
 
     def http_get(self, route="", params=None):
