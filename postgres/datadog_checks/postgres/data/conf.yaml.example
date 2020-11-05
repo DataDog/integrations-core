@@ -154,7 +154,7 @@ instances:
     # application_name: datadog-agent
 
     ## @param deep_database_monitoring - boolean - optional - default: false
-    ## Set to `true` to enable the BETA features for Deep Database Monitoring.
+    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
     ##
     ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
     ## success manager or Datadog support.
@@ -164,7 +164,7 @@ instances:
     ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
-    ## Please note this is a BETA feature and is subject to change or deprecation without notice.
+    ## Please note this is a ALPHA feature and is subject to change or deprecation without notice.
     #
     # pg_stat_statements_view: show_pg_stat_statements()
 
