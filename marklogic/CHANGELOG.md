@@ -1,5 +1,9 @@
 # CHANGELOG - MarkLogic
 
+## 1.1.1 / 2020-11-05
+
+* [Fixed] Remove possible extra '/' from base url configuration. See [#7941](https://github.com/DataDog/integrations-core/pull/7941).
+
 ## 1.1.0 / 2020-10-31
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
