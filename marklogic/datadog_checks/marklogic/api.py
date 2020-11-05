@@ -13,7 +13,7 @@ class MarkLogicApi(object):
         # type: (RequestsWrapper, str) -> None
         self._http = http
 
-        # Remove a possible trailing space, added by BASE_ENDPOINT
+        # Remove a possible trailing '/', added by BASE_ENDPOINT
         if api_url[-1] == '/':
             api_url = api_url[:-1]
         self._base_url = api_url + BASE_ENDPOINT
