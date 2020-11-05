@@ -6,6 +6,7 @@
 # in case of sys.executable returns empty string on Python 3.8 or later
 # Python issue link: https://bugs.python.org/issue42257
 import sys
+
 if not sys.executable:
     sys.executable = None
 
