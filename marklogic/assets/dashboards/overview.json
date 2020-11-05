@@ -5,7 +5,7 @@
     "template_variables": [
         {
             "default": "*",
-            "name": "host",
+            "name": "cluster",
             "prefix": "host"
         },
         {
@@ -114,10 +114,11 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "top(avg:marklogic.forests.storage.disk_size{*} by {forest_name}, 10, 'last', 'desc')"
+                        "q": "top(sum:marklogic.forests.storage.disk_size{*} by {forest_name}, 10, 'last', 'desc')"
                     }
                 ],
-                "title": "Avg of marklogic.forests.storage.disk_size over * by forest_name",
+                "time": {},
+                "title": "Total size of forests on disk",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "toplist"
@@ -226,7 +227,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:marklogic.hosts.query_read_rate{*}, sum:marklogic.hosts.large_read_rate{*}",
+                        "q": "sum:marklogic.hosts.query_read_rate{$cluster} by {host}, sum:marklogic.hosts.large_read_rate{$cluster} by {host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -235,7 +236,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Sum of marklogic.hosts.query_read_rate over *",
+                "time": {},
+                "title": "Read query and large documents rate over $cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -259,10 +261,11 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "top(avg:marklogic.databases.data_size{*} by {database_name}, 10, 'last', 'desc')"
+                        "q": "top(sum:marklogic.databases.data_size{*} by {database_name}, 10, 'last', 'desc')"
                     }
                 ],
-                "title": "Avg of marklogic.databases.data_size over * by database_name",
+                "time": {},
+                "title": "Total size of databases on disk",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "toplist"
@@ -285,7 +288,8 @@
                         "q": "sum:marklogic.databases.forests_count{$database_name}"
                     }
                 ],
-                "title": "Sum of marklogic.databases.forests_count over $database_name",
+                "time": {},
+                "title": "Total number of forest by $database_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -304,7 +308,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:marklogic.requests.total_requests{$host}",
+                        "q": "sum:marklogic.requests.total_requests{$cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -314,7 +318,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Avg of marklogic.requests.total_requests over $host",
+                "title": "Total number of active requests over $cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -349,7 +353,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Sum of marklogic.forests.total_rate over $forest_name by forest_name",
+                "time": {},
+                "title": "Sum of the processing rate factors by $forest_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -385,7 +390,7 @@
                 "height": 18,
                 "width": 15,
                 "x": 112,
-                "y": 4
+                "y": 5
             }
         },
         {
@@ -403,7 +408,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Sum of marklogic.databases.total_rate over $database_name by database_name",
+                "time": {},
+                "title": "Sum of the processing rate factors by $database_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -430,10 +436,23 @@
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            },
+                            {
+                                "comparator": "<=",
+                                "palette": "white_on_yellow",
+                                "value": 0
+                            }
+                        ],
                         "q": "sum:marklogic.databases.backup_count{$database_name}"
                     }
                 ],
-                "title": "Sum of marklogic.databases.backup_count over $database_name",
+                "time": {},
+                "title": "Number of backup for $database_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -471,7 +490,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:marklogic.hosts.total_rate{$host} by {host}",
+                        "q": "sum:marklogic.hosts.total_rate{$cluster} by {host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -480,7 +499,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Sum of marklogic.hosts.total_rate over $host by host",
+                "time": {},
+                "title": "Sum of the processing rate factors over $cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -598,7 +618,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:marklogic.servers.request_rate{*}",
+                        "q": "avg:marklogic.servers.request_rate{$cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -607,7 +627,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Avg of marklogic.servers.request_rate over *",
+                "time": {},
+                "title": "Average rate of request across $cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -661,7 +682,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Avg of marklogic.forests.query_read_rate over *",
+                "time": {},
+                "title": "Read query rate",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -696,7 +718,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Avg of marklogic.forests.compressed_tree_cache_hit_rate over *",
+                "time": {},
+                "title": "Hit rate of the compressed tree cache",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -729,10 +752,10 @@
             },
             "id": 5981632315787708,
             "layout": {
-                "height": 12,
-                "width": 14,
-                "x": 113,
-                "y": 60
+                "height": 11,
+                "width": 15,
+                "x": 112,
+                "y": 62
             }
         },
         {
