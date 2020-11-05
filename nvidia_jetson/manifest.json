@@ -6,7 +6,7 @@
   "metric_prefix": "nvidia.jetson.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Get metrics about your Nvidia Jetson board",
   "guid": "72845bb7-c3a6-4017-96f6-c232171102f8",
   "support": "core",
   "supported_os": [
@@ -26,6 +26,7 @@
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }
