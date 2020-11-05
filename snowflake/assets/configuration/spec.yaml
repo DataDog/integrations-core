@@ -139,3 +139,4 @@ files:
             Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
           min_collection_interval.default: 3600
           min_collection_interval.value.example: 3600
+          min_collection_interval.enabled: 3600
