@@ -2,7 +2,10 @@
 
 ## Using `tcpdump` for troubleshooting
 
-In one shell:
+`tcpdump` can help visualize the exact request/response content of SNMP `GET`/`GETNEXT`/etc calls.
+
+In a shell run `tcpdump`:
+
 ```
 tcpdump -vv -nni lo0 -T snmp host localhost and port 1161
 ```
@@ -12,7 +15,8 @@ tcpdump -vv -nni lo0 -T snmp host localhost and port 1161
 - `-T snmp`: type/protocol, snmp in our case
 
 
-In another shell:
+In another separate shell run `snmpwalk` or `snmpget`:
+
 ```
 snmpwalk -O n -v2c -c <COMMUNITY_STRING> localhost:1161 1.3.6.1.2.1.1.2.0
 ```
