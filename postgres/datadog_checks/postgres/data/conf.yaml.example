@@ -164,7 +164,7 @@ instances:
     ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
-    ## Please note this is a ALPHA feature and is subject to change or deprecation without notice.
+    ## Please note this is an ALPHA feature and is subject to change or deprecation without notice.
     #
     # pg_stat_statements_view: show_pg_stat_statements()
 
