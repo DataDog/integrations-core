@@ -1,0 +1,31 @@
+{
+  "display_name": "Nvidia Jetson",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "nvidia_jetson",
+  "metric_prefix": "nvidia_jetson.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "72845bb7-c3a6-4017-96f6-c232171102f8",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Nvidia Jetson",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "nvidia-jetson",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
