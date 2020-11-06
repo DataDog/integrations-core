@@ -164,3 +164,15 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
+
+
+def assert_metrics(aggregator, expected_tags):
+    """
+    Boilerplate asserting all the expected metrics and service checks.
+    Make sure ALL custom metric is tagged by database.
+    """
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname)
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
