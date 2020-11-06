@@ -117,7 +117,7 @@ instances:
     # user: <USER>
 
     ## @param password - string - optional
-    ## Password to use when connecting to JMX.
+    ## Password to use when connecting to JMX or HTTP depending on which is enabled.
     #
     # password: <PASSWORD>
 
@@ -291,12 +291,6 @@ instances:
     ## The username to use if services are behind basic or digest auth.
     #
     # username: <USERNAME>
-
-    ## @param http_password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    ## Renamed to `http_password` from `password` to be compatible with JMX's config options.
-    #
-    # http_password: <HTTP_PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify
