@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 2.0.2 / 2020-11-06
+
+* [Fixed] Fix replicaset identification with old configuration. See [#7964](https://github.com/DataDog/integrations-core/pull/7964).
+
 ## 2.0.1 / 2020-11-06
 
 * [Fixed] Add sharding_cluster_role tag to optime_lag metric. See [#7956](https://github.com/DataDog/integrations-core/pull/7956).
