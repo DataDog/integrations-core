@@ -252,12 +252,6 @@ instances:
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
     ##
-    ##   - type: dcos_auth
-    ##     login_url (required): DC/OS login endpoint
-    ##     service_account (required): The DC/OS service account to authenticate.
-    ##     private_key_path (required): The absolute path for the DC/OS service account.
-    ##     expiration: Token expiration in seconds, defaults to 300 (5 min).
-    ##
     ## The available writers are:
     ##
     ##   - type: header
