@@ -20,7 +20,12 @@
         },
         "replication": {
             "enableMajorityReadConcern": true,
-            "replSetName": "replset"
+            "replSet": {
+                "unknown": [
+                    "data",
+                    "format"
+                ]
+            }
         },
         "security": {
             "authorization": "enabled",
