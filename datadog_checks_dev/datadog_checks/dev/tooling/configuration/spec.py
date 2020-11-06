@@ -208,17 +208,26 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        if option_name in option_names_origin:
+        option.setdefault('hidden', False)
+        if not isinstance(option['hidden'], bool):
             loader.errors.append(
-                '{}, {}, {}option #{}: Option name `{}` already used by option #{}'.format(
-                    loader.source,
-                    file_name,
-                    sections_display,
-                    option_index,
-                    option_name,
-                    option_names_origin[option_name],
+                '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
+                    loader.source, file_name, sections_display, option_name
                 )
             )
+
+        if option_name in option_names_origin:
+            if not option['hidden']:
+                loader.errors.append(
+                    '{}, {}, {}option #{}: Option name `{}` already used by option #{}'.format(
+                        loader.source,
+                        file_name,
+                        sections_display,
+                        option_index,
+                        option_name,
+                        option_names_origin[option_name],
+                    )
+                )
         else:
             option_names_origin[option_name] = option_index
 
@@ -242,14 +251,6 @@ def options_validator(options, loader, file_name, *sections):
         if not isinstance(option['required'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `required` must be true or false'.format(
-                    loader.source, file_name, sections_display, option_name
-                )
-            )
-
-        option.setdefault('hidden', False)
-        if not isinstance(option['hidden'], bool):
-            loader.errors.append(
-                '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
