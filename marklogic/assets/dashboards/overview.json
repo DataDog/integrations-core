@@ -5,7 +5,7 @@
     "template_variables": [
         {
             "default": "*",
-            "name": "cluster",
+            "name": "host",
             "prefix": "host"
         },
         {
@@ -42,7 +42,7 @@
             "layout": {
                 "height": 78,
                 "width": 47,
-                "x": 168,
+                "x": 162,
                 "y": 6
             }
         },
@@ -76,7 +76,7 @@
                 "tags": [
                     "*"
                 ],
-                "title": "Forests health",
+                "title": "Forest health",
                 "title_align": "center",
                 "title_size": "16",
                 "type": "check_status"
@@ -97,7 +97,7 @@
                 "tags": [
                     "*"
                 ],
-                "title": "Databases health",
+                "title": "Database health",
                 "title_align": "center",
                 "title_size": "16",
                 "type": "check_status"
@@ -118,7 +118,7 @@
                     }
                 ],
                 "time": {},
-                "title": "Total size of forests on disk",
+                "title": "Largest forests on disk (top 10 forests)",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "toplist"
@@ -134,7 +134,7 @@
         {
             "definition": {
                 "background_color": "vivid_blue",
-                "content": "Forests summary",
+                "content": "# Forests",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "center",
@@ -152,8 +152,8 @@
         },
         {
             "definition": {
-                "background_color": "blue",
-                "content": "MarkLogic logs",
+                "background_color": "vivid_blue",
+                "content": "# MarkLogic logs",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "center",
@@ -165,14 +165,14 @@
             "layout": {
                 "height": 5,
                 "width": 47,
-                "x": 168,
+                "x": 162,
                 "y": 0
             }
         },
         {
             "definition": {
                 "background_color": "vivid_blue",
-                "content": "Overview",
+                "content": "\n# Overview",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "center",
@@ -204,8 +204,8 @@
         },
         {
             "definition": {
-                "background_color": "blue",
-                "content": "Hosts",
+                "background_color": "vivid_blue",
+                "content": "# Hosts",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "center",
@@ -218,7 +218,7 @@
                 "height": 5,
                 "width": 47,
                 "x": 24,
-                "y": 43
+                "y": 44
             }
         },
         {
@@ -227,7 +227,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:marklogic.hosts.query_read_rate{$cluster} by {host}, sum:marklogic.hosts.large_read_rate{$cluster} by {host}",
+                        "q": "avg:marklogic.hosts.query_read_rate{$host} by {host}, avg:marklogic.hosts.large_read_rate{$host} by {host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -237,7 +237,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Read query and large documents rate over $cluster",
+                "title": "Read query rate and large document read rate over $host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -254,7 +254,7 @@
                 "height": 15,
                 "width": 47,
                 "x": 24,
-                "y": 49
+                "y": 50
             }
         },
         {
@@ -265,7 +265,7 @@
                     }
                 ],
                 "time": {},
-                "title": "Total size of databases on disk",
+                "title": "Largest databases on disk (top 10 databases)",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "toplist"
@@ -273,8 +273,8 @@
             "id": 4216303646461122,
             "layout": {
                 "height": 15,
-                "width": 38,
-                "x": 128,
+                "width": 34,
+                "x": 126,
                 "y": 6
             }
         },
@@ -289,7 +289,7 @@
                     }
                 ],
                 "time": {},
-                "title": "Total number of forest by $database_name",
+                "title": "Forests of $database_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -297,8 +297,8 @@
             "id": 7180959663064248,
             "layout": {
                 "height": 8,
-                "width": 15,
-                "x": 131,
+                "width": 23,
+                "x": 113,
                 "y": 22
             }
         },
@@ -307,8 +307,9 @@
                 "legend_size": "0",
                 "requests": [
                     {
-                        "display_type": "line",
-                        "q": "sum:marklogic.requests.total_requests{$cluster}",
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:marklogic.requests.total_requests{$host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -318,7 +319,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Total number of active requests over $cluster",
+                "title": "Total number of active requests over $host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -333,8 +334,8 @@
             "id": 6497256550880508,
             "layout": {
                 "height": 15,
-                "width": 38,
-                "x": 128,
+                "width": 47,
+                "x": 113,
                 "y": 53
             }
         },
@@ -353,7 +354,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Sum of the processing rate factors by $forest_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -371,26 +371,26 @@
                 "height": 15,
                 "width": 38,
                 "x": 73,
-                "y": 54
+                "y": 68
             }
         },
         {
             "definition": {
                 "background_color": "gray",
-                "content": "These information are available for all the databases included in `resource_filters`, so the most important ones can be monitored here",
+                "content": "Configure the databases Datadog will track using [resource filters](https://github.com/DataDog/integrations-core/blob/03831e4fb3f5d4e95f9aabe8d5a5da10dbf9547e/marklogic/datadog_checks/marklogic/data/conf.yaml.example#L60-L75)",
                 "font_size": "14",
                 "show_tick": true,
-                "text_align": "center",
+                "text_align": "left",
                 "tick_edge": "right",
                 "tick_pos": "50%",
                 "type": "note"
             },
             "id": 3596562826502024,
             "layout": {
-                "height": 18,
-                "width": 15,
-                "x": 112,
-                "y": 5
+                "height": 15,
+                "width": 12,
+                "x": 113,
+                "y": 6
             }
         },
         {
@@ -408,7 +408,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Sum of the processing rate factors by $database_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -424,8 +423,8 @@
             "id": 7873483361703650,
             "layout": {
                 "height": 15,
-                "width": 38,
-                "x": 128,
+                "width": 47,
+                "x": 113,
                 "y": 31
             }
         },
@@ -452,7 +451,7 @@
                     }
                 ],
                 "time": {},
-                "title": "Number of backup for $database_name",
+                "title": "Backup of $database_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -460,8 +459,8 @@
             "id": 8732386596109986,
             "layout": {
                 "height": 8,
-                "width": 15,
-                "x": 148,
+                "width": 23,
+                "x": 137,
                 "y": 22
             }
         },
@@ -490,7 +489,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:marklogic.hosts.total_rate{$cluster} by {host}",
+                        "q": "sum:marklogic.hosts.total_rate{$host} by {host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -500,7 +499,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Sum of the processing rate factors over $cluster",
+                "title": "Sum of the processing rate factors over $host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -517,13 +516,13 @@
                 "height": 15,
                 "width": 47,
                 "x": 24,
-                "y": 65
+                "y": 66
             }
         },
         {
             "definition": {
                 "background_color": "vivid_blue",
-                "content": "Database summary",
+                "content": "# Databases",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "center",
@@ -534,15 +533,15 @@
             "id": 3172903413969796,
             "layout": {
                 "height": 5,
-                "width": 38,
-                "x": 128,
+                "width": 47,
+                "x": 113,
                 "y": 0
             }
         },
         {
             "definition": {
-                "background_color": "blue",
-                "content": "Requests",
+                "background_color": "vivid_blue",
+                "content": "# Requests",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "center",
@@ -553,8 +552,8 @@
             "id": 6184667112701002,
             "layout": {
                 "height": 5,
-                "width": 38,
-                "x": 128,
+                "width": 47,
+                "x": 113,
                 "y": 47
             }
         },
@@ -563,8 +562,9 @@
                 "legend_size": "0",
                 "requests": [
                     {
-                        "display_type": "line",
-                        "q": "sum:marklogic.transactions.total_transactions{*}",
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:marklogic.transactions.total_transactions{$host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -573,7 +573,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Total number of open transactions",
+                "time": {},
+                "title": "Total number of open transactions over $host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -590,7 +591,7 @@
                 "height": 15,
                 "width": 47,
                 "x": 24,
-                "y": 26
+                "y": 27
             }
         },
         {
@@ -618,7 +619,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:marklogic.servers.request_rate{$cluster}",
+                        "q": "avg:marklogic.servers.request_rate{$host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -628,7 +629,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Average rate of request across $cluster",
+                "title": "Average request rate across $host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -643,8 +644,8 @@
             "id": 7586296888730830,
             "layout": {
                 "height": 15,
-                "width": 38,
-                "x": 128,
+                "width": 47,
+                "x": 113,
                 "y": 69
             }
         },
@@ -653,7 +654,7 @@
                 "background_color": "gray",
                 "content": "If read query throughput is increasing while the hit rate for the compressed tree cache (`marklogic.forests.compressed_tree_cache_hit_rate`) is decreasing, it's likely that the cache is not large enough to handle the new queries\u2014consider adding memory to the cache.",
                 "font_size": "14",
-                "show_tick": true,
+                "show_tick": false,
                 "text_align": "center",
                 "tick_edge": "left",
                 "tick_pos": "50%",
@@ -661,10 +662,10 @@
             },
             "id": 5842035442347632,
             "layout": {
-                "height": 26,
-                "width": 15,
-                "x": 112,
-                "y": 25
+                "height": 13,
+                "width": 38,
+                "x": 73,
+                "y": 22
             }
         },
         {
@@ -673,7 +674,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:marklogic.forests.query_read_rate{*}",
+                        "q": "avg:marklogic.forests.query_read_rate{$forest_name} by {forest_name}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -700,7 +701,7 @@
                 "height": 15,
                 "width": 38,
                 "x": 73,
-                "y": 38
+                "y": 52
             }
         },
         {
@@ -719,7 +720,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Hit rate of the compressed tree cache",
+                "title": "Compressed tree cache hit rate",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -736,32 +737,13 @@
                 "height": 15,
                 "width": 38,
                 "x": 73,
-                "y": 22
+                "y": 36
             }
         },
         {
             "definition": {
                 "background_color": "gray",
-                "content": "Watch requests rates to spot unusual trafic spikes",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "right",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 5981632315787708,
-            "layout": {
-                "height": 11,
-                "width": 15,
-                "x": 112,
-                "y": 62
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "These service checks only appear when `enable_health_service_checks` is enabled.\nA resource can be green, yellow or red depending on how MarkLogic tagged it (`info`, `at-risk`, `critical`, etc)",
+                "content": "These service checks only appear when `enable_health_service_checks` is enabled.\nA resource can be green, yellow or red depending on how MarkLogic tagged it (`info`, `at-risk`, `critical`, etc.)",
                 "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
@@ -771,9 +753,9 @@
             },
             "id": 2934360651001512,
             "layout": {
-                "height": 9,
-                "width": 37,
-                "x": 35,
+                "height": 11,
+                "width": 31,
+                "x": 40,
                 "y": 15
             }
         }
