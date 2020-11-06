@@ -1,4 +1,4 @@
-# Profile for Cisco ASA 5525 devices
+# Profile for Cisco ASA devices
 
 extends:
   - _base.yaml
