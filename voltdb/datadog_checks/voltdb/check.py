@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from typing import Any, List, cast
 
 from datadog_checks.base import AgentCheck
@@ -29,6 +30,15 @@ class VoltDBCheck(AgentCheck):
             queries=[
                 queries.CPUMetrics,
                 queries.MemoryMetrics,
+                queries.SnapshotStatusMetrics,
+                queries.CommandLogMetrics,
+                queries.ProcedureMetrics,
+                queries.LatencyMetrics,
+                queries.StatementMetrics,
+                queries.GCMetrics,
+                queries.IOStatsMetrics,
+                queries.TableMetrics,
+                queries.IndexMetrics,
             ],
             tags=self._config.tags,
         )
@@ -38,12 +48,40 @@ class VoltDBCheck(AgentCheck):
         # type: (str) -> List[tuple]
         component = query
         params = self._config.build_api_params(procedure='@Statistics', parameters=[component])
-        response = self.http.get(self._config.api_url, params=params)
+        # auth=None: prevent RequestsWrapper from using username/password as basic auth.
+        response = self.http.get(self._config.api_url, params=params, auth=None)
         response.raise_for_status()
         raw = response.json()
         results = raw['results'][0]
         return results['data']
 
+    def _check_can_connect(self):
+        params = self._config.build_api_params(procedure='@SystemInformation')
+
+        try:
+            # auth=None: prevent RequestsWrapper from using username/password as basic auth.
+            r = self.http.get(self._config.api_url, params=params, auth=None)
+        except Exception as exc:
+            message = 'Unable to connect to VoltDB: {}'.format(exc)
+            self.service_check('can_connect', self.CRITICAL, message=message, tags=self._config.tags)
+            raise
+
+        try:
+            r.raise_for_status()
+        except Exception as exc:
+            message = 'Error response from VoltDB: {}'.format(exc)
+            try:
+                details = r.json()["statusstring"]
+            except (json.JSONDecodeError, KeyError):
+                pass
+            else:
+                message += ' (details: {})'.format(details)
+            self.service_check('can_connect', self.CRITICAL, message=message, tags=self._config.tags)
+            raise
+
+        self.service_check('can_connect', self.OK, tags=self._config.tags)
+
     def check(self, _):
-        # type: (dict) -> None
+        # type: (Any) -> None
+        self._check_can_connect()
         self._query_manager.execute()
