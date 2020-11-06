@@ -2,7 +2,7 @@
 
 ## Using `tcpdump` with SNMP
 
-`tcpdump` can help visualize the exact request/response content of SNMP `GET`/`GETNEXT`/etc calls.
+`tcpdump` shows the exact request and response content of SNMP `GET`, `GETNEXT` and other SNMP calls.
 
 In a shell run `tcpdump`:
 
@@ -18,10 +18,10 @@ tcpdump -vv -nni lo0 -T snmp host localhost and port 161
 In another separate shell run `snmpwalk` or `snmpget`:
 
 ```
-snmpwalk -O n -v2c -c <COMMUNITY_STRING> localhost:1161 1.3.6.1.2.1.1.2.0
+snmpwalk -O n -v2c -c <COMMUNITY_STRING> localhost:1161 1.3.6
 ```
 
-Once `snmpwalk` has been run we should get results like this from `tcpdump`:
+After you've run `snmpwalk`, you'll see results like this from `tcpdump`:
 
 ```
 tcpdump -vv -nni lo0 -T snmp host localhost and port 161
@@ -34,9 +34,7 @@ tcpdump: listening on lo0, link-type NULL (BSD loopback), capture size 262144 by
 
 ### From the Docker Agent container
 
-If you want to run `snmpget`/`snmpwalk` and `tcpdump` from the Docker Agent container you can install then as follow.
-
-From the Docker Agent container:
+If you want to run `snmpget`, `snmpwalk`, and `tcpdump` from the Docker Agent container you can install them by running the following commands (in the container):
 
 ```
 apt update
