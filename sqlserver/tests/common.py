@@ -29,7 +29,7 @@ LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
-CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
+CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
 EXPECTED_METRICS = [
     m[0] for m in SQLServer.INSTANCE_METRICS + SQLServer.TASK_SCHEDULER_METRICS + SQLServer.DATABASE_METRICS
 ] + CUSTOM_METRICS

@@ -7,7 +7,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
 
 from .common import EXPECTED_AO_METRICS_PRIMARY, EXPECTED_AO_METRICS_SECONDARY, EXPECTED_METRICS, \
-    EXPECTED_AO_METRICS_COMMON
+    EXPECTED_AO_METRICS_COMMON, CUSTOM_METRICS
 from .utils import always_on, not_windows_ci
 
 try:
@@ -30,7 +30,7 @@ def test_check_ao_e2e_primary(dd_agent_check, init_config, instance_ao_docker_pr
     for mname in EXPECTED_AO_METRICS_SECONDARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
 @not_windows_ci
@@ -65,7 +65,7 @@ def test_check_ao_secondary(dd_agent_check, init_config, instance_ao_docker_seco
     for mname in EXPECTED_AO_METRICS_PRIMARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
 
 
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
@@ -79,4 +79,4 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
