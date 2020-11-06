@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 2.1.2 / 2020-11-06
+
+* [Fixed] Add workaround for issue in platform.platform() on python 3.8 or later. See [#7932](https://github.com/DataDog/integrations-core/pull/7932). Thanks [kurochan](https://github.com/kurochan).
+
 ## 2.1.1 / 2020-11-06
 
 * [Fixed] Override the default `min_collection_interval`. See [#7949](https://github.com/DataDog/integrations-core/pull/7949).

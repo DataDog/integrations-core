@@ -83,7 +83,7 @@ datadog-marklogic==1.1.1
 datadog-mcache==1.10.0; sys_platform != 'win32'
 datadog-mesos-master==1.11.0; sys_platform != 'win32'
 datadog-mesos-slave==2.6.0; sys_platform != 'win32'
-datadog-mongo==2.0.0
+datadog-mongo==2.0.1
 datadog-mysql==2.1.0
 datadog-nagios==1.6.2
 datadog-network==1.19.0
@@ -114,7 +114,7 @@ datadog-sap-hana==1.3.0
 datadog-scylla==1.3.0
 datadog-sidekiq==1.2.0
 datadog-snmp==3.9.0
-datadog-snowflake==2.1.1
+datadog-snowflake==2.1.2
 datadog-solr==1.6.0
 datadog-spark==1.16.0
 datadog-sqlserver==2.1.0
