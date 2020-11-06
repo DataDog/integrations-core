@@ -28,7 +28,7 @@ kubernetes_state.deployment.rollingupdate.max_unavailable,gauge,,,,Maximum numbe
 kubernetes_state.endpoint.address_available,gauge,,,,Number of addresses available in endpoint,0,kubernetes,k8s_state.endpoint.address_avail
 kubernetes_state.endpoint.address_not_ready,gauge,,,,Number of addresses not ready in endpoint,-1,kubernetes,k8s_state.endpoint.address_not_ready
 kubernetes_state.endpoint.created,gauge,,,,Unix creation timestamp,0,kubernetes,k8s_state.endpoint.creation_time
-kubernetes_state.job,count,,,,The number of jobs,0,kubernetes,k8s_state.job.count
+kubernetes_state.job,count,gauge,,,The number of jobs,0,kubernetes,k8s_state.job.count
 kubernetes_state.job.failed,count,,,,Observed number of failed pods in a job,0,kubernetes,k8s_state.job.failed
 kubernetes_state.job.succeeded,count,,,,Observed number of succeeded pods in a job,0,kubernetes,k8s_state.job.succeeded
 kubernetes_state.limitrange.cpu.min,gauge,,,,Minimum CPU request for this type,0,kubernetes,k8s_state.cpu.min
