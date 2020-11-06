@@ -2,10 +2,7 @@
 
 ## 2.1.1 / 2020-11-06
 
-* [Added] Make improvements to documentation. See [#7902](https://github.com/DataDog/integrations-core/pull/7902).
 * [Fixed] Override the default `min_collection_interval`. See [#7949](https://github.com/DataDog/integrations-core/pull/7949).
-* [Fixed] Properly pin base package version for new QueryManager feature. See [#7832](https://github.com/DataDog/integrations-core/pull/7832).
-* [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
 
 ## 2.1.0 / 2020-10-31
 
@@ -28,4 +25,3 @@
 ## 1.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] New Integration: Snowflake. See [#7043](https://github.com/DataDog/integrations-core/pull/7043).
-
