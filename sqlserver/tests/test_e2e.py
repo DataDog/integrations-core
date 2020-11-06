@@ -19,15 +19,18 @@ except ImportError:
 pytestmark = pytest.mark.e2e
 
 
-def test_check_ao_primary(dd_agent_check, init_config, instance_ao_docker_primary):
-    aggregator = dd_agent_check({'init_config': init_config, 'instances': instance_ao_docker_primary})
+@not_windows_ci
+@always_on
+def test_check_ao_e2e_primary(dd_agent_check, init_config, instance_ao_docker_primary):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_ao_docker_primary]})
 
     for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON:
         aggregator.assert_metric(mname)
 
-    expected_metrics = {key: value for (key, value) in get_metadata_metrics().items() if
-                        key in set(EXPECTED_AO_METRICS_PRIMARY + EXPECTED_AO_METRICS_COMMON)}
-    aggregator.assert_metrics_using_metadata(expected_metrics)
+    for mname in EXPECTED_AO_METRICS_SECONDARY:
+        aggregator.assert_metric(mname, count=0)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @not_windows_ci
@@ -62,8 +65,7 @@ def test_check_ao_secondary(dd_agent_check, init_config, instance_ao_docker_seco
     for mname in EXPECTED_AO_METRICS_PRIMARY:
         aggregator.assert_metric(mname, count=0)
 
-    expected_metrics = {key: value for (key, value) in get_metadata_metrics().items() if key in set(EXPECTED_AO_METRICS_SECONDARY + EXPECTED_AO_METRICS_COMMON)}
-    aggregator.assert_metrics_using_metadata(expected_metrics)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
@@ -77,5 +79,4 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
 
-    expected_metrics = {key: value for (key, value) in get_metadata_metrics().items() if key in set(EXPECTED_METRICS)}
-    aggregator.assert_metrics_using_metadata(expected_metrics)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
