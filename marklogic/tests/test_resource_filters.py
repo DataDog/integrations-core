@@ -136,7 +136,7 @@ def test_collect_host_metrics(mock_requests, mock_status, aggregator):
 
     check.collect_per_resource_metrics()
 
-    expected_tags = COMMON_TAGS + ['host_name:ff0fef449486']
+    expected_tags = COMMON_TAGS + ['marklogic_host_name:ff0fef449486']
     for m in HOST_STATUS_METRICS_GENERAL:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
     for m in ['marklogic.requests.query-count', 'marklogic.requests.total-requests', 'marklogic.requests.update-count']:
