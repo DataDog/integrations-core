@@ -30,7 +30,7 @@ sqlserver.database.transactions,gauge,,transaction,,Number of transactions start
 sqlserver.database.write_transactions,gauge,,transaction,,"Number of transactions that wrote to all databases on the SQL Server instance and committed, in the last second.",0,sql_server,database trans write
 sqlserver.database.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary",0,sql_server,database state
 sqlserver.database.files.size,gauge,,kibibyte,,Current size of the database file,0,sql_server,database file size
-sqlserver.database.files.status,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
+sqlserver.database.files.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
 sqlserver.database.active_transactions,gauge,,transaction,,Number of active transactions across all databases on the SQL Server instance.,0,sql_server,database trans active
 sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending
 sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total
