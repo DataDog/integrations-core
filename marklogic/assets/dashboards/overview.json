@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "",
+    "description": "Datadog's integration for MarkLogic gives you the visibility you need to identify performance issues and tune your deployments more effectively.\n\nThis dashboard shows an overview of your cluster health, and provides more information about forests and databases.\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "free",
     "template_variables": [
         {
@@ -17,6 +17,11 @@
             "default": "*",
             "name": "database_name",
             "prefix": "database_name"
+        },
+        {
+            "default": "*",
+            "name": "ml_host_name",
+            "prefix": "host_name"
         }
     ],
     "title": "MarkLogic - Overview",
@@ -117,7 +122,6 @@
                         "q": "top(sum:marklogic.forests.storage.disk_size{*} by {forest_name}, 10, 'last', 'desc')"
                     }
                 ],
-                "time": {},
                 "title": "Largest forests on disk (top 10 forests)",
                 "title_align": "left",
                 "title_size": "16",
@@ -227,7 +231,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:marklogic.hosts.query_read_rate{$host} by {host}, avg:marklogic.hosts.large_read_rate{$host} by {host}",
+                        "q": "avg:marklogic.hosts.query_read_rate{$ml_host_name} by {host_name}, avg:marklogic.hosts.large_read_rate{$ml_host_name} by {host_name}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -237,7 +241,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Read query rate and large document read rate over $host",
+                "title": "Read query rate and large document read rate over $ml_host_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -264,7 +268,6 @@
                         "q": "top(sum:marklogic.databases.data_size{*} by {database_name}, 10, 'last', 'desc')"
                     }
                 ],
-                "time": {},
                 "title": "Largest databases on disk (top 10 databases)",
                 "title_align": "left",
                 "title_size": "16",
@@ -288,7 +291,6 @@
                         "q": "sum:marklogic.databases.forests_count{$database_name}"
                     }
                 ],
-                "time": {},
                 "title": "Forests of $database_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -450,7 +452,6 @@
                         "q": "sum:marklogic.databases.backup_count{$database_name}"
                     }
                 ],
-                "time": {},
                 "title": "Backup of $database_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -489,7 +490,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:marklogic.hosts.total_rate{$host} by {host}",
+                        "q": "sum:marklogic.hosts.total_rate{$ml_host_name} by {host_name}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -499,7 +500,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Sum of the processing rate factors over $host",
+                "title": "Sum of the processing rate factors over $ml_host_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -683,7 +684,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Read query rate",
                 "title_align": "left",
                 "title_size": "16",
@@ -719,7 +719,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Compressed tree cache hit rate",
                 "title_align": "left",
                 "title_size": "16",
@@ -743,7 +742,7 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "These service checks only appear when `enable_health_service_checks` is enabled.\nA resource can be green, yellow or red depending on how MarkLogic tagged it (`info`, `at-risk`, `critical`, etc.)",
+                "content": "These service checks only appear when `enable_health_service_checks` is enabled.\nA resource color depends on how MarkLogic tagged it. Green for `info`, red for `critical` and yellow for other tags like `at-risk`.",
                 "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
