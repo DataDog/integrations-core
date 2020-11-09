@@ -325,18 +325,9 @@ class RabbitMQ(AgentCheck):
                     explicit_filters.remove(name)
                     continue
 
-                match_found = False
-                for p in regex_filters:
-                    match = re.search(p, name)
-                    if match:
-                        if is_affirmative(tag_families) and match.groups():
-                            if object_type == QUEUE_TYPE:
-                                data_line["queue_family"] = match.groups()[0]
-                            if object_type == EXCHANGE_TYPE:
-                                data_line["exchange_family"] = match.groups()[0]
-                        matching_lines.append(data_line)
-                        match_found = True
-                        break
+                match_found = self._append_match_lines(
+                    regex_filters, name, tag_families, data_line, object_type, matching_lines
+                )
 
                 if match_found:
                     continue
@@ -350,21 +341,35 @@ class RabbitMQ(AgentCheck):
                     explicit_filters.remove(absolute_name)
                     continue
 
-                for p in regex_filters:
-                    match = re.search(p, absolute_name)
-                    if match:
-                        if is_affirmative(tag_families) and match.groups():
-                            if object_type == QUEUE_TYPE:
-                                data_line["queue_family"] = match.groups()[0]
-                            if object_type == EXCHANGE_TYPE:
-                                data_line["exchange_family"] = match.groups()[0]
-                        matching_lines.append(data_line)
-                        match_found = True
-                        break
+                match_found = self._append_match_lines(
+                    regex_filters, absolute_name, tag_families, data_line, object_type, matching_lines
+                )
                 if match_found:
                     continue
             return matching_lines
         return data
+
+    def _append_match_lines(self, regex_filters, name, tag_families, data_line, object_type, matching_lines):
+        result = False
+        object_tag_name = "queue_family"
+        if object_type == EXCHANGE_TYPE:
+            object_tag_name = "exchange_family"
+        for p in regex_filters:
+            match = re.search(p, name)
+            if match:
+                if is_affirmative(tag_families) and match.groups():
+                    named_groups_dict = match.groupdict()
+                    if len(named_groups_dict) > 0:
+                        for key in named_groups_dict:
+                            key_name = object_tag_name + "_" + key
+                            data_line[key] = named_groups_dict[key]
+                            TAGS_MAP[object_type][key] = key_name
+                    else:
+                        data_line[object_tag_name] = match.groups()[0]
+                matching_lines.append(data_line)
+                result = True
+                break
+        return result
 
     def _get_tags(self, data, object_type, custom_tags):
         tags = []

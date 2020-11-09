@@ -1,5 +1,13 @@
 # CHANGELOG - snmp
 
+## 3.9.0 / 2020-10-31
+
+* [Added] Add 'device vendor' tag to metrics. See [#7871](https://github.com/DataDog/integrations-core/pull/7871).
+* [Added] Track fetch ID in debug logs. See [#7736](https://github.com/DataDog/integrations-core/pull/7736).
+* [Added] Make refresh_oids_cache_interval available as init_config. See [#7821](https://github.com/DataDog/integrations-core/pull/7821).
+* [Added] Support alternative Mac Address index. See [#7688](https://github.com/DataDog/integrations-core/pull/7688).
+* [Fixed] Adding tag ciscoEnvMonSupplyStatusDescr to disambiguate metric. See [#7782](https://github.com/DataDog/integrations-core/pull/7782).
+
 ## 3.8.0 / 2020-09-04 / Agent 7.23.0
 
 * [Added] Add `index_transform` to support tagging using another table with different indexes. See [#7489](https://github.com/DataDog/integrations-core/pull/7489).

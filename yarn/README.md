@@ -117,12 +117,10 @@ The Yarn check does not include any events.
 
 ### Service Checks
 
-**yarn.can_connect**:
-
+**yarn.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`.
 
-**yarn.application.status**:
-
+**yarn.application.status**:<br>
 Returns per-application status according to the mapping specified in the [`conf.yaml`][5] file.
 
 ## Troubleshooting

@@ -1,5 +1,13 @@
 # CHANGELOG - directory
 
+## 1.9.1 / 2020-11-04
+
+* [Fixed] Add tags to the new `system.disk.directory.exists` service check. See [#7929](https://github.com/DataDog/integrations-core/pull/7929).
+
+## 1.9.0 / 2020-10-31
+
+* [Added] Add a service check for missing directories. See [#7714](https://github.com/DataDog/integrations-core/pull/7714).
+
 ## 1.8.0 / 2020-06-24 / Agent 7.21.0
 
 * [Added] Add option to not follow symlinks for stat. See [#6960](https://github.com/DataDog/integrations-core/pull/6960).

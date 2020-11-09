@@ -9,7 +9,7 @@ botocore==1.13.42
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.1.2
 contextlib2==0.6.0; python_version < "3.0"
-cryptography==2.8
+cryptography==3.2.1
 cx-oracle==7.2.0
 ddtrace==0.32.2
 dnspython==1.16.0
@@ -18,7 +18,7 @@ flup-py3==1.0.3; python_version > "3.0"
 flup==1.0.3.dev-20110405; python_version < "3.0"
 futures==3.3.0; python_version < "3.0"
 gearman==2.0.2; sys_platform != "win32" and python_version < "3.0"
-in-toto==0.4.2
+in-toto==0.5.0
 ipaddress==1.0.22; python_version < "3.0"
 jaydebeapi==1.2.3
 jpype1==0.7.1; python_version <= "2.7"
@@ -67,7 +67,7 @@ requests_ntlm==1.1.0
 requests_toolbelt==0.9.1
 rethinkdb==2.4.4
 scandir==1.8
-securesystemslib[crypto,pynacl]==0.14.2
+securesystemslib[crypto,pynacl]==0.17.0
 selectors34==1.2.0; sys_platform == "win32" and python_version < "3.4"
 semver==2.9.0
 serpent==1.27; sys_platform == "win32"
@@ -76,7 +76,7 @@ simplejson==3.6.5
 six==1.14.0
 snowflake-connector-python==2.1.3
 supervisor==4.1.0
-tuf==0.12.2
+tuf==0.15.0
 typing==3.7.4.1; python_version < "3.0"
 uptime==3.0.1
 vertica-python==0.10.1

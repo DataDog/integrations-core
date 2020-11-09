@@ -135,5 +135,8 @@ files:
 
             NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
             so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+
+            Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
           min_collection_interval.default: 3600
           min_collection_interval.value.example: 3600
+          min_collection_interval.enabled: 3600

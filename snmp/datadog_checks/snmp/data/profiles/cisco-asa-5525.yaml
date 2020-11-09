@@ -9,6 +9,9 @@ sysobjectid: 1.3.6.1.4.1.9.1.1408
 # 5505 1.3.6.1.4.1.9.1.745
 # 5555 1.3.6.1.4.1.9.1.1410
 
+device:
+  vendor: "cisco"
+
 metrics:
   - MIB: CISCO-FIREWALL-MIB
     table:

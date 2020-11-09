@@ -78,11 +78,13 @@ class AggregatorStub(object):
     def ignore_metric(cls, name):
         return name in cls.IGNORED_METRICS
 
-    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
+    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
 
-    def submit_metric_e2e(self, check, check_id, mtype, name, value, tags, hostname, device=None):
+    def submit_metric_e2e(
+        self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
+    ):
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))

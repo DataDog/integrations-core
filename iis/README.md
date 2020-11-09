@@ -90,7 +90,7 @@ The IIS check does not include any events.
 ### Service Checks
 
 **iis.site_up**:<br>
-The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise returns `OK`.
+The Agent submits this service check for each configured site in `iis.yaml`. It returns `CRITICAL` if the site's uptime is zero, otherwise returns `OK`.
 
 ## Troubleshooting
 

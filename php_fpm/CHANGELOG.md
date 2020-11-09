@@ -1,5 +1,10 @@
 # CHANGELOG - php_fpm
 
+## 1.11.0 / 2020-10-31
+
+* [Added] Add config spec. See [#7879](https://github.com/DataDog/integrations-core/pull/7879).
+* [Fixed] Add missing default HTTP headers: Accept, Accept-Encoding. See [#7725](https://github.com/DataDog/integrations-core/pull/7725).
+
 ## 1.10.1 / 2020-08-10 / Agent 7.22.0
 
 * [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).

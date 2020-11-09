@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 5.0.0 / 2020-10-31
+
+* [Added] add options method for validation. See [#7895](https://github.com/DataDog/integrations-core/pull/7895).
+* [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
+* [Added] Tracemalloc: Rename white/blacklist to include/exclude. See [#7626](https://github.com/DataDog/integrations-core/pull/7626).
+* [Added] Detect and abort if there are tox errors. See [#7801](https://github.com/DataDog/integrations-core/pull/7801).
+* [Added] Add fixed_cards_mover.py. See [#7724](https://github.com/DataDog/integrations-core/pull/7724).
+* [Added] Add warning when running environment without dev flag for non-core integrations. See [#7811](https://github.com/DataDog/integrations-core/pull/7811).
+* [Changed] Use creation, update and closed date to detect user inactivity.. See [#7771](https://github.com/DataDog/integrations-core/pull/7771).
+
 ## 4.2.0 / 2020-10-14
 
 * [Added] Validate JMX integrations metrics.yaml. See [#7733](https://github.com/DataDog/integrations-core/pull/7733).

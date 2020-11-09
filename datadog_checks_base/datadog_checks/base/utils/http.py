@@ -312,6 +312,9 @@ class RequestsWrapper(object):
     def delete(self, url, **options):
         return self._request('delete', url, options)
 
+    def options_method(self, url, **options):
+        return self._request('options', url, options)
+
     def _request(self, method, url, options):
         if self.log_requests:
             self.logger.debug(u'Sending %s request to %s', method.upper(), url)
@@ -445,6 +448,11 @@ def should_bypass_proxy(url, no_proxy_uris):
     # Returns True if URL should bypass the proxy.
     parsed_uri = urlparse(url).hostname
 
+    if '*' in no_proxy_uris:
+        # A single * character is supported, which matches all hosts, and effectively disables the proxy.
+        # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
     for no_proxy_uri in no_proxy_uris:
         try:
             # If no_proxy_uri is an IP or IP CIDR.
@@ -459,7 +467,13 @@ def should_bypass_proxy(url, no_proxy_uris):
             #   e.g. "foo.com" matches "foo.com" and "bar.foo.com"
             # A domain name with a leading "." matches subdomains only.
             #   e.g. ".y.com" matches "x.y.com" but not "y.com".
-            dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
+            if no_proxy_uri.startswith((".", "*.")):
+                # Support wildcard subdomain; treat as leading dot "."
+                # e.g. "*.example.domain" as ".example.domain"
+                dot_no_proxy_uri = no_proxy_uri.lstrip("*")
+            else:
+                # Used for matching subdomains.
+                dot_no_proxy_uri = ".{}".format(no_proxy_uri)
             if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
                 return True
     return False

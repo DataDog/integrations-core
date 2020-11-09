@@ -12,7 +12,7 @@ files:
       required: true
       description: URL of MarkLogic REST API.
       value:
-        example: http://localhost:8002/
+        example: http://localhost:8002
         type: string
     - name: enable_health_service_checks
       description: |

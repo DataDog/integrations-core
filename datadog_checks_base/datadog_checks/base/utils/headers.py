@@ -11,15 +11,32 @@ except ImportError:
     from ..stubs import datadog_agent
 
 
+def _get_common_headers():
+    return OrderedDict(
+        (
+            # Required by the HTTP spec. If missing, some websites may return junk (eg 404 responses).
+            ('Accept', '*/*'),
+            # Allow websites to send compressed responses.
+            # (In theory, not including this header allows servers to send anything, but in practice servers are
+            # typically conservative and send plain text, i.e. uncompressed responses.)
+            ('Accept-Encoding', 'gzip, deflate'),
+            # NOTE: we don't include a 'Connection' header. This is equivalent to using the spec-specific default
+            # behavior, i.e. 'keep-alive' for HTTP/1.1, and 'close' for HTTP/1.0.
+        )
+    )
+
+
 def get_default_headers():
     # http://docs.python-requests.org/en/master/user/advanced/#header-ordering
     # TODO: Use built-in when we drop Python 2 as dictionaries are guaranteed to be ordered in Python 3.6+ (and PyPy)
-    return OrderedDict(
+    headers = OrderedDict(
         (
             # Default to `0.0.0` if no version is found
             ('User-Agent', 'Datadog Agent/{}'.format(datadog_agent.get_version() or '0.0.0')),
         )
     )
+    headers.update(_get_common_headers())
+    return headers
 
 
 def update_headers(headers, extra_headers):
@@ -31,6 +48,7 @@ def headers(agentConfig, **kwargs):
     # Build the request headers
     version = __get_version(agentConfig)
     res = {'User-Agent': 'Datadog Agent/{}'.format(version)}
+    res.update(_get_common_headers())
 
     if 'http_host' in kwargs:
         res['Host'] = kwargs['http_host']

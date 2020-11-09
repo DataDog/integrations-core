@@ -48,7 +48,7 @@ instances:
     ## @param url - string - required
     ## URL of MarkLogic REST API.
     #
-  - url: http://localhost:8002/
+  - url: http://localhost:8002
 
     ## @param enable_health_service_checks - boolean - optional - default: false
     ## If `true`, the integration query the `/manage/v2?view=health` and submit the databases and forests health as 

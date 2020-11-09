@@ -102,6 +102,7 @@ Resources:
               enable-ecs-log-metadata: true
           MemoryReservation: 50
 ```
+**Note**: Use a [TaskDefinition secret][37] to avoid exposing the `apikey` in plain text.
 
 For more information on CloudFormation templating and syntax, review the [AWS CloudFormation documentation][36].
 
@@ -341,7 +342,7 @@ The ECS Fargate check does not include any events.
 
 ### Service Checks
 
-**fargate_check**
+**fargate_check**:<br>
 Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
 
 ## Troubleshooting
@@ -389,3 +390,4 @@ Need help? Contact [Datadog support][19].
 [34]: https://www.datadoghq.com/blog/monitor-aws-fargate
 [35]: https://aws.amazon.com/cloudformation/
 [36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
+[37]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html

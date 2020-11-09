@@ -23,6 +23,22 @@ ACTIVITY_METRICS = [
     'postgresql.waiting_queries',
 ]
 
+STATEMENT_METRICS = [
+    'postgresql.queries.count',
+    'postgresql.queries.time',
+    'postgresql.queries.rows',
+    'postgresql.queries.shared_blks_hit',
+    'postgresql.queries.shared_blks_read',
+    'postgresql.queries.shared_blks_dirtied',
+    'postgresql.queries.shared_blks_written',
+    'postgresql.queries.local_blks_hit',
+    'postgresql.queries.local_blks_read',
+    'postgresql.queries.local_blks_dirtied',
+    'postgresql.queries.local_blks_written',
+    'postgresql.queries.temp_blks_read',
+    'postgresql.queries.temp_blks_written',
+]
+
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
@@ -215,6 +231,38 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     for _ in range(3):
         check.check(pg_instance)
         assert check.config.tags == expected_tags
+
+
+def test_statement_metrics(aggregator, integration_check, pg_instance):
+    pg_instance['deep_database_monitoring'] = True
+    # The query signature should match the query and consistency of this tag has product impact. Do not change
+    # the query signature for this test unless you know what you're doing.
+    QUERY = 'select * from pg_stat_activity'
+    QUERY_SIGNATURE = '7cde606dbf8eaa17'
+
+    check = integration_check(pg_instance)
+    check._connect()
+    cursor = check.db.cursor()
+
+    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+    # This should result in a count of 1
+    cursor.execute(QUERY)
+    check.check(pg_instance)
+    cursor.execute(QUERY)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'user:datadog',
+        'query:{}'.format(QUERY),
+        'query_signature:{}'.format(QUERY_SIGNATURE),
+        'resource_hash:{}'.format(QUERY_SIGNATURE),
+    ]
+
+    for name in STATEMENT_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
 def assert_state_clean(check):

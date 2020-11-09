@@ -153,6 +153,17 @@ instances:
     #   - <PREFIX_*_SUFFIX>
     #   - <*_SUBSTRING_*>
 
+    ## @param ignore_metrics_by_labels - mapping - optional
+    ## A mapping of labels where metrics with matching label key and values are ignored.
+    ## Use the "*" wildcard to match all label values.
+    #
+    # ignore_metrics_by_labels:
+    #   <KEY_1>:
+    #   - <LABEL_1>
+    #   - <LABEL_2>
+    #   <KEY_2>:
+    #   - '*'
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

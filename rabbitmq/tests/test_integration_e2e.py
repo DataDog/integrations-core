@@ -181,6 +181,40 @@ def test_family_tagging(aggregator, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_family_tagging_with_named_groups(aggregator, check):
+    check.check(common.CONFIG_WITH_FAMILY_NAMED_GROUP)
+
+    # Node attributes
+    for mname in metrics.COMMON_METRICS:
+        aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
+
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
+    for mname in metrics.E_METRICS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family_first_group:test', count=2)
+
+    for mname in metrics.Q_METRICS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue_family_first_group:test', count=6)
+    # Overview attributes
+    for mname in metrics.OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in metrics.OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
+
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:/'], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myvhost'], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myothervhost'], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.status', status=RabbitMQ.OK)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_connections(aggregator, check):
     # no connections and no 'vhosts' list in the conf don't produce 'connections' metric
     check.check(common.CONFIG)

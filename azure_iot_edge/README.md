@@ -77,6 +77,30 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
 1. Save and deploy changes to your device configuration.
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it by configuring your Datadog Agent custom module:
+  - Under "Environment Variables", set the `DD_LOGS_ENABLED` environment variable:
+
+    ```yaml
+    DD_LOGS_ENABLED: true
+    ```
+
+1. Configure the **Edge Agent** and **Edge Hub** modules: under "Create Options", add the following label:
+
+    ```json
+    "Labels": {
+        "com.datadoghq.ad.logs": "[{\"source\": \"azure.iot_edge\", \"service\": \"<SERVICE>\"}]",
+        "...": "..."
+    }
+    ```
+
+    Change the `service` based on your environment.
+
+    Repeat this operation for any custom modules you'd like to collect logs for.
+
+1. Save and deploy changes to your device configuration.
+
 ### Validation
 
 Once the Agent has been deployed to the device, [run the Agent's status subcommand][7] and look for `azure_iot_edge` under the Checks section.
@@ -89,10 +113,10 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**azure.iot_edge.edge_agent.prometheus.health**:
+**azure.iot_edge.edge_agent.prometheus.health**:<br>
 Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise.
 
-**azure.iot_edge.edge_hub.prometheus.health**:
+**azure.iot_edge.edge_hub.prometheus.health**:<br>
 Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise.
 
 ### Events

@@ -106,9 +106,8 @@ This check emits an event each time a TokuMX node has a change in its replicatio
 
 ### Service Checks
 
-`tokumx.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to TokuMX to collect metrics, otherwise OK.
+**tokumx.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to TokuMX to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

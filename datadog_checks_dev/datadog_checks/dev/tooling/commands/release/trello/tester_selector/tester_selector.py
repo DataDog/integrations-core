@@ -9,13 +9,13 @@ from .....github import Github
 from .....trello import TrelloClient
 from ....console import echo_info, echo_warning
 from .github_trello_user_matcher import GithubTrelloUserMatcher
-from .github_users import GithubUser, GithubUsers
+from .github_users import GithubUser, GithubUsers, pr_date_str_to_date
 from .tester_selector_team import TesterSelectorTeam
 from .trello_users import TrelloUser, TrelloUsers
 
 
-def create_tester_selector(trello: TrelloClient, github_teams: List[str], user_config, app_dir: str):
-    github = Github(user_config, 5, 'datadog-agent', 'DataDog')
+def create_tester_selector(trello: TrelloClient, repo: str, github_teams: List[str], user_config, app_dir: str):
+    github = Github(user_config, 5, repo, 'DataDog')
     now = datetime.utcnow()
     user_cache_expiration = now + timedelta(days=-7)
     trello_users = TrelloUsers(trello, app_dir, user_cache_expiration)
@@ -90,5 +90,5 @@ class TesterSelector:
     def __get_last_user_activity(self, user: GithubUser) -> Optional[datetime]:
         last_pr_date = user.last_pr_date_str
         if last_pr_date:
-            return datetime.strptime(last_pr_date, "%Y-%m-%dT%H:%M:%SZ")
+            return pr_date_str_to_date(last_pr_date)
         return None

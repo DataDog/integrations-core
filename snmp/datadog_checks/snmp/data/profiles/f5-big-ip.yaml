@@ -9,6 +9,10 @@ extends:
   - _generic-udp.yaml
   - _generic-ip.yaml
 
+device:
+  vendor: "f5"
+
+
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
 
 metrics:

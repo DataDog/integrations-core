@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.2.0 / 2020-10-31
+
+* [Security] Update TUF, in-toto and securesystemslib. See [#7844](https://github.com/DataDog/integrations-core/pull/7844).
+
 ## 3.1.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

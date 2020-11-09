@@ -1,5 +1,11 @@
 # CHANGELOG - CoreDNS
 
+## 1.6.0 / 2020-10-31
+
+* [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] Add config specs. See [#7444](https://github.com/DataDog/integrations-core/pull/7444).
+
 ## 1.5.0 / 2020-07-16 / Agent 7.22.0
 
 * [Added] Adding new metrics for version 1.7.0 of CoreDNS. See [#6973](https://github.com/DataDog/integrations-core/pull/6973).

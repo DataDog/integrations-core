@@ -148,7 +148,7 @@ The SQL server check does not include any events.
 ### Service Checks
 
 **sqlserver.can_connect**:<br>
-Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to SQL Server to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

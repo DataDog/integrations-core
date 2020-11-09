@@ -184,6 +184,11 @@ class OpenMetricsScraperMixin(object):
         if ignored_patterns:
             config['_ignored_re'] = compile('|'.join(ignored_patterns))
 
+        # Ignore metrics based on label keys or specific label values
+        config['ignore_metrics_by_labels'] = instance.get(
+            'ignore_metrics_by_labels', default_instance.get('ignore_metrics_by_labels', {})
+        )
+
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
         config['send_histograms_buckets'] = is_affirmative(
@@ -350,6 +355,9 @@ class OpenMetricsScraperMixin(object):
         if config['metadata_metric_name'] and config['metadata_label_map']:
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
+        # Whether or not to enable flushing of the first value of monotonic counts
+        config['_successfully_executed'] = False
+
         return config
 
     def get_http_handler(self, scraper_config):
@@ -510,6 +518,8 @@ class OpenMetricsScraperMixin(object):
         for metric in self.scrape_metrics(scraper_config):
             self.process_metric(metric, scraper_config, metric_transformers=transformers)
 
+        scraper_config['_successfully_executed'] = True
+
     def transform_metadata(self, metric, scraper_config):
         labels = metric.samples[0][self.SAMPLE_LABELS]
         for metadata_name, label_name in iteritems(scraper_config['metadata_label_map']):
@@ -645,6 +655,29 @@ class OpenMetricsScraperMixin(object):
                     if mapping_key in label_mapping and mapping_value in label_mapping[mapping_key]:
                         sample_labels.update(label_mapping[mapping_key][mapping_value])
 
+    def _ignore_metrics_by_label(self, scraper_config, metric_name, sample):
+        ignore_metrics_by_label = scraper_config['ignore_metrics_by_labels']
+        sample_labels = sample[self.SAMPLE_LABELS]
+        for label_key, label_values in ignore_metrics_by_label.items():
+            if not label_values:
+                self.log.debug(
+                    "Skipping filter label `%s` with an empty values list, did you mean to use '*' wildcard?", label_key
+                )
+            elif '*' in label_values:
+                # Wildcard '*' means all metrics with label_key will be ignored
+                self.log.debug("Detected wildcard for label `%s`", label_key)
+                if label_key in sample_labels.keys():
+                    self.log.debug("Skipping metric `%s` due to label key matching: %s", metric_name, label_key)
+                    return True
+            else:
+                for val in label_values:
+                    if label_key in sample_labels and sample_labels[label_key] == val:
+                        self.log.debug(
+                            "Skipping metric `%s` due to label `%s` value matching: %s", metric_name, label_key, val
+                        )
+                        return True
+        return False
+
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
         Handle a Prometheus metric according to the following flow:
@@ -775,6 +808,9 @@ class OpenMetricsScraperMixin(object):
         if metric.type in ["gauge", "counter", "rate"]:
             metric_name_with_namespace = self._metric_name_with_namespace(metric_name, scraper_config)
             for sample in metric.samples:
+                if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
+                    continue
+
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
                     self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
@@ -783,7 +819,13 @@ class OpenMetricsScraperMixin(object):
                 # Determine the tags to send
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 if metric.type == "counter" and scraper_config['send_monotonic_counter']:
-                    self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
+                    self.monotonic_count(
+                        metric_name_with_namespace,
+                        val,
+                        tags=tags,
+                        hostname=custom_hostname,
+                        flush_first_value=scraper_config['_successfully_executed'],
+                    )
                 elif metric.type == "rate":
                     self.rate(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                 else:
@@ -793,7 +835,11 @@ class OpenMetricsScraperMixin(object):
                     # Submit metric as monotonic_count with appended name
                     if metric.type == "counter" and scraper_config['send_monotonic_with_gauge']:
                         self.monotonic_count(
-                            metric_name_with_namespace + '.total', val, tags=tags, hostname=custom_hostname
+                            metric_name_with_namespace + '.total',
+                            val,
+                            tags=tags,
+                            hostname=custom_hostname,
+                            flush_first_value=scraper_config['_successfully_executed'],
                         )
         elif metric.type == "histogram":
             self._submit_gauges_from_histogram(metric_name, metric, scraper_config)
@@ -827,6 +873,8 @@ class OpenMetricsScraperMixin(object):
             if not self._is_value_valid(val):
                 self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
+            if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
+                continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
@@ -837,6 +885,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
+                    flush_first_value=scraper_config['_successfully_executed'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
@@ -847,6 +896,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
+                    flush_first_value=scraper_config['_successfully_executed'],
                 )
             else:
                 try:
@@ -881,6 +931,8 @@ class OpenMetricsScraperMixin(object):
             if not self._is_value_valid(val):
                 self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
+            if self._ignore_metrics_by_label(scraper_config, metric_name, sample):
+                continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
@@ -891,6 +943,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
+                    flush_first_value=scraper_config['_successfully_executed'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
@@ -903,6 +956,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
+                    flush_first_value=scraper_config['_successfully_executed'],
                 )
             elif scraper_config['send_histograms_buckets'] and sample[self.SAMPLE_NAME].endswith("_bucket"):
                 if scraper_config['send_distribution_buckets']:
@@ -917,6 +971,7 @@ class OpenMetricsScraperMixin(object):
                         val,
                         tags=tags,
                         hostname=custom_hostname,
+                        flush_first_value=scraper_config['_successfully_executed'],
                     )
 
     def _compute_bucket_hash(self, tags):
@@ -1015,14 +1070,23 @@ class OpenMetricsScraperMixin(object):
         )
 
     def _submit_distribution_count(
-        self, monotonic, send_monotonic_with_gauge, metric_name, value, tags=None, hostname=None
+        self,
+        monotonic,
+        send_monotonic_with_gauge,
+        metric_name,
+        value,
+        tags=None,
+        hostname=None,
+        flush_first_value=False,
     ):
         if monotonic:
-            self.monotonic_count(metric_name, value, tags=tags, hostname=hostname)
+            self.monotonic_count(metric_name, value, tags=tags, hostname=hostname, flush_first_value=flush_first_value)
         else:
             self.gauge(metric_name, value, tags=tags, hostname=hostname)
             if send_monotonic_with_gauge:
-                self.monotonic_count(metric_name + ".total", value, tags=tags, hostname=hostname)
+                self.monotonic_count(
+                    metric_name + ".total", value, tags=tags, hostname=hostname, flush_first_value=flush_first_value
+                )
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
         custom_tags = scraper_config['custom_tags']

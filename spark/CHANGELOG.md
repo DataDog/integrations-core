@@ -1,5 +1,14 @@
 # CHANGELOG - spark
 
+## 1.17.0 / 2020-11-06
+
+* [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
+
+## 1.16.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
 ## 1.15.0 / 2020-09-03 / Agent 7.23.0
 
 * [Added] Add Stage and Job ID tags. See [#7459](https://github.com/DataDog/integrations-core/pull/7459).

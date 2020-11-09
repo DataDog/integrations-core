@@ -1,5 +1,9 @@
 # CHANGELOG - twemproxy
 
+## 1.8.0 / 2020-10-31
+
+* [Added] Add config spec. See [#7709](https://github.com/DataDog/integrations-core/pull/7709).
+
 ## 1.7.1 / 2020-07-03 / Agent 7.21.0
 
 * [Fixed] Don't collect version if metadata is not enabled. See [#7010](https://github.com/DataDog/integrations-core/pull/7010).

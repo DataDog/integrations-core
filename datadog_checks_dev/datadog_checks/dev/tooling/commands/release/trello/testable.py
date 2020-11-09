@@ -256,10 +256,11 @@ def testable(
     if repo == 'integrations-core':
         options = {
             '1': 'Integrations',
-            '2': 'Containers',
-            '3': 'Core',
-            '4': 'Platform',
-            '5': 'Tools and Libraries',
+            '2': 'Infra Integrations',
+            '3': 'Containers',
+            '4': 'Core',
+            '5': 'Platform',
+            '6': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -273,7 +274,8 @@ def testable(
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
-            '9': 'Tools and Libraries',
+            '9': 'Infra Integrations',
+            '10': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -294,7 +296,7 @@ def testable(
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
     github_teams = trello.label_github_team_map.values()
-    testerSelector = create_tester_selector(trello, github_teams, user_config, APP_DIR)
+    testerSelector = create_tester_selector(trello, repo, github_teams, user_config, APP_DIR)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:

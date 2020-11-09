@@ -1,6 +1,9 @@
 extends:
   - _base.yaml
 
+device:
+  vendor: "chatsworth"
+
 sysobjectid: 1.3.6.1.4.1.30932.*
 
 # [legacy] Global tags

@@ -55,8 +55,8 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-- `aerospike.can_connect`
-- `aerospike.cluster_up`
+**aerospike.can_connect**
+**aerospike.cluster_up**
 
 ### Events
 

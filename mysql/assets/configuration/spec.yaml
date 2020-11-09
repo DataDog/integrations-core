@@ -224,7 +224,7 @@ files:
                   high number of tables and schemas, this may have a negative impact on your database performance.
 
                   Metrics provided by the options:
-                    - mysql.info.schema.size (per schame)
+                    - mysql.info.schema.size (per schema)
                     - mysql.performance.query_run_time.avg (per schema)
                     - mysql.performance.digest_95th_percentile.avg_us
 

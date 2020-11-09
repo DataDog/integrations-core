@@ -18,6 +18,8 @@ a) Set Vault [`unauthenticated_metrics_access`][14] configuration to `true`.
 
 This will allow unauthenticated access to the `/v1/sys/metrics` endpoint.
 
+**Note**: The `/sys/metrics` endpoint requires Vault v1.1.0 or higher to collect metrics.
+
 b) Use a Vault client token.
 
 Below is an example using JWT auth method, but you can also use other [auth methods][15].
@@ -197,17 +199,17 @@ This event fires when the cluster leader changes.
 
 ### Service Checks
 
-`vault.can_connect`:
-Returns CRITICAL if the Agent cannot connect to Vault, otherwise OK.
+**vault.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Vault, otherwise `OK`.
 
-`vault.unsealed`:
-Returns CRITICAL if Vault is sealed, otherwise OK.
+**vault.unsealed**:<br>
+Returns `CRITICAL` if Vault is sealed, otherwise `OK`.
 
-`vault.initialized`:
-Returns CRITICAL if Vault is not yet initialized, otherwise OK.
+**vault.initialized**:<br>
+Returns `CRITICAL` if Vault is not yet initialized, otherwise `OK`.
 
-`vault.prometheus.health`:
-Returns CRITICAL if the check cannot access the metrics endpoint. Otherwise, returns OK.
+**vault.prometheus.health**:<br>
+Returns `CRITICAL` if the check cannot access the metrics endpoint. Otherwise, returns `OK`.
 
 ## Troubleshooting
 

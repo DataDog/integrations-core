@@ -207,13 +207,11 @@ The Elasticsearch check emits an event to Datadog each time the overall status o
 
 ### Service checks
 
-`elasticsearch.cluster_health`:
+**elasticsearch.cluster_health**:<br>
+Returns `OK` if the cluster status is green, `WARNING` if yellow, and `CRITICAL` otherwise.
 
-Returns `OK` if the cluster status is green, `Warn` if yellow, and `Critical` otherwise.
-
-`elasticsearch.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metrics.
+**elasticsearch.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Elasticsearch to collect metrics.
 
 ## Troubleshooting
 

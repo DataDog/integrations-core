@@ -766,6 +766,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
