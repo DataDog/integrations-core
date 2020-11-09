@@ -688,7 +688,7 @@ class AgentCheck(object):
         """
         Store `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
-            - `%ProgramData%\Datadog\run` on Windows.
+            - `%ProgramData%\\Datadog\\run` on Windows.
             - `/opt/datadog-agent/run` everywhere else.
         The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
 
