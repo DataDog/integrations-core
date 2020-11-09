@@ -21,7 +21,7 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 ### Architecture
 
-Most low-level metrics () needs to be collected on every mongod node. Other higher-level metrics should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
+Most low-level metrics (uptime, storage size etc.) needs to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Standalone" xxx -->
@@ -74,7 +74,7 @@ db.addUser("datadog", "<UNIQUEPASSWORD>", true)
 # On MongoDB 3.x or higher, use the createUser command.
 db.createUser({
   "user": "datadog",
-  "pwd": "pass",
+  "pwd": "<UNIQUEPASSWORD>",
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
@@ -106,8 +106,8 @@ db.addUser("datadog", "<UNIQUEPASSWORD>", true)
 
 # On MongoDB 3.x or higher, use the createUser command.
 db.createUser({
-  "user": "xx2",
-  "pwd": "xx",
+  "user": "datadog",
+  "pwd": "<UNIQUEPASSWORD>",
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
@@ -123,6 +123,8 @@ Then create the same user from a mongos proxy, this also has the side effect of 
 1. Configure one Agent for each member of each shard.
 2. Configure one Agent for each member of the config servers.
 3. Configure one extra Agent to connect to the cluster through a mongos proxy. This mongos can be a new one dedicated to monitoring purposes or an existing one.
+
+Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
 <!-- xxz tab xxx -->
 
 
