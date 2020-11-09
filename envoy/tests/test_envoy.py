@@ -28,9 +28,9 @@ def test_success(aggregator):
         if collected_metrics:
             expected_tags = [t for t in METRICS[metric]['tags'] if t]
             for tag_set in expected_tags:
-                assert all(all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags), (
-                    'tags ' + str(expected_tags) + ' not found in ' + metric
-                )
+                assert all(
+                    all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags
+                ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
         metrics_collected += len(collected_metrics)
 
     assert metrics_collected >= 445
