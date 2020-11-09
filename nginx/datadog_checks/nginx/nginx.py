@@ -83,8 +83,7 @@ class Nginx(AgentCheck):
         if not use_plus_api:
             response, content_type, version = self._get_data(instance, url)
             # for unpaid versions
-            if self.is_metadata_collection_enabled():
-                self._set_version_metadata(version)
+            self._set_version_metadata(version)
 
             self.log.debug("Nginx status `response`: %s", response)
             self.log.debug("Nginx status `content_type`: %s", content_type)
@@ -109,11 +108,11 @@ class Nginx(AgentCheck):
 
                 try:
                     if isinstance(response, dict):
-                        version_plus = response.get('nginx_version', None)
+                        version_plus = response.get('nginx_version')
                     else:
-                        version_plus = json.loads(response).get('nginx_version', None)
-                    if version_plus and self.is_metadata_collection_enabled():
-                        self._set_version_metadata(version_plus)
+                        version_plus = json.loads(response).get('nginx_version')
+
+                    self._set_version_metadata(version_plus)
                 except Exception as e:
                     self.log.warning("Couldn't submit nginx version: %s", e)
 
