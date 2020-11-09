@@ -73,27 +73,27 @@ instances:
     # empty_default_hostname: false
 
     ## @param ssl - boolean - optional - default: false
-    ## Enable SSL on Zookeeper
+    ## Enable SSL on Zookeeper.
     #
     # ssl: false
 
     ## @param private_key - string - optional
-    ## private key
+    ## The file location of the private key for SSL.
     #
     # private_key: <PRIVATE_KEY>
 
     ## @param ca_cert - string - optional
-    ## ca_cert
+    ## The file location of the CA certificate for SSL.
     #
     # ca_cert: <CA_CERT>
 
     ## @param cert - string - optional
-    ## cert
+    ## The file location of the certificate for SSL
     #
     # cert: <CERT>
 
     ## @param password - string - optional
-    ## password of key
+    ## The password to access the private key for SSL.
     #
     # password: <PASSWORD>
 

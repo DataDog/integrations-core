@@ -50,7 +50,7 @@ files:
           - template: instances/default
           - name: ssl
             description: |
-              Enable SSL on Zookeeper
+              Enable SSL on Zookeeper.
             value:
               type: boolean
               example: false
@@ -59,25 +59,25 @@ files:
 
           - name: private_key
             description: |
-              private key
+              The file location of the private key for SSL.
             value:
               type: string
 
           - name: ca_cert
             description: |
-              ca_cert
+              The file location of the CA certificate for SSL.
             value:
               type: string
 
           - name: cert
             description: |
-              cert
+              The file location of the certificate for SSL
             value:
               type: string
 
           - name: password
             description: |
-              password of key
+              The password to access the private key for SSL.
             value:
               type: string
 
