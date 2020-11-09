@@ -20,15 +20,19 @@ def test_build_resource_filters():
     # type: () -> None
     conf = Config(INSTANCE_FILTERS)
 
-    assert len(conf.resource_filters['included']) == 2
+    assert len(conf.resource_filters['included']) == 3
     assert conf.resource_filters['included'][0].resource_type == 'forest'
     assert conf.resource_filters['included'][0].regex.pattern == "^S[a-z]*"
     assert conf.resource_filters['included'][0].is_included is True
     assert conf.resource_filters['included'][0].group is None
-    assert conf.resource_filters['included'][1].resource_type == 'server'
-    assert conf.resource_filters['included'][1].regex.pattern == "Admin"
+    assert conf.resource_filters['included'][1].resource_type == 'database'
+    assert conf.resource_filters['included'][1].regex.pattern == "^Doc"
     assert conf.resource_filters['included'][1].is_included is True
-    assert conf.resource_filters['included'][1].group == 'Default'
+    assert conf.resource_filters['included'][1].group is None
+    assert conf.resource_filters['included'][2].resource_type == 'server'
+    assert conf.resource_filters['included'][2].regex.pattern == "Admin"
+    assert conf.resource_filters['included'][2].is_included is True
+    assert conf.resource_filters['included'][2].group == 'Default'
 
     assert len(conf.resource_filters['excluded']) == 1
     assert conf.resource_filters['excluded'][0].resource_type == 'forest'
@@ -61,7 +65,9 @@ def test_get_resources_to_monitor():
             {'name': 'Security', 'id': '1112331563215633422', 'type': 'forest', 'uri': '/forests/Security'},
             {'name': 'Schemas', 'id': '5750304059804042419', 'type': 'forest', 'uri': '/forests/Schemas'},
         ],
-        'database': [],
+        'database': [
+            {'id': '5004266825873163057', 'name': 'Documents', 'type': 'database', 'uri': '/databases/Documents'}
+        ],
         'host': [],
         'server': [
             {
@@ -80,7 +86,7 @@ def test_get_resources_to_monitor():
     filtered_res = check.get_resources_to_monitor()
     assert filtered_res == {
         'forest': [complete_filtered['forest'][0]],
-        'database': [],
+        'database': complete_filtered['database'],
         'host': [],
         'server': complete_filtered['server'],
     }

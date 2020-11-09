@@ -22,6 +22,7 @@ from .common import (
 from .metrics import (
     FOREST_STATUS_TREE_CACHE_METRICS,
     GLOBAL_METRICS,
+    RESOURCE_STATUS_DATABASE_METRICS,
     RESOURCE_STORAGE_FOREST_METRICS,
     STORAGE_FOREST_METRICS,
     STORAGE_HOST_METRICS,
@@ -121,6 +122,8 @@ def test_check_with_filters(aggregator):
     # Resource filter only
     for metric in STORAGE_HOST_METRICS + RESOURCE_STORAGE_FOREST_METRICS:
         aggregator.assert_metric_has_tag(metric, 'forest_name:Security', count=1)
+    for metric in RESOURCE_STATUS_DATABASE_METRICS:
+        aggregator.assert_metric_has_tag(metric, 'database_name:Documents', count=1)
     for metric in [
         'marklogic.requests.query-count',
         'marklogic.requests.total-requests',

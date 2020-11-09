@@ -131,13 +131,16 @@ class ReplicaCollector(MongoCollector):
             replset_name = status['set']
             self._report_replica_set_states(status['members'], replset_name)
 
+            # The replset_state tags represents the state of the current node (i.e primary at this point).
+            # The next section computes lag time for other nodes, thus `replset_state` is replaced with the
+            # state of each node.
+            lag_time_tags = [t for t in self.base_tags if not t.startswith('replset_state:')]
             # Compute a lag time
             for member in status.get('members', []):
                 if 'optimeDate' in primary and 'optimeDate' in member:
                     lag = primary['optimeDate'] - member['optimeDate']
-                    tags = self.check.base_tags + [
+                    tags = lag_time_tags + [
                         'member:{}'.format(member.get('name', 'unknown')),
-                        'replset_name:{}'.format(replset_name),
                         'replset_state:{}'.format(get_state_name(member.get('state')).lower()),
                     ]
                     self.gauge('mongodb.replset.optime_lag', lag.total_seconds(), tags)
