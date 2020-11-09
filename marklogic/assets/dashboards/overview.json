@@ -240,7 +240,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Read query rate and large document read rate over $ml_host_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -320,7 +319,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Total number of active requests over $host",
                 "title_align": "left",
                 "title_size": "16",
@@ -452,7 +450,8 @@
                         "q": "sum:marklogic.databases.backup_count{$database_name}"
                     }
                 ],
-                "title": "Backup of $database_name",
+                "time": {},
+                "title": "Backups of $database_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -574,7 +573,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Total number of open transactions over $host",
                 "title_align": "left",
                 "title_size": "16",
@@ -598,7 +596,7 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "[TODO] What query_read_rate and total",
+                "content": "Query read rate and large read rate [indicate](https://docs.marklogic.com/guide/opsdir/Analyse#id_21175) overall disk I/O performance during queries.",
                 "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
@@ -608,10 +606,10 @@
             },
             "id": 7562397926143496,
             "layout": {
-                "height": 24,
+                "height": 13,
                 "width": 18,
-                "x": 4,
-                "y": 53
+                "x": 5,
+                "y": 51
             }
         },
         {
@@ -629,7 +627,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Average request rate across $host",
                 "title_align": "left",
                 "title_size": "16",
@@ -656,7 +653,7 @@
                 "content": "If read query throughput is increasing while the hit rate for the compressed tree cache (`marklogic.forests.compressed_tree_cache_hit_rate`) is decreasing, it's likely that the cache is not large enough to handle the new queries\u2014consider adding memory to the cache.",
                 "font_size": "14",
                 "show_tick": false,
-                "text_align": "center",
+                "text_align": "left",
                 "tick_edge": "left",
                 "tick_pos": "50%",
                 "type": "note"
@@ -742,7 +739,7 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "These service checks only appear when `enable_health_service_checks` is enabled.\nA resource color depends on how MarkLogic tagged it. Green for `info`, red for `critical` and yellow for other tags like `at-risk`.",
+                "content": "These service checks only appear when `enable_health_service_checks` is enabled.\nA resource color depends on how MarkLogic tagged it: green for `info`, red for `critical`, and yellow for other tags like `at-risk`.",
                 "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
