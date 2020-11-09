@@ -23,6 +23,7 @@ def dd_environment(instance):
         'VOLTDB_CLIENT_PORT': str(common.VOLTDB_CLIENT_PORT),
         'TLS_OUTPUT_DIR': common.TLS_OUTPUT_DIR,
     }
+    # TODO: setup items to generate missing metrics: table, index, stored procedure, snapshot.
     with docker_run(compose_file, conditions=conditions, env_vars=env_vars):
         yield instance
 

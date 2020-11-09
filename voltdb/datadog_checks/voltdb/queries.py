@@ -64,6 +64,7 @@ SnapshotStatusMetrics = {
 
 # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatcommandlog
 # One row per server.
+# (Enterprise edition only.)
 CommandLogMetrics = {
     'name': 'commandlog',
     'query': 'COMMANDLOG',
@@ -206,6 +207,8 @@ IOStatsMetrics = {
     ],
 }
 
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstattable
+# One row per partition of each table (num_partitions = num_sites_per_node * num_nodes).
 TableMetrics = {
     'name': 'table',
     'query': 'TABLE',
@@ -228,6 +231,8 @@ TableMetrics = {
     ],
 }
 
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatindex
+# One row per index.
 IndexMetrics = {
     'name': 'index',
     'query': 'INDEX',
@@ -245,32 +250,3 @@ IndexMetrics = {
         {'name': 'index.memory_estimate', 'type': 'gauge'},
     ],
 }
-
-# COMPONENTS = [
-#     "CPU",
-#     "DRCONSUMER",
-#     "DRPRODUCER",
-#     "DRROLE",
-#     "EXPORT",
-#     "GC",
-#     "IDLETIME",
-#     "IMPORT",
-#     "INDEX",
-#     "INITIATOR",
-#     "IOSTATS",
-#     "LATENCY",
-#     "LIVECLIENTS",
-#     "MEMORY",
-#     "PARTITIONCOUNT",
-#     "PLANNER",
-#     "PROCEDUREDETAIL",
-#     "PROCEDUREINPUT",
-#     "PROCEDUREOUTPUT",
-#     "PROCEDUREPROFILE",
-#     "QUEUE",
-#     "REBALANCE",
-#     "SNAPSHOTSTATUS",
-#     "TABLE",
-#     "TASK",
-#     "TTL",
-# ]
