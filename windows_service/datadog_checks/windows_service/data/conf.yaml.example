@@ -21,7 +21,9 @@ instances:
     ## This matches all services starting with service, as if service.* is configured.
     ## For an exact match, use ^service$
     #
-  - services: []
+  - services:
+      - <SERVICE_NAME_1>
+      - <SERVICE_NAME_2>
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed
