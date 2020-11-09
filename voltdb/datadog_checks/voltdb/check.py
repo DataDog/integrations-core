@@ -5,7 +5,7 @@ import json
 from typing import Any, List, cast
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryManager, Query
 
 from . import queries
 from .config import Config
@@ -28,17 +28,19 @@ class VoltDBCheck(AgentCheck):
             self,
             self._execute_query_raw,
             queries=[
-                queries.CPUMetrics,
-                queries.MemoryMetrics,
-                queries.SnapshotStatusMetrics,
-                queries.CommandLogMetrics,
-                queries.ProcedureMetrics,
-                queries.LatencyMetrics,
-                queries.StatementMetrics,
-                queries.GCMetrics,
-                queries.IOStatsMetrics,
-                queries.TableMetrics,
-                queries.IndexMetrics,
+                # NOTE: This only works on Agent < 7.24.0.
+                # On Agent 7.24.0+, wrapping around `Query` is done automatically.
+                Query(queries.CPUMetrics),
+                Query(queries.MemoryMetrics),
+                Query(queries.SnapshotStatusMetrics),
+                Query(queries.CommandLogMetrics),
+                Query(queries.ProcedureMetrics),
+                Query(queries.LatencyMetrics),
+                Query(queries.StatementMetrics),
+                Query(queries.GCMetrics),
+                Query(queries.IOStatsMetrics),
+                Query(queries.TableMetrics),
+                Query(queries.IndexMetrics),
             ],
             tags=self._config.tags,
         )
