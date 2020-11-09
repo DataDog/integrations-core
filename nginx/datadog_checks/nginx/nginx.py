@@ -83,7 +83,8 @@ class Nginx(AgentCheck):
         if not use_plus_api:
             response, content_type, version = self._get_data(instance, url)
             # for unpaid versions
-            self._set_version_metadata(version)
+            if self.is_metadata_collection_enabled():
+                self._set_version_metadata(version)
 
             self.log.debug("Nginx status `response`: %s", response)
             self.log.debug("Nginx status `content_type`: %s", content_type)
@@ -105,6 +106,17 @@ class Nginx(AgentCheck):
 
             for endpoint, nest in plus_api_chain_list:
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
+
+                try:
+                    if isinstance(response, dict):
+                        version_plus = response.get('nginx_version', None)
+                    else:
+                        version_plus = json.loads(response).get('nginx_version', None)
+                    if version_plus and self.is_metadata_collection_enabled():
+                        self._set_version_metadata(version_plus)
+                except Exception as e:
+                    self.log.warning("Couldn't submit nginx version: %s", e)
+
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
 
@@ -140,10 +152,6 @@ class Nginx(AgentCheck):
                     func_count(name + "_count", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
-
-                # for vts and plus versions
-                if name == 'nginx.version':
-                    self._set_version_metadata(value)
 
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)

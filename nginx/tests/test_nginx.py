@@ -1,10 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+import mock
 import pytest
 import requests
 
-from .common import HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
+from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
+from .utils import mocked_perform_request
 
 pytestmark = pytest.mark.skipif(USING_VTS, reason='Using VTS')
 
@@ -56,3 +60,34 @@ def test_metadata(check, instance, datadog_agent):
     nginx_check.check(instance)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
+
+
+@mock.patch(
+    'datadog_checks.nginx.Nginx._get_plus_api_data',
+    return_value=open(os.path.join(FIXTURES_PATH, 'nginx_plus_in.json')).read(),
+)
+def test_metadata_plus(_, aggregator, check, datadog_agent):
+    # Hardcoded in the fixture
+    version = '1.13.7'
+    instance = {
+        'nginx_status_url': 'dummy_url',
+        'use_plus_api': True,
+    }
+
+    nginx_check = check(instance)
+    nginx_check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
+    nginx_check.check_id = 'test:123'
+
+    major, minor, patch = version.split('.')
+
+    version_metadata = {
+        'version.raw': version,
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+    }
+
+    nginx_check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
