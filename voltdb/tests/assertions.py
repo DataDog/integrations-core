@@ -4,7 +4,7 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import ServiceCheckStatus
-from datadog_checks.voltdb._types import Instance
+from datadog_checks.voltdb.types import Instance
 
 from . import common
 

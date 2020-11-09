@@ -8,9 +8,12 @@ services:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
-      - ./deployment.xml:/tmp/deployment.xml
+      - ./deployment-tls.xml:/tmp/deployment.xml
+      - $TLS_OUTPUT_DIR:/tmp/tlsoutput
+      - ./tlsstart.sh:/tmp/tlsstart.sh
+    entrypoint: ["sh", "/tmp/tlsstart.sh"]
     ports:
-      - ${VOLTDB_CLIENT_PORT}:8080  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
+      - ${VOLTDB_CLIENT_PORT}:8443  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
 
   voltdb1:
     image: voltdb/voltdb-community:8.4.2
@@ -19,7 +22,9 @@ services:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
-      - ./deployment.xml:/tmp/deployment.xml
+      - ./deployment-tls.xml:/tmp/deployment.xml
+      - ./tlsstart.sh:/tmp/tlsstart.sh
+    entrypoint: ["sh", "/tmp/tlsstart.sh"]
 
   voltdb2:
     image: voltdb/voltdb-community:8.4.2
@@ -28,4 +33,6 @@ services:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
-      - ./deployment.xml:/tmp/deployment.xml
+      - ./deployment-tls.xml:/tmp/deployment.xml
+      - ./tlsstart.sh:/tmp/tlsstart.sh
+    entrypoint: ["sh", "/tmp/tlsstart.sh"]

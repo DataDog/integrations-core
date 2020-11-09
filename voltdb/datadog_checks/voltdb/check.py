@@ -7,9 +7,9 @@ from typing import Any, List, cast
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
-from . import _queries as queries
-from ._config import Config
-from ._types import Instance
+from . import queries
+from .config import Config
+from .types import Instance
 
 
 class VoltDBCheck(AgentCheck):
@@ -21,7 +21,7 @@ class VoltDBCheck(AgentCheck):
         self._config = Config(cast(Instance, self.instance))
 
         if self._config.auth is not None:
-            _, password = self._config.auth
+            password = self._config.auth._password
             self.register_secret(password)
 
         self._query_manager = QueryManager(
@@ -44,23 +44,14 @@ class VoltDBCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
-    def _execute_query_raw(self, query):
-        # type: (str) -> List[tuple]
-        component = query
-        params = self._config.build_api_params(procedure='@Statistics', parameters=[component])
-        # auth=None: prevent RequestsWrapper from using username/password as basic auth.
-        response = self.http.get(self._config.api_url, params=params, auth=None)
-        response.raise_for_status()
-        raw = response.json()
-        results = raw['results'][0]
-        return results['data']
-
     def _check_can_connect(self):
+        # type: () -> None
+        url = self._config.api_url
+        auth = self._config.auth
         params = self._config.build_api_params(procedure='@SystemInformation')
 
         try:
-            # auth=None: prevent RequestsWrapper from using username/password as basic auth.
-            r = self.http.get(self._config.api_url, params=params, auth=None)
+            r = self.http.get(url, auth=auth, params=params)
         except Exception as exc:
             message = 'Unable to connect to VoltDB: {}'.format(exc)
             self.service_check('can_connect', self.CRITICAL, message=message, tags=self._config.tags)
@@ -80,6 +71,20 @@ class VoltDBCheck(AgentCheck):
             raise
 
         self.service_check('can_connect', self.OK, tags=self._config.tags)
+
+    def _execute_query_raw(self, query):
+        # type: (str) -> List[tuple]
+        component = query
+
+        url = self._config.api_url
+        auth = self._config.auth
+        params = self._config.build_api_params(procedure='@Statistics', parameters=[component])
+
+        response = self.http.get(url, auth=auth, params=params)
+        response.raise_for_status()
+
+        data = response.json()
+        return data['results'][0]['data']
 
     def check(self, _):
         # type: (Any) -> None

@@ -7,9 +7,9 @@ import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.voltdb import VoltDBCheck
-from datadog_checks.voltdb._types import Instance
+from datadog_checks.voltdb.types import Instance
 
-from . import assertions
+from . import assertions, common
 
 
 @pytest.mark.integration
@@ -37,7 +37,7 @@ class TestCheck:
     def test_failure_connection_refused(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
-        instance['host'] = 'doesnotexist'
+        instance['url'] = instance['url'].replace(common.HOST, 'doesnotexist')
 
         check = VoltDBCheck('voltdb', {}, [instance])
 

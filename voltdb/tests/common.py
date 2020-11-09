@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
-VOLTDB_API_PORT = 8080
 
 METRICS = [
     'voltdb.io.bytes_read',
@@ -44,3 +46,12 @@ METRICS = [
     'voltdb.memory.tuple_count',
     'voltdb.memory.tuple_data',
 ]
+
+TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))
+TLS_OUTPUT_DIR = os.path.join(HERE, 'tlsoutput')
+TLS_CLIENT_CERT = os.path.join(TLS_OUTPUT_DIR, 'client.pem')  # type: str
+TLS_PASSWORD = 'tlspass'
+
+VOLTDB_SCHEME = 'https' if TLS_ENABLED else 'http'
+VOLTDB_CLIENT_PORT = 8080
+VOLTDB_URL = '{}://{}:{}'.format(VOLTDB_SCHEME, HOST, VOLTDB_CLIENT_PORT)
