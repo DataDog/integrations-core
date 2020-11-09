@@ -1,7 +1,7 @@
 # Reusable local variable
 locals {
-  # short version of username (to avoid hitting GCP limit for cluster name)
-  short_user = substr("${var.user}", 0, 15) 
+  # short version of username (to avoid hitting GCP 40 chars limit for cluster name)
+  short_user = substr("${var.user}", 0, 17) 
 }
 
 # Shared common terraform config found in the templates/terraform folder in datadog_checks_dev
