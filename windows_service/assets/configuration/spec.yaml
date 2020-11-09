@@ -1,0 +1,31 @@
+name: Windows Service
+
+files:
+  - name: windows_service.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: services
+            description: |
+              List of services to monitor e.g. Dnscache, wmiApSrv, etc.
+
+              If any service is set to `ALL`, all services registered with the SCM will be monitored.
+
+              This matches all services starting with service, as if service.* is configured.
+              For an exact match, use ^service$
+            required: true
+            value:
+              type: array
+              items:
+                type: string
+          - name: disable_legacy_service_tag
+            description: |
+              Whether or not to stop submitting the tag `service` that has been renamed
+              to `windows_service` and disable the associated deprecation warning.
+            value:
+              type: boolean
+              example: false
+          - template: instances/default
