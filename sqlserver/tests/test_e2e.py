@@ -2,12 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from datadog_checks.dev.utils import get_metadata_metrics
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
 
-from .common import EXPECTED_AO_METRICS_PRIMARY, EXPECTED_AO_METRICS_SECONDARY, EXPECTED_METRICS, \
-    EXPECTED_AO_METRICS_COMMON, CUSTOM_METRICS
+from .common import (
+    CUSTOM_METRICS,
+    EXPECTED_AO_METRICS_COMMON,
+    EXPECTED_AO_METRICS_PRIMARY,
+    EXPECTED_AO_METRICS_SECONDARY,
+    EXPECTED_METRICS,
+)
 from .utils import always_on, not_windows_ci
 
 try:
