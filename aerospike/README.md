@@ -7,6 +7,8 @@ Get metrics from Aerospike Database in real time to:
 - Visualize and monitor Aerospike states.
 - Be notified about Aerospike failovers and events.
 
+*Note*: Aerospike on MacOS is only compatible on agent 6 when running Python 2. This integration is not available on agent 7+ for MacOS. 
+
 ## Setup
 
 ### Installation
