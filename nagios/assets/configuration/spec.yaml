@@ -1,0 +1,45 @@
+name: Nagios
+
+files:
+  - name: nagios.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: nagios_conf
+            required: True
+            description: |
+              Define the path to your Nagios configuration file.
+              The Agent reads the main Nagios configuration file to get the locations of the Nagios log files it should watch.
+              The integration also works with Icinga v1. If you use Icinga v1, set `nagios_conf` to the location of your Icinga
+              configuration file.
+            value:
+              type: string
+              example: /etc/nagios3/nagios.cfg
+          - name: collect_events
+            description: Set collect_events to false to disable Nagios Event collection.
+            value:
+              type: boolean
+              example: true
+          - name: passive_checks_events
+            description: Set passive_checks_events to collect Nagios checks events.
+            value:
+              type: boolean
+              example: False
+          - name: collect_host_performance_data
+            description: |
+              With the default configuration, the Nagios check doesn't collect any metrics.
+              Set `collect_host_performance_data` to `true` to collect Nagios host performance data.
+            value:
+              type: boolean
+              example: False
+          - name: collect_service_performance_data
+            description: |
+              With the default configuration, the Nagios check doesn't collect any metrics.
+              Set `collect_service_performance_data` to `true` to collect Nagios service performance data.
+            value:
+              type: boolean
+              example: false
+          - template: instances/default

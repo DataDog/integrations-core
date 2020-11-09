@@ -299,7 +299,8 @@ class MongoDb(AgentCheck):
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
-        if 'replSetName' in options.get('replication', {}):
+        replication_options = options.get('replication', {})
+        if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = admindb.command("replSetGetStatus")
             replset_name = repl_set_payload["set"]
             replset_state = repl_set_payload["myState"]
