@@ -32,7 +32,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "mysql": "assets/dashboards/overview.json"
+      "mysql": "assets/dashboards/overview.json",
+      "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
 
     },
     "saved_views": {
