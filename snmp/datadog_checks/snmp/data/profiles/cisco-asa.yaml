@@ -210,6 +210,8 @@ metrics:
     symbols:
       - OID: 1.3.6.1.2.1.99.1.1.1.4
         name: entPhySensorValue
+      - OID: 1.3.6.1.2.1.99.1.1.1.5
+        name: entPhySensorOperStatus
     metric_tags:
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.1
@@ -217,3 +219,1575 @@ metrics:
         tag: sensor_type
       - index: 1
         tag: sensor_id
+
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcFRUPowerSupplyValueTable
+      OID: 1.3.6.1.4.1.9.9.117.1.1.4
+      description:
+        This table lists the power capacity of a power FRU in the system
+        if it provides variable power. Power supplies usually provide either system
+        or inline power. They cannot be controlled by software to dictate how they distribute
+        power. We can also have what are known as variable power supplies. They can
+        provide both system and inline power and can be varied within hardware defined
+        ranges for system and inline limited by a total maximum combined output. They
+        could be configured by the user via CLI or SNMP or be controlled by software
+        internally. This table supplements the information in the cefcFRUPowerStatusTable
+        for power supply FRUs. The cefcFRUCurrent attribute in that table provides the
+        overall current the power supply FRU can provide while this table gives us the
+        individual contribution towards system and inline power.
+    forced_type: monotonic_count
+    symbols:
+      - name: cefcFRUTotalSystemCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.4.1.1
+        description:
+          Total current that could be supplied by the FRU (positive values)
+          for system operations.
+      - name: cefcFRUTotalInlineCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.4.1.3
+        description: Total current supplied by the FRU (positive values) for inline operations.
+    metric_tags:
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
+        table: entPhysicalTable
+        tag: entity_name
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcFRUPowerSupplyValueTable
+      OID: 1.3.6.1.4.1.9.9.117.1.1.4
+      description:
+        This table lists the power capacity of a power FRU in the system
+        if it provides variable power. Power supplies usually provide either system
+        or inline power. They cannot be controlled by software to dictate how they distribute
+        power. We can also have what are known as variable power supplies. They can
+        provide both system and inline power and can be varied within hardware defined
+        ranges for system and inline limited by a total maximum combined output. They
+        could be configured by the user via CLI or SNMP or be controlled by software
+        internally. This table supplements the information in the cefcFRUPowerStatusTable
+        for power supply FRUs. The cefcFRUCurrent attribute in that table provides the
+        overall current the power supply FRU can provide while this table gives us the
+        individual contribution towards system and inline power.
+    symbols:
+      - name: cefcFRUDrawnSystemCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.4.1.2
+        description:
+          Amount of current drawn by the FRU's in the system towards system
+          operations from this FRU
+      - name: cefcFRUDrawnInlineCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.4.1.4
+        description: Amount of current that is being drawn from this FRU for inline operation.
+    metric_tags:
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
+        table: entPhysicalTable
+        tag: entity_name
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcPowerSupplyInputTable
+      OID: 1.3.6.1.4.1.9.9.117.1.6.1
+      description:
+        This table contains the power input information for all the power
+        supplies that have entPhysicalTable entries with 'powerSupply' in the entPhysicalClass.
+        The entries are created by the agent at the system power-up or power supply
+        insertion. Entries are deleted by the agent upon power supply removal. The number
+        of entries is determined by the number of power supplies and number of power
+        inputs on the power supply.
+    symbols:
+      - name: cefcPowerSupplyInputType
+        OID: 1.3.6.1.4.1.9.9.117.1.6.1.1.2
+        description:
+          "The type of an input power detected on the power supply. unknown(1):
+          No input power is detected. acLow(2): Lower rating AC input power is detected.
+          acHigh(3): Higher rating AC input power is detected. dcLow(4): Lower rating
+          DC input power is detected. dcHigh(5): Higher rating DC input power is detected."
+    metric_tags:
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
+        table: entPhysicalTable
+        tag: entity_name
+      - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+        tag: power_supply
+        table: cefcPowerSupplyInputTable
+        column:
+          name: cefcPowerSupplyInputIndex
+          OID: 1.3.6.1.4.1.9.9.117.1.6.1.1.1
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcModulePowerConsumptionTable
+      OID: 1.3.6.1.4.1.9.9.117.1.8.2
+      description:
+        This table contains the total power consumption information for modules
+        whose ENTITY-MIB entPhysicalTable entries have an entPhysicalClass of 'module'.
+    forced_type: monotonic_count
+    symbols:
+      - name: cefcModulePowerConsumption
+        OID: 1.3.6.1.4.1.9.9.117.1.8.2.1.1
+        description:
+          The combined power consumption to operate the module and its submodule(s)
+          and inline-power device(s).
+    metric_tags:
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
+        table: entPhysicalTable
+        tag: entity_name
+
+  ############# IPSEC #############
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalActiveTunnels
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.1.0
+      description: The number of currently active IPsec Phase-1 IKE Tunnels.
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalInOctets
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.3.0
+      description:
+        The total number of octets received by all currently and previously
+        active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalInPkts
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.4.0
+      description:
+        The total number of packets received by all currently and previously
+        active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalInDropPkts
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.5.0
+      description:
+        The total number of packets which were dropped during receive processing
+        by all currently and previously active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalInP2Exchgs
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.7.0
+      description:
+        The total number of IPsec Phase-2 exchanges received by all currently
+        and previously active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalOutOctets
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.11.0
+      description:
+        The total number of octets sent by all currently and previously active
+        and IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalOutPkts
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.12.0
+      description:
+        The total number of packets sent by all currently and previously
+        active and IPsec Phase-1 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalOutDropPkts
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.13.0
+      description:
+        The total number of packets which were dropped during send processing
+        by all currently and previously active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalOutP2Exchgs
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.15.0
+      description:
+        The total number of IPsec Phase-2 exchanges which were sent by all
+        currently and previously active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalOutP2ExchgInvalids
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.16.0
+      description:
+        The total number of IPsec Phase-2 exchanges which were sent and found
+        to be invalid by all currently and previously active IPsec Phase-1 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalOutP2ExchgRejects
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.17.0
+      description:
+        The total number of IPsec Phase-2 exchanges which were sent and rejected
+        by all currently and previously active IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalAuthFails
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.23.0
+      description:
+        The total number of authentications which ended in failure by all
+        current and previous IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cikeGlobalDecryptFails
+      OID: 1.3.6.1.4.1.9.9.171.1.2.1.24.0
+      description:
+        The total number of decryptions which ended in failure by all current
+        and previous IPsec Phase-1 IKE Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInOctets
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.3.0
+      description:
+        The total number of octets received by all current and previous IPsec
+        Phase-2 Tunnels. This value is accumulated BEFORE determining whether or not
+        the packet should be decompressed. See also cipSecGlobalInOctWraps for the number
+        of times this counter has wrapped.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInDecompOctets
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.6.0
+      description:
+        The total number of decompressed octets received by all current and
+        previous IPsec Phase-2 Tunnels. This value is accumulated AFTER the packet is
+        decompressed. If compression is not being used, this value will match the value
+        of cipSecGlobalInOctets. See also cipSecGlobalInDecompOctWraps for the number
+        of times this counter has wrapped.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInPkts
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.9.0
+      description:
+        The total number of packets received by all current and previous
+        IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInDrops
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.10.0
+      description:
+        The total number of packets dropped during receive processing by
+        all current and previous IPsec Phase-2 Tunnels. This count does NOT include
+        packets dropped due to Anti-Replay processing.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInAuths
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.12.0
+      description:
+        The total number of inbound authentication's performed by all current
+        and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInAuthFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.13.0
+      description:
+        The total number of inbound authentication's which ended in failure
+        by all current and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInDecrypts
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.14.0
+      description:
+        The total number of inbound decryption's performed by all current
+        and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalInDecryptFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.15.0
+      description:
+        The total number of inbound decryption's which ended in failure by
+        all current and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutOctets
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.16.0
+      description:
+        The total number of octets sent by all current and previous IPsec
+        Phase-2 Tunnels. This value is accumulated AFTER determining whether or not
+        the packet should be compressed. See also cipSecGlobalOutOctWraps for the number
+        of times this counter has wrapped.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutUncompOctets
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.19.0
+      description:
+        The total number of uncompressed octets sent by all current and previous
+        IPsec Phase-2 Tunnels. This value is accumulated BEFORE the packet is compressed.
+        If compression is not being used, this value will match the value of cipSecGlobalOutOctets.
+        See also cipSecGlobalOutDecompOctWraps for the number of times this counter
+        has wrapped.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutPkts
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.22.0
+      description:
+        The total number of packets sent by all current and previous IPsec
+        Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutDrops
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.23.0
+      description:
+        The total number of packets dropped during send processing by all
+        current and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutAuths
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.24.0
+      description:
+        The total number of outbound authentication's performed by all current
+        and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutAuthFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.25.0
+      description:
+        The total number of outbound authentication's which ended in failure
+        by all current and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutEncrypts
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.26.0
+      description:
+        The total number of outbound encryption's performed by all current
+        and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalOutEncryptFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.27.0
+      description:
+        The total number of outbound encryption's which ended in failure
+        by all current and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalProtocolUseFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.28.0
+      description:
+        The total number of protocol use failures which occurred during processing
+        of all current and previously active IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalNoSaFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.29.0
+      description:
+        The total number of non-existent Security Association in failures
+        which occurred during processing of all current and previous IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    symbol:
+      name: cipSecGlobalSysCapFails
+      OID: 1.3.6.1.4.1.9.9.171.1.3.1.30.0
+      description:
+        The total number of system capacity failures which occurred during
+        processing of all current and previously active IPsec Phase-2 Tunnels.
+    forced_type: monotonic_count
+  - MIB: CISCO-IPSEC-FLOW-MONITOR-MIB
+    table:
+      name: cipSecPhase2GWStatsTable
+      OID: 1.3.6.1.4.1.9.9.171.1.3.5
+      description:
+        Phase-2 IPsec stats information is included in this table. Each entry
+        is related to a specific gateway which is identified by 'cmgwIndex'
+    forced_type: monotonic_count
+    symbols:
+      - name: cipSecPhase2GWActiveTunnels
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.1
+        description: The total number of currently active IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWPreviousTunnels
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.2
+        description: The total number of previously active IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWInOctets
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.3
+        description:
+          The total number of octets received by all current and previous IPsec
+          Phase-2 Tunnels. This value is accumulated BEFORE determining whether or not
+          the packet should be decompressed. See also cipSecGlobalInOctWraps for the number
+          of times this counter has wrapped.
+      - name: cipSecPhase2GWInDecompOctets
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.5
+        description:
+          The total number of decompressed octets received by all current and
+          previous IPsec Phase-2 Tunnels. This value is accumulated AFTER the packet is
+          decompressed. If compression is not being used, this value will match the value
+          of cipSecGlobalInOctets. See also cipSecGlobalInDecompOctWraps for the number
+          of times this counter has wrapped.
+      - name: cipSecPhase2GWInPkts
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.7
+        description:
+          The total number of packets received by all current and previous
+          IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWInDrops
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.8
+        description:
+          The total number of packets dropped during receive processing by
+          all current and previous IPsec Phase-2 Tunnels. This count does NOT include
+          packets dropped due to Anti-Replay processing.
+      - name: cipSecPhase2GWInReplayDrops
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.9
+        description:
+          The total number of packets dropped during receive processing due
+          to Anti-Replay processing by all current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWInAuths
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.10
+        description:
+          The total number of inbound authentication's performed by all current
+          and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWInAuthFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.11
+        description:
+          The total number of inbound authentication's which ended in failure
+          by all current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWInDecrypts
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.12
+        description:
+          The total number of inbound decryption's performed by all current
+          and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWInDecryptFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.13
+        description:
+          The total number of inbound decryption's which ended in failure by
+          all current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWOutOctets
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.14
+        description:
+          The total number of octets sent by all current and previous IPsec
+          Phase-2 Tunnels. This value is accumulated AFTER determining whether or not
+          the packet should be compressed. See also cipSecGlobalOutOctWraps for the number
+          of times this counter has wrapped.
+      - name: cipSecPhase2GWOutUncompOctets
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.16
+        description:
+          The total number of uncompressed octets sent by all current and previous
+          IPsec Phase-2 Tunnels. This value is accumulated BEFORE the packet is compressed.
+          If compression is not being used, this value will match the value of cipSecGlobalOutOctets.
+          See also cipSecGlobalOutDecompOctWraps for the number of times this counter
+          has wrapped.
+      - name: cipSecPhase2GWOutPkts
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.18
+        description:
+          The total number of packets sent by all current and previous IPsec
+          Phase-2 Tunnels.
+      - name: cipSecPhase2GWOutDrops
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.19
+        description:
+          The total number of packets dropped during send processing by all
+          current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWOutAuths
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.20
+        description:
+          The total number of outbound authentication's performed by all current
+          and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWOutAuthFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.21
+        description:
+          The total number of outbound authentication's which ended in failure
+          by all current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWOutEncrypts
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.22
+        description:
+          The total number of outbound encryption's performed by all current
+          and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWOutEncryptFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.23
+        description:
+          The total number of outbound encryption's which ended in failure
+          by all current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWProtocolUseFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.24
+        description:
+          The total number of protocol use failures which occurred during processing
+          of all current and previously active IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWNoSaFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.25
+        description:
+          The total number of non-existent Security Association in failures
+          which occurred during processing of all current and previous IPsec Phase-2 Tunnels.
+      - name: cipSecPhase2GWSysCapFails
+        OID: 1.3.6.1.4.1.9.9.171.1.3.5.1.26
+        description:
+          The total number of system capacity failures which occurred during
+          processing of all current and previously active IPsec Phase-2 Tunnels.
+    metric_tags:
+      - MIB: CISCO-MEDIA-GATEWAY-MIB
+        tag: gateway_index
+        table: cMediaGwTable
+        column:
+          name: cmgwIndex
+          OID: 1.3.6.1.4.1.9.9.324.1.1.1.1.1
+  ####### Remote access ########
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalBwUsage
+      OID: 1.3.6.1.4.1.9.9.392.1.2.1.0
+      description: The average bandwidth used by all the active remote access sessions.
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasNumGroups
+      OID: 1.3.6.1.4.1.9.9.392.1.3.4.0
+      description: The number of user groups whose members have active sessions.
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalInPkts
+      OID: 1.3.6.1.4.1.9.9.392.1.3.5.0
+      description:
+        The total number of packets received by all currently and previously
+        active remote access sessions.
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalOutPkts
+      OID: 1.3.6.1.4.1.9.9.392.1.3.6.0
+      description:
+        The total number of packets transmitted by all currently and previously
+        active remote access sessions.
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalInOctets
+      OID: 1.3.6.1.4.1.9.9.392.1.3.7.0
+      description:
+        "The total number of octets received by all currently and previously
+        active remote access sessions. This value is accumulated BEFORE determining
+        whether or not the packet should be decompressed. "
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalInDecompOctets
+      OID: 1.3.6.1.4.1.9.9.392.1.3.8.0
+      description:
+        "The total number of decompressed octets received by all current
+        and previous remote access sessions. This value is accumulated AFTER the packet
+        is decompressed. If compression is not being used, this value will match the
+        value of crasGlobalInOctets. "
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalOutOctets
+      OID: 1.3.6.1.4.1.9.9.392.1.3.9.0
+      description:
+        "The total number of octets transmitted by all currently and previously
+        active remote access sessions. This value is accumulated AFTER determining whether
+        or not the packet should be compressed. "
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalOutUncompOctets
+      OID: 1.3.6.1.4.1.9.9.392.1.3.10.0
+      description:
+        "The total number of uncompressed octets sent by all current and
+        previous remote access sessions. This value is accumulated BEFORE the packet
+        is compressed. If compression is not being used, this value will match the value
+        of crasGlobalOutOctets. "
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalInDropPkts
+      OID: 1.3.6.1.4.1.9.9.392.1.3.11.0
+      description:
+        The total number of packets which were dropped during receive processing
+        by all currently and previously active remote access sessions.
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasGlobalOutDropPkts
+      OID: 1.3.6.1.4.1.9.9.392.1.3.12.0
+      description:
+        The total number of packets which were dropped during receive processing
+        by all currently and previously active remote access sessions.
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    table:
+      name: crasSessionTable
+      OID: 1.3.6.1.4.1.9.9.392.1.3.21
+      description:
+        This table lists all the currently active sessions. For each session,
+        it lists the attributes (user, group, protocol, security), statistics (packet
+        and octets) and status.
+    forced_type: monotonic_count
+    symbols:
+      - name: crasSessionDuration
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.6
+        description: The number of seconds elapsed since this session was established.
+      - name: crasHeartbeatInterval
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.16
+        description:
+          The interval in seconds between two successive heartbeats employed
+          by this session. Value of 0 denotes that no heartbeat is used.
+      - name: crasSessionInPkts
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.31
+        description: The total number of packets received by this Remote Access session.
+      - name: crasSessionOutPkts
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.32
+        description: The total number of packets transmitted by this Remote Access Session.
+      - name: crasSessionInDropPkts
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.33
+        description:
+          The total number of packets received for processing on this session
+          which were dropped by the managed entity.
+      - name: crasSessionOutDropPkts
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.34
+        description:
+          The total number of outgoing packets on this session which were dropped
+          during transmit processing by the managed entity.
+      - name: crasSessionInOctets
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.35
+        description:
+          "The total number of octets received by this Remote Access Session.
+          This value is accumulated BEFORE determining whether or not the packet should
+          be decompressed. "
+      - name: crasSessionOutOctets
+        OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.36
+        description:
+          "The total number of octets transmitted by this Remote Access Session.
+          This value is accumulated AFTER determining whether or not the packet should
+          be compressed. "
+    metric_tags:
+      - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+        tag: user
+        table: crasSessionTable
+        column:
+          name: crasUsername
+          OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.1
+      - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+        tag: group
+        table: crasSessionTable
+        column:
+          name: crasGroup
+          OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.2
+      - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+        tag: session
+        table: crasSessionTable
+        column:
+          name: crasSessionIndex
+          OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.3
+      - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+        tag: private_ip
+        table: crasSessionTable
+        column:
+          name: crasLocalAddress
+          OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.8
+      - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+        tag: public_ip
+        table: crasSessionTable
+        column:
+          name: crasISPAddress
+          OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.10
+      - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+        tag: session_state
+        table: crasSessionTable
+        column:
+          name: crasSessionState
+          OID: 1.3.6.1.4.1.9.9.392.1.3.21.1.37
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasNumTotalFailures
+      OID: 1.3.6.1.4.1.9.9.392.1.4.1.1.0
+      description:
+        The number of attempts to establish sessions which failed, since
+        the last reboot of the managed device.
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasNumAbortedSessions
+      OID: 1.3.6.1.4.1.9.9.392.1.4.1.4.0
+      description:
+        The number of sessions which were successfully setup but were since
+        terminated abnormally.
+    forced_type: monotonic_count
+  - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
+    symbol:
+      name: crasNumDisabledAccounts
+      OID: 1.3.6.1.4.1.9.9.392.1.5.1.1.0
+      description:
+        The total number of user accounts which were disabled due to repeated
+        login failures.
+    forced_type: monotonic_count
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumSetupsAborted
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.2.0
+      description:
+        "The number of connection setup attempts that were aborted before
+        the connection could proceed to completion. The counter includes setup attempts
+        aborted by the firewall as well as those aborted by the initiator and/or the
+        responder(s) of/to the connection setup attempt. Consequently, this value subsumes
+        the values of objects 'cufwConnGlobalNumPolicyDeclined' and 'cufwConnGlobalNumResDeclined'.
+        This value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumPolicyDeclined
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.3.0
+      description:
+        "The number of connections which were attempted to be setup but which
+        were declined due to reasons of security policy. This includes the connections
+        that failed authentication. This value is accumulated from the last reboot of
+        the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumResDeclined
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.4.0
+      description:
+        "The number of connections which were attempted to be setup but which
+        were declined due to non-availability of required resources. This value is accumulated
+        from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumHalfOpen
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.5.0
+      description:
+        "The number of connections which are in the process of being setup
+        but which have not yet reached the established state in the connection table. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumActive
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.6.0
+      description: "The number of connections which are currently active. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumExpired
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.7.0
+      description:
+        "The number of connections which were active but which were since
+        normally terminated. This value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumAborted
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.8.0
+      description:
+        "The number of connections which were active but which were aborted
+        by the firewall due to reasons of policy or resource rationing. This value is
+        accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumEmbryonic
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.9.0
+      description:
+        "The number of embryonic application layer connections (that is,
+        connections in which the signaling channel has been established while the data
+        channel is awaiting setup). This value is accumulated from the last reboot of
+        the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalConnSetupRate1
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.10.0
+      description:
+        "The averaged number of connections which the firewall establishing
+        per second, averaged over the last 60 seconds. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalConnSetupRate5
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.11.0
+      description:
+        "The averaged number of connections which the firewall establishing
+        per second, averaged over the last 300 seconds. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnGlobalNumRemoteAccess
+      OID: 1.3.6.1.4.1.9.9.491.1.1.1.12.0
+      description:
+        "The number of active connections which correspond to remote access
+        applications. Specifically, the protocol for which the connection is established
+        must be one of PPP, PPTP, L2TP or remote access IPsec (IPsec connections employing
+        extended authentication). This value is accumulated from the last reboot of
+        the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnResMemoryUsage
+      OID: 1.3.6.1.4.1.9.9.491.1.1.2.1.0
+      description:
+        "The amount of memory occupied by all structures required to maintain
+        the state of all connections which are either being established or are active. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnResActiveConnMemoryUsage
+      OID: 1.3.6.1.4.1.9.9.491.1.1.2.2.0
+      description:
+        "The amount of memory occupied by all structures required to maintain
+        the state of all active connections. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnResHOConnMemoryUsage
+      OID: 1.3.6.1.4.1.9.9.491.1.1.2.3.0
+      description:
+        "The amount of memory occupied by all structures required to maintain
+        the state of all half open connections. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwConnResEmbrConnMemoryUsage
+      OID: 1.3.6.1.4.1.9.9.491.1.1.2.4.0
+      description:
+        "The amount of memory occupied by all structures required to maintain
+        the state of all embryonic connections. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    table:
+      name: cufwConnSummaryTable
+      OID: 1.3.6.1.4.1.9.9.491.1.1.4.1
+      description:
+        "This table summarizes the connection activity on the firewall per
+        layer3-layer 4 protocol instance. Each entry in the table lists the connection
+        summary of a distinct network protocol. For instance, the conceptual row corresponding
+        to the index cufwConnProtocol = fwpTcp yields the summary of TCP connection
+        activity on the firewall since its reboot. "
+    symbols:
+      - name: cufwConnNumAttempted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.2
+        description:
+          "The number of connections attempted since the last reboot of the
+          firewall, corresponding to the protocol denoted by 'cufwConnProtocol'. This
+          value is accumulated from the last reboot of the firewall. "
+      - name: cufwConnNumSetupsAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.3
+        description:
+          "The number of connection setup attempts, corresponding to the protocol
+          denoted by 'cufwConnProtocol', that were aborted before the connection could
+          proceed to completion. The counter includes setup attempts aborted by the firewall
+          as well as those aborted by the initiator and/or the responder(s) of/to the
+          connection setup attempt. Consequently, this value subsumes the values of objects
+          'cufwConnNumPolicyDeclined' and 'cufwConnNumResDeclined'. This value is
+          accumulated from the last reboot of the firewall. "
+      - name: cufwConnNumPolicyDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.4
+        description:
+          "The number of connection attempts that were declined due to security
+          policy, corresponding to the protocol denoted by 'cufwConnProtocol'. This
+          value is accumulated from the last reboot of the firewall. "
+      - name: cufwConnNumResDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.5
+        description:
+          "The number of connection attempts that were declined due to resource
+          unavailability, corresponding to the protocol denoted by 'cufwConnProtocol'.
+          This value is accumulated from the last reboot of the firewall. "
+      - name: cufwConnNumHalfOpen
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.6
+        description:
+          "The number of connections that are currently in the process of being
+          established, corresponding to the protocol denoted by 'cufwConnProtocol'. "
+      - name: cufwConnNumActive
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.7
+        description:
+          "The number of connections that are currently active, corresponding
+          to the protocol denoted by 'cufwConnProtocol'. "
+      - name: cufwConnNumAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.8
+        description:
+          "The number of connections that were abnormally terminated after
+          successful establishment, corresponding to the protocol denoted by 'cufwConnProtocol'.
+          This value is accumulated from the last reboot of the firewall. "
+      - name: cufwConnSetupRate1
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.9
+        description:
+          "The connection setup rate averaged over the last 60 seconds corresponding
+          to the protocol denoted by 'cufwConnProtocol'. "
+      - name: cufwConnSetupRate5
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.10
+        description:
+          "The connection setup rate averaged over the last 300 seconds corresponding
+          to the protocol denoted by 'cufwConnProtocol'. "
+    metric_tags:
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: protocol
+        table: cufwConnSummaryTable
+        column:
+          name: cufwConnProtocol
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.1.1.1
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    table:
+      name: cufwAppConnSummaryTable
+      OID: 1.3.6.1.4.1.9.9.491.1.1.4.2
+      description:
+        "This table lists the summary of firewall connections pertaining
+        to Layer 7 protocols, catalogued by distinct application protocols. Each entry
+        in the table lists the connection summary corresponding to a distinct application
+        protocol. For instance, to obtain the connection summary for SMTP on the firewall
+        since the last reboot of the device, use the conceptual row corresponding to
+        cufwAppConnProtocol = fwApSmtp "
+    symbols:
+      - name: cufwAppConnNumAttempted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.2
+        description:
+          "The number of connections attempted since the last reboot of the
+          firewall, corresponding to the protocol denoted by 'cufwAppConnProtocol'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwAppConnNumSetupsAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.3
+        description:
+          "The number of connection setup attempts, corresponding to the protocol
+          denoted by 'cufwAppConnProtocol', that were aborted before the connection
+          could proceed to completion. The counter includes setup attempts aborted by
+          the firewall as well as those aborted by the initiator and/or the responder(s)
+          of/to the connection setup attempt. Consequently, this value subsumes the values
+          of objects 'cufwAppConnNumPolicyDeclined' and 'cufwAppConnNumResDeclined'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwAppConnNumPolicyDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.4
+        description:
+          "The number of connection attempts that were declined due to security
+          policy, corresponding to the protocol denoted by 'cufwAppConnProtocol'. This
+          value is accumulated from the last reboot of the firewall subject to the control
+          exercised by cufwConnReptAppStats. "
+      - name: cufwAppConnNumResDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.5
+        description:
+          "The number of connection attempts that were declined due to resource
+          unavailability, corresponding to the protocol denoted by 'cufwAppConnProtocol'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwAppConnNumHalfOpen
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.6
+        description:
+          "The number of connections that are currently in the process of being
+          established, corresponding to the protocol denoted by 'cufwAppConnProtocol'. "
+      - name: cufwAppConnNumActive
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.7
+        description:
+          "The number of connections that are currently active, corresponding
+          to the protocol denoted by 'cufwAppConnProtocol'. "
+      - name: cufwAppConnNumAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.8
+        description:
+          "The number of connections that were terminated by the firewall successful
+          establishment, corresponding to the protocol denoted by 'cufwAppConnProtocol'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwAppConnSetupRate1
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.9
+        description:
+          "The connection setup rate averaged over the last 60 seconds corresponding
+          to the protocol denoted by 'cufwAppConnProtocol'. "
+      - name: cufwAppConnSetupRate5
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.10
+        description:
+          "The connection setup rate averaged over the last 300 seconds corresponding
+          to the protocol denoted by 'cufwAppConnProtocol'. "
+    metric_tags:
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: protocol
+        table: cufwAppConnSummaryTable
+        column:
+          name: cufwAppConnProtocol
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.2.1.1
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    table:
+      name: cufwPolicyConnSummaryTable
+      OID: 1.3.6.1.4.1.9.9.491.1.1.4.3
+      description:
+        "This table lists the summary of firewall connections for layer3-layer
+        4 protocols catalogued on a per policy basis. Each entry in the table lists
+        the connection summary of a distinct network protocol, configured on the specified
+        policy on the firewall, and pertaining to a specified target to which the policy
+        is currently applied. If a policy is bound to a target, it would have one or
+        more entries in this table. If the policy is detached from the target, all entries
+        corresponding to the association between the policy and the target are elminated
+        from this table. Although the information is indexed by policy targets as well,
+        one may aggregate the connection summary for a specific policy across all the
+        target to which the policy is currently applied by setting cufwConnPolicyTargetType
+        = 'targetAll' "
+    symbols:
+      - name: cufwPolConnNumAttempted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.5
+        description:
+          "The number of connections attempted since the last reboot of the
+          firewall, corresponding to the protocol denoted by 'cufwPolConnProtocol',
+          in the policy 'cufwPolConnPolicy' applied to the entity identified by 'cufwPolConnPolicyTarget'. "
+      - name: cufwPolConnNumSetupsAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.6
+        description:
+          "The number of connection setup attempts, corresponding to the protocol
+          denoted by 'cufwPolConnProtocol', associated with the policy 'cufwPolConnPolicy'
+          applied to the entity identified by 'cufwPolConnPolicyTarget', that were aborted
+          before the connection could proceed to completion. The counter includes setup
+          attempts aborted by the firewall as well as those aborted by the initiator and/or
+          the responder(s) of/to the connection setup attempt. Consequently, this value
+          subsumes the values of objects 'cufwPolConnNumPolicyDeclined' and 'cufwPolConnNumResDeclined'. "
+      - name: cufwPolConnNumPolicyDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.7
+        description:
+          "The number of connection attempts that were declined due to security
+          policy, corresponding to the protocol denoted by 'cufwPolConnProtocol', in
+          the policy 'cufwPolConnPolicy' applied to the entity identified by 'cufwPolConnPolicyTarget'. "
+      - name: cufwPolConnNumResDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.8
+        description:
+          "The number of connection attempts that were declined due to resource
+          unavailability, corresponding to the protocol denoted by 'cufwPolConnProtocol',
+          in the policy 'cufwPolConnPolicy' applied to the entity identified by 'cufwPolConnPolicyTarget'. "
+      - name: cufwPolConnNumHalfOpen
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.9
+        description:
+          "The number of connections that are currently in the process of being
+          established, corresponding to the protocol denoted by 'cufwPolConnProtocol',
+          in the policy 'cufwPolConnPolicy' applied to the entity identified by 'cufwPolConnPolicyTarget'. "
+      - name: cufwPolConnNumActive
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.10
+        description:
+          "The number of connections that are currently active, corresponding
+          to the protocol denoted by 'cufwPolConnProtocol', in the policy 'cufwPolConnPolicy'
+          applied to the entity identified by 'cufwPolConnPolicyTarget'. "
+      - name: cufwPolConnNumAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.11
+        description:
+          "The number of connections that were abnormally terminated after
+          successful establishment, corresponding to the protocol denoted by 'cufwPolConnProtocol',
+          in the policy 'cufwPolConnPolicy' applied to the entity identified by 'cufwPolConnPolicyTarget'. "
+    metric_tags:
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: policy
+        table: cufwPolicyConnSummaryTable
+        column:
+          name: cufwPolConnPolicy
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.1
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: entity_type
+        table: cufwPolicyConnSummaryTable
+        column:
+          name: cufwPolConnPolicyTargetType
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.2
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: entity
+        table: cufwPolicyConnSummaryTable
+        column:
+          name: cufwPolConnPolicyTarget
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.3
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: protocol
+        table: cufwPolicyConnSummaryTable
+        column:
+          name: cufwPolConnProtocol
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.3.1.4
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    table:
+      name: cufwPolicyAppConnSummaryTable
+      OID: 1.3.6.1.4.1.9.9.491.1.1.4.4
+      description:
+        "This table lists the summary of firewall connections pertaining
+        to Layer 7 protocols, catalogued on a per policy basis Each entry in the table
+        lists the connection summary of a distinct application protocol, configured
+        on the specified policy on the firewall, and pertaining to a specified target
+        to which the policy has been applied. If a policy is bound to a target, it would
+        have one or more entries in this table. If the policy is detached from the target,
+        all entries corresponding to the association between the policy and the target
+        are elminated from this table. Although the information is indexed by policy
+        targets as well, one may aggregate the connection summary for a specific policy
+        across all the target to which the policy is currently applied by setting cufwAppConnPolicyTargetType
+        = 'targetALL' "
+    symbols:
+      - name: cufwPolAppConnNumAttempted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.5
+        description:
+          "The number of connections attempted since the last reboot of the
+          firewall, corresponding to the protocol denoted by 'cufwPolAppConnProtocol',
+          in the policy 'cufwPolAppConnPolicy' applied to the entity identified by 'cufwPolAppConnPolicyTarget'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwPolAppConnNumSetupsAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.6
+        description:
+          "The number of connection setup attempts, corresponding to the protocol
+          denoted by 'cufwPolAppConnProtocol', associated with the policy 'cufwPolAppConnPolicy'
+          applied to the entity identified by 'cufwPolAppConnPolicyTarget', that were
+          aborted before the connections could proceed to completion. The counter includes
+          setup attempts aborted by the firewall as well as those aborted by the initiator
+          and/or the responder(s) of/to the connection setup attempt. Consequently, this
+          value subsumes the values of objects 'cufwPolAppConnNumPolicyDeclined' and
+          'cufwPolAppConnNumResDeclined'. This value is accumulated from the last reboot
+          of the firewall subject to the control exercised by cufwConnReptAppStats. "
+      - name: cufwPolAppConnNumPolicyDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.7
+        description:
+          "The number of connection attempts that were declined due to security
+          policy, corresponding to the protocol denoted by 'cufwPolAppConnProtocol',
+          in the policy 'cufwPolAppConnPolicy' applied to the entity identified by 'cufwPolAppConnPolicyTarget'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwPolAppConnNumResDeclined
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.8
+        description:
+          "The number of connection attempts that were declined due to resource
+          unavailability, corresponding to the protocol denoted by 'cufwPolAppConnProtocol',
+          in the policy 'cufwPolAppConnPolicy' applied to the entity identified by 'cufwPolAppConnPolicyTarget'.
+          This value is accumulated from the last reboot of the firewall subject to the
+          control exercised by cufwConnReptAppStats. "
+      - name: cufwPolAppConnNumHalfOpen
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.9
+        description:
+          "The number of connections that are currently in the process of being
+          established, corresponding to the protocol denoted by 'cufwPolAppConnProtocol',
+          in the policy 'cufwPolAppConnPolicy' applied to the entity identified by 'cufwPolAppConnPolicyTarget'. "
+      - name: cufwPolAppConnNumActive
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.10
+        description:
+          "The number of connections that are currently active, corresponding
+          to the protocol denoted by 'cufwPolAppConnProtocol', in the policy 'cufwPolAppConnPolicy'
+          applied to the entity identified by 'cufwPolAppConnPolicyTarget'. "
+      - name: cufwPolAppConnNumAborted
+        OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.11
+        description:
+          "The number of connections that were abnormally terminated after
+          successful establishment, corresponding to the protocol denoted by 'cufwPolAppConnProtocol',
+          in the policy 'cufwPolAppConnPolicy' applied to the entity identified by 'cufwPolAppConnPolicyTarget'. "
+    metric_tags:
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: policy
+        table: cufwPolicyAppConnSummaryTable
+        column:
+          name: cufwPolAppConnPolicy
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.1
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: entity_type
+        table: cufwPolicyAppConnSummaryTable
+        column:
+          name: cufwPolAppConnPolicyTargetType
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.2
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: entity
+        table: cufwPolicyAppConnSummaryTable
+        column:
+          name: cufwPolAppConnPolicyTarget
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.3
+      - MIB: CISCO-UNIFIED-FIREWALL-MIB
+        tag: protocol
+        table: cufwPolicyAppConnSummaryTable
+        column:
+          name: cufwPolAppConnProtocol
+          OID: 1.3.6.1.4.1.9.9.491.1.1.4.4.1.4
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsNumProcessed
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.2.0
+      description:
+        "The number of URL access requests processed by this firewall. This
+        value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsProcRate1
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.3.0
+      description:
+        "The number of URL access requests processed per seconds by this
+        firewall averaged over the last 60 seconds. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsProcRate5
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.4.0
+      description:
+        "The number of URL access requests processed per second by this firewall
+        averaged over the last 300 seconds. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsNumAllowed
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.5.0
+      description:
+        "The number of URL access requests allowed by this firewall, due
+        to a directive from a URL filtering server or a static policy configured on
+        the firewall. This value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsNumDenied
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.6.0
+      description:
+        "The number of URL access requests declined by this firewall, due
+        to a directive from a URL filtering server, a static policy configured on the
+        firewall, due to resource constraints or any other reason. This value is accumulated
+        from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsNumCacheAllowed
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.9.0
+      description:
+        "The number of URL access requests allowed by the firewall because
+        of a cached entry holding the result from a previous URL access request that
+        was handled either by a URLF Server or exclusive domain configuration. This
+        value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsNumCacheDenied
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.10.0
+      description:
+        "The number of URL access requests denied by the firewall because
+        of a cached entry holding the result from a previous URL access request that
+        was handled either by a URLF Server or exclusive domain configuration. This
+        value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfAllowModeReqNumAllowed
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.11.0
+      description:
+        "The number of URL access requests that were allowed by the firewall
+        when the URL filtering server was not available. This value is accumulated from
+        the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfAllowModeReqNumDenied
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.12.0
+      description:
+        "The number of URL access requests that were declined by the firewall
+        when the URL filtering server was not available. This value is accumulated from
+        the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfRequestsNumResDropped
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.13.0
+      description:
+        "The number of incoming URL access requests that were dropped by
+        the firewall because of resource constraints. This value is accumulated from
+        the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfNumServerTimeouts
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.16.0
+      description:
+        "The number of times the firewall failed to receive a response from
+        the configured URL filtering servers for a request to authorize a URL access
+        request. This is equal to the number of times a firewall removed a URL access
+        request from the queue of pending requests because no response was received
+        from the URL filtering server(s). This value is accumulated from the last reboot
+        of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfNumServerRetries
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.17.0
+      description:
+        "The number of URL access authorization requests re-sent by the firewall
+        to the URL Filtering Servers because a response was not received within the
+        configured time interval. This value is accumulated from the last reboot of
+        the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfResponsesNumLate
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.18.0
+      description:
+        "The number of responses from URL filtering servers which were received
+        after the original URL access request was removed from the queue of pending
+        requests. This value is accumulated from the last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfUrlAccRespsNumResDropped
+      OID: 1.3.6.1.4.1.9.9.491.1.3.1.19.0
+      description:
+        "The number of transport packets constituting responses to URL access
+        requests that were dropped by the firewall due to resource constraints waiting
+        for a response from the filtering server. This value is accumulated from the
+        last reboot of the firewall. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfResTotalRequestCacheSize
+      OID: 1.3.6.1.4.1.9.9.491.1.3.2.1.0
+      description:
+        "The amount of memory occupied by all the caches used in the firewall
+        to cache pending URL access requests. "
+  - MIB: CISCO-UNIFIED-FIREWALL-MIB
+    symbol:
+      name: cufwUrlfResTotalRespCacheSize
+      OID: 1.3.6.1.4.1.9.9.491.1.3.2.2.0
+      description:
+        "The amount of memory occupied by all the caches used in the firewall
+        to cache responses for URL requests received from servers while awaiting a response
+        from URL filter server. "
+  - MIB: CPI-UNITY-MIB
+    symbol:
+      name: cpiPduTableCount
+      OID: 1.3.6.1.4.1.30932.1.10.1.2.1.0
+      description:
+        Get the number of PDUs being monitored by this PDU. This is the number
+        of entries in the cpiPduTable.
+  - MIB: CPI-UNITY-MIB
+    table:
+      name: cpiPduTable
+      OID: 1.3.6.1.4.1.30932.1.10.1.2.10
+      description:
+        This table contains a list of PDU entries that are being monitored
+        by the PDU. The table contains one, or many rows, depending upon the number
+        of PDUs being monitored. Each row in the table represents a PDU in the daisy
+        chain. This table always contains at least one entry and a maximum of 32 entries.
+        The MAC address is used as an index on the table to allow data collectors to
+        ensure that information can be retrieved for a specific PDU.
+    symbols:
+      - name: cpiPduNumberBranches
+        OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.8
+        description: Get the number of branches (breakers) in the PDU.
+      - name: cpiPduNumberOutlets
+        OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.9
+        description: Get the number of outlets in the PDU.
+      - name: cpiPduTotalPower
+        OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.16
+        description: Get the power in volt-amps for the entire PDU.
+    metric_tags:
+      - MIB: CPI-UNITY-MIB
+        tag: mac
+        table: cpiPduTable
+        column:
+          name: cpiPduMac
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.1
+      - MIB: CPI-UNITY-MIB
+        tag: model
+        table: cpiPduTable
+        column:
+          name: cpiPduModel
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.2
+      - MIB: CPI-UNITY-MIB
+        tag: user
+        table: cpiPduTable
+        column:
+          name: cpiPduName
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
+      - MIB: CPI-UNITY-MIB
+        tag: firmware
+        table: cpiPduTable
+        column:
+          name: cpiPduVersion
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.11
+      - MIB: CPI-UNITY-MIB
+        tag: ip
+        table: cpiPduTable
+        column:
+          name: cpiPduIp
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.14
+      - MIB: CPI-UNITY-MIB
+        tag: cabinet
+        table: cpiPduTable
+        column:
+          name: cpiPduCabinetId
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.17
+      - MIB: CPI-UNITY-MIB
+        tag: serial_number
+        table: cpiPduTable
+        column:
+          name: cpiPduSerialNum
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.18
+  - MIB: CPI-UNITY-MIB
+    symbol:
+      name: cpiLineTableCount
+      OID: 1.3.6.1.4.1.30932.1.10.1.3.1.0
+      description:
+        Get the number of PDU input lines being monitored by this PDU. This
+        is the number of entries in the cpiLineTable and accounts for all input lines
+        in a daisy chain.
+  - MIB: CPI-UNITY-MIB
+    table:
+      name: cpiPduLineTable
+      OID: 1.3.6.1.4.1.30932.1.10.1.3.10
+      description:
+        This table contains a list of PDU line entries that are being monitored
+        by the PDU. The table contains one, or many rows, depending upon the number
+        of PDUs being monitored and the number of input lines. Each row in the table
+        represents a PDU line in the daisy chain. The table is indexed based on the
+        corresponding Line Input ID and the source PDU MAC.
+    symbols:
+      - name: cpiPduLineCurrent
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.10.1.3
+        description:
+          Get current draw in 1/100 amp of the line on the PDU. Convert the
+          value by dividing by 100.
+    metric_tags:
+      - MIB: CPI-UNITY-MIB
+        tag: line
+        table: cpiPduLineTable
+        column:
+          name: cpiPduLineId
+          OID: 1.3.6.1.4.1.30932.1.10.1.3.10.1.2
+      - MIB: CPI-UNITY-MIB
+        tag: mac
+        table: cpiPduLineTable
+        column:
+          name: cpiPduLineMac
+          OID: 1.3.6.1.4.1.30932.1.10.1.3.10.1.1
+  - MIB: CPI-UNITY-MIB
+    symbol:
+      name: cpiBranchTableCount
+      OID: 1.3.6.1.4.1.30932.1.10.1.3.100.0
+      description:
+        Get the number of PDU branches being monitored by this PDU. This
+        is the number of entries in the cpiPduBranchTable.
+  - MIB: CPI-UNITY-MIB
+    table:
+      name: cpiPduBranchTable
+      OID: 1.3.6.1.4.1.30932.1.10.1.3.110
+      description:
+        This table contains a list of PDU branch entries that are being monitored
+        by the PDU. The table contains one, or many rows, depending upon the number
+        of PDUs being monitored and the number of branches per PDU. Each row in the
+        table represents a PDU branch in the daisy chain. The table is indexed based
+        on the corresponding Branch ID and the source PDU MAC.
+    symbols:
+      - name: cpiPduBranchCurrent
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.3
+        description:
+          Get the current draw in 1/100 amp of the branch on the PDU. Convert
+          the value by dividing by 100.
+      - name: cpiPduBranchMaxCurrent
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.4
+        description:
+          Get the maximum current draw in 1/100 amp of the branch on the PDU.
+          Convert the value by dividing by 100.
+      - name: cpiPduBranchVoltage
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.5
+        description:
+          Get the voltage in 1/10 volts of the branch on the PDU. Convert the
+          value by dividing by 10.
+      - name: cpiPduBranchPower
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.6
+        description: Get the power in volt-amps for the branch.
+      - name: cpiPduBranchPowerFactor
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.7
+        description: Get the power factor for the branch.
+      - name: cpiPduBranchEnergy
+        OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.9
+        description:
+          Get the branch energy accumulated in decaVA-secs, divide by 360 to
+          obtain VA-hr.
+    metric_tags:
+      - MIB: CPI-UNITY-MIB
+        tag: branch
+        table: cpiPduBranchTable
+        column:
+          name: cpiPduBranchId
+          OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.2
+      - MIB: CPI-UNITY-MIB
+        tag: mac
+        table: cpiPduBranchTable
+        column:
+          name: cpiPduBranchMac
+          OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.1
+      - MIB: CPI-UNITY-MIB
+        tag: alarm_status
+        table: cpiPduBranchTable
+        column:
+          name: cpiPduBranchStatus
+          OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.8
+  - MIB: CPI-UNITY-MIB
+    symbol:
+      name: cpiOutletTableCount
+      OID: 1.3.6.1.4.1.30932.1.10.1.4.1.0
+      description:
+        Get the number of PDU outlets being monitored by this PDU. This is
+        the number of entries in the cpiPduOutletTable.
+  - MIB: CPI-UNITY-MIB
+    table:
+      name: cpiPduOutletTable
+      OID: 1.3.6.1.4.1.30932.1.10.1.4.10
+      description:
+        This table contains a list of PDU outlet entries that are being monitored
+        by the PDU. The table contains one, or many rows, depending upon the number
+        of PDUs being monitored and the number of outlets on each PDU. Each row in the
+        table represents a PDU outlet in the daisy chain. The table is indexed based
+        on the corresponding Outlet ID and the source PDU MAC.
+    symbols:
+      - name: cpiPduOutletCurrent
+        OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.6
+        description:
+          Get the current draw in 1/100 amp of the outlet on the PDU. Convert
+          the value by dividing by 100.
+      - name: cpiPduOutletVoltage
+        OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.7
+        description:
+          Get the voltage in 1/10 volts of the outlet on the PDU. Convert the
+          value by dividing by 10.
+      - name: cpiPduOutletPower
+        OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.8
+        description: The power in Volt-Amps of the outlet on the PDU.
+      - name: cpiPduOutletStatus
+        OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.9
+        description: Get the alarm status of the outlet.
+      - name: cpiPduOutletEnergy
+        OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.10
+        description:
+          Get the outlet energy accumulated in decaWatt-secs, divide by 360
+          to obtain Watt-hr.
+    metric_tags:
+      - MIB: CPI-UNITY-MIB
+        tag: outlet_name
+        table: cpiPduOutletTable
+        column:
+          name: cpiPduOutletName
+          OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.4
+      - MIB: CPI-UNITY-MIB
+        tag: mac
+        table: cpiPduOutletTable
+        column:
+          name: cpiPduOutletMac
+          OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.1
+      - MIB: CPI-UNITY-MIB
+        tag: branch
+        table: cpiPduOutletTable
+        column:
+          name: cpiPduOutletBranchId
+          OID: 1.3.6.1.4.1.30932.1.10.1.4.10.1.3
+  - MIB: CPI-UNITY-MIB
+    symbol:
+      name: cpiPduSensorCount
+      OID: 1.3.6.1.4.1.30932.1.10.1.5.1.0
+      description:
+        Get the number of PDU sensors being monitored by this PDU. This is
+        the number of entries in the cpiPduSensorTable.
+  - MIB: CPI-UNITY-MIB
+    table:
+      name: cpiPduSensorTable
+      OID: 1.3.6.1.4.1.30932.1.10.1.5.10
+      description:
+        This table contains a list of PDU sensor entries that are being monitored
+        by the PDU. The table contains zero, one, or many rows, depending upon the number
+        of PDUs being monitored and the number of sensors attached to the PDUs in the
+        daisy chain. Each row in the table represents a sensor in the daisy chain. The
+        table is index based on the corresponding Sensor ID and the source PDU MAC.
+    symbols:
+      - name: cpiPduSensorValue
+        OID: 1.3.6.1.4.1.30932.1.10.1.5.10.1.5
+        description:
+          Get the value of the sensor. For temperature the value is in degrees
+          Fahrenheit and for humidity the value is percent humidity.
+    metric_tags:
+      - MIB: CPI-UNITY-MIB
+        tag: sensor_id
+        table: cpiPduSensorTable
+        column:
+          name: cpiPduSensorId
+          OID: 1.3.6.1.4.1.30932.1.10.1.5.10.1.2
+      - MIB: CPI-UNITY-MIB
+        tag: sensor_mac
+        table: cpiPduSensorTable
+        column:
+          name: cpiPduSensorMac
+          OID: 1.3.6.1.4.1.30932.1.10.1.5.10.1.1
+      - MIB: CPI-UNITY-MIB
+        tag: sensor_name
+        table: cpiPduSensorTable
+        column:
+          name: cpiPduSensorName
+          OID: 1.3.6.1.4.1.30932.1.10.1.5.10.1.3
+      - MIB: CPI-UNITY-MIB
+        tag: sensor_type
+        table: cpiPduSensorTable
+        column:
+          name: cpiPduSensorType
+          OID: 1.3.6.1.4.1.30932.1.10.1.5.10.1.4
+  - MIB: SNMPv2-MIB
+    symbol:
+      name: sysUpTime
+      OID: 1.3.6.1.2.1.1.3.0
+      description:
+        The time (in hundredths of a second) since the network management
+        portion of the system was last re-initialized.

@@ -1410,6 +1410,326 @@ def test_cisco_asa(aggregator):
         for rtt in rtt_gauges:
             aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
 
+    # POWER SUPPLY
+    power_supply_table_monotonic = ['snmp.cefcFRUTotalSystemCurrent', 'snmp.cefcFRUTotalInlineCurrent']
+    for metric in power_supply_table_monotonic:
+        for index in range(4):
+            aggregator.assert_metric(
+                metric,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=common_tags + ['entity_name:eth{}'.format(index)],
+                count=1,
+            )
+    power_supply_table_gauge = ['snmp.cefcFRUDrawnInlineCurrent', 'snmp.cefcFRUDrawnSystemCurrent']
+    for metric in power_supply_table_gauge:
+        for index in range(4):
+            aggregator.assert_metric(
+                metric,
+                metric_type=aggregator.GAUGE,
+                tags=common_tags + ['entity_name:eth{}'.format(index)],
+                count=1,
+            )
+
+    power_supply_types = [1, 5]
+    power_supply_index = [25, 16]
+    for index in range(2):
+        aggregator.assert_metric(
+            'snmp.cefcPowerSupplyInputType',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + ['entity_name:eth{}'.format(index), 'power_supply:{}'.format(power_supply_index[index])],
+            count=1,
+            value=power_supply_types[index],
+        )
+        aggregator.assert_metric(
+            'snmp.cefcModulePowerConsumption',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=common_tags + ['entity_name:eth{}'.format(index)],
+            count=1,
+        )
+
+    # IPSEC
+    aggregator.assert_metric('snmp.cikeGlobalActiveTunnels', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    ipsec_global = [
+        'snmp.cikeGlobalAuthFails',
+        'snmp.cikeGlobalDecryptFails',
+        'snmp.cikeGlobalInDropPkts',
+        'snmp.cikeGlobalInOctets',
+        'snmp.cikeGlobalInP2Exchgs',
+        'snmp.cikeGlobalInPkts',
+        'snmp.cikeGlobalOutDropPkts',
+        'snmp.cikeGlobalOutOctets',
+        'snmp.cikeGlobalOutP2ExchgInvalids',
+        'snmp.cikeGlobalOutP2ExchgRejects',
+        'snmp.cikeGlobalOutP2Exchgs',
+        'snmp.cikeGlobalOutPkts',
+        'snmp.cipSecGlobalInAuthFails',
+        'snmp.cipSecGlobalInAuths',
+        'snmp.cipSecGlobalInDecompOctets',
+        'snmp.cipSecGlobalInDecryptFails',
+        'snmp.cipSecGlobalInDecrypts',
+        'snmp.cipSecGlobalInDrops',
+        'snmp.cipSecGlobalInOctets',
+        'snmp.cipSecGlobalInPkts',
+        'snmp.cipSecGlobalNoSaFails',
+        'snmp.cipSecGlobalOutAuthFails',
+        'snmp.cipSecGlobalOutAuths',
+        'snmp.cipSecGlobalOutDrops',
+        'snmp.cipSecGlobalOutEncryptFails',
+        'snmp.cipSecGlobalOutEncrypts',
+        'snmp.cipSecGlobalOutOctets',
+        'snmp.cipSecGlobalOutPkts',
+        'snmp.cipSecGlobalOutUncompOctets',
+        'snmp.cipSecGlobalProtocolUseFails',
+        'snmp.cipSecGlobalSysCapFails',
+    ]
+    for metric_name in ipsec_global:
+        aggregator.assert_metric(metric_name, metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
+
+    cipSecPhase2GWStatsTable = [
+        'snmp.cipSecPhase2GWActiveTunnels',
+        'snmp.cipSecPhase2GWInAuthFails',
+        'snmp.cipSecPhase2GWInAuths',
+        'snmp.cipSecPhase2GWInDecompOctets',
+        'snmp.cipSecPhase2GWInDecryptFails',
+        'snmp.cipSecPhase2GWInDecrypts',
+        'snmp.cipSecPhase2GWInDrops',
+        'snmp.cipSecPhase2GWInOctets',
+        'snmp.cipSecPhase2GWInPkts',
+        'snmp.cipSecPhase2GWInReplayDrops',
+        'snmp.cipSecPhase2GWNoSaFails',
+        'snmp.cipSecPhase2GWOutAuthFails',
+        'snmp.cipSecPhase2GWOutAuths',
+        'snmp.cipSecPhase2GWOutDrops',
+        'snmp.cipSecPhase2GWOutEncryptFails',
+        'snmp.cipSecPhase2GWOutEncrypts',
+        'snmp.cipSecPhase2GWOutOctets',
+        'snmp.cipSecPhase2GWOutPkts',
+        'snmp.cipSecPhase2GWOutUncompOctets',
+        'snmp.cipSecPhase2GWPreviousTunnels',
+        'snmp.cipSecPhase2GWProtocolUseFails',
+        'snmp.cipSecPhase2GWSysCapFails',
+    ]
+
+    for sec_metric in cipSecPhase2GWStatsTable:
+        for index in range(3):
+            aggregator.assert_metric(
+                sec_metric,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=common_tags + ['gateway_index:{}'.format(index)],
+                count=1,
+            )
+
+    aggregator.assert_metric('snmp.crasGlobalBwUsage', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.crasGlobalInDecompOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.crasGlobalInDropPkts', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.crasGlobalInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.crasGlobalInPkts', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.crasGlobalOutDropPkts', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.crasGlobalOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.crasGlobalOutPkts', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.crasGlobalOutUncompOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+
+    cras_session_table = [
+        'snmp.crasSessionDuration',
+        'snmp.crasHeartbeatInterval',
+        'snmp.crasSessionInPkts',
+        'snmp.crasSessionOutPkts',
+        'snmp.crasSessionInDropPkts',
+        'snmp.crasSessionOutDropPkts',
+        'snmp.crasSessionInOctets',
+        'snmp.crasSessionOutOctets',
+    ]
+
+    for column in cras_session_table:
+        for index in range(2):
+            cras_session_tags = [
+                'group:group {}'.format(index),
+                'private_ip:192.168.10.{}'.format(index + 1),
+                'public_ip:128.168.10.{}'.format(index + 1),
+                'session:{}'.format(index),
+                'session_state:1',
+                'user:user {}'.format(index),
+            ]
+            aggregator.assert_metric(
+                column, metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + cras_session_tags, count=1
+            )
+
+    aggregator.assert_metric(
+        'snmp.crasNumAbortedSessions', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.crasNumDisabledAccounts', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.crasNumGroups', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.crasNumTotalFailures', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+    )
+
+    aggregator.assert_metric('snmp.cpiBranchTableCount', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cpiLineTableCount', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cpiOutletTableCount', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduSensorCount', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduTableCount', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.cufwConnGlobalConnSetupRate1', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnGlobalConnSetupRate5', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.cufwConnGlobalNumAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwConnGlobalNumActive', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwConnGlobalNumEmbryonic', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwConnGlobalNumExpired', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwConnGlobalNumHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.cufwConnGlobalNumPolicyDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnGlobalNumRemoteAccess', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnGlobalNumResDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnGlobalNumSetupsAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwUrlfAllowModeReqNumAllowed', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwUrlfAllowModeReqNumDenied', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.cufwUrlfNumServerRetries', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwUrlfNumServerTimeouts', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwUrlfRequestsNumAllowed', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.cufwUrlfRequestsNumCacheAllowed', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwUrlfRequestsNumCacheDenied', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.cufwUrlfRequestsNumDenied', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.cufwUrlfRequestsNumProcessed', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwUrlfRequestsNumResDropped', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.cufwUrlfRequestsProcRate1', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.cufwUrlfRequestsProcRate5', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.cufwUrlfResTotalRequestCacheSize', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwUrlfResTotalRespCacheSize', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.cufwUrlfResponsesNumLate', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_metric(
+        'snmp.cufwUrlfUrlAccRespsNumResDropped', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnResActiveConnMemoryUsage', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnResEmbrConnMemoryUsage', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.cufwConnResHOConnMemoryUsage', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+    aggregator.assert_metric('snmp.cufwConnResMemoryUsage', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduBranchEnergy', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduBranchMaxCurrent', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduBranchPower', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduNumberBranches', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduNumberOutlets', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduOutletCurrent', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduOutletEnergy', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduOutletPower', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduOutletStatus', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduOutletVoltage', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduSensorValue', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cpiPduTotalPower', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwAppConnNumAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwAppConnNumActive', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwAppConnNumAttempted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwAppConnNumHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric(
+        'snmp.cufwAppConnNumPolicyDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+    aggregator.assert_metric('snmp.cufwAppConnNumResDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric(
+        'snmp.cufwAppConnNumSetupsAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+    aggregator.assert_metric('snmp.cufwAppConnSetupRate1', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwAppConnSetupRate5', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumActive', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumAttempted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumPolicyDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumResDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnNumSetupsAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnSetupRate1', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwConnSetupRate5', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolAppConnNumAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolAppConnNumActive', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolAppConnNumAttempted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolAppConnNumHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric(
+        'snmp.cufwPolAppConnNumPolicyDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+    aggregator.assert_metric(
+        'snmp.cufwPolAppConnNumResDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+    aggregator.assert_metric(
+        'snmp.cufwPolAppConnNumSetupsAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+    aggregator.assert_metric('snmp.cufwPolConnNumAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolConnNumActive', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolConnNumAttempted', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric('snmp.cufwPolConnNumHalfOpen', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric(
+        'snmp.cufwPolConnNumPolicyDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+    aggregator.assert_metric('snmp.cufwPolConnNumResDeclined', metric_type=aggregator.GAUGE, tags=common_tags, count=3)
+    aggregator.assert_metric(
+        'snmp.cufwPolConnNumSetupsAborted', metric_type=aggregator.GAUGE, tags=common_tags, count=3
+    )
+
+    sensor_types = [3, 5, 6]
+    for index in range(3):
+        aggregator.assert_metric(
+            'snmp.entPhySensorValue',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + ['sensor_id:{}'.format(index), 'sensor_type:{}'.format(sensor_types[index])],
+            count=1,
+        )
+        aggregator.assert_metric(
+            'snmp.entPhySensorOperStatus',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + ['sensor_id:{}'.format(index), 'sensor_type:{}'.format(sensor_types[index])],
+            count=1,
+        )
+
     aggregator.assert_all_metrics_covered()
 
 
