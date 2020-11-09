@@ -495,6 +495,10 @@ coverage:
         target: 75
         flags:
         - vertica
+      VoltDB:
+        target: 75
+        flags:
+        - voltdb
       WMI:
         target: 75
         flags:
@@ -1144,6 +1148,11 @@ flags:
     paths:
     - vertica/datadog_checks/vertica
     - vertica/tests
+  voltdb:
+    carryforward: true
+    paths:
+    - voltdb/datadog_checks/voltdb
+    - voltdb/tests
   vsphere:
     carryforward: true
     paths:

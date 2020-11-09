@@ -6,7 +6,7 @@
   "metric_prefix": "voltdb.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Collect status, performance and other metrics from a VoltDB cluster.",
   "guid": "15abd7c6-1845-405a-8627-f83be1e48b11",
   "support": "core",
   "supported_os": [
@@ -16,7 +16,7 @@
   ],
   "public_title": "VoltDB",
   "categories": [
-    ""
+    "data store"
   ],
   "type": "check",
   "is_public": false,
@@ -29,6 +29,7 @@
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }
