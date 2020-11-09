@@ -286,6 +286,7 @@ Tips for Kubernetes installations:
 
 - Customize the Airflow configuration with [pod annotations][14].
 - When modifying `airflow.cfg`, `statsd_host` should be set to the IP address of the Kubernetes node.
+- See the Datadog integrations-core for an [example setup][15].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -340,3 +341,4 @@ Need help? Contact [Datadog support][7].
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[15]: https://github.com/DataDog/integrations-core/tree/master/airflow/tests/k8s_sample
