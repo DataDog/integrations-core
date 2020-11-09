@@ -677,16 +677,14 @@ class AgentCheck(object):
         return '{}_{}'.format(self.check_id, key)
 
     def read_persistent_cache(self, key):
-        """
-        :param key:
-        :return: the value previously stored with `write_persistent_cache` for the same `key`.
+        """ Returns the value previously stored with `write_persistent_cache` for the same `key`.
+        :param key: The key to retrieve
         """
         # type: (str) -> str
         return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
 
     def write_persistent_cache(self, key, value):
-        """
-        Store `value` in a persistent cache for this check instance.
+        """Stores `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
             - `%ProgramData%\\Datadog\\run` on Windows.
             - `/opt/datadog-agent/run` everywhere else.
@@ -694,7 +692,6 @@ class AgentCheck(object):
 
         :param key: Used to build the filename.
         :param value: Value to store
-        :return:
         """
         # type: (str, str) -> None
         datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
