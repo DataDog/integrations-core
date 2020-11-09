@@ -1,5 +1,9 @@
 # CHANGELOG - marathon
 
+## 1.18.0 / 2020-11-06
+
+* [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
+
 ## 1.17.0 / 2020-10-31
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
