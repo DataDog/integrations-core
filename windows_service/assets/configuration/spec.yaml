@@ -21,6 +21,9 @@ files:
               type: array
               items:
                 type: string
+              example:
+                - <SERVICE_NAME_1>
+                - <SERVICE_NAME_2>
           - name: disable_legacy_service_tag
             description: |
               Whether or not to stop submitting the tag `service` that has been renamed
