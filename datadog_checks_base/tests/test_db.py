@@ -9,7 +9,7 @@ import pytz
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import Query, QueryManager
 
 pytestmark = pytest.mark.db
 
@@ -1042,6 +1042,23 @@ class TestSubmission:
         assert not id(query_manager1.queries[0]) == id(
             query_manager2.queries[0]
         ), "QueryManager does not copy the queries"
+
+    def test_accept_query_objects(self):
+        class MyCheck(AgentCheck):
+            pass
+
+        check = MyCheck('test', {}, [{}])
+        dummy_query = {
+            'name': 'test query',
+            'query': 'foo',
+            'columns': [
+                {'name': 'test.foo', 'type': 'gauge', 'tags': ['override:ok']},
+                {'name': 'test.baz', 'type': 'gauge', 'raw': True},
+            ],
+            'tags': ['test:bar'],
+        }
+        query_manager = QueryManager(check, mock_executor(), [Query(dummy_query)])
+        query_manager.compile_queries()
 
     def test_query_execution_error(self, caplog, aggregator):
         class Result(object):

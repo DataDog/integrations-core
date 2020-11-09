@@ -48,7 +48,11 @@ class QueryManager(object):
         self.executor = executor
         self.tags = tags or []
         self.error_handler = error_handler
-        self.queries = [Query(payload) for payload in queries or []]
+        # Accept either a `List[Query]` (< 7.24.0), or a `List[dict]` to be wrapped in `Query` (7.24.0+).
+        # The latter was introduced to avoid an issue with passing mutable query objects,
+        # see: https://github.com/DataDog/integrations-core/pull/7750
+        # But we still accept `List[Query]` for backwards compatibility.
+        self.queries = [Query(query) if not isinstance(query, Query) else query for query in queries or []]
         custom_queries = list(self.check.instance.get('custom_queries', []))
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)
 
