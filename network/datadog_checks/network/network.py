@@ -61,6 +61,7 @@ class Network(AgentCheck):
             )
 
         self._collect_cx_state = instance.get('collect_connection_state', False)
+        self._collect_cx_queues = instance.get('collect_connection_queues', True)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
 
@@ -342,11 +343,12 @@ class Network(AgentCheck):
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
-                    cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
-                    for (state, recvq, sendq) in self._parse_queues("ss", output):
-                        self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
-                        self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
+                    if self._collect_cx_queues:
+                        cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
+                        output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                        for (state, recvq, sendq) in self._parse_queues("ss", output):
+                            self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                            self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
@@ -369,9 +371,10 @@ class Network(AgentCheck):
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
-                for (state, recvq, sendq) in self._parse_queues("netstat", output):
-                    self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
-                    self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
+                if self._collect_cx_queues:
+                    for (state, recvq, sendq) in self._parse_queues("netstat", output):
+                        self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                        self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection states.")
