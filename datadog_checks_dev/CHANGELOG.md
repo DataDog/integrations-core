@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 5.1.0 / 2020-11-10
+
+* [Added] Allow mechanism for handling duplicate option names for config specs. See [#7968](https://github.com/DataDog/integrations-core/pull/7968).
+* [Added] Add Infra Integrations to Trello release script. See [#7906](https://github.com/DataDog/integrations-core/pull/7906).
+* [Fixed] Fix http validator. See [#7936](https://github.com/DataDog/integrations-core/pull/7936).
+* [Fixed] Fix Trello release script. See [#7909](https://github.com/DataDog/integrations-core/pull/7909).
+
 ## 5.0.0 / 2020-10-31
 
 * [Added] add options method for validation. See [#7895](https://github.com/DataDog/integrations-core/pull/7895).
