@@ -85,3 +85,66 @@ def test_custom_queries(aggregator, instance):
     aggregator.assert_metric(
         'vertica.table.force_outer', metric_type=0, tags=['db:datadog', 'foo:bar', 'test:vertica', 'table_name:datadog']
     )
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_include_all_tables(aggregator, datadog_agent, instance):
+    instance['include_tables'] = []
+
+    check = VerticaCheck('vertica', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_metric('vertica.license.expiration', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.license.size', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.node.total', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.projection.total', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.row.total', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.delete_vectors', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.memory.swap.total', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.query.active', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.resource_pool.memory.max', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.storage.size', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.node.resource_requests', metric_type=aggregator.GAUGE)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_include_system_tables(aggregator, instance):
+    instance['include_tables'] = ['system']
+    instance['exclude_tables'] = ['licenses']
+
+    check = VerticaCheck('vertica', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_metric('vertica.node.total', metric_type=aggregator.GAUGE)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_include_exclude_tables(aggregator, instance):
+    instance['include_tables'] = ['licenses']
+    instance['exclude_tables'] = ['system']
+
+    check = VerticaCheck('vertica', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_metric(name='vertica.license.expiration', metric_type=aggregator.GAUGE)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_include_table_custom(aggregator, instance):
+    instance['custom_queries'] = [
+        {
+            'tags': ['test:vertica'],
+            'query': 'SELECT force_outer, table_name FROM v_catalog.tables',
+            'columns': [{'name': 'table.test_custom', 'type': 'gauge'}, {'name': 'table_name', 'type': 'tag'}],
+        }
+    ]
+    instance['include_tables'] = ['custom']
+    instance['exclude_tables'] = []
+
+    check = VerticaCheck('vertica', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_metric(
+        'vertica.table.test_custom', metric_type=0, tags=['db:datadog', 'foo:bar', 'test:vertica', 'table_name:datadog']
+    )

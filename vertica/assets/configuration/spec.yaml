@@ -32,6 +32,35 @@ files:
             value:
               type: integer
               example: 5433
+          - name: include_tables
+            required: true
+            description: The tables to include for metric collection.
+            value: 
+              type: array
+              items:
+                type: string
+              example: 
+                - licenses
+                - license_audits
+                - system
+                - nodes
+                - projections
+                - projection_storage
+                - storage_containers
+                - host_resources
+                - query_metrics
+                - resource_pool_status
+                - disk_storage
+                - resource_usage
+                - version
+                - custom
+          - name: exclude_tables
+            required: false
+            description: The tables to exclude for metric collection.
+            value:
+              type: array
+              items: 
+                type: string
           - name: username
             required: true
             description: The database user to authenticate as.

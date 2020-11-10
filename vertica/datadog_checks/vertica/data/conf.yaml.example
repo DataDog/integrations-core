@@ -33,6 +33,30 @@ instances:
     #
     port: 5433
 
+    ## @param include_tables - list of strings - required
+    ## The tables to include for metric collection.
+    #
+    include_tables:
+      - licenses
+      - license_audits
+      - system
+      - nodes
+      - projections
+      - projection_storage
+      - storage_containers
+      - host_resources
+      - query_metrics
+      - resource_pool_status
+      - disk_storage
+      - resource_usage
+      - version
+      - custom
+
+    ## @param exclude_tables - list of strings - optional
+    ## The tables to exclude for metric collection.
+    #
+    # exclude_tables: []
+
     ## @param username - string - required
     ## The database user to authenticate as.
     #

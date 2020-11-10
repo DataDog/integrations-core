@@ -92,6 +92,37 @@ class VerticaCheck(AgentCheck):
         # Cache database results for re-use among disparate functions
         self._view = defaultdict(list)
 
+        self._tables = {
+            "licenses": self.query_licenses,
+            "license_audits": self.query_license_audits,
+            "system": self.query_system,
+            "nodes": self.query_nodes,
+            "projections": self.query_projections,
+            "projection_storage": self.query_projection_storage,
+            "storage_containers": self.query_storage_containers,
+            "host_resources": self.query_host_resources,
+            "query_metrics": self.query_query_metrics,
+            "resource_pool_status": self.query_resource_pool_status,
+            "disk_storage": self.query_disk_storage,
+            "resource_usage": self.query_resource_usage,
+            "version": self.query_version,
+            "custom": self.query_custom,
+        }
+
+        include_tables = self.instance.get("include_tables") or list(self._tables)
+        exclude_tables = self.instance.get("exclude_tables") or list()
+        desired_tables = set(include_tables) - set(exclude_tables)
+
+        # License query needs to be run before getting system
+        if 'system' in desired_tables:
+            desired_tables.add('licenses')
+
+        self._desired_tables = []
+
+        for table_name in self._tables:
+            if table_name in desired_tables:
+                self._desired_tables.append(table_name)
+
     def _get_default_client_lib_log_level(self):
         if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
             # Automatically collect library logs for debug flares.
@@ -111,20 +142,10 @@ class VerticaCheck(AgentCheck):
 
         # The order of queries is important as some results are cached for later re-use
         try:
-            self.query_licenses()
-            self.query_license_audits()
-            self.query_system()
-            self.query_nodes()
-            self.query_projections()
-            self.query_projection_storage()
-            self.query_storage_containers()
-            self.query_host_resources()
-            self.query_query_metrics()
-            self.query_resource_pool_status()
-            self.query_disk_storage()
-            self.query_resource_usage()
-            self.query_version()
-            self.query_custom()
+            for key in self._desired_tables:
+                func = self._tables.get(key)
+                func()
+
         finally:
             self._view.clear()
 
