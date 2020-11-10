@@ -52,7 +52,7 @@ class IbmDb2Check(AgentCheck):
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
 
-    def check(self, _):
+    def check(self, instance):
         if self._conn is None:
             connection = self.get_connection()
             if connection is None:

@@ -67,7 +67,7 @@ class MapReduceCheck(AgentCheck):
             cluster_name = self.DEFAULT_CLUSTER_NAME
         self.metric_tags = self.custom_tags + ['cluster_name:{}'.format(cluster_name)]
 
-    def check(self, _):
+    def check(self, instance):
         # Get the running MR applications from YARN
         running_apps = self._get_running_app_ids()
 
