@@ -477,7 +477,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
 class SqlDatabaseBackup(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'msdb.dbo.backupset'
-    DEFAULT_METRIC_TYPE = 'count'
+    DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = "select count(backup_set_uuid) as backup_set_uuid_count, database_name " \
                  "from {table} group by database_name".format(table=TABLE)
 
