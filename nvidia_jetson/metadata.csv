@@ -9,12 +9,12 @@ nvidia.jetson.iram.lfb,gauge,,byte,,Size of the largest free block,0,jetson,iram
 nvidia.jetson.swap.used,gauge,,byte,,Amount of SWAP in use in megabytes,0,jetson,swap.used
 nvidia.jetson.swap.total,gauge,,byte,,Total amount of SWAP available for applications,0,jetson,swap.total
 nvidia.jetson.swap.cached,gauge,,byte,,Amount of SWAP cached in megabytes,0,jetson,swap.cached
-nvidia.jetson.emc.usage,gauge,,percent,,Percent of EMC memory bandwidth being used, relative to the current running frequency,0,jetson,emc.usage
-nvidia.jetson.emc.freq,gauge,,hertz,,EMC frequency,0,jetson,emc.freq
-nvidia.jetson.gpu.usage,gauge,,percent,,Percent of the GR3D that is being used, relative to the current running frequency,0,jetson,gpu.usage
-nvidia.jetson.gpu.freq,gauge,,hertz,,GR3D frequency in megahertz,0,jetson,gpu.freq
-nvidia.jetson.cpu.usage,gauge,,percent,,Load statistics of the CPU core relative to the current running frequency, or 'off' in case a core is currently powered down,0,jetson,cpu.usage
-nvidia.jetson.cpu.freq,gauge,,hertz,,CPU frequency,0,jetson,cpu.freq
-nvidia.jetson.temp,gauge,,celsius,,Temperature,0,jetson,temp
+nvidia.jetson.emc.usage,gauge,,percent,,Percent of EMC memory bandwidth being used relative to the current running frequency,0,jetson,emc.usage
+nvidia.jetson.emc.freq,gauge,,megahertz,,EMC frequency,0,jetson,emc.freq
+nvidia.jetson.gpu.usage,gauge,,percent,,Percent of the GR3D that is being used relative to the current running frequency,0,jetson,gpu.usage
+nvidia.jetson.gpu.freq,gauge,,megahertz,,GR3D frequency,0,jetson,gpu.freq
+nvidia.jetson.cpu.usage,gauge,,percent,,Load statistics of the CPU core relative to the current running frequency or 'off' in case a core is currently powered down,0,jetson,cpu.usage
+nvidia.jetson.cpu.freq,gauge,,megahertz,,CPU frequency,0,jetson,cpu.freq
+nvidia.jetson.temp,gauge,,degree celsius,,Temperature,0,jetson,temp
 nvidia.jetson.vdd.instant,gauge,,milliwatts,,Current power consumption,0,jetson,vdd.instant
 nvidia.jetson.vdd.average,gauge,,milliwatts,,Average power consumption,0,jetson,vdd.average
