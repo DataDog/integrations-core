@@ -188,6 +188,9 @@ VALID_UNIT_NAMES = {
     'terawatt',
     'heap',
     'volume',
+    'milliwatt',
+    'microwatt',
+    'nanowatt'
 }
 
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
