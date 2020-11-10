@@ -691,8 +691,9 @@ class AgentCheck(object):
         return '{}_{}'.format(self.check_id, key)
 
     def read_persistent_cache(self, key):
-        """ Returns the value previously stored with `write_persistent_cache` for the same `key`.
-        :param key: The key to retrieve
+        """Returns the value previously stored with `write_persistent_cache` for the same `key`.
+
+        - **key** (_str_) - The key to retrieve
         """
         # type: (str) -> str
         return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
@@ -704,8 +705,8 @@ class AgentCheck(object):
             - `/opt/datadog-agent/run` everywhere else.
         The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
 
-        :param key: Used to build the filename.
-        :param value: Value to store
+        - **key** (_str_) - Identifier used to build the filename
+        - **value** (_str_) - Value to store
         """
         # type: (str, str) -> None
         datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
