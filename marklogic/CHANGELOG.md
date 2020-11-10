@@ -1,5 +1,10 @@
 # CHANGELOG - MarkLogic
 
+## 1.1.2 / 2020-11-10
+
+* [Fixed] Handle unavailable specific resource information. See [#7944](https://github.com/DataDog/integrations-core/pull/7944).
+* [Fixed] Rename marklogic host tags. See [#7960](https://github.com/DataDog/integrations-core/pull/7960).
+
 ## 1.1.1 / 2020-11-05
 
 * [Fixed] Remove possible extra '/' from base url configuration. See [#7941](https://github.com/DataDog/integrations-core/pull/7941).
