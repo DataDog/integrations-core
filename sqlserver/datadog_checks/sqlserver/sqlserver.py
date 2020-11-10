@@ -25,7 +25,6 @@ try:
 except ImportError:
     pyodbc = None
 
-
 if adodbapi is None and pyodbc is None:
     raise ImportError('adodbapi or pyodbc must be installed to use this check.')
 
@@ -46,16 +45,15 @@ COUNTER_TYPE_QUERY = """select distinct cntr_type
                         where counter_name = ?;"""
 
 BASE_NAME_QUERY = (
-    """select distinct counter_name
+        """select distinct counter_name
        from sys.dm_os_performance_counters
        where (counter_name=? or counter_name=?
        or counter_name=?) and cntr_type=%s;"""
-    % PERF_LARGE_RAW_BASE
+        % PERF_LARGE_RAW_BASE
 )
 
 
 class SQLServer(AgentCheck):
-
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
     # Default performance table metrics - Database Instance level
@@ -139,11 +137,19 @@ class SQLServer(AgentCheck):
     # Is Sync with Backup enum:
     #   0 = False, 1 = True
     DATABASE_METRICS = [
-        ('sqlserver.database.files.size', 'sys.database_files', 'size'),
-        ('sqlserver.database.files.state', 'sys.database_files', 'state'),
-        ('sqlserver.database.state', 'sys.databases', 'state'),
-        ('sqlserver.database,is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
-        ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_uuid_count'),
+        # ('sqlserver.database.files.size', 'sys.database_files', 'size'),
+        # ('sqlserver.database.files.state', 'sys.database_files', 'state'),
+        # ('sqlserver.database.state', 'sys.databases', 'state'),
+        # ('sqlserver.database,is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
+        # ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_uuid_count'),
+    ]
+
+    DATABASE_FRAGMENTATION_METRICS = [
+        ('sqlserver.database.avg_fragmentation_in_percent', 'sys.dm_db_index_physical_stats',
+         'avg_fragmentation_in_percent'),
+        ('sqlserver.database.fragment_count', 'sys.dm_db_index_physical_stats', 'fragment_count'),
+        ('sqlserver.database.avg_fragment_size_in_pages', 'sys.dm_db_index_physical_stats',
+         'avg_fragment_size_in_pages'),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -263,53 +269,63 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
+        # Load DB Fragmentation metrics
+        if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
+            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            object_name = self.instance.get('object_name', None)
+            for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
+                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags,
+                       'object_name': object_name
+                       }
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load any custom metrics from conf.d/sqlserver.yaml
-        for cfg in custom_metrics:
-            sql_type = None
-            base_name = None
-
-            custom_tags = tags + cfg.get('tags', [])
-            cfg['tags'] = custom_tags
-
-            db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
-            if db_table not in VALID_TABLES:
-                self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
-                continue
-
-            if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
-                self.log.debug(
-                    'Skipping custom metric %s for database %s, check instance configured for database %s',
-                    cfg['name'],
-                    cfg.get('database'),
-                    self.instance.get('database'),
-                )
-                continue
-
-            if db_table == DEFAULT_PERFORMANCE_TABLE:
-                user_type = cfg.get('type')
-                if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-                sql_type = None
-                try:
-                    if user_type is None:
-                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
-                except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
-                    continue
-
-                metrics_to_collect.append(
-                    self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
-                    )
-                )
-
-            else:
-                for column in cfg['columns']:
-                    metrics_to_collect.append(
-                        self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
-                        )
-                    )
+        # for cfg in custom_metrics:
+        #     sql_type = None
+        #     base_name = None
+        #
+        #     custom_tags = tags + cfg.get('tags', [])
+        #     cfg['tags'] = custom_tags
+        #
+        #     db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
+        #     if db_table not in VALID_TABLES:
+        #         self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
+        #         continue
+        #
+        #     if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
+        #         self.log.debug(
+        #             'Skipping custom metric %s for database %s, check instance configured for database %s',
+        #             cfg['name'],
+        #             cfg.get('database'),
+        #             self.instance.get('database'),
+        #         )
+        #         continue
+        #
+        #     if db_table == DEFAULT_PERFORMANCE_TABLE:
+        #         user_type = cfg.get('type')
+        #         if user_type is not None and user_type not in VALID_METRIC_TYPES:
+        #             self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
+        #         sql_type = None
+        #         try:
+        #             if user_type is None:
+        #                 sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+        #         except Exception:
+        #             self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
+        #             continue
+        #
+        #         metrics_to_collect.append(
+        #             self.typed_metric(
+        #                 cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+        #             )
+        #         )
+        #
+        #     else:
+        #         for column in cfg['columns']:
+        #             metrics_to_collect.append(
+        #                 self.typed_metric(
+        #                     cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+        #                 )
+        #             )
 
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)

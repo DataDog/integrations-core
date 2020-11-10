@@ -74,6 +74,18 @@ instances:
     #
     # include_task_scheduler_metrics: false
 
+    ## @param include_db_fragmentation_metrics - boolean - optional - default: false
+    ## Include database fragmentation metrics.
+    #
+    # include_db_fragmentation_metrics: false
+
+    ## @param object_name - string - optional
+    ## Fragmentation metrics will normally emit metrics for all objects within a database.
+    ## This option allows you to specify an object name to query for in fragmentation metrics.
+    ## Note that each object name is unique to each database.
+    #
+    # object_name: <OBJECT_NAME>
+
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
