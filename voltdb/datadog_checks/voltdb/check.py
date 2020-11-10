@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import pkg_resources
 from typing import Any, List, cast
 
 from datadog_checks.base import AgentCheck
@@ -10,6 +11,8 @@ from datadog_checks.base.utils.db import QueryManager, Query
 from . import queries
 from .config import Config
 from .types import Instance
+
+BASE_PARSED_VERSION = pkg_resources.get_distribution("datadog-checks-base").parsed_version
 
 
 class VoltDBCheck(AgentCheck):
@@ -24,24 +27,28 @@ class VoltDBCheck(AgentCheck):
             password = self._config.auth._password
             self.register_secret(password)
 
+        manager_queries = [
+            queries.CPUMetrics,
+            queries.MemoryMetrics,
+            queries.SnapshotStatusMetrics,
+            queries.CommandLogMetrics,
+            queries.ProcedureMetrics,
+            queries.LatencyMetrics,
+            queries.StatementMetrics,
+            queries.GCMetrics,
+            queries.IOStatsMetrics,
+            queries.TableMetrics,
+            queries.IndexMetrics,
+        ]
+
+        if BASE_PARSED_VERSION < pkg_resources.parse_version('15.0.0'):
+            # On Agent < 7.24.0 we must to pass `Query` objects instead of dicts.
+            manager_queries = [Query(query) for query in manager_queries]
+
         self._query_manager = QueryManager(
             self,
             self._execute_query_raw,
-            queries=[
-                # NOTE: This only works on Agent < 7.24.0.
-                # On Agent 7.24.0+, wrapping around `Query` is done automatically.
-                Query(queries.CPUMetrics),
-                Query(queries.MemoryMetrics),
-                Query(queries.SnapshotStatusMetrics),
-                Query(queries.CommandLogMetrics),
-                Query(queries.ProcedureMetrics),
-                Query(queries.LatencyMetrics),
-                Query(queries.StatementMetrics),
-                Query(queries.GCMetrics),
-                Query(queries.IOStatsMetrics),
-                Query(queries.TableMetrics),
-                Query(queries.IndexMetrics),
-            ],
+            queries=manager_queries,
             tags=self._config.tags,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
