@@ -146,5 +146,7 @@ def test_include_table_custom(aggregator, instance):
     check.check(instance)
 
     aggregator.assert_metric(
-        'vertica.table.test_custom', metric_type=0, tags=['db:datadog', 'foo:bar', 'test:vertica', 'table_name:datadog']
+        'vertica.table.test_custom',
+        metric_type=aggregator.GAUGE,
+        tags=['db:datadog', 'foo:bar', 'test:vertica', 'table_name:datadog'],
     )
