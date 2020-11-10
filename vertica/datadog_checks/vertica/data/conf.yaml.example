@@ -33,10 +33,11 @@ instances:
     #
     port: 5433
 
-    ## @param include_tables - list of strings - required
-    ## The tables to include for metric collection.
+    ## @param metric_groups - list of strings - required
+    ## Enable metric groups for metric collection. Metric groups are based on Vertica tables. 
+    ## By default all metric groups are collected.
     #
-    include_tables:
+    metric_groups:
       - licenses
       - license_audits
       - system
@@ -51,11 +52,6 @@ instances:
       - resource_usage
       - version
       - custom
-
-    ## @param exclude_tables - list of strings - optional
-    ## The tables to exclude for metric collection.
-    #
-    # exclude_tables: []
 
     ## @param username - string - required
     ## The database user to authenticate as.

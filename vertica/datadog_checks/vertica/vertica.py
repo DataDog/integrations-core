@@ -92,7 +92,7 @@ class VerticaCheck(AgentCheck):
         # Cache database results for re-use among disparate functions
         self._view = defaultdict(list)
 
-        self._tables = {
+        self._metric_groups = {
             "licenses": self.query_licenses,
             "license_audits": self.query_license_audits,
             "system": self.query_system,
@@ -109,19 +109,19 @@ class VerticaCheck(AgentCheck):
             "custom": self.query_custom,
         }
 
-        include_tables = self.instance.get("include_tables") or list(self._tables)
-        exclude_tables = self.instance.get("exclude_tables") or list()
-        desired_tables = set(include_tables) - set(exclude_tables)
+        include_groups = self.instance.get("metric_groups", [])
 
         # License query needs to be run before getting system
-        if 'system' in desired_tables:
-            desired_tables.add('licenses')
+        if 'system' in include_groups and 'licenses' not in include_groups:
+            include_groups.insert(0, 'licenses')
 
-        self._desired_tables = []
+        self._desired_groups = []
 
-        for table_name in self._tables:
-            if table_name in desired_tables:
-                self._desired_tables.append(table_name)
+        for group in include_groups:
+            if group in self._metric_groups:
+                self._desired_groups.append(group)
+            else:
+                self.log.debug("Metric group name `%s` is not valid, ignoring metric group", group)
 
     def _get_default_client_lib_log_level(self):
         if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
@@ -142,8 +142,8 @@ class VerticaCheck(AgentCheck):
 
         # The order of queries is important as some results are cached for later re-use
         try:
-            for key in self._desired_tables:
-                func = self._tables.get(key)
+            for key in self._desired_groups:
+                func = self._metric_groups.get(key)
                 func()
 
         finally:

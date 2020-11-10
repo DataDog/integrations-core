@@ -25,6 +25,22 @@ def test_check_e2e(dd_agent_check, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, datadog_agent, instance):
+    instance['metric_groups'] = [
+        'licenses',
+        'license_audits',
+        'system',
+        'nodes',
+        'projections',
+        'projection_storage',
+        'storage_containers',
+        'host_resources',
+        'query_metrics',
+        'resource_pool_status',
+        'disk_storage',
+        'resource_usage',
+        'version',
+        'custom',
+    ]
     check = VerticaCheck('vertica', {}, [instance])
     check.check_id = 'test:123'
     check.check(instance)
@@ -71,6 +87,7 @@ def test_check_connection_load_balance(instance):
 
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance):
+    instance['metric_groups'] = ['custom']
     instance['custom_queries'] = [
         {
             'tags': ['test:vertica'],
@@ -88,8 +105,23 @@ def test_custom_queries(aggregator, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_include_all_tables(aggregator, instance):
-    instance['include_tables'] = []
+def test_include_all_metric_groups(aggregator, instance):
+    instance['metric_groups'] = [
+        'licenses',
+        'license_audits',
+        'system',
+        'nodes',
+        'projections',
+        'projection_storage',
+        'storage_containers',
+        'host_resources',
+        'query_metrics',
+        'resource_pool_status',
+        'disk_storage',
+        'resource_usage',
+        'version',
+        'custom',
+    ]
 
     check = VerticaCheck('vertica', {}, [instance])
     check.check(instance)
@@ -108,9 +140,8 @@ def test_include_all_tables(aggregator, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_include_system_tables(aggregator, instance):
-    instance['include_tables'] = ['system']
-    instance['exclude_tables'] = ['licenses']
+def test_include_system_metric_group(aggregator, instance):
+    instance['metric_groups'] = ['system']
 
     check = VerticaCheck('vertica', {}, [instance])
     check.check(instance)
@@ -119,19 +150,7 @@ def test_include_system_tables(aggregator, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_include_exclude_tables(aggregator, instance):
-    instance['include_tables'] = ['licenses']
-    instance['exclude_tables'] = ['system']
-
-    check = VerticaCheck('vertica', {}, [instance])
-    check.check(instance)
-
-    aggregator.assert_metric('vertica.license.expiration', metric_type=aggregator.GAUGE)
-    aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.usefixtures('dd_environment')
-def test_include_table_custom(aggregator, instance):
+def test_include_custom_metric_group(aggregator, instance):
     instance['custom_queries'] = [
         {
             'tags': ['test:vertica'],
@@ -139,8 +158,7 @@ def test_include_table_custom(aggregator, instance):
             'columns': [{'name': 'table.test_custom', 'type': 'gauge'}, {'name': 'table_name', 'type': 'tag'}],
         }
     ]
-    instance['include_tables'] = ['custom']
-    instance['exclude_tables'] = []
+    instance['metric_groups'] = ['custom']
 
     check = VerticaCheck('vertica', {}, [instance])
     check.check(instance)

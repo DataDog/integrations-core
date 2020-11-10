@@ -32,9 +32,11 @@ files:
             value:
               type: integer
               example: 5433
-          - name: include_tables
+          - name: metric_groups
             required: true
-            description: The tables to include for metric collection.
+            description: |
+              Enable metric groups for metric collection. Metric groups are based on Vertica tables. 
+              By default all metric groups are collected.
             value: 
               type: array
               items:
@@ -54,13 +56,6 @@ files:
                 - resource_usage
                 - version
                 - custom
-          - name: exclude_tables
-            required: false
-            description: The tables to exclude for metric collection.
-            value:
-              type: array
-              items: 
-                type: string
           - name: username
             required: true
             description: The database user to authenticate as.
