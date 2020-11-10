@@ -102,9 +102,9 @@ class HarborCheck(AgentCheck):
         if read_only_status is not None:
             self.gauge('harbor.registry.read_only', int(read_only_status), tags=base_tags)
 
-    def check(self, instance):
-        harbor_url = instance["url"]
-        tags = instance.get("tags", [])
+    def check(self, _):
+        harbor_url = self.instance["url"]
+        tags = self.instance.get("tags", [])
         try:
             api = HarborAPI(harbor_url, self.http)
             self._check_health(api, tags)

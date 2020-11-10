@@ -148,7 +148,7 @@ class PgBouncer(AgentCheck):
             return self.database_url.replace(parsed_url.password, '******')
         return self.database_url
 
-    def check(self, instance):
+    def check(self, _):
         try:
             db = self._get_connection()
             self._collect_stats(db)

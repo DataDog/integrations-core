@@ -63,7 +63,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self._zk_client = KazooClient(hosts=self._zk_hosts_ports, timeout=int(init_config.get('zk_timeout', 5)))
             self._zk_client.start()
 
-    def check(self, instance):
+    def check(self, _):
         """The main entrypoint of the check."""
         self.log.debug("Running legacy Kafka Consumer check.")
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
@@ -90,7 +90,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # Support for storing offsets in Kafka not available until Kafka 0.8.2. Also, for legacy reasons, this check
         # only fetches consumer offsets from Kafka if Zookeeper is omitted or kafka_consumer_offsets is True.
         if self._kafka_client.config.get('api_version') >= (0, 8, 2) and is_affirmative(
-            instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
+            self.instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
                 self._get_kafka_consumer_offsets(contexts_limit)

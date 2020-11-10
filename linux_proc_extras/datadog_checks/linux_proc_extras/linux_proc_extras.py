@@ -35,7 +35,7 @@ class MoreUnixCheck(AgentCheck):
         self.tags = self.instance.get('tags', [])
         self.set_paths()
 
-    def check(self, instance):
+    def check(self, _):
         self.get_inode_info()
         self.get_stat_info()
         self.get_entropy_info()
