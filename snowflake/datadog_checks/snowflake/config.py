@@ -42,9 +42,6 @@ class Config(object):
         token = instance.get('token', None)
         client_keep_alive = instance.get('client_session_keep_alive', False)
 
-        # min_collection_interval defaults to 60 minutes
-        min_collection = instance.get('min_collection_interval', 3600)
-
         metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
 
         if account is None:
