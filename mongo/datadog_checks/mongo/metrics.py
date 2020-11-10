@@ -26,6 +26,7 @@ BASE_METRICS = {
     "connection_pool.numAScopedConnections": GAUGE,
     "connection_pool.totalCreated": RATE,
     "connection_pool.totalAvailable": GAUGE,
+    "connection_pool.totalInUse": GAUGE,
     "connection_pool.totalRefreshing": GAUGE,
     "cursors.timedOut": GAUGE,  # < 2.6
     "cursors.totalOpen": GAUGE,  # < 2.6
