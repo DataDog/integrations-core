@@ -256,6 +256,33 @@
             "syncSourceId": 0,
             "infoMessage": "",
             "configVersion": 4
+        },
+        {
+            "_id": 4,
+            "name": "mongo-mongodb-sharded-shard0-data-3.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "health": 1.0,
+            "state": 5,
+            "stateStr": "STARTUP2",
+            "uptime": 4822185,
+            "optimeDate": {
+                "$date": 0
+            },
+            "optimeDurableDate": {
+                "$date": 0
+            },
+            "lastHeartbeat": {
+                "$date": 0
+            },
+            "lastHeartbeatRecv": {
+                "$date": 0
+            },
+            "pingMs": 0,
+            "lastHeartbeatMessage": "",
+            "syncingTo": "mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "syncSourceHost": "mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "syncSourceId": 0,
+            "infoMessage": "",
+            "configVersion": 4
         }
     ],
     "ok": 1.0,
