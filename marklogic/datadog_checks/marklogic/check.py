@@ -139,9 +139,9 @@ class MarklogicCheck(AgentCheck):
         """
         for res_type in self.resources_to_monitor.keys():
             for res in self.resources_to_monitor[res_type]:
-                tags = ['{}_name:{}'.format(res_type, res['name'])] + self.config.tags
+                tags = ['{}:{}'.format(RESOURCE_TYPES[res_type]['tag_name'], res['name'])] + self.config.tags
                 if res.get('group'):
-                    tags.append('group_name:{}'.format(res['group']))
+                    tags.append('{}:{}'.format(RESOURCE_TYPES['group']['tag_name'], res['group']))
 
                 if RESOURCE_METRICS_AVAILABLE[res_type]['status']:
                     self._collect_resource_status_metrics(res_type, res['uri'], tags)

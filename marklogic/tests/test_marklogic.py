@@ -37,7 +37,7 @@ def _assert_metrics(aggregator, tags):
     for metric in FOREST_STATUS_TREE_CACHE_METRICS:
         aggregator.assert_metric(metric, tags=tags, at_least=0)
 
-    storage_tag_prefixes = ['storage_path', 'host_name', 'host_id']
+    storage_tag_prefixes = ['storage_path', 'marklogic_host_name', 'marklogic_host_id']
     for metric in STORAGE_HOST_METRICS:
         for tag in tags:
             aggregator.assert_metric_has_tag(metric, tag)
