@@ -1,3 +1,7 @@
+-- Backup master
+BACKUP DATABASE master TO DISK = N'/test' WITH FORMAT,
+  MEDIANAME = 'master',
+  MEDIADESCRIPTION = 'Backup master';
 
 --create sample database
 USE [master]

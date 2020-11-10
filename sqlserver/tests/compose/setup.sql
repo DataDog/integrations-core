@@ -1,3 +1,8 @@
+-- Backup master
+BACKUP DATABASE master TO DISK = N'/test' WITH FORMAT,
+  MEDIANAME = 'master',
+  MEDIADESCRIPTION = 'Backup master';
+
 -- AdventureWorks databases
 --
 RESTORE DATABASE [AdventureWorks2017] FROM  DISK = N'/var/opt/mssql/backup/AdventureWorks2017.bak' WITH
