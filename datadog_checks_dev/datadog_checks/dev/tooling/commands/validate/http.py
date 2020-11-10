@@ -46,13 +46,13 @@ def validate_config_http(file, check):
 
     if not has_instance_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `instances/http` but {check} uses http wrapper"
+            f"Detected {check} is missing `instances/http` or `instances/openmetrics` template in spec.yaml"
         )
         has_failed = True
 
     if not has_init_config_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `init_config/http` but {check} uses http wrapper"
+            f"Detected {check} is missing `init_config/http` or `init_config/openmetrics` template in spec.yaml"
         )
         has_failed = True
 
@@ -70,8 +70,8 @@ def validate_use_http_wrapper_file(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
-            if 'self.http' in line or 'OpenMetricsBaseCheck':
-                file_uses_http_wrapper = True
+            if 'self.http' in line or 'OpenMetricsBaseCheck' in line:
+                return True, has_failed
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
                 if http_func in line:
