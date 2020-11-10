@@ -1,0 +1,42 @@
+name: External DNS
+
+files:
+  - name: external_dns.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - template: instances/openmetrics
+            overrides:
+              prometheus_url.value.example: "http://localhost:7979/metrics"
+
+  - name: auto_conf.yaml
+    options:
+      - template: ad_identifiers
+        overrides:
+          value.example:
+            - external-dns
+      - template: init_config
+        options: []
+      - template: instances
+        options:
+          - name: prometheus_url
+            required: true
+            description: The URL where your application metrics are exposed by Prometheus.
+            value:
+              example: "http://%%host%%:7979/metrics"
+              type: string
+          - name: tags
+            description: |
+              List of tags to attach to every metric, event and service check emitted by this integration.
+
+              Learn more about tagging: https://docs.datadoghq.com/tagging/
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "externaldns-pod:%%host%%"
+            enabled: true
