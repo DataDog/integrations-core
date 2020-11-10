@@ -88,7 +88,7 @@ def test_custom_queries(aggregator, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_include_all_tables(aggregator, datadog_agent, instance):
+def test_include_all_tables(aggregator, instance):
     instance['include_tables'] = []
 
     check = VerticaCheck('vertica', {}, [instance])
@@ -126,7 +126,7 @@ def test_include_exclude_tables(aggregator, instance):
     check = VerticaCheck('vertica', {}, [instance])
     check.check(instance)
 
-    aggregator.assert_metric(name='vertica.license.expiration', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('vertica.license.expiration', metric_type=aggregator.GAUGE)
     aggregator.assert_all_metrics_covered()
 
 
