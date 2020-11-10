@@ -13,10 +13,11 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
+from .common import CHECK_NAME, LOCAL_SERVER, assert_metrics
+from .utils import windows_ci
+
 # mark the whole module
 pytestmark = pytest.mark.unit
-
-CHECK_NAME = 'sqlserver'
 
 
 def test_get_cursor(instance_sql2017):
@@ -61,3 +62,23 @@ def test_set_default_driver_conf():
     with EnvVars({'ODBCSYSINI': 'ABC'}):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
+
+
+@windows_ci
+def test_check_local(aggregator, init_config, instance_sql2017):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
+    sqlserver_check.check(instance_sql2017)
+    expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
+    assert_metrics(aggregator, expected_tags)
+
+
+@windows_ci
+@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
+def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovider):
+    instance = copy.deepcopy(instance_sql2017)
+    instance['adoprovider'] = adoprovider
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
+    sqlserver_check.check(instance)
+    expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
+    assert_metrics(aggregator, expected_tags)

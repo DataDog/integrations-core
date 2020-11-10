@@ -29,14 +29,14 @@ LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
-CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
+CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
 EXPECTED_METRICS = [
     m[0] for m in SQLServer.INSTANCE_METRICS + SQLServer.TASK_SCHEDULER_METRICS + SQLServer.DATABASE_METRICS
 ] + CUSTOM_METRICS
 
-EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_PRIMARY]
-
-EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS_PRIMARY]
+EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_COMMON = [m[0] for m in SQLServer.AO_METRICS]
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -164,3 +164,15 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
+
+
+def assert_metrics(aggregator, expected_tags):
+    """
+    Boilerplate asserting all the expected metrics and service checks.
+    Make sure ALL custom metric is tagged by database.
+    """
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname)
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
