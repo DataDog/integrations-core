@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 2.0.3 / 2020-11-09
+
+* [Fixed] Fix debug typo for custom queries. See [#7969](https://github.com/DataDog/integrations-core/pull/7969).
+
 ## 2.0.2 / 2020-11-06
 
 * [Fixed] Fix replicaset identification with old configuration. See [#7964](https://github.com/DataDog/integrations-core/pull/7964).

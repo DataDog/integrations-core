@@ -218,7 +218,7 @@ class MongoDb(AgentCheck):
                 self.log.debug(
                     "{} custom queries defined in the configuration won't be run because the mongod node is a "
                     "secondary and the queries don't specify 'run_on_secondary: true' in the configuration. "
-                    "Custom queries are only run on mongos, primaries on standalone by default to prevent "
+                    "Custom queries are only run on mongos, primaries, or standalone by default to prevent "
                     "duplicated information."
                 )
 

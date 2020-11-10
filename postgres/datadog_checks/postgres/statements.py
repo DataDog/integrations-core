@@ -167,7 +167,7 @@ class PostgresStatementMetrics(object):
                     continue
                 value = row[column]
                 if column == 'query':
-                    value = normalize_query_tag(value)
+                    value = normalize_query_tag(normalized_query)
                 tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
 
             for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():

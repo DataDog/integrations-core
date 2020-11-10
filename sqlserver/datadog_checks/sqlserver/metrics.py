@@ -522,6 +522,10 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# sys.dm_hadr_availability_group_states
+# Returns a row for each Always On availability group that possesses an availability replica on the local instance of
+# SQL Server. Each row displays the states that define the health of a given availability group.
+#
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
 class SqlAvailabilityGroups(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_availability_group_states'
@@ -561,6 +565,13 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# sys.availability_replicas (Transact-SQL)
+#
+# Returns a row for each of the availability replicas that belong to any Always On availability group in the WSFC
+# failover cluster. If the local server instance is unable to talk to the WSFC failover cluster, for example because
+# the cluster is down or quorum has been lost, only rows for local availability replicas are returned.
+# These rows will contain only the columns of data that are cached locally in metadata.
+#
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-replicas-transact-sql?view=sql-server-ver15
 class SqlAvailabilityReplicas(BaseSqlServerMetric):
     TABLE = 'sys.availability_replicas'

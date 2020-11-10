@@ -40,13 +40,13 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
         - `ExperimentalFeatures__Enabled`: `true`
         - `ExperimentalFeatures__EnableMetrics`: `true`
 
-1. Configure the **Edge Hub** runtime module as follows:
+2. Configure the **Edge Hub** runtime module as follows:
     - Image version must be `1.0.10` or above.
     - Under "Environment Variables", enable experimental metrics by adding these environment variables (note the double underscores):
         - `ExperimentalFeatures__Enabled`: `true`
         - `ExperimentalFeatures__EnableMetrics`: `true`
 
-1. Install and configure the Datadog Agent as a **custom module**:
+3. Install and configure the Datadog Agent as a **custom module**:
     - Set the module name. For example: `datadog-agent`.
     - Set the Agent image URI. For example: `datadog/agent:7`.
     - Under "Environment Variables", configure your `DD_API_KEY`. You may also set extra Agent configuration here (see [Agent Environment Variables][4]).
@@ -75,18 +75,18 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
     - Save the Datadog Agent custom module.
 
-1. Save and deploy changes to your device configuration.
+4. Save and deploy changes to your device configuration.
 
 #### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it by configuring your Datadog Agent custom module:
-  - Under "Environment Variables", set the `DD_LOGS_ENABLED` environment variable:
+    - Under "Environment Variables", set the `DD_LOGS_ENABLED` environment variable:
 
-    ```yaml
-    DD_LOGS_ENABLED: true
-    ```
+        ```yaml
+        DD_LOGS_ENABLED: true
+        ```
 
-1. Configure the **Edge Agent** and **Edge Hub** modules: under "Create Options", add the following label:
+2. Configure the **Edge Agent** and **Edge Hub** modules: under "Create Options", add the following label:
 
     ```json
     "Labels": {
@@ -99,7 +99,7 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
     Repeat this operation for any custom modules you'd like to collect logs for.
 
-1. Save and deploy changes to your device configuration.
+3. Save and deploy changes to your device configuration.
 
 ### Validation
 

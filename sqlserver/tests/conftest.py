@@ -88,13 +88,13 @@ def dd_environment():
     if pyodbc is None:
         raise Exception("pyodbc is not installed!")
 
-    def sqlserver():
+    def sqlserver_can_connect():
         conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
         pyodbc.connect(conn, timeout=30)
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
     conditions = [
-        WaitFor(sqlserver, wait=3, attempts=10),
+        WaitFor(sqlserver_can_connect, wait=3, attempts=10),
     ]
 
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
