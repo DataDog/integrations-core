@@ -692,10 +692,23 @@ class AgentCheck(object):
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
+        """Returns the value previously stored with `write_persistent_cache` for the same `key`.
+
+        - **key** (_str_) - The key to retrieve
+        """
         return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
 
     def write_persistent_cache(self, key, value):
         # type: (str, str) -> None
+        """Stores `value` in a persistent cache for this check instance.
+        The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
+            - `%ProgramData%\\Datadog\\run` on Windows.
+            - `/opt/datadog-agent/run` everywhere else.
+        The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
+
+        - **key** (_str_) - Identifier used to build the filename
+        - **value** (_str_) - Value to store
+        """
         datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
 
     def set_external_tags(self, external_tags):
