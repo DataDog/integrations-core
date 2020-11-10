@@ -70,7 +70,7 @@ def validate_use_http_wrapper_file(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
-            if 'self.http' in line:
+            if 'self.http' in line or 'OpenMetricsBaseCheck':
                 file_uses_http_wrapper = True
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
@@ -93,9 +93,10 @@ def validate_use_http_wrapper(check):
     has_failed = False
     check_uses_http_wrapper = False
     for file in get_check_files(check, include_tests=False):
-        file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
-        has_failed = has_failed or file_uses_request_lib
-        check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
+        if file.endswith('.py'):
+            file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
+            has_failed = has_failed or file_uses_request_lib
+            check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
 
     if has_failed:
         abort()
