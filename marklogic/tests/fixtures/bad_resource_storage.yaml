@@ -1,0 +1,35 @@
+forest-storage-list:
+    id: '4259429487027269237'
+    name: Documents
+    meta:
+      uri: "/manage/v2/forests?forest-id=Documents&view=storage"
+      current-time: '2020-11-05T11:43:28.611393Z'
+      elapsed-time:
+        units: sec
+        value: 0.008234
+    relations:
+      relation-group:
+      - typeref: databases
+        relation-count:
+          units: quantity
+          value: 1
+        relation:
+        - uriref: "/manage/v2/databases/Documents?view=status"
+          idref: '14041280532792470812'
+          nameref: Documents
+      - typeref: hosts
+        relation-count:
+          units: quantity
+          value: 1
+        relation:
+        - uriref: "/manage/v2/hosts/7a380b041d1e?view=status"
+          idref: '16250599935733697082'
+          nameref: 7a380b041d1e
+    storage-list-items:
+      storage-host:
+      - relation-id: '16250599935733697082'
+    related-views:
+      related-view:
+      - view-type: list
+        view-name: default
+        view-uri: "/manage/v2/forests?forest-id=Documents"

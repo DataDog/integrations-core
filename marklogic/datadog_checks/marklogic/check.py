@@ -143,14 +143,23 @@ class MarklogicCheck(AgentCheck):
                 if res.get('group'):
                     tags.append('{}:{}'.format(RESOURCE_TYPES['group']['tag_name'], res['group']))
 
-                if RESOURCE_METRICS_AVAILABLE[res_type]['status']:
-                    self._collect_resource_status_metrics(res_type, res['uri'], tags)
+                try:
+                    if RESOURCE_METRICS_AVAILABLE[res_type]['status']:
+                        self._collect_resource_status_metrics(res_type, res['uri'], tags)
+                except Exception as e:
+                    self.log.warning('Status information unavailable for resource %s: %s', res, str(e))
 
-                if RESOURCE_METRICS_AVAILABLE[res_type]['storage']:
-                    self._collect_resource_storage_metrics(res_type, res['name'], res.get('group'), tags)
+                try:
+                    if RESOURCE_METRICS_AVAILABLE[res_type]['storage']:
+                        self._collect_resource_storage_metrics(res_type, res['name'], res.get('group'), tags)
+                except Exception as e:
+                    self.log.warning('Storage information unavailable for resource %s: %s', res, str(e))
 
-                if RESOURCE_METRICS_AVAILABLE[res_type]['requests']:
-                    self._collect_resource_request_metrics(res_type, res['name'], res.get('group'), tags)
+                try:
+                    if RESOURCE_METRICS_AVAILABLE[res_type]['requests']:
+                        self._collect_resource_request_metrics(res_type, res['name'], res.get('group'), tags)
+                except Exception as e:
+                    self.log.warning('Requests information unavailable for resource %s: %s', res, str(e))
 
     def _collect_resource_status_metrics(self, resource_type, uri, tags):
         # type: (str, str, List[str]) -> None

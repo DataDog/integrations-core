@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from typing import Any, Dict, List
 
 import mock
@@ -137,3 +138,27 @@ def test_collect_host_metrics(mock_requests, mock_status, aggregator):
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+@mock.patch(
+    'datadog_checks.marklogic.api.MarkLogicApi.http_get', return_value=read_fixture_file('bad_resource_storage.yaml')
+)
+def test_bad_resource_storage(mock_requests, aggregator, caplog):
+    # type: (Any, Any, AggregatorStub) -> None
+    caplog.at_level(logging.WARNING)
+    check = MarklogicCheck('marklogic', {}, [INSTANCE_FILTERS])
+
+    check.resources_to_monitor = {
+        'forest': [
+            {'id': '4259429487027269237', 'type': 'forest', 'name': 'Documents', 'uri': '/forests/Documents'},
+        ],
+        'database': [],
+        'host': [],
+        'server': [],
+    }
+
+    check.collect_per_resource_metrics()
+
+    # This can happen when the database owning this forest is disabled
+    assert "Status information unavailable for resource {" in caplog.text
+    assert "Storage information unavailable for resource {" in caplog.text
