@@ -114,7 +114,7 @@ class Nginx(AgentCheck):
 
                     self._set_version_metadata(version_plus)
                 except Exception as e:
-                    self.log.warning("Couldn't submit nginx version: %s", e)
+                    self.log.debug("Couldn't submit nginx version: %s", e)
 
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
