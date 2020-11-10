@@ -79,6 +79,84 @@ metrics:
 !!! tip
     `sysobjectid` can also be a wildcard pattern to match a sub-tree of devices, eg `1.3.6.1.131.12.4.*`.
 
+### Generate a profile file from a collection of MIBs
+
+You can use `ddev` to create a profile from a list of mibs.
+
+```console
+$  ddev meta snmp generate-profile-from-mibs --help
+```
+
+This script requires a list of ASN1 MIB files as input argument, and copies to the clipboard a list of metrics that can be used to create a profile.
+
+#### Options
+`-f, --filter-path-oids` is an option to provide the path to a yaml file to be used as a filter to exclude some nodes within a MIB.
+For example:
+```yaml
+RFC1213-MIB:
+- system
+- interfaces
+- ip
+CISCO-SYSLOG-MIB: []
+SNMP-FRAMEWORK-MIB:
+- snmpEngine
+```
+Note that each `MIB:node_name` correspond to exactly one and only one OID. Well, not always. Some MIBs report legacy nodes that are overwritten. 
+Current solution is to edit the MIB removing legacy values manually before loading them with this profile generator.
+If a MIB is fully supported it can be omitted from the filter, as MIBs not found in a filter will be fully loaded. If a MIB is fully *not* supported 
+it can be listed with an empty node list, as `CISCO-SYSLOG-MIB` in the example.
+
+`-a, --aliases_metric_tag_path` is an option to provide the path to a yaml file containing a list of aliases to be used as metric tags for tables, in
+the following format:
+```yaml
+aliases:
+- from:
+    MIB: ENTITY-MIB
+    name: entPhysicalIndex
+  to:
+    MIB: ENTITY-MIB
+    name: entPhysicalName
+```
+MIBs tables most of the time define one or more indexes, as columns within the same table, or columns from a different table and even a different MIB. Index 
+value can be used to tag table's metrics. This is defined in the `INDEX` field in `row` nodes. 
+As an example, `entPhysicalContainsTable` in `ENTITY-MIB` is as follows:
+```txt
+entPhysicalContainsEntry OBJECT-TYPE
+SYNTAX      EntPhysicalContainsEntry
+MAX-ACCESS  not-accessible
+STATUS      current
+DESCRIPTION
+        "A single container/'containee' relationship."
+INDEX       { entPhysicalIndex, entPhysicalChildIndex }  <== this is the index definition
+::= { entPhysicalContainsTable 1 }
+```
+or its json dump, where `INDEX` is replaced by `indices`
+```json
+"entPhysicalContainsEntry": {
+    "name": "entPhysicalContainsEntry",
+    "oid": "1.3.6.1.2.1.47.1.3.3.1",
+    "nodetype": "row",
+    "class": "objecttype",
+    "maxaccess": "not-accessible",
+    "indices": [    
+      {
+        "module": "ENTITY-MIB",
+        "object": "entPhysicalIndex",
+        "implied": 0
+      },
+      {
+        "module": "ENTITY-MIB",
+        "object": "entPhysicalChildIndex",
+        "implied": 0
+      }
+    ],
+    "status": "current",
+    "description": "A single container/'containee' relationship."
+  },
+```
+Sometimes indexes could be replaced by another mib symbol that is more human friendly - we might prefer to see the interface name vs its numerical table index. 
+This can be achieved using metric_tag_aliases
+
 ### Add unit tests
 
 Add a unit test in `test_profiles.py` to verify that the metric is successfully collected by the integration when the profile is enabled. (These unit tests are mostly used to prevent regressions and will help with maintenance.)
