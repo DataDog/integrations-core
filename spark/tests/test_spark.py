@@ -11,6 +11,7 @@ import mock
 import pytest
 import requests
 import urllib3
+from packaging import version
 from requests import RequestException
 from six import iteritems
 from six.moves import BaseHTTPServer
@@ -19,7 +20,7 @@ from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.spark import SparkCheck
 
-from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE
+from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE, SPARK_VERSION
 
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
@@ -189,9 +190,14 @@ def yarn_requests_get_mock(url, *args, **kwargs):
             return MockedResponse(body, 200)
 
     elif arg_url == YARN_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        if SPARK_VERSION >= version.parse('3.0.0'):
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics_3-0-0'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
+        else:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
 
     elif arg_url == YARN_SPARK_EXECUTOR_URL:
         with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
@@ -586,6 +592,28 @@ SPARK_STAGE_COMPLETE_METRIC_TAGS = [
     'status:complete',
     'stage_id:0',
 ]
+
+if SPARK_VERSION >= version.parse('3.0.0'):
+    SPARK_STAGE_RUNNING_METRIC_VALUES.update({})
+
+    SPARK_STAGE_COMPLETE_METRIC_VALUES.update(
+        {
+            'spark.stage.executor_cpu_time': 0,
+            'spark.stage.executor_deserialize_cpu_time': 0,
+            'spark.stage.executor_deserialize_time': 0,
+            'spark.stage.jvm_gc_time': 0,
+            'spark.stage.peak_execution_memory': 0,
+            'spark.stage.result_serialization_time': 0,
+            'spark.stage.result_size': 0,
+            'spark.stage.shuffle_fetch_wait_time': 0,
+            'spark.stage.shuffle_local_blocks_fetched': 0,
+            'spark.stage.shuffle_local_bytes_read': 0,
+            'spark.stage.shuffle_remote_blocks_fetched': 0,
+            'spark.stage.shuffle_remote_bytes_read': 0,
+            'spark.stage.shuffle_remote_bytes_read_to_disk': 0,
+            'spark.stage.shuffle_write_time': 0,
+        }
+    )
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
