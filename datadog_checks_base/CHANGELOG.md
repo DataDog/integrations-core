@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.6.1 / 2020-11-10
+
+* [Fixed] Change DB utils behavior when a truncated row is found to only drop the row. See [#7983](https://github.com/DataDog/integrations-core/pull/7983).
+
 ## 15.6.0 / 2020-10-31
 
 * [Added] Sample the first value of monotonic counts for Open Metrics checks. See [#7904](https://github.com/DataDog/integrations-core/pull/7904).
