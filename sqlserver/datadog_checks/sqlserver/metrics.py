@@ -478,8 +478,10 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'msdb.dbo.backupset'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select count(backup_set_uuid) as backup_set_uuid_count, database_name " \
-                 "from {table} group by database_name".format(table=TABLE)
+    QUERY_BASE = (
+        "select count(backup_set_uuid) as backup_set_uuid_count, database_name "
+        "from {table} group by database_name".format(table=TABLE)
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -507,11 +509,13 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     TABLE = 'sys.dm_db_index_physical_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
 
-    QUERY_BASE = "SELECT DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, index_id, partition_number, " \
-                 "fragment_count, avg_fragment_size_in_pages, avg_fragmentation_in_percent " \
-                 "FROM {table} (NULL,NULL,NULL,NULL,NULL) " \
-                 "WHERE fragment_count is not NULL "\
-        .format(table=TABLE)
+    QUERY_BASE = (
+        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
+        "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
+        "avg_fragmentation_in_percent "
+        "from {table} (null,null,null,null,null) "
+        "where fragment_count is not null".format(table=TABLE)
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):

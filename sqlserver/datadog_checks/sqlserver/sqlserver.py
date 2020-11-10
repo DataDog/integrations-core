@@ -45,11 +45,11 @@ COUNTER_TYPE_QUERY = """select distinct cntr_type
                         where counter_name = ?;"""
 
 BASE_NAME_QUERY = (
-        """select distinct counter_name
+    """select distinct counter_name
        from sys.dm_os_performance_counters
        where (counter_name=? or counter_name=?
        or counter_name=?) and cntr_type=%s;"""
-        % PERF_LARGE_RAW_BASE
+    % PERF_LARGE_RAW_BASE
 )
 
 
@@ -140,16 +140,22 @@ class SQLServer(AgentCheck):
         ('sqlserver.database.files.size', 'sys.database_files', 'size'),
         ('sqlserver.database.files.state', 'sys.database_files', 'state'),
         ('sqlserver.database.state', 'sys.databases', 'state'),
-        ('sqlserver.database,is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
+        ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
         ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_uuid_count'),
     ]
 
     DATABASE_FRAGMENTATION_METRICS = [
-        ('sqlserver.database.avg_fragmentation_in_percent', 'sys.dm_db_index_physical_stats',
-         'avg_fragmentation_in_percent'),
+        (
+            'sqlserver.database.avg_fragmentation_in_percent',
+            'sys.dm_db_index_physical_stats',
+            'avg_fragmentation_in_percent',
+        ),
         ('sqlserver.database.fragment_count', 'sys.dm_db_index_physical_stats', 'fragment_count'),
-        ('sqlserver.database.avg_fragment_size_in_pages', 'sys.dm_db_index_physical_stats',
-         'avg_fragment_size_in_pages'),
+        (
+            'sqlserver.database.avg_fragment_size_in_pages',
+            'sys.dm_db_index_physical_stats',
+            'avg_fragment_size_in_pages',
+        ),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -274,9 +280,14 @@ class SQLServer(AgentCheck):
             db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
             object_name = self.instance.get('object_name', None)
             for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags,
-                       'object_name': object_name
-                       }
+                cfg = {
+                    'name': name,
+                    'table': table,
+                    'column': column,
+                    'instance_name': db_name,
+                    'tags': tags,
+                    'object_name': object_name,
+                }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
