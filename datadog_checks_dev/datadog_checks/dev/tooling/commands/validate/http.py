@@ -45,9 +45,7 @@ def validate_config_http(file, check):
                 has_init_config_http = True
 
     if not has_instance_http:
-        echo_failure(
-            f"Detected {check} is missing `instances/http` or `instances/openmetrics` template in spec.yaml"
-        )
+        echo_failure(f"Detected {check} is missing `instances/http` or `instances/openmetrics` template in spec.yaml")
         has_failed = True
 
     if not has_init_config_http:
