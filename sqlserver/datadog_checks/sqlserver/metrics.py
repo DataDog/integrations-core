@@ -473,6 +473,35 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
+class SqlDatabaseBackup(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'msdb.dbo.backupset'
+    DEFAULT_METRIC_TYPE = 'count'
+    QUERY_BASE = "select count(backup_set_uuid) as backup_set_uuid_count, database_name " \
+                 "from {table} group by database_name".format(table=TABLE)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        database_name = columns.index("database_name")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            if row[database_name] != self.instance:
+                continue
+
+            column_val = row[value_column_index]
+            metric_tags = [
+                'database:{}'.format(str(self.instance)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'
