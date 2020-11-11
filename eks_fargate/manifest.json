@@ -28,6 +28,9 @@
   "is_public": true,
   "integration_id": "eks-fargate",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
