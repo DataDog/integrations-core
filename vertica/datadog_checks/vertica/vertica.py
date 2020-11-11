@@ -128,7 +128,9 @@ class VerticaCheck(AgentCheck):
                     invalid_groups.append(group)
 
         if invalid_groups:
-            raise ConfigurationError(f"Invalid metric_groups found in vertica conf.yaml: {', '.join(invalid_groups)}")
+            raise ConfigurationError(
+                'Invalid metric_groups found in vertica conf.yaml: {}'.format(', '.join(invalid_groups))
+            )
 
     def _get_default_client_lib_log_level(self):
         if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
