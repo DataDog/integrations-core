@@ -213,15 +213,19 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_node_status_capacity_memory_bytes': 'node.memory_capacity',
                         'kube_node_status_capacity_pods': 'node.pods_capacity',
                         'kube_node_status_allocatable_nvidia_gpu_cards': 'node.gpu.cards_allocatable',
+                        'kube_node_status_allocatable': 'node.allocatable',
                         'kube_node_status_capacity_nvidia_gpu_cards': 'node.gpu.cards_capacity',
+                        'kube_node_status_capacity': 'node.capacity'
                         'kube_pod_container_status_terminated': 'container.terminated',
                         'kube_pod_container_status_waiting': 'container.waiting',
                         'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
                         'kube_persistentvolumeclaim_resource_requests_storage_bytes': 'persistentvolumeclaim.request_storage',  # noqa: E501
                         'kube_pod_container_resource_limits_cpu_cores': 'container.cpu_limit',
                         'kube_pod_container_resource_limits_memory_bytes': 'container.memory_limit',
+                        'kube_pod_container_resource_limits': 'container.limit',
                         'kube_pod_container_resource_requests_cpu_cores': 'container.cpu_requested',
                         'kube_pod_container_resource_requests_memory_bytes': 'container.memory_requested',
+                        'kube_pod_container_resource_requests': 'container.requested',
                         'kube_pod_container_status_ready': 'container.ready',
                         'kube_pod_container_status_restarts': 'container.restarts',  # up to kube-state-metrics 1.1.x
                         'kube_pod_container_status_restarts_total': 'container.restarts',  # noqa: E501, from kube-state-metrics 1.2.0
