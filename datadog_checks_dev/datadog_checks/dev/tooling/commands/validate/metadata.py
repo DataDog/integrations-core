@@ -190,7 +190,7 @@ VALID_UNIT_NAMES = {
     'volume',
     'milliwatt',
     'microwatt',
-    'nanowatt'
+    'nanowatt',
 }
 
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
