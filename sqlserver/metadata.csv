@@ -32,11 +32,11 @@ sqlserver.database.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 
 sqlserver.database.files.size,gauge,,kibibyte,,Current size of the database file,0,sql_server,database file size
 sqlserver.database.files.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
 sqlserver.database.active_transactions,gauge,,transaction,,Number of active transactions across all databases on the SQL Server instance.,0,sql_server,database trans active
-sqlserver.database.avg_fragment_size_in_pages,gauge,,,,"Average number of pages in one fragment in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,avg fragment size in pages
+sqlserver.database.avg_fragment_size_in_pages,gauge,,,,"The average number of pages in one fragment on the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,avg fragment size in pages
 sqlserver.database.avg_fragmentation_in_percent,gauge,,,,"Logical fragmentation for indexes, or extent fragmentation for heaps in the IN_ROW_DATA allocation unit.",0,sql_server,avg fragmentation percent
-sqlserver.database.backup_count,gauge,,,,"Total count of successful backups made for a database",0,sql_server,backup count
+sqlserver.database.backup_count,gauge,,,,"The total count of successful backups made for a database.",0,sql_server,backup count
 sqlserver.database.fragment_count,gauge,,,,"Number of fragments in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,fragment count
-sqlserver.database.is_sync_with_backup,gauge,,,,"Whether or not database is marked for replication synchronization with backup. 0 = Not marked for replication sync, 1 = Marked for replication sync.",0,sql_server,is sync with backup
+sqlserver.database.is_sync_with_backup,gauge,,,,"Whether or not the database is marked for replication synchronization with backup. 0 = Not marked for replication sync, 1 = Marked for replication sync.",0,sql_server,is sync with backup
 sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending
 sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total
 sqlserver.scheduler.current_tasks_count,gauge,,task,,Number of current tasks that are associated with this scheduler.,0,sql_server,task count

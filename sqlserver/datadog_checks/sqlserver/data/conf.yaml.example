@@ -80,9 +80,9 @@ instances:
     # include_db_fragmentation_metrics: false
 
     ## @param db_fragmentation_object_names - list of strings - optional
-    ## Fragmentation metrics will normally emit metrics for all objects within a database.
-    ## This option allows you to specify database object names to query for in fragmentation metrics.
-    ## Note that each object name is unique to each database.
+    ## Fragmentation metrics normally emit metrics for all objects within a database.
+    ## This option allows you to specify database object names to query for fragmentation metrics.
+    ## Note: Each object name is unique to each database.
     #
     # db_fragmentation_object_names: []
 
