@@ -96,7 +96,6 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg)
             return
 
-        metadata = {}
         try:
             metadata = request.json()
         except ValueError:
