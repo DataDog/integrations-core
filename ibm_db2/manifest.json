@@ -24,6 +24,9 @@
   "type": "check",
   "is_public": true,
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "IBM Db2 Overview": "assets/dashboards/overview.json"
