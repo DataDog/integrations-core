@@ -1,3 +1,4 @@
+
 --create sample database
 USE [master]
 GO
