@@ -1,0 +1,82 @@
+name: Go-Metro
+files:
+- name: go-metro.yaml
+  options:
+  - template: init_config
+    options:
+    - name: snaplen
+      description: should be >=104 (to accomodate for the largest possible TCP header)
+      required: true
+      value:
+        type: integer
+        example: 512
+    - name: idle_ttl
+      description: Time after which an idle flow (no traffic received) is flushed.
+      required: true
+      value:
+        type: integer
+        example: 300
+    - name: exp_ttl
+      description: Time after which a finished flow is flushed.
+      required: true
+      value:
+        type: integer
+        example: 60
+    - name: statsd_ip
+      description: StatsD IP.
+      required: true
+      value:
+        type: string
+        example: 127.0.0.1
+    - name: statsd_port
+      description: StatsD Port.
+      required: true
+      value:
+        type: integer
+        example: 8125
+    - name: log_to_file
+      description: Whether or not this check should log in the Agent log file.
+      required: true
+      value:
+        type: boolean
+        example: true
+    - name: log_level
+      description: |
+        Minimum level of logs logged by this check.
+        available levels: trace, debug, info, warning, error, critical
+      required: true
+      value:
+        type: string
+        example: info
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: interface
+      description: Name of the interface to sniff from.
+      required: true
+      value:
+        type: string
+        example: eth0
+    - name: ips
+      description: |
+        Include by IP - The check performs name lookup and tags with hostname if available.
+        Which avoids having go-metro inspect every incoming/outgoing packet through the interface.
+      required: true
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <IP>
+    - name: hosts
+      description: |
+        Include by hostname - The check performs ip lookup and filter by hosts IP's
+        which avoids having go-metro inspect every incoming/outgoing packet through the interface.
+      required: true
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <HOSTNAME>
+    - template: instances/default
