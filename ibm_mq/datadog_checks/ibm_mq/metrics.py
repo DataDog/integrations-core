@@ -87,6 +87,7 @@ def channel_metrics():
         'npm_speed': pymqi.CMQCFC.MQIACH_NPM_SPEED,
         'sharing_conversations': pymqi.CMQCFC.MQIACH_SHARING_CONVERSATIONS,
         'short_timer': pymqi.CMQCFC.MQIACH_SHORT_TIMER,
+        'active_connections': pymqi.CMQCFC.MQIACH_SESSION_COUNT,
     }
 
 

@@ -194,6 +194,7 @@ CHANNEL_METRICS = [
     ('ibm_mq.channel.npm_speed', GAUGE),
     ('ibm_mq.channel.sharing_conversations', GAUGE),
     ('ibm_mq.channel.short_timer', GAUGE),
+    ('ibm_mq.channel.active_connections', GAUGE),
 ]
 
 CHANNEL_STATUS_METRICS = [
