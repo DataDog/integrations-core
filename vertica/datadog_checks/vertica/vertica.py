@@ -109,7 +109,7 @@ class VerticaCheck(AgentCheck):
             "custom": self.query_custom,
         }
 
-        include_groups = self.instance.get("metric_groups", [])
+        include_groups = self.instance.get("metric_groups") or list(self._metric_groups)
 
         # License query needs to be run before getting system
         if 'system' in include_groups and 'licenses' not in include_groups:
