@@ -547,7 +547,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
             object_name = row[object_name_index]
             index_id = row[index_id_index]
 
-            object_list = self.cfg_instance.get('db_frag_object_names')
+            object_list = self.cfg_instance.get('db_fragmentation_object_names')
 
             if object_list and (object_name not in object_list):
                 continue
