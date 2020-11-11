@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import threading
 from contextlib import closing
 
 import snowflake.connector as sf
+from snowflake.connector.network import SnowflakeRestful
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
@@ -33,6 +35,8 @@ class SnowflakeCheck(AgentCheck):
     __NAMESPACE__ = 'snowflake'
 
     SERVICE_CHECK_CONNECT = 'snowflake.can_connect'
+
+    MONKEY_PATCH_LOCK = threading.Lock()
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
@@ -101,23 +105,27 @@ class SnowflakeCheck(AgentCheck):
         )
 
         try:
-            conn = sf.connect(
-                user=self.config.user,
-                password=self.config.password,
-                account=self.config.account,
-                database=self.config.database,
-                schema=self.config.schema,
-                warehouse=self.config.warehouse,
-                role=self.config.role,
-                passcode_in_password=self.config.passcode_in_password,
-                passcode=self.config.passcode,
-                client_prefetch_threads=self.config.client_prefetch_threads,
-                login_timeout=self.config.login_timeout,
-                ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
-                authenticator=self.config.authenticator,
-                token=self.config.token,
-                client_session_keep_alive=self.config.client_keep_alive,
-            )
+            proxies = self.http.options['proxies']
+            with self.MONKEY_PATCH_LOCK:
+                # Monkey patch proxies to request_exec
+                SnowflakeRestful._request_exec = self._make_snowflake_request_func(proxies, SnowflakeRestful._request_exec)
+                conn = sf.connect(
+                    user=self.config.user,
+                    password=self.config.password,
+                    account=self.config.account,
+                    database=self.config.database,
+                    schema=self.config.schema,
+                    warehouse=self.config.warehouse,
+                    role=self.config.role,
+                    passcode_in_password=self.config.passcode_in_password,
+                    passcode=self.config.passcode,
+                    client_prefetch_threads=self.config.client_prefetch_threads,
+                    login_timeout=self.config.login_timeout,
+                    ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
+                    authenticator=self.config.authenticator,
+                    token=self.config.token,
+                    client_session_keep_alive=self.config.client_keep_alive,
+                )
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
@@ -126,24 +134,20 @@ class SnowflakeCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
 
-            proxies = self.http.options['proxies']
-            if proxies:
-                try:
-                    self._conn._rest._request_exec = self._make_snowflake_request_func(proxies, self._conn._rest._request_exec)
-                except Exception as e:
-                    self.log.warning("Proxy issues")
-                    raise
-
     def _make_snowflake_request_func(self, proxies, method):
         """
-        This is a wrapper proxies in the connection.
+        This is a wrapper proxies in the connection. The current Snowflake implementation applies proxy configs globally.
 
         TODO: Remove when https://github.com/snowflakedb/snowflake-connector-python/pull/352 gets merged
         """
         def _request_exec(*args, **kwargs):
-            session = kwargs.get('session') or args[0]
+            session = kwargs.get('session') or args[1]
             session.proxies = proxies
-            return method(*args, **kwargs)
+            try:
+                return method(*args, **kwargs)
+            except Exception as e:
+                self.warning("Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e))
+                return
         return _request_exec
 
     @AgentCheck.metadata_entrypoint
