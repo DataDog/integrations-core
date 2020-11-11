@@ -126,6 +126,26 @@ class SnowflakeCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
 
+            proxies = self.http.options['proxies']
+            if proxies:
+                try:
+                    self._conn._rest._request_exec = self._make_snowflake_request_func(proxies, self._conn._rest._request_exec)
+                except Exception as e:
+                    self.log.warning("Proxy issues")
+                    raise
+
+    def _make_snowflake_request_func(self, proxies, method):
+        """
+        This is a wrapper proxies in the connection.
+
+        TODO: Remove when https://github.com/snowflakedb/snowflake-connector-python/pull/352 gets merged
+        """
+        def _request_exec(*args, **kwargs):
+            session = kwargs.get('session') or args[0]
+            session.proxies = proxies
+            return method(*args, **kwargs)
+        return _request_exec
+
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):
         try:

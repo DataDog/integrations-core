@@ -75,7 +75,6 @@ class Config(object):
         self.login_timeout = login_timeout  # type: int
         self.ocsp_response_cache_filename = ocsp_response_cache_filename  # type: Optional[str]
         self.tags = tags  # type: List[str]
-        self.min_collection = min_collection
         self.metric_groups = metric_groups
         self.authenticator = authenticator
         self.token = token
