@@ -215,7 +215,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_node_status_allocatable_nvidia_gpu_cards': 'node.gpu.cards_allocatable',
                         'kube_node_status_allocatable': 'node.allocatable',
                         'kube_node_status_capacity_nvidia_gpu_cards': 'node.gpu.cards_capacity',
-                        'kube_node_status_capacity': 'node.capacity'
+                        'kube_node_status_capacity': 'node.capacity',
                         'kube_pod_container_status_terminated': 'container.terminated',
                         'kube_pod_container_status_waiting': 'container.waiting',
                         'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
