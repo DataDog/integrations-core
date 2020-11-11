@@ -27,6 +27,8 @@ def get_dependencies():
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
+
 setup(
     name='datadog-go-metro',
     version=ABOUT['__version__'],
@@ -60,7 +62,7 @@ setup(
     packages=['datadog_checks.go-metro'],
 
     # Run-time dependencies
-    install_requires=['datadog-checks-base'],
+    install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': get_dependencies()},
 
     # Extra files to ship with the wheel package
