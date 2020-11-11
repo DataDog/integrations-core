@@ -141,7 +141,7 @@ class SQLServer(AgentCheck):
         ('sqlserver.database.files.state', 'sys.database_files', 'state'),
         ('sqlserver.database.state', 'sys.databases', 'state'),
         ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
-        ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_uuid_count'),
+        ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
     ]
 
     DATABASE_FRAGMENTATION_METRICS = [

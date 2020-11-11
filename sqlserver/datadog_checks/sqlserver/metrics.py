@@ -478,10 +478,12 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'msdb.dbo.backupset'
     DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = (
-        "select count(backup_set_uuid) as backup_set_uuid_count, database_name "
-        "from {table} group by database_name".format(table=TABLE)
-    )
+    QUERY_BASE = """
+        select sys.databases.name as database_name, count(backup_set_id) as backup_set_id_count
+        from {table} right outer join sys.databases
+        on sys.databases.name = msdb.dbo.backupset.database_name
+        group by sys.databases.name""".format(table=TABLE)
+
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
