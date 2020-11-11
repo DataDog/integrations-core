@@ -473,6 +473,10 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# msdb.dbo.backupset
+#
+# Contains a row for each backup set. A backup set
+# contains the backup from a single, successful backup operation.
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
 class SqlDatabaseBackup(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
@@ -482,8 +486,9 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
         select sys.databases.name as database_name, count(backup_set_id) as backup_set_id_count
         from {table} right outer join sys.databases
         on sys.databases.name = msdb.dbo.backupset.database_name
-        group by sys.databases.name""".format(table=TABLE)
-
+        group by sys.databases.name""".format(
+        table=TABLE
+    )
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -506,6 +511,11 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# sys.dm_db_index_physical_stats
+#
+# Returns size and fragmentation information for the data and
+# indexes of the specified table or view in SQL Server.
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
 class SqlDbFragmentation(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_index_physical_stats'
@@ -537,7 +547,9 @@ class SqlDbFragmentation(BaseSqlServerMetric):
             object_name = row[object_name_index]
             index_id = row[index_id_index]
 
-            if self.cfg_instance.get('object_name') and self.cfg_instance.get('object_name') != object_name:
+            object_list = self.cfg_instance.get('db_frag_object_names')
+
+            if object_list and (object_name not in object_list):
                 continue
 
             metric_tags = [

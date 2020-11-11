@@ -278,7 +278,7 @@ class SQLServer(AgentCheck):
         # Load DB Fragmentation metrics
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
             db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            object_name = self.instance.get('object_name', None)
+            db_frag_object_names = self.instance.get('db_frag_object_names', [])
             for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
                 cfg = {
                     'name': name,
@@ -286,7 +286,7 @@ class SQLServer(AgentCheck):
                     'column': column,
                     'instance_name': db_name,
                     'tags': tags,
-                    'object_name': object_name,
+                    'db_frag_object_names': db_frag_object_names,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
