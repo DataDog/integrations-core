@@ -14,6 +14,22 @@ from .metrics import ALL_METRICS
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check, instance):
+    instance['metric_groups'] = [
+        'licenses',
+        'license_audits',
+        'system',
+        'nodes',
+        'projections',
+        'projection_storage',
+        'storage_containers',
+        'host_resources',
+        'query_metrics',
+        'resource_pool_status',
+        'disk_storage',
+        'resource_usage',
+        'version',
+        'custom',
+    ]
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric in ALL_METRICS:

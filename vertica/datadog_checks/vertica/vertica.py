@@ -14,7 +14,7 @@ import vertica_python as vertica
 from six import iteritems
 from vertica_python.vertica.column import timestamp_tz_parse
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import views
@@ -113,15 +113,22 @@ class VerticaCheck(AgentCheck):
 
         # License query needs to be run before getting system
         if 'system' in include_groups and 'licenses' not in include_groups:
+            self.log.debug("Including licenses group as it is required for sytem collection")
             include_groups.insert(0, 'licenses')
 
         self._desired_groups = []
+        invalid_groups = []
 
-        for group in include_groups:
-            if group in self._metric_groups:
-                self._desired_groups.append(group)
-            else:
-                self.log.debug("Metric group name `%s` is not valid, ignoring metric group", group)
+        if include_groups:
+            for group in include_groups:
+                try:
+                    if group in self._metric_groups:
+                        self._desired_groups.append(group)
+                except KeyError:
+                    invalid_groups.append(group)
+
+        if invalid_groups:
+            raise ConfigurationError(f"Invalid metric_groups found in vertica conf.yaml: {', '.join(invalid_groups)}")
 
     def _get_default_client_lib_log_level(self):
         if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
