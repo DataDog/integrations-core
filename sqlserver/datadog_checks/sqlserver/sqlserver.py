@@ -25,7 +25,6 @@ try:
 except ImportError:
     pyodbc = None
 
-
 if adodbapi is None and pyodbc is None:
     raise ImportError('adodbapi or pyodbc must be installed to use this check.')
 
@@ -55,7 +54,6 @@ BASE_NAME_QUERY = (
 
 
 class SQLServer(AgentCheck):
-
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
     # Default performance table metrics - Database Instance level
@@ -136,10 +134,28 @@ class SQLServer(AgentCheck):
     # Database State enum:
     #   0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending,
     #   4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary
+    # Is Sync with Backup enum:
+    #   0 = False, 1 = True
     DATABASE_METRICS = [
         ('sqlserver.database.files.size', 'sys.database_files', 'size'),
         ('sqlserver.database.files.state', 'sys.database_files', 'state'),
         ('sqlserver.database.state', 'sys.databases', 'state'),
+        ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
+        ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
+    ]
+
+    DATABASE_FRAGMENTATION_METRICS = [
+        (
+            'sqlserver.database.avg_fragmentation_in_percent',
+            'sys.dm_db_index_physical_stats',
+            'avg_fragmentation_in_percent',
+        ),
+        ('sqlserver.database.fragment_count', 'sys.dm_db_index_physical_stats', 'fragment_count'),
+        (
+            'sqlserver.database.avg_fragment_size_in_pages',
+            'sys.dm_db_index_physical_stats',
+            'avg_fragment_size_in_pages',
+        ),
     ]
 
     def __init__(self, name, init_config, instances):
@@ -257,6 +273,21 @@ class SQLServer(AgentCheck):
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
             for name, table, column in self.TASK_SCHEDULER_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        # Load DB Fragmentation metrics
+        if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
+            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
+            for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
+                cfg = {
+                    'name': name,
+                    'table': table,
+                    'column': column,
+                    'instance_name': db_name,
+                    'tags': tags,
+                    'db_fragmentation_object_names': db_fragmentation_object_names,
+                }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
