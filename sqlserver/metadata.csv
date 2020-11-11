@@ -35,7 +35,7 @@ sqlserver.database.active_transactions,gauge,,transaction,,Number of active tran
 sqlserver.database.avg_fragment_size_in_pages,gauge,,,,"The average number of pages in one fragment on the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,avg fragment size in pages
 sqlserver.database.avg_fragmentation_in_percent,gauge,,,,"Logical fragmentation for indexes, or extent fragmentation for heaps in the IN_ROW_DATA allocation unit.",0,sql_server,avg fragmentation percent
 sqlserver.database.backup_count,gauge,,,,"The total count of successful backups made for a database.",0,sql_server,backup count
-sqlserver.database.fragment_count,gauge,,,,"Number of fragments in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,fragment count
+sqlserver.database.fragment_count,gauge,,,,"The number of fragments in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,fragment count
 sqlserver.database.is_sync_with_backup,gauge,,,,"Whether or not the database is marked for replication synchronization with backup. 0 = Not marked for replication sync, 1 = Marked for replication sync.",0,sql_server,is sync with backup
 sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending
 sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total
