@@ -35,7 +35,9 @@ keytool -import -keystore $TRUSTSTORE -storetype pkcs12 -storepass $PASSWORD -al
 
 # Export client certificate (for the Agent to use).
 # See: https://stackoverflow.com/questions/652916/converting-a-java-keystore-into-pem-format
-openssl pkcs12 -in $KEYSTORE -out $CLIENT_CERT_PEM_FILE -password pass:$PASSWORD -passout pass:$PASSWORD
+# Also make sure it doesn't have a password (see: https://serverfault.com/a/515842).
+openssl pkcs12 -in $KEYSTORE -out $CLIENT_CERT_PEM_FILE -password pass:$PASSWORD -passout pass:temp
+openssl rsa -in $CLIENT_CERT_PEM_FILE -passin pass:temp -out $CLIENT_CERT_PEM_FILE
 
 # Run usual entrypoint (provided by base VoltDB image).
 exec ./docker-entrypoint.sh

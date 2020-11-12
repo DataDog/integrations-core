@@ -71,13 +71,14 @@ class TestCheck:
 class TestVersionMetadata:
     VERSION_MOCK_TARGET = 'datadog_checks.voltdb.VoltDBCheck._fetch_version'
 
-    def _run_test(self, instance, datadog_agent, metadata):
-        # type: (Instance, DatadogAgentStub, dict) -> None
+    def _run_test(self, instance, datadog_agent, metadata, error_contains=''):
+        # type: (Instance, DatadogAgentStub, dict, str) -> None
         check_id = 'test'
         check = VoltDBCheck('voltdb', {}, [instance])
         check.check_id = check_id
         error = check.run()
-        assert not error
+        if error_contains:
+            assert error_contains in error
         datadog_agent.assert_metadata(check_id, metadata)
 
     def test_default(self, instance, datadog_agent):
@@ -99,12 +100,10 @@ class TestVersionMetadata:
         # type: (Instance, DatadogAgentStub) -> None
         malformed_version_string = 'obviously_not_a_version_string'
         with mock.patch(self.VERSION_MOCK_TARGET, return_value=malformed_version_string):
-            # Should not fail.
             self._run_test(instance, datadog_agent, metadata={})
 
     @pytest.mark.integration
     def test_failure(self, instance, datadog_agent):
         # type: (Instance, DatadogAgentStub) -> None
         with mock.patch(self.VERSION_MOCK_TARGET, side_effect=ValueError('Oops!')):
-            # Should not fail.
-            self._run_test(instance, datadog_agent, metadata={})
+            self._run_test(instance, datadog_agent, metadata={}, error_contains='Oops!')
