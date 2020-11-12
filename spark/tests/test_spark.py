@@ -613,8 +613,7 @@ SPARK_STAGE_COMPLETE_METRIC_TAGS = [
 ]
 
 # These metrics are enabled by default for every app in Spark v3
-# They can be enabled with configuration in Spark v2.4
-# See https://spark.apache.org/docs/2.4.0/configuration.html#available-properties
+# They are not always there for Spark v2.4
 if SPARK_VERSION >= VERSION_3_0_0:
     SPARK_STAGE_RUNNING_METRIC_VALUES.update({})
 

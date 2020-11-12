@@ -13,15 +13,29 @@ spark.stage.count,count,,task,,Number of stages,0,spark,stg count
 spark.stage.num_active_tasks,count,,task,,Number of active tasks in the application's stages,0,spark,stg nm act tsk
 spark.stage.num_complete_tasks,count,,task,,Number of complete tasks in the application's stages,0,spark,stg nm cmp tsk
 spark.stage.num_failed_tasks,count,,task,,Number of failed tasks in the application's stages,0,spark,stg nm fld tsk
+spark.stage.executor_cpu_time,count,,nanosecond,,CPU time the executor spent running this task. This includes time fetching shuffle data.,0,spark,stg exe cpu tm
+spark.stage.executor_deserialize_cpu_time,count,,millisecond,,Elapsed time spent to deserialize this task.,0,spark,stg exe deserialize cpu tm
+spark.stage.executor_deserialize_time,count,,nanosecond,,CPU time taken on the executor to deserialize this task.,0,spark,stg exe deserialize tm
 spark.stage.executor_run_time,count,,millisecond,,Time spent by the executor in the application's stages,0,spark,stg exe rn tm
+spark.stage.jvm_gc_time,count,,millisecond,,Elapsed time the JVM spent in garbage collection while executing this task.,0,spark,stg jvm gc tm
+spark.stage.peak_execution_memory,count,,,,"Peak memory used by internal data structures created during shuffles, aggregations and joins. The value of this accumulator should be approximately the sum of the peak sizes across all such data structures created in this task. For SQL jobs, this only tracks all unsafe operators and ExternalSort.",0,spark,stg peak exe mem
+spark.stage.result_size,gauge,,byte,,The number of bytes this task transmitted back to the driver as the TaskResult.,0,spark,stg res sz
+spark.stage.result_serialization_time,count,,millisecond,,Elapsed time spent serializing the task result.,0,spark,stg res serialize tm
 spark.stage.input_bytes,count,,byte,,Input bytes in the application's stages,0,spark,stg in byt
 spark.stage.input_records,count,,record,,Input records in the application's stages,0,spark,stg in rec
 spark.stage.output_bytes,count,,byte,,Output bytes in the application's stages,0,spark,stg out byt
 spark.stage.output_records,count,,record,,Output records in the application's stages,0,spark,stg out rec
+spark.stage.shuffle_fetch_wait_time,count,,millisecond,,"Time the task spent waiting for remote shuffle blocks. This only includes the time blocking on shuffle input data. For instance if block B is being fetched while the task is still not finished processing block A, it is not considered to be blocking on block B.",0,spark,stg shfl fetch wait time
+spark.stage.shuffle_local_blocks_fetched,count,,block,,Number of local blocks fetched in shuffle operations.,0,spark,stg shfl loc block fetch
+spark.stage.shuffle_local_bytes_read,count,,byte,,Number of bytes read in shuffle operations from local disk.,0,spark,stg shfl loc byte r
 spark.stage.shuffle_read_bytes,count,,byte,,Number of bytes read during a shuffle in the application's stages,0,spark,stg shfl rd byt
 spark.stage.shuffle_read_records,count,,record,,Number of records read during a shuffle in the application's stages,0,spark,stg shfl rd rec
+spark.stage.shuffle_remote_blocks_fetched,count,,block,,Number of remote blocks fetched in shuffle operations.,0,spark,stg shfl rem block fetch
+spark.stage.shuffle_remote_bytes_read,count,,byte,,Number of remote bytes read in shuffle operations.,0,spark,stg shfl rem byte r
+spark.stage.shuffle_remote_bytes_read_to_disk,count,,byte,,"Number of remote bytes read to disk in shuffle operations. Large blocks are fetched to disk in shuffle read operations, as opposed to being read into memory, which is the default behavior.",0,spark,stg shfl rem byte r disk
 spark.stage.shuffle_write_bytes,count,,byte,,Number of shuffled bytes in the application's stages,0,spark,stg shfl wrt byt
 spark.stage.shuffle_write_records,count,,record,,Number of shuffled records in the application's stages,0,spark,stg shfl wrt rec
+spark.stage.shuffle_write_time,count,,nanosecond,,Time spent blocking on writes to disk or buffer cache.,0,spark,stg shfl w time
 spark.stage.memory_bytes_spilled,count,,byte,,Number of bytes spilled to disk in the application's stages,0,spark,stg mem byt spld
 spark.stage.disk_bytes_spilled,count,,byte,,Max size on disk of the spilled bytes in the application's stages,0,spark,stg dsk byt spld
 spark.driver.rdd_blocks,count,,block,,Number of RDD blocks in the driver,0,spark,dvr rdd blk
