@@ -2,7 +2,7 @@
 
 ## Using `tcpdump` with SNMP
 
-`tcpdump` shows the exact request and response content of SNMP `GET`, `GETNEXT` and other SNMP calls.
+The `tcpdump` command shows the exact request and response content of SNMP `GET`, `GETNEXT` and other SNMP calls.
 
 In a shell run `tcpdump`:
 
