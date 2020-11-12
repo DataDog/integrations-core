@@ -2,6 +2,9 @@ steps:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema#checkout
 - checkout: self
   fetchDepth: 10
+  # Allow `script` steps to interact with the git remote (required for such operations to succeed on private repos).
+  # See: https://docs.microsoft.com/en-us/azure/devops/pipelines/scripts/git-commands?view=azure-devops&tabs=yaml#allow-scripts-to-access-the-system-token
+  persistCredentials: true
 
 # Azure checks out the code from the PR but leaves us in a detached state.
 # Because ddev cannot work in that state, we create a branch.
