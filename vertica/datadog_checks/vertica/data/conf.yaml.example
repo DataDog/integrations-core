@@ -33,25 +33,24 @@ instances:
     #
     port: 5433
 
-    ## @param metric_groups - list of strings - required
+    ## @param metric_groups - list of strings - optional
     ## Enable metric groups for metric collection. Metric groups are based on Vertica tables. 
     ## By default all metric groups are collected.
     #
-    metric_groups:
-      - licenses
-      - license_audits
-      - system
-      - nodes
-      - projections
-      - projection_storage
-      - storage_containers
-      - host_resources
-      - query_metrics
-      - resource_pool_status
-      - disk_storage
-      - resource_usage
-      - version
-      - custom
+    # metric_groups:
+    #   - licenses
+    #   - license_audits
+    #   - system
+    #   - nodes
+    #   - projections
+    #   - projection_storage
+    #   - storage_containers
+    #   - host_resources
+    #   - query_metrics
+    #   - resource_pool_status
+    #   - disk_storage
+    #   - resource_usage
+    #   - custom
 
     ## @param username - string - required
     ## The database user to authenticate as.

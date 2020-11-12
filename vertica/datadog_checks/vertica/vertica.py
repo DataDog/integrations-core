@@ -5,7 +5,7 @@ from __future__ import division
 
 import logging
 import ssl
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from datetime import datetime
 from itertools import chain
 from os.path import expanduser, isdir
@@ -30,6 +30,7 @@ class VerticaCheck(AgentCheck):
     SERVICE_CHECK_NODE_STATE = 'node_state'
 
     def __init__(self, name, init_config, instances):
+
         super(VerticaCheck, self).__init__(name, init_config, instances)
 
         self._db = self.instance.get('db', '')
@@ -92,45 +93,9 @@ class VerticaCheck(AgentCheck):
         # Cache database results for re-use among disparate functions
         self._view = defaultdict(list)
 
-        self._metric_groups = {
-            "licenses": self.query_licenses,
-            "license_audits": self.query_license_audits,
-            "system": self.query_system,
-            "nodes": self.query_nodes,
-            "projections": self.query_projections,
-            "projection_storage": self.query_projection_storage,
-            "storage_containers": self.query_storage_containers,
-            "host_resources": self.query_host_resources,
-            "query_metrics": self.query_query_metrics,
-            "resource_pool_status": self.query_resource_pool_status,
-            "disk_storage": self.query_disk_storage,
-            "resource_usage": self.query_resource_usage,
-            "version": self.query_version,
-            "custom": self.query_custom,
-        }
+        self._metric_groups = []
 
-        include_groups = self.instance.get("metric_groups") or list(self._metric_groups)
-
-        # License query needs to be run before getting system
-        if 'system' in include_groups and 'licenses' not in include_groups:
-            self.log.debug("Including licenses group as it is required for sytem collection")
-            include_groups.insert(0, 'licenses')
-
-        self._desired_groups = []
-        invalid_groups = []
-
-        if include_groups:
-            for group in include_groups:
-                try:
-                    if group in self._metric_groups:
-                        self._desired_groups.append(group)
-                except KeyError:
-                    invalid_groups.append(group)
-
-        if invalid_groups:
-            raise ConfigurationError(
-                'Invalid metric_groups found in vertica conf.yaml: {}'.format(', '.join(invalid_groups))
-            )
+        self.check_initializations.append(self.parse_metric_groups)
 
     def _get_default_client_lib_log_level(self):
         if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
@@ -151,9 +116,10 @@ class VerticaCheck(AgentCheck):
 
         # The order of queries is important as some results are cached for later re-use
         try:
-            for key in self._desired_groups:
-                func = self._metric_groups.get(key)
-                func()
+            for method in self._metric_groups:
+                method()
+
+            self.query_version()
 
         finally:
             self._view.clear()
@@ -656,3 +622,43 @@ class VerticaCheck(AgentCheck):
 
         for row in cursor.iterate():
             yield row
+
+    def parse_metric_groups(self):
+        default_metric_groups = OrderedDict(
+            (
+                ('licenses', self.query_licenses),
+                ('license_audits', self.query_license_audits),
+                ('system', self.query_system),
+                ('nodes', self.query_nodes),
+                ('projections', self.query_projections),
+                ('projection_storage', self.query_projection_storage),
+                ('storage_containers', self.query_storage_containers),
+                ('host_resources', self.query_host_resources),
+                ('query_metrics', self.query_query_metrics),
+                ('resource_pool_status', self.query_resource_pool_status),
+                ('disk_storage', self.query_disk_storage),
+                ('resource_usage', self.query_resource_usage),
+                ('custom', self.query_custom),
+            )
+        )
+
+        metric_groups = self.instance.get('metric_groups') or list(default_metric_groups)
+
+        # Ensure all metric groups are valid
+        invalid_groups = []
+
+        for group in metric_groups:
+            if group not in default_metric_groups:
+                invalid_groups.append(group)
+
+        if invalid_groups:
+            raise ConfigurationError(
+                'Invalid metric_groups found in vertica conf.yaml: {}'.format(', '.join(invalid_groups))
+            )
+
+        # License query needs to be run before getting system
+        if 'system' in metric_groups and 'licenses' not in metric_groups:
+            self.log.debug('Including licenses group as it is required for sytem collection')
+            metric_groups.insert(0, 'licenses')
+
+        self._metric_groups.extend(default_metric_groups[group] for group in metric_groups)

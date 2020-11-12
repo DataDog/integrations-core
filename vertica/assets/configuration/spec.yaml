@@ -33,7 +33,6 @@ files:
               type: integer
               example: 5433
           - name: metric_groups
-            required: true
             description: |
               Enable metric groups for metric collection. Metric groups are based on Vertica tables. 
               By default all metric groups are collected.
@@ -54,8 +53,7 @@ files:
                 - resource_pool_status
                 - disk_storage
                 - resource_usage
-                - version
-                - custom
+                - custom              
           - name: username
             required: true
             description: The database user to authenticate as.
