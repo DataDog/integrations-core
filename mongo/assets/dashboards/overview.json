@@ -189,7 +189,6 @@
         "title": "Number of page faults per host",
         "title_size": "16",
         "title_align": "left",
-        "time": { "live_span": "4h" },
         "show_legend": false,
         "legend_size": "0"
       },
