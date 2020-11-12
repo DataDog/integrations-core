@@ -29,7 +29,7 @@ def dd_environment():
             service_name='sonarqube',
             env_vars={'PROJECT_DIR': project_dir},
             conditions=[
-                CheckDockerLogs('sonarqube', ['SonarQube is up']),
+                CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
                 CheckEndpoints([common.WEB_INSTANCE['web_endpoint']]),
             ],
             mount_logs=True,
