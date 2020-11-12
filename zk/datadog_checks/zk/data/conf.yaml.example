@@ -116,6 +116,11 @@ instances:
     #
     # tls_validate_hostname: true
 
+    ## @param enable_ssl - boolean - optional - default: false
+    ## This enables the SSL/TLS version of the Zookeeper Check.
+    #
+    # enable_ssl: false
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
