@@ -105,10 +105,12 @@ class SnowflakeCheck(AgentCheck):
         )
 
         try:
-            proxies = self.http.options['proxies']
+            proxies = self.http.options['proxies']  # SKIP_HTTP
             with self.MONKEY_PATCH_LOCK:
                 # Monkey patch proxies to request_exec
-                SnowflakeRestful._request_exec = self._make_snowflake_request_func(proxies, SnowflakeRestful._request_exec)
+                SnowflakeRestful._request_exec = self._make_snowflake_request_func(
+                    proxies, SnowflakeRestful._request_exec
+                )
                 conn = sf.connect(
                     user=self.config.user,
                     password=self.config.password,
@@ -136,18 +138,23 @@ class SnowflakeCheck(AgentCheck):
 
     def _make_snowflake_request_func(self, proxies, method):
         """
-        This is a wrapper proxies in the connection. The current Snowflake implementation applies proxy configs globally.
+        This is a workaround to include proxy config in the Snowflake connection.
+        The current Snowflake logic applies global proxy configs via env vars.
 
         TODO: Remove when https://github.com/snowflakedb/snowflake-connector-python/pull/352 gets merged
         """
+
         def _request_exec(*args, **kwargs):
             session = kwargs.get('session') or args[1]
             session.proxies = proxies
             try:
                 return method(*args, **kwargs)
             except Exception as e:
-                self.warning("Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e))
+                self.warning(
+                    "Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e)
+                )
                 return
+
         return _request_exec
 
     @AgentCheck.metadata_entrypoint

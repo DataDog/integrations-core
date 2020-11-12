@@ -6,6 +6,7 @@ import copy
 import mock
 import pytest
 
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .conftest import CHECK_NAME
@@ -147,3 +148,12 @@ def test_metric_group_exceptions(instance):
         check.log.warning.assert_called_once_with(
             "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
         )
+
+
+def test_proxy_config():
+    instance = {}
+    init_config = {}
+    http = RequestsWrapper(instance, init_config)
+
+    assert http.options['proxies'] is None
+    assert http.no_proxy_uris is None
