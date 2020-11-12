@@ -28,8 +28,7 @@ STANDARD_FIELDS = {
     'tls_cert': None,
     'tls_private_key': None,
     'tls_private_key_password': None,
-    'tls_validate_hostname': True,
-    'tls_load_default_certs': True,
+    'tls_validate_hostname': True
 }
 
 
@@ -120,7 +119,7 @@ class TlsContextWrapper(object):
                 context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
             else:
                 context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-        elif self.config['tls_load_default_certs']:
+        else:
             context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
