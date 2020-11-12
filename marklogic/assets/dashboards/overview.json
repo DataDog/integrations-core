@@ -5,7 +5,7 @@
     "template_variables": [
         {
             "default": "*",
-            "name": "host",
+            "name": "dd_host",
             "prefix": "host"
         },
         {
@@ -21,7 +21,7 @@
         {
             "default": "*",
             "name": "ml_host_name",
-            "prefix": "host_name"
+            "prefix": "marklogic_host_name"
         }
     ],
     "title": "MarkLogic - Overview",
@@ -310,7 +310,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "sum:marklogic.requests.total_requests{$host}",
+                        "q": "sum:marklogic.requests.total_requests{$dd_host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -319,7 +319,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Total number of active requests over $host",
+                "time": {},
+                "title": "Total number of active requests over $dd_host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -450,7 +451,6 @@
                         "q": "sum:marklogic.databases.backup_count{$database_name}"
                     }
                 ],
-                "time": {},
                 "title": "Backups of $database_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -498,7 +498,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Sum of the processing rate factors over $ml_host_name",
                 "title_align": "left",
                 "title_size": "16",
@@ -564,7 +563,7 @@
                     {
                         "display_type": "bars",
                         "on_right_yaxis": false,
-                        "q": "sum:marklogic.transactions.total_transactions{$host}",
+                        "q": "sum:marklogic.transactions.total_transactions{$dd_host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -573,7 +572,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Total number of open transactions over $host",
+                "time": {},
+                "title": "Total number of open transactions over $dd_host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -618,7 +618,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:marklogic.servers.request_rate{$host}",
+                        "q": "avg:marklogic.servers.request_rate{$dd_host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -627,7 +627,8 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Average request rate across $host",
+                "time": {},
+                "title": "Average request rate across $dd_host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
