@@ -105,7 +105,7 @@ class SnowflakeCheck(AgentCheck):
         )
 
         try:
-            proxies = self.http.options['proxies']  # SKIP_HTTP
+            proxies = self.http.options['proxies']  # SKIP_HTTP_VALIDATION
             with self.MONKEY_PATCH_LOCK:
                 # Monkey patch proxies to request_exec
                 SnowflakeRestful._request_exec = self._make_snowflake_request_func(
