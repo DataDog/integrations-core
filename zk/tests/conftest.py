@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
 
@@ -18,7 +19,13 @@ PORT = 12181
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
 
-VALID_CONFIG = {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
+VALID_CONFIG = {
+    'host': HOST,
+    'port': PORT,
+    'expected_mode': "standalone",
+    'tags': ["mytag"],
+    'timeout': 500,
+}
 
 VALID_SSL_CONFIG = {
     'host': HOST,
@@ -33,6 +40,20 @@ VALID_SSL_CONFIG = {
     'password': 'testpass',
 }
 
+# This is different than VALID_SSL_CONFIG since the key locations are different
+VALID_SSL_CONFIG_FOR_TEST = {
+    'host': HOST,
+    'port': PORT,
+    'expected_mode': "standalone",
+    'tags': ["mytag"],
+    'timeout': 500,
+    'ssl': True,
+    'private_key': os.path.join(HERE, 'compose', 'private_key.pem'),
+    'ca_cert': os.path.join(HERE, 'compose', 'ca_cert.pem'),
+    'cert': os.path.join(HERE, 'compose', 'cert.pem'),
+    'password': 'testpass',
+}
+
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
@@ -43,9 +64,21 @@ def get_instance():
     return VALID_CONFIG
 
 
+@pytest.fixture(scope="session")
+def get_test_instance():
+    if get_ssl():
+        return VALID_SSL_CONFIG_FOR_TEST
+    return VALID_CONFIG
+
+
 @pytest.fixture
 def get_invalid_mode_instance():
-    return {'host': HOST, 'port': PORT, 'expected_mode': "follower", 'tags': []}
+    invalid_mode = VALID_CONFIG
+    if get_ssl():
+        invalid_mode = VALID_SSL_CONFIG_FOR_TEST
+
+    invalid_mode['expected_mode'] = "follower"
+    return invalid_mode
 
 
 @pytest.fixture
@@ -67,20 +100,10 @@ def get_ssl():
 
 @pytest.fixture(scope="session")
 def dd_environment(get_instance):
-    def condition():
+    def condition_non_ssl():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
-        # TODO: This doesn't work for SSL yet
-        dummy_instance = {
-            'host': HOST,
-            'port': PORT,
-            'timeout': 500,
-            'ssl': get_ssl(),
-            'private_key': os.path.join(HERE, 'compose', 'private_key.pem'),
-            'ca_cert': os.path.join(HERE, 'compose', 'ca_cert.pem'),
-            'cert': os.path.join(HERE, 'compose', 'cert.pem'),
-            'password': 'testpass',
-        }
+        dummy_instance = {'host': HOST, 'port': PORT, 'timeout': 500}
         for _ in range(10):
             try:
                 out = ZookeeperCheck('zk', {}, [dummy_instance])._send_command('ruok')
@@ -99,17 +122,30 @@ def dd_environment(get_instance):
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
     if [3, 5, 0] <= get_version() < [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
+        if get_ssl():
+            compose_file = os.path.join(HERE, 'compose', 'zk35_ssl.yaml')
     elif get_version() >= [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
-
-    if get_ssl():
-        compose_file = os.path.join(HERE, 'compose', 'zk36plus_ssl.yaml')
+        if get_ssl():
+            compose_file = os.path.join(HERE, 'compose', 'zk36plus_ssl.yaml')
 
     private_key = os.path.join(HERE, 'compose', 'private_key.pem')
     cert = os.path.join(HERE, 'compose', 'cert.pem')
     ca_cert = os.path.join(HERE, 'compose', 'ca_cert.pem')
 
-    with docker_run(compose_file, conditions=[condition]):
+    condition_ssl = [
+        CheckDockerLogs(
+            compose_file,
+            'Starting server',
+        )
+    ]
+
+    if get_ssl():
+        condition = condition_ssl
+    else:
+        condition = [condition_non_ssl]
+
+    with docker_run(compose_file, conditions=condition):
         yield get_instance, {
             'docker_volumes': [
                 '{}:/conf/private_key.pem'.format(private_key),
@@ -117,4 +153,3 @@ def dd_environment(get_instance):
                 '{}:/conf/ca_cert.pem'.format(ca_cert),
             ]
         }
-
