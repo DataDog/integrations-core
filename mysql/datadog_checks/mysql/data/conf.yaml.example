@@ -284,6 +284,9 @@ instances:
 #     - type: multi_line
 #       name: new_log_start_with_date
 #       pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#     - type: multi_line
+#       name: new_logs_do_not_always_start_with_timestamp
+#       pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
 #   - type: file
 #     path: <ERROR_LOG_FILE_PATH>
 #     source: mysql
