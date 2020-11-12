@@ -48,38 +48,13 @@ files:
               type: boolean
 
           - template: instances/default
-          - name: ssl
+          - template: instances/tls
+          - name: enable_ssl
             description: |
-              Enable SSL on Zookeeper.
+              This enables the SSL/TLS version of the Zookeeper Check.
             value:
-              type: boolean
               example: false
-              default: false
-
-
-          - name: private_key
-            description: |
-              The file location of the private key for SSL.
-            value:
-              type: string
-
-          - name: ca_cert
-            description: |
-              The file location of the CA certificate for SSL.
-            value:
-              type: string
-
-          - name: cert
-            description: |
-              The file location of the certificate for SSL
-            value:
-              type: string
-
-          - name: password
-            description: |
-              The password to access the private key for SSL.
-            value:
-              type: string
+              type: boolean
 
       - template: logs
         example:

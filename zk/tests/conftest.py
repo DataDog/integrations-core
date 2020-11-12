@@ -33,11 +33,11 @@ VALID_SSL_CONFIG = {
     'expected_mode': "standalone",
     'tags': ["mytag"],
     'timeout': 500,
-    'ssl': True,
-    'private_key': '/conf/private_key.pem',
-    'ca_cert': '/conf/ca_cert.pem',
-    'cert': '/conf/cert.pem',
-    'password': 'testpass',
+    'enable_ssl': True,
+    'tls_private_key': '/conf/private_key.pem',
+    'tls_ca_cert': '/conf/ca_cert.pem',
+    'tls_cert': '/conf/cert.pem',
+    'tls_private_key_password': 'testpass',
 }
 
 # This is different than VALID_SSL_CONFIG since the key locations are different
@@ -47,11 +47,11 @@ VALID_SSL_CONFIG_FOR_TEST = {
     'expected_mode': "standalone",
     'tags': ["mytag"],
     'timeout': 500,
-    'ssl': True,
-    'private_key': os.path.join(HERE, 'compose', 'private_key.pem'),
-    'ca_cert': os.path.join(HERE, 'compose', 'ca_cert.pem'),
-    'cert': os.path.join(HERE, 'compose', 'cert.pem'),
-    'password': 'testpass',
+    'enable_ssl': True,
+    'tls_private_key': os.path.join(HERE, 'compose', 'private_key.pem'),
+    'tls_ca_cert': os.path.join(HERE, 'compose', 'ca_cert.pem'),
+    'tls_cert': os.path.join(HERE, 'compose', 'cert.pem'),
+    'tls_private_key_password': 'testpass',
 }
 
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']

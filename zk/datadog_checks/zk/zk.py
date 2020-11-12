@@ -58,7 +58,6 @@ zk_max_file_descriptor_count    4096
 """
 import re
 import socket
-import ssl
 import struct
 from collections import defaultdict
 from contextlib import closing
@@ -121,11 +120,7 @@ class ZookeeperCheck(AgentCheck):
         self.base_tags = list(set(self.instance.get('tags', [])))
         self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
-        self.ssl = bool(self.instance.get('ssl', False))
-        self.private_key = self.instance.get('private_key')
-        self.ca_cert = self.instance.get('ca_cert')
-        self.cert = self.instance.get('cert')
-        self.password = self.instance.get('password')
+        self.enable_ssl = bool(self.instance.get('enable_ssl', False))
 
     def check(self, _):
         # Send a service check based on the `ruok` response.
@@ -250,11 +245,8 @@ class ZookeeperCheck(AgentCheck):
 
     def _send_command(self, command):
         buf = StringIO()
-        # try-finally and try-except to stay compatible with python 2.4
-        if self.ssl:
-            context = ssl.create_default_context()
-            context.load_cert_chain(certfile=self.cert, keyfile=self.private_key, password=self.password)
-            context.load_verify_locations(cafile=self.ca_cert)
+        if self.enable_ssl:
+            context = self.get_tls_context()
             with closing(socket.create_connection((self.host, self.port))) as sock:
                 ssock = context.wrap_socket(sock, server_hostname=self.host)
                 ssock.settimeout(self.timeout)
@@ -266,6 +258,7 @@ class ZookeeperCheck(AgentCheck):
         else:
             with closing(socket.socket()) as sock:
                 sock.settimeout(self.timeout)
+                # try-finally and try-except to stay compatible with python 2.4
                 try:
                     # Connect to the zk client port and send the stat command
                     sock.connect((self.host, self.port))
