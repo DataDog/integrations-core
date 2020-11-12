@@ -50,11 +50,9 @@ To configure this check for an Agent running on a host:
      - type: file
        path: /opt/sonarqube/logs/access.log
        source: sonarqube
-       service: <SERVICE>
      - type: file
        path: /opt/sonarqube/logs/ce.log
        source: sonarqube
-       service: <SERVICE>
        log_processing_rules:
          - type: multi_line
            name: log_start_with_date
@@ -62,7 +60,6 @@ To configure this check for an Agent running on a host:
      - type: file
        path: /opt/sonarqube/logs/es.log
        source: sonarqube
-       service: <SERVICE>
        log_processing_rules:
          - type: multi_line
            name: log_start_with_date
@@ -70,7 +67,6 @@ To configure this check for an Agent running on a host:
      - type: file
        path: /opt/sonarqube/logs/sonar.log
        source: sonarqube
-       service: <SERVICE>
        log_processing_rules:
          - type: multi_line
            name: log_start_with_date
@@ -78,7 +74,6 @@ To configure this check for an Agent running on a host:
      - type: file
        path: /opt/sonarqube/logs/web.log
        source: sonarqube
-       service: <SERVICE>
        log_processing_rules:
          - type: multi_line
            name: log_start_with_date
@@ -102,7 +97,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "sonarqube", "service": "<SERVICE_NAME>"}` |
+| `<LOG_CONFIG>` | `{"source": "sonarqube"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
