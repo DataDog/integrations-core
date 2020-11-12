@@ -68,7 +68,7 @@ def validate_use_http_wrapper_file(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
-            if 'self.http' in line or 'OpenMetricsBaseCheck' in line:
+            if ('self.http' in line or 'OpenMetricsBaseCheck' in line) and 'SKIP_HTTP_VALIDATION' not in line:
                 return True, has_failed
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
