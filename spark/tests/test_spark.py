@@ -20,7 +20,7 @@ from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.spark import SparkCheck
 
-from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE, SPARK_VERSION
+from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE, SPARK_VERSION, VERSION_3_0_0
 
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
@@ -245,9 +245,14 @@ def mesos_requests_get_mock(url, *args, **kwargs):
             return MockedResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        if SPARK_VERSION >= VERSION_3_0_0:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics_3-0-0'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
+        else:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_EXECUTOR_URL:
         with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
@@ -284,9 +289,14 @@ def driver_requests_get_mock(url, *args, **kwargs):
             return MockedResponse(body, 200)
 
     elif arg_url == DRIVER_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        if SPARK_VERSION >= VERSION_3_0_0:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics_3-0-0'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
+        else:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
 
     elif arg_url == DRIVER_SPARK_EXECUTOR_URL:
         with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
@@ -328,9 +338,14 @@ def standalone_requests_get_mock(url, *args, **kwargs):
             return MockedResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        if SPARK_VERSION >= VERSION_3_0_0:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics_3-0-0'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
+        else:
+            with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
+                body = f.read()
+                return MockedResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
         with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
@@ -561,6 +576,8 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 16 * 3,
 }
 
+SPARK_STAGE_RUNNING_PRE20_METRIC_VALUES = SPARK_STAGE_RUNNING_METRIC_VALUES.copy()
+
 SPARK_STAGE_RUNNING_METRIC_TAGS = [
     'cluster_name:' + CLUSTER_NAME,
     'app_name:' + APP_NAME,
@@ -586,6 +603,8 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.disk_bytes_spilled': 113 * 2,
 }
 
+SPARK_STAGE_COMPLETE_PRE20_METRIC_VALUES = SPARK_STAGE_COMPLETE_METRIC_VALUES.copy()
+
 SPARK_STAGE_COMPLETE_METRIC_TAGS = [
     'cluster_name:' + CLUSTER_NAME,
     'app_name:' + APP_NAME,
@@ -593,25 +612,28 @@ SPARK_STAGE_COMPLETE_METRIC_TAGS = [
     'stage_id:0',
 ]
 
-if SPARK_VERSION >= version.parse('3.0.0'):
+# These metrics are enabled by default for every app in Spark v3
+# They can be enabled with configuration in Spark v2.4
+# See https://spark.apache.org/docs/2.4.0/configuration.html#available-properties
+if SPARK_VERSION >= VERSION_3_0_0:
     SPARK_STAGE_RUNNING_METRIC_VALUES.update({})
 
     SPARK_STAGE_COMPLETE_METRIC_VALUES.update(
         {
-            'spark.stage.executor_cpu_time': 0,
-            'spark.stage.executor_deserialize_cpu_time': 0,
-            'spark.stage.executor_deserialize_time': 0,
-            'spark.stage.jvm_gc_time': 0,
-            'spark.stage.peak_execution_memory': 0,
-            'spark.stage.result_serialization_time': 0,
-            'spark.stage.result_size': 0,
-            'spark.stage.shuffle_fetch_wait_time': 0,
-            'spark.stage.shuffle_local_blocks_fetched': 0,
-            'spark.stage.shuffle_local_bytes_read': 0,
-            'spark.stage.shuffle_remote_blocks_fetched': 0,
-            'spark.stage.shuffle_remote_bytes_read': 0,
-            'spark.stage.shuffle_remote_bytes_read_to_disk': 0,
-            'spark.stage.shuffle_write_time': 0,
+            'spark.stage.executor_cpu_time': 1000 * 2,
+            'spark.stage.executor_deserialize_cpu_time': 1001 * 2,
+            'spark.stage.executor_deserialize_time': 1002 * 2,
+            'spark.stage.jvm_gc_time': 1003 * 2,
+            'spark.stage.peak_execution_memory': 1004 * 2,
+            'spark.stage.result_serialization_time': 1005 * 2,
+            'spark.stage.result_size': 1006,
+            'spark.stage.shuffle_fetch_wait_time': 1007 * 2,
+            'spark.stage.shuffle_local_blocks_fetched': 1008 * 2,
+            'spark.stage.shuffle_local_bytes_read': 1009 * 2,
+            'spark.stage.shuffle_remote_blocks_fetched': 1010 * 2,
+            'spark.stage.shuffle_remote_bytes_read': 1011 * 2,
+            'spark.stage.shuffle_remote_bytes_read_to_disk': 1012 * 2,
+            'spark.stage.shuffle_write_time': 1013 * 2,
         }
     )
 
@@ -997,11 +1019,11 @@ def test_standalone_pre20(aggregator):
             aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
 
         # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_PRE20_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
 
         # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_PRE20_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
 
         # Check the driver metrics

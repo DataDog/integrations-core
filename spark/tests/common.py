@@ -11,6 +11,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 SPARK_VERSION_RAW = os.environ['SPARK_VERSION']
 SPARK_VERSION = version.parse(SPARK_VERSION_RAW)
+VERSION_3_0_0 = version.parse('3.0.0')
 
 EXPECTED_E2E_METRICS = [
     'spark.driver.total_shuffle_read',
@@ -65,22 +66,28 @@ EXPECTED_E2E_METRICS = [
     'spark.job.num_failed_tasks',
 ]
 
-if SPARK_VERSION >= version.parse('3.0.0'):
-    EXPECTED_E2E_METRICS.extend([
-        'spark.stage.executor_deserialize_cpu_time',
-        'spark.stage.executor_deserialize_time',
-        'spark.stage.jvm_gc_time',
-        'spark.stage.peak_execution_memory',
-        'spark.stage.result_serialization_time',
-        'spark.stage.result_size',
-        'spark.stage.shuffle_fetch_wait_time',
-        'spark.stage.shuffle_local_blocks_fetched',
-        'spark.stage.shuffle_local_bytes_read',
-        'spark.stage.shuffle_remote_blocks_fetched',
-        'spark.stage.shuffle_remote_bytes_read',
-        'spark.stage.shuffle_remote_bytes_read_to_disk',
-        'spark.stage.shuffle_write_time',
-    ])
+
+# These metrics are enabled by default for all apps in Spark v3
+# They can be enabled with configuration in Spark v2.4
+# See https://spark.apache.org/docs/2.4.0/configuration.html#available-properties
+if SPARK_VERSION >= VERSION_3_0_0:
+    EXPECTED_E2E_METRICS.extend(
+        [
+            'spark.stage.executor_deserialize_cpu_time',
+            'spark.stage.executor_deserialize_time',
+            'spark.stage.jvm_gc_time',
+            'spark.stage.peak_execution_memory',
+            'spark.stage.result_serialization_time',
+            'spark.stage.result_size',
+            'spark.stage.shuffle_fetch_wait_time',
+            'spark.stage.shuffle_local_blocks_fetched',
+            'spark.stage.shuffle_local_bytes_read',
+            'spark.stage.shuffle_remote_blocks_fetched',
+            'spark.stage.shuffle_remote_bytes_read',
+            'spark.stage.shuffle_remote_bytes_read_to_disk',
+            'spark.stage.shuffle_write_time',
+        ]
+    )
 
 
 INSTANCE_STANDALONE = {
