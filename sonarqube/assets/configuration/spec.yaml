@@ -7,6 +7,7 @@ files:
     - template: init_config/jmx
       overrides:
         is_jmx.value.example: false
+    - template: init_config/http
   - template: instances
     options:
     - name: web_endpoint
@@ -79,6 +80,12 @@ files:
           items:
             type: string
     - template: instances/jmx
+      overrides:
+        password.description: |
+          Password to use when connecting to JMX or HTTP (depending on the value of `is_jmx`).
+    - template: instances/http
+      overrides:
+        password.hidden: true
   - template: logs
     example:
     - type: file
