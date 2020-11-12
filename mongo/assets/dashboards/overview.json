@@ -6,9 +6,8 @@
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "https://cdn-assets-cloud.frontify.com/local/frontify/eyJwYXRoIjoiXC9wdWJsaWNcL3VwbG9hZFwvc2NyZWVuc1wvMTk3OTA0XC80M2ZmNTdhYjc4OTdlZjUzY2IzMWUwNGU0MTVjZTY2NC0xNTYyMTAzMDk0LnBuZyJ9:frontify:7CTV2DtJsWvlctEUEyFK36JoXsZuVtHssMaDED6O5z0?width=2400",
-        "sizing": "fit",
-        "margin": "small"
+        "url": "https://app.datadoghq.com/static/images/saas_logos/bot/mongodb@2x.png",
+        "sizing": "zoom"
       },
       "layout": { "x": 0, "y": 0, "width": 32, "height": 10 }
     },
@@ -432,7 +431,7 @@
       "definition": {
         "type": "note",
         "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure to use Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions that is fetched from secondaries.",
-        "background_color": "green",
+        "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
@@ -460,7 +459,7 @@
       "definition": {
         "type": "note",
         "content": "Count of chunks requires Agent 7.24+/6.24+ and 'jumbo_chunks' set in the integration configuration directed to your 'mongos' proxy.",
-        "background_color": "green",
+        "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
@@ -543,7 +542,7 @@
       "definition": {
         "type": "note",
         "content": "If MongoDB cannot split a chunk that exceeds the specified chunk size, MongoDB labels the chunk as jumbo.\n\nThese jumbo chunks can become a performance bottleneck as they continue to grow, especially if the shard key value occurs with high frequency.",
-        "background_color": "green",
+        "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
@@ -557,7 +556,7 @@
       "definition": {
         "type": "note",
         "content": "This metric reports the percentage of used client connection for each replica set. Use these values to understand the load and capacity requirements of your cluster.",
-        "background_color": "green",
+        "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
@@ -571,7 +570,7 @@
       "definition": {
         "type": "note",
         "content": "The number of page fault usually increase significantly when your server is experiencing poor performance.\nIt can be caused by limited memory or data sets getting larger.\n\nIn containerized environment you may want to change to query to group `by {pod_name}` instead.",
-        "background_color": "green",
+        "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
@@ -616,7 +615,7 @@
       "definition": {
         "type": "note",
         "content": "Amount of RAM used by the mongo process. During normal use, this value tends to grow. In dedicated database servers, this number tends to approach the total amount of system memory.",
-        "background_color": "green",
+        "background_color": "gray",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
