@@ -28,7 +28,7 @@ STANDARD_FIELDS = {
     'tls_cert': None,
     'tls_private_key': None,
     'tls_private_key_password': None,
-    'tls_validate_hostname': True
+    'tls_validate_hostname': True,
 }
 
 
