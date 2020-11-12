@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import hashlib
 
+import mock
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.voltdb import VoltDBCheck
 from datadog_checks.voltdb.types import Instance
 
@@ -62,3 +64,47 @@ class TestCheck:
         assert '401 Client Error: Unauthorized' in error
 
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+class TestVersionMetadata:
+    VERSION_MOCK_TARGET = 'datadog_checks.voltdb.VoltDBCheck._fetch_version'
+
+    def _run_test(self, instance, datadog_agent, metadata):
+        # type: (Instance, DatadogAgentStub, dict) -> None
+        check_id = 'test'
+        check = VoltDBCheck('voltdb', {}, [instance])
+        check.check_id = check_id
+        error = check.run()
+        assert not error
+        datadog_agent.assert_metadata(check_id, metadata)
+
+    def test_default(self, instance, datadog_agent):
+        # type: (Instance, DatadogAgentStub) -> None
+        version = common.VOLTDB_VERSION
+        major, minor, patch = version.split('.')
+        metadata = {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': version,
+        }
+
+        self._run_test(instance, datadog_agent, metadata=metadata)
+
+    @pytest.mark.integration
+    def test_malformed(self, instance, datadog_agent):
+        # type: (Instance, DatadogAgentStub) -> None
+        malformed_version_string = 'obviously_not_a_version_string'
+        with mock.patch(self.VERSION_MOCK_TARGET, return_value=malformed_version_string):
+            # Should not fail.
+            self._run_test(instance, datadog_agent, metadata={})
+
+    @pytest.mark.integration
+    def test_failure(self, instance, datadog_agent):
+        # type: (Instance, DatadogAgentStub) -> None
+        with mock.patch(self.VERSION_MOCK_TARGET, side_effect=ValueError('Oops!')):
+            # Should not fail.
+            self._run_test(instance, datadog_agent, metadata={})

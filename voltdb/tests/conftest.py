@@ -20,6 +20,7 @@ def dd_environment(instance):
         CheckDockerLogs(compose_file, patterns=['Server completed initialization']),
     ]
     env_vars = {
+        'VOLTDB_IMAGE': common.VOLTDB_IMAGE,
         'VOLTDB_CLIENT_PORT': str(common.VOLTDB_CLIENT_PORT),
         'TLS_OUTPUT_DIR': common.TLS_OUTPUT_DIR,
     }
