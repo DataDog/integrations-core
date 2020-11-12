@@ -4,8 +4,8 @@
 import click
 
 from ...console import CONTEXT_SETTINGS
-from .translate_profile import translate_profile
 from .generate_profile import generate_profile_from_mibs
+from .translate_profile import translate_profile
 
 ALL_COMMANDS = [generate_profile_from_mibs, translate_profile]
 
