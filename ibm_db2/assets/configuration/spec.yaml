@@ -19,6 +19,7 @@ files:
         required: True
         value:
           type: string
+          example: <DATABASE_NAME>
       - name: username
         description: The database user to authenticate as.
         required: True
@@ -33,6 +34,7 @@ files:
         description: The hostname used to connect to a remote or uncataloged database.
         value:
           type: string
+          example: <HOSTNAME>
       - name: port
         description: The port used to connect to a remote or uncataloged database.
         value:
@@ -54,17 +56,17 @@ files:
             3. columns - This is a list representing each column, ordered sequentially
                          from left to right. The number of columns must equal the number
                          of columns returned in the query.
-                        There are 2 required pieces of data:
+                         There are 2 required pieces of data:
                            a. name - This is the suffix to append to the metric_prefix
                                      in order to form the full metric name. If `type` is
                                      `tag`, this column will instead be considered a tag
-                                      and will be applied to every metric collected by
-                                      this particular query.
+                                     and will be applied to every metric collected by
+                                     this particular query.
                            b. type - This is the submission method (gauge, count, rate, etc.).
                                      This can also be set to `tag` to tag each metric in the row
-                                      with the name and value of the item in this column. You can
-                                      use the `count` type to perform aggregation for queries that
-                                      return multiple rows with the same or no tags.
+                                     with the name and value of the item in this column. You can
+                                     use the `count` type to perform aggregation for queries that
+                                     return multiple rows with the same or no tags.
 
                           Columns without a name are ignored, put this for any column you wish to skip:
                             - {}
