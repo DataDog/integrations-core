@@ -81,6 +81,20 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_db_fragmentation_metrics
+      description: Include database fragmentation metrics.
+      value:
+        type: boolean
+        example: false
+    - name: db_fragmentation_object_names
+      description: |
+        Fragmentation metrics normally emit metrics for all objects within a database.
+        This option allows you to specify database object names to query for fragmentation metrics.
+        Note: Each object name is unique to each database.
+      value:
+        type: array
+        items:
+          type: string
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider

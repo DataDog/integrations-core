@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 5.2.1 / 2020-11-10
+
+* [Fixed] Fix query tag to use the normalized query. See [#7982](https://github.com/DataDog/integrations-core/pull/7982).
+* [Fixed] Change `deep_database_monitoring` language from BETA to ALPHA. See [#7947](https://github.com/DataDog/integrations-core/pull/7947).
+
 ## 5.2.0 / 2020-10-31
 
 * [Added] Support postgres statement-level metrics for deep database monitoring. See [#7852](https://github.com/DataDog/integrations-core/pull/7852).

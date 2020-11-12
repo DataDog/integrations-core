@@ -35,8 +35,8 @@ def _parse_storage_metrics(data, tags, include_location_forest):
     for host_data in all_hosts_data:
         host_tags = tags[:]
         host_id = host_data['relation-id']
-        host_tags.append('host_id:{}'.format(host_id))
-        host_tags.append('host_name:{}'.format(hosts_meta[host_id]))
+        host_tags.append('marklogic_host_id:{}'.format(host_id))
+        host_tags.append('marklogic_host_name:{}'.format(hosts_meta[host_id]))
         for location_data in host_data['locations']['location']:
             location_tags = host_tags + ['storage_path:{}'.format(location_data['path'])]
             for host_key, host_value in iteritems(location_data):

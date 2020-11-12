@@ -44,7 +44,6 @@ class StatementMetrics:
         """
         result = []
         new_cache = {}
-        negative_result_found = False
         metrics = set(metrics)
 
         if len(rows) > 0:
@@ -68,11 +67,6 @@ class StatementMetrics:
             # whether a metric is submitted for the row during this run or not.
             new_cache[row_key] = row
 
-            # If a stats reset has happened, all other logic can be skipped since the previous check run's values are
-            # invalidated.
-            if negative_result_found:
-                continue
-
             prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
@@ -83,8 +77,8 @@ class StatementMetrics:
             # There are a couple of edge cases to be aware of:
             #
             # 1. Table truncation or stats reset: Because the table values are always increasing, a negative value
-            #    suggests truncation or a stats reset. In this case, all rows from the previous run must be discarded.
-            #    Tracking should start over with the current run's values.
+            #    suggests truncation or a stats reset. In this case, the row difference is discarded and the row should.
+            #    be tracked from this run forward.
             #
             # 2. No changes since the previous run: There is no need to store metrics of 0, since that is implied by
             #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
@@ -94,7 +88,9 @@ class StatementMetrics:
 
             # Check for negative values, but only in the columns used for metrics
             if any(diffed_row[k] < 0 for k in metric_columns):
-                negative_result_found = True
+                # A "break" might be expected here instead of "continue," but there are cases where a subset of rows
+                # are removed. To avoid situations where all results are discarded every check run, we err on the side
+                # of potentially including truncated rows that exceed previous run counts.
                 continue
 
             # No changes to the query; no metric needed
@@ -104,9 +100,6 @@ class StatementMetrics:
             result.append(diffed_row)
 
         self._previous_statements = new_cache
-
-        if negative_result_found:
-            return []
 
         return result
 

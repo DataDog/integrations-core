@@ -10,17 +10,17 @@ ALLOWED_RESOURCES_FOR_FILTERS = ['database', 'forest', 'host', 'server']
 BASE_ENDPOINT = '/manage/v2'
 
 RESOURCE_TYPES = {
-    'cluster': {'plural': None, 'singular': 'cluster'},
-    'forest': {'plural': 'forests', 'singular': 'forest'},
-    'forests': {'plural': 'forests', 'singular': 'forest'},
-    'database': {'plural': 'databases', 'singular': 'database'},
-    'databases': {'plural': 'databases', 'singular': 'database'},
-    'group': {'plural': 'groups', 'singular': 'group'},
-    'groups': {'plural': 'groups', 'singular': 'group'},
-    'host': {'plural': 'hosts', 'singular': 'host'},
-    'hosts': {'plural': 'hosts', 'singular': 'host'},
-    'server': {'plural': 'servers', 'singular': 'server'},
-    'servers': {'plural': 'servers', 'singular': 'server'},
+    'cluster': {'plural': None, 'singular': 'cluster', 'tag_name': 'cluster_name'},
+    'forest': {'plural': 'forests', 'singular': 'forest', 'tag_name': 'forest_name'},
+    'forests': {'plural': 'forests', 'singular': 'forest', 'tag_name': 'forest_name'},
+    'database': {'plural': 'databases', 'singular': 'database', 'tag_name': 'database_name'},
+    'databases': {'plural': 'databases', 'singular': 'database', 'tag_name': 'database_name'},
+    'group': {'plural': 'groups', 'singular': 'group', 'tag_name': 'group_name'},
+    'groups': {'plural': 'groups', 'singular': 'group', 'tag_name': 'group_name'},
+    'host': {'plural': 'hosts', 'singular': 'host', 'tag_name': 'marklogic_host_name'},
+    'hosts': {'plural': 'hosts', 'singular': 'host', 'tag_name': 'marklogic_host_name'},
+    'server': {'plural': 'servers', 'singular': 'server', 'tag_name': 'server_name'},
+    'servers': {'plural': 'servers', 'singular': 'server', 'tag_name': 'server_name'},
 }  # type: Dict[str, Dict]
 
 # Storage metrics are duplications
