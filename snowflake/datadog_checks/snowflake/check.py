@@ -150,7 +150,7 @@ class SnowflakeCheck(AgentCheck):
             try:
                 return method(*args, **kwargs)
             except Exception as e:
-                self.warning(
+                self.log.error(
                     "Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e)
                 )
                 return
