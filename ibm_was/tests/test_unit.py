@@ -81,7 +81,7 @@ def test_config_validation(check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
         with pytest.raises(ConfigurationError) as e:
             check = check(None)
-            check.check({})
+            check.check(common.MISSING_REQ_FIELD_INSTANCE)
             assert "Please specify a servlet_url" in str(e)
 
 
@@ -115,6 +115,8 @@ def test_right_server_tag(instance, check, aggregator):
 
 def test_right_values(instance, check, aggregator):
     del instance['custom_queries']
+    instance['collect_thread_pool_stats'] = False
+    instance['collect_servlet_session_stats'] = False
 
     with mock.patch(
         'datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-multiple-nodes.xml')
