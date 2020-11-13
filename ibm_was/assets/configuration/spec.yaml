@@ -1,0 +1,86 @@
+name: IBM WAS
+files:
+  - name: ibm_was.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: servlet_url
+            required: true
+            description: |
+              The URL of the PerfServlet configured to report metrics.
+              Note: The default port is usually 9080.
+            value:
+              type: string
+              example: http://localhost:<PORT>/wasPerfTool/servlet/perfservlet
+          - template: instances/http
+          - template: instances/db
+            overrides:
+              use_global_custom_queries.hidden: true
+              custom_queries.description: |
+                List of custom or additional XML attributes to parse and submit as metrics
+                Each must contain a `metric_prefix` and `stat` element
+                If the `stat` node has sub `stat` nodes, the name of these nodes must be specified
+                in the order they occur within the XML document and will be displayed as tags.
+                The metric will be named `ibmwas.<metric_prefix>.<xml_attribute_name>` and be tagged with the
+                `name` value of the corresponding `tag_keys` attributes.
+
+                  <Stat name="Thread Pools Custom">
+                    <Stat name="AriesThreadPool">
+                      <TimeStatistic name="ActiveTime" totalTime="0" ... />
+                    </Stat>
+                    <Stat name="Default">
+                      <CountStatistic name="DeclaredThreadHungCount" count="0" ... />
+                    </Stat>
+                  </Stat>
+
+                The following custom query would emit:
+                  self.gauge('ibm_was.thread_pools.ActiveTime', value=0, tags=['threadKey:AriesThreadPool', ...])
+                  self.gauge('ibm_was.thread_pools.DeclaredThreadHungCount', value=0, tags=['threadKey:Default', ...])
+              custom_queries.value.type:
+                array
+              custom_queries.value.items.type: object
+              custom_queries.value.items.properties:
+                  - name: metric_prefix
+                    type: string
+                  - name: stat
+                    type: string
+                  - name: tag_keys
+                    type: array
+                    items:
+                      type: string
+              custom_queries.value.example:
+                - metric_prefix: "thread_pools"
+                  stat: "Thread Pools Custom"
+                  tag_keys:
+                    - "threadKey"
+          - name: custom_queries_units_gauge
+            description: |
+              List of unit names used to map CountStatistic to gauge in custom queries.
+              By default CountStatistic stats are submitted as monotonic count, but some of them actually contain
+              data which are gauge, as they have data with a unit. To get that behavior, the unit can be added here
+              and the check will translate the metric type.
+
+              For example:
+                <Stat name="xdProcessModule">
+                  <CountStatistic ID="4" count="11779168" name="totalMemory" unit="unit.kbyte" ... />
+                </Stat>
+
+              would be submitted as a count, but will be as a gauge if `unit.kbyte` is present in `custom_queries_units_gauge`.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - unit.kbyte
+                - kilobyte
+                - second
+          - template: instances/default
+      - template: logs
+        example:
+          - type: file
+            path: /opt/IBM/WebSphere/AppServer/profiles/InfoSphere/logs/server1/*.log
+            source: ibm_was
+            service: websphere
