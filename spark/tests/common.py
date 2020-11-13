@@ -64,6 +64,11 @@ EXPECTED_E2E_METRICS = [
     'spark.job.num_completed_tasks',
     'spark.job.num_skipped_stages',
     'spark.job.num_failed_tasks',
+    'spark.driver.memory.used_on_heap_storage',
+    'spark.driver.memory.used_off_heap_storage',
+    'spark.driver.memory.total_on_heap_storage',
+    'spark.driver.memory.total_off_heap_storage',
+    'spark.driver.total_gc_time',
 ]
 
 
