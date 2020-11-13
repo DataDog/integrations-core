@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.13.1 / 2020-11-13
+
+* [Fixed] Fix exception message. See [#7912](https://github.com/DataDog/integrations-core/pull/7912).
+
 ## 3.13.0 / 2020-10-31
 
 * [Added] Support couch v3. See [#7570](https://github.com/DataDog/integrations-core/pull/7570).
