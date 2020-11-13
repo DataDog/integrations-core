@@ -18,56 +18,58 @@ METRIC_PREFIX = 'ibm_mq'
 
 def queue_metrics():
     return {
-        'service_interval': pymqi.CMQC.MQIA_Q_SERVICE_INTERVAL,
-        'inhibit_put': pymqi.CMQC.MQIA_INHIBIT_PUT,
-        'depth_low_limit': pymqi.CMQC.MQIA_Q_DEPTH_LOW_LIMIT,
-        'inhibit_get': pymqi.CMQC.MQIA_INHIBIT_GET,
-        'harden_get_backout': pymqi.CMQC.MQIA_HARDEN_GET_BACKOUT,
-        'service_interval_event': pymqi.CMQC.MQIA_Q_SERVICE_INTERVAL_EVENT,
-        'trigger_control': pymqi.CMQC.MQIA_TRIGGER_CONTROL,
-        'usage': pymqi.CMQC.MQIA_USAGE,
-        'scope': pymqi.CMQC.MQIA_SCOPE,
-        'type': pymqi.CMQC.MQIA_Q_TYPE,
-        'depth_max': pymqi.CMQC.MQIA_MAX_Q_DEPTH,
-        'backout_threshold': pymqi.CMQC.MQIA_BACKOUT_THRESHOLD,
-        'depth_high_event': pymqi.CMQC.MQIA_Q_DEPTH_HIGH_EVENT,
-        'depth_low_event': pymqi.CMQC.MQIA_Q_DEPTH_LOW_EVENT,
-        'trigger_message_priority': pymqi.CMQC.MQIA_TRIGGER_MSG_PRIORITY,
-        'depth_current': pymqi.CMQC.MQIA_CURRENT_Q_DEPTH,
-        'depth_max_event': pymqi.CMQC.MQIA_Q_DEPTH_MAX_EVENT,
-        'open_input_count': pymqi.CMQC.MQIA_OPEN_INPUT_COUNT,
-        'persistence': pymqi.CMQC.MQIA_DEF_PERSISTENCE,
-        'trigger_depth': pymqi.CMQC.MQIA_TRIGGER_DEPTH,
-        'max_message_length': pymqi.CMQC.MQIA_MAX_MSG_LENGTH,
-        'depth_high_limit': pymqi.CMQC.MQIA_Q_DEPTH_HIGH_LIMIT,
-        'priority': pymqi.CMQC.MQIA_DEF_PRIORITY,
-        'input_open_option': pymqi.CMQC.MQIA_DEF_INPUT_OPEN_OPTION,
-        'message_delivery_sequence': pymqi.CMQC.MQIA_MSG_DELIVERY_SEQUENCE,
-        'retention_interval': pymqi.CMQC.MQIA_RETENTION_INTERVAL,
-        'open_output_count': pymqi.CMQC.MQIA_OPEN_OUTPUT_COUNT,
-        'trigger_type': pymqi.CMQC.MQIA_TRIGGER_TYPE,
-        'depth_percent': depth_percent,
+        # 'service_interval': pymqi.CMQC.MQIA_Q_SERVICE_INTERVAL,
+        # 'inhibit_put': pymqi.CMQC.MQIA_INHIBIT_PUT,
+        # 'depth_low_limit': pymqi.CMQC.MQIA_Q_DEPTH_LOW_LIMIT,
+        # 'inhibit_get': pymqi.CMQC.MQIA_INHIBIT_GET,
+        # 'harden_get_backout': pymqi.CMQC.MQIA_HARDEN_GET_BACKOUT,
+        # 'service_interval_event': pymqi.CMQC.MQIA_Q_SERVICE_INTERVAL_EVENT,
+        # 'trigger_control': pymqi.CMQC.MQIA_TRIGGER_CONTROL,
+        # 'usage': pymqi.CMQC.MQIA_USAGE,
+        # 'scope': pymqi.CMQC.MQIA_SCOPE,
+        # 'type': pymqi.CMQC.MQIA_Q_TYPE,
+        # 'depth_max': pymqi.CMQC.MQIA_MAX_Q_DEPTH,
+        # 'backout_threshold': pymqi.CMQC.MQIA_BACKOUT_THRESHOLD,
+        # 'depth_high_event': pymqi.CMQC.MQIA_Q_DEPTH_HIGH_EVENT,
+        # 'depth_low_event': pymqi.CMQC.MQIA_Q_DEPTH_LOW_EVENT,
+        # 'trigger_message_priority': pymqi.CMQC.MQIA_TRIGGER_MSG_PRIORITY,
+        # 'depth_current': pymqi.CMQC.MQIA_CURRENT_Q_DEPTH,
+        # 'depth_max_event': pymqi.CMQC.MQIA_Q_DEPTH_MAX_EVENT,
+        # 'open_input_count': pymqi.CMQC.MQIA_OPEN_INPUT_COUNT,
+        # 'persistence': pymqi.CMQC.MQIA_DEF_PERSISTENCE,
+        # 'trigger_depth': pymqi.CMQC.MQIA_TRIGGER_DEPTH,
+        # 'max_message_length': pymqi.CMQC.MQIA_MAX_MSG_LENGTH,
+        # 'depth_high_limit': pymqi.CMQC.MQIA_Q_DEPTH_HIGH_LIMIT,
+        # 'priority': pymqi.CMQC.MQIA_DEF_PRIORITY,
+        # 'input_open_option': pymqi.CMQC.MQIA_DEF_INPUT_OPEN_OPTION,
+        # 'message_delivery_sequence': pymqi.CMQC.MQIA_MSG_DELIVERY_SEQUENCE,
+        # 'retention_interval': pymqi.CMQC.MQIA_RETENTION_INTERVAL,
+        # 'open_output_count': pymqi.CMQC.MQIA_OPEN_OUTPUT_COUNT,
+        # 'trigger_type': pymqi.CMQC.MQIA_TRIGGER_TYPE,
+        # 'depth_percent': depth_percent,
     }
 
 
 def pcf_metrics():
     return {
-        'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
-        'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+        # 'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
+        # 'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
     }
 
 
 def pcf_status_reset_metrics():
     return {
-        'high_q_depth': (pymqi.CMQC.MQIA_HIGH_Q_DEPTH, GAUGE),
-        'msg_deq_count': (pymqi.CMQC.MQIA_MSG_DEQ_COUNT, COUNT),
-        'msg_enq_count': (pymqi.CMQC.MQIA_MSG_ENQ_COUNT, COUNT),
-        'time_since_reset': (pymqi.CMQC.MQIA_TIME_SINCE_RESET, COUNT),
+        # 'high_q_depth': (pymqi.CMQC.MQIA_HIGH_Q_DEPTH, GAUGE),
+        # 'msg_deq_count': (pymqi.CMQC.MQIA_MSG_DEQ_COUNT, COUNT),
+        # 'msg_enq_count': (pymqi.CMQC.MQIA_MSG_ENQ_COUNT, COUNT),
+        # 'time_since_reset': (pymqi.CMQC.MQIA_TIME_SINCE_RESET, COUNT),
     }
 
 
 def queue_manager_metrics():
-    return {'dist_lists': pymqi.CMQC.MQIA_DIST_LISTS, 'max_msg_list': pymqi.CMQC.MQIA_MAX_MSG_LENGTH}
+    return {
+        # 'dist_lists': pymqi.CMQC.MQIA_DIST_LISTS, 'max_msg_list': pymqi.CMQC.MQIA_MAX_MSG_LENGTH
+    }
 
 
 def channel_metrics():
@@ -122,7 +124,11 @@ def channel_stats_metrics():
 
 def queue_stats_metrics():
     return {
-        'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
+        # 'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
+        # 'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
+        # 'q_type': (pymqi.CMQC.MQIA_Q_TYPE, GAUGE),
+        'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),  # this is a list
+        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT)  # this is a list
     }
 
 
