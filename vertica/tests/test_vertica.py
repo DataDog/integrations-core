@@ -71,7 +71,6 @@ def test_check_connection_load_balance(instance, dd_run_check):
 
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance, dd_run_check):
-    instance['metric_groups'] = ['custom']
     instance['custom_queries'] = [
         {
             'tags': ['test:vertica'],

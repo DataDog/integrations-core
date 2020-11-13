@@ -120,6 +120,7 @@ class VerticaCheck(AgentCheck):
                 method()
 
             self.query_version()
+            self.query_custom()
 
         finally:
             self._view.clear()
@@ -638,7 +639,6 @@ class VerticaCheck(AgentCheck):
                 ('resource_pool_status', self.query_resource_pool_status),
                 ('disk_storage', self.query_disk_storage),
                 ('resource_usage', self.query_resource_usage),
-                ('custom', self.query_custom),
             )
         )
 
@@ -658,7 +658,7 @@ class VerticaCheck(AgentCheck):
 
         # License query needs to be run before getting system
         if 'system' in metric_groups and 'licenses' not in metric_groups:
-            self.log.debug('Including licenses group as it is required for sytem collection')
+            self.log.debug('Detected `system` metric group, adding the `licenses` to metric_groups.')
             metric_groups.insert(0, 'licenses')
 
         self._metric_groups.extend(default_metric_groups[group] for group in metric_groups)
