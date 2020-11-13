@@ -27,18 +27,18 @@ files:
                 The metric will be named `ibmwas.<metric_prefix>.<xml_attribute_name>` and be tagged with the
                 `name` value of the corresponding `tag_keys` attributes.
 
-                  <Stat name="Thread Pools Custom">
-                    <Stat name="AriesThreadPool">
-                      <TimeStatistic name="ActiveTime" totalTime="0" ... />
-                    </Stat>
-                    <Stat name="Default">
-                      <CountStatistic name="DeclaredThreadHungCount" count="0" ... />
-                    </Stat>
+                <Stat name="Thread Pools Custom">
+                  <Stat name="AriesThreadPool">
+                    <TimeStatistic name="ActiveTime" totalTime="0" ... />
                   </Stat>
+                  <Stat name="Default">
+                    <CountStatistic name="DeclaredThreadHungCount" count="0" ... />
+                  </Stat>
+                </Stat>
 
                 The following custom query would emit:
-                  self.gauge('ibm_was.thread_pools.ActiveTime', value=0, tags=['threadKey:AriesThreadPool', ...])
-                  self.gauge('ibm_was.thread_pools.DeclaredThreadHungCount', value=0, tags=['threadKey:Default', ...])
+                self.gauge('ibm_was.thread_pools.ActiveTime', value=0, tags=['threadKey:AriesThreadPool', ...])
+                self.gauge('ibm_was.thread_pools.DeclaredThreadHungCount', value=0, tags=['threadKey:Default', ...])
               custom_queries.value.type:
                 array
               custom_queries.value.items.type: object
@@ -64,9 +64,9 @@ files:
               and the check will translate the metric type.
 
               For example:
-                <Stat name="xdProcessModule">
-                  <CountStatistic ID="4" count="11779168" name="totalMemory" unit="unit.kbyte" ... />
-                </Stat>
+              <Stat name="xdProcessModule">
+                <CountStatistic ID="4" count="11779168" name="totalMemory" unit="unit.kbyte" ... />
+              </Stat>
 
               would be submitted as a count, but will be as a gauge if `unit.kbyte` is present in `custom_queries_units_gauge`.
             value:

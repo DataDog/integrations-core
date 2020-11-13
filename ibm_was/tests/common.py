@@ -12,9 +12,6 @@ PORT = '9080'
 
 INSTANCE = {
     'servlet_url': 'http://{}:{}/wasPerfTool/servlet/perfservlet'.format(HOST, PORT),
-    'collect_thread_pool_stats': True,
-    'collect_servlet_session_stats': True,
-    'collect_jdbc_stats': True,
     'tags': ['key1:value1'],
     'custom_queries': [
         {'metric_prefix': 'jdbc_custom', 'tag_keys': ['JDBCKey', 'JDBCKey2'], 'stat': 'JDBC Connection Custom'},
@@ -23,17 +20,8 @@ INSTANCE = {
     ],
 }
 
-MISSING_REQ_FIELD_INSTANCE = {
-    'collect_thread_pool_stats': True,
-    'collect_servlet_session_stats': True,
-    'collect_jdbc_stats': True,
-}
-
 MALFORMED_CUSTOM_QUERY_INSTANCE = {
     'servlet_url': 'http://{}:{}/wasPerfTool/servlet/perfservlet'.format(HOST, PORT),
-    'collect_thread_pool_stats': True,
-    'collect_servlet_session_stats': True,
-    'collect_jdbc_stats': True,
     'custom_queries': [{'tag_keys': ['JDBCKey', 'JDBCKey2'], 'stat': 'JDBC Connection Custom'}],
 }
 
