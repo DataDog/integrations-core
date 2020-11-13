@@ -64,7 +64,7 @@ def test_metadata(check, instance, datadog_agent):
 
 @mock.patch(
     'datadog_checks.nginx.Nginx._get_plus_api_data',
-    return_value=open(os.path.join(FIXTURES_PATH, 'nginx_plus_in.json')).read(),
+    return_value=open(os.path.join(FIXTURES_PATH, 'plus_api_nginx.json')).read(),
 )
 def test_metadata_plus(_, aggregator, check, datadog_agent):
     # Hardcoded in the fixture

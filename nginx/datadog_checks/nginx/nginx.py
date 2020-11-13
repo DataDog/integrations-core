@@ -106,15 +106,15 @@ class Nginx(AgentCheck):
             for endpoint, nest in plus_api_chain_list:
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
 
-                try:
-                    if isinstance(response, dict):
-                        version_plus = response.get('nginx_version')
-                    else:
-                        version_plus = json.loads(response).get('nginx_version')
-
-                    self._set_version_metadata(version_plus)
-                except Exception as e:
-                    self.log.debug("Couldn't submit nginx version: %s", e)
+                if endpoint == 'nginx':
+                    try:
+                        if isinstance(response, dict):
+                            version_plus = response.get('version')
+                        else:
+                            version_plus = json.loads(response).get('version')
+                        self._set_version_metadata(version_plus)
+                    except Exception as e:
+                        self.log.debug("Couldn't submit nginx version: %s", e)
 
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
