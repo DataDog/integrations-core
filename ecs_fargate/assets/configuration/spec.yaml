@@ -1,0 +1,10 @@
+name: Amazon Fargate
+files:
+  - name: ecs_fargate.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+      - template: instances
+        options:
+          - template: instances/http

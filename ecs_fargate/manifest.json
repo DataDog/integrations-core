@@ -24,6 +24,9 @@
   "type": "check",
   "integration_id": "aws-fargate",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"

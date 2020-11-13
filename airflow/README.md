@@ -17,17 +17,24 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 
 ### Installation
 
-All three steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][9] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
+All steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][9] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
 
-#### Step 1: Configure Airflow to collect health metrics and service checks
+### Configuration
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+##### Configure Airflow
 
 Configure the Airflow check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
 (Optional) Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
 
-**Note**: If you are using containers, see [Autodiscovery Container Identifiers][12] for details.
+##### Connect Airflow to DogStatsD
 
-#### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
+Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics:
 
 **Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][13].
 
@@ -170,16 +177,16 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
              state: "$3"
    ```
 
-#### Step 3: Restart Datadog Agent and Airflow
+##### Restart Datadog Agent and Airflow
 
 1. [Restart the Agent][4].
 2. Restart Airflow to start sending your Airflow metrics to the Agent DogStatsD endpoint.
 
-#### Integration Service Checks
+##### Integration service checks
 
-Use the default configuration of your `airflow.d/conf.yaml` file to activate the collection of your Airflow service checks. See the sample [airflow.d/conf.yaml][3] for all available configuration options.
+Use the default configuration in your `airflow.d/conf.yaml` file to activate your Airflow service checks. See the sample [airflow.d/conf.yaml][3] for all available configuration options.
 
-#### Log collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -248,6 +255,42 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][7].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][13] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                 |
+|----------------------|-----------------------|
+| `<INTEGRATION_NAME>` | `airflow`             |
+| `<INIT_CONFIG>`      | blank or `{}`         |
+| `<INSTANCE_CONFIG>`  | `{"url": "%%host%%"}` |
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][14].
+
+| Parameter      | Value                                                 |
+|----------------|-------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "airflow", "service": "<YOUR_APP_NAME>"}` |
+
+##### Kubernetes
+
+Tips for Kubernetes installations:
+
+- Customize the Airflow configuration with [pod annotations][14].
+- When modifying `airflow.cfg`, `statsd_host` should be set to the IP address of the Kubernetes node.
+- See the Datadog `integrations-core` repo for an [example setup][15].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `airflow` under the Checks section.
@@ -295,5 +338,7 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
-[12]: https://docs.datadoghq.com/agent/guide/ad_identifiers/
-[13]: https://github.com/apache/airflow/issues/11514
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[15]: https://github.com/DataDog/integrations-core/tree/master/airflow/tests/k8s_sample

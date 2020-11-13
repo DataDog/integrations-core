@@ -627,7 +627,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
     devices_matched = [
         {'community_string': 'hpe-proliant', 'sysobjectid': '1.3.6.1.4.1.232.1.2'},
-        {'community_string': 'network', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
+        {'community_string': 'generic-router', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
     ]
     common_tags = common.CHECK_TAGS + ['snmp_profile:profile1']
     for device in devices_matched:
@@ -646,7 +646,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
     caplog.at_level(logging.WARNING)
     devices_not_matched = [
-        {'community_string': '3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
+        {'community_string': 'cisco-3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
     ]
     for device in devices_not_matched:
         instance = common.generate_instance_config([])

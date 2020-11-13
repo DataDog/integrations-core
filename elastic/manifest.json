@@ -34,7 +34,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "elasticsearch": "assets/dashboards/overview.json",
+      "elasticsearch_timeboard": "assets/dashboards/metrics.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "elasticsearch"

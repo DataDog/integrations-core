@@ -68,6 +68,7 @@ nav:
       - tutorials/snmp/how-to.md
       - tutorials/snmp/profile-format.md
       - tutorials/snmp/sim-format.md
+      - tutorials/snmp/tools.md
     - Memory profiling: tutorials/memory-profiling.md
   - Architecture:
     - SNMP: architecture/snmp.md
