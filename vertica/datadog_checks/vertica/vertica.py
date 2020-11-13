@@ -625,6 +625,7 @@ class VerticaCheck(AgentCheck):
             yield row
 
     def parse_metric_groups(self):
+        # If you create a new function, please add this to `default_metric_groups` below and the config file (under `metric_groups`).
         default_metric_groups = OrderedDict(
             (
                 ('licenses', self.query_licenses),
