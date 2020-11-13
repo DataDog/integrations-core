@@ -109,6 +109,11 @@ instances:
     #
     # streaming_metrics: true
 
+    ## @param executor_level_metrics - boolean - optional - default: false
+    ## Enable collection of more granular executor metrics.
+    #
+    # executor_level_metrics: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
