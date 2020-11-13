@@ -62,6 +62,7 @@ class SnowflakeCheck(AgentCheck):
         if not self.metric_queries:
             raise ConfigurationError('No valid metric_groups configured, please list at least one.')
 
+        self._proxies = self.http.options['proxies']  # SKIP_HTTP_VALIDATION
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
@@ -105,11 +106,10 @@ class SnowflakeCheck(AgentCheck):
         )
 
         try:
-            proxies = self.http.options['proxies']  # SKIP_HTTP_VALIDATION
             with self.MONKEY_PATCH_LOCK:
                 # Monkey patch proxies to request_exec
                 SnowflakeRestful._request_exec = self._make_snowflake_request_func(
-                    proxies, SnowflakeRestful._request_exec
+                    self._proxies, SnowflakeRestful._request_exec
                 )
                 conn = sf.connect(
                     user=self.config.user,

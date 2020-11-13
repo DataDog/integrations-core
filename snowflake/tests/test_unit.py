@@ -11,6 +11,9 @@ from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .conftest import CHECK_NAME
 
+PROXY_CONFIG = {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}
+INVALID_PROXY = {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}
+
 
 def test_config():
     # Test missing account
@@ -150,10 +153,39 @@ def test_metric_group_exceptions(instance):
         )
 
 
-def test_proxy_config():
+def test_no_proxy_config():
     instance = {}
     init_config = {}
     http = RequestsWrapper(instance, init_config)
 
     assert http.options['proxies'] is None
     assert http.no_proxy_uris is None
+
+
+def test_proxy_agent_config(instance):
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=PROXY_CONFIG):
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+
+        assert check.http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert check._proxies == {'http': 'http_host', 'https': 'https_host'}
+        assert check.http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
+
+
+def test_proxy_init_config_override(instance):
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=INVALID_PROXY):
+        init_config = {'proxy': PROXY_CONFIG}
+        check = SnowflakeCheck(CHECK_NAME, init_config, [instance])
+        assert check.http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert check._proxies == {'http': 'http_host', 'https': 'https_host'}
+        assert check.http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
+
+
+def test_proxy_instance_override(instance):
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=INVALID_PROXY):
+        instance = copy.deepcopy(instance)
+        instance['proxy'] = PROXY_CONFIG
+        init_config = {'proxy': INVALID_PROXY}
+        check = SnowflakeCheck(CHECK_NAME, init_config, [instance])
+        assert check.http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
+        assert check._proxies == {'http': 'http_host', 'https': 'https_host'}
+        assert check.http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
