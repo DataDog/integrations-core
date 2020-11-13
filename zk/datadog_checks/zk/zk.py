@@ -120,7 +120,7 @@ class ZookeeperCheck(AgentCheck):
         self.base_tags = list(set(self.instance.get('tags', [])))
         self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
-        self.enable_ssl = bool(self.instance.get('enable_ssl', False))
+        self.use_tls = is_affirmative(self.instance.get('use_tls', False))
 
     def check(self, _):
         # Send a service check based on the `ruok` response.
@@ -244,29 +244,17 @@ class ZookeeperCheck(AgentCheck):
         return buf
 
     def _send_command(self, command):
-        buf = StringIO()
-        if self.enable_ssl:
-            context = self.get_tls_context()
+        try:
             with closing(socket.create_connection((self.host, self.port))) as sock:
-                ssock = context.wrap_socket(sock, server_hostname=self.host)
-                ssock.settimeout(self.timeout)
-                try:
-                    buf = self._get_data(ssock, command)
-
-                except (socket.timeout, socket.error):
-                    raise ZKConnectionFailure()
-        else:
-            with closing(socket.socket()) as sock:
                 sock.settimeout(self.timeout)
-                # try-finally and try-except to stay compatible with python 2.4
-                try:
-                    # Connect to the zk client port and send the stat command
-                    sock.connect((self.host, self.port))
-                    buf = self._get_data(sock, command)
-
-                except (socket.timeout, socket.error):
-                    raise ZKConnectionFailure()
-        return buf
+                if self.use_tls:
+                    context = self.get_tls_context()
+                    with closing(context.wrap_socket(sock, server_hostname=self.host)) as ssock:
+                        return self._get_data(ssock, command)
+                else:
+                    return self._get_data(sock, command)
+        except (socket.timeout, socket.error):
+            raise ZKConnectionFailure()
 
     def parse_stat(self, buf):
         """

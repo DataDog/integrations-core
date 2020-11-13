@@ -72,6 +72,11 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param use_tls - boolean - optional - default: false
+    ## This enables the SSL/TLS version of the Zookeeper Check.
+    #
+    # use_tls: false
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
     #
@@ -115,11 +120,6 @@ instances:
     ## Verifies that the server's cert hostname matches the one requested.
     #
     # tls_validate_hostname: true
-
-    ## @param enable_ssl - boolean - optional - default: false
-    ## This enables the SSL/TLS version of the Zookeeper Check.
-    #
-    # enable_ssl: false
 
 ## Log Section
 ##

@@ -33,7 +33,6 @@ def test_check(aggregator, dd_environment, get_test_instance, caplog):
     caplog.set_level(logging.DEBUG)
     zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
     zk_check.check(get_test_instance)
-    zk_check.check(get_test_instance)
 
     # adding to skip for now
     skipped_metrics = extract_nan_metrics(caplog.text)

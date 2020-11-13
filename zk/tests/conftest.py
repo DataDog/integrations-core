@@ -4,6 +4,7 @@
 import os
 import sys
 import time
+from copy import deepcopy
 
 import pytest
 
@@ -27,27 +28,27 @@ VALID_CONFIG = {
     'timeout': 500,
 }
 
-VALID_SSL_CONFIG = {
+VALID_TLS_CONFIG = {
     'host': HOST,
     'port': PORT,
     'expected_mode': "standalone",
     'tags': ["mytag"],
     'timeout': 500,
-    'enable_ssl': True,
+    'use_tls': True,
     'tls_private_key': '/conf/private_key.pem',
     'tls_ca_cert': '/conf/ca_cert.pem',
     'tls_cert': '/conf/cert.pem',
     'tls_private_key_password': 'testpass',
 }
 
-# This is different than VALID_SSL_CONFIG since the key locations are different
-VALID_SSL_CONFIG_FOR_TEST = {
+# This is different than VALID_TLS_CONFIG since the key locations are different
+VALID_TLS_CONFIG_FOR_TEST = {
     'host': HOST,
     'port': PORT,
     'expected_mode': "standalone",
     'tags': ["mytag"],
     'timeout': 500,
-    'enable_ssl': True,
+    'use_tls': True,
     'tls_private_key': os.path.join(HERE, 'compose', 'private_key.pem'),
     'tls_ca_cert': os.path.join(HERE, 'compose', 'ca_cert.pem'),
     'tls_cert': os.path.join(HERE, 'compose', 'cert.pem'),
@@ -59,23 +60,23 @@ STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactiv
 
 @pytest.fixture(scope="session")
 def get_instance():
-    if get_ssl():
-        return VALID_SSL_CONFIG
+    if get_tls():
+        return VALID_TLS_CONFIG
     return VALID_CONFIG
 
 
 @pytest.fixture(scope="session")
 def get_test_instance():
-    if get_ssl():
-        return VALID_SSL_CONFIG_FOR_TEST
+    if get_tls():
+        return VALID_TLS_CONFIG_FOR_TEST
     return VALID_CONFIG
 
 
 @pytest.fixture
 def get_invalid_mode_instance():
-    invalid_mode = VALID_CONFIG
-    if get_ssl():
-        invalid_mode = VALID_SSL_CONFIG_FOR_TEST
+    invalid_mode = deepcopy(VALID_CONFIG)
+    if get_tls():
+        invalid_mode = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
 
     invalid_mode['expected_mode'] = "follower"
     return invalid_mode
@@ -83,7 +84,13 @@ def get_invalid_mode_instance():
 
 @pytest.fixture
 def get_conn_failure_config():
-    return {'host': HOST, 'port': 2182, 'expected_mode': "down", 'tags': []}
+    conn_failure_config = deepcopy(VALID_CONFIG)
+    if get_tls():
+        conn_failure_config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
+    conn_failure_config['port'] = 2182
+    conn_failure_config['expected_mode'] = 'down'
+    conn_failure_config['tags'] = []
+    return conn_failure_config
 
 
 def get_version():
@@ -94,13 +101,13 @@ def get_version():
     return version
 
 
-def get_ssl():
+def get_tls():
     return os.environ.get("SSL") == 'True'
 
 
 @pytest.fixture(scope="session")
 def dd_environment(get_instance):
-    def condition_non_ssl():
+    def condition_non_tls():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
         dummy_instance = {'host': HOST, 'port': PORT, 'timeout': 500}
@@ -122,28 +129,28 @@ def dd_environment(get_instance):
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
     if [3, 5, 0] <= get_version() < [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
-        if get_ssl():
+        if get_tls():
             compose_file = os.path.join(HERE, 'compose', 'zk35_ssl.yaml')
     elif get_version() >= [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
-        if get_ssl():
+        if get_tls():
             compose_file = os.path.join(HERE, 'compose', 'zk36plus_ssl.yaml')
 
     private_key = os.path.join(HERE, 'compose', 'private_key.pem')
     cert = os.path.join(HERE, 'compose', 'cert.pem')
     ca_cert = os.path.join(HERE, 'compose', 'ca_cert.pem')
 
-    condition_ssl = [
+    condition_tls = [
         CheckDockerLogs(
             compose_file,
             'Starting server',
         )
     ]
 
-    if get_ssl():
-        condition = condition_ssl
+    if get_tls():
+        condition = condition_tls
     else:
-        condition = [condition_non_ssl]
+        condition = [condition_non_tls]
 
     with docker_run(compose_file, conditions=condition):
         yield get_instance, {
