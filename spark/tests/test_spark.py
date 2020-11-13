@@ -652,7 +652,6 @@ SPARK_DRIVER_METRIC_VALUES = {
 }
 
 SPARK_EXECUTOR_METRIC_VALUES = {
-    'spark.executor.count': 2,
     'spark.executor.rdd_blocks': 1,
     'spark.executor.memory_used': 2,
     'spark.executor.disk_used': 3,
@@ -666,6 +665,8 @@ SPARK_EXECUTOR_METRIC_VALUES = {
     'spark.executor.total_shuffle_write': 11,
     'spark.executor.max_memory': 555755765,
 }
+
+SPARK_EXECUTOR_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME, 'executor:1']
 
 SPARK_RDD_METRIC_VALUES = {
     'spark.rdd.count': 1,
@@ -718,7 +719,8 @@ def test_yarn(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_METRIC_TAGS + CUSTOM_TAGS)
+        aggregator.assert_metric('spark.executor.count', value=2, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
@@ -792,7 +794,8 @@ def test_mesos(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_METRIC_TAGS + CUSTOM_TAGS)
+        aggregator.assert_metric('spark.executor.count', value=2, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
@@ -862,7 +865,8 @@ def test_driver_unit(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_METRIC_TAGS + CUSTOM_TAGS)
+        aggregator.assert_metric('spark.executor.count', value=2, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
@@ -923,7 +927,8 @@ def test_standalone_unit(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_METRIC_TAGS)
+        aggregator.assert_metric('spark.executor.count', value=2, tags=SPARK_METRIC_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
@@ -977,7 +982,8 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_METRIC_TAGS)
+        aggregator.assert_metric('spark.executor.count', value=2, tags=SPARK_METRIC_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
@@ -1031,7 +1037,8 @@ def test_standalone_pre20(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_METRIC_TAGS)
+        aggregator.assert_metric('spark.executor.count', value=2, tags=SPARK_METRIC_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):

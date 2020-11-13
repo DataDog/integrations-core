@@ -46,6 +46,7 @@ spark.driver.failed_tasks,count,,task,,Number of failed tasks in the driver,0,sp
 spark.driver.completed_tasks,count,,task,,Number of completed tasks in the driver,0,spark,dvr comp tsk
 spark.driver.total_tasks,count,,task,,Number of total tasks in the driver,0,spark,dvr tot task
 spark.driver.total_duration,count,,millisecond,,Time spent in the driver,0,spark,dvr tot dur
+spark.driver.total_gc_time,count,,millisecond,,Elapsed time the JVM spent in garbage collection summed in the driver.,0,spark,dvr tot gc tm
 spark.driver.total_input_bytes,count,,byte,,Number of input bytes in the driver,0,spark,dvr tot in byt
 spark.driver.total_shuffle_read,count,,byte,,Number of bytes read during a shuffle in the driver,0,spark,dvr tot shfl rd
 spark.driver.total_shuffle_write,count,,byte,,Number of shuffled bytes in the driver,0,spark,dvr tot shfl wrt
@@ -60,6 +61,7 @@ spark.executor.failed_tasks,count,,task,,Number of failed tasks in the applicati
 spark.executor.completed_tasks,count,,task,,Number of completed tasks in the application's executors,0,spark,exe comp tsk
 spark.executor.total_tasks,count,,task,,Total number of tasks in the application's executors,0,spark,exe tot tsk
 spark.executor.total_duration,count,,millisecond,,Time spent by the application's executors executing tasks,0,spark,exe tot dur
+spark.executor.total_gc_time,count,,millisecond,,Elapsed time the JVM spent in garbage collection summed in the application's executors.,0,spark,dvr tot gc tm
 spark.executor.total_input_bytes,count,,byte,,Total number of input bytes in the application's executors,0,spark,exe in byt
 spark.executor.total_shuffle_read,count,,byte,,Total number of bytes read during a shuffle in the application's executors,0,spark,exe tot shfl rd
 spark.executor.total_shuffle_write,count,,byte,,Total number of shuffled bytes in the application's executors,0,spark,exe tot shfl wrt

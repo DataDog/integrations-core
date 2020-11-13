@@ -103,54 +103,32 @@ SPARK_STAGE_METRICS = {
     'diskBytesSpilled': ('spark.stage.disk_bytes_spilled', COUNT),
 }
 
+SPARK_EXECUTOR_TEMPLATE_METRICS = {
+    'rddBlocks': ('spark.{}.rdd_blocks', COUNT),
+    'memoryUsed': ('spark.{}.memory_used', COUNT),
+    'diskUsed': ('spark.{}.disk_used', COUNT),
+    'activeTasks': ('spark.{}.active_tasks', COUNT),
+    'failedTasks': ('spark.{}.failed_tasks', COUNT),
+    'completedTasks': ('spark.{}.completed_tasks', COUNT),
+    'totalGCTime': ('spark.{}.total_gc_time', COUNT),
+    'totalTasks': ('spark.{}.total_tasks', COUNT),
+    'totalDuration': ('spark.{}.total_duration', COUNT),
+    'totalInputBytes': ('spark.{}.total_input_bytes', COUNT),
+    'totalShuffleRead': ('spark.{}.total_shuffle_read', COUNT),
+    'totalShuffleWrite': ('spark.{}.total_shuffle_write', COUNT),
+    'maxMemory': ('spark.{}.max_memory', COUNT),
+}
+
 SPARK_DRIVER_METRICS = {
-    'rddBlocks': ('spark.driver.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.driver.memory_used', COUNT),
-    'memoryMetrics': (
-        {
-            'usedOnHeapStorageMemory': ('spark.driver.memory.used_on_heap_storage', GAUGE),
-            'usedOffHeapStorageMemory': ('spark.driver.memory.used_off_heap_storage', GAUGE),
-            'totalOnHeapStorageMemory': ('spark.driver.memory.total_on_heap_storage', GAUGE),
-            'totalOffHeapStorageMemory': ('spark.driver.memory.total_off_heap_storage', GAUGE),
-        },
-        dict,
-    ),
-    'diskUsed': ('spark.driver.disk_used', COUNT),
-    'activeTasks': ('spark.driver.active_tasks', COUNT),
-    'failedTasks': ('spark.driver.failed_tasks', COUNT),
-    'completedTasks': ('spark.driver.completed_tasks', COUNT),
-    'totalGCTime': ('spark.driver.total_gc_time', COUNT),
-    'totalTasks': ('spark.driver.total_tasks', COUNT),
-    'totalDuration': ('spark.driver.total_duration', COUNT),
-    'totalInputBytes': ('spark.driver.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.driver.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.driver.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.driver.max_memory', COUNT),
+    key: (value[0].format('driver'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
 }
 
 SPARK_EXECUTOR_METRICS = {
-    'rddBlocks': ('spark.executor.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.executor.memory_used', COUNT),
-    'memoryMetrics': (
-        {
-            'usedOnHeapStorageMemory': ('spark.executor.memory.used_on_heap_storage', GAUGE),
-            'usedOffHeapStorageMemory': ('spark.executor.memory.used_off_heap_storage', GAUGE),
-            'totalOnHeapStorageMemory': ('spark.executor.memory.total_on_heap_storage', GAUGE),
-            'totalOffHeapStorageMemory': ('spark.executor.memory.total_off_heap_storage', GAUGE),
-        },
-        dict,
-    ),
-    'diskUsed': ('spark.executor.disk_used', COUNT),
-    'activeTasks': ('spark.executor.active_tasks', COUNT),
-    'failedTasks': ('spark.executor.failed_tasks', COUNT),
-    'completedTasks': ('spark.executor.completed_tasks', COUNT),
-    'totalGCTime': ('spark.executor.total_gc_time', COUNT),
-    'totalTasks': ('spark.executor.total_tasks', COUNT),
-    'totalDuration': ('spark.executor.total_duration', COUNT),
-    'totalInputBytes': ('spark.executor.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.executor.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.executor.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.executor.max_memory', COUNT),
+    key: (value[0].format('executor'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
+}
+
+SPARK_EXECUTOR_LEVEL_METRICS = {
+    key: (value[0].format('executor.id'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
 }
 
 SPARK_RDD_METRICS = {
@@ -591,7 +569,13 @@ class SparkCheck(AgentCheck):
                 if executor.get('id') == 'driver':
                     self._set_metrics_from_json(tags, executor, SPARK_DRIVER_METRICS)
                 else:
-                    self._set_metrics_from_json(tags + ['executor:{}'.format(executor.get('id', 'unknown'))], executor, SPARK_EXECUTOR_METRICS)
+                    self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
+                    if is_affirmative(self.instance.get('executor_level_metrics')):
+                        self._set_metrics_from_json(
+                            tags + ['executor:{}'.format(executor.get('id', 'unknown'))],
+                            executor,
+                            SPARK_EXECUTOR_LEVEL_METRICS,
+                        )
 
             if len(response):
                 self._set_metric('spark.executor.count', COUNT, len(response), tags)
@@ -648,11 +632,7 @@ class SparkCheck(AgentCheck):
         for status, (metric_name, metric_type) in iteritems(metrics):
             metric_status = metrics_json.get(status)
 
-            # Nested metrics
-            if isinstance(metric_status, dict):
-                self._set_metrics_from_json(tags, metric_status, metric_name)
-
-            elif metric_status is not None:
+            if metric_status is not None:
                 self._set_metric(metric_name, metric_type, metric_status, tags)
 
     def _set_metric(self, metric_name, metric_type, value, tags=None):
