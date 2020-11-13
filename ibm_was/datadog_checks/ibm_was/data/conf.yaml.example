@@ -297,6 +297,26 @@ instances:
     #
     # persist_connections: false
 
+    ## @param collect_jdbc_stats - boolean - optional - default: true
+    ## Whether or not to collect JDBC Connection Pool stats
+    #
+    # collect_jdbc_stats: true
+
+    ## @param collect_jvm_stats - boolean - optional - default: true
+    ## Whether or not to collect JVM Runtime stats
+    #
+    # collect_jvm_stats: true
+
+    ## @param collect_servlet_session_stats - boolean - optional - default: true
+    ## Whether or not to collect Servlet Session Manager stats
+    #
+    # collect_servlet_session_stats: true
+
+    ## @param collect_thread_pool_stats - boolean - optional - default: true
+    ## Whether or not to collect Thread Pools stats
+    #
+    # collect_thread_pool_stats: true
+
     ## @param custom_queries - list of mappings - optional
     ## List of custom or additional XML attributes to parse and submit as metrics
     ## Each must contain a `metric_prefix` and `stat` element
