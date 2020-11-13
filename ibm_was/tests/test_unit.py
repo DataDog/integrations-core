@@ -8,6 +8,7 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.ibm_was import IbmWasCheck
 
 from . import common
 
@@ -52,8 +53,7 @@ def test_custom_queries_missing_stat_in_payload(instance, check):
 def test_custom_query_validation(check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
         with pytest.raises(ConfigurationError) as e:
-            check = check(None)
-            check.check(common.MALFORMED_CUSTOM_QUERY_INSTANCE)
+            IbmWasCheck('ibm_was', {}, [common.MALFORMED_CUSTOM_QUERY_INSTANCE])
             assert "missing required field" in str(e)
 
 
@@ -80,8 +80,7 @@ def test_custom_query_unit_casing(aggregator, instance, check):
 def test_config_validation(check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
         with pytest.raises(ConfigurationError) as e:
-            check = check(None)
-            check.check(common.MISSING_REQ_FIELD_INSTANCE)
+            IbmWasCheck('ibm_was', {}, [common.MISSING_REQ_FIELD_INSTANCE])
             assert "Please specify a servlet_url" in str(e)
 
 
