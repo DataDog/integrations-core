@@ -265,6 +265,10 @@ class PostgreSql(AgentCheck):
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
 
+        replication_stats_metrics = self.metrics_cache.get_replication_stats_metrics(self.version)
+        if replication_stats_metrics:
+            metric_scope.append(replication_stats_metrics)
+
         cursor = self.db.cursor()
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False, relations_config)
         if results_len is not None:

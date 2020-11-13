@@ -249,6 +249,18 @@ SELECT {metrics_columns}
  WHERE (SELECT pg_is_in_recovery())""",
 }
 
+# Requires postgres 10+
+REPLICATION_STATS_METRICS = {
+    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
+    'metrics': {
+        'write_lag': ('postgresql.replication.wal_write_lag', AgentCheck.gauge),
+        'flush_lag': ('postgresql.replication.wal_flush_lag', AgentCheck.gauge),
+        'replay_lag': ('postgresql.replication.wal_replay_lag', AgentCheck.gauge),
+    },
+    'relation': False,
+    'query': 'SELECT application_name, state, sync_state, {metrics_columns} FROM pg_stat_replication',
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {

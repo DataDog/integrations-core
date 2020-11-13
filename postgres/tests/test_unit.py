@@ -213,6 +213,23 @@ def test_version_metadata(check, test_case, params):
         m.assert_any_call('test:123', 'version.raw', test_case)
 
 
+@pytest.mark.usefixtures('mock_cursor_for_replica_stats')
+def test_replication_stats(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    base_tags = ['foo:bar', 'server:localhost', 'port:5432']
+    app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
+    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
+
+    aggregator.assert_metric('postgresql.db.count', 0, base_tags)
+    for suffix, value in zip(['wal_write_lag', 'wal_flush_lag', 'wal_replay_lag'], [12, 13, 14]):
+        metric_name = 'postgresql.replication.{}'.format(suffix)
+        aggregator.assert_metric(metric_name, value, app1_tags)
+        aggregator.assert_metric(metric_name, value, app2_tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
 def test_relation_filter():
     relations_config = {'breed': {'relation_name': 'breed', 'schemas': ['public']}}
     query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
