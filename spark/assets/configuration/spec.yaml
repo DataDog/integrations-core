@@ -79,6 +79,11 @@ files:
         value:
           type: boolean
           example: true
+      - name: executor_level_metrics
+        description: Enable collection of more granular executor metrics.
+        value:
+          type: boolean
+          example: false
       - template: instances/http
         overrides:
           auth_token.description: |
