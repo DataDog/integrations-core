@@ -716,8 +716,13 @@ def test_idrac(aggregator):
 
     indexes = ['29', '22']
     device_types = ['26', '4']
-    for index, device_type in zip(indexes, device_types):
-        tags = ['chassis_index:{}'.format(index), 'device_type:{}'.format(device_type)] + common_tags
+    device_indexes = ['4', '21']
+    for index, device_type, device_index in zip(indexes, device_types, device_indexes):
+        tags = [
+            'chassis_index:{}'.format(index),
+            'device_type:{}'.format(device_type),
+            'device_index:{}'.format(device_index),
+        ] + common_tags
         aggregator.assert_metric(
             'snmp.{}'.format("memoryDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
         )
