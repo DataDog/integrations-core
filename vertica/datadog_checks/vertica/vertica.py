@@ -30,7 +30,6 @@ class VerticaCheck(AgentCheck):
     SERVICE_CHECK_NODE_STATE = 'node_state'
 
     def __init__(self, name, init_config, instances):
-
         super(VerticaCheck, self).__init__(name, init_config, instances)
 
         self._db = self.instance.get('db', '')
