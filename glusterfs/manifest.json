@@ -1,0 +1,34 @@
+{
+  "display_name": "GlusterFS",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "glusterfs",
+  "metric_prefix": "glusterfs.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "1cb9a21c-8cc4-4727-a4b1-ab7015c7ae24",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Red Hat Gluster Storage",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "glusterfs",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
