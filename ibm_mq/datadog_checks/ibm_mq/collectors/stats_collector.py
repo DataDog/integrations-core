@@ -60,7 +60,6 @@ class StatsCollector(object):
                 #     )
                 #     continue
 
-                self.log.info(str(pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME))
                 if isinstance(stats, ChannelStats):
                     self._collect_channel_stats(stats)
                 elif isinstance(stats, QueueStats):

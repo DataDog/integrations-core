@@ -124,11 +124,26 @@ def channel_stats_metrics():
 
 def queue_stats_metrics():
     return {
-        # 'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
-        # 'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
-        # 'q_type': (pymqi.CMQC.MQIA_Q_TYPE, GAUGE),
+        'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
+        'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
+        'q_type': (pymqi.CMQC.MQIA_Q_TYPE, GAUGE),
         'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),  # this is a list
-        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT)  # this is a list
+        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT),  # this is a list
+        'get_count': (pymqi.CMQCFC.MQIAMO_GETS, COUNT), # this is a list
+        'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),  # empty in tests
+        'get_fail_count': (pymqi.CMQCFC.MQIAMO_GETS_FAILED, COUNT),
+        'get_bytes': (pymqi.CMQCFC.MQIAMO64_GET_BYTES, COUNT),  # list
+        'put_bytes': (pymqi.CMQCFC.MQIAMO64_PUT_BYTES, COUNT),  # list
+        'put1_count': (pymqi.CMQCFC.MQIAMO_PUT1S, COUNT),  # list
+        'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),  # empty
+        'browse_count': (pymqi.CMQCFC.MQIAMO_BROWSES, COUNT),  # list
+        'browse_fail_count': (pymqi.CMQCFC.MQIAMO_BROWSES_FAILED, COUNT),  # empty
+        'browse_bytes': (pymqi.CMQCFC.MQIAMO64_BROWSE_BYTES, GAUGE),  # list
+        'non_queued_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_NOT_QUEUED, COUNT),
+        'expired_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_EXPIRED, COUNT),
+        'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
+        'cb_count': (pymqi.CMQCFC.MQIAMO_CBS, COUNT),  # empty
+        'cb_fail_count': (pymqi.CMQCFC.MQIAMO_CBS_FAILED, COUNT),  # empty
     }
 
 
