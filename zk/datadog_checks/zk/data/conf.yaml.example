@@ -73,7 +73,7 @@ instances:
     # empty_default_hostname: false
 
     ## @param use_tls - boolean - optional - default: false
-    ## This enables the SSL/TLS version of the Zookeeper Check.
+    ## This instructs the Zookeeper check to connect using TLS.
     #
     # use_tls: false
 
