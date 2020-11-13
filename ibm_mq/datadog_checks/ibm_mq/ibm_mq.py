@@ -89,7 +89,16 @@ class IbmMqCheck(AgentCheck):
                 self.log.debug("MQ type `%s` not found in properties for metric `%s` and tags `%s`", metric_name, tags)
                 continue
             try:
-                metric_value = int(properties[pymqi_type])
+
+                # TODO: Finish this
+                if isinstance(properties[pymqi_type], list):
+                    # Some metrics are returned as a list of two values.
+                    # Index 0 = Contains the value for non-persistent messages
+                    # Index 1 = Contains the value for persistent messages
+                    # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.mon.doc/q037510_.htm#q037510___q037510_2
+                    metric_value = int(properties[pymqi_type][0])  # for testing ONLY, otherwise need both
+                else:
+                    metric_value = int(properties[pymqi_type])
             except ValueError as e:
                 self.log.debug(
                     "Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s",
