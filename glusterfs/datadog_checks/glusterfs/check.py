@@ -40,8 +40,6 @@ VOL_SUBVOL_STATS = {
     'disperse_redundancy': 'disperse_redundancy',
     'replica': 'replica',
 }
-
-VOLUME_STATS.update(GENERAL_STATS)
 VOLUME_STATS.update(VOL_SUBVOL_STATS)
 
 
@@ -84,6 +82,11 @@ class GlusterfsCheck(AgentCheck):
             for key, metric in VOLUME_STATS.items():
                 if key in volume:
                     self.gauge(metric, volume[key], volume_tags)
+                else:
+                    self.log.debug("Field not found in volume data: %s", key)
+            for key, metric in GENERAL_STATS.items():
+                if key in volume:
+                    self.gauge('volume.' + metric, volume[key], volume_tags)
                 else:
                     self.log.debug("Field not found in volume data: %s", key)
 
