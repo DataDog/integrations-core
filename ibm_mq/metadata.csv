@@ -1,4 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+ibm_mq.channel.channels,gauge,,resource,,The number of active channels.,0,ibm_mq,active channel count
+ibm_mq.channel.count,gauge,,,,Sum by status to count channels. Filter by channel and status tags to create notifications.,0,ibm_mq,channel count
 ibm_mq.channel.batch_interval,gauge,,second,,This attribute is a period during which the channel keeps a batch open even if there are no messages on the transmission queue (parameter identifier: BATCHINT).,0,ibm_mq,batch interval
 ibm_mq.channel.batch_size,gauge,,resource,,This attribute is the maximum number of messages to be sent before a sync point is taken (parameter identifier: BATCHSZ).,0,ibm_mq,batch size
 ibm_mq.channel.disc_interval,gauge,,second,,"This attribute is the length of time after which a channel closes down, if no message arrives during that period (parameter identifier: DISCINT).",0,ibm_mq,disc interval
