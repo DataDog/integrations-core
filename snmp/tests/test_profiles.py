@@ -307,7 +307,7 @@ def test_f5(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
     for interface in interfaces:
-        interface_tags = ['interface:{}'.format(interface)] + tags
+        interface_tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
@@ -321,7 +321,7 @@ def test_f5(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric),
                 metric_type=aggregator.GAUGE,
-                tags=['interface:{}'.format(interface)] + tags,
+                tags=['interface:{}'.format(interface), 'interface_alias:generic description'] + tags,
                 count=1,
             )
     for version in ['ipv4', 'ipv6']:
@@ -399,7 +399,7 @@ def test_router(aggregator):
     common.assert_common_metrics(aggregator, common_tags)
 
     for interface in ['eth0', 'eth1']:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -426,7 +426,7 @@ def test_router(aggregator):
             )
         for metric in IP_IF_COUNTS:
             for interface in ['17', '21']:
-                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common_tags
+                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
                 aggregator.assert_metric(
                     'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
                 )
@@ -455,7 +455,7 @@ def test_f5_router(aggregator):
     common.assert_common_metrics(aggregator, common_tags)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -490,7 +490,7 @@ def test_cisco_3850(aggregator):
     common.assert_common_metrics(aggregator, common_tags)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -753,7 +753,7 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -1148,7 +1148,7 @@ def test_proliant(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     for interface in ['eth0', 'eth1']:
-        if_tags = ['interface:{}'.format(interface)] + common_tags
+        if_tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
