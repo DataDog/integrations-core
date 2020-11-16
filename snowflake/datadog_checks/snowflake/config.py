@@ -42,9 +42,6 @@ class Config(object):
         token = instance.get('token', None)
         client_keep_alive = instance.get('client_session_keep_alive', False)
 
-        # min_collection_interval defaults to 60 minutes
-        min_collection = instance.get('min_collection_interval', 3600)
-
         metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
 
         if account is None:
@@ -78,7 +75,6 @@ class Config(object):
         self.login_timeout = login_timeout  # type: int
         self.ocsp_response_cache_filename = ocsp_response_cache_filename  # type: Optional[str]
         self.tags = tags  # type: List[str]
-        self.min_collection = min_collection
         self.metric_groups = metric_groups
         self.authenticator = authenticator
         self.token = token
