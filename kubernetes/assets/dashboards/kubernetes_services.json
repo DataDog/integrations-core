@@ -27,7 +27,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.service.count{$scope,$kube_service,$kube_namespace,$kube_cluster_name} by {type}",
+                        "q": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name} by {type}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -44,7 +44,7 @@
                     "max": "auto",
                     "include_zero": true
                 },
-                "title": "Services by Type",
+                "title": "Service types per cluster",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": false,
@@ -474,7 +474,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.service.count{$scope,$kube_service,$kube_cluster_name,$kube_namespace}",
+                        "q": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
@@ -485,7 +485,7 @@
                         ]
                     }
                 ],
-                "title": "Services",
+                "title": "Services per cluster",
                 "title_size": "16",
                 "title_align": "left",
                 "precision": 0
