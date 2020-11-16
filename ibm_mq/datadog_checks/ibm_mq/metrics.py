@@ -67,9 +67,7 @@ def pcf_status_reset_metrics():
 
 
 def queue_manager_metrics():
-    return {
-        'dist_lists': pymqi.CMQC.MQIA_DIST_LISTS, 'max_msg_list': pymqi.CMQC.MQIA_MAX_MSG_LENGTH
-    }
+    return {'dist_lists': pymqi.CMQC.MQIA_DIST_LISTS, 'max_msg_list': pymqi.CMQC.MQIA_MAX_MSG_LENGTH}
 
 
 def channel_metrics():
@@ -136,7 +134,6 @@ def queue_stats_metrics():
         'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
         'cb_count': (pymqi.CMQCFC.MQIAMO_CBS, COUNT),
         'cb_fail_count': (pymqi.CMQCFC.MQIAMO_CBS_FAILED, COUNT),
-
         # These metrics are returned as a list of two values.
         # Index 0 = Contains the value for non-persistent messages
         # Index 1 = Contains the value for persistent messages

@@ -51,14 +51,14 @@ class StatsCollector(object):
                 stats = self._get_stats(message, header)
 
                 # We only collect metrics generated after the check instance creation.
-                # if stats.start_datetime < self.config.instance_creation_datetime:
-                #     self.log.debug(
-                #         "Skipping messages created before agent startup. "
-                #         "Message time: %s / Check instance creation time: %s",
-                #         stats.start_datetime,
-                #         self.config.instance_creation_datetime,
-                #     )
-                #     continue
+                if stats.start_datetime < self.config.instance_creation_datetime:
+                    self.log.debug(
+                        "Skipping messages created before agent startup. "
+                        "Message time: %s / Check instance creation time: %s",
+                        stats.start_datetime,
+                        self.config.instance_creation_datetime,
+                    )
+                    continue
 
                 if isinstance(stats, ChannelStats):
                     self._collect_channel_stats(stats)
