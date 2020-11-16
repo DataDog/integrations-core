@@ -77,11 +77,11 @@ def test_custom_query_unit_casing(aggregator, instance, check):
     aggregator.assert_metric('ibm_was.xdpm.total_memory', metric_type=aggregator.GAUGE)
 
 
-def test_config_validation(check):
-    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
-        with pytest.raises(ConfigurationError) as e:
-            IbmWasCheck('ibm_was', {}, [common.MISSING_REQ_FIELD_INSTANCE])
-            assert "Please specify a servlet_url" in str(e)
+def test_config_validation(check, dd_run_check):
+    with pytest.raises(Exception, match='Please specify a servlet_url in the configuration file') as e:
+        check = IbmWasCheck('ibm_was', {}, [common.MISSING_REQ_FIELD_INSTANCE])
+        dd_run_check(check, extract_message=True)
+        assert "Please specify a servlet_url" in str(e)
 
 
 def test_critical_service_check(instance, check, aggregator):
