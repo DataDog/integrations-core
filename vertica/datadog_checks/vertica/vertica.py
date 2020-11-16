@@ -662,4 +662,6 @@ class VerticaCheck(AgentCheck):
             self.log.debug('Detected `system` metric group, adding the `licenses` to metric_groups.')
             metric_groups.insert(0, 'licenses')
 
-        self._metric_groups.extend(default_metric_groups[group] for group in metric_groups)
+        self._metric_groups.extend(
+            default_metric_groups[group] for group in default_metric_groups if group in metric_groups
+        )
