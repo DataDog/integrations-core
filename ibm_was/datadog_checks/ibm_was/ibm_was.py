@@ -37,7 +37,6 @@ class IbmWasCheck(AgentCheck):
         self.service_check_tags = self.custom_tags + ['url:{}'.format(self.url)]
 
         self.check_initializations.append(self._validate_config)
-        self._validate_config()
 
     def _validate_config(self):
         if not self.instance.get('servlet_url'):
