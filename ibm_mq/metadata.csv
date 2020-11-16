@@ -72,3 +72,28 @@ ibm_mq.stats.channel.full_batches,count,,message,,The number of batches processe
 ibm_mq.stats.channel.incomplete_batches,count,,message,,"The number of batches processed by the channel, that were sent without the value of the channel attribute BATCHSZ being reached.",0,ibm_mq,stats chan incomplete batches
 ibm_mq.stats.channel.avg_batch_size,gauge,,message,,The average batch size of batches processed by the channel.,0,ibm_mq,stats chan avg batch size
 ibm_mq.stats.queue.q_min_depth,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.q_max_depth,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.q_type,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put_fail_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.get_fail_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put1_fail_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.browse_fail_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.non_queued_msg_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.expired_msg_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.purge_count,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.avg_q_time_persistent,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.avg_q_time_nonpersistent,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put_count_persistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put_count_nonpersistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.get_count_nonpersistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.get_count_persistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.browse_bytes_persistent,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.browse_bytes_nonpersistent,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.browse_count_nonpersistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.browse_count_persistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.get_bytes_persistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.get_bytes_nonpersistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put_bytes_nonpersistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put_bytes_persistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put1_count_nonpersistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth
+ibm_mq.stats.queue.put1_count_persistent,count,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth

@@ -132,8 +132,6 @@ def queue_stats_metrics():
         'non_queued_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_NOT_QUEUED, COUNT),
         'expired_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_EXPIRED, COUNT),
         'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
-        'cb_count': (pymqi.CMQCFC.MQIAMO_CBS, COUNT),
-        'cb_fail_count': (pymqi.CMQCFC.MQIAMO_CBS_FAILED, COUNT),
         # These metrics are returned as a list of two values.
         # Index 0 = Contains the value for non-persistent messages
         # Index 1 = Contains the value for persistent messages

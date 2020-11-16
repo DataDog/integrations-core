@@ -215,6 +215,31 @@ CHANNEL_STATS_METRICS = [
 
 QUEUE_STATS_METRICS = [
     ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+    ('ibm_mq.stats.queue.q_max_depth', GAUGE),
+    ('ibm_mq.stats.queue.q_type', GAUGE),
+    ('ibm_mq.stats.queue.put_fail_count', COUNT),
+    ('ibm_mq.stats.queue.get_fail_count', COUNT),
+    ('ibm_mq.stats.queue.put1_fail_count', COUNT),
+    ('ibm_mq.stats.queue.browse_fail_count', COUNT),
+    ('ibm_mq.stats.queue.non_queued_msg_count', COUNT),
+    ('ibm_mq.stats.queue.expired_msg_count', COUNT),
+    ('ibm_mq.stats.queue.purge_count', COUNT),
+    ('ibm_mq.stats.queue.avg_q_time_nonpersistent', GAUGE),
+    ('ibm_mq.stats.queue.avg_q_time_persistent', GAUGE),
+    ('ibm_mq.stats.queue.put_count_nonpersistent', COUNT),
+    ('ibm_mq.stats.queue.put_count_persistent', COUNT),
+    ('ibm_mq.stats.queue.get_count_nonpersistent', COUNT),
+    ('ibm_mq.stats.queue.get_count_persistent', COUNT),
+    ('ibm_mq.stats.queue.browse_bytes_nonpersistent', GAUGE),
+    ('ibm_mq.stats.queue.browse_bytes_persistent', GAUGE),
+    ('ibm_mq.stats.queue.browse_count_nonpersistent', COUNT),
+    ('ibm_mq.stats.queue.browse_count_persistent', COUNT),
+    ('ibm_mq.stats.queue.get_bytes_nonpersistent', COUNT),
+    ('ibm_mq.stats.queue.get_bytes_persistent', COUNT),
+    ('ibm_mq.stats.queue.put_bytes_nonpersistent', COUNT),
+    ('ibm_mq.stats.queue.put_bytes_persistent', COUNT),
+    ('ibm_mq.stats.queue.put1_count_nonpersistent', COUNT),
+    ('ibm_mq.stats.queue.put1_count_persistent', COUNT),
 ]
 
 if IS_CLUSTER:
