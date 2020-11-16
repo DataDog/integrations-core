@@ -127,23 +127,29 @@ def queue_stats_metrics():
         'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
         'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
         'q_type': (pymqi.CMQC.MQIA_Q_TYPE, GAUGE),
-        'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),  # this is a list
-        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT),  # this is a list
-        'get_count': (pymqi.CMQCFC.MQIAMO_GETS, COUNT), # this is a list
-        'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),  # empty in tests
+        'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),
         'get_fail_count': (pymqi.CMQCFC.MQIAMO_GETS_FAILED, COUNT),
-        'get_bytes': (pymqi.CMQCFC.MQIAMO64_GET_BYTES, COUNT),  # list
-        'put_bytes': (pymqi.CMQCFC.MQIAMO64_PUT_BYTES, COUNT),  # list
-        'put1_count': (pymqi.CMQCFC.MQIAMO_PUT1S, COUNT),  # list
-        'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),  # empty
-        'browse_count': (pymqi.CMQCFC.MQIAMO_BROWSES, COUNT),  # list
-        'browse_fail_count': (pymqi.CMQCFC.MQIAMO_BROWSES_FAILED, COUNT),  # empty
-        'browse_bytes': (pymqi.CMQCFC.MQIAMO64_BROWSE_BYTES, GAUGE),  # list
+        'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),
+        'browse_fail_count': (pymqi.CMQCFC.MQIAMO_BROWSES_FAILED, COUNT),
         'non_queued_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_NOT_QUEUED, COUNT),
         'expired_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_EXPIRED, COUNT),
         'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
-        'cb_count': (pymqi.CMQCFC.MQIAMO_CBS, COUNT),  # empty
-        'cb_fail_count': (pymqi.CMQCFC.MQIAMO_CBS_FAILED, COUNT),  # empty
+        'cb_count': (pymqi.CMQCFC.MQIAMO_CBS, COUNT),
+        'cb_fail_count': (pymqi.CMQCFC.MQIAMO_CBS_FAILED, COUNT),
+
+        # These metrics are returned as a list of two values.
+        # Index 0 = Contains the value for non-persistent messages
+        # Index 1 = Contains the value for persistent messages
+        # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.mon.doc/q037510_.htm#q037510___q037510_2
+        #
+        'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),
+        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT),
+        'get_count': (pymqi.CMQCFC.MQIAMO_GETS, COUNT),
+        'browse_bytes': (pymqi.CMQCFC.MQIAMO64_BROWSE_BYTES, GAUGE),
+        'browse_count': (pymqi.CMQCFC.MQIAMO_BROWSES, COUNT),
+        'get_bytes': (pymqi.CMQCFC.MQIAMO64_GET_BYTES, COUNT),
+        'put_bytes': (pymqi.CMQCFC.MQIAMO64_PUT_BYTES, COUNT),
+        'put1_count': (pymqi.CMQCFC.MQIAMO_PUT1S, COUNT),
     }
 
 
