@@ -171,7 +171,7 @@ class PostgresMetricsCache:
     def get_replication_stats_metrics(self, version):
         if version >= V10 and self.replication_stats_metrics is None:
             self.replication_stats_metrics = dict(REPLICATION_STATS_METRICS)
-            return self.replication_stats_metrics
+        return self.replication_stats_metrics
 
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
