@@ -344,7 +344,7 @@
                     {
                         "display_type": "line",
                         "on_right_yaxis": false,
-                        "q": "avg:nvidia.jetson.vdd.average{$host} by {probe,host}/1000",
+                        "q": "avg:nvidia.jetson.power.average{$host} by {probe,host}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
