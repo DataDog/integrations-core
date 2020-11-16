@@ -124,6 +124,24 @@ instances:
     #
     # command_timeout: 5
 
+    ## @param custom_queries - list of mappings - optional
+    ## Get metrics from a custom SQL query but only if the database is writable
+    ## (i.e. it's the master in an availability group) Notes:
+    ## - Custom SQL query must be defined in its own instance
+    ## - For performance counter queries, use `custom_metrics` instead
+    ## See XXX for more information.
+    #
+    # custom_queries:
+    #   - metric_prefix: sqlserver
+    #     query: <QUERY>
+    #     columns:
+    #     - name: <COLUNMS_1_NAME>
+    #       type: <COLUMNS_1_TYPE>
+    #     - name: <COLUNMS_2_NAME>
+    #       type: <COLUMNS_2_TYPE>
+    #     tags:
+    #     - <TAG_KEY>:<TAG_VALUE>
+
     ## @param stored_procedure - string - optional
     ## Get metrics from custom proc in MyDB but only if the database is writable
     ## (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
