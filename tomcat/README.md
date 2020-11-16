@@ -115,7 +115,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 _Available for Agent versions >6.0_
 
-1. Tomcat uses by default the `log4j` logger. To activate the logging into a file and customize the log format edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
+1. To submit logs to Datadog, Tomcat uses the `log4j` logger. For versions of Tomcat before 8.0, `log4j` is configured by default. For Tomcat 8.0 and after, you must configure Tomcat to use `log4j` by following the [Apache Tomcat documentation][15]. In the first step of those instructions, edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
 
    ```conf
      log4j.rootLogger = INFO, CATALINA
@@ -158,6 +158,7 @@ _Available for Agent versions >6.0_
      log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager] =\
        INFO, HOST-MANAGER
    ```
+   Then follow the remaining steps in [the Tomcat docs][15] for configuring `log4j`.
 
 2. By default, Datadog's integration pipeline support the following conversion patterns:
 
@@ -262,3 +263,4 @@ Additional helpful documentation, links, and articles:
 [12]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [13]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [14]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
+[15]: https://tomcat.apache.org/tomcat-8.0-doc/logging.html#Using_Log4j
