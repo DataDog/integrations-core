@@ -16,7 +16,7 @@ nvidia.jetson.gpu.freq,gauge,,megahertz,,GR3D frequency,0,nvidia_jetson,gpu.freq
 nvidia.jetson.cpu.usage,gauge,,percent,,Load statistics of the CPU core relative to the current running frequency or 'off' in case a core is currently powered down,0,nvidia_jetson,cpu.usage
 nvidia.jetson.cpu.freq,gauge,,megahertz,,CPU frequency,0,nvidia_jetson,cpu.freq
 nvidia.jetson.cpu.inactive_count,gauge,,unit,,Number of inactive cores,0,nvidia_jetson,cpu.inactive_count
-nvidia.jetson.cpu.total_count,gauge,unit,,Total number of cores,0,nvidia_jetson,cpu.total_count
+nvidia.jetson.cpu.total_count,gauge,,unit,,Total number of cores,0,nvidia_jetson,cpu.total_count
 nvidia.jetson.temp,gauge,,degree celsius,,Temperature,0,nvidia_jetson,temp
-nvidia.jetson.power.instant,gauge,,milliwatts,,Current power consumption,0,nvidia_jetson,power.instant
-nvidia.jetson.power.average,gauge,,milliwatts,,Average power consumption,0,nvidia_jetson,power.average
+nvidia.jetson.power.instant,gauge,,milliwatt,,Current power consumption,0,nvidia_jetson,power.instant
+nvidia.jetson.power.average,gauge,,milliwatt,,Average power consumption,0,nvidia_jetson,power.average
