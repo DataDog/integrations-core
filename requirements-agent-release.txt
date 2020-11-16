@@ -113,7 +113,7 @@ datadog-sap-hana==1.2.0
 datadog-scylla==1.2.1
 datadog-sidekiq==1.1.2
 datadog-snmp==3.8.0
-datadog-snowflake==2.2.0-beta.1
+datadog-snowflake==2.2.0-beta.2
 datadog-solr==1.5.1
 datadog-spark==1.15.0
 datadog-sqlserver==2.0.0

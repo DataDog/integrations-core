@@ -1,5 +1,8 @@
 # CHANGELOG - Snowflake
 
+## 2.2.0-beta.2 / 2020-11-16
+
+
 ## 2.2.0-beta.1 / 2020-11-16
 
 
