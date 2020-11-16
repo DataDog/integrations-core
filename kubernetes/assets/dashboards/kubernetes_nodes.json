@@ -8,7 +8,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host,!condition:ready} by {status,condition,cluster_name}, 10, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.nodes.by_condition{$kube_cluster_name,status:true,$host,!condition:ready} by {status,condition,cluster_name}, 10, 'last', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -55,7 +55,7 @@
                 "grouping": "cluster",
                 "group_by": [],
                 "tags": [
-                    "$cluster",
+                    "$kube_cluster_name",
                     "$host"
                 ],
                 "time": {
@@ -80,7 +80,7 @@
                 "grouping": "cluster",
                 "group_by": [],
                 "tags": [
-                    "$cluster",
+                    "$kube_cluster_name",
                     "$host"
                 ],
                 "time": {
@@ -119,7 +119,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.memory.usage{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.memory.usage{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -154,7 +154,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.cpu.requests{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -193,7 +193,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.memory.requests{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.memory.requests{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "cool",
@@ -232,7 +232,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.usage.total{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -267,7 +267,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.pods.running{$cluster,$host} by {host}, 50, 'mean', 'desc')",
+                        "q": "top(sum:kubernetes.pods.running{$kube_cluster_name,$host} by {host}, 50, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -321,7 +321,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.rx_bytes{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "purple",
@@ -360,7 +360,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.tx_bytes{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "green",
@@ -399,7 +399,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.read_bytes{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -438,7 +438,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.write_bytes{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -477,7 +477,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host} by {condition,status}, 10, 'mean', 'desc')"
+                        "q": "top(sum:kubernetes_state.nodes.by_condition{$kube_cluster_name,status:true,$host} by {condition,status}, 10, 'mean', 'desc')"
                     }
                 ],
                 "custom_links": [],
@@ -496,7 +496,7 @@
             "id": 15,
             "definition": {
                 "type": "event_timeline",
-                "query": "sources:kubernetes $host $cluster",
+                "query": "sources:kubernetes $host $kube_cluster_name",
                 "tags_execution": "and",
                 "title": "",
                 "title_size": "16",
@@ -535,7 +535,7 @@
             "id": 17,
             "definition": {
                 "type": "event_stream",
-                "query": "sources:kubernetes $host $cluster",
+                "query": "sources:kubernetes $host $kube_cluster_name",
                 "tags_execution": "and",
                 "event_size": "s",
                 "title": "",
@@ -555,7 +555,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
+                        "q": "avg:kubernetes.memory.usage_pct{$kube_cluster_name,$host} by {host}, avg:kubernetes.memory.usage_pct{$kube_cluster_name,$host} by {host}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -593,7 +593,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes_state.node.cpu_allocatable{$cluster,$host} by {host}",
+                        "q": "avg:kubernetes_state.node.cpu_allocatable{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -647,7 +647,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
+                        "q": "avg:kubernetes_state.node.pods_allocatable{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -682,7 +682,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
+                        "q": "avg:kubernetes_state.node.memory_allocatable{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -717,7 +717,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.containers.running{$cluster,$host} by {host}",
+                        "q": "sum:kubernetes.containers.running{$kube_cluster_name,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -752,7 +752,7 @@
                 "type": "query_table",
                 "requests": [
                     {
-                        "q": "avg:kubernetes_state.node.cpu_allocatable{$host, $cluster} by {host}",
+                        "q": "avg:kubernetes_state.node.cpu_allocatable{$host, $kube_cluster_name} by {host}",
                         "aggregator": "avg",
                         "limit": 25,
                         "order": "asc",
@@ -777,7 +777,7 @@
                 "type": "query_table",
                 "requests": [
                     {
-                        "q": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
+                        "q": "avg:kubernetes_state.node.pods_allocatable{$kube_cluster_name,$host} by {host}",
                         "aggregator": "avg",
                         "limit": 25,
                         "order": "asc",
@@ -802,7 +802,7 @@
                 "type": "query_table",
                 "requests": [
                     {
-                        "q": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
+                        "q": "avg:kubernetes_state.node.memory_allocatable{$kube_cluster_name,$host} by {host}",
                         "aggregator": "avg",
                         "limit": 25,
                         "order": "asc",
@@ -827,7 +827,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.nodes.by_condition{$cluster,$host,condition:ready,status:true} by {condition,status,cluster_name}",
+                        "q": "sum:kubernetes_state.nodes.by_condition{$kube_cluster_name,$host,condition:ready,status:true} by {condition,status,cluster_name}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -862,7 +862,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(max:tls.seconds_left{kubelet:server,$cluster,$host} by {host}, 25, 'last', 'asc')",
+                        "q": "top(max:tls.seconds_left{kubelet:server,$kube_cluster_name,$host} by {host}, 25, 'last', 'asc')",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -900,7 +900,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.node.count{$cluster,$host}",
+                        "q": "sum:kubernetes_state.node.count{$kube_cluster_name,$host}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -931,7 +931,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {cluster_name}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {cluster_name}*100",
+                        "q": "avg:kubernetes.memory.usage_pct{$kube_cluster_name,$host} by {cluster_name}, avg:kubernetes.memory.usage_pct{$kube_cluster_name,$host} by {cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -978,7 +978,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {cluster_name}, sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {cluster_name}*100",
+                        "q": "sum:kubernetes.filesystem.usage_pct{$kube_cluster_name,$host} by {cluster_name}, sum:kubernetes.filesystem.usage_pct{$kube_cluster_name,$host} by {cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1019,7 +1019,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {cluster_name}/sum:kubernetes.cpu.capacity{$cluster,$host} by {cluster_name}*100",
+                        "q": "sum:kubernetes.cpu.requests{$kube_cluster_name,$host} by {cluster_name}/sum:kubernetes.cpu.capacity{$kube_cluster_name,$host} by {cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1117,7 +1117,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {host}",
+                        "q": "100-avg:system.cpu.idle{$host,$kube_cluster_name} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -1159,7 +1159,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {cluster_name}",
+                        "q": "100-avg:system.cpu.idle{$host,$kube_cluster_name} by {cluster_name}",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -1207,7 +1207,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {host}/sum:kubernetes.cpu.capacity{$cluster,$host} by {host}*100",
+                        "q": "sum:kubernetes.cpu.requests{$kube_cluster_name,$host} by {host}/sum:kubernetes.cpu.capacity{$kube_cluster_name,$host} by {host}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1249,7 +1249,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host}",
+                        "q": "sum:kubernetes_state.node.cpu_capacity{$kube_cluster_name,$host}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -1280,7 +1280,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.node.memory_capacity{$cluster,$host}",
+                        "q": "sum:kubernetes_state.node.memory_capacity{$kube_cluster_name,$host}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -1330,7 +1330,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.pod.ready{$cluster,condition:true,$host} by {host,pod_name}, 10, 'last', 'desc')"
+                        "q": "top(sum:kubernetes_state.pod.ready{$kube_cluster_name,condition:true,$host} by {host,pod_name}, 10, 'last', 'desc')"
                     }
                 ],
                 "custom_links": [],
@@ -1351,7 +1351,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {host}",
+                        "q": "100-avg:system.cpu.idle{$host,$kube_cluster_name} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1399,7 +1399,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
+                        "q": "avg:kubernetes.memory.usage_pct{$kube_cluster_name,$host} by {host}, avg:kubernetes.memory.usage_pct{$kube_cluster_name,$host} by {host}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1443,7 +1443,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host,!condition:ready}",
+                        "q": "sum:kubernetes_state.nodes.by_condition{$kube_cluster_name,status:true,$host,!condition:ready}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -1475,9 +1475,9 @@
     ],
     "template_variables": [
         {
-            "name": "cluster",
+            "name": "kube_cluster_name",
             "default": "*",
-            "prefix": "cluster_name"
+            "prefix": "kube_cluster_name"
         },
         {
             "name": "host",
