@@ -11,7 +11,11 @@ CLUSTER_STATS = {
     'node_count': 'cluster.node.count',
     'nodes_active': 'cluster.nodes.active',
     'volumes_started': 'volumes.started',
-    'volumes_count': 'volumes.count'
+    'volume_count': 'volumes.count'
+}
+
+VOLUME_STATS = {
+
 }
 
 GLUSTER_VERSION = 'glfs_version'
@@ -22,13 +26,19 @@ class GlusterfsCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        tags = self.instance.get('tags', [])
+        self._tags = self.instance.get('tags', [])
         output, _, _ = get_subprocess_output(['gstatus', '-a', '-o', 'json'], self.log)
         gstatus = json.loads(output)
         if 'data' in gstatus:
             data = gstatus['data']
             for key, metric in CLUSTER_STATS.items():
                 if key in data:
-                    self.gauge(metric, data[key], tags)
+                    self.gauge(metric, data[key], self._tags)
+            self.parse_volume_summary(data)
         else:
             self.log.warning("No data from gstatus")
+
+    def parse_volume_summary(self, output):
+        if 'volume_summary' in output:
+            volume_summary = output['volume_summary']
+
