@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "nvidia_jetson",
   "metric_prefix": "nvidia.jetson.",
-  "metric_to_check": "",
+  "metric_to_check": "nvidia.jetson.mem.used",
   "creates_events": false,
   "short_description": "Get metrics about your Nvidia Jetson board",
   "guid": "72845bb7-c3a6-4017-96f6-c232171102f8",
