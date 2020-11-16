@@ -48,6 +48,7 @@ class PostgresMetricsCache:
         self.bgw_metrics = None
         self.archiver_metrics = None
         self.replication_metrics = None
+        self.replication_stats_metrics = None
         self.activity_metrics = None
 
     def get_instance_metrics(self, version):
