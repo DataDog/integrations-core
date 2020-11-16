@@ -67,6 +67,8 @@ def assert_collection(aggregator, tags, runs=1):
         'vault.runtime.sys.bytes',
         'vault.runtime.total.gc.pause_ns',
         'vault.runtime.total.gc.runs',
+        'vault.token.creation',
+        'vault.identity.entity.creation',
     ):
         summaries.remove(metric)
 

@@ -548,7 +548,7 @@ vault.vault.swift.delete.sum,gauge,,millisecond,,Duration of a DELETE operation 
 vault.vault.swift.list.count,count,,,,Duration of a LIST operation against the Swift storage backend count,0,vault,
 vault.vault.swift.list.quantile,gauge,,millisecond,,Duration of a LIST operation against the Swift storage backend quantile,0,vault,
 vault.vault.swift.list.sum,gauge,,millisecond,,Duration of a LIST operation against the Swift storage backend sum,0,vault,
-vault.vault.token.creation,count,,,,A new service or batch token was created. (Name chosen to be distinct from vault.token.create - an existing sample metric.),0,vault,
+vault.vault.token.creation,count,,,,A new service or batch token was created. (Always 1. Name chosen to be distinct from vault.token.create - an existing sample metric.),0,vault,
 vault.vault.token.count,gauge,,,,Number of service tokens available for use.,0,vault,
 vault.vault.token.count.by_auth,gauge,,,,Number of existing tokens broken down by auth method used to create them.,0,vault,
 vault.vault.token.count.by_policy,gauge,,,,Number of existing tokens counted in each policy assigned (so this metric adds to >=100% of tokens.),0,vault,
