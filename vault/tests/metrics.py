@@ -69,6 +69,4 @@ METRICS = {
     'vault.runtime.total.gc.pause_ns',
     'vault.runtime.total.gc.runs',
     'vault.token.lookup',
-    'vault.token.creation',
-    'vault.identity.entity.creation',
 }

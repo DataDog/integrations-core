@@ -556,11 +556,3 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
-
-    def test_metrics(self, aggregator, instance):
-        instance = instance()
-        c = Vault(Vault.CHECK_NAME, {}, [instance])
-        run_check(c)
-
-        aggregator.assert_metric('vault.vault.token.creation', metric_type=aggregator.MONOTONIC_COUNT)
-        aggregator.assert_metric('vault.vault.identity.entity.creation', metric_type=aggregator.MONOTONIC_COUNT)
