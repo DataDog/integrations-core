@@ -49,9 +49,9 @@ VALID_TLS_CONFIG_FOR_TEST = {
     'tags': ["mytag"],
     'timeout': 500,
     'use_tls': True,
-    'tls_private_key': os.path.join(HERE, 'compose', 'private_key.pem'),
-    'tls_ca_cert': os.path.join(HERE, 'compose', 'ca_cert.pem'),
-    'tls_cert': os.path.join(HERE, 'compose', 'cert.pem'),
+    'tls_private_key': os.path.join(HERE, 'compose/client', 'private_key.pem'),
+    'tls_ca_cert': os.path.join(HERE, 'compose/client', 'ca_cert.pem'),
+    'tls_cert': os.path.join(HERE, 'compose/client', 'cert.pem'),
     'tls_private_key_password': 'testpass',
 }
 
@@ -136,9 +136,9 @@ def dd_environment(get_instance):
         if get_tls():
             compose_file = os.path.join(HERE, 'compose', 'zk36plus_ssl.yaml')
 
-    private_key = os.path.join(HERE, 'compose', 'private_key.pem')
-    cert = os.path.join(HERE, 'compose', 'cert.pem')
-    ca_cert = os.path.join(HERE, 'compose', 'ca_cert.pem')
+    private_key = os.path.join(HERE, 'compose/client', 'private_key.pem')
+    cert = os.path.join(HERE, 'compose/client', 'cert.pem')
+    ca_cert = os.path.join(HERE, 'compose/client', 'ca_cert.pem')
 
     condition_tls = [
         CheckDockerLogs(
