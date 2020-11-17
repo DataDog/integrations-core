@@ -29,7 +29,9 @@
     },
     "dashboards": {},
     "monitors": {},
-    "saved_views": {},
+    "saved_views": {
+      "status_overview": "assets/saved_views/status_overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "sonarqube"
