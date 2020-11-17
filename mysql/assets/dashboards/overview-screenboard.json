@@ -126,7 +126,7 @@
             "aggregator": "avg"
           }
         ],
-        "title": "Number of Connctions",
+        "title": "Number of Connections",
         "title_size": "16",
         "title_align": "left",
         "autoscale": true,
