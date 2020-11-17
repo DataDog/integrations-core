@@ -1,5 +1,8 @@
 # CHANGELOG - spark
 
+## 1.18.0-beta.1 / 2020-11-17
+
+
 ## 1.17.0 / 2020-11-06
 
 * [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
