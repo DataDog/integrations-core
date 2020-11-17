@@ -1,14 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
+from copy import copy, deepcopy
 
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
-from .common import CHECK_NAME, assert_metrics
+from .common import CHECK_NAME, CUSTOM_QUERY_A, CUSTOM_QUERY_B, assert_metrics
 from .utils import not_windows_ci
 
 try:
@@ -170,3 +170,24 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
 
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads')
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_queries(aggregator, instance_docker):
+    instance = copy(instance_docker)
+    querya = copy(CUSTOM_QUERY_A)
+    queryb = copy(CUSTOM_QUERY_B)
+    instance['custom_queries'] = [querya, queryb]
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.check(instance)
+    tags = list(instance['tags'])
+
+    for tag in ('a', 'b', 'c'):
+        value = ord(tag)
+        custom_tags = ['customtag:{}'.format(tag)]
+        custom_tags.extend(tags)
+
+        aggregator.assert_metric('custom.num', value=value, tags=custom_tags + ['query:custom'])
+        aggregator.assert_metric('another_custom_one.num', value=value, tags=custom_tags + ['query:another_custom_one'])

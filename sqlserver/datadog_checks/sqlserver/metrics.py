@@ -37,30 +37,30 @@ class CustomQueryMetric(object):
         if not self.query:
             errors.append("custom query field `query` is required for metric_prefix `{}`".format(self.metric_prefix))
 
-        if not self.columns:
+        if self.columns:
+            for column in self.columns:
+                name = column.get('name')
+                if not name:
+                    errors.append("column field `name` is required for metric_prefix `{}`".format(self.metric_prefix))
+
+                column_type = column.get('type')
+                if not column_type:
+                    errors.append(
+                        "column field `type` is required for column `{}` of metric_prefix `{}`".format(
+                            name,
+                            self.metric_prefix,
+                        )
+                    )
+                if column_type != 'tag' and not hasattr(AgentCheck, column_type):
+                    errors.append(
+                        "invalid submission method `{}` for column `{}` of metric_prefix `{}`".format(
+                            column_type,
+                            name,
+                            self.metric_prefix,
+                        )
+                    )
+        else:
             errors.append("custom query field `columns` is required for metric_prefix `{}`".format(self.metric_prefix))
-
-        for column in self.columns:
-            name = column.get('name')
-            if not name:
-                errors.append("column field `name` is required for metric_prefix `{}`".format(self.metric_prefix))
-
-            column_type = column.get('type')
-            if not column_type:
-                errors.append(
-                    "column field `type` is required for column `{}` of metric_prefix `{}`".format(
-                        name,
-                        self.metric_prefix,
-                    )
-                )
-            if column_type != 'tag' and not hasattr(AgentCheck, column_type):
-                errors.append(
-                    "invalid submission method `{}` for column `{}` of metric_prefix `{}`".format(
-                        column_type,
-                        name,
-                        self.metric_prefix,
-                    )
-                )
 
         if errors:
             msg = 'Errors found while validating `custom_queries` configuration instance {}: {}'
