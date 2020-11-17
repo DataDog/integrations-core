@@ -13,10 +13,18 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
 @click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
-@click.option('--tag-pattern', default=None, help="The regex pattern for the format of the tag. Required if the tag doesn't follow semver")
-@click.option('--tag-prefix', default=None, help="Specify the prefix of the tag to use if the tag doesn't follow semver")
+@click.option(
+    '--tag-pattern',
+    default=None,
+    help="The regex pattern for the format of the tag. Required if the tag doesn't follow semver",
+)
+@click.option(
+    '--tag-prefix', default=None, help="Specify the prefix of the tag to use if the tag doesn't follow semver"
+)
 @click.option('--dry-run', '-n', is_flag=True, help="Run the command in dry-run mode")
-@click.option('--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since")
+@click.option(
+    '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
+)
 @click.pass_context
 def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since):
     """Show all the pending PRs for a given check."""
