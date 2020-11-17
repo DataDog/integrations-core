@@ -289,7 +289,13 @@ def test_f5(aggregator):
         'sysMultiHostCpuIowait',
     ]
 
-    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
+    interfaces = [
+        ('1.0', 'desc2'),
+        ('mgmt', 'desc1'),
+        ('/Common/internal', 'desc5'),
+        ('/Common/http-tunnel', 'desc3'),
+        ('/Common/socks-tunnel', 'desc4'),
+    ]
     tags = [
         'snmp_profile:' + profile,
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
@@ -306,8 +312,8 @@ def test_f5(aggregator):
     for metric in cpu_rates:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
-    for interface in interfaces:
-        interface_tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + tags
+    for interface, desc in interfaces:
+        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
@@ -317,11 +323,11 @@ def test_f5(aggregator):
                 'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
             )
     for metric in IF_GAUGES:
-        for interface in interfaces:
+        for interface, desc in interfaces:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric),
                 metric_type=aggregator.GAUGE,
-                tags=['interface:{}'.format(interface), 'interface_alias:generic description'] + tags,
+                tags=['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags,
                 count=1,
             )
     for version in ['ipv4', 'ipv6']:
@@ -398,8 +404,12 @@ def test_router(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    for interface in ['eth0', 'eth1']:
-        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
+    interfaces = [
+        ('eth0', 'kept'),
+        ('eth1', 'their forward oxen'),
+    ]
+    for interface, if_desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -426,7 +436,7 @@ def test_router(aggregator):
             )
         for metric in IP_IF_COUNTS:
             for interface in ['17', '21']:
-                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
+                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common_tags
                 aggregator.assert_metric(
                     'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
                 )
@@ -445,7 +455,13 @@ def test_f5_router(aggregator):
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
-    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
+    interfaces = [
+        ('1.0', 'desc2'),
+        ('mgmt', 'desc1'),
+        ('/Common/internal', 'desc5'),
+        ('/Common/http-tunnel', 'desc3'),
+        ('/Common/socks-tunnel', 'desc4'),
+    ]
     common_tags = [
         'snmp_profile:router',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
@@ -454,8 +470,8 @@ def test_f5_router(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
+    for interface, desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -489,8 +505,23 @@ def test_cisco_3850(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    aliases = {
+        'Gi1/0/24': 'LWAP-example',
+        'Gi1/0/33': 'switchboard console',
+        'Gi1/0/38': 'Mitel Console',
+        'Gi1/1/3': 'Link to Switch',
+        'Gi2/0/13': 'AP01',
+        'Gi2/0/14': 'AP02',
+        'Gi2/0/15': 'AP03',
+        'Gi2/0/16': 'AP04',
+        'Gi2/0/17': 'AP05',
+        'Gi2/0/18': 'AP06',
+        'Gi2/1/4': 'Link to Switch',
+    }
+
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
+        alias = aliases.get(interface, '')
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(alias)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -753,7 +784,7 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -1147,8 +1178,13 @@ def test_proliant(aggregator):
         for metric in drive_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for interface in ['eth0', 'eth1']:
-        if_tags = ['interface:{}'.format(interface), 'interface_alias:generic description'] + common_tags
+    interfaces = [
+        ('eth0', 'quaintly zombies quaintly forward'),
+        ('eth1', 'quaintly but quaintly quaintly'),
+    ]
+
+    for interface, desc in interfaces:
+        if_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1

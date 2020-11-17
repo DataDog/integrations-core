@@ -231,7 +231,6 @@ def test_table_regex_match(aggregator):
         for interface in ['tunl0', 'eth0', 'ip6tnl0']:
             tags = common_tags + [
                 'interface:{}'.format(interface),
-                'interface_alias:generic description',
                 'prefix:{}'.format(interface[:1]),
                 'suffix:{}'.format(interface[1:]),
             ]
