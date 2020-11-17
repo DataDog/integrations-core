@@ -168,13 +168,17 @@ class SQLServer(AgentCheck):
 
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
-        self.custom_queries = self.instance.get('custom_queries')
+        self.custom_queries = []
+        custom_queries = self.instance.get('custom_queries')
 
-        if self.proc and self.custom_queries:
+        if self.proc and custom_queries:
             msg = 'Stored Procedures and Custom Queries cannot be part of the same check instance.'
             raise ConfigurationError(msg)
-        elif self.custom_queries:
-            self._validate_custom_queries()
+        elif custom_queries:
+            for id_, query in enumerate(custom_queries):
+                # will raise a ConfigurationError if the query doesn't validate
+                custom_query = metrics.CustomQueryMetric(query, id_)
+                self.custom_queries.append(custom_query)
 
         self.connection = Connection(init_config, self.instance, self.handle_service_check, self.log)
 
@@ -492,82 +496,10 @@ class SQLServer(AgentCheck):
         """
         tags = self.instance.get("tags", [])
         for custom_query in self.custom_queries:
-            metric_prefix = custom_query.get('metric_prefix').rstrip('.')
-            query = custom_query.get('query')
-            columns = custom_query.get('columns')
 
             with self.connection.open_managed_default_connection():
                 with self.connection.get_managed_cursor() as cursor:
-                    self.log.debug("Running query: %s", query)
-                    cursor.execute(query)
-                    rows = cursor.fetchall()
-                    self.log.debug("Query results: %s", rows)
-
-                    for row in rows:
-                        if not row:
-                            self.log.debug("query result for metric_prefix %s: returned an empty result", metric_prefix)
-                            continue
-
-                        if len(columns) != len(row):
-                            self.log.error(
-                                "query result for metric_prefix %s: expected %s columns, got %s",
-                                metric_prefix,
-                                len(columns),
-                                len(row),
-                            )
-                            continue
-
-                        metric_info = []
-                        query_tags = list(custom_query.get('tags', []))
-                        query_tags.extend(tags)
-
-                        for column, value in zip(columns, row):
-
-                            # Columns can be ignored via configuration.
-                            if not column:
-                                continue
-
-                            name = column.get('name')
-                            if not name:
-                                self.log.error("column field `name` is required for metric_prefix `%s`", metric_prefix)
-                                break
-
-                            column_type = column.get('type')
-                            if not column_type:
-                                self.log.error(
-                                    "column field `type` is required for column `%s` of metric_prefix `%s`",
-                                    name,
-                                    metric_prefix,
-                                )
-                                break
-
-                            if column_type == 'tag':
-                                query_tags.append('{}:{}'.format(name, value))
-                            else:
-                                if not hasattr(self, column_type):
-                                    self.log.error(
-                                        "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
-                                        column_type,
-                                        name,
-                                        metric_prefix,
-                                    )
-                                    break
-                                try:
-                                    metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
-                                except (ValueError, TypeError):
-                                    self.log.error(
-                                        "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
-                                        value,
-                                        name,
-                                        metric_prefix,
-                                    )
-                                    break
-
-                        # Only submit metrics if there were absolutely no errors - all or nothing.
-                        else:
-                            for info in metric_info:
-                                metric, value, method = info
-                                getattr(self, method)(metric, value, tags=set(query_tags))
+                    custom_query.fetch_metrics(cursor, self, tags)
 
     def do_stored_procedure_check(self):
         """

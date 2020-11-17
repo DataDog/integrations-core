@@ -8,8 +8,112 @@ from __future__ import division
 
 from collections import defaultdict
 
+from datadog_checks.base import AgentCheck, ConfigurationError
+
 # Queries
 ALL_INSTANCES = 'ALL'
+
+
+class CustomQueryMetric(object):
+    """Validate and process custom SQL queries.
+
+    This class is distinct from the BaseSqlServerMetric classes due to its reliance on "traditional" or
+    or non-performance counter queries.
+    """
+
+    def __init__(self, query_config, instance_id):
+        self.query = query_config.get('query')
+        self.metric_prefix = query_config.get('metric_prefix', '').rstrip('.')
+        self.columns = query_config.get('columns')
+        self.query_tags = query_config.get('tags', [])
+
+        self.validate(instance_id)
+
+    def validate(self, instance_id):
+        errors = []
+        if not self.metric_prefix:
+            errors.append("custom query field `metric_prefix` is required")
+
+        if not self.query:
+            errors.append("custom query field `query` is required for metric_prefix `{}`".format(self.metric_prefix))
+
+        if not self.columns:
+            errors.append("custom query field `columns` is required for metric_prefix `{}`".format(self.metric_prefix))
+
+        for column in self.columns:
+            name = column.get('name')
+            if not name:
+                errors.append("column field `name` is required for metric_prefix `{}`".format(self.metric_prefix))
+
+            column_type = column.get('type')
+            if not column_type:
+                errors.append(
+                    "column field `type` is required for column `{}` of metric_prefix `{}`".format(
+                        name,
+                        self.metric_prefix,
+                    )
+                )
+            if column_type != 'tag' and not hasattr(AgentCheck, column_type):
+                errors.append(
+                    "invalid submission method `{}` for column `{}` of metric_prefix `{}`".format(
+                        column_type,
+                        name,
+                        self.metric_prefix,
+                    )
+                )
+
+        if errors:
+            msg = 'Errors found while validating `custom_queries` configuration instance {}: {}'
+            raise ConfigurationError(msg.format(instance_id, ';'.join(errors)))
+
+    def fetch_metrics(self, cursor, agent, tags):
+        agent.log.debug("Running query: %s", self.query)
+        cursor.execute(self.query)
+        rows = cursor.fetchall()
+        agent.log.debug("Query results: %s", rows)
+
+        for row in rows:
+            if len(self.columns) != len(row):
+                agent.log.error(
+                    "query result for metric_prefix %s: expected %s columns, got %s",
+                    self.metric_prefix,
+                    len(self.columns),
+                    len(row),
+                )
+                break
+
+            metric_info = []
+            query_tags = list(self.query_tags)
+            query_tags.extend(tags)
+
+            for column, value in zip(self.columns, row):
+
+                # Columns can be ignored via configuration.
+                if not column:
+                    continue
+
+                name = column.get('name')
+                column_type = column.get('type')
+
+                if column_type == 'tag':
+                    query_tags.append('{}:{}'.format(name, value))
+                else:
+                    try:
+                        metric_info.append(('{}.{}'.format(self.metric_prefix, name), float(value), column_type))
+                    except (ValueError, TypeError):
+                        agent.log.error(
+                            "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
+                            value,
+                            name,
+                            self.metric_prefix,
+                        )
+                        break
+
+            # Only submit metrics if there were absolutely no errors - all or nothing.
+            else:
+                for info in metric_info:
+                    metric, value, method = info
+                    getattr(agent, method)(metric, value, tags=set(query_tags))
 
 
 class BaseSqlServerMetric(object):
