@@ -48,9 +48,7 @@ class CreateSchema(LazyFunction):
         process.wait()
 
         if process.returncode != 0:
-            raise SubprocessError(
-                'Command: {}\nExit code: {}'.format(command, process.returncode)
-            )
+            raise SubprocessError('Command: {}\nExit code: {}'.format(command, process.returncode))
 
 
 class EnsureExpectedMetricsShowUp(LazyFunction):
