@@ -16,7 +16,7 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 @click.option('--tag-pattern', default=None, help="The regex pattern for the format of the tag. Required if the tag doesn't follow semver")
 @click.option('--tag-prefix', default=None, help="Specify the prefix of the tag to use if the tag doesn't follow semver")
 @click.option('--dry-run', '-n', is_flag=True, help="Run the command in dry-run mode")
-@click.option('--since', help="The git ref to use instead of auto-detecting the tag to view changes since")
+@click.option('--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since")
 @click.pass_context
 def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since):
     """Show all the pending PRs for a given check."""
