@@ -472,24 +472,6 @@ class SQLServer(AgentCheck):
                 # except Exception as e:
                 #     self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
 
-    def _validate_custom_queries(self):
-        errors = []
-        for custom_query in self.custom_queries:
-            metric_prefix = custom_query.get('metric_prefix')
-            if not metric_prefix:
-                errors.append("custom query field `metric_prefix` is required")
-
-            query = custom_query.get('query')
-            if not query:
-                errors.append("custom query field `query` is required for metric_prefix `%s`", metric_prefix)
-
-            columns = custom_query.get('columns')
-            if not columns:
-                errors.append("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
-        if errors:
-            msg = 'Errors found while validating `custom_queries` configuration: %s'
-            raise ConfigurationError(msg, ';'.join(errors))
-
     def do_custom_queries(self):
         """
         Fetch metrics from custom SQL queries
