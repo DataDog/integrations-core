@@ -46,7 +46,7 @@ class TestCheck:
         with pytest.raises(Exception) as ctx:
             check.check(instance)
         error = str(ctx.value)
-        assert 'nodename nor servname provided' in error
+        assert error
 
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
 
