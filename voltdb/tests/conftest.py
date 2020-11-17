@@ -10,21 +10,31 @@ from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.voltdb.types import Instance
 
 from . import common
+from .utils import CreateSchema, EnsureExpectedMetricsShowUp
 
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     compose_filename = 'docker-compose-tls.yaml' if common.TLS_ENABLED else 'docker-compose.yaml'
     compose_file = os.path.join(common.HERE, 'compose', compose_filename)
+
+    schema_file = os.path.join(common.HERE, 'compose', 'schema.sql')
+    with open(schema_file) as f:
+        schema = f.read()
+
     conditions = [
         CheckDockerLogs(compose_file, patterns=['Server completed initialization']),
+        CreateSchema(compose_file, schema, container_name='voltdb0'),
+        EnsureExpectedMetricsShowUp(instance),
     ]
+
     env_vars = {
         'VOLTDB_IMAGE': common.VOLTDB_IMAGE,
         'VOLTDB_CLIENT_PORT': str(common.VOLTDB_CLIENT_PORT),
         'TLS_OUTPUT_DIR': common.TLS_OUTPUT_DIR,
+        'TLS_CONTAINER_LOCALCERT_PATH': common.TLS_CONTAINER_LOCALCERT_PATH,
     }
-    # TODO: setup items to generate missing metrics: table, index, stored procedure, snapshot.
+
     with docker_run(compose_file, conditions=conditions, env_vars=env_vars):
         yield instance
 

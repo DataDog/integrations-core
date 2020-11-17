@@ -105,6 +105,7 @@ ProcedureMetrics = {
         {'name': 'procedure.avg_parameter_set_size', 'type': 'gauge'},
         {'name': 'procedure.aborts', 'type': 'monotonic_count'},
         {'name': 'procedure.failures', 'type': 'monotonic_count'},
+        None,  # TRANSACTIONAL
     ],
     'extras': [
         {
@@ -224,10 +225,12 @@ TableMetrics = {
         {'name': 'table.tuple_allocated_memory', 'type': 'gauge'},
         {'name': 'table.tuple_data_memory', 'type': 'gauge'},
         {'name': 'table.string_data_memory', 'type': 'gauge'},
-        {'name': 'table.tuple_limit', 'type': 'gauge'},
+        {'name': 'table.tuple_limit', 'type': 'gauge'},  # May be null.
         {'name': 'table.percent_full', 'type': 'gauge'},
-        {'name': 'distributed_replication', 'type': 'tag', 'boolean': True},
-        None,  # EXPORT
+        # The following two columns were added in V10 only. Leave them out for now, as we target v8.4.
+        # See: https://docs.voltdb.com/ReleaseNotes/index.php
+        # {'name': 'distributed_replication', 'type': 'tag', 'boolean': True},
+        # None,  # EXPORT
     ],
 }
 
@@ -237,6 +240,7 @@ IndexMetrics = {
     'name': 'index',
     'query': 'INDEX',
     'columns': [
+        None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
         {'name': 'hostname', 'type': 'tag'},
         {'name': 'site_id', 'type': 'tag'},

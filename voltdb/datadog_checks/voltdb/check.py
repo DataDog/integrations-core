@@ -44,7 +44,7 @@ class VoltDBCheck(AgentCheck):
 
         if BASE_PARSED_VERSION < pkg_resources.parse_version('15.0.0'):
             # On Agent < 7.24.0 we must to pass `Query` objects instead of dicts.
-            manager_queries = [Query(query) for query in manager_queries]
+            manager_queries = [Query(query) for query in manager_queries]  # type: ignore
 
         self._query_manager = QueryManager(
             self,

@@ -9,8 +9,9 @@ services:
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment-tls.xml:/tmp/deployment.xml
-      - $TLS_OUTPUT_DIR:/tmp/tlsoutput
       - ./tlsstart.sh:/tmp/tlsstart.sh
+      - ${TLS_OUTPUT_DIR}:/tmp/tlsoutput
+      - ./localcert.properties:${TLS_CONTAINER_LOCALCERT_PATH}
     entrypoint: ["sh", "/tmp/tlsstart.sh"]
     ports:
       - ${VOLTDB_CLIENT_PORT}:8443  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
