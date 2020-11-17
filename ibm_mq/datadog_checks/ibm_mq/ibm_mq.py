@@ -88,15 +88,30 @@ class IbmMqCheck(AgentCheck):
             if pymqi_type not in properties:
                 self.log.debug("MQ type `%s` not found in properties for metric `%s` and tags `%s`", metric_name, tags)
                 continue
-            try:
-                metric_value = int(properties[pymqi_type])
-            except ValueError as e:
-                self.log.debug(
-                    "Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s",
-                    properties[pymqi_type],
-                    metric_name,
-                    tags,
-                    e,
-                )
-                return
-            self.send_metric(metric_type, metric_full_name, metric_value, tags)
+
+            values_to_submit = []
+            value = properties[pymqi_type]
+
+            if isinstance(value, list):
+                # Some metrics are returned as a list of two values.
+                # Index 0 = Contains the value for non-persistent messages
+                # Index 1 = Contains the value for persistent messages
+                # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.mon.doc/q037510_.htm#q037510___q037510_2
+                values_to_submit.append((tags + ['persistent:false'], value[0]))
+                values_to_submit.append((tags + ['persistent:true'], value[1]))
+            else:
+                values_to_submit.append((tags, value))
+
+            for new_tags, metric_value in values_to_submit:
+                try:
+                    metric_value = int(metric_value)
+                except ValueError as e:
+                    self.log.debug(
+                        "Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s",
+                        properties[pymqi_type],
+                        metric_name,
+                        new_tags,
+                        e,
+                    )
+                    return
+                self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
