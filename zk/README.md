@@ -30,6 +30,59 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6].
 
+#### Enabling SSL
+
+Zookeeper 3.5 introduced the ability to use SSL authentication. The agent is able to connect to Zookeeper using SSL as well.
+
+One thing to note is that Zookeeper uses `truststores` and `keystores` JKS files while the Agent TLS/SSL configuration uses `tls_ca_cert`, `tls_cert`, and `tls_private_key` config options that accept PEM files.
+It may be confusing at first for those familiar with the JKS files to map to PEM files.
+
+It is assumed that one already has the server and client truststore and keystore files to start Zookeeper in SSL mode in the first place.
+More information on setting up Zookeeper in SSL mode first can be found [here][13].
+
+We will use following files as examples:
+- `server_truststore.jks`
+- `server_keystore.jks` 
+- `client_truststore.jks`
+- `client_keystore.jks`
+
+We also assume that both sides' `keystore`s and `truststore`s have each other's certificates, meaning that a Java Zookeeper client can already connect to a Zookeeper server.
+
+
+_We first will get `cert.pem` file from `client_truststore.jks`._
+1. Use `keytool` to export `client_truststore.jks` to a PKCS12 file called `cert.p12`:
+    ```
+    keytool -importkeystore -srckeystore client_truststore.jks -destkeystore cert.p12 -srcstoretype jks -deststoretype pkcs12
+    ```
+2. Use `openssl` to export the new PKCS12 `cert.p12` file to `cert.pem` PEM file:
+    ```
+    openssl pkcs12 -in cert.p12 -out cert.pem
+    ```
+
+_Next we will get `ca_cert.pem` file from `server_truststore.jks`._
+1. Use `keytool` to export `server_truststore.jks` to a PKCS12 file called `ca_cert.p12`:
+
+    ```
+    keytool -importkeystore -srckeystore server_truststore.jks -destkeystore ca_cert.p12 -srcstoretype jks -deststoretype pkcs12
+    ```
+2. Use `openssl` to export the new PKCS12 `ca_cert.p12` file to `ca_cert.pem` PEM file:
+    ```
+    openssl pkcs12 -in ca_cert.p12 -out ca_cert.pem
+    ```
+
+_Finally we will get `private_key.pem` file from `client_keystore.jks`._
+1. Use `keytool` to export `client_keystore.jks` to a PKCS12 file called `private_key.p12`:
+    ```
+    keytool -importkeystore -srckeystore client_keystore.jks -destkeystore private_key.p12 -srcstoretype jks -deststoretype pkcs12
+    ```
+   
+2. Use `openssl` to export the new PKCS12 `private_key.p12` file to `private_key.pem` PEM file:
+    ```
+    openssl pkcs12 -in private_key.p12 -out private_key.pem
+    ```
+
+You may need to enter a password for these commands, in which case this password should be included in the `tls_private_key_password` config option.
+
 #### Log collection
 
 _Available for Agent versions >6.0_
@@ -169,3 +222,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[13]: https://cwiki.apache.org/confluence/display/ZOOKEEPER/ZooKeeper+SSL+User+Guide
