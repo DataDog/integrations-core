@@ -31,7 +31,11 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "mysql": "assets/dashboards/overview.json",
+      "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
+
+    },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
       "operations_overview": "assets/saved_views/operations_overview.json",
