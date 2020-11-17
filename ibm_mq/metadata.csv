@@ -73,7 +73,6 @@ ibm_mq.stats.channel.incomplete_batches,count,,message,,"The number of batches p
 ibm_mq.stats.channel.avg_batch_size,gauge,,message,,"The average batch size of batches processed by the channel (parameter identifier: MQIAMO_AVG_BATCH_SIZE).",0,ibm_mq,stats chan avg batch size
 ibm_mq.stats.queue.q_min_depth,gauge,,message,,"The minimum queue depth during the monitoring period (parameter identifier: MQIAMO_Q_MIN_DEPTH).",0,ibm_mq,stats queue q min depth
 ibm_mq.stats.queue.q_max_depth,gauge,,message,,The maximum queue depth during the monitoring period (parameter identifier: MQIAMO_Q_MAX_DEPTH).,0,ibm_mq,stats queue q max depth
-ibm_mq.stats.queue.q_type,gauge,,message,,The type of the queue (parameter identifier: MQIA_Q_TYPE).,0,ibm_mq,stats queue q type
 ibm_mq.stats.queue.put_fail_count,count,,message,,The number of unsuccessful attempts to put a message to the queue (parameter identifier: MQIAMO_PUTS_FAILED).,0,ibm_mq,stats queue put fail count
 ibm_mq.stats.queue.get_fail_count,count,,message,,The number of unsuccessful destructive get requests (parameter identifier: MQIAMO_GETS_FAILED).,0,ibm_mq,stats queue get fail count
 ibm_mq.stats.queue.put1_fail_count,count,,message,,The number of unsuccessful attempts to put a message using MQPUT1 calls (parameter identifier: MQIAMO_PUT1S_FAILED).,0,ibm_mq,stats queue put1 fail count

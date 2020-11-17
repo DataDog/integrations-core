@@ -216,7 +216,6 @@ CHANNEL_STATS_METRICS = [
 QUEUE_STATS_METRICS = [
     ('ibm_mq.stats.queue.q_min_depth', GAUGE),
     ('ibm_mq.stats.queue.q_max_depth', GAUGE),
-    ('ibm_mq.stats.queue.q_type', GAUGE),
     ('ibm_mq.stats.queue.put_fail_count', COUNT),
     ('ibm_mq.stats.queue.get_fail_count', COUNT),
     ('ibm_mq.stats.queue.put1_fail_count', COUNT),

@@ -124,7 +124,6 @@ def queue_stats_metrics():
     return {
         'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
         'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
-        'q_type': (pymqi.CMQC.MQIA_Q_TYPE, GAUGE),
         'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),
         'get_fail_count': (pymqi.CMQCFC.MQIAMO_GETS_FAILED, COUNT),
         'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),
