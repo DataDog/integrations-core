@@ -253,9 +253,18 @@ SELECT {metrics_columns}
 REPLICATION_STATS_METRICS = {
     'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
     'metrics': {
-        'write_lag': ('postgresql.replication.wal_write_lag', AgentCheck.gauge),
-        'flush_lag': ('postgresql.replication.wal_flush_lag', AgentCheck.gauge),
-        'replay_lag': ('postgresql.replication.wal_replay_lag', AgentCheck.gauge),
+        'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
+            'postgresql.replication.wal_write_lag',
+            AgentCheck.gauge,
+        ),
+        'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
+            'postgresql.replication.wal_flush_lag',
+            AgentCheck.gauge,
+        ),
+        'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
+            'postgresql.replication.wal_replay_lag',
+            AgentCheck.gauge,
+        ),
     },
     'relation': False,
     'query': 'SELECT application_name, state, sync_state, {metrics_columns} FROM pg_stat_replication',
