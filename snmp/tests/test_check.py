@@ -1076,7 +1076,6 @@ def test_timeout(aggregator, caplog):
     # Some metrics still arrived
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
-    aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
