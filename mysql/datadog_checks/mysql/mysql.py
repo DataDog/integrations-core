@@ -543,7 +543,7 @@ class MySql(AgentCheck):
                     cursor.execute("SHOW SLAVE STATUS;")
 
                 results = cursor.fetchall()
-                self.log.debug("Getting replication status: {}".format(results))
+                self.log.debug("Getting replication status: %s", results)
                 for slave_result in results:
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
