@@ -3,26 +3,13 @@
   "description": "",
   "widgets": [
     {
-      "id": 2932944765675138,
-      "definition": {
-        "type": "note",
-        "content": "MySQL LOGO HERE",
-        "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
+      "id": 7819738301267990,
       "layout": {
         "x": 1,
-        "y": 1,
+        "y": 14,
         "width": 30,
-        "height": 10
-      }
-    },
-    {
-      "id": 7819738301267990,
+        "height": 40
+      },
       "definition": {
         "type": "note",
         "content": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.\n\nTo learn more about our MySQL integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.\n\n\n",
@@ -32,16 +19,16 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "left"
-      },
-      "layout": {
-        "x": 1,
-        "y": 12,
-        "width": 30,
-        "height": 31
       }
     },
     {
       "id": 4949655736738342,
+      "layout": {
+        "x": 33,
+        "y": 1,
+        "width": 70,
+        "height": 5
+      },
       "definition": {
         "type": "note",
         "content": "Basic Activity Monitor",
@@ -51,16 +38,16 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 33,
-        "y": 1,
-        "width": 70,
-        "height": 5
       }
     },
     {
       "id": 2053914314500650,
+      "layout": {
+        "x": 105,
+        "y": 1,
+        "width": 70,
+        "height": 5
+      },
       "definition": {
         "type": "note",
         "content": "Throughput",
@@ -70,16 +57,16 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 105,
-        "y": 1,
-        "width": 70,
-        "height": 5
       }
     },
     {
       "id": 33563484962610,
+      "layout": {
+        "x": 33,
+        "y": 46,
+        "width": 70,
+        "height": 5
+      },
       "definition": {
         "type": "note",
         "content": "MySQL Resource Utilization",
@@ -89,16 +76,16 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 33,
-        "y": 46,
-        "width": 70,
-        "height": 5
       }
     },
     {
       "id": 7813434609764132,
+      "layout": {
+        "x": 33,
+        "y": 24,
+        "width": 70,
+        "height": 5
+      },
       "definition": {
         "type": "note",
         "content": "Performance",
@@ -108,16 +95,16 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 33,
-        "y": 24,
-        "width": 70,
-        "height": 5
       }
     },
     {
       "id": 8724911101387132,
+      "layout": {
+        "x": 177,
+        "y": 16,
+        "width": 47,
+        "height": 5
+      },
       "definition": {
         "type": "note",
         "content": "Logs",
@@ -127,12 +114,6 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 177,
-        "y": 16,
-        "width": 47,
-        "height": 5
       }
     },
     {
@@ -368,7 +349,6 @@
         "title": "Rate of Select Queries",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -417,6 +397,12 @@
     },
     {
       "id": 8995043206631004,
+      "layout": {
+        "x": 105,
+        "y": 39,
+        "width": 70,
+        "height": 5
+      },
       "definition": {
         "type": "note",
         "content": "System Resource Utilization",
@@ -426,12 +412,6 @@
         "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 105,
-        "y": 39,
-        "width": 70,
-        "height": 5
       }
     },
     {
@@ -509,7 +489,6 @@
         "title": "MySQL CPU Time (%)",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -569,7 +548,16 @@
     },
     {
       "id": 3597777553720704,
+      "layout": {
+        "x": 177,
+        "y": 22,
+        "width": 47,
+        "height": 55
+      },
       "definition": {
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
         "type": "log_stream",
         "indexes": [],
         "query": "source:mysql",
@@ -583,16 +571,7 @@
         ],
         "show_date_column": true,
         "show_message_column": true,
-        "message_display": "expanded-md",
-        "title": "",
-        "title_size": "16",
-        "title_align": "left"
-      },
-      "layout": {
-        "x": 177,
-        "y": 22,
-        "width": 47,
-        "height": 55
+        "message_display": "expanded-md"
       }
     },
     {
@@ -621,7 +600,6 @@
         "title": "Rate of Update Queries",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -658,7 +636,6 @@
         "title": "Rate of Insert Queries",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -695,7 +672,6 @@
         "title": "Rate of Delete Queries",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -740,8 +716,8 @@
         "title": "Rate of Data Reads/Writes",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
-        "show_legend": false
+        "show_legend": false,
+        "legend_size": "0"
       },
       "layout": {
         "x": 33,
@@ -763,7 +739,6 @@
         "title": "Rate of Connections to Server",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "precision": 2
       },
       "layout": {
@@ -798,8 +773,8 @@
         "title": "Cache Utilization Ratio",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
-        "show_legend": false
+        "show_legend": false,
+        "legend_size": "0"
       },
       "layout": {
         "x": 68,
@@ -834,8 +809,8 @@
         "title": "Slow Query Rate",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
-        "show_legend": false
+        "show_legend": false,
+        "legend_size": "0"
       },
       "layout": {
         "x": 68,
@@ -869,7 +844,6 @@
         "title": "Failed MySQL Connects",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "precision": 2
       },
       "layout": {
@@ -881,6 +855,12 @@
     },
     {
       "id": 5811070951344460,
+      "layout": {
+        "x": 1,
+        "y": 81,
+        "width": 30,
+        "height": 8
+      },
       "definition": {
         "type": "note",
         "content": "InnoDB is the storage management system for both MariaDB and MySQL.",
@@ -890,16 +870,16 @@
         "show_tick": true,
         "tick_pos": "50%",
         "tick_edge": "right"
-      },
-      "layout": {
-        "x": 1,
-        "y": 70,
-        "width": 30,
-        "height": 8
       }
     },
     {
       "id": 7403239476791868,
+      "layout": {
+        "x": 1,
+        "y": 55,
+        "width": 30,
+        "height": 25
+      },
       "definition": {
         "type": "note",
         "content": "Most of the metrics and monitoring strategies outlined here also apply to MySQL-compatible technologies such MariaDB and Percona Server, with some notable differences. For instance, some of the features in the MySQL Workbench are not compatible with currently available versions of MariaDB.\n\nAmazon RDS users should check out our specialized monitoring guides for [MySQL on RDS](https://www.datadoghq.com/blog/monitoring-rds-mysql-performance-metrics/) and for the MySQL-compatible [Amazon Aurora](https://www.datadoghq.com/blog/monitoring-amazon-aurora-performance-metrics/).\n\n",
@@ -909,16 +889,16 @@
         "show_tick": true,
         "tick_pos": "50%",
         "tick_edge": "right"
-      },
-      "layout": {
-        "x": 1,
-        "y": 44,
-        "width": 30,
-        "height": 24
       }
     },
     {
       "id": 400903025136302,
+      "layout": {
+        "x": 177,
+        "y": 1,
+        "width": 47,
+        "height": 13
+      },
       "definition": {
         "type": "note",
         "content": "The current rate of queries will naturally rise and fall, and as such it’s not always an actionable metric based on fixed thresholds. But it is worthwhile to alert on sudden changes in query volume—drastic drops in throughput, especially, can indicate a serious problem.",
@@ -928,12 +908,20 @@
         "show_tick": true,
         "tick_pos": "50%",
         "tick_edge": "left"
-      },
+      }
+    },
+    {
+      "id": 1801107147992128,
       "layout": {
-        "x": 177,
+        "x": 1,
         "y": 1,
-        "width": 47,
-        "height": 13
+        "width": 30,
+        "height": 12
+      },
+      "definition": {
+        "type": "image",
+        "url": "/static/images/saas_logos/bot/mysql@2x.png",
+        "sizing": "fit"
       }
     }
   ],
