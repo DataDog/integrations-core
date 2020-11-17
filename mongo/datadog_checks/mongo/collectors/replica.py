@@ -137,6 +137,9 @@ class ReplicaCollector(MongoCollector):
             lag_time_tags = [t for t in self.base_tags if not t.startswith('replset_state:')]
             # Compute a lag time
             for member in status.get('members', []):
+                if get_state_name(member.get('state')) not in ('SECONDARY', 'PRIMARY'):
+                    # Can only compute a meaningful lag time from secondaries and primaries
+                    continue
                 if 'optimeDate' in primary and 'optimeDate' in member:
                     lag = primary['optimeDate'] - member['optimeDate']
                     tags = lag_time_tags + [

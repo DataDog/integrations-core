@@ -144,12 +144,6 @@ class TestTLSContext:
             context = check.get_tls_context()  # type: MagicMock
             context.load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
 
-    def test_no_ca_certs_no_default(self):
-        instance = {'tls_load_default_certs': False}
-        check = AgentCheck('test', {}, [instance])
-        context = check.get_tls_context()
-        assert len(context.get_ca_certs()) == 0
-
     def test_ca_cert_file(self):
         with patch('ssl.SSLContext'), TempDir("test_ca_cert_file") as tmp_dir:
             filename = os.path.join(tmp_dir, 'foo')

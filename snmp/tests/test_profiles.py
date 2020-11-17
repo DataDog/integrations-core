@@ -245,8 +245,8 @@ def test_cisco_voice(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
-    profile = "f5-big-ip"
-    run_profile_check('f5', profile)
+    profile = 'f5-big-ip'
+    run_profile_check(profile)
 
     gauges = [
         'sysStatMemoryTotal',
@@ -393,7 +393,7 @@ def test_f5(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     profile = "generic-router"
-    run_profile_check('network', profile)
+    run_profile_check(profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -438,7 +438,7 @@ def test_router(aggregator):
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
-    instance['community_string'] = 'f5'
+    instance['community_string'] = 'f5-big-ip'
     instance['enforce_mib_constraints'] = False
 
     init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
@@ -478,7 +478,7 @@ def test_f5_router(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_3850(aggregator):
     profile = "cisco-3850"
-    run_profile_check('3850', profile)
+    run_profile_check(profile)
     # We're not covering all interfaces
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
     common_tags = common.CHECK_TAGS + [
@@ -716,8 +716,13 @@ def test_idrac(aggregator):
 
     indexes = ['29', '22']
     device_types = ['26', '4']
-    for index, device_type in zip(indexes, device_types):
-        tags = ['chassis_index:{}'.format(index), 'device_type:{}'.format(device_type)] + common_tags
+    device_indexes = ['4', '21']
+    for index, device_type, device_index in zip(indexes, device_types, device_indexes):
+        tags = [
+            'chassis_index:{}'.format(index),
+            'device_type:{}'.format(device_type),
+            'device_index:{}'.format(device_index),
+        ] + common_tags
         aggregator.assert_metric(
             'snmp.{}'.format("memoryDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
         )
@@ -731,7 +736,7 @@ def test_idrac(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_nexus(aggregator):
     profile = "cisco-nexus"
-    run_profile_check('cisco_nexus', profile)
+    run_profile_check(profile)
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
@@ -934,7 +939,7 @@ def test_dell_poweredge(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_hp_ilo4(aggregator):
     profile = "hp-ilo4"
-    run_profile_check('hp_ilo4', profile)
+    run_profile_check(profile)
 
     status_gauges = [
         'cpqHeCritLogCondition',
@@ -1226,7 +1231,7 @@ def test_generic_host_resources(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_palo_alto(aggregator):
     profile = "palo-alto"
-    run_profile_check('pan-common', profile)
+    run_profile_check(profile)
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
@@ -1274,9 +1279,9 @@ def test_palo_alto(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_cisco_asa_5525(aggregator):
-    profile = "cisco-asa-5525"
-    run_profile_check('cisco_asa_5525', profile)
+def test_cisco_asa(aggregator):
+    profile = "cisco-asa"
+    run_profile_check(profile)
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
@@ -1607,7 +1612,7 @@ def test_aruba(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
     profile = "chatsworth_pdu"
-    run_profile_check('chatsworth', profile)
+    run_profile_check(profile)
 
     # Legacy global tags are applied to all metrics
     legacy_global_tags = [

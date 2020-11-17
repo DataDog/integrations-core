@@ -1,5 +1,10 @@
 # CHANGELOG - mysql
 
+## 2.1.1 / 2020-11-10
+
+* [Fixed] Change `deep_database_monitoring` language from BETA to ALPHA. See [#7948](https://github.com/DataDog/integrations-core/pull/7948).
+* [Fixed] Fix configuration typo. See [#7911](https://github.com/DataDog/integrations-core/pull/7911).
+
 ## 2.1.0 / 2020-10-31
 
 * [Added] Support MySQL statement-level metrics for deep database monitoring. See [#7851](https://github.com/DataDog/integrations-core/pull/7851).

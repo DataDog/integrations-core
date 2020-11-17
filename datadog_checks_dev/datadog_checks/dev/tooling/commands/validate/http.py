@@ -39,20 +39,18 @@ def validate_config_http(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for _, line in enumerate(f):
-            if 'instances/http' or 'instances/openmetrics' in line:
+            if 'instances/http' in line or 'instances/openmetrics' in line:
                 has_instance_http = True
-            if 'init_config/http' or 'init_config/openmetrics' in line:
+            if 'init_config/http' in line or 'init_config/openmetrics' in line:
                 has_init_config_http = True
 
     if not has_instance_http:
-        echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `instances/http` but {check} uses http wrapper"
-        )
+        echo_failure(f"Detected {check} is missing `instances/http` or `instances/openmetrics` template in spec.yaml")
         has_failed = True
 
     if not has_init_config_http:
         echo_failure(
-            f"Detected {check}'s spec.yaml file does not contain `init_config/http` but {check} uses http wrapper"
+            f"Detected {check} is missing `init_config/http` or `init_config/openmetrics` template in spec.yaml"
         )
         has_failed = True
 
@@ -70,8 +68,8 @@ def validate_use_http_wrapper_file(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
-            if 'self.http' in line:
-                file_uses_http_wrapper = True
+            if ('self.http' in line or 'OpenMetricsBaseCheck' in line) and 'SKIP_HTTP_VALIDATION' not in line:
+                return True, has_failed
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
                 if http_func in line:
@@ -93,9 +91,10 @@ def validate_use_http_wrapper(check):
     has_failed = False
     check_uses_http_wrapper = False
     for file in get_check_files(check, include_tests=False):
-        file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
-        has_failed = has_failed or file_uses_request_lib
-        check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
+        if file.endswith('.py'):
+            file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
+            has_failed = has_failed or file_uses_request_lib
+            check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
 
     if has_failed:
         abort()

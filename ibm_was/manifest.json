@@ -25,6 +25,9 @@
   "is_public": true,
   "integration_id": "ibm-was",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "IBM_WAS": "assets/dashboards/overview.json"

@@ -122,7 +122,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                                                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": {"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}}` |
+| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": [{"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}]}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

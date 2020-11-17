@@ -24,6 +24,14 @@
         ]
     },
     {
+        "name": "mongodb.connection_pool.totalinuse",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.connection_pool.numascopedconnections",
         "type": 0,
         "value": 0.0,

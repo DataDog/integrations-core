@@ -17,9 +17,6 @@ from .common import (
     INIT_CONFIG,
     INIT_CONFIG_ALT_TABLES,
     INIT_CONFIG_OBJECT_NAME,
-    INSTANCE_AO_DOCKER_PRIMARY,
-    INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY,
-    INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG,
     INSTANCE_AO_DOCKER_SECONDARY,
     INSTANCE_DOCKER,
     INSTANCE_E2E,
@@ -65,17 +62,28 @@ def instance_e2e():
 
 @pytest.fixture
 def instance_ao_docker_primary():
-    return deepcopy(INSTANCE_AO_DOCKER_PRIMARY)
+    instance = INSTANCE_DOCKER
+    instance['include_ao_metrics'] = True
+    instance['driver'] = 'FreeTDS'
+    return deepcopy(instance)
 
 
 @pytest.fixture
 def instance_ao_docker_primary_local_only():
-    return deepcopy(INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY)
+    instance = INSTANCE_DOCKER
+    instance['include_ao_metrics'] = True
+    instance['driver'] = 'FreeTDS'
+    instance['only_emit_local'] = True
+    return deepcopy(instance)
 
 
 @pytest.fixture
 def instance_ao_docker_primary_non_existing_ag():
-    return deepcopy(INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG)
+    instance = INSTANCE_DOCKER
+    instance['include_ao_metrics'] = True
+    instance['driver'] = 'FreeTDS'
+    instance['availability_group'] = 'AG2'
+    return deepcopy(instance)
 
 
 @pytest.fixture
@@ -88,13 +96,13 @@ def dd_environment():
     if pyodbc is None:
         raise Exception("pyodbc is not installed!")
 
-    def sqlserver():
+    def sqlserver_can_connect():
         conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
         pyodbc.connect(conn, timeout=30)
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
     conditions = [
-        WaitFor(sqlserver, wait=3, attempts=10),
+        WaitFor(sqlserver_can_connect, wait=3, attempts=10),
     ]
 
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
@@ -102,6 +110,13 @@ def dd_environment():
             CheckDockerLogs(
                 compose_file,
                 'Always On Availability Groups connection with primary database established for secondary database',
+            )
+        ]
+    else:
+        conditions += [
+            CheckDockerLogs(
+                compose_file,
+                'setup.sql completed',
             )
         ]
 

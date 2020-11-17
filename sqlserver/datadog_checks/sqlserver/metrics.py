@@ -473,6 +473,96 @@ class SqlDatabaseStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# msdb.dbo.backupset
+#
+# Contains a row for each backup set. A backup set
+# contains the backup from a single, successful backup operation.
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
+class SqlDatabaseBackup(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'msdb.dbo.backupset'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """
+        select sys.databases.name as database_name, count(backup_set_id) as backup_set_id_count
+        from {table} right outer join sys.databases
+        on sys.databases.name = msdb.dbo.backupset.database_name
+        group by sys.databases.name""".format(
+        table=TABLE
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        database_name = columns.index("database_name")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            if row[database_name] != self.instance:
+                continue
+
+            column_val = row[value_column_index]
+            metric_tags = [
+                'database:{}'.format(str(self.instance)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# sys.dm_db_index_physical_stats
+#
+# Returns size and fragmentation information for the data and
+# indexes of the specified table or view in SQL Server.
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
+class SqlDbFragmentation(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.dm_db_index_physical_stats'
+    DEFAULT_METRIC_TYPE = 'gauge'
+
+    QUERY_BASE = (
+        "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
+        "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
+        "avg_fragmentation_in_percent "
+        "from {table} (null,null,null,null,null) "
+        "where fragment_count is not null".format(table=TABLE)
+    )
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+        database_name = columns.index("database_name")
+        object_name_index = columns.index("object_name")
+        index_id_index = columns.index("index_id")
+
+        for row in rows:
+            if row[database_name] != self.instance:
+                continue
+
+            column_val = row[value_column_index]
+            object_name = row[object_name_index]
+            index_id = row[index_id_index]
+
+            object_list = self.cfg_instance.get('db_fragmentation_object_names')
+
+            if object_list and (object_name not in object_list):
+                continue
+
+            metric_tags = [
+                'database_name:{}'.format(str(self.instance)),
+                'object_name:{}'.format(str(object_name)),
+                'index_id:{}'.format(str(index_id)),
+            ]
+
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'
@@ -522,6 +612,10 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# sys.dm_hadr_availability_group_states
+# Returns a row for each Always On availability group that possesses an availability replica on the local instance of
+# SQL Server. Each row displays the states that define the health of a given availability group.
+#
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
 class SqlAvailabilityGroups(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_availability_group_states'
@@ -561,6 +655,13 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+# sys.availability_replicas (Transact-SQL)
+#
+# Returns a row for each of the availability replicas that belong to any Always On availability group in the WSFC
+# failover cluster. If the local server instance is unable to talk to the WSFC failover cluster, for example because
+# the cluster is down or quorum has been lost, only rows for local availability replicas are returned.
+# These rows will contain only the columns of data that are cached locally in metadata.
+#
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-availability-replicas-transact-sql?view=sql-server-ver15
 class SqlAvailabilityReplicas(BaseSqlServerMetric):
     TABLE = 'sys.availability_replicas'

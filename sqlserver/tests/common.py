@@ -29,14 +29,18 @@ LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
-CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
+CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
 EXPECTED_METRICS = [
-    m[0] for m in SQLServer.INSTANCE_METRICS + SQLServer.TASK_SCHEDULER_METRICS + SQLServer.DATABASE_METRICS
+    m[0]
+    for m in SQLServer.INSTANCE_METRICS
+    + SQLServer.TASK_SCHEDULER_METRICS
+    + SQLServer.DATABASE_METRICS
+    + SQLServer.DATABASE_FRAGMENTATION_METRICS
 ] + CUSTOM_METRICS
 
-EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_PRIMARY]
-
-EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS + SQLServer.AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS_PRIMARY]
+EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_COMMON = [m[0] for m in SQLServer.AO_METRICS]
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -46,38 +50,7 @@ INSTANCE_DOCKER = {
     'password': 'Password123',
     'tags': ['optional:tag1'],
     'include_task_scheduler_metrics': True,
-}
-
-INSTANCE_AO_DOCKER_PRIMARY = {
-    'host': '{},1433'.format(HOST),
-    'connector': 'odbc',
-    'driver': 'FreeTDS',
-    'username': 'sa',
-    'password': 'Password123',
-    'tags': ['optional:tag1'],
-    'include_ao_metrics': True,
-}
-
-INSTANCE_AO_DOCKER_PRIMARY_NON_EXIST_AG = {
-    'host': '{},1433'.format(HOST),
-    'connector': 'odbc',
-    'driver': 'FreeTDS',
-    'username': 'sa',
-    'password': 'Password123',
-    'tags': ['optional:tag1'],
-    'include_ao_metrics': True,
-    'availability_group': 'AG2',  # this AG doesn't exist in the setup
-}
-
-INSTANCE_AO_DOCKER_PRIMARY_LOCAL_ONLY = {
-    'host': '{},1433'.format(HOST),
-    'connector': 'odbc',
-    'driver': 'FreeTDS',
-    'username': 'sa',
-    'password': 'Password123',
-    'tags': ['optional:tag1'],
-    'include_ao_metrics': True,
-    'only_emit_local': True,
+    'include_db_fragmentation_metrics': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
@@ -100,6 +73,7 @@ INSTANCE_SQL2017 = {
     'connector': 'odbc',
     'driver': '{ODBC Driver 17 for SQL Server}',
     'include_task_scheduler_metrics': True,
+    'include_db_fragmentation_metrics': True,
 }
 
 INIT_CONFIG = {
@@ -164,3 +138,15 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
+
+
+def assert_metrics(aggregator, expected_tags):
+    """
+    Boilerplate asserting all the expected metrics and service checks.
+    Make sure ALL custom metric is tagged by database.
+    """
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname)
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()

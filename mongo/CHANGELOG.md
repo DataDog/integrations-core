@@ -1,5 +1,14 @@
 # CHANGELOG - mongo
 
+## 2.1.0 / 2020-11-10
+
+* [Added] Add mongodb.connection_pool.totalinuse. See [#7986](https://github.com/DataDog/integrations-core/pull/7986).
+* [Fixed] Ignore startup nodes for lagtime. See [#7990](https://github.com/DataDog/integrations-core/pull/7990).
+
+## 2.0.3 / 2020-11-09
+
+* [Fixed] Fix debug typo for custom queries. See [#7969](https://github.com/DataDog/integrations-core/pull/7969).
+
 ## 2.0.2 / 2020-11-06
 
 * [Fixed] Fix replicaset identification with old configuration. See [#7964](https://github.com/DataDog/integrations-core/pull/7964).
