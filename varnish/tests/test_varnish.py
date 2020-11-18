@@ -12,11 +12,11 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 
 GAUGE_IN_5_RATE_IN_6 = [
-        "varnish.n_expired",
-        "varnish.n_lru_moved",
-        "varnish.n_lru_nuked",
-        "varnish.n_obj_purged",
-        "varnish.n_purges",
+    "varnish.n_expired",
+    "varnish.n_lru_moved",
+    "varnish.n_lru_nuked",
+    "varnish.n_obj_purged",
+    "varnish.n_purges",
 ]
 
 
