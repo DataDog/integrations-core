@@ -53,7 +53,7 @@ To convert the JKS files to PEM files:
     keytool -exportcert -file ca_cert.pem -keystore client_truststore.jks -alias server-cert -rfc
     ```
    
-2. Get the `cert.pem` file from `server_truststore.jks`, since `cert.pem`:
+2. Get the `cert.pem` file from `server_truststore.jks`, since `server_truststore.jks` contains the trusted certificates of clients connecting to it:
     ```
     keytool -exportcert -file cert.pem -keystore server_truststore.jks -alias client-cert -rfc
     ```
