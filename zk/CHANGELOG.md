@@ -1,5 +1,9 @@
 # CHANGELOG - zk
 
+## 2.9.0 / 2020-11-18
+
+* [Added] Add SSL Support for Zookeeper. See [#7884](https://github.com/DataDog/integrations-core/pull/7884).
+
 ## 2.8.0 / 2020-10-31
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
