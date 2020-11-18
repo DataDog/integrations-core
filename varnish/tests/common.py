@@ -360,7 +360,7 @@ METRICS_5 = [
     "varnish.LCK.backend_tcp.creat",
     "varnish.n_purgesps",
 ]
-METRICS_6 = ["varnish.sess_dropped", "varnish.LCK.tcp_pool.creat"]  # metrics where the "MAIN" prefix was removed
+METRICS_6 = ["varnish.sess_dropped", "varnish.LCK.tcp_pool.creat"]
 
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
