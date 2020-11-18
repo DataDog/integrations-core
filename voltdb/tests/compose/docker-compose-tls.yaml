@@ -2,13 +2,14 @@ version: '3'
 
 services:
   voltdb0:
-    image: voltdb/voltdb-community:8.4.2
+    image: ${VOLTDB_IMAGE}
     container_name: voltdb0
     environment:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment-tls.xml:/tmp/deployment.xml
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
       - ./tlsstart.sh:/tmp/tlsstart.sh
       - ${TLS_OUTPUT_DIR}:/tmp/tlsoutput
       - ./localcert.properties:${TLS_CONTAINER_LOCALCERT_PATH}
@@ -17,23 +18,25 @@ services:
       - ${VOLTDB_CLIENT_PORT}:8443  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
 
   voltdb1:
-    image: voltdb/voltdb-community:8.4.2
+    image: ${VOLTDB_IMAGE}
     container_name: voltdb1
     environment:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment-tls.xml:/tmp/deployment.xml
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
       - ./tlsstart.sh:/tmp/tlsstart.sh
     entrypoint: ["sh", "/tmp/tlsstart.sh"]
 
   voltdb2:
-    image: voltdb/voltdb-community:8.4.2
+    image: ${VOLTDB_IMAGE}
     container_name: voltdb2
     environment:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment-tls.xml:/tmp/deployment.xml
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
       - ./tlsstart.sh:/tmp/tlsstart.sh
     entrypoint: ["sh", "/tmp/tlsstart.sh"]

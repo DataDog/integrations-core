@@ -8,3 +8,7 @@ CREATE TABLE Hero (
 -- See: https://docs.voltdb.com/UsingVoltDB/DesignCodeFreeProcs.php
 CREATE PROCEDURE LookUpHero AS
     SELECT HeroID, Name FROM Hero WHERE HeroID = ?;
+
+CREATE PROCEDURE HeroStats AS
+    SELECT COUNT(*) AS HeroCount, AVG(CHAR_LENGTH(Name)) AS AvgNameLength
+    FROM HERO;

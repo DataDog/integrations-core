@@ -46,10 +46,20 @@ def instance():
         'url': common.VOLTDB_URL,
         'username': 'doggo',
         'password': 'doggopass',  # SHA256: e81255cee7bd2c4fbb4c8d6e9d6ba1d33a912bdfa9901dc9acfb2bd7f3e8eeb1
+        'custom_queries': [
+            {
+                'query': 'HeroStats',
+                'columns': [
+                    {'name': 'custom.heroes.count', 'type': 'gauge'},
+                    {'name': 'custom.heroes.avg_name_length', 'type': 'gauge'},
+                ],
+                'tags': ['test:voltdb'],
+            },
+        ],
     }  # type: Instance
 
     if common.TLS_ENABLED:
         instance['tls_verify'] = False  # We use self-signed certs.
-        instance['tls_cert'] = (common.TLS_CLIENT_CERT, common.TLS_PASSWORD)
+        # For some reason, no need to set 'tls_cert' for our custom cert.
 
     return instance

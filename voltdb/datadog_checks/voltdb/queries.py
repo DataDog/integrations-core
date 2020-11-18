@@ -6,7 +6,7 @@
 # One row per server.
 CPUMetrics = {
     'name': 'cpu',
-    'query': 'CPU',
+    'query': '@Statistics:[CPU]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -19,7 +19,7 @@ CPUMetrics = {
 # One row per server.
 MemoryMetrics = {
     'name': 'memory',
-    'query': 'MEMORY',
+    'query': '@Statistics:[MEMORY]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -42,7 +42,7 @@ MemoryMetrics = {
 # One row per snapshot file in the recent snapshots performed on the cluster.
 SnapshotStatusMetrics = {
     'name': 'snapshot_status',
-    'query': 'SNAPSHOTSTATUS',
+    'query': '@Statistics:[SNAPSHOTSTATUS]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -67,7 +67,7 @@ SnapshotStatusMetrics = {
 # (Enterprise edition only.)
 CommandLogMetrics = {
     'name': 'commandlog',
-    'query': 'COMMANDLOG',
+    'query': '@Statistics:[COMMANDLOG]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -84,7 +84,7 @@ CommandLogMetrics = {
 # One row per (non-system) stored procedure that has been executed on the cluster, by execution site.
 ProcedureMetrics = {
     'name': 'procedure',
-    'query': 'PROCEDURE',
+    'query': '@Statistics:[PROCEDURE]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -120,7 +120,7 @@ ProcedureMetrics = {
 # One row per server.
 LatencyMetrics = {
     'name': 'latency',
-    'query': 'LATENCY',
+    'query': '@Statistics:[LATENCY]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -142,7 +142,7 @@ LatencyMetrics = {
 # One row per statement for each (non-system) procedure that has been executed on the cluster, by execution site.
 StatementMetrics = {
     'name': 'statement',
-    'query': 'PROCEDUREDETAIL',
+    'query': '@Statistics:[PROCEDUREDETAIL]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -178,7 +178,7 @@ StatementMetrics = {
 # One row per server.
 GCMetrics = {
     'name': 'gc',
-    'query': 'GC',
+    'query': '@Statistics:[GC]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -194,7 +194,7 @@ GCMetrics = {
 # One row per client connection on the cluster.
 IOStatsMetrics = {
     'name': 'iostats',
-    'query': 'IOSTATS',
+    'query': '@Statistics:[IOSTATS]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -212,7 +212,7 @@ IOStatsMetrics = {
 # One row per partition of each table (num_partitions = num_sites_per_node * num_nodes).
 TableMetrics = {
     'name': 'table',
-    'query': 'TABLE',
+    'query': '@Statistics:[TABLE]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -238,7 +238,7 @@ TableMetrics = {
 # One row per index.
 IndexMetrics = {
     'name': 'index',
-    'query': 'INDEX',
+    'query': '@Statistics:[INDEX]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},

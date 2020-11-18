@@ -95,6 +95,9 @@ METRICS = [
     # INDEX
     'voltdb.index.entry_count',
     'voltdb.index.memory_estimate',
+    # Custom queries
+    'voltdb.custom.heroes.count',
+    'voltdb.custom.heroes.avg_name_length',
 ]
 
 TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))

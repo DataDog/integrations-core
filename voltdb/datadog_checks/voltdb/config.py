@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import requests
 from six.moves.urllib.parse import urljoin
@@ -47,11 +47,15 @@ class Config(object):
         return self._auth
 
     def build_api_params(self, procedure, parameters=None):
-        # type: (str, List[str]) -> dict
+        # type: (str, Union[str, List[str]]) -> dict
         # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
         params = {'Procedure': procedure}
-        if parameters is not None:
-            params['Parameters'] = json.dumps(parameters)
+
+        if parameters:
+            if not isinstance(parameters, str):
+                parameters = json.dumps(parameters)
+            params['Parameters'] = parameters
+
         return params
 
 

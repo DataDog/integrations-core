@@ -104,11 +104,13 @@ class VoltDBCheck(AgentCheck):
 
     def _execute_query_raw(self, query):
         # type: (str) -> List[tuple]
-        component = query
+        # Ad-hoc format, close to the HTTP API format.
+        # Eg 'A:[B, C]' -> '?Procedure=A&Parameters=[B, C]'
+        procedure, _, parameters = query.partition(":")
 
         url = self._config.api_url
         auth = self._config.auth
-        params = self._config.build_api_params(procedure='@Statistics', parameters=[component])
+        params = self._config.build_api_params(procedure=procedure, parameters=parameters)
 
         response = self.http.get(url, auth=auth, params=params)
         response.raise_for_status()

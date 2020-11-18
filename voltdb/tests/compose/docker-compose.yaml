@@ -9,6 +9,7 @@ services:
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment.xml:/tmp/deployment.xml
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
     ports:
       - ${VOLTDB_CLIENT_PORT}:8080  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
 
@@ -20,6 +21,7 @@ services:
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment.xml:/tmp/deployment.xml
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
 
   voltdb2:
     image: ${VOLTDB_IMAGE}
@@ -29,3 +31,4 @@ services:
       - HOSTS=voltdb0,voltdb1,voltdb2
     volumes:
       - ./deployment.xml:/tmp/deployment.xml
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
