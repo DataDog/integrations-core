@@ -76,9 +76,9 @@ varnish.LCK.backend.dbg_busy,rate,,lock,second,This metric is only available fro
 varnish.LCK.backend.dbg_try_fail,rate,,lock,second,This metric is only available from >=6.x.,0,varnish,backend dbg try fail
 varnish.LCK.backend.destroy,rate,,lock,second,Destroyed locks.,0,varnish,backend destroy
 varnish.LCK.backend.locks,rate,,lock,second,Lock operations.,0,varnish,backend locks
-varnish.LCK.backend_tcp.creat,rate,,,second,,0,varnish,backend tcp creat
-varnish.LCK.backend_tcp.destroy,rate,,,second,This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp destroy
-varnish.LCK.backend_tcp.locks,rate,,,second,This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp locks
+varnish.LCK.backend_tcp.creat,rate,,lock,second,Created locks LCK. This metric is only provided by varnish <= 5.x,,0,varnish,backend tcp creat
+varnish.LCK.backend_tcp.destroy,rate,,lock,second,Destroyed locks LCK.,This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp destroy
+varnish.LCK.backend_tcp.locks,rate,,operation,second,Lock Operations LCK.This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp locks
 varnish.LCK.ban.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,ban colls
 varnish.LCK.ban.creat,rate,,lock,second,Created locks.,0,varnish,ban create
 varnish.LCK.ban.destroy,rate,,lock,second,Destroyed locks.,0,varnish,ban destroy
@@ -463,7 +463,7 @@ varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communica
 varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only available from >=4.x.",0,varnish,vsm overflow
 varnish.vsm_overflowed,gauge,,byte,second,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only available from >=4.x.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only available from >=4.x.",0,varnish,vsm used
-varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish >=4.x..,0,varnish,n purges
+varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish <=6.x.,0,varnish,n purges
 varnish.ws_backend_overflow,rate,,,,,,This metric is only available from >=6.x.,0,varnish,ws backend overflow
 varnish.ws_client_overflow,rate,,,,,,This metric is only available from >=6.x.,0,varnish,ws client_overflow
 varnish.ws_session_overflow,rate,,,,,,This metric is only available from >=6.x.,0,varnish,ws session_overflow
