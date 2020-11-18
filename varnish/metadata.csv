@@ -386,10 +386,10 @@ varnish.sc_tx_pipe,rate,,,second,,0,varnish,sc_tx_pipe
 varnish.sc_vcl_failure,rate,,,second,,0,varnish,sc_vcl_failure
 varnish.sess_closed,rate,,connection,second,Client connections closed.,0,varnish,sess closed
 varnish.sess_closed_err,rate,,connection,second,Client connections closed with error.,0,varnish,sess closed err
-varnish.sess_conn,rate,,connection,second,Client connections accepted. This metric is only provided by varnish 4.x.,0,varnish,sess conn
-varnish.sess_drop,rate,,connection,second,Client connections dropped due to lack of worker thread. This metric is only provided by varnish 4.x. and 5.x,-1,varnish,sess drop
-varnish.sess_dropped,rate,,connection,second,Client connections dropped due to a full queue. This metric is only provided by varnish 4.x. and 6.x,-1,varnish,sess dropped
-varnish.sess_fail,rate,,connection,second,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors. This metric is only provided by varnish 4.x.",-1,varnish,sess fail
+varnish.sess_conn,rate,,connection,second,Client connections accepted.,0,varnish,sess conn
+varnish.sess_drop,rate,,connection,second,Client connections dropped due to lack of worker thread.,-1,varnish,sess drop
+varnish.sess_dropped,rate,,connection,second,Client connections dropped due to a full queue.,-1,varnish,sess dropped
+varnish.sess_fail,rate,,connection,second,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors.",-1,varnish,sess fail
 varnish.sess_fail_econnaborted,rate,,connection,second,"",-1,varnish,sess fail econnaborted
 varnish.sess_fail_eintr,rate,,connection,second,"",-1,varnish,sess fail eintr
 varnish.sess_fail_emfile,rate,,connection,second,"",-1,varnish,sess fail emfile
@@ -398,9 +398,9 @@ varnish.sess_fail_other,rate,,connection,second,"",-1,varnish,sess fail other
 varnish.sess_fail_ebadf,rate,,connection,second,"",-1,varnish,sess fail ebadf
 varnish.sess_herd,rate,,connection,second,,0,varnish,sess herd
 varnish.sess_linger,rate,,connection,second,This metric is only provided by varnish 3.x.,0,varnish,sess linger
-varnish.sess_pipe_overflow,rate,,connection,second,This metric is only provided by varnish 4.x.,0,varnish,sess pipe overflow
+varnish.sess_pipe_overflow,rate,,connection,second,,0,varnish,sess pipe overflow
 varnish.sess_pipeline,rate,,connection,second,,0,varnish,sess pipeline
-varnish.sess_queued,rate,,connection,second,Client connections queued to wait for a thread. This metric is only provided by varnish 4.x.,-1,varnish,sess queued
+varnish.sess_queued,rate,,connection,second,Client connections queued to wait for a thread.,-1,varnish,sess queued
 varnish.sess_readahead,rate,,connection,second,,0,varnish,sess readahead
 varnish.shm_cont,rate,,event,second,SHM MTX contention.,0,varnish,shm cont
 varnish.shm_cycles,rate,,event,second,SHM cycles through buffer.,0,varnish,shm cycles
@@ -429,10 +429,10 @@ varnish.sms_nreq,gauge,,event,second,SMS allocator requests.,0,varnish,sms nreq
 varnish.summs,rate,,,second,,0,varnish,summs
 varnish.thread_queue_len,gauge,,connection,,Length of session queue waiting for threads. This metric is only provided by varnish 4.x.,0,varnish,thread queue len
 varnish.threads,gauge,,thread,,Number of threads. This metric is only provided by varnish 4.x.,0,varnish,threads
-varnish.threads_created,rate,,thread,second,Threads created. This metric is only provided by varnish 4.x.,0,varnish,threads created
-varnish.threads_destroyed,rate,,thread,second,Threads destroyed. This metric is only provided by varnish 4.x.,0,varnish,threads destroyed
-varnish.threads_failed,rate,,thread,second,Threads that failed to get created. This metric is only provided by varnish 4.x.,-1,varnish,threads failed
-varnish.threads_limited,rate,,thread,second,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish 4.x.,-1,varnish,threads limited
+varnish.threads_created,rate,,thread,second,Threads created.,0,varnish,threads created
+varnish.threads_destroyed,rate,,thread,second,Threads destroyed.,0,varnish,threads destroyed
+varnish.threads_failed,rate,,thread,second,Threads that failed to get created.,-1,varnish,threads failed
+varnish.threads_limited,rate,,thread,second,Threads that were needed but couldn't be created because of a thread pool limit.,-1,varnish,threads limited
 varnish.uptime,rate,,,,,0,varnish,uptime
 varnish.VBE.boot.default.bereq_bodybytes,rate,,,,,,0,varnish,vbe boot default bereq_bodybytes
 varnish.VBE.boot.default.bereq_hdrbytes,rate,,,,,,0,varnish,vbe boot default bereq_hdrbytes
@@ -460,7 +460,7 @@ varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communica
 varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm overflow
 varnish.vsm_overflowed,gauge,,byte,second,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm used
-varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish 4.x. and 5.x,0,varnish,n purges
+varnish.n_purgesps,rate,,event,,Purges executed.,0,varnish,n purges
 varnish.ws_backend_overflow,rate,,,,,,,0,varnish,ws backend overflow
 varnish.ws_client_overflow,rate,,,,,,,0,varnish,ws client_overflow
 varnish.ws_session_overflow,rate,,,,,,,0,varnish,ws session_overflow
