@@ -32,35 +32,33 @@ To configure this check for an Agent running on a host:
 
 #### Enabling SSL
 
-Zookeeper 3.5 introduced the ability to use SSL authentication. The agent is able to connect to Zookeeper using SSL as well.
+Zookeeper 3.5 introduced the ability to use SSL authentication. For information about setting up SSL with Zookeeper, see the [Zookeeper SSL User Guide][13]. 
 
-One thing to note is that Zookeeper uses `truststores` and `keystores` JKS files while the Agent TLS/SSL configuration uses `tls_ca_cert`, `tls_cert`, and `tls_private_key` config options that accept PEM files.
-It may be confusing at first for those familiar with the JKS files to map to PEM files.
+After you have Zookeeper set up with SSL, you can also configure the Datadog Agent to connect to Zookeeper using SSL. If you already have authentication set up using JKS files, follow the steps below to convert them to PEM files for TLS/SSL configuration.
 
-It is assumed that one already has the server and client truststore and keystore files to start Zookeeper in SSL mode in the first place.
-More information on setting up Zookeeper in SSL mode first can be found [here][13].
+The following example commands assume that your JKS `truststore` and `keystore` files are called:
 
-We will use following files as examples:
 - `server_truststore.jks`
 - `server_keystore.jks` 
 - `client_truststore.jks`
 - `client_keystore.jks`
 
 We also assume that both sides' `keystore`s and `truststore`s have each other's certificates with alias `server_cert` and `client_cert`, meaning that a Java Zookeeper client can already connect to a Zookeeper server.
-You may need to enter a password for these commands, in which case this password should be included in the `tls_private_key_password` config option.
+If you need to enter a password, add the option `-tls_private_key_password <PASSWORD>` to each command.
 
+To convert the JKS files to PEM files:
 
-1. We can get `ca_cert.pem` file from `client_truststore.jks`, since the client's truststore should contain the certificate of the server that is trustable.
+1. Get the `ca_cert.pem` file from `client_truststore.jks`, since the client's truststore contains the certificate of the server that is trustable:
     ```
     keytool -exportcert -file ca_cert.pem -keystore client_truststore.jks -alias server-cert -rfc
     ```
    
-2. Next, we can get `cert.pem` file from `server_truststore.jks`, since `cert.pem` is the certificate of the client.
+2. Get the `cert.pem` file from `server_truststore.jks`, since `cert.pem`:
     ```
     keytool -exportcert -file cert.pem -keystore server_truststore.jks -alias client-cert -rfc
     ```
 
-3. Finally, we will get `private_key.pem` file from `client_keystore.jks`, as the client's `keystore` contains the private key of the client for alias `client-cert`.
+3. Get the `private_key.pem` file from `client_keystore.jks`, since the client's `keystore` contains the private key of the client for alias `client-cert`:
     ```
     keytool -importkeystore -srckeystore client_keystore.jks -destkeystore private_key.p12 -srcstoretype jks -deststoretype pkcs12 -srcalias client-cert
     openssl pkcs12 -in private_key.p12 -out private_key.pem
