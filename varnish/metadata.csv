@@ -26,12 +26,12 @@ varnish.bans_persisted_fragmentation,gauge,,byte,,Extra bytes accumulated throug
 varnish.bans_req,gauge,,object,,Bans which use req.* variables. These bans can not be washed by the ban-lurker.,0,varnish,bans req
 varnish.bans_tested,rate,,object,second,Bans and objects tested against each other during hash lookup.,0,varnish,bans tested
 varnish.bans_tests_tested,rate,,object,second,Tests and objects tested against each other during lookup. 'ban req.url == foo && req.http.host == bar' counts as one in 'bans_tested' and as two in 'bans_tests_tested'.,0,varnish,bans tests tested
-varnish.beresp_shortlived,rate,,,second,,0,varnish,beresp shortlived
-varnish.beresp_uncacheable,rate,,,second,,0,varnish,beresp uncacheable
+varnish.beresp_shortlived,rate,,,,This metric is only available from 6.x+,0,varnish,beresp shortlived
+varnish.beresp_uncacheable,rate,,,second,This metric is only available from 6.x+,0,varnish,beresp uncacheable
 varnish.busy_killed,rate,,request,second,Requests killed.,0,varnish,busy killed
 varnish.busy_sleep,rate,,request,second,Requests sent to sleep without a worker thread because they found a busy object.,0,varnish,busy sleep
 varnish.busy_wakeup,rate,,request,second,Requests taken off the busy object sleep list and and rescheduled.,0,varnish,busy wakeup
-varnish.cache_hit_grace,rate,,request,second,,0,varnish,hit grace
+varnish.cache_hit_grace,rate,,request,second,This metric is only available from 6.x+,0,varnish,hit grace
 varnish.cache_hit,rate,,request,second,Requests served from the cache.,0,varnish,hit
 varnish.cache_hitmiss,rate,,request,second,,0,varnish,hitmiss
 varnish.cache_hitpass,rate,,request,second,Requests passed to a backend where the decision to pass them found in the cache.,0,varnish,hitpass
@@ -44,7 +44,7 @@ varnish.client_req_400,rate,,request,second,Requests that were malformed in some
 varnish.client_req_411,rate,,request,second,Requests that were missing a Content-Length: header.,-1,varnish,client req 411
 varnish.client_req_413,rate,,request,second,Requests that were too big.,-1,varnish,client req 413
 varnish.client_req_417,rate,,request,second,Requests with a bad Expect: header.,-1,varnish,client req 417
-varnish.client_resp_500,rate,,request,second,Requests with server error.,-1,varnish,client req 500
+varnish.client_resp_500,rate,,request,second,Requests with server error. This metric is only available from 6.x+,-1,varnish,client req 500
 varnish.dir_dns_cache_full,gauge,,event,second,DNS director full DNS cache. This metric is only provided by varnish 3.x.,0,varnish,dir dns cache full
 varnish.dir_dns_failed,gauge,,event,second,DNS director failed lookup. This metric is only provided by varnish 3.x.,0,varnish,dir dns fail
 varnish.dir_dns_hit,gauge,,event,second,DNS director cached lookup hit. This metric is only provided by varnish 3.x.,0,varnish,dir dns hit
@@ -72,37 +72,40 @@ varnish.hcb_lock,rate,,event,second,HCB lookups with lock.,0,varnish,HCB lock
 varnish.hcb_nolock,rate,,event,second,HCB lookups without lock.,0,varnish,HCB nolock
 varnish.LCK.backend.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,backend colls
 varnish.LCK.backend.creat,rate,,lock,second,Created locks.,0,varnish,backend create
-varnish.LCK.backend.dbg_busy,rate,,lock,second,,0,varnish,backend dbg busy
-varnish.LCK.backend.dbg_try_fail,rate,,lock,second,,0,varnish,backend dbg try fail
+varnish.LCK.backend.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,backend dbg busy
+varnish.LCK.backend.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,backend dbg try fail
 varnish.LCK.backend.destroy,rate,,lock,second,Destroyed locks.,0,varnish,backend destroy
 varnish.LCK.backend.locks,rate,,lock,second,Lock operations.,0,varnish,backend locks
+varnish.LCK.backend_tcp.creat,rate,,,second,,0,varnish,backend tcp creat
+varnish.LCK.backend_tcp.destroy,rate,,,second,This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp destroy
+varnish.LCK.backend_tcp.locks,rate,,,second,This metric is only provided by varnish <=5.x.,0,varnish, backend_tcp locks
 varnish.LCK.ban.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,ban colls
 varnish.LCK.ban.creat,rate,,lock,second,Created locks.,0,varnish,ban create
 varnish.LCK.ban.destroy,rate,,lock,second,Destroyed locks.,0,varnish,ban destroy
-varnish.LCK.ban.dbg_busy,rate,,lock,second,,0,varnish,ban dbg busy
-varnish.LCK.ban.dbg_try_fail,rate,,lock,second,,0,varnish,ban dgb try fail
+varnish.LCK.ban.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,ban dbg busy
+varnish.LCK.ban.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,ban dgb try fail
 varnish.LCK.ban.locks,rate,,lock,second,Lock operations.,0,varnish,ban locks
 varnish.LCK.busyobj.creat,rate,,lock,second,Created locks.,0,varnish,busyobj create
-varnish.LCK.busyobj.dbg_busy,rate,,lock,second,,0,varnish,busyobj dbg busy
-varnish.LCK.busyobj.dbg_try_fail,rate,,lock,second,,0,varnish,busyobj dbg try fail
+varnish.LCK.busyobj.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,busyobj dbg busy
+varnish.LCK.busyobj.dbg_try_fail,rate,,lock,secondThis metric is only available from 6.x+,,0,varnish,busyobj dbg try fail
 varnish.LCK.busyobj.destroy,rate,,lock,second,Destroyed locks.,0,varnish,busyobj destroy
 varnish.LCK.busyobj.locks,rate,,lock,second,Lock operations.,0,varnish,busyobj locks
 varnish.LCK.cli.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,cli colls
 varnish.LCK.cli.creat,rate,,lock,second,Created locks.,0,varnish,cli create
-varnish.LCK.cli.dbg_busy,rate,,lock,second,,0,varnish,cli dbg busy
-varnish.LCK.cli.dbg_try_fail,rate,,lock,second,,0,varnish,cli dbg try fail
+varnish.LCK.cli.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,cli dbg busy
+varnish.LCK.cli.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,cli dbg try fail
 varnish.LCK.cli.destroy,rate,,lock,second,Destroyed locks.,0,varnish,cli destroy
 varnish.LCK.cli.locks,rate,,lock,second,Lock operations.,0,varnish,cli locks
 varnish.LCK.exp.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,exp colls
 varnish.LCK.exp.creat,rate,,lock,second,Created locks.,0,varnish,exp create
-varnish.LCK.exp.dbg_busy,rate,,lock,second,,0,varnish,exp dbg busy
-varnish.LCK.exp.dbg_try_fail,rate,,lock,second,,0,varnish,exp dbg try fail
+varnish.LCK.exp.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,exp dbg busy
+varnish.LCK.exp.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,exp dbg try fail
 varnish.LCK.exp.destroy,rate,,lock,second,Destroyed locks.,0,varnish,exp destroy
 varnish.LCK.exp.locks,rate,,lock,second,Lock operations.,0,varnish,exp locks
 varnish.LCK.hcb.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hcb colls
 varnish.LCK.hcb.creat,rate,,lock,second,Created locks.,0,varnish,hcb create
-varnish.LCK.hcb.dbg_busy,rate,,lock,second,,0,varnish,hcb dbg busy
-varnish.LCK.hcb.dbg_try_fail,rate,,lock,second,,0,varnish,hcb dbg try fail
+varnish.LCK.hcb.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,hcb dbg busy
+varnish.LCK.hcb.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,hcb dbg try fail
 varnish.LCK.hcb.destroy,rate,,lock,second,Destroyed locks.,0,varnish,hcb destroy
 varnish.LCK.hcb.locks,rate,,lock,second,Lock operations.,0,varnish,hcb locks
 varnish.LCK.hcl.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hcl colls
@@ -119,13 +122,13 @@ varnish.LCK.hsl.destroy,rate,,lock,second,Destroyed locks.,0,varnish,hsl destroy
 varnish.LCK.hsl.locks,rate,,lock,second,Lock operations.,0,varnish,hsl locks
 varnish.LCK.lru.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,lru colls
 varnish.LCK.lru.creat,rate,,lock,second,Created locks.,0,varnish,lru create
-varnish.LCK.lru.dbg_busy,rate,,lock,second,,0,varnish,lru dbg busy
-varnish.LCK.lru.dbg_try_fail,rate,,lock,second,,0,varnish,lru dbg try fail
+varnish.LCK.lru.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,lru dbg busy
+varnish.LCK.lru.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,lru dbg try fail
 varnish.LCK.lru.destroy,rate,,lock,second,Destroyed locks.,0,varnish,lru destroy
 varnish.LCK.lru.locks,rate,,lock,second,Lock operations.,0,varnish,lru locks
 varnish.LCK.mempool.creat,rate,,lock,second,Created locks.,0,varnish,mempool create
-varnish.LCK.mempool.dbg_busy,rate,,lock,second,,0,varnish,mempool dbg busy
-varnish.LCK.mempool.dbg_try_fail,rate,,lock,second,,0,varnish,mempool dbg try_fail
+varnish.LCK.mempool.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,mempool dbg busy
+varnish.LCK.mempool.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,mempool dbg try_fail
 varnish.LCK.mempool.destroy,rate,,lock,second,Destroyed locks.,0,varnish,mempool destroy
 varnish.LCK.mempool.locks,rate,,lock,second,Lock operations.,0,varnish,mempool locks
 varnish.LCK.nbusyobj.creat,rate,,lock,second,Created locks.,0,varnish,nbusyobj create
@@ -133,30 +136,30 @@ varnish.LCK.nbusyobj.destroy,rate,,lock,second,Destroyed locks.,0,varnish,nbusyo
 varnish.LCK.nbusyobj.locks,rate,,lock,second,Lock operations.,0,varnish,nbusyobj locks
 varnish.LCK.objhdr.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,objhdr colls
 varnish.LCK.objhdr.creat,rate,,lock,second,Created locks.,0,varnish,objhdr create
-varnish.LCK.objhdr.dbg_busy,rate,,lock,second,Created locks.,0,varnish,objhdr dbg
-varnish.LCK.objhdr.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,objhdr try fail
+varnish.LCK.objhdr.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,objhdr dbg busy
+varnish.LCK.objhdr.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,objhdr try fail
 varnish.LCK.objhdr.destroy,rate,,lock,second,Destroyed locks.,0,varnish,objhdr destroy
 varnish.LCK.objhdr.locks,rate,,lock,second,Lock operations.,0,varnish,objhdr locks
-varnish.LCK.perpool.creat,rate,,lock,second,,0,varnish,perpool creat
-varnish.LCK.perpool.dbg_busy,rate,,lock,second,Created locks.,0,varnish,perpool dbg
-varnish.LCK.perpool.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,perpool try fail
-varnish.LCK.perpool.destroy,rate,,lock,second,,0,varnish,perpool destroy
-varnish.LCK.perpool.locks,rate,,lock,second,,0,varnish,perpool locks
+varnish.LCK.perpool.creat,rate,,lock,second,This metric is only available from 6.x+,0,varnish,perpool creat
+varnish.LCK.perpool.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,perpool dbg busy
+varnish.LCK.perpool.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,perpool try fail
+varnish.LCK.perpool.destroy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,perpool destroy
+varnish.LCK.perpool.locks,rate,,lock,second,This metric is only available from 6.x+,0,varnish,perpool locks
 varnish.LCK.pipestat.creat,rate,,lock,second,Created locks.,0,varnish,pipestat create
-varnish.LCK.pipestat.dbg_busy,rate,,lock,second,Created locks.,0,varnish,pipestat dbg
-varnish.LCK.pipestat.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,pipestat try fail
+varnish.LCK.pipestat.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,pipestat dbg busy
+varnish.LCK.pipestat.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,pipestat try fail
 varnish.LCK.pipestat.destroy,rate,,lock,second,Destroyed locks.,0,varnish,pipestat destroy
 varnish.LCK.pipestat.locks,rate,,lock,second,Lock operations,0,varnish,pipestat locks
-varnish.LCK.probe.locks,rate,,lock,second,Lock operations.,0,varnish,pipestat locks
-varnish.LCK.probe.creat,rate,,lock,second,,0,varnish,probe creat
-varnish.LCK.probe.dbg_busy,rate,,lock,second,Created locks.,0,varnish,probe dbg
-varnish.LCK.probe.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,probe try fail
-varnish.LCK.probe.destroy,rate,,lock,second,,0,varnish,probe destroy
-varnish.LCK.sma.dbg_busy,rate,,lock,second,Created locks.,0,varnish,sma dbg
-varnish.LCK.sma.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,sma try fail
+varnish.LCK.probe.locks,rate,,lock,second,This metric is only available from 6.x+,0,varnish,pipestat locks
+varnish.LCK.probe.creat,rate,,lock,second,This metric is only available from 6.x+,0,varnish,probe creat
+varnish.LCK.probe.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,probe dbg busy
+varnish.LCK.probe.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,probe try fail
+varnish.LCK.probe.destroy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,probe destroy
+varnish.LCK.sma.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,sma dbg busy
+varnish.LCK.sma.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,sma try fail
 varnish.LCK.sess.creat,rate,,lock,second,Created locks.,0,varnish,sess create
-varnish.LCK.sess.dbg_busy,rate,,lock,second,Created locks.,0,varnish,sess dbg
-varnish.LCK.sess.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,sess try fail
+varnish.LCK.sess.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,sess dbg busy
+varnish.LCK.sess.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,sess try fail
 varnish.LCK.sess.destroy,rate,,lock,second,Destroyed locks.,0,varnish,sess destroy
 varnish.LCK.sess.locks,rate,,lock,second,Lock operations.,0,varnish,sess locks
 varnish.LCK.sessmem.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sessmem colls
@@ -184,14 +187,14 @@ varnish.LCK.stat.creat,rate,,lock,second,Created locks. This metric is only prov
 varnish.LCK.stat.destroy,rate,,lock,second,Destroyed locks. This metric is only provided by varnish 3.x.,0,varnish,stat destroy
 varnish.LCK.stat.locks,rate,,lock,second,Lock operations. This metric is only provided by varnish 3.x.,0,varnish,stat locks
 varnish.LCK.tcp_pool.creat,rate,,lock,second,,0,varnish,tcp_pool creat
-varnish.LCK.tcp_pool.dbg_busy,rate,,lock,second,Created locks.,0,varnish,tcp_pool dbg
-varnish.LCK.tcp_pool.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,tcp_pool try fail
-varnish.LCK.tcp_pool.destroy,rate,,lock,second,,0,varnish,tcp_pool destroy
-varnish.LCK.tcp_pool.locks,rate,,lock,second,,0,varnish,tcp_pool locks
+varnish.LCK.tcp_pool.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,tcp_pool dbg busy
+varnish.LCK.tcp_pool.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,tcp_pool try fail
+varnish.LCK.tcp_pool.destroy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,tcp_pool destroy
+varnish.LCK.tcp_pool.locks,rate,,lock,second,This metric is only available from 6.x+,0,varnish,tcp_pool locks
 varnish.LCK.vbe.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vbe colls
 varnish.LCK.vbe.creat,rate,,lock,second,Created locks. This metric is only provided by varnish 3.x.,0,varnish,vbe create
-varnish.LCK.vbe.dbg_busy,rate,,lock,second,Created locks.,0,varnish,vbe dbg
-varnish.LCK.vbe.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,vbe try fail
+varnish.LCK.vbe.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vbe dbg busy
+varnish.LCK.vbe.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vbe try fail
 varnish.LCK.vbe.destroy,rate,,lock,second,Destroyed locks. This metric is only provided by varnish 3.x.,0,varnish,vbe destroy
 varnish.LCK.vbe.locks,rate,,lock,second,Lock operations. This metric is only provided by varnish 3.x.,0,varnish,vbe locks
 varnish.LCK.vbp.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vbp colls
@@ -199,36 +202,36 @@ varnish.LCK.vbp.creat,rate,,lock,second,Created locks.,0,varnish,vbp create
 varnish.LCK.vbp.destroy,rate,,lock,second,Destroyed locks.,0,varnish,vbp destroy
 varnish.LCK.vbp.locks,rate,,lock,second,Lock operations.,0,varnish,vbp locks
 varnish.LCK.vcapace.creat,rate,,lock,second,Created locks.,0,varnish,vcapace create
-varnish.LCK.vcapace.dbg_busy,rate,,lock,second,Created locks.,0,varnish,vcapace dbg
-varnish.LCK.vcapace.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,vcapace try fail
+varnish.LCK.vcapace.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vcapace dbg busy
+varnish.LCK.vcapace.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vcapace try fail
 varnish.LCK.vcapace.destroy,rate,,lock,second,Destroyed locks.,0,varnish,vcapace destroy
 varnish.LCK.vcapace.locks,rate,,lock,second,Lock operations.,0,varnish,vcapace locks
 varnish.LCK.vcl.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vcl colls
 varnish.LCK.vcl.creat,rate,,lock,second,Created locks.,0,varnish,vcl create
-varnish.LCK.vcl.dbg_busy,rate,,lock,second,Created locks.,0,varnish,vcl dbg
-varnish.LCK.vcl.dbg_try_fail,rate,,lock,second,Created locks.,0,varnish,vcl try fail
+varnish.LCK.vcl.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vcl dbg busy
+varnish.LCK.vcl.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vcl try fail
 varnish.LCK.vcl.destroy,rate,,lock,second,Destroyed locks.,0,varnish,vcl destroy
 varnish.LCK.vcl.locks,rate,,lock,second,Lock operations.,0,varnish,vcl locks
 varnish.LCK.vxid.creat,rate,,lock,second,Created locks.,0,varnish,vxid create
-varnish.LCK.vxid.dbg_busy,rate,,lock,second,,0,varnish,vxid dbg
-varnish.LCK.vxid.dbg_try_fail,rate,,lock,second,,0,varnish,vxid try fail
+varnish.LCK.vxid.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vxid dbg busy
+varnish.LCK.vxid.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,vxid try fail
 varnish.LCK.vxid.destroy,rate,,lock,second,Destroyed locks.,0,varnish,vxid destroy
 varnish.LCK.vxid.locks,rate,,lock,second,Lock operations.,0,varnish,vxid locks
 varnish.LCK.waiter.creat,rate,,lock,second,Created locks.,0,varnish,vxid create
-varnish.LCK.waiter.dbg_busy,rate,,lock,second,,0,varnish,waiter dbg
-varnish.LCK.waiter.dbg_try_fail,rate,,lock,second,,0,varnish,waiter try fail
+varnish.LCK.waiter.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,waiter dbg busy
+varnish.LCK.waiter.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,waiter try fail
 varnish.LCK.waiter.destroy,rate,,lock,second,Destroyed locks.,0,waiter,vxid destroy
 varnish.LCK.waiter.locks,rate,,lock,second,Lock operations,waiter,vxid locks
 varnish.LCK.wq.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,wq colls
 varnish.LCK.wq.creat,rate,,lock,second,Created locks.,0,varnish,wq create
-varnish.LCK.wq.dbg_busy,rate,,lock,second,,0,varnish,wq dbg
-varnish.LCK.wq.dbg_try_fail,rate,,lock,second,,0,varnish,wq try fail
+varnish.LCK.wq.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,wq dbg busy
+varnish.LCK.wq.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,wq try fail
 varnish.LCK.wq.destroy,rate,,lock,second,Destroyed locks.,0,varnish,wq destroy
 varnish.LCK.wq.locks,rate,,lock,second,Lock operations.,0,varnish,wq locks
 varnish.LCK.wstat.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,wstat colls
 varnish.LCK.wstat.creat,rate,,lock,second,Created locks.,0,varnish,wstat create
-varnish.LCK.wstat.dbg_busy,rate,,lock,second,,0,varnish,wstat dbg
-varnish.LCK.wstat.dbg_try_fail,rate,,lock,second,,0,varnish,wstat try fail
+varnish.LCK.wstat.dbg_busy,rate,,lock,second,This metric is only available from 6.x+,0,varnish,wstat dbg busy
+varnish.LCK.wstat.dbg_try_fail,rate,,lock,second,This metric is only available from 6.x+,0,varnish,wstat try fail
 varnish.LCK.wstat.destroy,rate,,lock,second,Destroyed locks.,0,varnish,wstat destroy
 varnish.LCK.wstat.locks,rate,,lock,second,Lock operations.,0,varnish,wstat locks
 varnish.losthdr,rate,,event,second,HTTP header overflows.,-1,varnish,lost headers
@@ -317,21 +320,21 @@ varnish.n_ban_dups,rate,,object,second,Duplicate bans removed. This metric is on
 varnish.n_ban_obj_test,rate,,object,second,Objects tested. This metric is only provided by varnish 3.x.,0,varnish,n ban obj test
 varnish.n_ban_re_test,rate,,object,second,Regexps tested against. This metric is only provided by varnish 3.x.,0,varnish,n ban re test
 varnish.n_ban_retire,rate,,object,second,Old bans deleted. This metric is only provided by varnish 3.x.,0,varnish,n ban retire
-varnish.n_expired,rate,,object,,Objects that expired from cache because of TTL.,0,varnish,n expired
+varnish.n_expired,gauge,,object,,Objects that expired from cache because of TTL. It is a rate on 6.x+,0,varnish,n expired
 varnish.n_gunzip,rate,,event,second,Gunzip operations.,0,varnish,n gunzip
 varnish.n_gzip,rate,,event,second,Gzip operations.,0,varnish,n gzip
-varnish.n_lru_limited,rate,,operation,,.,0,varnish,n lru limited
-varnish.n_lru_moved,rate,,operation,,Move operations done on the LRU list.,0,varnish,n lru moved
-varnish.n_lru_nuked,rate,,operation,,Objects forcefully evicted from storage to make room for new objects.,0,varnish,n lru nuked
-varnish.n_obj_purged,rate,,object,,Purged objects.,0,varnish,n obj purged
+varnish.n_lru_limited,rate,,operation,,This metric is only available from 6.x+,0,varnish,n lru limited
+varnish.n_lru_moved,gauge,,operation,,Move operations done on the LRU list. It is a rate on 6.x+,0,varnish,n lru moved
+varnish.n_lru_nuked,gauge,,operation,,Objects forcefully evicted from storage to make room for new objects. It is a rate on 6.x+,0,varnish,n lru nuked
+varnish.n_obj_purged,gauge,,object,,Purged objects. It is a rate on 6.x+,0,varnish,n obj purged
 varnish.n_object,gauge,,object,,object structs made.,0,varnish,n object
 varnish.n_objectcore,gauge,,object,,objectcore structs made.,0,varnish,n objectcore
 varnish.n_objecthead,gauge,,object,,objecthead structs made.,0,varnish,n objecthead
 varnish.n_objoverflow,rate,,object,second,Objects overflowing workspace. This metric is only provided by varnish 3.x.,0,varnish,n objoverflow
 varnish.n_objsendfile,rate,,object,second,Objects sent with sendfile. This metric is only provided by varnish 3.x.,0,varnish,n objsendfile
 varnish.n_objwrite,rate,,object,second,Objects sent with write. This metric is only provided by varnish 3.x.,0,varnish,n objwrite
-varnish.n_pipe,gauge,,event,,,0,varnish,n pipe
-varnish.n_purges,rate,,event,,Purges executed.,0,varnish,n purges
+varnish.n_pipe,gauge,,event,,This metric is only available from 6.x+,0,varnish,n pipe
+varnish.n_purges,gauge,,event,,Purges executed. It is a rate on 6.x+,0,varnish,n purges
 varnish.n_test_gunzip,rate,,event,,,0,varnish,n test gunzip
 varnish.n_sess,rate,,object,,sess structs made. This metric is only provided by varnish 3.x.,0,varnish,n sess
 varnish.n_sess_mem,rate,,object,,sess_mem structs made. This metric is only provided by varnish 3.x.,0,varnish,n sess mem
@@ -348,7 +351,7 @@ varnish.n_wrk_failed,rate,,event,second,Worker threads not created. This metric 
 varnish.n_wrk_lqueue,rate,,event,second,Work request queue length. This metric is only provided by varnish 3.x.,0,varnish,n wrk lqueue
 varnish.n_wrk_max,rate,,event,second,Worker threads limited. This metric is only provided by varnish 3.x.,0,varnish,n wrk max
 varnish.n_wrk_queued,rate,,event,second,Queued work requests. This metric is only provided by varnish 3.x.,0,varnish,n wrk queued
-varnish.pipe_limited,rate,,,,,0,varnish,pipe limited
+varnish.pipe_limited,rate,,,,This metric is only available from 6.x+,0,varnish,pipe limited
 varnish.pools,gauge,,,,Thread pools.,0,varnish,pools
 varnish.req_dropped,rate,,,,,0,varnish,pools
 varnish.s_bodybytes,rate,,byte,second,Total body size. This metric is only provided by varnish 3.x.,0,varnish,s bodybytes
@@ -376,7 +379,7 @@ varnish.sc_req_http20,rate,,,second,,0,varnish,sc_req_http20
 varnish.sc_resp_close,rate,,,second,,0,varnish,sc_resp_close
 varnish.sc_rx_bad,rate,,,second,,0,varnish,sc_rx_bad
 varnish.sc_rx_body,rate,,,second,,0,varnish,sc_rx_body
-varnish.sc_rx_close_idle,rate,,,second,,0,varnish,sc_rx_close_idle
+varnish.sc_rx_close_idle,rate,,,second,This metric is only available from 6.x+,0,varnish,sc_rx_close_idle
 varnish.sc_rx_junk,rate,,,second,,0,varnish,sc_rx_junk
 varnish.sc_rx_overflow,rate,,,second,,0,varnish,sc_rx_overflow
 varnish.sc_rx_timeout,rate,,,second,,0,varnish,sc_rx_timeout
@@ -387,15 +390,15 @@ varnish.sc_vcl_failure,rate,,,second,,0,varnish,sc_vcl_failure
 varnish.sess_closed,rate,,connection,second,Client connections closed.,0,varnish,sess closed
 varnish.sess_closed_err,rate,,connection,second,Client connections closed with error.,0,varnish,sess closed err
 varnish.sess_conn,rate,,connection,second,Client connections accepted.,0,varnish,sess conn
-varnish.sess_drop,rate,,connection,second,Client connections dropped due to lack of worker thread.,-1,varnish,sess drop
-varnish.sess_dropped,rate,,connection,second,Client connections dropped due to a full queue.,-1,varnish,sess dropped
+varnish.sess_drop,rate,,connection,second,Client connections dropped due to lack of worker thread. This metric is only available in 5.x or lower,-1,varnish,sess drop
+varnish.sess_dropped,rate,,connection,second,Client connections dropped due to a full queue. This metric is only available from 6.x+,-1,varnish,sess dropped
 varnish.sess_fail,rate,,connection,second,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors.",-1,varnish,sess fail
-varnish.sess_fail_econnaborted,rate,,connection,second,"",-1,varnish,sess fail econnaborted
-varnish.sess_fail_eintr,rate,,connection,second,"",-1,varnish,sess fail eintr
-varnish.sess_fail_emfile,rate,,connection,second,"",-1,varnish,sess fail emfile
-varnish.sess_fail_enomem,rate,,connection,second,"",-1,varnish,sess fail enomem
-varnish.sess_fail_other,rate,,connection,second,"",-1,varnish,sess fail other
-varnish.sess_fail_ebadf,rate,,connection,second,"",-1,varnish,sess fail ebadf
+varnish.sess_fail_ebadf,rate,,connection,second,This metric is only available from 6.x+,-1,varnish,sess fail ebadf
+varnish.sess_fail_econnaborted,rate,,connection,second,This metric is only available from 6.x+,-1,varnish,sess fail econnaborted
+varnish.sess_fail_eintr,rate,,connection,second,This metric is only available from 6.x+,-1,varnish,sess fail eintr
+varnish.sess_fail_emfile,rate,,connection,second,This metric is only available from 6.x+,-1,varnish,sess fail emfile
+varnish.sess_fail_enomem,rate,,connection,second,This metric is only available from 6.x+,-1,varnish,sess fail enomem
+varnish.sess_fail_other,rate,,connection,second,This metric is only available from 6.x+,-1,varnish,sess fail other
 varnish.sess_herd,rate,,connection,second,,0,varnish,sess herd
 varnish.sess_linger,rate,,connection,second,This metric is only provided by varnish 3.x.,0,varnish,sess linger
 varnish.sess_pipe_overflow,rate,,connection,second,,0,varnish,sess pipe overflow
@@ -438,21 +441,21 @@ varnish.VBE.boot.default.bereq_bodybytes,rate,,,,,,0,varnish,vbe boot default be
 varnish.VBE.boot.default.bereq_hdrbytes,rate,,,,,,0,varnish,vbe boot default bereq_hdrbytes
 varnish.VBE.boot.default.beresp_bodybytes,rate,,,,,,0,varnish,vbe boot default beresp_bodybytes
 varnish.VBE.boot.default.beresp_hdrbytes,rate,,,,,,0,varnish,vbe boot default beresp_hdrbytes
-varnish.VBE.boot.default.busy,rate,,,,,,0,varnish,vbe boot default busy
-varnish.VBE.boot.default.conn,gauge,,,,,,0,varnish,vbe boot default conn
-varnish.VBE.boot.default.fail_eacces,rate,,,,,,0,varnish,vbe boot default fail_eacces
-varnish.VBE.boot.default.fail_eaddrnotavail,rate,,,,,,0,varnish,vbe boot default fail_eaddrnotavail
-varnish.VBE.boot.default.fail_econnrefused,rate,,,,,,0,varnish,vbe boot default fail_econnrefused
-varnish.VBE.boot.default.fail_enetunreach,rate,,,,,,0,varnish,vbe boot default fail_enetunreach
-varnish.VBE.boot.default.fail_etimedout,rate,,,,,,0,varnish,vbe boot default fail_etimedout
-varnish.VBE.boot.default.fail_other,rate,,,,,,0,varnish,vbe boot default fail_other
-varnish.VBE.boot.default.fail,rate,,,,,,0,varnish,vbe boot default fail
-varnish.VBE.boot.default.helddown,rate,,,,,,0,varnish,vbe boot default helddown
+varnish.VBE.boot.default.busy,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default busy
+varnish.VBE.boot.default.conn,gauge,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default conn
+varnish.VBE.boot.default.fail_eacces,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail_eacces
+varnish.VBE.boot.default.fail_eaddrnotavail,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail_eaddrnotavail
+varnish.VBE.boot.default.fail_econnrefused,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail_econnrefused
+varnish.VBE.boot.default.fail_enetunreach,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail_enetunreach
+varnish.VBE.boot.default.fail_etimedout,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail_etimedout
+varnish.VBE.boot.default.fail_other,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail_other
+varnish.VBE.boot.default.fail,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default fail
+varnish.VBE.boot.default.helddown,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default helddown
 varnish.VBE.boot.default.pipe_hdrbytes,rate,,,,,,0,varnish,vbe boot default pipe_hdrbytes
 varnish.VBE.boot.default.pipe_in,rate,,,,,,0,varnish,vbe boot default pipe_in
 varnish.VBE.boot.default.pipe_out,rate,,,,,,0,varnish,vbe boot default pipe_out
 varnish.VBE.boot.default.req,rate,,,,,,0,varnish,vbe boot default req
-varnish.VBE.boot.default.unhealthy,rate,,,,,,0,varnish,vbe boot default unhealthy
+varnish.VBE.boot.default.unhealthy,rate,,,,,This metric is only available from 6.x+,0,varnish,vbe boot default unhealthy
 varnish.vcl_fail,rate,,,,,,,0,varnish,vcl fail
 varnish.vmods,gauge,,object,,Loaded VMODs.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc.",0,varnish,vsm cooling
@@ -461,7 +464,7 @@ varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory 
 varnish.vsm_overflowed,gauge,,byte,second,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc.",0,varnish,vsm used
 varnish.n_purgesps,rate,,event,,Purges executed.,0,varnish,n purges
-varnish.ws_backend_overflow,rate,,,,,,,0,varnish,ws backend overflow
-varnish.ws_client_overflow,rate,,,,,,,0,varnish,ws client_overflow
-varnish.ws_session_overflow,rate,,,,,,,0,varnish,ws session_overflow
-varnish.ws_thread_overflow,rate,,,,,,,0,varnish,ws thread_overflow
+varnish.ws_backend_overflow,rate,,,,,,This metric is only available from 6.x+,0,varnish,ws backend overflow
+varnish.ws_client_overflow,rate,,,,,,This metric is only available from 6.x+,0,varnish,ws client_overflow
+varnish.ws_session_overflow,rate,,,,,,This metric is only available from 6.x+,0,varnish,ws session_overflow
+varnish.ws_thread_overflow,rate,,,,,,This metric is only available from 6.x+,0,varnish,ws thread_overflow
