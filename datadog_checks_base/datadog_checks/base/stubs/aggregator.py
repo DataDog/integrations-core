@@ -96,7 +96,7 @@ class AggregatorStub(object):
     ):
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags or [], hostname, device))
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
