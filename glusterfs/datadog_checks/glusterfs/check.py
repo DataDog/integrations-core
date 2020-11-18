@@ -8,10 +8,10 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 CLUSTER_STATS = {
-    'node_count': 'cluster.nodes.count',
-    'nodes_active': 'cluster.nodes.active',
-    'volumes_started': 'cluster.volumes.started',
-    'volume_count': 'cluster.volumes.count'
+    'node_count': 'nodes.count',
+    'nodes_active': 'nodes.active',
+    'volumes_started': 'volumes.started',
+    'volume_count': 'volumes.count'
 }
 
 
@@ -26,6 +26,12 @@ GENERAL_STATS = {
 
 }
 
+VOL_SUBVOL_STATS = {
+    'disperse': 'disperse',
+    'disperse_redundancy': 'disperse_redundancy',
+    'replica': 'replica',
+}
+
 VOLUME_STATS = {
     'v_used_percent': 'used.percent',
     'num_bricks': 'bricks.count',
@@ -34,16 +40,13 @@ VOLUME_STATS = {
 #    'v_size': 'size.total', # strip GiB from value
     'snapshot_count': 'snapshot.count',
 }
-
-VOL_SUBVOL_STATS = {
-    'disperse': 'disperse',
-    'disperse_redundancy': 'disperse_redundancy',
-    'replica': 'replica',
-}
+VOLUME_STATS.update(GENERAL_STATS)
+VOLUME_STATS.update(VOL_SUBVOL_STATS)
 
 BRICK_STATS = {
     'block_size': 'block_size'
 }
+BRICK_STATS.update(GENERAL_STATS)
 
 
 GLUSTER_VERSION = 'glfs_version'
@@ -62,9 +65,8 @@ class GlusterfsCheck(AgentCheck):
         gstatus = json.loads(output)
         if 'data' in gstatus:
             data = gstatus['data']
-            for key, metric in CLUSTER_STATS.items():
-                if key in data:
-                    self.gauge(metric, data[key], self._tags)
+            self.submit_metric(data, 'cluster', CLUSTER_STATS, self._tags)
+
             self.submit_version_metadata(data)
 
             if 'volume_summary' in output:
@@ -81,29 +83,14 @@ class GlusterfsCheck(AgentCheck):
         for volume in output:
             volume_tags = ["vol_name:{}".format(volume['name']), "vol_type:{}".format(volume['type'])]
             volume_tags.extend(self._tags)
-            unprefixed_metrics = {}
-            unprefixed_metrics.update(GENERAL_STATS)
-            unprefixed_metrics.update(VOL_SUBVOL_STATS)
-            for key, metric in VOLUME_STATS.items():
-                if key in volume:
-                    self.gauge(metric, volume[key], volume_tags)
-                else:
-                    self.log.debug("Field not found in volume data: %s", key)
-            for key, metric in unprefixed_metrics.items():
-                if key in volume:
-                    self.gauge('volume.' + metric, volume[key], volume_tags)
-                else:
-                    self.log.debug("Field not found in volume data: %s", key)
+            self.submit_metric(volume, 'volume', VOLUME_STATS, volume_tags)
+
             if 'subvols' in volume:
                 self.parse_subvols_stats(volume['subvols'], volume_tags)
 
     def parse_subvols_stats(self, subvols, volume_tags):
         for subvol in subvols:
-            for key, metric in VOL_SUBVOL_STATS.items():
-                if key in subvol:
-                    self.gauge(metric, subvol[key], volume_tags)
-                else:
-                    self.log.debug("Field not found in subvol data: %s", key)
+            self.submit_metric(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
 
             if 'bricks' in subvol:
                 for brick in subvol['bricks']:
@@ -116,14 +103,11 @@ class GlusterfsCheck(AgentCheck):
                             'device:{}'.format(brick_device),
                             'fs_name:{}'.format(fs_name)]
                     tags.extend(self._tags)
-                    for key, metric in BRICK_STATS.items():
-                        if key in brick:
-                            self.gauge(metric, brick[key], tags)
-                        else:
-                            self.log.debug("Field not found in brick data: %s", key)
+                    self.submit_metric(brick, 'brick', BRICK_STATS, tags)
 
-                    for key, metric in GENERAL_STATS.items():
-                        if key in brick:
-                            self.gauge('brick.' + metric, brick[key], tags)
-                        else:
-                            self.log.debug("Field not found in brick data: %s", key)
+    def submit_metric(self, payload, prefix, metric_mapping, tags):
+        for key, metric in metric_mapping.items():
+            if key in payload:
+                self.gauge('{}.'.format(prefix) + metric, payload[key], tags)
+            else:
+                self.log.debug("Field not found in %s data: %s", prefix, key)
