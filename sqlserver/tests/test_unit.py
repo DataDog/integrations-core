@@ -13,7 +13,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
-from .common import CHECK_NAME, CUSTOM_QUERY_A, CUSTOM_QUERY_B, LOCAL_SERVER, assert_metrics
+from .common import CHECK_NAME, LOCAL_SERVER, assert_metrics
 from .utils import windows_ci
 
 # mark the whole module
@@ -62,32 +62,6 @@ def test_set_default_driver_conf():
     with EnvVars({'ODBCSYSINI': 'ABC'}):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
-
-
-def test_custom_query_validation(instance_docker):
-    instance = copy.copy(instance_docker)
-
-    # missing query
-    with pytest.raises(ConfigurationError):
-        querya = copy.copy(CUSTOM_QUERY_A)
-        querya.pop('query')
-        instance['custom_queries'] = [querya]
-        SQLServer(CHECK_NAME, {}, [instance])
-
-    # missing columns
-    with pytest.raises(ConfigurationError):
-        querya = copy.copy(CUSTOM_QUERY_A)
-        querya.pop('columns')
-        instance['custom_queries'] = [querya]
-        SQLServer(CHECK_NAME, {}, [instance])
-
-    # invalid type
-    with pytest.raises(ConfigurationError):
-        querya = copy.copy(CUSTOM_QUERY_A)
-        queryb = copy.copy(CUSTOM_QUERY_B)
-        queryb['columns'][1]['type'] = 'notamethod'
-        instance['custom_queries'] = [querya, queryb]
-        SQLServer(CHECK_NAME, {}, [instance])
 
 
 @windows_ci

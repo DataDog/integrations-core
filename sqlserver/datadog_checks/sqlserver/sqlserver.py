@@ -9,6 +9,7 @@ import six
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.db import QueryManager
 
 from . import metrics
 from .connection import Connection, SQLConnectionError
@@ -54,6 +55,8 @@ BASE_NAME_QUERY = (
 
 
 class SQLServer(AgentCheck):
+    __NAMESPACE__ = 'sqlserver'
+
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
     # Default performance table metrics - Database Instance level
@@ -168,15 +171,10 @@ class SQLServer(AgentCheck):
 
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
-        self.custom_queries = []
-        custom_queries = self.instance.get('custom_queries')
 
-        if custom_queries:
-            instance_tags = self.instance.get("tags", [])
-            for id_, query in enumerate(custom_queries):
-                # will raise a ConfigurationError if the query doesn't validate
-                custom_query = metrics.CustomQueryMetric(query, instance_tags, id_)
-                self.custom_queries.append(custom_query)
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.instance.get("tags", []))
+        self.check_initializations.append(self._query_manager.compile_queries)
 
         self.connection = Connection(init_config, self.instance, self.handle_service_check, self.log)
 
@@ -221,7 +219,7 @@ class SQLServer(AgentCheck):
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
-        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message)
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _make_metric_list_to_collect(self, custom_metrics):
         """
@@ -464,9 +462,13 @@ class SQLServer(AgentCheck):
                         rows, cols = instance_results[metric.__class__.__name__]
                         metric.fetch_metric(rows, cols)
 
-                # custom queries, if configured
-                for custom_query in self.custom_queries:
-                    custom_query.fetch_metrics(cursor, self)
+            # reuse connection for any custom queries
+            self._query_manager.execute()
+
+    def execute_query_raw(self, query):
+        with self.connection.get_managed_cursor() as cursor:
+            cursor.execute(query)
+            return cursor.fetchall()
 
     def do_stored_procedure_check(self):
         """
@@ -499,7 +501,7 @@ class SQLServer(AgentCheck):
                     tags.extend(custom_tags)
 
                     if row.type.lower() in self.proc_type_mapping:
-                        self.proc_type_mapping[row.type](row.metric, row.value, tags)
+                        self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
                     else:
                         self.log.warning(
                             '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric

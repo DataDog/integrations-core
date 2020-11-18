@@ -181,7 +181,7 @@ def test_custom_queries(aggregator, instance_docker):
     instance['custom_queries'] = [querya, queryb]
 
     check = SQLServer(CHECK_NAME, {}, [instance])
-    check.check(instance)
+    check.run()
     tags = list(instance['tags'])
 
     for tag in ('a', 'b', 'c'):

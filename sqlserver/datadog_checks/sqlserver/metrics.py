@@ -7,97 +7,10 @@ Collection of metric classes for specific SQL Server tables.
 from __future__ import division
 
 from collections import defaultdict
-
-from datadog_checks.base import AgentCheck, ConfigurationError
+from functools import partial
 
 # Queries
 ALL_INSTANCES = 'ALL'
-
-
-class CustomQueryMetric(object):
-    """Validate and process custom SQL queries.
-
-    This class is distinct from the BaseSqlServerMetric classes due to its reliance on "traditional" or
-    or non-performance counter queries.
-    """
-
-    def __init__(self, query_config, instance_tags, instance_id):
-        self.query = query_config.get('query')
-        self.columns = query_config.get('columns')
-        self.instance_tags = instance_tags
-        self.query_tags = query_config.get('tags', [])
-
-        self.validate(instance_id)
-
-    def validate(self, instance_id):
-        errors = []
-        if not self.query:
-            errors.append("custom query field `query` is required")
-
-        if self.columns:
-            for column in self.columns:
-                name = column.get('name')
-                if not name:
-                    errors.append("column field `name` is required")
-
-                column_type = column.get('type')
-                if not column_type:
-                    errors.append("column field `type` is required for column `{}`".format(name))
-                if column_type != 'tag' and not hasattr(AgentCheck, column_type):
-                    errors.append("invalid submission method `{}` for column `{}`".format(column_type, name))
-        else:
-            errors.append("custom query field `columns` is required")
-
-        if errors:
-            msg = 'Errors found while validating `custom_queries` configuration instance {}: {}'
-            raise ConfigurationError(msg.format(instance_id, ';'.join(errors)))
-
-    def fetch_metrics(self, cursor, agent):
-        agent.log.debug("Running query: %s", self.query)
-        cursor.execute(self.query)
-        rows = cursor.fetchall()
-        agent.log.debug("Query results: %s", rows)
-
-        for row in rows:
-            if len(self.columns) != len(row):
-                agent.log.error(
-                    "query result expected %s columns, got %s",
-                    len(self.columns),
-                    len(row),
-                )
-                break
-
-            metric_info = []
-            query_tags = list(self.query_tags)
-            query_tags.extend(self.instance_tags)
-
-            for column, value in zip(self.columns, row):
-
-                # Columns can be ignored via configuration.
-                if not column:
-                    continue
-
-                name = column.get('name')
-                column_type = column.get('type')
-
-                if column_type == 'tag':
-                    query_tags.append('{}:{}'.format(name, value))
-                else:
-                    try:
-                        metric_info.append(('{}.{}'.format('sqlserver', name), float(value), column_type))
-                    except (ValueError, TypeError):
-                        agent.log.error(
-                            "non-numeric value `%s` for metric column `%s`",
-                            value,
-                            name,
-                        )
-                        break
-
-            # Only submit metrics if there were absolutely no errors - all or nothing.
-            else:
-                for info in metric_info:
-                    metric, value, method = info
-                    getattr(agent, method)(metric, value, tags=set(query_tags))
 
 
 class BaseSqlServerMetric(object):
@@ -124,7 +37,7 @@ class BaseSqlServerMetric(object):
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
-        self.report_function = report_function
+        self.report_function = partial(report_function, raw=True)
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
