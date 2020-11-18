@@ -1,0 +1,108 @@
+name: IBM Db2
+files:
+- name: ibm_db2.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/db
+      overrides:
+        global_custom_queries.value.example:
+          - metric_prefix: ibm_db2
+            query: <QUERY>
+            columns: <COLUMNS>
+            tags: <TAGS>
+    - template: init_config/default
+  - template: instances
+    options:
+      - name: db
+        description: The name of the database to establish a connection with.
+        required: True
+        value:
+          type: string
+          example: <DATABASE_NAME>
+      - name: username
+        description: The database user to authenticate as.
+        required: True
+        value:
+          type: string
+      - name: password
+        description: The password of `username`.
+        required: True
+        value:
+          type: string
+      - name: host
+        description: The hostname used to connect to a remote or uncataloged database.
+        value:
+          type: string
+          example: <HOSTNAME>
+      - name: port
+        description: The port used to connect to a remote or uncataloged database.
+        value:
+          type: integer
+          example: 50000
+      - name: tls_cert
+        description: |
+          The path to a SSL certicate to use, when connecting to a database in a secure fashion. It
+          has to be accessible and readable by the agent user.
+        value:
+          type: string
+      - template: instances/db
+        overrides:
+          custom_queries.description: |
+            Each query must have 3 fields:
+
+            1. metric_prefix - This is what each metric will start with.
+            2. query - This is the SQL to execute. It can be a simple statement or a multi-line script.
+            3. columns - This is a list representing each column, ordered sequentially
+                         from left to right. The number of columns must equal the number
+                         of columns returned in the query.
+                         There are 2 required pieces of data:
+                           a. name - This is the suffix to append to the metric_prefix
+                                     in order to form the full metric name. If `type` is
+                                     `tag`, this column will instead be considered a tag
+                                     and will be applied to every metric collected by
+                                     this particular query.
+                           b. type - This is the submission method (gauge, count, rate, etc.).
+                                     This can also be set to `tag` to tag each metric in the row
+                                     with the name and value of the item in this column. You can
+                                     use the `count` type to perform aggregation for queries that
+                                     return multiple rows with the same or no tags.
+
+                          Columns without a name are ignored, put this for any column you wish to skip:
+                            - {}
+            4. tags (optional) - A list of tags to apply to each metric.
+          custom_queries.value.items:
+            type: object
+            properties:
+              - name: metric_prefix
+                type: string
+              - name: query
+                type: string
+              - name: columns
+                type: array
+                items:
+                  type: object
+              - name: tags
+                type: array
+                items:
+                  type: string
+          custom_queries.value.example:
+            - metric_prefix: ibm_db2
+              query: SELECT files_closed, tbsp_name FROM TABLE(MON_GET_TABLESPACE(NULL, -1))
+              columns:
+                - name: tablespace.files_closed
+                  type: monotonic_count
+                - name: tablespace
+                  type: tag
+              tags:
+                - test:ibm_db2
+      - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        source: ibm_db2
+        path: /home/db2inst1/sqllib/db2dump/db2diag.log
+        log_processing_rules:
+          - type: multi_line
+            name: new_log_start_with_date
+            pattern: \d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])
