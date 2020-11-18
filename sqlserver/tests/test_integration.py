@@ -189,5 +189,5 @@ def test_custom_queries(aggregator, instance_docker):
         custom_tags = ['customtag:{}'.format(tag)]
         custom_tags.extend(tags)
 
-        aggregator.assert_metric('custom.num', value=value, tags=custom_tags + ['query:custom'])
-        aggregator.assert_metric('another_custom_one.num', value=value, tags=custom_tags + ['query:another_custom_one'])
+        aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:custom'])
+        aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])

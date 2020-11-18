@@ -171,13 +171,11 @@ class SQLServer(AgentCheck):
         self.custom_queries = []
         custom_queries = self.instance.get('custom_queries')
 
-        if self.proc and custom_queries:
-            msg = 'Stored Procedures and Custom Queries cannot be part of the same check instance.'
-            raise ConfigurationError(msg)
-        elif custom_queries:
+        if custom_queries:
+            instance_tags = self.instance.get("tags", [])
             for id_, query in enumerate(custom_queries):
                 # will raise a ConfigurationError if the query doesn't validate
-                custom_query = metrics.CustomQueryMetric(query, id_)
+                custom_query = metrics.CustomQueryMetric(query, instance_tags, id_)
                 self.custom_queries.append(custom_query)
 
         self.connection = Connection(init_config, self.instance, self.handle_service_check, self.log)
@@ -430,8 +428,6 @@ class SQLServer(AgentCheck):
         if self.do_check:
             if self.proc:
                 self.do_stored_procedure_check()
-            elif self.custom_queries:
-                self.do_custom_queries()
             else:
                 self.collect_metrics()
         else:
@@ -460,7 +456,6 @@ class SQLServer(AgentCheck):
 
                 # Using the cached data, extract and report individual metrics
                 for metric in metrics_to_collect:
-                    # try:
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
                         rows, cols = instance_results['SqlFractionMetric']
@@ -469,19 +464,9 @@ class SQLServer(AgentCheck):
                         rows, cols = instance_results[metric.__class__.__name__]
                         metric.fetch_metric(rows, cols)
 
-                # except Exception as e:
-                #     self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
-
-    def do_custom_queries(self):
-        """
-        Fetch metrics from custom SQL queries
-        """
-        tags = self.instance.get("tags", [])
-        for custom_query in self.custom_queries:
-
-            with self.connection.open_managed_default_connection():
-                with self.connection.get_managed_cursor() as cursor:
-                    custom_query.fetch_metrics(cursor, self, tags)
+                # custom queries, if configured
+                for custom_query in self.custom_queries:
+                    custom_query.fetch_metrics(cursor, self)
 
     def do_stored_procedure_check(self):
         """

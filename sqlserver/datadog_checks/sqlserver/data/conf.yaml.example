@@ -125,22 +125,35 @@ instances:
     # command_timeout: 5
 
     ## @param custom_queries - list of mappings - optional
-    ## Get metrics from a custom SQL query but only if the database is writable
-    ## (i.e. it's the master in an availability group) Notes:
-    ## - Custom SQL query must be defined in its own instance
-    ## - For performance counter queries, use `custom_metrics` instead
-    ## See XXX for more information.
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column. You can
+    ##                          use the `count` type to perform aggregation for queries that
+    ##                          return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
     #
     # custom_queries:
-    #   - metric_prefix: sqlserver
-    #     query: <QUERY>
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
     #     columns:
-    #     - name: <COLUNMS_1_NAME>
-    #       type: <COLUMNS_1_TYPE>
-    #     - name: <COLUNMS_2_NAME>
-    #       type: <COLUMNS_2_TYPE>
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
     #     tags:
-    #     - <TAG_KEY>:<TAG_VALUE>
+    #     - test:<INTEGRATION>
 
     ## @param stored_procedure - string - optional
     ## Get metrics from custom proc in MyDB but only if the database is writable

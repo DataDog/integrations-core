@@ -64,14 +64,12 @@ INSTANCE_AO_DOCKER_SECONDARY = {
 }
 
 CUSTOM_QUERY_A = {
-    'metric_prefix': 'custom',
     'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
     'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
     'tags': ['query:custom'],
 }
 
 CUSTOM_QUERY_B = {
-    'metric_prefix': 'another_custom_one',
     'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
     'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
     'tags': ['query:another_custom_one'],

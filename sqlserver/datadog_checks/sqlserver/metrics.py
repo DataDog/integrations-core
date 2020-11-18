@@ -21,52 +21,42 @@ class CustomQueryMetric(object):
     or non-performance counter queries.
     """
 
-    def __init__(self, query_config, instance_id):
+    def __init__(self, query_config, instance_tags, instance_id):
         self.query = query_config.get('query')
-        self.metric_prefix = query_config.get('metric_prefix', '').rstrip('.')
         self.columns = query_config.get('columns')
+        self.instance_tags = instance_tags
         self.query_tags = query_config.get('tags', [])
 
         self.validate(instance_id)
 
     def validate(self, instance_id):
         errors = []
-        if not self.metric_prefix:
-            errors.append("custom query field `metric_prefix` is required")
-
         if not self.query:
-            errors.append("custom query field `query` is required for metric_prefix `{}`".format(self.metric_prefix))
+            errors.append("custom query field `query` is required")
 
         if self.columns:
             for column in self.columns:
                 name = column.get('name')
                 if not name:
-                    errors.append("column field `name` is required for metric_prefix `{}`".format(self.metric_prefix))
+                    errors.append("column field `name` is required")
 
                 column_type = column.get('type')
                 if not column_type:
                     errors.append(
-                        "column field `type` is required for column `{}` of metric_prefix `{}`".format(
-                            name,
-                            self.metric_prefix,
-                        )
+                        "column field `type` is required for column `{}`".format(name)
                     )
                 if column_type != 'tag' and not hasattr(AgentCheck, column_type):
                     errors.append(
-                        "invalid submission method `{}` for column `{}` of metric_prefix `{}`".format(
-                            column_type,
-                            name,
-                            self.metric_prefix,
-                        )
+                        "invalid submission method `{}` for column `{}`".format(column_type, name)
                     )
         else:
-            errors.append("custom query field `columns` is required for metric_prefix `{}`".format(self.metric_prefix))
+            errors.append("custom query field `columns` is required")
 
         if errors:
             msg = 'Errors found while validating `custom_queries` configuration instance {}: {}'
             raise ConfigurationError(msg.format(instance_id, ';'.join(errors)))
 
-    def fetch_metrics(self, cursor, agent, tags):
+    def fetch_metrics(self, cursor, agent):
         agent.log.debug("Running query: %s", self.query)
         cursor.execute(self.query)
         rows = cursor.fetchall()
@@ -75,8 +65,7 @@ class CustomQueryMetric(object):
         for row in rows:
             if len(self.columns) != len(row):
                 agent.log.error(
-                    "query result for metric_prefix %s: expected %s columns, got %s",
-                    self.metric_prefix,
+                    "query result expected %s columns, got %s",
                     len(self.columns),
                     len(row),
                 )
@@ -84,7 +73,7 @@ class CustomQueryMetric(object):
 
             metric_info = []
             query_tags = list(self.query_tags)
-            query_tags.extend(tags)
+            query_tags.extend(self.instance_tags)
 
             for column, value in zip(self.columns, row):
 
@@ -99,13 +88,12 @@ class CustomQueryMetric(object):
                     query_tags.append('{}:{}'.format(name, value))
                 else:
                     try:
-                        metric_info.append(('{}.{}'.format(self.metric_prefix, name), float(value), column_type))
+                        metric_info.append(('{}.{}'.format('sqlserver', name), float(value), column_type))
                     except (ValueError, TypeError):
                         agent.log.error(
-                            "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
+                            "non-numeric value `%s` for metric column `%s`",
                             value,
                             name,
-                            self.metric_prefix,
                         )
                         break
 
