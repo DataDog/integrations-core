@@ -20,6 +20,9 @@ def test_check(aggregator, check, instance):
     for mname in metrics_to_check:
         aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 def test_inclusion_filter(aggregator, check, instance):
     instance['metrics_filter'] = ['SMA.*']
