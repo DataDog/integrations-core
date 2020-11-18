@@ -43,7 +43,7 @@ The following example commands assume that your JKS `truststore` and `keystore` 
 - `client_truststore.jks`
 - `client_keystore.jks`
 
-We also assume that both sides' `keystore`s and `truststore`s have each other's certificates with aliases `server_cert` and `client_cert`, meaning that a Java ZooKeeper client can already connect to a ZooKeeper server.
+The instructions also assume that both sides' `keystore` and `truststore` files have each other's certificates with aliases `server_cert` and `client_cert`, meaning that a Java ZooKeeper client can already connect to a ZooKeeper server.
 If your private key has a password, make sure this password is included in the `config.yaml` file for config option `tls_private_key_password`.
 
 To convert the JKS files to PEM files:
