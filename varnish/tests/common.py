@@ -10,7 +10,6 @@ import os
 COMMON_METRICS = [
     "varnish.uptime",  # metrics where the "MAIN" prefix was removed
     "varnish.sess_conn",  # metrics where the "MAIN" prefix was removed
-    "varnish.sess_drop",  # metrics where the "MAIN" prefix was removed
     "varnish.sess_fail",  # metrics where the "MAIN" prefix was removed
     "varnish.client_req_400",  # metrics where the "MAIN" prefix was removed
     "varnish.client_req_417",  # metrics where the "MAIN" prefix was removed
@@ -53,7 +52,6 @@ COMMON_METRICS = [
     "varnish.SMA.Transient.c_fail",
     "varnish.VBE.boot.default.req",
     "varnish.LCK.backend.creat",
-    "varnish.LCK.backend_tcp.creat",
     "varnish.LCK.ban.creat",
     "varnish.LCK.ban.locks",
     "varnish.LCK.busyobj.creat",
@@ -64,7 +62,15 @@ COMMON_METRICS = [
     "varnish.LCK.vcl.destroy",
     "varnish.LCK.vcl.locks",
     "varnish.n_purges",
+]
+METRICS_5 = [
+    "varnish.sess_drop",  # metrics where the "MAIN" prefix was removed
+    "varnish.LCK.backend_tcp.creat",
     "varnish.n_purgesps",
+]
+METRICS_6 = [
+    "varnish.sess_dropped",  # metrics where the "MAIN" prefix was removed
+    "varnish.LCK.tcp_pool.creat"
 ]
 
 VARNISHADM_PATH = "varnishadm"
