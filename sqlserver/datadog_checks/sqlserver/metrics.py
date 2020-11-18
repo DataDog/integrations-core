@@ -42,13 +42,9 @@ class CustomQueryMetric(object):
 
                 column_type = column.get('type')
                 if not column_type:
-                    errors.append(
-                        "column field `type` is required for column `{}`".format(name)
-                    )
+                    errors.append("column field `type` is required for column `{}`".format(name))
                 if column_type != 'tag' and not hasattr(AgentCheck, column_type):
-                    errors.append(
-                        "invalid submission method `{}` for column `{}`".format(column_type, name)
-                    )
+                    errors.append("invalid submission method `{}` for column `{}`".format(column_type, name))
         else:
             errors.append("custom query field `columns` is required")
 
