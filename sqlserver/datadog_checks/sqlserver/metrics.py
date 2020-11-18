@@ -7,6 +7,7 @@ Collection of metric classes for specific SQL Server tables.
 from __future__ import division
 
 from collections import defaultdict
+from functools import partial
 
 # Queries
 ALL_INSTANCES = 'ALL'
@@ -36,7 +37,7 @@ class BaseSqlServerMetric(object):
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
-        self.report_function = report_function
+        self.report_function = partial(report_function, raw=True)
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])

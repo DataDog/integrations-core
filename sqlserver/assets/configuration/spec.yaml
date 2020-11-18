@@ -17,6 +17,7 @@ files:
         example:
           - name: sqlserver.clr.execution
             counter_name: CLR Execution
+    - template: init_config/db
   - template: instances
     description: |
       Every instance is scheduled independent of the others.
@@ -135,6 +136,7 @@ files:
       value:
         type: integer
         example: 5
+    - template: instances/db
     - name: stored_procedure
       description: |
         Get metrics from custom proc in MyDB but only if the database is writable
