@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from typing import Any
+import os
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 CLUSTER_STATS = {
@@ -61,7 +63,18 @@ class GlusterfsCheck(AgentCheck):
         self._tags = self.instance.get('tags', [])
 
     def check(self, _):
-        output, _, _ = get_subprocess_output(['gstatus', '-a', '-o', 'json'], self.log)
+        gstatus_cmd = 'gstatus'
+        use_sudo = _is_affirmative(self.instance.get('use_sudo', False))
+        if use_sudo:
+            test_sudo = os.system('setsid sudo -l < /dev/null')
+            if test_sudo != 0:
+                raise Exception('The dd-agent user does not have sudo access')
+            gluster_args = ['sudo', gstatus_cmd]
+        else:
+            gluster_args = [gstatus_cmd]
+
+        gluster_args += ['-a', '-o', 'json']
+        output, _, _ = get_subprocess_output(gluster_args, self.log)
         gstatus = json.loads(output)
         if 'data' in gstatus:
             data = gstatus['data']
@@ -94,6 +107,8 @@ class GlusterfsCheck(AgentCheck):
 
             if 'bricks' in subvol:
                 for brick in subvol['bricks']:
+                    # brick_name:172.29.187.90:/export/xvdf1/brick
+                    # split this tag into server + export tags
                     brick_name = brick['name']
                     brick_type = brick['type']
                     brick_device = brick['device']
