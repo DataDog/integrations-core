@@ -1,5 +1,10 @@
 #!/bin/sh -ex
 
+if [ ! $TLS_ENABLED ]; then
+    # Run usual entrypoint (provided by base VoltDB image).
+    exec ./docker-entrypoint.sh
+fi
+
 # Must match paths in deployment-tls.xml
 SSL_LOCAL="/etc/ssl/local"
 KEYSTORE="$SSL_LOCAL/voltdb.keystore"

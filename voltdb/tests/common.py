@@ -86,12 +86,12 @@ METRICS = [
     'voltdb.io.messages_read',
     'voltdb.io.messages_written',
     # TABLE
+    # ('voltdb.table.tuple_limit' not submitted as it is null)
     'voltdb.table.tuple_count',
     'voltdb.table.tuple_allocated_memory',
     'voltdb.table.tuple_data_memory',
     'voltdb.table.string_data_memory',
     'voltdb.table.percent_full',
-    # ('voltdb.table.tuple_limit' not submitted as it is null)
     # INDEX
     'voltdb.index.entry_count',
     'voltdb.index.memory_estimate',
@@ -106,8 +106,9 @@ TLS_CLIENT_CERT = os.path.join(TLS_OUTPUT_DIR, 'client.pem')  # type: str
 TLS_PASSWORD = 'tlspass'
 TLS_CONTAINER_LOCALCERT_PATH = '/tmp/localcert.properties'
 
+VOLTDB_DEPLOYMENT = os.path.join(HERE, 'compose', 'deployment-tls.xml' if TLS_ENABLED else 'deployment.xml')
 VOLTDB_SCHEME = 'https' if TLS_ENABLED else 'http'
-VOLTDB_CLIENT_PORT = 8080
+VOLTDB_CLIENT_PORT = 8443 if TLS_ENABLED else 8080
 VOLTDB_URL = '{}://{}:{}'.format(VOLTDB_SCHEME, HOST, VOLTDB_CLIENT_PORT)
 
 VOLTDB_VERSION = os.environ['VOLTDB_VERSION']
