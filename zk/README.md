@@ -61,11 +61,9 @@ To convert the JKS files to PEM files:
 3. Get the `private_key.pem` file from `client_keystore.jks`, since the client's `keystore` contains the private key of the client for alias `client-cert`:
     ```
     keytool -importkeystore -srckeystore client_keystore.jks -destkeystore private_key.p12 -srcstoretype jks -deststoretype pkcs12 -srcalias client-cert
+4. Run the `openssl pkcs12` command, which exports both the client `cert.pem` and the `private_key.pem` for the certificate, so the Zookeeper integration can use them via the `tls_cert` option. Add `-nodes` to this command if you want to get a non-password-protected `private_key.pem` file:
     openssl pkcs12 -in private_key.p12 -out private_key.pem
-    ```
-
-Note: Adding `-nodes` to the `openssl` command is required here if you want to get a non-password protected `private_key.pem`.
-Note2: This exports both the client cert.pem and the `private_key.pem` for the certificate, which makes it easy for the integration to use via the `tls_cert` option.
+ 
 
 #### Log collection
 
