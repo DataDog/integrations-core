@@ -531,6 +531,7 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
         node_name_index = columns.index("NodeName")
+
         for row in rows:
             column_val = row[value_column_index]
             node_name = row[node_name_index]

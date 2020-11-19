@@ -288,7 +288,7 @@ class SQLServer(AgentCheck):
         #         metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load FCI metrics
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+        if True:
             for name, table, column in self.FCI_METRICS:
                 cfg = {
                     'name': name,
