@@ -115,6 +115,15 @@ class SQLServer(AgentCheck):
         ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
     ]
 
+    # AlwaysOn metrics for Failover Cluster Instances (FCI).
+    # This is in a separate category than other AlwaysOn metrics
+    # because FCI specifies a different SQLServer setup
+    # compared to Availability Groups (AG).
+    FCI_METRICS = [
+        ('sqlserver.fci.status', 'sys.dm_os_cluster_nodes', 'status'),
+        ('sqlserver.fci.is_current_owner', 'sys.dm_os_cluster_nodes', 'is_current_owner'),
+    ]
+
     # Non-performance table metrics - can be database specific
     # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
@@ -230,122 +239,133 @@ class SQLServer(AgentCheck):
         metrics_to_collect = []
         tags = self.instance.get('tags', [])
 
-        # Load instance-level (previously Performance) metrics)
-        # If several check instances are querying the same server host, it can be wise to turn these off
-        # to avoid sending duplicate metrics
-        if is_affirmative(self.instance.get('include_instance_metrics', True)):
-            for name, counter_name, instance_name in self.INSTANCE_METRICS:
-                try:
-                    sql_type, base_name = self.get_sql_type(counter_name)
-                    cfg = {
-                        'name': name,
-                        'counter_name': counter_name,
-                        'instance_name': instance_name,
-                        'tags': tags,
-                    }
+        # # Load instance-level (previously Performance) metrics)
+        # # If several check instances are querying the same server host, it can be wise to turn these off
+        # # to avoid sending duplicate metrics
+        # if is_affirmative(self.instance.get('include_instance_metrics', True)):
+        #     for name, counter_name, instance_name in self.INSTANCE_METRICS:
+        #         try:
+        #             sql_type, base_name = self.get_sql_type(counter_name)
+        #             cfg = {
+        #                 'name': name,
+        #                 'counter_name': counter_name,
+        #                 'instance_name': instance_name,
+        #                 'tags': tags,
+        #             }
+        #
+        #             metrics_to_collect.append(
+        #                 self.typed_metric(
+        #                     cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+        #                 )
+        #             )
+        #         except SQLConnectionError:
+        #             raise
+        #         except Exception:
+        #             self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
+        #             continue
+        #
+        # # Load database statistics
+        # for name, table, column in self.DATABASE_METRICS:
+        #     # include database as a filter option
+        #     db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+        #     cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
+        #     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        #
+        # # Load AlwaysOn metrics
+        # if is_affirmative(self.instance.get('include_ao_metrics', False)):
+        #     for name, table, column in self.AO_METRICS + self.AO_METRICS_PRIMARY + self.AO_METRICS_SECONDARY:
+        #         db_name = 'master'
+        #         cfg = {
+        #             'name': name,
+        #             'table': table,
+        #             'column': column,
+        #             'instance_name': db_name,
+        #             'tags': tags,
+        #             'ao_database': self.instance.get('ao_database', None),
+        #             'availability_group': self.instance.get('availability_group', None),
+        #             'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
+        #         }
+        #         metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-                    metrics_to_collect.append(
-                        self.typed_metric(
-                            cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
-                        )
-                    )
-                except SQLConnectionError:
-                    raise
-                except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
-                    continue
-
-        # Load database statistics
-        for name, table, column in self.DATABASE_METRICS:
-            # include database as a filter option
-            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
-            metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load AlwaysOn metrics
-        if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            for name, table, column in self.AO_METRICS + self.AO_METRICS_PRIMARY + self.AO_METRICS_SECONDARY:
-                db_name = 'master'
+        # Load FCI metrics
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            for name, table, column in self.FCI_METRICS:
                 cfg = {
                     'name': name,
                     'table': table,
                     'column': column,
-                    'instance_name': db_name,
                     'tags': tags,
-                    'ao_database': self.instance.get('ao_database', None),
-                    'availability_group': self.instance.get('availability_group', None),
-                    'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load metrics from scheduler and task tables, if enabled
-        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
-            for name, table, column in self.TASK_SCHEDULER_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load DB Fragmentation metrics
-        if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
-            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'instance_name': db_name,
-                    'tags': tags,
-                    'db_fragmentation_object_names': db_fragmentation_object_names,
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load any custom metrics from conf.d/sqlserver.yaml
-        for cfg in custom_metrics:
-            sql_type = None
-            base_name = None
-
-            custom_tags = tags + cfg.get('tags', [])
-            cfg['tags'] = custom_tags
-
-            db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
-            if db_table not in VALID_TABLES:
-                self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
-                continue
-
-            if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
-                self.log.debug(
-                    'Skipping custom metric %s for database %s, check instance configured for database %s',
-                    cfg['name'],
-                    cfg.get('database'),
-                    self.instance.get('database'),
-                )
-                continue
-
-            if db_table == DEFAULT_PERFORMANCE_TABLE:
-                user_type = cfg.get('type')
-                if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
-                sql_type = None
-                try:
-                    if user_type is None:
-                        sql_type, base_name = self.get_sql_type(cfg['counter_name'])
-                except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
-                    continue
-
-                metrics_to_collect.append(
-                    self.typed_metric(
-                        cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
-                    )
-                )
-
-            else:
-                for column in cfg['columns']:
-                    metrics_to_collect.append(
-                        self.typed_metric(
-                            cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
-                        )
-                    )
+        # # Load metrics from scheduler and task tables, if enabled
+        # if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
+        #     for name, table, column in self.TASK_SCHEDULER_METRICS:
+        #         cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+        #         metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        #
+        # # Load DB Fragmentation metrics
+        # if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
+        #     db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+        #     db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
+        #     for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
+        #         cfg = {
+        #             'name': name,
+        #             'table': table,
+        #             'column': column,
+        #             'instance_name': db_name,
+        #             'tags': tags,
+        #             'db_fragmentation_object_names': db_fragmentation_object_names,
+        #         }
+        #         metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        #
+        # # Load any custom metrics from conf.d/sqlserver.yaml
+        # for cfg in custom_metrics:
+        #     sql_type = None
+        #     base_name = None
+        #
+        #     custom_tags = tags + cfg.get('tags', [])
+        #     cfg['tags'] = custom_tags
+        #
+        #     db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
+        #     if db_table not in VALID_TABLES:
+        #         self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
+        #         continue
+        #
+        #     if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
+        #         self.log.debug(
+        #             'Skipping custom metric %s for database %s, check instance configured for database %s',
+        #             cfg['name'],
+        #             cfg.get('database'),
+        #             self.instance.get('database'),
+        #         )
+        #         continue
+        #
+        #     if db_table == DEFAULT_PERFORMANCE_TABLE:
+        #         user_type = cfg.get('type')
+        #         if user_type is not None and user_type not in VALID_METRIC_TYPES:
+        #             self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
+        #         sql_type = None
+        #         try:
+        #             if user_type is None:
+        #                 sql_type, base_name = self.get_sql_type(cfg['counter_name'])
+        #         except Exception:
+        #             self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
+        #             continue
+        #
+        #         metrics_to_collect.append(
+        #             self.typed_metric(
+        #                 cfg_inst=cfg, table=db_table, base_name=base_name, user_type=user_type, sql_type=sql_type
+        #             )
+        #         )
+        #
+        #     else:
+        #         for column in cfg['columns']:
+        #             metrics_to_collect.append(
+        #                 self.typed_metric(
+        #                     cfg_inst=cfg, table=db_table, base_name=base_name, sql_type=sql_type, column=column
+        #                 )
+        #             )
 
         self.instance_metrics = metrics_to_collect
         self.log.debug("metrics to collect %s", metrics_to_collect)

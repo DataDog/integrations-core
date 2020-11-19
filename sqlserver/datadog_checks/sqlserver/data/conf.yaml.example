@@ -74,6 +74,12 @@ instances:
     #
     # ao_database: <AO_DATABASE>
 
+    ## @param include_fci_metrics - boolean - optional - default: false
+    ## Include Failover Cluster Instance metrics. Note that these metrics
+    ## requires a SQLServer set up with Failover Clustering enabled.
+    #
+    # include_fci_metrics: false
+
     ## @param include_instance_metrics - boolean - optional - default: true
     ## Include server-level instance metrics.  When setting up multiple instances for
     ## different databases on the same host these metrics will be duplicated unless this option is turned off.

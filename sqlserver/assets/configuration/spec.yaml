@@ -70,6 +70,13 @@ files:
         AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
       value:
         type: string
+    - name: include_fci_metrics
+      description: |
+        Include Failover Cluster Instance metrics. Note that these metrics
+        requires a SQLServer set up with Failover Clustering enabled.
+      value:
+        type: boolean
+        example: false
     - name: include_instance_metrics
       description: |
         Include server-level instance metrics.  When setting up multiple instances for
