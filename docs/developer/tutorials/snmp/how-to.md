@@ -249,6 +249,13 @@ For example:
 mib2dev.py --mib-module=<MIB> --start-oid=1.3.6.1.4.1.674.10892.1.400.20 --stop-oid=1.3.6.1.4.1.674.10892.1.600.12 > /path/to/mytable.snmprec
 ```
 
+The following command will generate 4 rows for the `IF-MIB:ifTable (1.3.6.1.2.1.2.2)`:
+
+```bash
+mib2dev.py --mib-module=IF-MIB --start-oid=1.3.6.1.2.1.2.2 --stop-oid=1.3.6.1.2.1.2.3 --table-size=4 > /path/to/mytable.snmprec
+```
+
+
 ## Generate simulation data from a walk
 
 As an alternative to [`.snmprec` files](./sim-format.md), it is possible to [use a walk as simulation data](http://snmplabs.com/snmpsim/documentation/building-simulation-data.html#using-snmpwalk-reporting). This is especially useful when debugging live devices, since you can export the device walk and use this real data locally.
