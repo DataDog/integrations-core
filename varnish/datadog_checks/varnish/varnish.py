@@ -233,14 +233,19 @@ class Varnish(AgentCheck):
 
                 if name.startswith("MAIN."):
                     name = name.split('.', 1)[1]
+
+                metric_name = self.normalize(name, prefix="varnish")
                 value = metric.get("value", 0)
 
-                if metric["flag"] in ("a", "c"):
-                    self.rate(self.normalize(name, prefix="varnish"), long(value), tags=tags)
-                elif metric["flag"] in ("g", "i"):
-                    self.gauge(self.normalize(name, prefix="varnish"), long(value), tags=tags)
+                if metric.get("flag") in ("a", "c"):
+                    self.rate(metric_name, long(value), tags=tags)
+                elif metric.get("flag") in ("g", "i"):
+                    self.gauge(metric_name, long(value), tags=tags)
                     if 'n_purges' in self.normalize(name, prefix="varnish"):
                         self.rate('varnish.n_purgesps', long(value), tags=tags)
+                elif 'flag' not in metric:
+                    self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
+                    self.log.debug("Raw metric %s is missing the `flag` field", str(metric))
         elif varnishstat_format == "text":
             for line in output.split("\n"):
                 self.log.debug("Parsing varnish results: %s", line)
