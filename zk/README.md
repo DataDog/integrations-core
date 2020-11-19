@@ -50,22 +50,17 @@ To convert the JKS files to PEM files:
 
 1. Get the `ca_cert.pem` file from `client_truststore.jks`, since the client's truststore contains the certificate of the server that is trustable:
     ```
-    keytool -exportcert -file ca_cert.pem -keystore client_truststore.jks -alias server-cert -rfc
+    keytool -exportcert -file ca_cert.pem -keystore client_truststore.jks -alias server_cert -rfc
     ```
    
-2. Get the `cert.pem` file from `server_truststore.jks`, since `server_truststore.jks` contains the trusted certificates of clients connecting to it:
+2. Get the `cert.pem` file from `client_keystore.jks`, since the client's `keystore` contains the cert of the client for alias `client_cert`:
     ```
-    keytool -exportcert -file cert.pem -keystore server_truststore.jks -alias client-cert -rfc
-    ```
-
-3. Get the `private_key.pem` file from `client_keystore.jks`, since the client's `keystore` contains the private key of the client for alias `client-cert`:
-    ```
-    keytool -importkeystore -srckeystore client_keystore.jks -destkeystore private_key.p12 -srcstoretype jks -deststoretype pkcs12 -srcalias client-cert
+    keytool -importkeystore -srckeystore client_keystore.jks -destkeystore cert.p12 -srcstoretype jks -deststoretype pkcs12 -srcalias client_cert
     ```   
 
-4. Run the `openssl pkcs12` command, which exports both the client `cert.pem` and the `private_key.pem` for the certificate, so the ZooKeeper integration can use them via the `tls_cert` option. Add `-nodes` to this command if you want to get a non-password-protected `private_key.pem` file:
+3. Run the `openssl pkcs12` command, which exports both the client cert and the private key for the certificate. The `tls_cert` config option is able to read and parse the PEM file which contains both the cert and private key. Add `-nodes` to this command if you want to get a non-password-protected file:
    ```
-   openssl pkcs12 -in private_key.p12 -out private_key.pem
+   openssl pkcs12 -in cert.p12 -out cert.pem
    ``` 
 
 #### Log collection
