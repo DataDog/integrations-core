@@ -233,7 +233,7 @@ snmpwalk -v 2c -c public -OentU 127.0.0.1:1161 1.3.6.1.2.1.2.2
 
 ## Generate table simulation data
 
-If you'd like to generate [simulation data for tables](./sim-format.md#tables) automatically, you can use the [`mib2dev.py`](http://snmplabs.com/snmpsim/documentation/building-simulation-data.html?highlight=snmpsim-record-mibs#examples) tool shipped with `snmpsim`. (This tool will be renamed as `snmpsim-record-mibs` in the upcoming 1.0 release of the library.)
+If you'd like to generate [simulation data for tables](./sim-format.md#tables) automatically, you can use the [`mib2dev.py`](https://github.com/etingof/snmpsim/blob/master/docs/source/documentation/building-simulation-data.rst#examples) tool shipped with `snmpsim`. (This tool will be renamed as `snmpsim-record-mibs` in the upcoming 1.0 release of the library.)
 
 First, install snmpsim:
 
