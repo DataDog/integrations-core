@@ -22,7 +22,6 @@ GAUGE_IN_5_RATE_IN_6 = [
 
 def test_check(aggregator, check, instance):
     check.check(instance)
-    metrics_to_check = []
     exclude = []
 
     if common.VARNISH_VERSION.startswith("5"):

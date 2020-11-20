@@ -10,7 +10,7 @@ varnish.backend_reuse,rate,,connection,,Recycled connections that has were reuse
 varnish.backend_toolate,rate,,connection,,Backend connections closed because they were idle too long.,0,varnish,backend toolate
 varnish.backend_unhealthy,rate,,connection,,Backend connections not tried because the backend was unhealthy.,0,varnish,backend unhealthy
 varnish.bans,gauge,,object,,"Bans in system, including bans superseded by newer bans and bans already checked by the ban-lurker. This metric is only provided by varnish >=4.x.",0,varnish,bans
-varnish.bans_added,rate,,object,,Bans added to ban list. This metric is only provided by varnish >=4.x,0,varnish,bans added
+varnish.bans_added,rate,,object,,Bans added to ban list. This metric is only provided by varnish >=4.x.,0,varnish,bans added
 varnish.bans_completed,gauge,,object,,"Bans which are no longer active, either because they got checked by the ban-lurker or superseded by newer identical bans. This metric is only provided by varnish >=4.x.",0,varnish,bans completed
 varnish.bans_deleted,rate,,object,,Bans deleted from ban list. This metric is only provided by varnish >=4.x.,0,varnish,bans deleted
 varnish.bans_dups,rate,,object,,Bans replaced by later identical bans. This metric is only provided by varnish >=4.x.,0,varnish,bans duplicated
@@ -18,7 +18,7 @@ varnish.bans_lurker_contention,rate,,event,,Times the ban-lurker waited for look
 varnish.bans_lurker_obj_killed,rate,,object,,Objects killed by ban-lurker. This metric is only provided by varnish >=4.x.,0,varnish,bans lurker obj killed
 varnish.bans_lurker_obj_killed_cutoff,rate,,object,,Objects killed by ban-lurker for cutoff. This metric is only provided by varnish >=4.x.,0,varnish,bans lurker obj killed
 varnish.bans_lurker_tested,rate,,object,,Bans and objects tested against each other by the ban-lurker. This metric is only provided by varnish >=4.x.,0,varnish,bans lurker tested
-varnish.bans_lurker_tests_tested,rate,,object,,Tests and objects tested against each other by the ban-lurker. 'ban req.url == foo && req.http.host == bar' counts as one in 'bans_tested' and as two in 'bans_tests_tested' This metric is only provided by varnish >=4.x..,0,varnish,bans lurker tests tested
+varnish.bans_lurker_tests_tested,rate,,object,,Tests and objects tested against each other by the ban-lurker. 'ban req.url == foo && req.http.host == bar' counts as one in 'bans_tested' and as two in 'bans_tests_tested'. This metric is only provided by varnish >=4.x.,0,varnish,bans lurker tests tested
 varnish.bans_obj,gauge,,object,,Bans which use obj.* variables. These bans can possibly be washed by the ban-lurker. This metric is only provided by varnish >=4.x.,0,varnish,bans obj
 varnish.bans_obj_killed,rate,,object,,Objects killed by bans during object lookup. This metric is only provided by varnish >=4.x.,0,varnish,bans obj killed
 varnish.bans_persisted_bytes,gauge,,byte,,Bytes used by the persisted ban lists. This metric is only provided by varnish >=4.x.,0,varnish,bans persisted bytes
@@ -45,10 +45,10 @@ varnish.client_req_411,rate,,request,,Requests that were missing a Content-Lengt
 varnish.client_req_413,rate,,request,,Requests that were too big. This metric is only provided by varnish >=4.x.,-1,varnish,client req 413
 varnish.client_req_417,rate,,request,,Requests with a bad Expect: header. This metric is only provided by varnish >=4.x.,-1,varnish,client req 417
 varnish.client_resp_500,rate,,request,,Number of times we failed a response due to running out of workspace memory during delivery. This metric is only available from >=6.x.,-1,varnish,client req 500
-varnish.dir_dns_cache_full,gauge,,event,,DNS director full DNS cache. This metric is only provided by varnish 3.x.,0,varnish,dir dns cache full
-varnish.dir_dns_failed,gauge,,event,,DNS director failed lookup. This metric is only provided by varnish 3.x.,0,varnish,dir dns fail
-varnish.dir_dns_hit,gauge,,event,,DNS director cached lookup hit. This metric is only provided by varnish 3.x.,0,varnish,dir dns hit
-varnish.dir_dns_lookups,gauge,,event,,DNS director lookups. This metric is only provided by varnish 3.x.,0,varnish,dir dns lookups
+varnish.dir_dns_cache_full,rate,,event,,DNS director full DNS cache. This metric is only provided by varnish 3.x.,0,varnish,dir dns cache full
+varnish.dir_dns_failed,rate,,event,,DNS director failed lookup. This metric is only provided by varnish 3.x.,0,varnish,dir dns fail
+varnish.dir_dns_hit,rate,,event,,DNS director cached lookup hit. This metric is only provided by varnish 3.x.,0,varnish,dir dns hit
+varnish.dir_dns_lookups,rate,,event,,DNS director lookups. This metric is only provided by varnish 3.x.,0,varnish,dir dns lookups
 varnish.esi_errors,rate,,event,,Edge Side Includes (ESI) parse errors.,0,varnish,esi errors
 varnish.esi_warnings,rate,,event,,Edge Side Includes (ESI) parse warnings.,0,varnish,esi warnings
 varnish.exp_mailed,rate,,object,,Objects mailed to expiry thread for handling. This metric is only provided by varnish >=4.x.,0,varnish,exp mailed
