@@ -14,7 +14,7 @@ class HAProxyCheck(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if is_affirmative(instance.get('use_prometheus', False)):
-            return super(HAProxyCheck, cls).__new__(cls)
+            return super(HAProxyCheck, cls).__new__(cls, name, init_config, instances)
         else:
             return HAProxyCheckLegacy(name, init_config, instances)
 

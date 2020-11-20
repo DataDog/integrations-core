@@ -7,6 +7,9 @@ from ...errors import CheckException
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
+if not PY2:
+    from .v2.base import OpenMetricsBaseCheckV2
+
 STANDARD_FIELDS = [
     'prometheus_url',
     'namespace',
@@ -59,6 +62,17 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         'ssl_ca_cert': {'name': 'tls_ca_cert'},
         'prometheus_timeout': {'name': 'timeout'},
     }
+
+    def __new__(cls, *args, **kwargs):
+        # Legacy signature
+        if kwargs or len(args) != 3 or not isinstance(args[2], list):
+            return super(OpenMetricsBaseCheck, cls).__new__(cls)
+
+        instance = args[2][0]
+        if not PY2 and 'openmetrics_endpoint' in instance:
+            return OpenMetricsBaseCheckV2(*args, **kwargs)
+        else:
+            return super(OpenMetricsBaseCheck, cls).__new__(cls)
 
     def __init__(self, *args, **kwargs):
         """
