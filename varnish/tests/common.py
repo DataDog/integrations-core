@@ -50,6 +50,7 @@ COMMON_METRICS = [
     "varnish.SMA.s0.c_fail",
     "varnish.SMA.Transient.c_req",
     "varnish.SMA.Transient.c_fail",
+    "varnish.VBE.boot.default.req",
     "varnish.LCK.backend.creat",
     "varnish.LCK.ban.creat",
     "varnish.LCK.ban.locks",
@@ -273,14 +274,15 @@ COMMON_METRICS = [
     "varnish.VBE.boot.default.pipe_hdrbytes",
     "varnish.VBE.boot.default.pipe_in",
     "varnish.VBE.boot.default.pipe_out",
-    "varnish.VBE.boot.default.req",
 ]
 METRICS_5 = [
     "varnish.sess_drop",  # metrics where the "MAIN" prefix was removed
     "varnish.LCK.backend_tcp.creat",
-    "varnish.n_purgesps",
     "varnish.LCK.backend_tcp.destroy",
     "varnish.LCK.backend_tcp.locks",
+    # This is a rate that is artificially emitted with the same value as varnish.n_purges
+    # which is a gauge in versions <=5
+    "varnish.n_purgesps",
 ]
 METRICS_6 = [
     "varnish.sess_dropped",

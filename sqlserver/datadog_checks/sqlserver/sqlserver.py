@@ -9,6 +9,7 @@ import six
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.db import QueryManager
 
 from . import metrics
 from .connection import Connection, SQLConnectionError
@@ -54,6 +55,8 @@ BASE_NAME_QUERY = (
 
 
 class SQLServer(AgentCheck):
+    __NAMESPACE__ = 'sqlserver'
+
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 
     # Default performance table metrics - Database Instance level
@@ -165,7 +168,13 @@ class SQLServer(AgentCheck):
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(list)
         self.do_check = True
+
+        self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
+
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.instance.get("tags", []))
+        self.check_initializations.append(self._query_manager.compile_queries)
 
         self.connection = Connection(init_config, self.instance, self.handle_service_check, self.log)
 
@@ -210,7 +219,7 @@ class SQLServer(AgentCheck):
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
-        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message)
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _make_metric_list_to_collect(self, custom_metrics):
         """
@@ -415,11 +424,10 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
-            proc = self.instance.get('stored_procedure')
-            if proc is None:
-                self.collect_metrics()
+            if self.proc:
+                self.do_stored_procedure_check()
             else:
-                self.do_stored_procedure_check(proc)
+                self.collect_metrics()
         else:
             self.log.debug("Skipping check")
 
@@ -446,7 +454,6 @@ class SQLServer(AgentCheck):
 
                 # Using the cached data, extract and report individual metrics
                 for metric in metrics_to_collect:
-                    # try:
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
                         rows, cols = instance_results['SqlFractionMetric']
@@ -455,14 +462,20 @@ class SQLServer(AgentCheck):
                         rows, cols = instance_results[metric.__class__.__name__]
                         metric.fetch_metric(rows, cols)
 
-                # except Exception as e:
-                #     self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
+            # reuse connection for any custom queries
+            self._query_manager.execute()
 
-    def do_stored_procedure_check(self, proc):
+    def execute_query_raw(self, query):
+        with self.connection.get_managed_cursor() as cursor:
+            cursor.execute(query)
+            return cursor.fetchall()
+
+    def do_stored_procedure_check(self):
         """
         Fetch the metrics from the stored proc
         """
 
+        proc = self.proc
         guardSql = self.instance.get('proc_only_if')
         custom_tags = self.instance.get("tags", [])
 
@@ -488,7 +501,7 @@ class SQLServer(AgentCheck):
                     tags.extend(custom_tags)
 
                     if row.type.lower() in self.proc_type_mapping:
-                        self.proc_type_mapping[row.type](row.metric, row.value, tags)
+                        self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
                     else:
                         self.log.warning(
                             '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric
