@@ -38,10 +38,10 @@ varnish.client_req_400,rate,,request,,Requests that were malformed in some drast
 varnish.client_req_411,rate,,request,,Requests that were missing a Content-Length: header. This metric is only provided by varnish 4.x.,-1,varnish,client req 411
 varnish.client_req_413,rate,,request,,Requests that were too big. This metric is only provided by varnish 4.x.,-1,varnish,client req 413
 varnish.client_req_417,rate,,request,,Requests with a bad Expect: header. This metric is only provided by varnish 4.x.,-1,varnish,client req 417
-varnish.dir_dns.cache_full,rate,,event,,DNS director full DNS cache. This metric is only provided by varnish 3.x.,0,varnish,dir dns cache full
-varnish.dir_d.s_failed,rate,,event,,DNS director failed lookup. This metric is only provided by varnish 3.x.,0,varnish,dir dns fail
-varnish.dir_d.s_hit,rate,,event,,DNS director cached lookup hit. This metric is only provided by varnish 3.x.,0,varnish,dir dns hit
-varnish.dir_d.s_lookups,rate,,event,,DNS director lookups. This metric is only provided by varnish 3.x.,0,varnish,dir dns lookups
+varnish.dir_dns_cache_full,rate,,event,,DNS director full DNS cache. This metric is only provided by varnish 3.x.,0,varnish,dir dns cache full
+varnish.dir_dns_failed,rate,,event,,DNS director failed lookup. This metric is only provided by varnish 3.x.,0,varnish,dir dns fail
+varnish.dir_dns_hit,rate,,event,,DNS director cached lookup hit. This metric is only provided by varnish 3.x.,0,varnish,dir dns hit
+varnish.dir_dns_lookups,rate,,event,,DNS director lookups. This metric is only provided by varnish 3.x.,0,varnish,dir dns lookups
 varnish.esi_errors,rate,,event,,Edge Side Includes (ESI) parse errors.,0,varnish,esi errors
 varnish.esi_warnings,rate,,event,,Edge Side Includes (ESI) parse warnings.,0,varnish,esi warnings
 varnish.exp_mailed,rate,,object,,Objects mailed to expiry thread for handling. This metric is only provided by varnish 4.x.,0,varnish,exp mailed
@@ -292,17 +292,17 @@ varnish.s_resp_bodybytes,rate,,byte,,Total response body bytes transmitted. This
 varnish.s_resp_hdrbytes,rate,,byte,,Total response header bytes transmitted. This metric is only provided by varnish 4.x.,0,varnish,s resp hdrbytes
 varnish.s_sess,rate,,connection,,Client connections.,0,varnish,s sess
 varnish.s_synth,rate,,response,,Synthetic responses made. This metric is only provided by varnish 4.x.,0,varnish,s synth
-varnish.se.s_closed,rate,,connection,,Client connections closed.,0,varnish,sess closed
-varnish.se.s_conn,rate,,connection,,Client connections accepted. This metric is only provided by varnish 4.x.,0,varnish,sess conn
-varnish.se.s_drop,rate,,connection,,Client connections dropped due to lack of worker thread. This metric is only provided by varnish 4.x. and 5.x,-1,varnish,sess drop
-varnish.se.s_dropped,rate,,connection,,Client connections dropped due to a full queue. This metric is only provided by varnish 4.x. and 6.x,-1,varnish,sess dropped
-varnish.se.s_fail,rate,,connection,,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors. This metric is only provided by varnish 4.x.",-1,varnish,sess fail
-varnish.se.s_herd,rate,,connection,,,0,varnish,sess herd
-varnish.se.s_linger,rate,,connection,,This metric is only provided by varnish 3.x.,0,varnish,sess linger
-varnish.se.s_pipe_overflow,rate,,connection,,This metric is only provided by varnish 4.x.,0,varnish,sess pipe overflow
-varnish.se.s_pipeline,rate,,connection,,,0,varnish,sess pipeline
-varnish.se.s_queued,rate,,connection,,Client connections queued to wait for a thread. This metric is only provided by varnish 4.x.,-1,varnish,sess queued
-varnish.se.s_readahead,rate,,connection,,,0,varnish,sess readahead
+varnish.sess_closed,rate,,connection,,Client connections closed.,0,varnish,sess closed
+varnish.sess_conn,rate,,connection,,Client connections accepted. This metric is only provided by varnish 4.x.,0,varnish,sess conn
+varnish.sess_drop,rate,,connection,,Client connections dropped due to lack of worker thread. This metric is only provided by varnish 4.x. and 5.x,-1,varnish,sess drop
+varnish.sess_dropped,rate,,connection,,Client connections dropped due to a full queue. This metric is only provided by varnish 4.x. and 6.x,-1,varnish,sess dropped
+varnish.sess_fail,rate,,connection,,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors. This metric is only provided by varnish 4.x.",-1,varnish,sess fail
+varnish.sess_herd,rate,,connection,,,0,varnish,sess herd
+varnish.sess_linger,rate,,connection,,This metric is only provided by varnish 3.x.,0,varnish,sess linger
+varnish.sess_pipe_overflow,rate,,connection,,This metric is only provided by varnish 4.x.,0,varnish,sess pipe overflow
+varnish.sess_pipeline,rate,,connection,,,0,varnish,sess pipeline
+varnish.sess_queued,rate,,connection,,Client connections queued to wait for a thread. This metric is only provided by varnish 4.x.,-1,varnish,sess queued
+varnish.sess_readahead,rate,,connection,,,0,varnish,sess readahead
 varnish.shm_cont,rate,,event,,SHM MTX contention.,0,varnish,shm cont
 varnish.shm_cycles,rate,,event,,SHM cycles through buffer.,0,varnish,shm cycles
 varnish.shm_flushes,rate,,event,,SHM flushes due to overflow.,0,varnish,shm flushes
@@ -322,17 +322,17 @@ varnish.SMA.Transient.c_req,rate,,event,,Times the storage has been asked to pro
 varnish.SMA.Transient.g_alloc,gauge,,event,,Storage allocations outstanding.,0,varnish,SMA Transient g alloc
 varnish.SMA.Transient.g_bytes,gauge,,byte,,Space allocated from the storage.,0,varnish,SMA Transient g bytes
 varnish.SMA.Transient.g_space,gauge,,byte,,Space left in the storage.,0,varnish,SMA Transient g space
-varnish.s.s_balloc,rate,,byte,,SMS space allocated.,0,varnish,sms balloc
-varnish.s.s_bfree,rate,,byte,,SMS space freed.,0,varnish,sms bfree
-varnish.s.s_nbytes,rate,,byte,,SMS outstanding space.,0,varnish,sms nbytes
-varnish.s.s_nobj,rate,,event,,SMS outstanding allocations.,0,varnish,sms nobj
-varnish.s.s_nreq,rate,,event,,SMS allocator requests.,0,varnish,sms nreq
+varnish.sms_balloc,rate,,byte,,SMS space allocated.,0,varnish,sms balloc
+varnish.sms_bfree,rate,,byte,,SMS space freed.,0,varnish,sms bfree
+varnish.sms_nbytes,rate,,byte,,SMS outstanding space.,0,varnish,sms nbytes
+varnish.sms_nobj,rate,,event,,SMS outstanding allocations.,0,varnish,sms nobj
+varnish.sms_nreq,rate,,event,,SMS allocator requests.,0,varnish,sms nreq
 varnish.thread_queue_len,gauge,,connection,,Length of session queue waiting for threads. This metric is only provided by varnish 4.x.,0,varnish,thread queue len
 varnish.threads,gauge,,thread,,Number of threads. This metric is only provided by varnish 4.x.,0,varnish,threads
-varnish.threa.s_created,rate,,thread,,Threads created. This metric is only provided by varnish 4.x.,0,varnish,threads created
-varnish.threa.s_destroyed,rate,,thread,,Threads destroyed. This metric is only provided by varnish 4.x.,0,varnish,threads destroyed
-varnish.threa.s_failed,rate,,thread,,Threads that failed to get created. This metric is only provided by varnish 4.x.,-1,varnish,threads failed
-varnish.threa.s_limited,rate,,thread,,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish 4.x.,-1,varnish,threads limited
+varnish.threads_created,rate,,thread,,Threads created. This metric is only provided by varnish 4.x.,0,varnish,threads created
+varnish.threads_destroyed,rate,,thread,,Threads destroyed. This metric is only provided by varnish 4.x.,0,varnish,threads destroyed
+varnish.threads_failed,rate,,thread,,Threads that failed to get created. This metric is only provided by varnish 4.x.,-1,varnish,threads failed
+varnish.threads_limited,rate,,thread,,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish 4.x.,-1,varnish,threads limited
 varnish.uptime,rate,,second,,,0,varnish,uptime
 varnish.vmods,gauge,,object,,Loaded VMODs. This metric is only provided by varnish 4.x.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm cooling
