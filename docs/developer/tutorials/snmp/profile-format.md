@@ -311,8 +311,8 @@ metrics:
 
 ##### Mapping index to tag string value
 
-You can use the following syntax to map index to tags string value.
-In the example below, the metrics will be `snmp.ipSystemStatsHCInReceives` with tags like `ipversion:ipv6`.
+You can use the following syntax to map indexes to tag string values.
+In the example below, the submitted metrics will be `snmp.ipSystemStatsHCInReceives` with tags like `ipversion:ipv6`.
 
 
 ```yaml
