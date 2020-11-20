@@ -1,0 +1,41 @@
+{
+  "display_name": "SonarQube",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "sonarqube",
+  "metric_prefix": "sonarqube.",
+  "metric_to_check": "sonarqube.server.database.pool_active_connections",
+  "creates_events": false,
+  "short_description": "Monitor your SonarQube server and projects.",
+  "guid": "ce089575-93bf-47f0-80b6-ffaf6e34722c",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "SonarQube",
+  "categories": [
+    "security",
+    "issue tracking",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "sonarqube",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {
+      "status_overview": "assets/saved_views/status_overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "sonarqube"
+    },
+    "metrics_metadata": "metadata.csv"
+  }
+}

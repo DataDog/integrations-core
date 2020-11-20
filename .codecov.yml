@@ -435,6 +435,10 @@ coverage:
         target: 75
         flags:
         - snowflake
+      SonarQube:
+        target: 75
+        flags:
+        - sonarqube
       Spark:
         target: 75
         flags:
@@ -1059,6 +1063,11 @@ flags:
     paths:
     - snowflake/datadog_checks/snowflake
     - snowflake/tests
+  sonarqube:
+    carryforward: true
+    paths:
+    - sonarqube/datadog_checks/sonarqube
+    - sonarqube/tests
   spark:
     carryforward: true
     paths:

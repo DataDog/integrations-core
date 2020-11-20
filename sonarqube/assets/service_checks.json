@@ -1,0 +1,32 @@
+[
+    {
+        "agent_version": "7.25.0",
+        "integration": "SonarQube",
+        "groups": [
+            "host",
+            "instance"
+        ],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "check": "sonarqube.can_connect",
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SonarQube instance's JMX endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.25.0",
+        "integration": "SonarQube",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "check": "sonarqube.api_access",
+        "name": "API Access",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SonarQube instance's web endpoint, otherwise returns `OK`."
+    }
+]
