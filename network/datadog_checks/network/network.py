@@ -61,7 +61,7 @@ class Network(AgentCheck):
             )
 
         self._collect_cx_state = instance.get('collect_connection_state', False)
-        self._collect_cx_queues = instance.get('collect_connection_queues', True)
+        self._collect_cx_queues = instance.get('collect_connection_queues', False)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
 
