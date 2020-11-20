@@ -1,7 +1,8 @@
 version: '3.5'
 services:
+
   varnish:
-    image: varnish:6.5.1
+    image: datadog/docker-library:varnish_5_2_1
     container_name: ci_varnish
     ports:
     - "80"
