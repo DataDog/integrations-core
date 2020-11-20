@@ -52,9 +52,8 @@ def test_custom_queries_missing_stat_in_payload(instance, check):
 
 def test_custom_query_validation(check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
-        with pytest.raises(ConfigurationError) as e:
+        with pytest.raises(ConfigurationError, match='missing required field') as e:
             IbmWasCheck('ibm_was', {}, [common.MALFORMED_CUSTOM_QUERY_INSTANCE])
-            assert "missing required field" in str(e)
 
 
 def test_custom_query_unit(aggregator, instance, check):
