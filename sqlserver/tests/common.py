@@ -53,6 +53,7 @@ INSTANCE_DOCKER = {
     'include_task_scheduler_metrics': True,
     'include_db_fragmentation_metrics': True,
     'include_fci_metrics': True,
+    'include_ao_metrics': False,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
