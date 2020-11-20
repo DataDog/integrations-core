@@ -333,7 +333,7 @@ varnish.threads_created,gauge,,thread,,Threads created. This metric is only prov
 varnish.threads_destroyed,gauge,,thread,,Threads destroyed. This metric is only provided by varnish 4.x.,0,varnish,threads destroyed
 varnish.threads_failed,gauge,,thread,,Threads that failed to get created. This metric is only provided by varnish 4.x.,-1,varnish,threads failed
 varnish.threads_limited,gauge,,thread,,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish 4.x.,-1,varnish,threads limited
-varnish.uptime,gauge,,,,,0,varnish,uptime
+varnish.uptime,gauge,,second,,,0,varnish,uptime
 varnish.vmods,gauge,,object,,Loaded VMODs. This metric is only provided by varnish 4.x.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm cooling
 varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm free
