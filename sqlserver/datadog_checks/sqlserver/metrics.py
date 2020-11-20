@@ -542,6 +542,11 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
+        # report dummy metric
+        metric_name = '{}'.format(self.datadog_name)
+        column_val = 10
+        self.report_function(metric_name, column_val, tags=self.tags)
+
 
 # sys.dm_db_index_physical_stats
 #

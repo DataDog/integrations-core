@@ -289,6 +289,7 @@ class SQLServer(AgentCheck):
 
         # Load FCI metrics
         if True:
+            self.log.warning("Loading FCI metrics")
             for name, table, column in self.FCI_METRICS:
                 cfg = {
                     'name': name,
