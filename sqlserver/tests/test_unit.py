@@ -26,6 +26,7 @@ def test_get_cursor(instance_sql2017):
     connection pool is empty or the params for `get_cursor` are invalid.
     """
     check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
+    check.initialize_connection()
     with pytest.raises(SQLConnectionError):
         check.connection.get_cursor('foo')
 
@@ -36,10 +37,12 @@ def test_missing_db(instance_sql2017):
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         with pytest.raises(ConfigurationError):
             check = SQLServer(CHECK_NAME, {}, [instance])
+            check.initialize_connection()
 
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
+        check.initialize_connection()
         assert check.do_check is False
 
 
@@ -67,7 +70,7 @@ def test_set_default_driver_conf():
 @windows_ci
 def test_check_local(aggregator, init_config, instance_sql2017):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
-    sqlserver_check.check(instance_sql2017)
+    sqlserver_check.run()
     expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
@@ -79,6 +82,6 @@ def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovide
     instance['adoprovider'] = adoprovider
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
-    sqlserver_check.check(instance)
+    sqlserver_check.run()
     expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)

@@ -6,7 +6,7 @@ from copy import copy, deepcopy
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.sqlserver import SQLConnectionError
+from datadog_checks.sqlserver.connection import SQLConnectionError
 
 from .common import CHECK_NAME, CUSTOM_QUERY_A, CUSTOM_QUERY_B, assert_metrics
 from .utils import not_windows_ci
@@ -26,9 +26,9 @@ def test_check_invalid_password(aggregator, init_config, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
 
-    with pytest.raises(SQLConnectionError) as excinfo:
+    with pytest.raises(SQLConnectionError):
+        sqlserver_check.initialize_connection()
         sqlserver_check.check(instance_docker)
-        assert excinfo.value.args[0] == 'Unable to connect to SQL Server'
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
@@ -38,7 +38,7 @@ def test_check_invalid_password(aggregator, init_config, instance_docker):
 
 def test_check_docker(aggregator, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    sqlserver_check.check(instance_docker)
+    sqlserver_check.run()
     expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
@@ -115,7 +115,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     load_stored_procedure(instance_pass, proc, sp_tags)
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_pass])
-    sqlserver_check.check(instance_docker)
+    sqlserver_check.run()
 
     expected_tags = instance_pass.get('tags', []) + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
@@ -134,7 +134,7 @@ def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker
     load_stored_procedure(instance_fail, proc, sp_tags)
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_fail])
-    sqlserver_check.check(instance_fail)
+    sqlserver_check.run()
 
     # apply a proc check that will never fail and assert that the metrics remain unchanged
     assert len(aggregator._metrics) == 0
@@ -143,7 +143,7 @@ def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker
 def test_custom_metrics_object_name(aggregator, init_config_object_name, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
-    sqlserver_check.check(instance_docker)
+    sqlserver_check.run()
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
@@ -154,7 +154,7 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
     instance['include_task_scheduler_metrics'] = False
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance])
-    sqlserver_check.check(instance_docker)
+    sqlserver_check.run()
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)
     aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=['optional:tag1'], count=1)
@@ -166,7 +166,7 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
     )
 
     # check a second time for io metrics to be processed
-    sqlserver_check.check(instance_docker)
+    sqlserver_check.run()
 
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads')
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
