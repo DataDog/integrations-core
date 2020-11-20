@@ -294,8 +294,8 @@ varnish.s_sess,gauge,,connection,second,Client connections.,0,varnish,s sess
 varnish.s_synth,gauge,,response,second,Synthetic responses made. This metric is only provided by varnish 4.x.,0,varnish,s synth
 varnish.sess_closed,gauge,,connection,second,Client connections closed.,0,varnish,sess closed
 varnish.sess_conn,gauge,,connection,second,Client connections accepted. This metric is only provided by varnish 4.x.,0,varnish,sess conn
-varnish.sess_drop,gauge,,connection,second,Client connections dropped due to lack of worker thread. This metric is only provided by varnish 4.x.,-1,varnish,sess drop
-varnish.sess_dropped,gauge,,connection,second,Client connections dropped due to a full queue. This metric is only provided by varnish 4.x.,-1,varnish,sess dropped
+varnish.sess_drop,gauge,,connection,second,Client connections dropped due to lack of worker thread. This metric is only provided by varnish 4.x. and 5.x,-1,varnish,sess drop
+varnish.sess_dropped,gauge,,connection,second,Client connections dropped due to a full queue. This metric is only provided by varnish 4.x. and 6.x,-1,varnish,sess dropped
 varnish.sess_fail,gauge,,connection,second,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors. This metric is only provided by varnish 4.x.",-1,varnish,sess fail
 varnish.sess_herd,gauge,,connection,second,,0,varnish,sess herd
 varnish.sess_linger,gauge,,connection,second,This metric is only provided by varnish 3.x.,0,varnish,sess linger
@@ -340,4 +340,4 @@ varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communica
 varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm overflow
 varnish.vsm_overflowed,gauge,,byte,second,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm used
-varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish 4.x.,0,varnish,n purges
+varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish 4.x. and 5.x,0,varnish,n purges

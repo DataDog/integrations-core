@@ -27,7 +27,11 @@ def check():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    varnish_version = os.getenv("VARNISH_VERSION")
+    if varnish_version.startswith("5"):
+        compose_file = os.path.join(common.HERE, 'compose', 'docker-compose-4-5.yaml')
+    else:
+        compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     with docker_run(compose_file, log_patterns=[r'Child \(\d+\) Started', r'Child \(\d+\) said Child starts'], sleep=2):
         yield common.get_config_by_version(), E2E_METADATA
 
