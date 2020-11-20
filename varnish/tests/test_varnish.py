@@ -29,7 +29,6 @@ def test_check(aggregator, check, instance):
     else:
         exclude = GAUGE_IN_5_RATE_IN_6
         metrics_to_check = common.COMMON_METRICS + common.METRICS_6
-
     for mname in metrics_to_check:
         aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
