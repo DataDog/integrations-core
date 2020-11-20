@@ -80,7 +80,6 @@ def test_config_validation(check, dd_run_check):
     with pytest.raises(Exception, match='Please specify a servlet_url in the configuration file') as e:
         check = IbmWasCheck('ibm_was', {}, [common.MISSING_REQ_FIELD_INSTANCE])
         dd_run_check(check, extract_message=True)
-        assert "Please specify a servlet_url" in str(e)
 
 
 def test_critical_service_check(instance, check, aggregator):
