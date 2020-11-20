@@ -285,7 +285,6 @@ METRICS_5 = [
     "varnish.n_purgesps",
 ]
 METRICS_6 = [
-    "varnish.sess_dropped",
     "varnish.LCK.backend.dbg_busy",
     "varnish.LCK.tcp_pool.creat",
     "varnish.LCK.tcp_pool.destroy",
