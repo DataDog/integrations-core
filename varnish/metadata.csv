@@ -240,7 +240,7 @@ varnish.MGT.child_exit,gauge,,process,,Child processes the were cleanly stopped.
 varnish.MGT.child_panic,gauge,,process,,Child processes that panicked. This metric is only provided by varnish 4.x.,0,varnish,mgt child panic
 varnish.MGT.child_start,gauge,,process,,Child processes that started. This metric is only provided by varnish 4.x.,0,varnish,mgt child start
 varnish.MGT.child_stop,gauge,,process,,Child processes that exited with an unexpected return code. This metric is only provided by varnish 4.x.,0,varnish,mgt child stop
-varnish.MGT.uptime,gauge,,,,This metric is only provided by varnish 4.x.,0,varnish,mgt uptime
+varnish.MGT.uptime,gauge,,second,,This metric is only provided by varnish 4.x.,0,varnish,mgt uptime
 varnish.n_backend,gauge,,,,Number of backends.,0,varnish,n backend
 varnish.n_ban,gauge,,object,,Active bans. This metric is only provided by varnish 3.x.,0,varnish,n ban
 varnish.n_ban_add,gauge,,object,,New bans added. This metric is only provided by varnish 3.x.,0,varnish,n ban add
@@ -333,7 +333,7 @@ varnish.threads_created,gauge,,thread,,Threads created. This metric is only prov
 varnish.threads_destroyed,gauge,,thread,,Threads destroyed. This metric is only provided by varnish 4.x.,0,varnish,threads destroyed
 varnish.threads_failed,gauge,,thread,,Threads that failed to get created. This metric is only provided by varnish 4.x.,-1,varnish,threads failed
 varnish.threads_limited,gauge,,thread,,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish 4.x.,-1,varnish,threads limited
-varnish.uptime,gauge,,,,,0,varnish,uptime
+varnish.uptime,gauge,,second,,,0,varnish,uptime
 varnish.vmods,gauge,,object,,Loaded VMODs. This metric is only provided by varnish 4.x.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm cooling
 varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm free
