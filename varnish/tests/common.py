@@ -64,8 +64,13 @@ COMMON_METRICS = [
     "varnish.LCK.vcl.destroy",
     "varnish.LCK.vcl.locks",
     "varnish.n_purges",
+]
+METRICS_5 = [
+    "varnish.sess_drop",  # metrics where the "MAIN" prefix was removed
+    "varnish.LCK.backend_tcp.creat",
     "varnish.n_purgesps",
 ]
+METRICS_6 = ["varnish.sess_dropped", "varnish.LCK.tcp_pool.creat"]  # metrics where the "MAIN" prefix was removed
 
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
