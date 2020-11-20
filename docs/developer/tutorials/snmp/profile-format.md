@@ -309,6 +309,36 @@ metrics:
         index: 1
 ```
 
+##### Mapping index to tag string value
+
+You can use the following syntax to map index to tags string value.
+In the example below, the metrics will be `snmp.ipSystemStatsHCInReceives` with tags like `ipversion:ipv6`.
+
+
+```yaml
+metrics:
+- MIB: IP-MIB
+  table:
+    OID: 1.3.6.1.2.1.4.31.1
+    name: ipSystemStatsTable
+  forced_type: monotonic_count
+  symbols:
+  - OID: 1.3.6.1.2.1.4.31.1.1.4
+    name: ipSystemStatsHCInReceives
+  metric_tags:
+  - index: 1
+    tag: ipversion
+    mapping:
+      0: unknown
+      1: ipv4
+      2: ipv6
+      3: ipv4z
+      4: ipv6z
+      16: dns
+```
+
+##### Tagging tips
+
 !!! note
     General guidelines on [Datadog tagging](https://docs.datadoghq.com/tagging/) also apply to table metric tags.
 
