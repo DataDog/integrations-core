@@ -1291,38 +1291,50 @@ def test_cisco_asa_5525(aggregator):
 
 
 def assert_cisco_asa(aggregator, profile):
+
     run_profile_check(profile)
+
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
         'snmp_host:kept',
         'device_vendor:cisco',
     ]
+
     common.assert_common_metrics(aggregator, common_tags)
+
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
+
     for metric in TCP_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
     for metric in UDP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
+
     if_tags = ['interface:eth0'] + common_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
         )
+
     for metric in IF_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
     for metric in IF_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
     aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
+
     frus = [3, 4, 5, 7, 16, 17, 24, 25]
     for fru in frus:
         tags = ['fru:{}'.format(fru)] + common_tags
         for metric in FRU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
     cpus = [7746]
     for cpu in cpus:
         tags = ['cpu:{}'.format(cpu)] + common_tags
@@ -1330,6 +1342,7 @@ def assert_cisco_asa(aggregator, profile):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     sensor_tags = ['sensor_id:31', 'sensor_type:9'] + common_tags
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+
     stat_tags = [(20, 2), (5, 5)]
     for (svc, stat) in stat_tags:
         aggregator.assert_metric(
@@ -1337,6 +1350,7 @@ def assert_cisco_asa(aggregator, profile):
             metric_type=aggregator.GAUGE,
             tags=['stat_type:{}'.format(stat), 'service_type:{}'.format(svc)] + common_tags,
         )
+
     aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.crasNumSessions', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.crasNumUsers', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -1346,34 +1360,42 @@ def assert_cisco_asa(aggregator, profile):
     aggregator.assert_metric('snmp.cipSecGlobalActiveTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+
     for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
             tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
+
     power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
     aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
+
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
         aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
+
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
         'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
+
     frus = [2, 7, 8, 21, 26, 27, 30, 31]
     for fru in frus:
         tags = ['fru:{}'.format(fru)] + common_tags
         aggregator.assert_metric(
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
+
     for metrics in MEMORY_METRICS:
         tags = ['mem_pool_name:test_pool'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+
     for conn in [1, 2, 5]:
         conn_tags = ['connection_type:{}'.format(conn)] + common_tags
         aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.RATE, tags=conn_tags)
+
     hardware_tags = [(3, 'Secondary unit'), (5, 'Primary unit'), (6, 'Failover LAN Interface')]
     for (htype, hdesc) in hardware_tags:
         aggregator.assert_metric(
@@ -1381,6 +1403,7 @@ def assert_cisco_asa(aggregator, profile):
             metric_type=aggregator.GAUGE,
             tags=['hardware_type:{}'.format(htype), 'hardware_desc:{}'.format(hdesc)] + common_tags,
         )
+
     for switch in [4684, 4850, 8851, 9997, 15228, 16580, 24389, 30813, 36264]:
         aggregator.assert_metric(
             'snmp.cvsChassisUpTime',
@@ -1388,6 +1411,7 @@ def assert_cisco_asa(aggregator, profile):
             tags=['chassis_switch_id:{}'.format(switch)] + common_tags,
         )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
     # RTT
     rtt_indexes = [1, 7, 10, 13, 15, 18, 20]
     rtt_types = [22, 21, 17, 6, 20, 8, 16]
@@ -1401,6 +1425,7 @@ def assert_cisco_asa(aggregator, profile):
         ] + common_tags
         for rtt in rtt_gauges:
             aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
+
     aggregator.assert_all_metrics_covered()
 
 
