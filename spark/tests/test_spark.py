@@ -431,6 +431,7 @@ YARN_CONFIG = {
     'spark_url': 'http://localhost:8088',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_yarn_mode',
+    'executor_level_metrics': True,
     'tags': list(CUSTOM_TAGS),
 }
 
@@ -438,6 +439,7 @@ YARN_AUTH_CONFIG = {
     'spark_url': 'http://localhost:8088',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_yarn_mode',
+    'executor_level_metrics': True,
     'tags': list(CUSTOM_TAGS),
     'username': TEST_USERNAME,
     'password': TEST_PASSWORD,
@@ -447,6 +449,7 @@ MESOS_CONFIG = {
     'spark_url': 'http://localhost:5050',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_mesos_mode',
+    'executor_level_metrics': True,
     'tags': list(CUSTOM_TAGS),
 }
 
@@ -454,6 +457,7 @@ MESOS_FILTERED_CONFIG = {
     'spark_url': 'http://localhost:5050',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_mesos_mode',
+    'executor_level_metrics': True,
     'spark_ui_ports': [1234],
 }
 
@@ -461,6 +465,7 @@ DRIVER_CONFIG = {
     'spark_url': 'http://localhost:4040',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_driver_mode',
+    'executor_level_metrics': True,
     'tags': list(CUSTOM_TAGS),
 }
 
@@ -468,21 +473,29 @@ STANDALONE_CONFIG = {
     'spark_url': 'http://localhost:8080',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
+    'executor_level_metrics': True,
 }
 
 STANDALONE_CONFIG_PRE_20 = {
     'spark_url': 'http://localhost:8080',
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
+    'executor_level_metrics': True,
     'spark_pre_20_mode': 'true',
 }
 
-SSL_CONFIG = {'spark_url': SSL_SERVER_URL, 'cluster_name': CLUSTER_NAME, 'spark_cluster_mode': 'spark_standalone_mode'}
+SSL_CONFIG = {
+    'spark_url': SSL_SERVER_URL,
+    'cluster_name': CLUSTER_NAME,
+    'spark_cluster_mode': 'spark_standalone_mode',
+    'executor_level_metrics': True,
+}
 
 SSL_NO_VERIFY_CONFIG = {
     'spark_url': SSL_SERVER_URL,
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
+    'executor_level_metrics': True,
     'ssl_verify': False,
 }
 
@@ -491,6 +504,7 @@ SSL_CERT_CONFIG = {
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
     'ssl_verify': os.path.join(CERTIFICATE_DIR, 'cert.cert'),
+    'executor_level_metrics': True,
 }
 
 SPARK_JOB_RUNNING_METRIC_VALUES = {
@@ -618,6 +632,27 @@ SPARK_EXECUTOR_METRIC_VALUES = {
     'spark.executor.max_memory': 555755765,
 }
 
+SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
+    'spark.executor.id.rdd_blocks': 1,
+    'spark.executor.id.memory_used': 2,
+    'spark.executor.id.disk_used': 3,
+    'spark.executor.id.active_tasks': 4,
+    'spark.executor.id.failed_tasks': 5,
+    'spark.executor.id.completed_tasks': 6,
+    'spark.executor.id.total_tasks': 7,
+    'spark.executor.id.total_duration': 8,
+    'spark.executor.id.total_input_bytes': 9,
+    'spark.executor.id.total_shuffle_read': 10,
+    'spark.executor.id.total_shuffle_write': 11,
+    'spark.executor.id.max_memory': 555755765,
+}
+
+SPARK_EXECUTOR_LEVEL_METRIC_TAGS = [
+    'cluster_name:' + CLUSTER_NAME,
+    'app_name:' + APP_NAME,
+    'executor_id:1',
+]
+
 SPARK_RDD_METRIC_VALUES = {
     'spark.rdd.count': 1,
     'spark.rdd.num_partitions': 2,
@@ -667,7 +702,11 @@ def test_yarn(aggregator):
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
-        # Check the executor metrics
+        # Check the executor level metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
@@ -741,7 +780,11 @@ def test_mesos(aggregator):
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
-        # Check the executor metrics
+        # Check the executor level metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
@@ -811,7 +854,11 @@ def test_driver_unit(aggregator):
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
-        # Check the executor metrics
+        # Check the executor level metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
@@ -872,6 +919,10 @@ def test_standalone_unit(aggregator):
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
+        # Check the executor level metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
+
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
@@ -926,7 +977,11 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
-        # Check the executor metrics
+        # Check the executor level metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
+
+        # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
@@ -980,7 +1035,11 @@ def test_standalone_pre20(aggregator):
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
-        # Check the executor metrics
+        # Check the executor level metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
+
+        # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
