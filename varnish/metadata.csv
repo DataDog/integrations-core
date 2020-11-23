@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-varnish.accept_fail,gauge,,connection,,Accept failures. This metric is only provided by varnish 3.x.,0,varnish,accept fail
+varnish.accept_fail,gauge,,connection,second,Accept failures. This metric is only provided by varnish 3.x.,0,varnish,accept fail
 varnish.backend_busy,gauge,,connection,second,Maximum number of connections to a given backend.,0,varnish,backend busy
 varnish.backend_conn,gauge,,connection,second,Successful connections to a given backend.,0,varnish,backend conn
 varnish.backend_fail,gauge,,connection,second,Failed connections for a given backend.,0,varnish,backend fail
@@ -30,9 +30,9 @@ varnish.busy_wakeup,gauge,,request,second,Requests taken off the busy object sle
 varnish.cache_hit,gauge,,request,second,Requests served from the cache.,0,varnish,hit
 varnish.cache_hitpass,gauge,,request,second,Requests passed to a backend where the decision to pass them found in the cache.,0,varnish,hitpass
 varnish.cache_miss,gauge,,request,second,Requests fetched from a backend server.,0,varnish,miss
-varnish.client_conn,gauge,,connection,,Client connections accepted. This metric is only provided by varnish 3.x.,0,varnish,client conn
-varnish.client_drop,gauge,,connection,,"Client connection dropped, no session. This metric is only provided by varnish 3.x.",0,varnish,client drop
-varnish.client_drop_late,gauge,,connection,,Client connection dropped late. This metric is only provided by varnish 3.x.,0,varnish,client drop late
+varnish.client_conn,gauge,,connection,second,Client connections accepted. This metric is only provided by varnish 3.x.,0,varnish,client conn
+varnish.client_drop,gauge,,connection,second,"Client connection dropped, no session. This metric is only provided by varnish 3.x.",0,varnish,client drop
+varnish.client_drop_late,gauge,,connection,second,Client connection dropped late. This metric is only provided by varnish 3.x.,0,varnish,client drop late
 varnish.client_req,gauge,,request,second,Parseable client requests seen.,0,varnish,client req
 varnish.client_req_400,gauge,,request,second,Requests that were malformed in some drastic way. This metric is only provided by varnish >=4.x.,-1,varnish,client req 400
 varnish.client_req_411,gauge,,request,second,Requests that were missing a Content-Length: header. This metric is only provided by varnish >=4.x.,-1,varnish,client req 411
@@ -62,42 +62,42 @@ varnish.fetch_zero,gauge,,response,second,Number of responses that have zero len
 varnish.hcb_insert,gauge,,event,second,HCB inserts.,0,varnish,HCB insert
 varnish.hcb_lock,gauge,,event,second,HCB lookups with lock.,0,varnish,HCB lock
 varnish.hcb_nolock,gauge,,event,second,HCB lookups without lock.,0,varnish,HCB nolock
-varnish.LCK.backend.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,backend colls
+varnish.LCK.backend.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,backend colls
 varnish.LCK.backend.creat,gauge,,lock,second,Created locks.,0,varnish,backend create
 varnish.LCK.backend.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,backend destroy
 varnish.LCK.backend.locks,gauge,,lock,second,Lock operations.,0,varnish,backend locks
-varnish.LCK.ban.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,ban colls
+varnish.LCK.ban.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,ban colls
 varnish.LCK.ban.creat,gauge,,lock,second,Created locks.,0,varnish,ban create
 varnish.LCK.ban.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,ban destroy
 varnish.LCK.ban.locks,gauge,,lock,second,Lock operations.,0,varnish,ban locks
 varnish.LCK.busyobj.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish >=4.x.,0,varnish,busyobj create
 varnish.LCK.busyobj.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish >=4.x.,0,varnish,busyobj destroy
 varnish.LCK.busyobj.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish >=4.x.,0,varnish,busyobj locks
-varnish.LCK.cli.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,cli colls
+varnish.LCK.cli.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,cli colls
 varnish.LCK.cli.creat,gauge,,lock,second,Created locks.,0,varnish,cli create
 varnish.LCK.cli.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,cli destroy
 varnish.LCK.cli.locks,gauge,,lock,second,Lock operations.,0,varnish,cli locks
-varnish.LCK.exp.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,exp colls
+varnish.LCK.exp.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,exp colls
 varnish.LCK.exp.creat,gauge,,lock,second,Created locks.,0,varnish,exp create
 varnish.LCK.exp.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,exp destroy
 varnish.LCK.exp.locks,gauge,,lock,second,Lock operations.,0,varnish,exp locks
-varnish.LCK.hcb.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hcb colls
+varnish.LCK.hcb.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hcb colls
 varnish.LCK.hcb.creat,gauge,,lock,second,Created locks.,0,varnish,hcb create
 varnish.LCK.hcb.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,hcb destroy
 varnish.LCK.hcb.locks,gauge,,lock,second,Lock operations.,0,varnish,hcb locks
-varnish.LCK.hcl.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hcl colls
+varnish.LCK.hcl.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hcl colls
 varnish.LCK.hcl.creat,gauge,,lock,second,Created locks.,0,varnish,hcl create
 varnish.LCK.hcl.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,hcl destroy
 varnish.LCK.hcl.locks,gauge,,lock,second,Lock operations.,0,varnish,hcl locks
-varnish.LCK.herder.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,herder colls
+varnish.LCK.herder.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,herder colls
 varnish.LCK.herder.creat,gauge,,lock,second,Created locks.,0,varnish,herder create
 varnish.LCK.herder.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,herder destroy
 varnish.LCK.herder.locks,gauge,,lock,second,Lock operations.,0,varnish,herder locks
-varnish.LCK.hsl.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hsl colls
+varnish.LCK.hsl.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,hsl colls
 varnish.LCK.hsl.creat,gauge,,lock,second,Created locks.,0,varnish,hsl create
 varnish.LCK.hsl.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,hsl destroy
 varnish.LCK.hsl.locks,gauge,,lock,second,Lock operations.,0,varnish,hsl locks
-varnish.LCK.lru.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,lru colls
+varnish.LCK.lru.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,lru colls
 varnish.LCK.lru.creat,gauge,,lock,second,Created locks.,0,varnish,lru create
 varnish.LCK.lru.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,lru destroy
 varnish.LCK.lru.locks,gauge,,lock,second,Lock operations.,0,varnish,lru locks
@@ -107,7 +107,7 @@ varnish.LCK.mempool.locks,gauge,,lock,second,Lock operations. This metric is onl
 varnish.LCK.nbusyobj.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish >=4.x.,0,varnish,nbusyobj create
 varnish.LCK.nbusyobj.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish >=4.x.,0,varnish,nbusyobj destroy
 varnish.LCK.nbusyobj.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish >=4.x.,0,varnish,nbusyobj locks
-varnish.LCK.objhdr.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,objhdr colls
+varnish.LCK.objhdr.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,objhdr colls
 varnish.LCK.objhdr.creat,gauge,,lock,second,Created locks.,0,varnish,objhdr create
 varnish.LCK.objhdr.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,objhdr destroy
 varnish.LCK.objhdr.locks,gauge,,lock,second,Lock operations.,0,varnish,objhdr locks
@@ -117,53 +117,53 @@ varnish.LCK.pipestat.locks,gauge,,lock,second,Lock operations. This metric is on
 varnish.LCK.sess.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish >=4.x.,0,varnish,sess create
 varnish.LCK.sess.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish >=4.x.,0,varnish,sess destroy
 varnish.LCK.sess.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish >=4.x.,0,varnish,sess locks
-varnish.LCK.sessmem.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sessmem colls
+varnish.LCK.sessmem.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sessmem colls
 varnish.LCK.sessmem.creat,gauge,,lock,second,Created locks.,0,varnish,sessmem create
 varnish.LCK.sessmem.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,sessmem destroy
 varnish.LCK.sessmem.locks,gauge,,lock,second,Lock operations.,0,varnish,sessmem locks
-varnish.LCK.sma.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sma colls
+varnish.LCK.sma.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sma colls
 varnish.LCK.sma.creat,gauge,,lock,second,Created locks.,0,varnish,sma create
 varnish.LCK.sma.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,sma destroy
 varnish.LCK.sma.locks,gauge,,lock,second,Lock operations.,0,varnish,sma locks
-varnish.LCK.smf.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,smf colls
+varnish.LCK.smf.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,smf colls
 varnish.LCK.smf.creat,gauge,,lock,second,Created locks.,0,varnish,smf create
 varnish.LCK.smf.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,smf destroy
 varnish.LCK.smf.locks,gauge,,lock,second,Lock operations.,0,varnish,smf locks
-varnish.LCK.smp.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,smp colls
+varnish.LCK.smp.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,smp colls
 varnish.LCK.smp.creat,gauge,,lock,second,Created locks.,0,varnish,smp create
 varnish.LCK.smp.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,smp destroy
 varnish.LCK.smp.locks,gauge,,lock,second,Lock operations.,0,varnish,smp locks
-varnish.LCK.sms.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sms colls
+varnish.LCK.sms.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,sms colls
 varnish.LCK.sms.creat,gauge,,lock,second,Created locks.,0,varnish,sms create
 varnish.LCK.sms.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,sms destroy
 varnish.LCK.sms.locks,gauge,,lock,second,Lock operations.,0,varnish,sms locks
-varnish.LCK.stat.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,stat colls
+varnish.LCK.stat.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,stat colls
 varnish.LCK.stat.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish 3.x.,0,varnish,stat create
 varnish.LCK.stat.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish 3.x.,0,varnish,stat destroy
 varnish.LCK.stat.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish 3.x.,0,varnish,stat locks
-varnish.LCK.vbe.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vbe colls
+varnish.LCK.vbe.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vbe colls
 varnish.LCK.vbe.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish 3.x.,0,varnish,vbe create
 varnish.LCK.vbe.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish 3.x.,0,varnish,vbe destroy
 varnish.LCK.vbe.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish 3.x.,0,varnish,vbe locks
-varnish.LCK.vbp.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vbp colls
+varnish.LCK.vbp.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vbp colls
 varnish.LCK.vbp.creat,gauge,,lock,second,Created locks.,0,varnish,vbp create
 varnish.LCK.vbp.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,vbp destroy
 varnish.LCK.vbp.locks,gauge,,lock,second,Lock operations.,0,varnish,vbp locks
 varnish.LCK.vcapace.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish >=4.x.,0,varnish,vcapace create
 varnish.LCK.vcapace.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish >=4.x.,0,varnish,vcapace destroy
 varnish.LCK.vcapace.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish >=4.x.,0,varnish,vcapace locks
-varnish.LCK.vcl.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vcl colls
+varnish.LCK.vcl.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,vcl colls
 varnish.LCK.vcl.creat,gauge,,lock,second,Created locks.,0,varnish,vcl create
 varnish.LCK.vcl.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,vcl destroy
 varnish.LCK.vcl.locks,gauge,,lock,second,Lock operations.,0,varnish,vcl locks
 varnish.LCK.vxid.creat,gauge,,lock,second,Created locks. This metric is only provided by varnish >=4.x.,0,varnish,vxid create
 varnish.LCK.vxid.destroy,gauge,,lock,second,Destroyed locks. This metric is only provided by varnish >=4.x.,0,varnish,vxid destroy
 varnish.LCK.vxid.locks,gauge,,lock,second,Lock operations. This metric is only provided by varnish >=4.x.,0,varnish,vxid locks
-varnish.LCK.wq.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,wq colls
+varnish.LCK.wq.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,wq colls
 varnish.LCK.wq.creat,gauge,,lock,second,Created locks.,0,varnish,wq create
 varnish.LCK.wq.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,wq destroy
 varnish.LCK.wq.locks,gauge,,lock,second,Lock operations.,0,varnish,wq locks
-varnish.LCK.wstat.colls,gauge,,lock,,Collisions. This metric is only provided by varnish 3.x.,0,varnish,wstat colls
+varnish.LCK.wstat.colls,gauge,,lock,second,Collisions. This metric is only provided by varnish 3.x.,0,varnish,wstat colls
 varnish.LCK.wstat.creat,gauge,,lock,second,Created locks.,0,varnish,wstat create
 varnish.LCK.wstat.destroy,gauge,,lock,second,Destroyed locks.,0,varnish,wstat destroy
 varnish.LCK.wstat.locks,gauge,,lock,second,Lock operations.,0,varnish,wstat locks
@@ -240,7 +240,7 @@ varnish.MGT.child_exit,gauge,,process,second,Child processes the were cleanly st
 varnish.MGT.child_panic,gauge,,process,second,Child processes that panicked. This metric is only provided by varnish >=4.x.,0,varnish,mgt child panic
 varnish.MGT.child_start,gauge,,process,second,Child processes that started. This metric is only provided by varnish >=4.x.,0,varnish,mgt child start
 varnish.MGT.child_stop,gauge,,process,second,Child processes that exited with an unexpected return code. This metric is only provided by varnish >=4.x.,0,varnish,mgt child stop
-varnish.MGT.uptime,gauge,,second,second,This metric is only provided by varnish >=4.x.,0,varnish,mgt uptime
+varnish.MGT.uptime,gauge,,second,,This metric is only provided by varnish >=4.x.,0,varnish,mgt uptime
 varnish.n_backend,gauge,,,,Number of backends.,0,varnish,n backend
 varnish.n_ban,gauge,,object,second,Active bans. This metric is only provided by varnish 3.x.,0,varnish,n ban
 varnish.n_ban_add,gauge,,object,second,New bans added. This metric is only provided by varnish 3.x.,0,varnish,n ban add
@@ -322,10 +322,10 @@ varnish.SMA.Transient.c_req,gauge,,event,second,Times the storage has been asked
 varnish.SMA.Transient.g_alloc,gauge,,event,,Storage allocations outstanding.,0,varnish,SMA Transient g alloc
 varnish.SMA.Transient.g_bytes,gauge,,byte,,Space allocated from the storage.,0,varnish,SMA Transient g bytes
 varnish.SMA.Transient.g_space,gauge,,byte,,Space left in the storage.,0,varnish,SMA Transient g space
-varnish.sms_balloc,gauge,,byte,second,SMS space allocated.,0,varnish,sms balloc
-varnish.sms_bfree,gauge,,byte,second,SMS space freed.,0,varnish,sms bfree
-varnish.sms_nbytes,gauge,,byte,second,SMS outstanding space.,0,varnish,sms nbytes
-varnish.sms_nobj,gauge,,event,second,SMS outstanding allocations.,0,varnish,sms nobj
+varnish.sms_balloc,gauge,,byte,,SMS space allocated.,0,varnish,sms balloc
+varnish.sms_bfree,gauge,,byte,,SMS space freed.,0,varnish,sms bfree
+varnish.sms_nbytes,gauge,,byte,,SMS outstanding space.,0,varnish,sms nbytes
+varnish.sms_nobj,gauge,,event,,SMS outstanding allocations.,0,varnish,sms nobj
 varnish.sms_nreq,gauge,,event,second,SMS allocator requests.,0,varnish,sms nreq
 varnish.thread_queue_len,gauge,,connection,,Length of session queue waiting for threads. This metric is only provided by varnish >=4.x.,0,varnish,thread queue len
 varnish.threads,gauge,,thread,,Number of threads. This metric is only provided by varnish >=4.x.,0,varnish,threads
@@ -333,7 +333,7 @@ varnish.threads_created,gauge,,thread,second,Threads created. This metric is onl
 varnish.threads_destroyed,gauge,,thread,second,Threads destroyed. This metric is only provided by varnish >=4.x.,0,varnish,threads destroyed
 varnish.threads_failed,gauge,,thread,second,Threads that failed to get created. This metric is only provided by varnish >=4.x.,-1,varnish,threads failed
 varnish.threads_limited,gauge,,thread,second,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish >=4.x.,-1,varnish,threads limited
-varnish.uptime,gauge,,second,second,,0,varnish,uptime
+varnish.uptime,gauge,,second,,,0,varnish,uptime
 varnish.vmods,gauge,,object,,Loaded VMODs. This metric is only provided by varnish >=4.x.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm cooling
 varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm free
