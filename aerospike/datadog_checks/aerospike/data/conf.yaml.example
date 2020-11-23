@@ -151,8 +151,7 @@ instances:
 # logs:
 #   - type: file
 #     path: /var/log/aerospike/aerospike.log
-#     source: spark
-#     server: <SERVICE_NAME>
+#     source: aerospike
 
 ## All options defined here are available to all instances.
 #
