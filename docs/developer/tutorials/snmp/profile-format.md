@@ -277,7 +277,7 @@ External table indexes must be a subset of the indexes of the current table, or 
 
 ##### Using an index
 
-Note: Here, "_index_" refers to one of the values in the `INDEX` field of the table MIB definition.
+Important: "_index_" refers to one digit of the index part of the OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on. 
 
 ```yaml
 metrics:
@@ -314,7 +314,6 @@ metrics:
 You can use the following syntax to map indexes to tag string values.
 In the example below, the submitted metrics will be `snmp.ipSystemStatsHCInReceives` with tags like `ipversion:ipv6`.
 
-
 ```yaml
 metrics:
 - MIB: IP-MIB
@@ -336,6 +335,9 @@ metrics:
       4: ipv6z
       16: dns
 ```
+
+See meaning of index as used here in [Using an index](#using-an-index) section.
+
 
 ##### Tagging tips
 
