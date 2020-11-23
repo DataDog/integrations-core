@@ -155,6 +155,8 @@ def _parse_oid_metric(metric):
     """
     Parse a fully resolved OID/name metric.
 
+    Note: This OID/name syntax is deprecated in favour of symbol.OID/symbol.name syntax.
+
     Example:
 
     ```
