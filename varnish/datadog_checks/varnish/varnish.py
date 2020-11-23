@@ -277,7 +277,7 @@ class Varnish(AgentCheck):
             self.rate('varnish.n_purgesps', float(value), tags=tags)
 
     def _emit_rate(self, metric_name, value, tags):
-        if metric_name in self.GAUGE_IN_5_RATE_IN_6 and self.instance.get('compatibility_mode', True):
+        if metric_name in self.GAUGE_IN_5_RATE_IN_6 and self.instance.get('compatibility_mode', False):
             self.log.debug("Varnish (gauge - compatibility_mode) %s %d", metric_name, int(value))
             self.gauge(metric_name, float(value), tags=tags)
             if 'n_purges' in metric_name:
