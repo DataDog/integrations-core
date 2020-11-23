@@ -1,0 +1,31 @@
+{
+  "display_name": "OpenTelemetry",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "opentelemetry",
+  "metric_prefix": "opentelemetry.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "7e87e1cc-df3b-4aa1-a6c0-3489f8296f86",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "OpenTelemetry",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "opentelemetry",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
