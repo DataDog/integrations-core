@@ -20,6 +20,9 @@ def test_check(aggregator):
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric, at_least=1)
 
+    if not ceph_check._octopus:
+        aggregator.assert_metric("ceph.total_objects", at_least=1)
+
     for sc in EXPECTED_SERVICE_CHECKS:
         aggregator.assert_service_check(sc, status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)
     aggregator.assert_service_check('ceph.overall_status', status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)

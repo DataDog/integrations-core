@@ -41,9 +41,12 @@ class Ceph(AgentCheck):
     ]
     NAMESPACE = 'ceph'
 
+    def __init__(self, name, init_config, instances):
+        super(Ceph, self).__init__(name, init_config, instances)
+        self._octopus = False
+
     def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))
-        ceph_args = []
         if use_sudo:
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
@@ -67,14 +70,26 @@ class Ceph(AgentCheck):
             name = cmd.replace(' ', '_')
             raw[name] = res
 
+        mon_map = raw['status']['monmap']
+        if 'min_mon_release_name' in mon_map and mon_map['min_mon_release_name'] == 'octopus':
+            self.log.debug("Detected octopus version of ceph... Some metrics may be missing due to changes")
+            self._octopus = True
+
         return raw
 
     def _extract_tags(self, raw, instance):
         tags = instance.get('tags', [])
-        if 'mon_status' in raw:
+        fsid = None
+        if self._octopus:
+            fsid = raw['status']['fsid']
+        elif 'mon_status' in raw:
             fsid = raw['mon_status']['monmap']['fsid']
-            tags.append(self.NAMESPACE + '_fsid:%s' % fsid)
             tags.append(self.NAMESPACE + '_mon_state:%s' % raw['mon_status']['state'])
+        else:
+            self.log.debug("Could not find fsid")
+
+        if fsid is not None:
+            tags.append(self.NAMESPACE + '_fsid:%s' % fsid)
 
         return tags
 
@@ -188,7 +203,13 @@ class Ceph(AgentCheck):
             self.log.debug('Error retrieving osd_pool_stats metrics')
 
         try:
-            osdstatus = raw['status']['osdmap']['osdmap']
+            raw_osdstatus = raw['status']['osdmap']
+            if 'osdmap' in raw_osdstatus:
+                osdstatus = raw_osdstatus['osdmap']
+            else:
+                osdstatus = raw_osdstatus
+
+            self.log.debug("osdmap value: %s", osdstatus)
             self._publish(osdstatus, self.gauge, ['num_osds'], tags)
             self._publish(osdstatus, self.gauge, ['num_in_osds'], tags)
             self._publish(osdstatus, self.gauge, ['num_up_osds'], tags)
@@ -205,21 +226,29 @@ class Ceph(AgentCheck):
         except KeyError:
             self.log.debug('Error retrieving pgstatus metrics')
 
-        try:
-            num_mons = len(raw['mon_status']['monmap']['mons'])
-            self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
-        except KeyError:
-            self.log.debug('Error retrieving mon_status metrics')
+        if self._octopus:
+            try:
+                num_mons = int(raw['status']['monmap']['num_mons'])
+                self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
+            except KeyError:
+                self.log.debug('Error retrieving num_mons metric')
+        else:
+            try:
+                num_mons = len(raw['mon_status']['monmap']['mons'])
+                self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
+            except KeyError:
+                self.log.debug('Error retrieving mon_status metrics')
 
-        try:
-            num_mons_active = len(raw['mon_status']['quorum'])
-            self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
-        except KeyError:
-            self.log.debug('Error retrieving mon_status quorum metrics')
+            try:
+                num_mons_active = len(raw['mon_status']['quorum'])
+                self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
+            except KeyError:
+                self.log.debug('Error retrieving mon_status quorum metrics')
 
         try:
             stats = raw['df_detail']['stats']
-            self._publish(stats, self.gauge, ['total_objects'], tags)
+            if not self._octopus:
+                self._publish(stats, self.gauge, ['total_objects'], tags)
             used = float(stats['total_used_bytes'])
             total = float(stats['total_bytes'])
             if total > 0:

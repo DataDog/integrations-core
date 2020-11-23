@@ -24,7 +24,6 @@ EXPECTED_METRICS = [
     "ceph.num_pgs",
     "ceph.num_mons",
     "ceph.aggregate_pct_used",
-    "ceph.total_objects",
     "ceph.num_objects",
     "ceph.read_bytes",
     "ceph.write_bytes",
