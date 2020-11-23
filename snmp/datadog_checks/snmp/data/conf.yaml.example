@@ -50,7 +50,8 @@ init_config:
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
   ##
   ## Single scalar metrics and table metrics can be defined in this section.
-  ## Details on how to define metrics can be found here: https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+  ## Details on how to define metrics can be found here:
+  ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
   #
   #
   # global_metrics:
@@ -245,8 +246,9 @@ instances:
     ## Otherwise, they will be used in addition of global_metrics.
     ##
     ## Single scalar metrics and table metrics can be defined in this section.
-    ## Details on how to define metrics can be found here: https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
-    ##
+    ## Details on how to define metrics can be found here:
+    ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+    #
     # metrics:
     #   - OID: 1.3.6.1.2.1.6.5.0
     #     name: tcpPassiveOpens
