@@ -73,6 +73,21 @@ files:
             value:
               type: integer
               example: 6082
+          - name: compatibility_mode
+            description: |
+              The following metrics have chaged the submission type from gauge to rate in varnish 6.
+              * varnish.n_expired
+              * varnish.n_lru_moved
+              * varnish.n_lru_nuked
+              * varnish.n_obj_purged
+              * varnish.n_purges
+              This can be a problem if you have multiple instances of the check running against different varnish versions.
+              Setting this to `true` will ensure these metrics continue to be emitted as gauges.
+            enabled: true
+            value:
+              type: boolean
+              default: true
+              example: false
           - template: instances/default
       - template: logs
         example:

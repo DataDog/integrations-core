@@ -69,6 +69,18 @@ instances:
     #
     # daemon_port: 6082
 
+    ## @param compatibility_mode - boolean - optional - default: true
+    ## The following metrics have chaged the submission type from gauge to rate in varnish 6.
+    ## * varnish.n_expired
+    ## * varnish.n_lru_moved
+    ## * varnish.n_lru_nuked
+    ## * varnish.n_obj_purged
+    ## * varnish.n_purges
+    ## This can be a problem if you have multiple instances of the check running against different varnish versions.
+    ## Setting this to `true` will ensure these metrics continue to be emitted as gauges.
+    #
+    compatibility_mode: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

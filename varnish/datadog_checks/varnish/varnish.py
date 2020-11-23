@@ -41,6 +41,14 @@ class Varnish(AgentCheck):
         "json": "-j",  # version >=5.0.0
     }
 
+    GAUGE_IN_5_RATE_IN_6 = {
+        "varnish.n_expired",
+        "varnish.n_lru_moved",
+        "varnish.n_lru_nuked",
+        "varnish.n_obj_purged",
+        "varnish.n_purges",
+    }
+
     # Output of varnishstat -V : `varnishstat (varnish-4.1.1 revision 66bb824)`
     version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
 
@@ -155,11 +163,11 @@ class Varnish(AgentCheck):
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)
+                if err:
+                    self.log.error('Error getting service check from varnishadm: %s', err)
             except OSError as e:
                 self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
                 output = None
-            if err:
-                self.log.error('Error getting service check from varnishadm: %s', err)
 
             if output:
                 self._parse_varnishadm(output, custom_tags)
@@ -238,11 +246,9 @@ class Varnish(AgentCheck):
                 value = metric.get("value", 0)
 
                 if metric.get("flag") in ("a", "c"):
-                    self.rate(metric_name, long(value), tags=tags)
+                    self._emit_rate(metric_name, long(value), tags)
                 elif metric.get("flag") in ("g", "i"):
-                    self.gauge(metric_name, long(value), tags=tags)
-                    if 'n_purges' in self.normalize(name, prefix="varnish"):
-                        self.rate('varnish.n_purgesps', long(value), tags=tags)
+                    self._emit_gauge(metric_name, long(value), tags)
                 elif 'flag' not in metric:
                     self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
                     self.log.debug("Raw metric %s is missing the `flag` field", str(metric))
@@ -258,14 +264,28 @@ class Varnish(AgentCheck):
                 # Now figure out which value to pick
                 if rate_val.lower() in ("nan", "."):
                     # col 2 matters
-                    self.log.debug("Varnish (gauge) %s %d", metric_name, int(gauge_val))
-                    self.gauge(metric_name, int(gauge_val), tags=tags)
-                    if 'n_purges' in metric_name:
-                        self.rate('varnish.n_purgesps', float(gauge_val), tags=tags)
+                    self._emit_gauge(metric_name, gauge_val, tags)
                 else:
                     # col 3 has a rate (since restart)
-                    self.log.debug("Varnish (rate) %s %d", metric_name, int(gauge_val))
-                    self.rate(metric_name, float(gauge_val), tags=tags)
+                    self._emit_rate(metric_name, gauge_val, tags)
+
+    def _emit_gauge(self, metric_name, value, tags):
+        self.log.debug("Varnish (gauge) %s %d", metric_name, int(value))
+        self.gauge(metric_name, int(value), tags=tags)
+        if 'n_purges' in metric_name:
+            # This metric is already a rate in varnish 6
+            self.rate('varnish.n_purgesps', float(value), tags=tags)
+
+    def _emit_rate(self, metric_name, value, tags):
+        if metric_name in self.GAUGE_IN_5_RATE_IN_6 and self.instance.get('compatibility_mode', True):
+            self.log.debug("Varnish (gauge - compatibility_mode) %s %d", metric_name, int(value))
+            self.gauge(metric_name, float(value), tags=tags)
+            if 'n_purges' in metric_name:
+                # This metric is already a rate in varnish 6
+                self.rate('varnish.n_purgesps', float(value), tags=tags)
+        else:
+            self.log.debug("Varnish (rate) %s %d", metric_name, int(value))
+            self.rate(metric_name, float(value), tags=tags)
 
     def _parse_varnishadm(self, output, tags):
         """Parse out service checks from varnishadm.

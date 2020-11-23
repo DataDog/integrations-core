@@ -21,8 +21,8 @@ E2E_METADATA = {
 
 
 @pytest.fixture
-def check():
-    return Varnish(common.CHECK_NAME, {}, {})
+def check(instance):
+    return Varnish(common.CHECK_NAME, {}, [instance])
 
 
 @pytest.fixture(scope='session')

@@ -320,13 +320,13 @@ varnish.n_ban_dups,rate,,object,,Duplicate bans removed. This metric is only pro
 varnish.n_ban_obj_test,rate,,object,,Objects tested. This metric is only provided by varnish 3.x.,0,varnish,n ban obj test
 varnish.n_ban_re_test,rate,,object,,Regexps tested against. This metric is only provided by varnish 3.x.,0,varnish,n ban re test
 varnish.n_ban_retire,rate,,object,,Old bans deleted. This metric is only provided by varnish 3.x.,0,varnish,n ban retire
-varnish.n_expired,gauge,,object,,Objects that expired from cache because of TTL. It is a rate on >=6.x.,0,varnish,n expired
+varnish.n_expired,rate,,object,,Objects that expired from cache because of TTL. It is a gauge on varnish <=5.x.,0,varnish,n expired
 varnish.n_gunzip,rate,,event,,Gunzip operations.,0,varnish,n gunzip
 varnish.n_gzip,rate,,event,,Gzip operations.,0,varnish,n gzip
 varnish.n_lru_limited,rate,,operation,,Number of times more storage space were needed but limit was reached in a nuke_limit. This metric is only available from >=6.x.,0,varnish,reached nuke_limit
-varnish.n_lru_moved,gauge,,operation,,Move operations done on the LRU list. It is a rate on >=6.x.,0,varnish,n lru moved
-varnish.n_lru_nuked,gauge,,operation,,Objects forcefully evicted from storage to make room for new objects. It is a rate on >=6.x.,0,varnish,n lru nuked
-varnish.n_obj_purged,gauge,,object,,Purged objects. This metric is only provided by varnish >=4.x. It is a rate on >=6.x.,0,varnish,n obj purged
+varnish.n_lru_moved,rate,,operation,,Move operations done on the LRU list. It is a gauge on varnish <=5.x.,0,varnish,n lru moved
+varnish.n_lru_nuked,rate,,operation,,Objects forcefully evicted from storage to make room for new objects. It is a gauge on varnish <=5.x.,0,varnish,n lru nuked
+varnish.n_obj_purged,rate,,object,,Purged objects. This metric is only provided by varnish >=4.x. It is a gauge on varnish <=5.x.,0,varnish,n obj purged
 varnish.n_object,gauge,,object,,object structs made.,0,varnish,n object
 varnish.n_objectcore,gauge,,object,,objectcore structs made.,0,varnish,n objectcore
 varnish.n_objecthead,gauge,,object,,objecthead structs made.,0,varnish,n objecthead
@@ -334,7 +334,8 @@ varnish.n_objoverflow,rate,,object,,Objects overflowing workspace. This metric i
 varnish.n_objsendfile,rate,,object,,Objects sent with sendfile. This metric is only provided by varnish 3.x.,0,varnish,n objsendfile
 varnish.n_objwrite,rate,,object,,Objects sent with write. This metric is only provided by varnish 3.x.,0,varnish,n objwrite
 varnish.n_pipe,gauge,,session,,Number of ongoing pipe sessions. This metric is only available from >=6.x.,0,varnish,n pipe
-varnish.n_purges,gauge,,event,,Purges executed. This metric is only provided by varnish >=4.x. It is a rate on >=6.x.,0,varnish,n purges
+varnish.n_purges,rate,,event,,Purges executed. This metric is only provided by varnish >=4.x. It is a gauge on varnish <=5.x.,0,varnish,n purges
+varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish <=6.x.,0,varnish,n purges
 varnish.n_test_gunzip,rate,,operation,,Test gunzip operations,0,varnish,n test gunzip
 varnish.n_sess,rate,,object,,sess structs made. This metric is only provided by varnish 3.x.,0,varnish,n sess
 varnish.n_sess_mem,rate,,object,,sess_mem structs made. This metric is only provided by varnish 3.x.,0,varnish,n sess mem
@@ -463,7 +464,6 @@ varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communica
 varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm overflow
 varnish.vsm_overflowed,gauge,,byte,,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm used
-varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish <=6.x.,0,varnish,n purges
 varnish.ws_backend_overflow,rate,,event,,workspace_backend overflows. This metric is only available from >=6.x.,0,varnish,ws backend overflow
 varnish.ws_client_overflow,rate,,event,,workspace_client overflows. This metric is only available from >=6.x.,0,varnish,ws client_overflow
 varnish.ws_session_overflow,rate,,event,,workspace_session overflows. This metric is only available from >=6.x.,0,varnish,ws session_overflow
