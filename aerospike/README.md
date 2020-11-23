@@ -38,7 +38,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `aerospike.d/conf.yaml` file to start collecting your Apache Logs:
+2. Add this configuration block to your `aerospike.d/conf.yaml` file to start collecting your Aerospike Logs:
 
    ```yaml
    logs:
