@@ -30,7 +30,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
