@@ -47,7 +47,7 @@ To configure this check for an Agent running on a host:
        service: <SERVICE_NAME>
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample aerospike.d/conf.yaml][1] for all available configuration options.
+    Change the `path` parameter value and configure them for your environment. See the [sample aerospike.d/conf.yaml][1] for all available configuration options.
 
 3. [Restart the Agent][2].
 
