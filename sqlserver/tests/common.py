@@ -52,6 +52,7 @@ INSTANCE_DOCKER = {
     'tags': ['optional:tag1'],
     'include_task_scheduler_metrics': True,
     'include_db_fragmentation_metrics': True,
+    'include_fci_metrics': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
@@ -87,6 +88,7 @@ INSTANCE_SQL2017 = {
     'driver': '{ODBC Driver 17 for SQL Server}',
     'include_task_scheduler_metrics': True,
     'include_db_fragmentation_metrics': True,
+    'include_fci_metrics': True,
 }
 
 INIT_CONFIG = {

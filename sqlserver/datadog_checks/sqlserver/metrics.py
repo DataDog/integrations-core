@@ -535,9 +535,7 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
         for row in rows:
             column_val = row[value_column_index]
             node_name = row[node_name_index]
-            metric_tags = [
-                'node_name:{}'.format(str(node_name))
-            ]
+            metric_tags = ['node_name:{}'.format(str(node_name))]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
