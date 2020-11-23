@@ -20,7 +20,7 @@ except ImportError:
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment"), not_windows_ci]
 
 
-def test_check_invalid_password(aggregator, init_config, instance_docker):
+def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
 
     instance_docker['password'] = 'FOO'
 
@@ -36,9 +36,9 @@ def test_check_invalid_password(aggregator, init_config, instance_docker):
     )
 
 
-def test_check_docker(aggregator, init_config, instance_docker):
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
@@ -105,7 +105,7 @@ def load_stored_procedure(instance, proc_name, sp_tags):
     cursor.close()
 
 
-def test_check_stored_procedure(aggregator, init_config, instance_docker):
+def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_docker):
     instance_pass = deepcopy(instance_docker)
 
     proc = 'pyStoredProc'
@@ -115,14 +115,14 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     load_stored_procedure(instance_pass, proc, sp_tags)
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_pass])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
 
     expected_tags = instance_pass.get('tags', []) + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
 
-def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker):
+def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, instance_docker):
     instance_fail = deepcopy(instance_docker)
     proc = 'pyStoredProc'
     proc_only_fail = "select cntr_type from sys.dm_os_performance_counters where counter_name in ('FOO');"
@@ -134,16 +134,16 @@ def test_check_stored_procedure_proc_if(aggregator, init_config, instance_docker
     load_stored_procedure(instance_fail, proc, sp_tags)
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_fail])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
 
     # apply a proc check that will never fail and assert that the metrics remain unchanged
     assert len(aggregator._metrics) == 0
 
 
-def test_custom_metrics_object_name(aggregator, init_config_object_name, instance_docker):
+def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)

@@ -31,7 +31,7 @@ def test_get_cursor(instance_sql2017):
         check.connection.get_cursor('foo')
 
 
-def test_missing_db(instance_sql2017):
+def test_missing_db(instance_sql2017, dd_run_check):
     instance = copy.copy(instance_sql2017)
     instance['ignore_missing_database'] = False
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
@@ -43,6 +43,7 @@ def test_missing_db(instance_sql2017):
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
         check.initialize_connection()
+        dd_run_check(check)
         assert check.do_check is False
 
 
