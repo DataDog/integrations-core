@@ -60,14 +60,26 @@ EXPECTED_E2E_METRICS = [
 
 
 INSTANCE_STANDALONE = {
-    'spark_url': 'http://{}:8080'.format(HOST),
+    'spark_url': 'http://spark-master:8080',
     'cluster_name': 'SparkCluster',
     'spark_cluster_mode': 'spark_standalone_mode',
 }
 
 
-INSTANCE_DRIVER = {
-    'spark_url': 'http://{}:4040'.format(HOST),
+INSTANCE_DRIVER_1 = {
+    'spark_url': 'http://spark-app-1:4040',
     'cluster_name': 'SparkDriver',
     'spark_cluster_mode': 'spark_driver_mode',
+}
+
+INSTANCE_DRIVER_2 = {
+    'spark_url': 'http://spark-app-2:4050',
+    'cluster_name': 'SparkDriver',
+    'spark_cluster_mode': 'spark_driver_mode',
+}
+
+HOSTNAME_TO_PORT_MAPPING = {
+    "spark-app-1": ('127.0.0.1', 4040),
+    "spark-app-2": ('127.0.0.1', 4050),
+    "spark-master": ('127.0.0.1', 8080),
 }

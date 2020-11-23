@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems
+from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -38,6 +40,9 @@ SPARK_VERSION_PATH = 'api/v1/version'
 SPARK_MASTER_STATE_PATH = '/json/'
 SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
+
+# Extract the application name and the dd metric name from the structured streams metrics.
+STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
 
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
@@ -139,6 +144,14 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
 
+SPARK_STRUCTURED_STREAMING_METRICS = {
+    'inputRate-total': ('spark.structured_streaming.input_rate', GAUGE),
+    'latency': ('spark.structured_streaming.latency', GAUGE),
+    'processingRate-total': ('spark.structured_streaming.processing_rate', GAUGE),
+    'states-rowsTotal': ('spark.structured_streaming.rows_count', GAUGE),
+    'states-usedBytes': ('spark.structured_streaming.used_bytes', GAUGE),
+}
+
 
 class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
@@ -154,6 +167,8 @@ class SparkCheck(AgentCheck):
         # `proxyapproved=true` GET param.
         # The page also sets a cookie that needs to be stored (no need to set persist_connections in the config)
         self.proxy_redirect_cookies = None
+
+        self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
     def check(self, instance):
         # Get additional tags from the conf file
@@ -185,6 +200,7 @@ class SparkCheck(AgentCheck):
         # Get the streaming statistics metrics
         if is_affirmative(instance.get('streaming_metrics', True)):
             self._spark_streaming_statistics_metrics(instance, spark_apps, tags)
+            self._spark_structured_streams_metrics(instance, spark_apps, tags)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
@@ -607,6 +623,41 @@ class SparkCheck(AgentCheck):
                 # then it means that the application is not a streaming application, we should skip metric submission
                 if e.response.status_code != 404:
                     raise
+
+    def _spark_structured_streams_metrics(self, instance, running_apps, addl_tags):
+        """
+        Get metrics for each application structured stream.
+        Requires:
+        - The Metric Servlet to be enabled to path <APP_URL>/metrics/json (enabled by default)
+        - `SET spark.sql.streaming.metricsEnabled=true` in the app
+        """
+
+        for app_name, tracking_url in itervalues(running_apps):
+            try:
+                base_url = self._get_request_url(instance, tracking_url)
+                response = self._rest_request_to_json(
+                    base_url, self.metricsservlet_path, SPARK_SERVICE_CHECK, addl_tags
+                )
+                self.log.debug('Structured streaming metrics: %s', response)
+                response = {
+                    metric_name: v['value']
+                    for metric_name, v in iteritems(response.get('gauges'))
+                    if 'streaming' in metric_name and 'value' in v
+                }
+                for gauge_name, value in iteritems(response):
+                    match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
+                    if not match:
+                        continue
+                    groups = match.groupdict()
+                    metric_name = groups['metric_name']
+                    if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        continue
+                    metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
+                    tags = ['app_name:%s' % str(app_name)]
+                    tags.extend(addl_tags)
+                    self._set_metric(metric_name, submission_type, value, tags=tags)
+            except HTTPError:
+                pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         """

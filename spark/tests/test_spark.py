@@ -19,7 +19,7 @@ from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.spark import SparkCheck
 
-from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE
+from .common import INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
 
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
@@ -106,6 +106,7 @@ YARN_SPARK_RDD_URL = Url(
 YARN_SPARK_STREAMING_STATISTICS_URL = Url(
     join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
 )
+YARN_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, 'metrics/json'))
 
 # Mesos Service URLs
 MESOS_APP_URL = Url(urljoin(SPARK_MESOS_URL, MESOS_APPS_PATH))
@@ -117,6 +118,7 @@ MESOS_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP
 MESOS_SPARK_STREAMING_STATISTICS_URL = Url(
     join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
 )
+MESOS_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
 
 # Driver Service URLs
 DRIVER_APP_URL = Url(urljoin(SPARK_APP_URL, SPARK_REST_PATH))
@@ -128,6 +130,7 @@ DRIVER_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_AP
 DRIVER_SPARK_STREAMING_STATISTICS_URL = Url(
     join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
 )
+DRIVER_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
 
 # Spark Standalone Service URLs
 STANDALONE_APP_URL = Url(urljoin(STANDALONE_URL, STANDALONE_APPS_PATH))
@@ -140,6 +143,7 @@ STANDALONE_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPAR
 STANDALONE_SPARK_STREAMING_STATISTICS_URL = Url(
     join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
 )
+STANDALONE_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
 
 STANDALONE_SPARK_JOB_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'jobs'))
 STANDALONE_SPARK_STAGE_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'stages'))
@@ -148,6 +152,7 @@ STANDALONE_SPARK_RDD_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH
 STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20 = Url(
     join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'streaming/statistics')
 )
+STANDALONE_SPARK_METRICS_JSON_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
@@ -208,6 +213,11 @@ def yarn_requests_get_mock(url, *args, **kwargs):
             body = f.read()
             return MockedResponse(body, 200)
 
+    elif arg_url == YARN_SPARK_METRICS_JSON_URL:
+        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
+            body = f.read()
+            return MockedResponse(body, 200)
+
 
 def yarn_requests_auth_mock(*args, **kwargs):
     # Make sure we're passing in authentication
@@ -258,6 +268,11 @@ def mesos_requests_get_mock(url, *args, **kwargs):
             body = f.read()
             return MockedResponse(body, 200)
 
+    elif arg_url == MESOS_SPARK_METRICS_JSON_URL:
+        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
+            body = f.read()
+            return MockedResponse(body, 200)
+
 
 def driver_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
@@ -294,6 +309,11 @@ def driver_requests_get_mock(url, *args, **kwargs):
 
     elif arg_url == DRIVER_SPARK_STREAMING_STATISTICS_URL:
         with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
+            body = f.read()
+            return MockedResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_METRICS_JSON_URL:
+        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
             body = f.read()
             return MockedResponse(body, 200)
 
@@ -338,6 +358,11 @@ def standalone_requests_get_mock(url, *args, **kwargs):
 
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
         with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
+            body = f.read()
+            return MockedResponse(body, 200)
+
+    elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL:
+        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
             body = f.read()
             return MockedResponse(body, 200)
 
@@ -402,6 +427,11 @@ def standalone_requests_pre20_get_mock(url, *args, **kwargs):
 
     elif arg_url == VERSION_PATH:
         with open(os.path.join(FIXTURE_DIR, 'version'), 'rb') as f:
+            body = f.read()
+            return MockedResponse(body, 200)
+
+    elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL_PRE20:
+        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
             body = f.read()
             return MockedResponse(body, 200)
 
@@ -677,6 +707,14 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
     'spark.streaming.statistics.num_total_completed_batches': 28,
 }
 
+SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
+    'spark.structured_streaming.input_rate': 12,
+    'spark.structured_streaming.latency': 12,
+    'spark.structured_streaming.processing_rate': 12,
+    'spark.structured_streaming.rows_count': 12,
+    'spark.structured_streaming.used_bytes': 12,
+}
+
 SPARK_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME]
 
 
@@ -716,6 +754,10 @@ def test_yarn(aggregator):
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the structured streaming metrics
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
@@ -796,6 +838,10 @@ def test_mesos(aggregator):
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
+        # Check the structured streaming metrics
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
         # Check the service tests
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
@@ -870,6 +916,10 @@ def test_driver_unit(aggregator):
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
+        # Check the structured streaming metrics
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
         # Check the service tests
 
         for sc in aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK):
@@ -935,6 +985,10 @@ def test_standalone_unit(aggregator):
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
+        # Check the structured streaming metrics
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -993,6 +1047,10 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
+        # Check the structured streaming metrics
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -1049,6 +1107,10 @@ def test_standalone_pre20(aggregator):
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+
+        # Check the structured streaming metrics
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
 
         # Check the service tests
@@ -1159,72 +1221,99 @@ def run_ssl_server():
     return httpd
 
 
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    'instance, service_check, cluster_name, spark_url',
-    [
-        pytest.param(
-            INSTANCE_STANDALONE,
-            'spark.standalone_master.can_connect',
-            'SparkCluster',
-            'http://{}:8080'.format(HOST),
-            id='standalone',
-        ),
-        pytest.param(
-            INSTANCE_DRIVER,
-            'spark.driver.can_connect',
-            'SparkDriver',
-            'http://{}:4040'.format(HOST),
-            id='driver',
-        ),
-    ],
-)
 @pytest.mark.integration
-def test_integration(aggregator, instance, service_check, cluster_name, spark_url):
-    c = SparkCheck('spark', {}, [instance])
-    c.check(instance)
+@pytest.mark.usefixtures('dd_environment')
+def test_integration_standalone(aggregator):
+    c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
+    c.check(INSTANCE_STANDALONE)
 
-    # Check the running job metrics
-    for metric in SPARK_JOB_RUNNING_METRIC_VALUES:
-        aggregator.assert_metric(metric)
-
-    # Check the succeeded job metrics
-    for metric in SPARK_JOB_SUCCEEDED_METRIC_VALUES:
-        aggregator.assert_metric(metric)
-
-    # Check the running stage metrics
-    for metric in SPARK_STAGE_RUNNING_METRIC_VALUES:
-        aggregator.assert_metric(metric)
-
-    # Check the complete stage metrics
-    for metric in SPARK_STAGE_COMPLETE_METRIC_VALUES:
-        aggregator.assert_metric(metric)
-
-    # Check the driver metrics
-    for metric in SPARK_DRIVER_METRIC_VALUES:
-        aggregator.assert_metric(metric)
-
-    # Check the streaming statistics metrics and remove 2 we're not getting for now
-    streaming_statistics = set(SPARK_STREAMING_STATISTICS_METRIC_VALUES) - {
+    all_metric_values = (
+        SPARK_JOB_RUNNING_METRIC_VALUES,
+        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
+        SPARK_STAGE_RUNNING_METRIC_VALUES,
+        SPARK_STAGE_COMPLETE_METRIC_VALUES,
+        SPARK_DRIVER_METRIC_VALUES,
+        SPARK_STREAMING_STATISTICS_METRIC_VALUES,
+        SPARK_STRUCTURED_STREAMING_METRIC_VALUES,
+        SPARK_EXECUTOR_METRIC_VALUES,
+    )
+    # Extract all keys
+    expected_metrics = set(k for j in all_metric_values for k in j) - {
         'spark.streaming.statistics.avg_processing_time',
         'spark.streaming.statistics.avg_total_delay',
     }
-
-    for metric in streaming_statistics:
+    # Check the running job metrics
+    for metric in expected_metrics:
         aggregator.assert_metric(metric)
 
-    # TODO: Further investigate why we aren't getting these, it may be Docker networking
-    #
-    # # Check the executor metrics
-    # for metric in SPARK_EXECUTOR_METRIC_VALUES:
-    #     aggregator.assert_metric(metric)
-    #
-    # # Check the RDD metrics
-    # for metric in SPARK_RDD_METRIC_VALUES:
-    #     aggregator.assert_metric(metric)
+    aggregator.assert_service_check(
+        'spark.standalone_master.can_connect',
+        status=SparkCheck.OK,
+        tags=['cluster_name:{}'.format('SparkCluster'), 'url:{}'.format('http://spark-master:8080')],
+    )
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_integration_driver_1(aggregator):
+    c = SparkCheck('spark', {}, [INSTANCE_DRIVER_1])
+    c.check(INSTANCE_DRIVER_1)
+
+    all_metric_values = (
+        SPARK_JOB_RUNNING_METRIC_VALUES,
+        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
+        SPARK_STAGE_RUNNING_METRIC_VALUES,
+        SPARK_STAGE_COMPLETE_METRIC_VALUES,
+        SPARK_DRIVER_METRIC_VALUES,
+        SPARK_STREAMING_STATISTICS_METRIC_VALUES,
+    )
+    # Extract all keys
+    expected_metrics = (
+        set(k for j in all_metric_values for k in j)
+        - {
+            'spark.streaming.statistics.avg_processing_time',
+            'spark.streaming.statistics.avg_total_delay',
+        }
+        | {'spark.executor.count'}
+    )
+    # Check the running job metrics
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
 
     aggregator.assert_service_check(
-        service_check,
+        'spark.driver.can_connect',
         status=SparkCheck.OK,
-        tags=['cluster_name:{}'.format(cluster_name), 'url:{}'.format(spark_url)],
+        tags=['cluster_name:{}'.format('SparkDriver'), 'url:{}'.format('http://spark-app-1:4040')],
     )
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_integration_driver_2(aggregator):
+    c = SparkCheck('spark', {}, [INSTANCE_DRIVER_2])
+    c.check(INSTANCE_DRIVER_2)
+
+    all_metric_values = (
+        SPARK_JOB_RUNNING_METRIC_VALUES,
+        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
+        SPARK_STAGE_RUNNING_METRIC_VALUES,
+        SPARK_STAGE_COMPLETE_METRIC_VALUES,
+        SPARK_DRIVER_METRIC_VALUES,
+        SPARK_STRUCTURED_STREAMING_METRIC_VALUES,
+        SPARK_EXECUTOR_METRIC_VALUES,
+    )
+    # Extract all keys
+    expected_metrics = set(k for j in all_metric_values for k in j)
+
+    # Check the running job metrics
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_service_check(
+        'spark.driver.can_connect',
+        status=SparkCheck.OK,
+        tags=['cluster_name:{}'.format('SparkDriver'), 'url:{}'.format('http://spark-app-2:4050')],
+    )
+    aggregator.assert_all_metrics_covered()

@@ -105,9 +105,27 @@ instances:
     # spark_proxy_enabled: false
 
     ## @param streaming_metrics - boolean - optional - default: true
-    ## Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
+    ## Enable collection of streaming statistics.
+    ## Both Spark Streaming (DStream) and Structured Streaming (DataFrame) can be monitored but the latter requires
+    ## additional configuration. To collect Structured Streaming metrics you need to:
+    ##   1. The default MetricsServlet sink has not been disabled.
+    ##   2. Set 'spark.sql.streaming.metricsEnabled=true' in the configuration.
+    ## For more details refer to Spark official documentation:
+    ##   1. https://spark.apache.org/docs/latest/monitoring.html#metrics
+    ##   2. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#reporting-metrics-using-dropwizard 
+    ## Note that if the MetricsServlet is not serving the JSON metrics payload on the default path (/metrics/json)
+    ## you also need to set the `metricsservlet_path`.
     #
     # streaming_metrics: true
+
+    ## @param metricsservlet_path - string - optional - default: /metrics/json
+    ## Some Spark metrics are only available via a DropWizard sink, notably the Structured Streaming ones. The
+    ## integration fetches a JSON metrics payload from each application by leveraging the default MetricsServlet
+    ## sink which exposes metrics on the /metrics/json path by default for all application. If you configured
+    ## the MetricsServlet to use a non-default path, you also need to update the following field to tell
+    ## the integration about it.
+    #
+    # metricsservlet_path: /metrics/json
 
     ## @param executor_level_metrics - boolean - optional - default: false
     ## Enable collection of more granular executor metrics.
