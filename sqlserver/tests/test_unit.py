@@ -42,6 +42,12 @@ def test_missing_db(instance_sql2017):
         check = SQLServer(CHECK_NAME, {}, [instance])
         assert check.do_check is False
 
+# FCI metrics will not appear in `compose` or `compose-ha`,
+# so this test ensures that the metric is still checked.
+# def test_fci_metrics(instance_sql2017):
+#     instance = copy.copy(instance_sql2017)
+#     instance['include_fci_metrics'] = True
+
 
 def test_set_default_driver_conf():
     # Docker Agent with ODBCSYSINI env var
