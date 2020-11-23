@@ -1315,8 +1315,19 @@ def test_palo_alto(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_cisco_asa(aggregator):
+def test_cisco_asa_all(aggregator):
     profile = "cisco-asa"
+    assert_cisco_asa(aggregator, profile)
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_cisco_asa_5525(aggregator):
+    profile = "cisco-asa-5525"
+    assert_cisco_asa(aggregator, profile)
+
+
+def assert_cisco_asa(aggregator, profile):
+
     run_profile_check(profile)
 
     common_tags = common.CHECK_TAGS + [
