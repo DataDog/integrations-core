@@ -126,8 +126,7 @@ files:
     example:
       - type: file
         path: /var/log/aerospike/aerospike.log
-        source: spark
-        server: <SERVICE_NAME>
+        source: aerospike
   - template: init_config
     options:
     - name: mappings
