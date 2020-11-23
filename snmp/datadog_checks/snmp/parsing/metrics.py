@@ -194,6 +194,12 @@ def _parse_symbol_metric(metric):
     metrics:
       - MIB: IF-MIB
         symbol: <string or OID/name object>
+      - MIB: IF-MIB
+        symbol:                     # MIB-less syntax
+          OID: 1.3.6.1.2.1.6.5.0
+          name: tcpActiveOpens
+      - MIB: IF-MIB
+        symbol: tcpActiveOpens      # require MIB syntax
     ```
     """
     mib = metric['MIB']
