@@ -264,27 +264,27 @@ class Varnish(AgentCheck):
                 # Now figure out which value to pick
                 if rate_val.lower() in ("nan", "."):
                     # col 2 matters
-                    self._emit_gauge(metric_name, gauge_val, tags)
+                    self._emit_gauge(metric_name, long(gauge_val), tags)
                 else:
                     # col 3 has a rate (since restart)
-                    self._emit_rate(metric_name, gauge_val, tags)
+                    self._emit_rate(metric_name, float(gauge_val), tags)
 
     def _emit_gauge(self, metric_name, value, tags):
-        self.log.debug("Varnish (gauge) %s %d", metric_name, int(value))
-        self.gauge(metric_name, int(value), tags=tags)
+        self.log.debug("Varnish (gauge) %s %d", metric_name, value)
+        self.gauge(metric_name, value, tags=tags)
         if 'n_purges' in metric_name:
             # This metric is already a rate in varnish 6
             self.rate('varnish.n_purgesps', float(value), tags=tags)
 
     def _emit_rate(self, metric_name, value, tags):
         if metric_name in self.GAUGE_IN_5_RATE_IN_6 and self.instance.get('compatibility_mode', False):
-            self.log.debug("Varnish (gauge - compatibility_mode) %s %d", metric_name, int(value))
-            self.gauge(metric_name, float(value), tags=tags)
+            self.log.debug("Varnish (gauge - compatibility_mode) %s %d", metric_name, value)
+            self.gauge(metric_name, value, tags=tags)
             if 'n_purges' in metric_name:
                 # This metric is already a rate in varnish 6
-                self.rate('varnish.n_purgesps', float(value), tags=tags)
+                self.rate('varnish.n_purgesps', value, tags=tags)
         else:
-            self.log.debug("Varnish (rate) %s %d", metric_name, int(value))
+            self.log.debug("Varnish (rate) %s %d", metric_name, value)
             self.rate(metric_name, float(value), tags=tags)
 
     def _parse_varnishadm(self, output, tags):

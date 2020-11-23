@@ -274,15 +274,15 @@ COMMON_METRICS = [
     "varnish.VBE.boot.default.pipe_hdrbytes",
     "varnish.VBE.boot.default.pipe_in",
     "varnish.VBE.boot.default.pipe_out",
-    # This is a rate that is artificially emitted with the same value as varnish.n_purges
-    # which is a gauge in versions <=5
-    "varnish.n_purgesps",
 ]
 METRICS_5 = [
     "varnish.sess_drop",  # metrics where the "MAIN" prefix was removed
     "varnish.LCK.backend_tcp.creat",
     "varnish.LCK.backend_tcp.destroy",
     "varnish.LCK.backend_tcp.locks",
+    # This is a rate that is artificially emitted with the same value as varnish.n_purges
+    # which is a gauge in versions <=5
+    "varnish.n_purgesps",
 ]
 METRICS_6 = [
     "varnish.LCK.backend.dbg_busy",
