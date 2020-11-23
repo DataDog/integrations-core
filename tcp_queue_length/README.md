@@ -23,7 +23,7 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: CentOS/RHEL versions < 8 are not supported
+**Note**: CentOS/RHEL versions < 8 are not supported.
 
 ### Configuration
 
