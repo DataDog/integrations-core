@@ -115,6 +115,18 @@ class SQLServer(AgentCheck):
         ('sqlserver.ao.secondary_replica_health', 'sys.dm_hadr_availability_group_states', 'secondary_recovery_health'),
     ]
 
+    # AlwaysOn metrics for Failover Cluster Instances (FCI).
+    # This is in a separate category than other AlwaysOn metrics
+    # because FCI specifies a different SQLServer setup
+    # compared to Availability Groups (AG).
+    # datadog metric name, sql table, column name
+    # FCI status enum:
+    #   0 = Up, 1 = Down, 2 = Paused, 3 = Joining, -1 = Unknown
+    FCI_METRICS = [
+        ('sqlserver.fci.status', 'sys.dm_os_cluster_nodes', 'status'),
+        ('sqlserver.fci.is_current_owner', 'sys.dm_os_cluster_nodes', 'is_current_owner'),
+    ]
+
     # Non-performance table metrics - can be database specific
     # datadog metric name, sql table, column name
     TASK_SCHEDULER_METRICS = [
@@ -275,6 +287,17 @@ class SQLServer(AgentCheck):
                     'ao_database': self.instance.get('ao_database', None),
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
+                }
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        # Load FCI metrics
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            for name, table, column in self.FCI_METRICS:
+                cfg = {
+                    'name': name,
+                    'table': table,
+                    'column': column,
+                    'tags': tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
