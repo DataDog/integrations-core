@@ -1,6 +1,7 @@
 # Profile for Cisco ASA devices
 
 extends:
+  - _base.yaml
   - _cisco-asa.yaml
 
 device:

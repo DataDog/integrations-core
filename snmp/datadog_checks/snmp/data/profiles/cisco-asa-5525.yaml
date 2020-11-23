@@ -3,6 +3,7 @@
 # moving ciscoASA5525 to cisco-asa.yaml will trigger duplicate sysObjectID error.
 
 extends:
+  - _base.yaml
   - _cisco-asa.yaml
 
 device:
