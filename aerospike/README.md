@@ -44,7 +44,6 @@ To configure this check for an Agent running on a host:
      - type: file
        path: /var/log/aerospike/aerospike.log
        source: aerospike
-       service: <SERVICE_NAME>
    ```
 
     Change the `path` parameter value and configure them for your environment. See the [sample aerospike.d/conf.yaml][1] for all available configuration options.
