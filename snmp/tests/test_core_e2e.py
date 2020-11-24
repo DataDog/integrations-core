@@ -31,7 +31,7 @@ def test_e2e_metric_types(dd_agent_check):
     expected_metrics = defaultdict(int)
     print(">>> python metrics:")
     for metric_name, metrics in aggregator._metrics.items():
-        print("metric_name", metric_name)
+        print("%s: %s".format(metric_name, metrics))
         for metric in metrics:
             expected_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
 
@@ -40,8 +40,9 @@ def test_e2e_metric_types(dd_agent_check):
 
     print(">>> core metrics:")
     for metric_name, metrics in aggregator._metrics.items():
-        print("metric_name", metric_name)
+        print("%s: %s".format(metric_name, metrics))
 
+    print(">>> expected metrics:")
     for (name, mtype, tags), count in expected_metrics.items():
         print("metric:", name, mtype, tags, count)
         aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
