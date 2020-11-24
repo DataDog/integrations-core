@@ -45,9 +45,46 @@ instances:
     # password: <PASSWORD>
 
     ## @param database - string - optional - default: master
-    ## Database name to query
+    ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
     # database: master
+
+    ## @param database_autodiscovery - boolean - optional - default: false
+    ## Auto-discover and monitor databases.  If `true`, overrides `database` option.
+    ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
+    #
+    # database_autodiscovery: false
+
+    ## @param autodiscovery_include - list of strings - optional
+    ## Regular expression for specific database names to always include as part of `database_autodiscovery`.
+    ## Will only report metrics for databases that are actually found in this instance, so missing
+    ## databases from this option should be harmless.
+    ##
+    ## Character casing is ignored. For convenience, the regular expressions start matching from the beginning and
+    ## therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
+    ##
+    ## When conflicts arise, included databases will take precedence.
+    #
+    # autodiscovery_include:
+    #   - master
+    #   - AdventureWorks2017
+
+    ## @param autodiscovery_exclude - list of strings - optional
+    ## Regular expression for specific database names to always exclude as part of `database_autodiscovery`.
+    ##
+    ## Character casing is ignored. For convenience, the regular expressions start matching from the beginning and
+    ## therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
+    ##
+    ## Can use expression `.*` to exclude everything, then selectively include databases from `autodiscovery_include`.
+    #
+    # autodiscovery_exclude:
+    #   - model
+    #   - msdb
+
+    ## @param database_autodiscovery_interval - integer - optional - default: 3600
+    ## Frequency in seconds of scans for new databases.  Defaults to `3600`.
+    #
+    # database_autodiscovery_interval: 3600
 
     ## @param include_ao_metrics - boolean - optional - default: false
     ## Include AlwaysOn availability group metrics.

@@ -3,6 +3,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from itertools import chain
+
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
@@ -32,11 +34,14 @@ CHECK_NAME = "sqlserver"
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
 EXPECTED_METRICS = [
     m[0]
-    for m in SQLServer.INSTANCE_METRICS
-    + SQLServer.TASK_SCHEDULER_METRICS
-    + SQLServer.DATABASE_METRICS
-    + SQLServer.DATABASE_FRAGMENTATION_METRICS
-    + SQLServer.FCI_METRICS
+    for m in chain(
+        SQLServer.INSTANCE_METRICS,
+        SQLServer.INSTANCE_METRICS_TOTAL,
+        SQLServer.TASK_SCHEDULER_METRICS,
+        SQLServer.DATABASE_METRICS,
+        SQLServer.DATABASE_FRAGMENTATION_METRICS,
+        SQLServer.FCI_METRICS,
+    )
 ] + CUSTOM_METRICS
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS_PRIMARY]

@@ -91,6 +91,13 @@ def instance_ao_docker_secondary():
     return deepcopy(INSTANCE_AO_DOCKER_SECONDARY)
 
 
+@pytest.fixture
+def instance_autodiscovery():
+    instance = INSTANCE_DOCKER
+    instance['database_autodiscovery'] = True
+    return deepcopy(instance)
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     if pyodbc is None:
