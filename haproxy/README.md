@@ -18,7 +18,19 @@ The Haproxy check is included in the [Datadog Agent][2] package, so you don't ne
 
 #### Prepare HAProxy
 
-##### Versions < 2
+##### Using Prometheus
+
+The check supports a newer implementation starting with HAProxy version 2 (enterprise version 1.9rc1) that is based on a Prometheus endpoint:
+
+1. Configure your `haproxy.conf` using the [official guide][16].
+
+2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
+
+3. [Restart HAProxy to enable the stats endpoint][3].
+
+Note: The prometheus endpoint can also be set in prior version using the [HAProxy exporter][17]
+
+##### Using the stats endpoint
 
 The Agent collects metrics via a stats endpoint:
 
@@ -36,16 +48,6 @@ The Agent collects metrics via a stats endpoint:
    ```
 
 2. [Restart HAProxy to enable the stats endpoint][3].
-
-##### Versions >= 2
-
-The check supports a newer implementation starting with HAProxy version 2 that is based on a Prometheus endpoint:
-
-1. Configure your `haproxy.conf` using the [official guide][16].
-
-2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
-
-3. [Restart HAProxy to enable the stats endpoint][3].
 
 ### Configuration
 
@@ -198,3 +200,4 @@ Need help? Contact [Datadog support][11].
 [14]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
 [15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
 [16]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
+[17]: https://github.com/prometheus/haproxy_exporter
