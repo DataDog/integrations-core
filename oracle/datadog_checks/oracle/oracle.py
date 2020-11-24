@@ -87,8 +87,7 @@ class Oracle(AgentCheck):
 
     def check(self, _):
         try:
-            with closing(self._connection):
-                self._query_manager.execute()
+            self._query_manager.execute()
         except Exception as e:
             self._cached_connection = None
             self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL, tags=self._service_check_tags)
