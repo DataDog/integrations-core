@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.14.1 / 2020-11-24
+
+* [Fixed] Increase robustness of parsing of Unix socket responses in legacy implementation. See [#8080](https://github.com/DataDog/integrations-core/pull/8080).
+
 ## 2.14.0 / 2020-10-31
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
