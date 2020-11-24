@@ -337,7 +337,7 @@ varnish.uptime,gauge,,second,,,0,varnish,uptime
 varnish.vmods,gauge,,object,,Loaded VMODs. This metric is only provided by varnish >=4.x.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm cooling
 varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm free
-varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm overflow
-varnish.vsm_overflowed,gauge,,byte,,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm overflowed
+varnish.vsm_overflow,gauge,,byte,,"Number of bytes which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm overflow
+varnish.vsm_overflowed,gauge,,byte,second,"Total number of bytes which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish >=4.x.",0,varnish,vsm used
 varnish.n_purgesps,gauge,,event,second,Purges executed. This metric is only provided by varnish 4.x and 5.x,0,varnish,n purges
