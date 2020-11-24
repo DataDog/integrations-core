@@ -192,11 +192,12 @@ class HAProxyCheckLegacy(AgentCheck):
             output = sock.recv(BUFSIZE)
         sock.close()
 
-        responses = response.split('\n\n')
-        if len(responses) != len(commands) + 1 or responses[len(responses) - 1] != '':
-            raise CheckException("Got a different number of responses than expected")
+        responses = [r.strip() for r in response.split('\n\n') if r.strip()]
 
-        return tuple(r.splitlines() for r in responses[: len(commands)])
+        if len(responses) != len(commands):
+            raise CheckException("Expected {} responses, got {}".format(len(commands), len(responses)))
+
+        return tuple(r.splitlines() for r in responses)
 
     def _fetch_socket_data(self, parsed_url):
         """Hit a given stats socket and return the stats lines."""
