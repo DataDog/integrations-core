@@ -28,7 +28,7 @@ The recommended way to setup this integration is by enabling the Prometheus endp
 
 3. [Restart HAProxy to enable the Prometheus endpoint][3].
 
-Note: The prometheus endpoint can also be set in prior versions using the [HAProxy exporter][17].
+4. [Restart the Agent][6].
 
 ##### Using the stats endpoint
 
