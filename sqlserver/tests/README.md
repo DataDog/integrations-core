@@ -20,6 +20,12 @@ Same as Linux, MSSQL runs in a Docker container and we talk to the database thro
 brew install unixodbc freetds
 ```
 
+## Failover Cluster Instance (FCI) Metrics
+
+Failover Cluster Instance metrics will not be available using `compose` or `compose-ha` due to the special set up required.
+These metrics can be found after setting up a SQL Server FCI instance following this [tutorial on GCP][17].
+
 
 [15]: http://www.freetds.org
 [16]: https://brew.sh
+[17]: https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance

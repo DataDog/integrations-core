@@ -334,7 +334,7 @@ varnish.n_objoverflow,gauge,,object,second,Objects overflowing workspace. This m
 varnish.n_objsendfile,gauge,,object,second,Objects sent with sendfile. This metric is only provided by varnish 3.x.,0,varnish,n objsendfile
 varnish.n_objwrite,gauge,,object,second,Objects sent with write. This metric is only provided by varnish 3.x.,0,varnish,n objwrite
 varnish.n_pipe,gauge,,session,,Number of ongoing pipe sessions. This metric is only available from >=6.x.,0,varnish,n pipe
-varnish.n_purges,gauge,,event,,Purges executed. This metric is only provided by varnish >=4.x. It is a rate on >=6.x.,0,varnish,n purges
+varnish.n_purges,gauge,,event,second,Purges executed. This metric is only provided by varnish >=4.x.,0,varnish,n purges
 varnish.n_test_gunzip,gauge,,operation,second,Test gunzip operations,0,varnish,n test gunzip
 varnish.n_sess,gauge,,object,second,sess structs made. This metric is only provided by varnish 3.x.,0,varnish,n sess
 varnish.n_sess_mem,gauge,,object,second,sess_mem structs made. This metric is only provided by varnish 3.x.,0,varnish,n sess mem
