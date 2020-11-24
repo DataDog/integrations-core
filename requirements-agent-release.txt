@@ -116,8 +116,9 @@ datadog-sidekiq==1.2.0
 datadog-snmp==3.9.0
 datadog-snowflake==2.1.2
 datadog-solr==1.6.0
-datadog-spark==1.17.0
-datadog-sqlserver==2.1.0
+datadog-sonarqube==1.0.0
+datadog-spark==1.18.0
+datadog-sqlserver==2.2.0
 datadog-squid==1.9.0
 datadog-ssh-check==1.11.3
 datadog-statsd==1.6.0
