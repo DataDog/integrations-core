@@ -72,7 +72,7 @@ class Ceph(AgentCheck):
 
         mon_map = raw['status']['monmap']
         if 'min_mon_release_name' in mon_map and mon_map['min_mon_release_name'] == 'octopus':
-            self.log.debug("Detected octopus version of ceph... Some metrics may be missing due to changes")
+            self.log.debug("Detected octopus version of ceph...")
             self._octopus = True
 
         return raw
