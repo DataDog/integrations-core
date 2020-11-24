@@ -69,20 +69,20 @@ def test_set_default_driver_conf():
 
 
 @windows_ci
-def test_check_local(aggregator, init_config, instance_sql2017):
+def test_check_local(aggregator, dd_run_check, init_config, instance_sql2017):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
     expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
 @windows_ci
 @pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
-def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovider):
+def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql2017, adoprovider):
     instance = copy.deepcopy(instance_sql2017)
     instance['adoprovider'] = adoprovider
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
     expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)

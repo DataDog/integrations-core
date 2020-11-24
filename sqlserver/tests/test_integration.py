@@ -149,12 +149,12 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
 
 
-def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_docker):
+def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tables, instance_docker):
     instance = deepcopy(instance_docker)
     instance['include_task_scheduler_metrics'] = False
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance])
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)
     aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=['optional:tag1'], count=1)
@@ -166,7 +166,7 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
     )
 
     # check a second time for io metrics to be processed
-    sqlserver_check.run()
+    dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_reads')
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
@@ -174,14 +174,14 @@ def test_custom_metrics_alt_tables(aggregator, init_config_alt_tables, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, instance_docker):
+def test_custom_queries(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     querya = copy(CUSTOM_QUERY_A)
     queryb = copy(CUSTOM_QUERY_B)
     instance['custom_queries'] = [querya, queryb]
 
     check = SQLServer(CHECK_NAME, {}, [instance])
-    check.run()
+    dd_run_check(check)
     tags = list(instance['tags'])
 
     for tag in ('a', 'b', 'c'):
