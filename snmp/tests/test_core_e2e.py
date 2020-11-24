@@ -24,7 +24,7 @@ def test_e2e_metric_types(dd_agent_check):
     core_instance['loader'] = 'core'
 
     print(">>> python instance:", python_instance)
-    print(">>> core instance:", core_instance)
+    print(">>> core instance  :", core_instance)
 
     aggregator = dd_agent_check(python_instance, rate=True)
 
