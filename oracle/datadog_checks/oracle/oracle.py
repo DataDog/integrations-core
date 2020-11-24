@@ -54,10 +54,18 @@ class Oracle(AgentCheck):
 
         self._fix_custom_queries()
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self._tags)
+        self._query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=manager_queries,
+            error_handler=self.handle_query_error,
+            tags=self._tags,
+        )
 
         self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
+
+        self._current_errors = 0
 
     def _fix_custom_queries(self):
         """
@@ -85,14 +93,19 @@ class Oracle(AgentCheck):
             # JDBC doesn't support iter protocol
             return cursor.fetchall()
 
+    def handle_query_error(self, error):
+        self._current_errors += 1
+        self._cached_connection = None
+
+        return error
+
     def check(self, _):
-        try:
-            self._query_manager.execute()
-        except Exception as e:
-            self._cached_connection = None
+        self._current_errors = 0
+
+        self._query_manager.execute()
+
+        if self._current_errors:
             self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL, tags=self._service_check_tags)
-            self.log.error(e)
-            raise
         else:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
 

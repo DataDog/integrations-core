@@ -7,7 +7,6 @@ except ImportError:
     from contextlib2 import ExitStack
 
 import mock
-import pytest
 
 from datadog_checks.oracle import Oracle
 
@@ -60,8 +59,8 @@ def test__get_connection_jdbc(check, dd_run_check):
         for mock_call in mocks:
             stack.enter_context(mock.patch(*mock_call))
         dd_run_check(check)
+        assert check._connection == con
 
-    assert check._connection == con
     jdb.connect.assert_called_with(
         'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
     )
@@ -75,9 +74,7 @@ def test__get_connection_failure(check, dd_run_check):
     expected_tags = ['server:localhost:1521', 'optional:tag1']
     service_check = mock.MagicMock()
     check.service_check = service_check
-    check._query_manager.queries = []
-    with pytest.raises(Exception):
-        dd_run_check(check)
+    dd_run_check(check)
     service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.CRITICAL, tags=expected_tags)
 
 
