@@ -27,12 +27,13 @@ def test_check(aggregator, check, instance):
         metrics_to_check = common.COMMON_METRICS + common.METRICS_5
     else:
         metrics_to_check = common.COMMON_METRICS + common.METRICS_6
+
     for mname in metrics_to_check:
         aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
+    aggregator.assert_all_metrics_covered()
     metadata_metrics = get_metadata_metrics()
-    exclude = [m for m in aggregator.metric_names if m not in metadata_metrics]
-    aggregator.assert_metrics_using_metadata(metadata_metrics, exclude=exclude, check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(metadata_metrics, check_metric_type=False)
 
 
 def test_inclusion_filter(aggregator, check, instance):
