@@ -44,8 +44,6 @@ EXPECTED_E2E_METRICS = [
     'spark.stage.memory_bytes_spilled',
     'spark.streaming.statistics.batch_duration',
     'spark.stage.shuffle_write_records',
-    'spark.streaming.statistics.avg_input_rate',
-    'spark.streaming.statistics.avg_scheduling_delay',
     'spark.job.num_completed_stages',
     'spark.job.count',
     'spark.job.num_tasks',
