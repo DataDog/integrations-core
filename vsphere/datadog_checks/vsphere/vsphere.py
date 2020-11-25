@@ -1505,20 +1505,20 @@ class VSphereCheck(AgentCheck):
         if set_external_tags is not None:
             set_external_tags(self.get_external_host_tags())
 
-
-        self.log.info("Waiting for Collection operation threaded jobs to complete")
-        for each_job in self.task_list:
-            if not each_job.wait(JOB_TIMEOUT):
-                err_msg = u"Collection operation timed out while querying perf metrics"
-                error_code = 'CollectionError'
-                self.log.warning(err_msg)
-                self.raiseAlert(instance, error_code, err_msg)
-                self.log.critical("Restarting thread pool")
-                self.restart_pool()
-                thread_crashed = True
-                break
-        if not thread_crashed:
-            self.log.info("Thread jobs completed")
+        if self.pool_started:
+            self.log.info("Waiting for Collection operation threaded jobs to complete")
+            for each_job in self.task_list:
+                if not each_job.wait(JOB_TIMEOUT):
+                    err_msg = u"Collection operation timed out while querying perf metrics"
+                    error_code = 'CollectionError'
+                    self.log.warning(err_msg)
+                    self.raiseAlert(instance, error_code, err_msg)
+                    self.log.critical("Restarting thread pool")
+                    self.restart_pool()
+                    thread_crashed = True
+                    break
+            if not thread_crashed:
+                self.log.info("Thread jobs completed")
 
         # ## <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
