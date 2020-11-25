@@ -173,6 +173,9 @@ class VSphereCheck(AgentCheck):
         self.metric_ids = {}
         self.latest_event_query = {}
 
+        # list of threads to collect metrics
+        self.task_list = []
+
         #init the statsd client
         statsd_host = init_config.get('statsd_server_host',STATSD_SERVER_HOST)
         statsd_port = init_config.get('statsd_server_port',STATSD_SERVER_PORT)
@@ -1433,24 +1436,11 @@ class VSphereCheck(AgentCheck):
 
         self.log.info(u"Collecting metrics of %d mors for vcenter instance %s",n_mors,i_key)
 
-        task_list = []
+        
+        self.task_list = []
         for query_specs in self.make_query_specs(instance):
             if query_specs:
-                task_list.append(self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs)))
-
-        self.log.info("Waiting for thread jobs to complete")
-        thread_timeout = False
-        for each_job in task_list:
-            if not each_job.wait(JOB_TIMEOUT):
-                err_msg = u"Threaded job timeout while collecting metrics"
-                error_code = 'CollectionError'
-                self.log.warning(err_msg)
-                self.raiseAlert(instance, error_code, err_msg)
-                self.restart_pool()
-                thread_timeout = True
-                break
-        if not thread_timeout:
-            self.log.info("Thread jobs - done")
+                self.task_list.append(self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs)))
 
         self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
 
@@ -1514,6 +1504,21 @@ class VSphereCheck(AgentCheck):
 
         if set_external_tags is not None:
             set_external_tags(self.get_external_host_tags())
+
+
+        self.log.info("Waiting for thread jobs to complete")
+        for each_job in self.task_list:
+            if not each_job.wait(JOB_TIMEOUT):
+                err_msg = u"Threaded job timeout while collecting metrics"
+                error_code = 'CollectionError'
+                self.log.warning(err_msg)
+                self.raiseAlert(instance, error_code, err_msg)
+                self.log.critical("Restarting thread pool")
+                self.restart_pool()
+                thread_crashed = True
+                break
+        if not thread_crashed:
+            self.log.info("Thread jobs - done")
 
         # ## <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
