@@ -1506,10 +1506,10 @@ class VSphereCheck(AgentCheck):
             set_external_tags(self.get_external_host_tags())
 
 
-        self.log.info("Waiting for thread jobs to complete")
+        self.log.info("Waiting for Collection operation threaded jobs to complete")
         for each_job in self.task_list:
             if not each_job.wait(JOB_TIMEOUT):
-                err_msg = u"Threaded job timeout while collecting metrics"
+                err_msg = u"Collection operation timed out while querying perf metrics"
                 error_code = 'CollectionError'
                 self.log.warning(err_msg)
                 self.raiseAlert(instance, error_code, err_msg)
@@ -1518,7 +1518,7 @@ class VSphereCheck(AgentCheck):
                 thread_crashed = True
                 break
         if not thread_crashed:
-            self.log.info("Thread jobs - done")
+            self.log.info("Thread jobs completed")
 
         # ## <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
