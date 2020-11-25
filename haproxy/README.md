@@ -20,7 +20,7 @@ The Haproxy check is included in the [Datadog Agent][2] package, so you don't ne
 
 ##### Using Prometheus
 
-The recommended way to setup this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][17], or alternatively setup the legacy socket-based integration described in the next section.
+The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][17], or alternatively set up the legacy socket-based integration described in the next section.
 
 1. Configure your `haproxy.conf` using the [official guide][16].
 
@@ -32,7 +32,7 @@ The recommended way to setup this integration is by enabling the Prometheus endp
 
 ##### Using the stats endpoint
 
-Note: this configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
+**Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
 The Agent collects metrics via a stats endpoint:
 
