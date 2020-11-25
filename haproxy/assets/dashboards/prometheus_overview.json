@@ -442,7 +442,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Number of connections attempt over $host,$server",
+                "title": "Number of connection attempts over $host,$server",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -465,7 +465,7 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "For every HAProxy session, two connections are consumed - one for the client to HAProxy, and the other for HAProxy to your backend. Ultimately, the maximum number of connections HAProxy can handle is limited by your configuration and platform",
+                "content": "For every HAProxy session, two connections are consumed - one for the client to HAProxy, and the other for HAProxy to your backend. Ultimately, the maximum number of connections HAProxy can handle is limited by your configuration and platform.",
                 "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",
@@ -599,7 +599,7 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "Observing traffic volume over time is essential to determine if changes to your network infrastructure are needed. A 10Mb/s pipe might work for a startup getting its feet wet, but is insufficient for larger traffic volumes. Tracking HAProxy\u2019s network usage will empower you to scale your infrastructure with your ever-changing needs.",
+                "content": "Observing traffic volume over time is essential to determine if changes to your network infrastructure are needed. A 10Mb/s pipe might work for a startup with less traffic, but is insufficient for larger traffic volumes. Tracking HAProxy\u2019s network usage will empower you to scale your infrastructure with your ever-changing needs.",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "left",
