@@ -1433,9 +1433,15 @@ class VSphereCheck(AgentCheck):
 
         self.log.info(u"Collecting metrics of %d mors for vcenter instance %s",n_mors,i_key)
 
+        task_list = []
         for query_specs in self.make_query_specs(instance):
             if query_specs:
-                self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
+                task_list.append(self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs)))
+
+        self.log.info("Waiting for thread jobs to complete")
+        for each in task_list:
+            each.wait(JOB_TIMEOUT)
+        self.log.info("Thread jobs - done")
 
         self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
 
