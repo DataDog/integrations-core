@@ -8,7 +8,7 @@ coverage:
   precision: 2
   status:
     default_rules:
-      carryforward_behavior: exclude
+      flag_coverage_not_uploaded_behavior: exclude
     project:
       default:
         target: 75
