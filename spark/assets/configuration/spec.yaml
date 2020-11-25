@@ -93,7 +93,7 @@ files:
         description: |
           Some Spark metrics are only available via a DropWizard sink, notably the Structured Streaming ones. The
           integration fetches a JSON metrics payload from each application by leveraging the default MetricsServlet
-          sink which exposes metrics on the /metrics/json path by default for all application. If you configured
+          sink which exposes metrics on the /metrics/json path by default for all applications. If you configured
           the MetricsServlet to use a non-default path, you also need to update the following field to tell
           the integration about it.
         value:
