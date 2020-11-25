@@ -373,7 +373,7 @@ class AggregatorStub(object):
                 else:
                     # E2E tests
                     if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
-                            actual_metric_type = 'count'
+                        actual_metric_type = 'count'
 
                 if check_metric_type:
                     if expected_metric_type != actual_metric_type:
