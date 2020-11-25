@@ -12,7 +12,8 @@ files:
         example: false
         type: boolean
       description: |
-        Enable to preview the new version of the check which supports HAProxy version 2 or higher or environments using the HAProxy exporter.
+        Enable to preview the new version of the check which supports HAProxy version 2 or higher 
+        or environments using the HAProxy exporter.
 
         Prometheus-related options take effect only when this is set to `true`.
     - name: url
