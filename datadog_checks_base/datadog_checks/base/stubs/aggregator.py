@@ -62,6 +62,15 @@ class AggregatorStub(object):
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
     IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
+    METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP = {
+        'gauge': 'gauge',
+        'rate': 'gauge',
+        'count': 'count',
+        'monotonic_count': 'count',
+        'counter': 'rate',
+        'histogram': 'gauge',
+        'historate': 'rate',
+    }
 
     def __init__(self):
         self._metrics = defaultdict(list)
@@ -320,13 +329,16 @@ class AggregatorStub(object):
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
-    def assert_metrics_using_metadata(self, metadata_metrics, check_metric_type=True, exclude=None):
+    def assert_metrics_using_metadata(
+        self, metadata_metrics, check_metric_type=True, check_submission_type=False, exclude=None
+    ):
         """
         Assert metrics using metadata.csv
 
-        Checking type: Since we are asserting the in-app metric type (NOT submission type),
-        asserting the type make sense only for e2e (metrics collected from agent).
-        For integration tests, set kwarg `check_metric_type=False`.
+        Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
+        asserting this type make sense for e2e (metrics collected from agent).
+        For integrations tests, we can check the submission type with `check_submission_type=True`, or
+        use `check_metric_type=True` not to check types.
 
         Usage:
 
@@ -350,8 +362,11 @@ class AggregatorStub(object):
                     expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
                     actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
-                    if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
-                        actual_metric_type = 'count'
+                    if check_submission_type:
+                        actual_metric_type = AggregatorStub.METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP[actual_metric_type]
+                    else:
+                        if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
+                            actual_metric_type = 'count'
 
                     if expected_metric_type != actual_metric_type:
                         errors.add(
