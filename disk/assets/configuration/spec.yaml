@@ -44,7 +44,9 @@ files:
         options:
           - name: use_mount
             required: true
-            description: Instruct the check to collect using mount points instead of volumes.
+            description: |
+              If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
+              (for example `device:/dev/disk1s5`).
             value:
               example: false
               type: boolean
