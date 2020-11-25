@@ -15,6 +15,10 @@ def test_e2e(dd_agent_check):
     for metric in common.EXPECTED_E2E_METRICS:
         aggregator.assert_metric(metric)
 
+    for metric in ['avg_input_rate', 'avg_scheduling_delay']:
+        # Flaky metrics
+        aggregator.assert_metric("spark.streaming.statistics.{}".format(metric), at_least=0)
+
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check(
