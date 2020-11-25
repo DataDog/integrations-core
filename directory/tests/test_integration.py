@@ -4,7 +4,6 @@
 
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.directory import DirectoryCheck
 
 from . import common
@@ -19,5 +18,3 @@ def test_check(aggregator):
     check.check(config)
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
-
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

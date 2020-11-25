@@ -68,8 +68,8 @@ class AggregatorStub(object):
         'count': 'count',
         'monotonic_count': 'count',
         'counter': 'rate',
-        'histogram': 'gauge',
-        'historate': 'rate',
+        'histogram': 'rate', # Checking .count only, the other are gauges
+        'historate': 'rate', # Checking .count only, the other are gauges
     }
 
     def __init__(self):
@@ -354,20 +354,28 @@ class AggregatorStub(object):
                 continue
             for metric_stub in metric_stubs:
                 metric_stub_name = backend_normalize_metric_name(metric_stub.name)
+                actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+
+                # We only check `*.count` metrics for histogram and historate submissions
+                # Note: all Openmetrics histogram and summary metrics are actually separatly submitted as gauges
+                if check_submission_type and actual_metric_type in ['histogram', 'historate']:
+                    metric_stub_name += '.count'
+
+                # Checking the metric is in `metadata.csv`
                 if metric_stub_name not in metadata_metrics:
                     errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub_name))
                     continue
 
-                if check_metric_type:
-                    expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
-                    actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
-
-                    if check_submission_type:
-                        actual_metric_type = AggregatorStub.METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP[actual_metric_type]
-                    else:
-                        if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
+                expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
+                if check_submission_type:
+                    # Integration tests type mapping
+                    actual_metric_type = AggregatorStub.METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP[actual_metric_type]
+                else:
+                    # E2E tests
+                    if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
                             actual_metric_type = 'count'
 
+                if check_metric_type:
                     if expected_metric_type != actual_metric_type:
                         errors.add(
                             "Expect `{}` to have type `{}` but got `{}`.".format(

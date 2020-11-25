@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from . import common
 
 pytestmark = pytest.mark.integration
@@ -18,6 +20,7 @@ def test_integration_metrics(aggregator, check, instance, datadog_agent):
     for metric in common.ELAPSED_TIME_METRICS:
         aggregator.assert_metric(metric)
     assert_metrics_covered(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
@@ -47,6 +50,7 @@ def test_e2e(dd_agent_check, instance):
     for metric in common.ELAPSED_TIME_BUCKET_METRICS:
         aggregator.assert_metric(metric)
     assert_metrics_covered(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def assert_metrics_covered(aggregator):
