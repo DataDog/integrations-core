@@ -68,6 +68,15 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param role - string - required
+    ## Name of the role to use.
+    ##
+    ## By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. However, we recommend
+    ## to configure a role specific for monitoring:
+    ## https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+    #
+    role: <ROLE>
+
     ## @param database - string - optional - default: SNOWFLAKE
     ## Name of the default database to use.
     #
@@ -77,11 +86,6 @@ instances:
     ## Name of the default schema to use for the database.
     #
     # schema: ACCOUNT_USAGE
-
-    ## @param role - string - optional - default: ACCOUNTADMIN
-    ## Name of the default role to use.
-    #
-    # role: ACCOUNTADMIN
 
     ## @param warehouse - string - optional
     ## Name of the default warehouse to use.

@@ -67,6 +67,17 @@ files:
         value:
           type: string
           example: <PASSWORD>
+      - name: role
+        enable: true
+        required: true
+        description: |
+          Name of the role to use.
+
+          By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. However, we recommend
+          to configure a role specific for monitoring:
+          https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+        value:
+          type: string
       - name: database
         description: Name of the default database to use.
         value:
@@ -77,11 +88,6 @@ files:
         value:
           type: string
           example: ACCOUNT_USAGE
-      - name: role
-        description: Name of the default role to use.
-        value:
-          type: string
-          example: ACCOUNTADMIN
       - name: warehouse
         description: Name of the default warehouse to use.
         value:
