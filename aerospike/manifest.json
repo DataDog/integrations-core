@@ -15,7 +15,8 @@
   "public_title": "Datadog-Aerospike Integration",
   "categories": [
     "data store",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
@@ -29,7 +30,9 @@
       "Aerospike Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "aerospike"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }
