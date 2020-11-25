@@ -53,7 +53,7 @@ coverage:
         target: 75
         flags:
         - apache
-      Azure IoT Edge:
+      Azure_IoT_Edge:
         target: 75
         flags:
         - azure_iot_edge
