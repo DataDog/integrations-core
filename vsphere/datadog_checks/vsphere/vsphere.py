@@ -212,7 +212,7 @@ class VSphereCheck(AgentCheck):
                 self.restart_pool()
                 break
 
-    def raiseAlert(self,instance,error_code,error_msg,reset=True):
+    def raiseAlert(self, instance, error_code, error_msg, reset=True):
         if error_code == 'InvalidLogin':
             title = 'NTNX_NC_VC_user_authentication_alert'
         elif error_code == 'RuntimeFault':
@@ -1439,9 +1439,18 @@ class VSphereCheck(AgentCheck):
                 task_list.append(self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs)))
 
         self.log.info("Waiting for thread jobs to complete")
-        for each in task_list:
-            each.wait(JOB_TIMEOUT)
-        self.log.info("Thread jobs - done")
+        thread_timeout = False
+        for each_job in task_list:
+            if not each_job.wait(JOB_TIMEOUT):
+                err_msg = u"Threaded job timeout while collecting metrics"
+                error_code = 'CollectionError'
+                self.log.warning(err_msg)
+                self.raiseAlert(instance, error_code, err_msg)
+                self.restart_pool()
+                thread_timeout = True
+                break
+        if not thread_timeout:
+            self.log.info("Thread jobs - done")
 
         self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
 
