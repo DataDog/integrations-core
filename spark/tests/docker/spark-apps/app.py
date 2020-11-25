@@ -1,30 +1,18 @@
-import time
-
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 
 
 def main():
     # Adapted from https://github.com/apache/spark/tree/master/examples/src/main/python/streaming
-    sc = SparkContext(appName='PythonStreamingQueue')
+    sc = SparkContext(appName="PythonStreaming")
     ssc = StreamingContext(sc, 1)
 
-    # Create the queue through which RDDs can be pushed to
-    # a QueueInputDStream
-    rddQueue = []
-    for _ in range(5):
-        rddQueue += [ssc.sparkContext.parallelize([j for j in range(1, 1001)], 10)]
-
-    # Create the QueueInputDStream and use it do some processing
-    inputStream = ssc.queueStream(rddQueue)
-    mappedStream = inputStream.map(lambda x: (x % 10, 1))
-    reducedStream = mappedStream.reduceByKey(lambda a, b: a + b)
-    reducedStream.pprint()
+    lines = ssc.socketTextStream("localhost", 9998)
+    counts = lines.flatMap(lambda line: line.split(" ")).map(lambda word: (word, 1)).reduceByKey(lambda a, b: a + b)
+    counts.pprint()
 
     ssc.start()
-    while True:
-        time.sleep(60)
-    # ssc.stop(stopSparkContext=True, stopGraceFully=True)
+    ssc.awaitTermination()
 
 
 if __name__ == '__main__':

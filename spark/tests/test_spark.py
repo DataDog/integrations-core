@@ -1227,24 +1227,22 @@ def test_integration_standalone(aggregator):
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
     c.check(INSTANCE_STANDALONE)
 
-    all_metric_values = (
+    expected_metric_values = (
         SPARK_JOB_RUNNING_METRIC_VALUES,
-        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
         SPARK_STAGE_RUNNING_METRIC_VALUES,
-        SPARK_STAGE_COMPLETE_METRIC_VALUES,
         SPARK_DRIVER_METRIC_VALUES,
-        SPARK_STREAMING_STATISTICS_METRIC_VALUES,
         SPARK_STRUCTURED_STREAMING_METRIC_VALUES,
         SPARK_EXECUTOR_METRIC_VALUES,
     )
+    optional_metric_values = (SPARK_STREAMING_STATISTICS_METRIC_VALUES,)
     # Extract all keys
-    expected_metrics = set(k for j in all_metric_values for k in j) - {
-        'spark.streaming.statistics.avg_processing_time',
-        'spark.streaming.statistics.avg_total_delay',
-    }
+    expected_metrics = set(k for j in expected_metric_values for k in j)
+    optional_metrics = set(k for j in optional_metric_values for k in j)
     # Check the running job metrics
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+    for metric in optional_metrics:
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_service_check(
         'spark.standalone_master.can_connect',
@@ -1262,24 +1260,22 @@ def test_integration_driver_1(aggregator):
 
     all_metric_values = (
         SPARK_JOB_RUNNING_METRIC_VALUES,
-        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
         SPARK_STAGE_RUNNING_METRIC_VALUES,
-        SPARK_STAGE_COMPLETE_METRIC_VALUES,
         SPARK_DRIVER_METRIC_VALUES,
+    )
+    optional_metric_values = (
         SPARK_STREAMING_STATISTICS_METRIC_VALUES,
+        SPARK_EXECUTOR_METRIC_VALUES,
     )
     # Extract all keys
-    expected_metrics = (
-        set(k for j in all_metric_values for k in j)
-        - {
-            'spark.streaming.statistics.avg_processing_time',
-            'spark.streaming.statistics.avg_total_delay',
-        }
-        | {'spark.executor.count'}
-    )
+    expected_metrics = set(k for j in all_metric_values for k in j)
+    optional_metrics = set(k for j in optional_metric_values for k in j)
+
     # Check the running job metrics
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+    for metric in optional_metrics:
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_service_check(
         'spark.driver.can_connect',
@@ -1296,20 +1292,24 @@ def test_integration_driver_2(aggregator):
     c.check(INSTANCE_DRIVER_2)
 
     all_metric_values = (
-        SPARK_JOB_RUNNING_METRIC_VALUES,
-        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
-        SPARK_STAGE_RUNNING_METRIC_VALUES,
-        SPARK_STAGE_COMPLETE_METRIC_VALUES,
         SPARK_DRIVER_METRIC_VALUES,
         SPARK_STRUCTURED_STREAMING_METRIC_VALUES,
+    )
+    optional_metric_values = (
+        SPARK_STAGE_RUNNING_METRIC_VALUES,
         SPARK_EXECUTOR_METRIC_VALUES,
+        SPARK_JOB_RUNNING_METRIC_VALUES,
+        SPARK_JOB_SUCCEEDED_METRIC_VALUES,
     )
     # Extract all keys
     expected_metrics = set(k for j in all_metric_values for k in j)
+    optional_metrics = set(k for j in optional_metric_values for k in j)
 
     # Check the running job metrics
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+    for metric in optional_metrics:
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_service_check(
         'spark.driver.can_connect',
