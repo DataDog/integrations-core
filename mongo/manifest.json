@@ -46,6 +46,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mongodb"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

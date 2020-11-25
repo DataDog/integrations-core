@@ -188,6 +188,9 @@ VALID_UNIT_NAMES = {
     'terawatt',
     'heap',
     'volume',
+    'milliwatt',
+    'microwatt',
+    'nanowatt',
 }
 
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
@@ -340,7 +343,7 @@ def metadata(check, check_duplicates, show_warnings):
                 echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
 
             # integration header
-            integration = row['integration'].lower()
+            integration = row['integration']
             normalized_integration = normalize_display_name(display_name)
             if integration != normalized_integration and normalized_integration not in EXCLUDE_INTEGRATIONS:
                 errors = True

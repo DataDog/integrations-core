@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 
@@ -53,3 +54,23 @@ def kerberos():
             conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
         ):
             yield common_config
+
+
+@pytest.fixture(scope="session")
+def uds_path():
+    if Platform.is_mac():
+        # See: https://github.com/docker/for-mac/issues/483
+        pytest.skip('Sharing Unix sockets is not supported by Docker for Mac.')
+
+    with TempDir() as tmp_dir:
+        compose_file = os.path.join(HERE, 'compose', 'uds.yaml')
+        uds_filename = 'tmp.sock'
+        uds_path = os.path.join(tmp_dir, uds_filename)
+        with docker_run(
+            compose_file=compose_file,
+            env_vars={
+                "UDS_HOST_DIRECTORY": tmp_dir,
+                'UDS_FILENAME': uds_filename,
+            },
+        ):
+            yield uds_path

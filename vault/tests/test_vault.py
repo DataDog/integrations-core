@@ -257,6 +257,90 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
 
+    def test_replication_dr_mode(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+        c.log.debug = mock.MagicMock()
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == instance['api_url'] + '/sys/health':
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': 'secondary',
+                        'replication_performance_mode': 'primary',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': True,
+                        'performance_standby': False,
+                        'version': '0.10.2',
+                    },
+                    status_code=200,
+                )
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            run_check(c)
+            c.log.debug.assert_called_with(
+                "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
+            )
+        aggregator.assert_metric('vault.is_leader', 1)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+        aggregator.assert_all_metrics_covered()
+
+    def test_replication_dr_mode_changed(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+        c.log.debug = mock.MagicMock()
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == instance['api_url'] + '/sys/health':
+                if getattr(mock_requests_get, 'first_health_call', True):
+                    mock_requests_get.first_health_call = False
+                    replication_dr_mode = 'primary'
+                else:
+                    replication_dr_mode = 'secondary'
+
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': replication_dr_mode,
+                        'replication_performance_mode': 'primary',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': True,
+                        'performance_standby': False,
+                        'version': '0.10.2',
+                    },
+                    status_code=200,
+                )
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            run_check(c)
+            assert not c._replication_dr_secondary_mode
+            aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+            aggregator.assert_metric('vault.is_leader', 1)
+            aggregator.assert_all_metrics_covered()
+            aggregator.reset()
+
+            run_check(c)
+            c.log.debug.assert_called_with(
+                "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
+            )
+            assert c._replication_dr_secondary_mode
+            aggregator.assert_metric('vault.is_leader', 1)
+            aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+            aggregator.assert_all_metrics_covered()
+
     @pytest.mark.parametrize("cluster", [True, False])
     def test_event_leader_change(self, aggregator, cluster):
         instance = INSTANCES['main']

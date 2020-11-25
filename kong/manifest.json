@@ -43,6 +43,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "kong"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

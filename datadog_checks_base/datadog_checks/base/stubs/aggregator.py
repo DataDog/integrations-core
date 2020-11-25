@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import re
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
@@ -10,6 +11,9 @@ from six import iteritems
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
+
+METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
+METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
 
 
 def normalize_tags(tags, sort=False):
@@ -21,6 +25,15 @@ def normalize_tags(tags, sort=False):
         else:
             return [to_native_string(tag) for tag in tags]
     return tags
+
+
+def backend_normalize_metric_name(metric_name):
+    """
+    Normalize a metric name for the backend to understand it.
+    This is the same metric that is used to validate the metadata.csv file
+    """
+    metric_name = METRIC_REPLACEMENT.sub("_", metric_name)
+    return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
 
 
 class AggregatorStub(object):
@@ -65,11 +78,13 @@ class AggregatorStub(object):
     def ignore_metric(cls, name):
         return name in cls.IGNORED_METRICS
 
-    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
+    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
 
-    def submit_metric_e2e(self, check, check_id, mtype, name, value, tags, hostname, device=None):
+    def submit_metric_e2e(
+        self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
+    ):
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
@@ -326,19 +341,22 @@ class AggregatorStub(object):
             if metric_name in exclude:
                 continue
             for metric_stub in metric_stubs:
-
-                if metric_stub.name not in metadata_metrics:
-                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub.name))
+                metric_stub_name = backend_normalize_metric_name(metric_stub.name)
+                if metric_stub_name not in metadata_metrics:
+                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub_name))
                     continue
 
                 if check_metric_type:
-                    expected_metric_type = metadata_metrics[metric_stub.name]['metric_type']
+                    expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
                     actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+
+                    if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
+                        actual_metric_type = 'count'
 
                     if expected_metric_type != actual_metric_type:
                         errors.add(
                             "Expect `{}` to have type `{}` but got `{}`.".format(
-                                metric_stub.name, expected_metric_type, actual_metric_type
+                                metric_stub_name, expected_metric_type, actual_metric_type
                             )
                         )
 

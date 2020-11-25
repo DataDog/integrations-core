@@ -19,6 +19,10 @@ Ensure that you have configured the following:
 - [Trello](../../ddev/configuration.md#trello) credentials
 - [Trello team mappings](../../ddev/configuration.md#card-assignment)
 
+## Before Freeze
+
+1. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
+
 ## Freeze
 
 At midnight (EDT/EST) on the Friday before QA week we freeze, at which point the release manager will release

@@ -70,9 +70,12 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
-
-    for interface in ['eth0', 'eth1']:
-        tags = ['interface:{}'.format(interface)] + common_tags
+    interfaces = [
+        ('eth0', 'kept'),
+        ('eth1', 'their forward oxen'),
+    ]
+    for interface, if_desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IF_RATES:
@@ -103,6 +106,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
+        'device_vendor:apc',
     ]
     metrics = [
         'upsAdvBatteryNumOfBadBattPacks',

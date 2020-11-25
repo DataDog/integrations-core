@@ -30,6 +30,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "azure.active_directory"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

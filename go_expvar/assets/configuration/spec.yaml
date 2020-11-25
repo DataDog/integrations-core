@@ -1,0 +1,71 @@
+name: Go-Expvar
+files:
+- name: go_expvar.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: expvar_url
+      required: true
+      description: Expvar URL to gather your metrics from.
+      value:
+        type: string
+        example: http://localhost:8080
+    - name: namespace
+      description: Define your namespace that is prefixed to all metrics collected by this check.
+      value:
+        type: string
+        default: go_expvar
+    - name: metrics
+      description: |
+        These metrics are just here as examples.
+        Most memstats metrics are collected by default without configuration needed.
+        See http://godoc.org/runtime#MemStats for their explanation
+
+        For each metric you want to collect, specify its "path" and its "alias".
+        with no alias specified, the metric name defaults to a path based name.
+
+        Note: You can use a regex when you want to report for all elements matching a certain pattern
+
+        You can also specify a `type` for the metrics. One of:
+         * count
+         * gauge (the default)
+         * rate (note that this shows up as a gauge in Datadog that is meant to be seen as a "per second rate")
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: path
+              type: string
+            - name: type
+              type: string
+            - name: alias
+              type: string
+            - name: tags
+              type: array
+              items:
+                type: string
+        example:
+          - path: memstats/PauseTotalNs
+            alias: go_expvar.gc.pause_time_in_ns
+            type: rate
+            tags:
+              - "<TAG_KEY>:<TAG_VALUE>"
+          - path: memstats/Alloc
+          - path: memstats/Lookups
+            type: rate
+          - path: memstats/Mallocs
+            type: count
+          - path: memstats/Frees
+            type: rate
+          - path: memstats/BySize/1/Mallocs
+          - path: myvariable
+            alias: go_expvar.my_custom_name
+            type: gauge
+          - path: routes/get_.*/count
+    - template: instances/http
+    - template: instances/default

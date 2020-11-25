@@ -49,6 +49,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "postgresql"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

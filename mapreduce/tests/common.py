@@ -6,6 +6,7 @@ import time
 from contextlib import contextmanager
 
 import requests
+from datadog_test_libs.utils.mock_dns import mock_local
 
 from datadog_checks.dev import get_docker_hostname, get_here, run_command
 from datadog_checks.mapreduce import MapReduceCheck
@@ -70,45 +71,10 @@ def setup_mapreduce():
 
 
 @contextmanager
-def mock_local():
-    """
-    Mock 'socket' to resolve hostname based on a provided mapping.
-    Only used for integration tests, this method has no effect for e2e tests.
-    """
-    # TODO - replace with helper function when #7106 gets merged
-    mapping = {x: '127.0.0.1' for x in MOCKED_E2E_HOSTS}
-
-    import socket
-
-    _orig_getaddrinfo = socket.getaddrinfo
-    _orig_connect = socket.socket.connect
-
-    def patched_getaddrinfo(host, port, *args, **kwargs):
-        if host in mapping:
-            # See socket.getaddrinfo, just updating the hostname here.
-            # https://docs.python.org/3/library/socket.html#socket.getaddrinfo
-            dest_addr = mapping[host]
-            return [(2, 1, 6, '', (dest_addr, port))]
-
-        return _orig_getaddrinfo(host, port, *args, **kwargs)
-
-    def patched_connect(self, address):
-        host, port = address[0], address[1]
-        if host in mapping:
-            dest_addr = mapping[host]
-            host = dest_addr
-
-        return _orig_connect(self, (host, port))
-
-    socket.getaddrinfo = patched_getaddrinfo
-    socket.socket.connect = patched_connect
-    try:
+def mock_local_mapreduce_dns():
+    mapping = {x: ('127.0.0.1', None) for x in MOCKED_E2E_HOSTS}
+    with mock_local(mapping):
         yield
-    except Exception:
-        raise
-    finally:
-        socket.getaddrinfo = _orig_getaddrinfo
-        socket.socket.connect = _orig_connect
 
 
 CLUSTER_TAG = ['cluster_name:{}'.format(CLUSTER_NAME)]

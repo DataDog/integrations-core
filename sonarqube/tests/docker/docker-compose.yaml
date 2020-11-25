@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  sonarqube:
+    container_name: sonarqube
+    image: sonarqube:${SONARQUBE_VERSION}-community
+    ulimits:
+      nproc: 4096
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9000:9000"
+      - "10443:10443"
+    environment:
+      SONARQUBE_WEB_ACCESSLOGS_PATTERN: combined
+      SONARQUBE_WEB_JVM_OPTS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Dcom.sun.management.jmxremote.port=10443
+        -Dcom.sun.management.jmxremote.rmi.port=10443
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=localhost
+    volumes:
+      - ${DD_LOG_1}:/opt/sonarqube/logs/access.log
+      - ${DD_LOG_2}:/opt/sonarqube/logs/ce.log
+      - ${DD_LOG_3}:/opt/sonarqube/logs/es.log
+      - ${DD_LOG_4}:/opt/sonarqube/logs/sonar.log
+      - ${DD_LOG_5}:/opt/sonarqube/logs/web.log
+  sonar-scanner:
+    container_name: sonar-scanner
+    image: sonarsource/sonar-scanner-cli:4.5
+    environment:
+      SONAR_HOST_URL: http://sonarqube:9000
+    volumes:
+      - ${PROJECT_DIR}:/usr/src
+    depends_on:
+      - sonarqube

@@ -12,7 +12,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "haproxy.",
-  "metric_to_check": "haproxy.frontend.bytes.in_rate",
+  "metric_to_check": [
+    "haproxy.frontend.bytes.in_rate",
+    "haproxy.frontend.bytes.in.total"
+  ],
   "name": "haproxy",
   "process_signatures": [
     "haproxy",
@@ -30,6 +33,9 @@
   "type": "check",
   "integration_id": "haproxy",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -42,6 +48,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "haproxy"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

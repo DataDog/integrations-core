@@ -38,6 +38,15 @@ sudo modprobe nf_conntrack_ipv6
      ## the command `netstat` from the system package `net-tools` to be installed
      #
      - collect_connection_state: false
+
+     ## @param collect_connection_queues - boolean - optional
+     ## Set to true to enable connection queues collection
+     ## Note: connection queues collections require both
+     ## `collect_connection_state` and `collect_connection_queues` to be true
+     ## because it also requires the command `ss` from system package `iproute2` or
+     ## the command `netstat` from the system package `net-tools` to be installed
+     #
+     - collect_connection_queues: false
    ```
 
 2. [Restart the Agent][5] to effect any configuration changes.

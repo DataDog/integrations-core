@@ -80,6 +80,9 @@ class Vault(OpenMetricsBaseCheck):
         # Avoid error on the first attempt to refresh tokens
         self._refreshing_token = False
 
+        # Detect if Vault is in replication mode
+        self._replication_dr_secondary_mode = False
+
         # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
         # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
         # potential configuration errors as part of the check run phase.
@@ -100,7 +103,7 @@ class Vault(OpenMetricsBaseCheck):
             for submit_function in submission_queue:
                 submit_function(tags=tags)
 
-        if self._client_token or self._no_token:
+        if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
                 self.process(self._scraper_config)
@@ -191,10 +194,16 @@ class Vault(OpenMetricsBaseCheck):
     def check_health_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/health'
         health_data = self.access_api(url, ignore_status_codes=self.SYS_HEALTH_DEFAULT_CODES)
-
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
             dynamic_tags.append('cluster_name:{}'.format(cluster_name))
+
+        replication_mode = health_data.get('replication_dr_mode', '').lower()
+        if replication_mode == 'secondary':
+            self._replication_dr_secondary_mode = True
+            self.log.debug("Detected vault in replication DR secondary mode, skipping Prometheus metric collection.")
+        else:
+            self._replication_dr_secondary_mode = False
 
         vault_version = health_data.get('version')
         if vault_version:

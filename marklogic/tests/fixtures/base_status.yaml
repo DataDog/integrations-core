@@ -1,0 +1,335 @@
+local-cluster-status:
+  effective-version: 9001200
+  id: '13700913624870898348'
+  meta:
+    current-time: '2020-05-02T00:07:38.360792Z'
+    elapsed-time:
+      units: sec
+      value: 0.020349
+    uri: /manage/v2?view=status
+  name: 26f962ec5443-cluster
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: item
+      view-uri: /manage/v2/clusters/26f962ec5443-cluster
+  role: local
+  status-relations:
+    forests-status:
+      forests-status-summary:
+        backup-count:
+          units: quantity
+          value: 0
+        cache-properties:
+          compressed-tree-cache-hit-rate:
+            units: hits/sec
+            value: 0
+          compressed-tree-cache-miss-rate:
+            units: misses/sec
+            value: 0
+          compressed-tree-cache-ratio:
+            units: '%'
+            value: 93
+          large-binary-cache-hit-rate:
+            units: hits/sec
+            value: 0
+          large-binary-cache-miss-rate:
+            units: misses/sec
+            value: 0
+          list-cache-hit-rate:
+            units: hits/sec
+            value: 0.0299999993294477
+          list-cache-miss-rate:
+            units: misses/sec
+            value: 0
+          list-cache-ratio:
+            units: '%'
+            value: 95
+          triple-cache-hit-rate:
+            units: hits/sec
+            value: 0
+          triple-cache-miss-rate:
+            units: misses/sec
+            value: 0
+          triple-value-cache-hit-rate:
+            units: hits/sec
+            value: 0
+          triple-value-cache-miss-rate:
+            units: misses/sec
+            value: 0
+        max-stands-per-forest:
+          units: quantity
+          value: 1
+        merge-count:
+          units: quantity
+          value: 0
+        restore-count:
+          units: quantity
+          value: 0
+        state-not-open:
+          units: quantity
+          value: 0
+        total-forests:
+          units: quantity
+          value: 10
+      typeref: forests
+      uriref: /manage/v2/forests?view=status
+    hosts-status:
+      hosts-status-summary:
+        load-properties:
+          load-detail:
+            backup-read-load:
+              units: sec/sec
+              value: 0
+            backup-write-load:
+              units: sec/sec
+              value: 0
+            deadlock-wait-load:
+              units: sec/sec
+              value: 0
+            external-binary-read-load:
+              units: sec/sec
+              value: 0
+            foreign-xdqp-client-receive-load:
+              units: sec/sec
+              value: 0
+            foreign-xdqp-client-send-load:
+              units: sec/sec
+              value: 0
+            foreign-xdqp-server-receive-load:
+              units: sec/sec
+              value: 0
+            foreign-xdqp-server-send-load:
+              units: sec/sec
+              value: 0
+            journal-write-load:
+              units: sec/sec
+              value: 0
+            large-read-load:
+              units: sec/sec
+              value: 0
+            large-write-load:
+              units: sec/sec
+              value: 0
+            merge-read-load:
+              units: sec/sec
+              value: 0
+            merge-write-load:
+              units: sec/sec
+              value: 0
+            query-read-load:
+              units: sec/sec
+              value: 0
+            read-lock-hold-load:
+              units: sec/sec
+              value: 0
+            read-lock-wait-load:
+              units: sec/sec
+              value: 0
+            restore-read-load:
+              units: sec/sec
+              value: 0
+            restore-write-load:
+              units: sec/sec
+              value: 0
+            save-write-load:
+              units: sec/sec
+              value: 0
+            write-lock-hold-load:
+              units: sec/sec
+              value: 0
+            write-lock-wait-load:
+              units: sec/sec
+              value: 0
+            xdqp-client-receive-load:
+              units: sec/sec
+              value: 0
+            xdqp-client-send-load:
+              units: sec/sec
+              value: 0
+            xdqp-server-receive-load:
+              units: sec/sec
+              value: 0
+            xdqp-server-send-load:
+              units: sec/sec
+              value: 0
+          total-load:
+            units: MB/sec
+            value: 0
+        memory-process-huge-pages-size: 0
+        memory-process-rss: 449
+        memory-size: 6144
+        memory-system-free: 5525
+        memory-system-total: 5947
+        rate-properties:
+          rate-detail:
+            backup-read-rate:
+              units: MB/sec
+              value: 0
+            backup-write-rate:
+              units: MB/sec
+              value: 0
+            deadlock-rate:
+              units: locks/sec
+              value: 0
+            external-binary-read-rate:
+              units: MB/sec
+              value: 0
+            foreign-xdqp-client-receive-rate:
+              units: MB/sec
+              value: 0
+            foreign-xdqp-client-send-rate:
+              units: MB/sec
+              value: 0
+            foreign-xdqp-server-receive-rate:
+              units: MB/sec
+              value: 0
+            foreign-xdqp-server-send-rate:
+              units: MB/sec
+              value: 0
+            journal-write-rate:
+              units: MB/sec
+              value: 0
+            large-read-rate:
+              units: MB/sec
+              value: 0
+            large-write-rate:
+              units: MB/sec
+              value: 0
+            memory-process-swap-rate:
+              units: MB/sec
+              value: 0
+            memory-system-pagein-rate:
+              units: MB/sec
+              value: 0
+            memory-system-pageout-rate:
+              units: MB/sec
+              value: 16.639799118042
+            memory-system-swapin-rate:
+              units: MB/sec
+              value: 0
+            memory-system-swapout-rate:
+              units: MB/sec
+              value: 0
+            merge-read-rate:
+              units: MB/sec
+              value: 0
+            merge-write-rate:
+              units: MB/sec
+              value: 0
+            query-read-rate:
+              units: MB/sec
+              value: 0
+            read-lock-rate:
+              units: locks/sec
+              value: 0
+            restore-read-rate:
+              units: MB/sec
+              value: 0
+            restore-write-rate:
+              units: MB/sec
+              value: 0
+            save-write-rate:
+              units: MB/sec
+              value: 0
+            write-lock-rate:
+              units: locks/sec
+              value: 0.0250579994171858
+            xdqp-client-receive-rate:
+              units: MB/sec
+              value: 0
+            xdqp-client-send-rate:
+              units: MB/sec
+              value: 0
+            xdqp-server-receive-rate:
+              units: MB/sec
+              value: 0
+            xdqp-server-send-rate:
+              units: MB/sec
+              value: 0
+          total-rate:
+            units: MB/sec
+            value: 16.639799118042
+        total-cpu-stat-system: 0.737475991249085
+        total-cpu-stat-user: 1.00873005390167
+        total-hosts:
+          units: quantity
+          value: 1
+        total-hosts-offline:
+          units: quantity
+          value: 0
+      typeref: hosts
+      uriref: /manage/v2/hosts?view=status
+    requests-status:
+      requests-status-summary:
+        max-seconds:
+          units: sec
+          value: 0.041299
+        mean-seconds:
+          units: sec
+          value: 0.0308595
+        median-seconds:
+          units: sec
+          value: 0.0308595
+        min-seconds:
+          units: sec
+          value: 0.02042
+        ninetieth-percentile-seconds:
+          units: sec
+          value: 0.041299
+        query-count:
+          units: quantity
+          value: 0
+        standard-dev-seconds:
+          units: sec
+          value: 0.0148
+        total-requests:
+          units: quantity
+          value: 2
+        update-count:
+          units: quantity
+          value: 2
+      typeref: requests
+      uriref: /manage/v2/requests
+    servers-status:
+      servers-status-summary:
+        expanded-tree-cache-hit-rate:
+          units: hits/sec
+          value: 0
+        expanded-tree-cache-miss-rate:
+          units: misses/sec
+          value: 0
+        request-count:
+          units: quantity
+          value: 2
+        request-rate:
+          units: quantity/sec
+          value: 0.959999978542328
+      typeref: servers
+      uriref: /manage/v2/servers?view=status
+    transactions-status:
+      transactions-status-summary:
+        max-seconds:
+          units: sec
+          value: 0.38038
+        mean-seconds:
+          units: sec
+          value: 0.38038
+        median-seconds:
+          units: sec
+          value: 0.38038
+        min-seconds:
+          units: sec
+          value: 0.38038
+        ninetieth-percentile-seconds:
+          units: sec
+          value: 0.38038
+        standard-dev-seconds:
+          units: sec
+          value: 0
+        total-transactions:
+          units: quantity
+          value: 2
+      typeref: transactions
+      uriref: /manage/v2/transactions
+  version: 9.0-12

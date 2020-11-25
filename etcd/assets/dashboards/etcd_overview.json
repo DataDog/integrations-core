@@ -1,6 +1,6 @@
 {
-    "title": "Etcd Overview",
-    "description": "",
+    "title": "Etcd v3 - Overview",
+    "description": "This dashboard visualizes your etcd v3 cluster's activity and performance so you can ensure your configurations are synced across your hosts and containers. Further reading on etcd monitoring:\n\n- [Datadog's etcd integration docs](https://docs.datadoghq.com/integrations/etcd/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
             "id": 0,

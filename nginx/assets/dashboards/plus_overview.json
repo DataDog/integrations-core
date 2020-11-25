@@ -3,50 +3,22 @@
   "description": "",
   "widgets": [
     {
-      "id": 0,
+      "id": 8372466299201261,
       "definition": {
         "type": "image",
-        "url": "https://s3.amazonaws.com/dd-integrations/nginx/configuration/tile/logo.png",
-        "sizing": "fit"
+        "url": "/static/images/screenboard/integrations/nginx.png",
+        "sizing": "fit",
+        "margin": "small"
       },
       "layout": {
         "x": 0,
         "y": 0,
-        "width": 54,
+        "width": 42,
         "height": 10
       }
     },
     {
-      "id": 1,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "per_second(sum:nginx.requests.total{$scope})",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Requests per second",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 0,
-        "y": 18,
-        "width": 43,
-        "height": 16
-      }
-    },
-    {
-      "id": 2,
+      "id": 176993534233840,
       "definition": {
         "type": "hostmap",
         "requests": {
@@ -69,14 +41,14 @@
         }
       },
       "layout": {
-        "x": 44,
-        "y": 35,
+        "x": 134,
+        "y": 17,
         "width": 28,
-        "height": 25
+        "height": 22
       }
     },
     {
-      "id": 3,
+      "id": 1659566404329661,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -98,71 +70,52 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 74,
-        "y": 35,
+        "x": 44,
+        "y": 63,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 4,
+      "id": 8336477571075253,
       "definition": {
         "type": "note",
-        "content": "\n\n\n\n\n\n\nConnections",
-        "background_color": "gray",
+        "content": "Connections",
+        "background_color": "blue",
         "font_size": "18",
         "text_align": "center",
-        "show_tick": true,
+        "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
       },
       "layout": {
-        "x": 74,
-        "y": 0,
+        "x": 44,
+        "y": 40,
         "width": 43,
         "height": 5
       }
     },
     {
-      "id": 5,
+      "id": 2656052651840502,
       "definition": {
         "type": "note",
-        "content": "Requests",
+        "content": "**Green** : low number of requests\n\n**Orange**: high number of requests",
         "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      },
-      "layout": {
-        "x": 0,
-        "y": 11,
-        "width": 72,
-        "height": 5
-      }
-    },
-    {
-      "id": 6,
-      "definition": {
-        "type": "note",
-        "content": "**Green** : low number of requests\n**Orange**: high number of requests",
-        "background_color": "yellow",
         "font_size": "14",
         "text_align": "left",
         "show_tick": true,
         "tick_pos": "50%",
-        "tick_edge": "top"
+        "tick_edge": "left"
       },
       "layout": {
-        "x": 44,
-        "y": 62,
+        "x": 165,
+        "y": 32,
         "width": 28,
-        "height": 6
+        "height": 9
       }
     },
     {
-      "id": 7,
+      "id": 2111309826939806,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -177,21 +130,28 @@
           }
         ],
         "custom_links": [],
-        "title": "Dropped connections (per second)",
+        "yaxis": {
+          "label": "",
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "include_zero": true
+        },
+        "title": "Dropped connections per second",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0"
       },
       "layout": {
-        "x": 74,
-        "y": 52,
+        "x": 44,
+        "y": 80,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 8,
+      "id": 5199341327805669,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -213,14 +173,14 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 74,
-        "y": 18,
+        "x": 44,
+        "y": 46,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 9,
+      "id": 6219404675198026,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -242,14 +202,14 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 0,
-        "y": 52,
+        "x": 89,
+        "y": 23,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 10,
+      "id": 2398136529304304,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -271,45 +231,14 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 0,
-        "y": 35,
+        "x": 89,
+        "y": 6,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 11,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "per_second(sum:nginx.requests.total{$scope})",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "value": 0,
-                "palette": "white_on_green"
-              }
-            ]
-          }
-        ],
-        "custom_links": [],
-        "title": "Requests per second",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 2
-      },
-      "layout": {
-        "x": 44,
-        "y": 18,
-        "width": 28,
-        "height": 16
-      }
-    },
-    {
-      "id": 12,
+      "id": 6355141662128461,
       "definition": {
         "type": "query_value",
         "requests": [
@@ -333,45 +262,14 @@
         "precision": 2
       },
       "layout": {
-        "x": 96,
-        "y": 7,
+        "x": 66,
+        "y": 6,
         "width": 21,
         "height": 10
       }
     },
     {
-      "id": 13,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:nginx.connections.idle{$scope}+sum:nginx.connections.active{$scope}",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "value": 0,
-                "palette": "white_on_green"
-              }
-            ]
-          }
-        ],
-        "custom_links": [],
-        "title": "Current connections",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 2
-      },
-      "layout": {
-        "x": 74,
-        "y": 7,
-        "width": 21,
-        "height": 10
-      }
-    },
-    {
-      "id": 14,
+      "id": 6153160185090231,
       "definition": {
         "type": "check_status",
         "title": "Nginx host up",
@@ -385,14 +283,14 @@
         ]
       },
       "layout": {
-        "x": 55,
-        "y": 0,
-        "width": 17,
+        "x": 44,
+        "y": 6,
+        "width": 21,
         "height": 10
       }
     },
     {
-      "id": 15,
+      "id": 8037534708701763,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -414,14 +312,14 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 30,
-        "y": 70,
+        "x": 44,
+        "y": 115,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 16,
+      "id": 8511590679875315,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -443,14 +341,14 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 74,
-        "y": 70,
+        "x": 44,
+        "y": 132,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 17,
+      "id": 595506684540405,
       "definition": {
         "type": "query_value",
         "requests": [
@@ -472,21 +370,21 @@
           }
         ],
         "custom_links": [],
-        "title": "Avg of failed ssl handshakes",
+        "title": "Avg failed ssl handshakes",
         "title_size": "16",
         "title_align": "left",
         "autoscale": true,
         "precision": 2
       },
       "layout": {
-        "x": 14,
-        "y": 70,
-        "width": 15,
-        "height": 7
+        "x": 66,
+        "y": 104,
+        "width": 21,
+        "height": 10
       }
     },
     {
-      "id": 18,
+      "id": 993429390778853,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -509,13 +407,13 @@
       },
       "layout": {
         "x": 119,
-        "y": 18,
+        "y": 62,
         "width": 43,
         "height": 16
       }
     },
     {
-      "id": 19,
+      "id": 2052302855332566,
       "definition": {
         "type": "query_value",
         "requests": [
@@ -544,14 +442,14 @@
         "precision": 0
       },
       "layout": {
-        "x": 119,
-        "y": 7,
-        "width": 21,
-        "height": 10
+        "x": 89,
+        "y": 62,
+        "width": 29,
+        "height": 16
       }
     },
     {
-      "id": 20,
+      "id": 4062044007757727,
       "definition": {
         "type": "timeseries",
         "requests": [
@@ -565,27 +463,34 @@
             }
           }
         ],
-        "custom_links": [],
-        "title": "Hitten bytes in cache",
+        "yaxis": {
+          "label": "",
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "include_zero": true
+        },
+        "title": "Bytes hit in cache",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
       "layout": {
         "x": 119,
-        "y": 35,
+        "y": 46,
         "width": 43,
-        "height": 16
+        "height": 15
       }
     },
     {
-      "id": 21,
+      "id": 6606546066384782,
       "definition": {
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:nginx.cache.miss.bytes{$scope}, sum:nginx.cache.miss.bytes_written{$scope}",
+            "q": "sum:nginx.cache.miss.bytes{$scope}, sum:nginx.cache.miss.bytes_written{$scope}, sum:nginx.cache.miss.bytes{$scope}+sum:nginx.cache.miss.bytes_written{$scope}",
             "display_type": "line",
             "style": {
               "palette": "dog_classic",
@@ -595,6 +500,13 @@
           }
         ],
         "custom_links": [],
+        "yaxis": {
+          "label": "",
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "include_zero": true
+        },
         "title": "Missed bytes in cache",
         "title_size": "16",
         "title_align": "left",
@@ -602,19 +514,19 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 119,
-        "y": 52,
-        "width": 43,
+        "x": 89,
+        "y": 79,
+        "width": 73,
         "height": 16
       }
     },
     {
-      "id": 22,
+      "id": 4379244766192226,
       "definition": {
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:nginx.cache.bypass.bytes{$scope}, sum:nginx.cache.bypass.bytes_written{$scope}",
+            "q": "sum:nginx.cache.bypass.bytes{$scope}, sum:nginx.cache.bypass.bytes_written{$scope}, sum:nginx.cache.bypass.bytes{$scope}+sum:nginx.cache.bypass.bytes_written{$scope}",
             "display_type": "line",
             "style": {
               "palette": "dog_classic",
@@ -624,6 +536,13 @@
           }
         ],
         "custom_links": [],
+        "yaxis": {
+          "label": "",
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "include_zero": true
+        },
         "title": "Bypassed bytes in cached",
         "title_size": "16",
         "title_align": "left",
@@ -631,52 +550,52 @@
         "legend_size": "0"
       },
       "layout": {
-        "x": 119,
-        "y": 69,
-        "width": 43,
+        "x": 89,
+        "y": 96,
+        "width": 73,
         "height": 16
       }
     },
     {
-      "id": 23,
+      "id": 327971175756520,
       "definition": {
         "type": "note",
-        "content": "\n\n\n\n\n\n\nCache",
-        "background_color": "gray",
+        "content": "Cache",
+        "background_color": "blue",
         "font_size": "18",
         "text_align": "center",
-        "show_tick": true,
+        "show_tick": false,
         "tick_pos": "50%",
         "tick_edge": "bottom"
       },
       "layout": {
-        "x": 119,
-        "y": 0,
+        "x": 89,
+        "y": 40,
+        "width": 73,
+        "height": 5
+      }
+    },
+    {
+      "id": 6557769317880587,
+      "definition": {
+        "type": "note",
+        "content": "SSL",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 44,
+        "y": 98,
         "width": 43,
         "height": 5
       }
     },
     {
-      "id": 24,
-      "definition": {
-        "type": "note",
-        "content": "SSL",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
-      },
-      "layout": {
-        "x": 0,
-        "y": 70,
-        "width": 12,
-        "height": 16
-      }
-    },
-    {
-      "id": 25,
+      "id": 4864066584496850,
       "definition": {
         "type": "query_value",
         "requests": [
@@ -685,22 +604,22 @@
             "aggregator": "avg"
           }
         ],
-        "custom_links": [],
-        "title": "Avg hitten bytes",
+        "title": "Avg bytes hit",
         "title_size": "16",
         "title_align": "left",
+        "time": {},
         "autoscale": true,
         "precision": 2
       },
       "layout": {
-        "x": 141,
-        "y": 7,
-        "width": 21,
-        "height": 10
+        "x": 89,
+        "y": 46,
+        "width": 29,
+        "height": 15
       }
     },
     {
-      "id": 26,
+      "id": 288065467518527,
       "definition": {
         "type": "query_value",
         "requests": [
@@ -722,17 +641,285 @@
           }
         ],
         "custom_links": [],
-        "title": "Avg of successful ssl handshakes",
+        "title": "Avg successful ssl handshakes",
         "title_size": "16",
         "title_align": "left",
         "autoscale": true,
         "precision": 2
       },
       "layout": {
-        "x": 14,
-        "y": 79,
-        "width": 15,
-        "height": 7
+        "x": 44,
+        "y": 104,
+        "width": 20,
+        "height": 10
+      }
+    },
+    {
+      "id": 4641248259991682,
+      "definition": {
+        "type": "note",
+        "content": "With this dashboard, you can get a high-level view of your NGINX Plus deployments and troubleshoot performance issues, including:\n\n- a high-level view of combined end-user activity\n- how often your servers are failing to process seemingly valid requests\n- how long your servers are taking to process client requests\n\n\nTo learn more about our NGINX integration, see:\n\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/nginx/?tab=host).\n\n- Our [blog post](https://www.datadoghq.com/blog/how-to-monitor-nginx/).\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.\n\n",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 42,
+        "height": 32
+      }
+    },
+    {
+      "id": 2771656542084460,
+      "definition": {
+        "type": "note",
+        "content": "Basic Activity Summary",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 44,
+        "y": 0,
+        "width": 43,
+        "height": 5
+      }
+    },
+    {
+      "id": 8732063752278218,
+      "definition": {
+        "type": "note",
+        "content": "Error Summary",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 89,
+        "y": 0,
+        "width": 43,
+        "height": 5
+      }
+    },
+    {
+      "id": 8186862559661412,
+      "definition": {
+        "type": "note",
+        "content": "Terms are different between NGINX and NGINX Plus:\n\n### NGINX (open source)\tvs. NGINX Plus\n\n- `accepts` ->  `accepted`\n\n- `reading` + `writing`-> `current`\n\n- `waiting` -> `idle`\n\n- `active` (includes `waiting` states) -> `active` (excludes `idle` states)\n\n- `requests` -> `total`\n\nFor more information on the differences between NGINX and NGINX Plus, please refer to this [blog post](https://www.datadoghq.com/blog/how-to-monitor-nginx/#basic-activity-metrics).",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 0,
+        "y": 45,
+        "width": 41,
+        "height": 25
+      }
+    },
+    {
+      "id": 1966399736175836,
+      "definition": {
+        "type": "note",
+        "content": "Performance Summary",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 134,
+        "y": 0,
+        "width": 28,
+        "height": 5
+      }
+    },
+    {
+      "id": 425535556761542,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:nginx.connections.accepted{$scope}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Accepted connections",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 44,
+        "y": 17,
+        "width": 21,
+        "height": 10
+      }
+    },
+    {
+      "id": 6104147714317808,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:nginx.net.waiting{$scope}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Idle/waiting connections",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 44,
+        "y": 28,
+        "width": 21,
+        "height": 10
+      }
+    },
+    {
+      "id": 6051745457649742,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:nginx.requests.total{$scope}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Total requests",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 66,
+        "y": 28,
+        "width": 21,
+        "height": 10
+      }
+    },
+    {
+      "id": 1528297584896356,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:nginx.net.request_per_s{$scope}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Requests per second",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 134,
+        "y": 6,
+        "width": 28,
+        "height": 10
+      }
+    },
+    {
+      "id": 4609975630827406,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "per_second(sum:nginx.connections.dropped{$scope})",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Dropped connections",
+        "title_size": "16",
+        "title_align": "left",
+        "precision": 2
+      },
+      "layout": {
+        "x": 66,
+        "y": 17,
+        "width": 21,
+        "height": 10
+      }
+    },
+    {
+      "id": 4824885675186612,
+      "definition": {
+        "type": "note",
+        "content": "Sampling your request data (**requests** in open source, or **total** in Plus) with a fixed time interval provides you with the number of requests you’re receiving per unit of time—often minutes or seconds. \n\nMonitoring this metric can alert you to spikes in incoming web traffic, whether legitimate or nefarious, or sudden drops, which are usually indicative of problems. A drastic change in requests per second can alert you to problems brewing somewhere in your environment, even if it cannot tell you exactly where those problems lie. Note that all requests are counted the same, regardless of their URLs.\n\n",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 165,
+        "y": 0,
+        "width": 28,
+        "height": 31
       }
     }
   ],
@@ -744,7 +931,7 @@
     }
   ],
   "layout_type": "free",
-  "is_read_only": true,
+  "is_read_only": false,
   "notify_list": [],
-  "id": 30278
+  "id": "s99-7ft-7y5"
 }

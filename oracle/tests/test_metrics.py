@@ -5,7 +5,7 @@ import copy
 
 import mock
 
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import Query, QueryManager
 from datadog_checks.oracle import queries
 
 
@@ -13,11 +13,11 @@ def test_sys_metrics(aggregator, check):
     con = mock.MagicMock()
     cur = mock.MagicMock()
     con.cursor.return_value = cur
-    metrics = copy.deepcopy(queries.SystemMetrics.query_data['columns'][1]['items'])
+    metrics = copy.deepcopy(queries.SystemMetrics['columns'][1]['items'])
     cur.fetchall.return_value = zip([0] * len(metrics.keys()), metrics.keys())
 
     check._connection = con
-    check._query_manager.queries = [queries.SystemMetrics]
+    check._query_manager.queries = [Query(queries.SystemMetrics)]
     check._query_manager.tags = ['custom_tag']
     check._query_manager.compile_queries()
     check._query_manager.execute()
@@ -30,7 +30,7 @@ def test_process_metrics(aggregator, check):
     con = mock.MagicMock()
     cur = mock.MagicMock()
     con.cursor.return_value = cur
-    metrics = copy.deepcopy(queries.ProcessMetrics.query_data['columns'][1:])
+    metrics = copy.deepcopy(queries.ProcessMetrics['columns'][1:])
     programs = [
         "PSEUDO",
         "oracle@localhost.localdomain (PMON)",
@@ -40,7 +40,7 @@ def test_process_metrics(aggregator, check):
     cur.fetchall.return_value = [[program] + ([0] * len(metrics)) for program in programs]
 
     check._connection = con
-    check._query_manager.queries = [queries.ProcessMetrics]
+    check._query_manager.queries = [Query(queries.ProcessMetrics)]
     check._query_manager.tags = ['custom_tag']
     check._query_manager.compile_queries()
     check._query_manager.execute()
@@ -67,7 +67,7 @@ def test_tablespace_metrics(aggregator, check):
     con.cursor.return_value = cur
 
     check._connection = con
-    check._query_manager.queries = [queries.TableSpaceMetrics]
+    check._query_manager.queries = [Query(queries.TableSpaceMetrics)]
     check._query_manager.tags = ['custom_tag']
     check._query_manager.compile_queries()
     check._query_manager.execute()

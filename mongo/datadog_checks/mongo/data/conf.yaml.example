@@ -112,12 +112,14 @@ instances:
     ##   * `tcmalloc` -  TCMalloc memory allocator
     ##   * `top` - Usage statistics for each collection
     ##   * `collection` - Metrics of the specified collections
+    ##   * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
     #
     # additional_metrics:
     #   - metrics.commands
     #   - tcmalloc
     #   - top
     #   - collection
+    #   - jumbo_chunks
 
     ## @param collections - list of strings - optional
     ## Collect metrics on specific collections from the database specified
@@ -138,11 +140,14 @@ instances:
 
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo
+    ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
+    ## You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
     ## See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
     #
     # custom_queries:
     #   - metric_prefix: mongo
     #     query: <MONGO_COMMAND_QUERY>
+    #     database: <MONGO_DATABASE>
     #     fields:
     #     - field_name: <FIELD_NAME>
     #       name: <METRIC_SUFFIX>
@@ -199,6 +204,8 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.

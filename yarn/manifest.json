@@ -32,6 +32,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "yarn"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -22,6 +22,11 @@ class PartialFormatter(string.Formatter):
             return string.Formatter.get_value(self, key, args, kwargs)
 
 
+def milliseconds_to_nanoseconds(value):
+    """Convert from ms to ns (used for pg_stat* conversion to metrics with units in ns)"""
+    return value * 1000000
+
+
 def get_schema_field(descriptors):
     """Return column containg the schema name for that query."""
     for column, name in descriptors:
@@ -242,6 +247,27 @@ REPLICATION_METRICS = {
     'query': """
 SELECT {metrics_columns}
  WHERE (SELECT pg_is_in_recovery())""",
+}
+
+# Requires postgres 10+
+REPLICATION_STATS_METRICS = {
+    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
+    'metrics': {
+        'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
+            'postgresql.replication.wal_write_lag',
+            AgentCheck.gauge,
+        ),
+        'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
+            'postgresql.replication.wal_flush_lag',
+            AgentCheck.gauge,
+        ),
+        'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
+            'postgresql.replication.wal_replay_lag',
+            AgentCheck.gauge,
+        ),
+    },
+    'relation': False,
+    'query': 'SELECT application_name, state, sync_state, {metrics_columns} FROM pg_stat_replication',
 }
 
 CONNECTION_METRICS = {

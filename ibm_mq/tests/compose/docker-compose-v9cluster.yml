@@ -13,6 +13,7 @@ services:
     volumes:
       - './startup_commands.sh:/tmp/startup_commands.sh'
       - './cluster-config1.mqsc:/etc/mqm/config.mqsc'
+      - '../keys:/etc/mqm/pki/keys'
 
     networks:
       - ibm-net
@@ -28,6 +29,7 @@ services:
       - "9444:9443"
     volumes:
       - './cluster-config2.mqsc:/etc/mqm/config.mqsc'
+      - '../keys:/etc/mqm/pki/keys'
 
     networks:
       - ibm-net

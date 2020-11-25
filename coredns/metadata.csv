@@ -11,7 +11,7 @@ coredns.cache_misses_count,count,,miss,,Counter of cache misses.,1,coredns,cache
 coredns.cache_prefetch_count,count,,,,"The number of time the cache has prefetched a cached item.",1,coredns,cache prefetch
 coredns.cache_stale_count,count,,request,,"Counter of requests served from stale cache entries.",0,coredns,cache stale
 coredns.dnssec.cache_size,gauge,,,,"Total elements in the cache, type is signature.",0,coredns,dnssec cache size
-corends.dnssec.cache_hits,count,,hit,,"Counter of cache hits.",0,coredns,dnssec cache hit
+coredns.dnssec.cache_hits,count,,hit,,"Counter of cache hits.",0,coredns,dnssec cache hit
 coredns.dnssec.cache_misses,count,,miss,,"Counter of cache misses.",0,coredns,dnssec cache miss
 coredns.request_count,count,,request,,total query count.,1,coredns,request count
 coredns.request_type_count,count,,,,counter of queries per zone and type,1,coredns,request type
@@ -77,6 +77,6 @@ coredns.process.open_fds,gauge,,file,,Number of open file descriptors.,0,coredns
 coredns.process.resident_memory_bytes,gauge,,byte,,Resident memory size in bytes.,0,coredns,
 coredns.process.start_time_seconds,gauge,,second,,Start time of the process since unix epoch in seconds.,0,coredns,
 coredns.process.virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes.,0,coredns,
-corends.template.matches_count,count,,,,"The total number of matched requests by regex.",0,coredns,template matches
+coredns.template.matches_count,count,,,,"The total number of matched requests by regex.",0,coredns,template matches
 coredns.template.failures_count,count,,error,,"The number of times the Go templating failed.",0,coredns,template failure
 coredns.template.rr_failures_count,count,,error,,"The number of times the templated resource record was invalid and could not be parsed.",0,coredns,template resource failure

@@ -15,6 +15,7 @@ from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
 from ....trello import TrelloClient
 from ....utils import format_commit_id
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from .fixed_cards_mover import FixedCardsMover
 from .rc_build_cards_updater import RCBuildCardsUpdater
 from .tester_selector.tester_selector import TesterSelector, TrelloUser, create_tester_selector
 
@@ -180,9 +181,21 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.option(
     '--update-rc-builds-cards', is_flag=True, help='Update cards in RC builds column with `target_ref` version'
 )
+@click.option(
+    '--move-cards',
+    is_flag=True,
+    help='Do not create a card for a change, but move the existing card from '
+    + '`HAVE BUGS - FIXME` or `FIXED - Ready to Rebuild` to INBOX team',
+)
 @click.pass_context
 def testable(
-    ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, update_rc_builds_cards: bool
+    ctx: click.Context,
+    base_ref: str,
+    target_ref: str,
+    milestone: str,
+    dry_run: bool,
+    update_rc_builds_cards: bool,
+    move_cards: bool,
 ) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
@@ -243,10 +256,11 @@ def testable(
     if repo == 'integrations-core':
         options = {
             '1': 'Integrations',
-            '2': 'Containers',
-            '3': 'Core',
-            '4': 'Platform',
-            '5': 'Tools and Libraries',
+            '2': 'Infra Integrations',
+            '3': 'Containers',
+            '4': 'Core',
+            '5': 'Platform',
+            '6': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -260,7 +274,8 @@ def testable(
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
-            '9': 'Tools and Libraries',
+            '9': 'Infra Integrations',
+            '10': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -271,12 +286,17 @@ def testable(
     commit_ids: Set[str] = set()
     user_config = ctx.obj
     trello = TrelloClient(user_config)
+
+    fixed_cards_mover = None
+    if move_cards:
+        fixed_cards_mover = FixedCardsMover(trello, dry_run)
+
     rc_build_cards_updater = None
     if update_rc_builds_cards:
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
     github_teams = trello.label_github_team_map.values()
-    testerSelector = create_tester_selector(trello, github_teams, user_config, APP_DIR)
+    testerSelector = create_tester_selector(trello, repo, github_teams, user_config, APP_DIR)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:
@@ -358,6 +378,9 @@ def testable(
         if not (trello_config['key'] and trello_config['token']):
             abort('Error: You are not authenticated for Trello. Please set your trello ddev config')
 
+        if fixed_cards_mover:
+            fixed_cards_mover.on_new_pr(pr_url)
+            continue
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
             create_trello_card(
@@ -449,7 +472,11 @@ def testable(
     if rc_build_cards_updater and not dry_run:
         rc_build_cards_updater.update_cards()
 
-    if dry_run:
+    if fixed_cards_mover:
+        message = fixed_cards_mover.get_message()
+        echo_info('\n')
+        echo_info(message)
+    elif dry_run:
         show_card_assigments(testerSelector)
 
 

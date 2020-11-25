@@ -15,7 +15,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "couch.",
-  "metric_to_check": "couchdb.couchdb.request_time",
+  "metric_to_check": [
+    "couchdb.couchdb.request_time.n",
+    "couchdb.couchdb.request_time"
+  ],
   "name": "couch",
   "process_signatures": [
     "couchjs"
@@ -39,6 +42,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "couchdb"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

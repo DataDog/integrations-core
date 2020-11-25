@@ -34,9 +34,7 @@ setup(
     description='The {integration_name} check',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords='datadog agent {check_name} check',
-    # The project's main homepage.
-    url='https://github.com/DataDog/integrations-{repo_choice}',
+    keywords='datadog agent {check_name} check',{package_url}
     # Author details
     author='{author}',
     author_email='{email_packages}',

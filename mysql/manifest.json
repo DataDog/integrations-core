@@ -30,11 +30,12 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {
-      "Replication Behind Master": "assets/monitors/mysql_replication_seconds_behind_master.json",
-      "Slave Replication Not Running": "assets/monitors/mysql_replication_slave.json"
+    "monitors": {},
+    "dashboards": {
+      "mysql": "assets/dashboards/overview.json",
+      "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
+
     },
-    "dashboards": {},
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
       "operations_overview": "assets/saved_views/operations_overview.json",
@@ -43,6 +44,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mysql"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

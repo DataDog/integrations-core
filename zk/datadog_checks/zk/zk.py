@@ -120,10 +120,13 @@ class ZookeeperCheck(AgentCheck):
         self.base_tags = list(set(self.instance.get('tags', [])))
         self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
+        self.use_tls = is_affirmative(self.instance.get('use_tls', False))
 
     def check(self, _):
         # Send a service check based on the `ruok` response.
         # Set instance status to down if not ok.
+        status = None
+        message = None
         try:
             ruok_out = self._send_command('ruok')
         except ZKConnectionFailure:
@@ -220,34 +223,38 @@ class ZookeeperCheck(AgentCheck):
             gauge_name = 'zookeeper.instances.%s' % k
             self.gauge(gauge_name, v)
 
-    def _send_command(self, command):
-        buf = StringIO()
+    @staticmethod
+    def _get_data(sock, command):
         chunk_size = 1024
         max_reads = 10000
-        # try-finally and try-except to stay compatible with python 2.4
-        with closing(socket.socket()) as sock:
-            sock.settimeout(self.timeout)
-            try:
-                # Connect to the zk client port and send the stat command
-                sock.connect((self.host, self.port))
-                sock.sendall(ensure_bytes(command))
+        buf = StringIO()
+        sock.sendall(ensure_bytes(command))
+        # Read the response into a StringIO buffer
+        chunk = ensure_unicode(sock.recv(chunk_size))
+        buf.write(chunk)
+        num_reads = 1
 
-                # Read the response into a StringIO buffer
-                chunk = ensure_unicode(sock.recv(chunk_size))
-                buf.write(chunk)
-                num_reads = 1
-
-                while chunk:
-                    if num_reads > max_reads:
-                        # Safeguard against an infinite loop
-                        raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
-                    chunk = ensure_unicode(sock.recv(chunk_size))
-                    buf.write(chunk)
-                    num_reads += 1
-            except (socket.timeout, socket.error):
-                raise ZKConnectionFailure()
-
+        while chunk:
+            if num_reads > max_reads:
+                # Safeguard against an infinite loop
+                raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
+            chunk = ensure_unicode(sock.recv(chunk_size))
+            buf.write(chunk)
+            num_reads += 1
         return buf
+
+    def _send_command(self, command):
+        try:
+            with closing(socket.create_connection((self.host, self.port))) as sock:
+                sock.settimeout(self.timeout)
+                if self.use_tls:
+                    context = self.get_tls_context()
+                    with closing(context.wrap_socket(sock, server_hostname=self.host)) as ssock:
+                        return self._get_data(ssock, command)
+                else:
+                    return self._get_data(sock, command)
+        except (socket.timeout, socket.error):
+            raise ZKConnectionFailure()
 
     def parse_stat(self, buf):
         """

@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.23.0",
+        "integration": "Snowflake",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "snowflake.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Snowflake can connect",
+        "description": "Returns `CRITICAL` if the check cannot authenticate Snowflake credentials. Returns `OK` otherwise."
+    }
+]

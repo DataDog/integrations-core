@@ -24,3 +24,8 @@ files:
   - template: instances
     options:
     - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/messages
+        source: nfsstat

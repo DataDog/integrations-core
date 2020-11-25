@@ -72,10 +72,6 @@ No additional installation is needed on your server.
 
 4. [Restart the Agent][8].
 
-### Validation
-
-[Run the Agent's `status` subcommand][10] and look for `sidekiq` under the Checks section.
-
 ## Data Collected
 
 ### Metrics

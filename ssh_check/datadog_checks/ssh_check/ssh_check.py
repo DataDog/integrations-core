@@ -64,9 +64,14 @@ class CheckSSH(AgentCheck):
         try:
             # Try to connect to check status of SSH
             try:
-                client.connect(
-                    self.host, port=self.port, username=self.username, password=self.password, pkey=private_key
-                )
+                if not private_key:
+                    client.connect(self.host, port=self.port, username=self.username, password=self.password)
+                else:
+                    # If the private key is not valid and we pass password instead of passphrase it will attempt to
+                    # connect using the password and the error will be misleading
+                    client.connect(
+                        self.host, port=self.port, username=self.username, passphrase=self.password, pkey=private_key
+                    )
                 self.service_check(
                     self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags, message=exception_message
                 )

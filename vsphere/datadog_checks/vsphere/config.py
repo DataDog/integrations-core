@@ -86,7 +86,7 @@ class VSphereConfig(object):
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             instance.get("collect_per_instance_filters", {})
         )
-
+        self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.validate_config()
 
     def is_historical(self):

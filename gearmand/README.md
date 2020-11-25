@@ -51,6 +51,29 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `gearmand.d/conf.yaml` file to start collecting your Gearman logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /var/log/gearmand.log
+        source: gearman
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample gearmand.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
+See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `gearmand` under the Checks section.
@@ -67,9 +90,8 @@ The Gearmand check does not include any events.
 
 ### Service Checks
 
-`gearman.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
+**gearman.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Gearman to collect metrics.
 
 ## Troubleshooting
 
@@ -83,3 +105,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/gearmand/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/

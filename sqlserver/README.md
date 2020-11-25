@@ -86,6 +86,7 @@ _Available for Agent versions >6.0_
     ```yaml
     logs:
       - type: file
+        encoding: utf-16-le
         path: "<LOG_FILE_PATH>"
         source: sqlserver
         service: "<SERVICE_NAME>"
@@ -147,7 +148,7 @@ The SQL server check does not include any events.
 ### Service Checks
 
 **sqlserver.can_connect**:<br>
-Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to SQL Server to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

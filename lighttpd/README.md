@@ -53,6 +53,29 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `lighttpd.d/conf.yaml` file to start collecting your lighttpd Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: lighttpd
+   ```
+
+   Change the `path` parameter value and configure it for your environment.
+   See the [sample lighttpd.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
+
 ### Validation
 
 [Run the Agent's `status` subcommand][7] and look for `lighttpd` under the Checks section.
@@ -69,9 +92,8 @@ The Lighttpd check does not include any events.
 
 ### Service Checks
 
-`- lighttpd.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, otherwise OK.
+**lighttpd.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to lighttpd to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

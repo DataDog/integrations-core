@@ -4,7 +4,7 @@ services:
   postgres:
     image: "postgres:latest"
     environment:
-      POSTGRES_PASSWORD: datadog
+      POSTGRES_PASSWORD: d@tadog
     volumes:
       - ${TEST_RESOURCES_PATH}/pg:/docker-entrypoint-initdb.d
     ports:
@@ -14,7 +14,7 @@ services:
     image: "pgbouncer/pgbouncer:${PGBOUNCER_IMAGE_TAG}"
     environment:
       DATABASES_USER: postgres
-      DATABASES_PASSWORD: datadog
+      DATABASES_PASSWORD: d@tadog
       DATABASES_HOST: postgres
       DATABASES_PORT: 5432
       PGBOUNCER_LISTEN_PORT: 6432

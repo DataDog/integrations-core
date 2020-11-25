@@ -23,6 +23,9 @@
   "is_public": true,
   "integration_id": "presto",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Presto Overview": "assets/dashboards/overview.json"
@@ -37,6 +40,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "presto"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

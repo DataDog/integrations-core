@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
-from typing import Dict, List
+from typing import Callable, Dict, List, Optional, Tuple
 
 import win32wnet
 from six import iteritems
@@ -11,9 +11,9 @@ from ... import AgentCheck, is_affirmative
 from ...utils.containers import hash_mutable
 
 try:
-    from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
+    from .winpdh import DATA_TYPE_DOUBLE, DATA_TYPE_INT, WinPDHCounter
 except ImportError:
-    from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
+    from .winpdh_stub import DATA_TYPE_DOUBLE, DATA_TYPE_INT, WinPDHCounter  # type: ignore
 
 
 RESOURCETYPE_ANY = 0
@@ -22,6 +22,27 @@ DEFAULT_SHARE = 'c$'
 int_types = ["int", "long", "uint"]
 
 double_types = ["double", "float"]
+
+# Use tuples instead of namedtuples for backwards compat.
+CounterListItem = Tuple[
+    str,  # counterset
+    Optional[str],  # inst_name
+    str,  # counter_name
+    str,  # dd_name
+    str,  # mtype
+]
+CounterValues = Tuple[
+    Dict[str, float],  # datatypes
+    Optional[str],  # remote_machine
+    bool,  # check_instance
+    str,  # message
+]
+CounterMetric = Tuple[
+    Optional[str],  # inst_name
+    str,  # dd_name
+    Callable,  # metric_func
+    WinPDHCounter,  # counterobj
+]
 
 
 class PDHBaseCheck(AgentCheck):
@@ -33,20 +54,20 @@ class PDHBaseCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
         # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
-        counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
+        counter_list = kwargs.get('counter_list', args[-1])  # type: List[CounterListItem]
         if 'counter_list' not in kwargs:
             args = args[:-1]  # Base class does not know how to interpret it
 
         super(PDHBaseCheck, self).__init__(*args, **kwargs)
 
-        self._missing_counters = {}  # type: Dict[str, tuple]
-        self._metrics = defaultdict(list)  # type: Dict[int, List[List]]  # This dictionary only has one key
+        self._missing_counters = {}  # type: Dict[CounterListItem, CounterValues]
+        self._metrics = defaultdict(list)  # type: Dict[int, List[CounterMetric]]  # This dictionary only has one key
         self._tags = defaultdict(list)  # type: Dict[int, List[str]]  # This dictionary only has one key
         self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))  # type: bool
 
         try:
             self.instance_hash = hash_mutable(self.instance)  # type: int
-            cfg_tags = self.instance.get('tags')  # type: List[str]
+            cfg_tags = self.instance.get('tags')  # type: Optional[List[str]]
             if cfg_tags is not None:
                 if not isinstance(cfg_tags, list):
                     self.log.error("Tags must be configured as a list")
@@ -154,15 +175,15 @@ class PDHBaseCheck(AgentCheck):
             for counter, values in list(iteritems(self._missing_counters)):
                 self._make_counters(counter_data=([counter], values))
 
-        for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
+        for inst_name, dd_name, metric_func, counterobj in self._metrics[self.instance_hash]:
             try:
                 if self.refresh_counters:
-                    counter.collect_counters()
-                vals = counter.get_all_values()
+                    counterobj.collect_counters()
+                vals = counterobj.get_all_values()
                 for instance_name, val in iteritems(vals):
                     tags = list(self._tags.get(self.instance_hash, []))  # type: List[str]
 
-                    if not counter.is_single_instance():
+                    if not counterobj.is_single_instance():
                         tag = "instance:%s" % instance_name
                         tags.append(tag)
                     metric_func(dd_name, val, tags)
@@ -170,8 +191,8 @@ class PDHBaseCheck(AgentCheck):
                 # don't give up on all of the metrics because one failed
                 self.log.error("Failed to get data for %s %s: %s", inst_name, dd_name, str(e))
 
-    def _make_counters(self, key=None, counter_data=([], ())):  # Key left in for retrocompatibility
-        # type: (int, tuple) -> None
+    def _make_counters(self, key=None, counter_data=([], ({}, '', False, ''))):  # Key left in for retrocompatibility
+        # type: (int, Tuple[List[CounterListItem], CounterValues]) -> None
         counter_list, (datatypes, remote_machine, check_instance, message) = counter_data
 
         # list of the metrics. Each entry is itself an entry,
@@ -181,7 +202,7 @@ class PDHBaseCheck(AgentCheck):
             if check_instance and self._no_instance(inst_name):
                 inst_name = None
 
-            m = getattr(self, mtype.lower())
+            m = getattr(self, mtype.lower())  # type: Callable
             precision = datatypes.get(dd_name)
 
             try:
@@ -206,10 +227,17 @@ class PDHBaseCheck(AgentCheck):
             else:
                 self._missing_counters.pop((counterset, inst_name, counter_name, dd_name, mtype), None)
 
-            entry = [inst_name, dd_name, m, obj]
+            entry = (inst_name, dd_name, m, obj)
             self.log.debug('%s: %s', message, entry)
             self._metrics[self.instance_hash].append(entry)
 
     @classmethod
     def _no_instance(cls, inst_name):
-        return inst_name.lower() == 'none' or len(inst_name) == 0 or inst_name == '*' or inst_name.lower() == 'all'
+        # type: (Optional[str]) -> bool
+        return (
+            inst_name is None
+            or inst_name.lower() == 'none'
+            or len(inst_name) == 0
+            or inst_name == '*'
+            or inst_name.lower() == 'all'
+        )

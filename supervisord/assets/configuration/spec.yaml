@@ -1,0 +1,77 @@
+name: Supervisord
+files:
+- name: supervisord.yaml
+  options:
+    - template: init_config
+      options:
+        - template: init_config/default
+    - template: instances
+      options: 
+        - name: name
+          required: true
+          description: An arbitrary name to identify the supervisord server.
+          value:
+            type: string
+            example: <SUPERVISORD_SERVER_NAME>
+        - name: host
+          description: The host where supervisord server is running.
+          value: 
+            type: string
+            example: localhost
+        - name: port
+          description: |
+            The TCP port value that supervisor is listening on for HTTP/XML-RPC requests.
+
+            See: http://supervisord.org/configuration.html#inet-http-server-section-settings
+          value:
+            type: integer
+            example: 9001
+        - name: socket
+          description: |
+            The path to a UNIX domain socket that supervisor is listening on for HTTP/XML-RPC requests.
+
+            See: http://supervisord.org/configuration.html#unix-http-server-section-settings
+          value:
+            type: string
+            example: <SOCKETFILE_PATH>
+            default: None
+        - name: user
+          description: Required only if a username is configured.
+          value:
+            type: string
+            example: <USERNAME>
+            default: None
+        - name: pass
+          description: Required only if a password is configured.
+          value:
+            type: string
+            example: <PASSWORD>
+            default: None
+        - name: proc_regex
+          description: Regex pattern[s] matching the names of processes to monitor.
+          value:
+            type: array
+            items:
+              type: string
+            example: [<PROC_REGEX>]
+            default: None
+        - name: proc_names
+          description: |
+            The process to monitor within this supervisord instance.
+            If not specified, the check will monitor all processes.
+          value:
+            type: array
+            items:
+              type: string
+            example: [<PROCESS_NAME_1>, <PROCESS_NAME_2>]
+            default: None
+        - template: instances/default
+    - template: logs
+      example:
+        - type: file
+          path: /var/log/supervisor/supervisord.log
+          source: supervisord
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2},\d{3} 

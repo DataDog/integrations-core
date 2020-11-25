@@ -627,7 +627,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
     devices_matched = [
         {'community_string': 'hpe-proliant', 'sysobjectid': '1.3.6.1.4.1.232.1.2'},
-        {'community_string': 'network', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
+        {'community_string': 'generic-router', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
     ]
     common_tags = common.CHECK_TAGS + ['snmp_profile:profile1']
     for device in devices_matched:
@@ -646,7 +646,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
     caplog.at_level(logging.WARNING)
     devices_not_matched = [
-        {'community_string': '3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
+        {'community_string': 'cisco-3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
     ]
     for device in devices_not_matched:
         instance = common.generate_instance_config([])
@@ -766,6 +766,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
@@ -866,6 +867,7 @@ def test_different_tables(aggregator):
             'metric_tags': [
                 {'tag': 'interface', 'column': 'ifDescr'},
                 {'tag': 'speed', 'column': 'ifHighSpeed', 'table': 'ifXTable'},
+                {'tag': 'interface_alias', 'column': 'ifAlias', 'table': 'ifXTable'},
             ],
         }
     ]
@@ -1074,7 +1076,6 @@ def test_timeout(aggregator, caplog):
     # Some metrics still arrived
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
-    aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
@@ -1119,6 +1120,23 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
 
     for _ in range(3):
         run_check()
+
+
+@pytest.mark.parametrize(
+    'init_config, instance_extra, expected_interval',
+    [
+        pytest.param({}, {}, 0, id='none'),
+        pytest.param({}, {'refresh_oids_cache_interval': 3600}, 3600, id='instance_config'),
+        pytest.param({'refresh_oids_cache_interval': 3600}, {}, 3600, id='init_config'),
+        pytest.param({'refresh_oids_cache_interval': 0}, {'refresh_oids_cache_interval': 3600}, 3600, id='both'),
+    ],
+)
+def test_oids_cache_configs(init_config, instance_extra, expected_interval):
+    instance = common.generate_instance_config(common.TABULAR_OBJECTS)
+    instance.update(instance_extra)
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    assert check._config.oid_config._refresh_interval_sec == expected_interval
 
 
 @pytest.mark.parametrize(

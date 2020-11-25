@@ -54,6 +54,9 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 
 #### Datadog User creation
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Stand Alone" xxx -->
+
 Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
 ```text
@@ -77,6 +80,25 @@ GRANT SELECT ON sys.dba_tablespace_usage_metrics TO datadog;
 ```text
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Multitenant" xxx -->
+
+##### Oracle 12c or 19c
+
+Log in to the root database as an Administrator to create a `datadog` user and grant permissions:
+
+```text
+alter session set container = cdb$root;
+CREATE USER c##datadog IDENTIFIED BY password CONTAINER=ALL;
+GRANT CREATE SESSION TO c##datadog CONTAINER=ALL;
+Grant select any dictionary to c##datadog container=all;
+GRANT SELECT ON GV_$PROCESS TO c##datadog CONTAINER=ALL;
+GRANT SELECT ON gv_$sysmetric TO c##datadog CONTAINER=ALL;
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Configuration
 
@@ -217,6 +239,70 @@ is what the following example configuration would become:
 
 See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 
+### Example
+
+Create a query configuration to help identify database locks:
+
+1. To include a custom query, modify `conf.d\oracle.d\conf.yaml`. Uncomment the `custom_queries` block, add the required queries and columns, and restart the agent.
+
+```yaml
+  init_config:
+  instances:
+      - server: localhost:1521
+        service_name: orcl11g.us.oracle.com
+        user: datadog
+        password: xxxxxxx
+        jdbc_driver_path: /u01/app/oracle/product/11.2/dbhome_1/jdbc/lib/ojdbc6.jar
+        tags:
+          - db:oracle
+        custom_queries:
+          - metric_prefix: oracle.custom_query.locks
+            query: |
+              select blocking_session, username, osuser, sid, serial# as serial, wait_class, seconds_in_wait
+              from v_$session
+              where blocking_session is not NULL order by blocking_session
+            columns:
+              - name: blocking_session
+                type: gauge
+              - name: username
+                type: tag
+              - name: osuser
+                type: tag
+              - name: sid
+                type: tag
+              - name: serial
+                type: tag
+              - name: wait_class
+                type: tag
+              - name: seconds_in_wait
+                type: tag
+```
+
+2. To access `v_$session`, give permission to `DATADOG` and test the permissions.
+
+```text
+SQL> grant select on sys.v_$session to datadog;
+
+##connecting with the DD user to validate the access:
+
+
+SQL> show user
+USER is "DATADOG"
+
+
+##creating a synonym to make the view visible
+SQL> create synonym datadog.v_$session for sys.v_$session;
+
+
+Synonym created.
+
+
+SQL> select blocking_session,username,osuser, sid, serial#, wait_class, seconds_in_wait from v_$session
+where blocking_session is not NULL order by blocking_session;
+```
+
+3. Once configured, you can create a [monitor][14] based on `oracle.custom_query.locks` metrics.
+
 ## Data Collected
 
 ### Metrics
@@ -229,7 +315,7 @@ The Oracle Database check does not include any events.
 
 ### Service Checks
 
-**oracle.can_connect**
+**oracle.can_connect**:<br>
 Verifies the database is available and accepting connections.
 
 ## Troubleshooting
@@ -249,3 +335,4 @@ Need help? Contact [Datadog support][12].
 [11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [12]: https://docs.datadoghq.com/help/
 [13]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
+[14]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold

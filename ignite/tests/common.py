@@ -1,7 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
+
+from pkg_resources import parse_version
+
+from datadog_checks.dev import get_here
 from datadog_checks.dev.jmx import JVM_E2E_METRICS
+
+HERE = get_here()
+
+IGNITE_IMAGE = os.environ['IGNITE_IMAGE']
+IGNITE_VERSION = os.environ.get('IGNITE_VERSION', '')
+
+IS_PRE_2_9 = False if not IGNITE_VERSION else parse_version(IGNITE_VERSION) < parse_version('2.9')
 
 GAUGES = [
     'ignite.cache.offheap_miss_percentage',
@@ -22,7 +34,6 @@ GAUGES = [
     'ignite.heap_memory_committed',
     'ignite.cache.rebalancing_keys_rate',
     'ignite.total_server_nodes',
-    'ignite.cache.cluster_owning_partitions',
     'ignite.checkpoint.last_pages_write_duration',
     'ignite.cache.offheap_allocated_size',
     'ignite.cache.thread_map_size',
@@ -139,7 +150,6 @@ GAUGES = [
     'ignite.jobs.maximum_failover',
     'ignite.cache.committed_versions_size',
     'ignite.total_baseline_nodes',
-    'ignite.cache.cluster_moving_partitions',
     'ignite.cache.offheap_hit_percentage',
     'ignite.jobs.active.average',
     'ignite.cache.dht_xid_map_size',
@@ -154,6 +164,12 @@ GAUGES = [
     'ignite.checkpoint.last_copied_on_write_pages',
     'ignite.wal.last_rollover',
 ] + JVM_E2E_METRICS
+
+if IS_PRE_2_9:
+    GAUGES += [
+        'ignite.cache.cluster_owning_partitions',
+        'ignite.cache.cluster_moving_partitions',
+    ]
 
 MONOTONIC_COUNTS = [
     "ignite.cache.commits",

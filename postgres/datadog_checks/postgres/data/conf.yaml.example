@@ -146,6 +146,28 @@ instances:
     #     tags:
     #     - <TAG_KEY>:<TAG_VALUE>
 
+    ## @param application_name - string - optional - default: datadog-agent
+    ## The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
+    ## It is typically set by an application upon connection to the server.
+    ## The name is displayed in the pg_stat_activity view and included in CSV log entries.
+    #
+    # application_name: datadog-agent
+
+    ## @param deep_database_monitoring - boolean - optional - default: false
+    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+    ##
+    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+    ## success manager or Datadog support.
+    #
+    # deep_database_monitoring: true
+
+    ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
+    ## Set this value if you want to define a custom view or function to allow the datadog user to query the
+    ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
+    ## Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+    #
+    # pg_stat_statements_view: show_pg_stat_statements()
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -182,6 +204,8 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.

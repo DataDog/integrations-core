@@ -40,7 +40,7 @@ def get_requirements(fpath, exclude=None, only=None):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-    name='datadog_checks_base',
+    name='datadog-checks-base',
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',
@@ -63,10 +63,30 @@ setup(
     extras_require={
         'deps': get_requirements(
             'requirements.in',
-            exclude=['kubernetes', 'orjson', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
+            exclude=[
+                'kubernetes',
+                'mmh3',
+                'orjson',
+                'pysocks',
+                'requests-kerberos',
+                'requests_ntlm',
+                'win-inet-pton',
+                'cryptography',
+                'pyjwt',
+            ],
         ),
+        'db': get_requirements('requirements.in', only=['mmh3']),
         'http': get_requirements(
-            'requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']
+            'requirements.in',
+            only=[
+                'pysocks',
+                'requests-kerberos',
+                'requests_ntlm',
+                'requests-unixsocket',
+                'win-inet-pton',
+                'cryptography',
+                'pyjwt',
+            ],
         ),
         'json': get_requirements('requirements.in', only=['orjson']),
         'kube': get_requirements('requirements.in', only=['kubernetes']),

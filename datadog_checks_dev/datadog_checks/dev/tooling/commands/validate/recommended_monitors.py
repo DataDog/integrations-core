@@ -93,9 +93,7 @@ def recommended_monitors():
                 result = [i for i in decoded.get('tags') if i.startswith('integration:')]
                 if len(result) < 1:
                     file_failed = True
-                    display_queue.append(
-                        (echo_failure, f"    {monitor_filename} must have an `integration` tag"),
-                    )
+                    display_queue.append((echo_failure, f"    {monitor_filename} must have an `integration` tag"))
 
                 display_name = manifest.get("display_name").lower()
                 monitor_name = decoded.get('name').lower()

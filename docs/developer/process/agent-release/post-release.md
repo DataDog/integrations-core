@@ -19,6 +19,7 @@ Run the following commands to update the contents:
 
 1. `ddev agent changelog -w -f` to update the existing [`AGENT_CHANGELOG`][agent-changelog] file
 2. `ddev agent integrations -w -f` to update the existing [`AGENT_INTEGRATIONS`][agent-integrations] file.
+3. `ddev agent integrations-changelog -w` to add Agent version to existing `CHANGELOG.md` releases of integrations.
 
 Create a pull request and wait for approval before merging.
 

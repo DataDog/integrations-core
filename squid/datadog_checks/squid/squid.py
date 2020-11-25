@@ -69,7 +69,24 @@ SQUID_COUNTERS = [
     "aborted_requests",
 ]
 
-VERSION_REGEX = re.compile(r".*/(.*)")
+# Regular SEMVER pattern but the "patch" part is optional.
+SQUID_VERSION_PATTERN = re.compile(
+    r"""
+    (?P<major>0|[1-9]\d*)
+    \.
+    (?P<minor>0|[1-9]\d*)
+    (?:\.(?P<patch>0|[1-9]\d*))?
+    (?:-(?P<release>
+        (?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)
+        (?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*
+    ))?
+    (?:\+(?P<build>
+        [0-9a-zA-Z-]+
+        (?:\.[0-9a-zA-Z-]+)*
+    ))?
+    """,
+    re.VERBOSE,
+)
 
 
 class SquidCheck(AgentCheck):
@@ -136,19 +153,15 @@ class SquidCheck(AgentCheck):
 
         return counter, value
 
+    @AgentCheck.metadata_entrypoint
     def submit_version(self, headers):
-        server_version = headers.get("Server", "")
+        version_header = headers.get("Server", "")
+        if "/" not in version_header:
+            self.log.debug("Squid version %s not valid version", version_header)
+            return
 
-        match = VERSION_REGEX.match(server_version)
-        if match is None:
-            self.log.debug("Squid version is unknown: %s", server_version)
-            return None
-
-        version = match.group(1)
-
-        if version is not None:
-            self.set_metadata('version', version)
-            self.log.debug("Squid version %s metadata submitted", version)
-
-        else:
-            self.log.debug("Squid version %s not valid version", server_version)
+        squid_version = version_header.split('/')[1]
+        self.set_metadata(
+            'version', squid_version, scheme='regex', final_scheme='semver', pattern=SQUID_VERSION_PATTERN
+        )
+        self.log.debug("Squid version %s metadata submitted")

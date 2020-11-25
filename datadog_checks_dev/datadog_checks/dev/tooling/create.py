@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import re
 from datetime import datetime
 from uuid import uuid4
 
@@ -16,7 +15,7 @@ from ..utils import (
     write_file,
     write_file_binary,
 )
-from .utils import normalize_package_name
+from .utils import kebab_case_name, normalize_package_name
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
@@ -29,9 +28,27 @@ def get_valid_templates():
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
-    check_name_kebab = re.sub('_| ', '-', integration_name.lower())
+    check_name_kebab = kebab_case_name(integration_name)
+
+    datadog_checks_base_req = 'datadog-checks-base[deps]>=6.6.0'
+    third_party_install_info = f"""\
+To install the {integration_name} check on your host:
+
+
+1. Install the [developer toolkit]
+(https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit)
+ on any machine.
+
+2. Run `ddev release build {normalized_integration_name}` to build the package.
+
+3. [Download the Datadog Agent](https://app.datadoghq.com/account/settings#agent).
+
+4. Upload the build artifact to any host with an Agent and
+ run `datadog-agent integration install -w
+ path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl`."""
 
     if repo_choice == 'core':
+        check_name = normalized_integration_name
         author = 'Datadog'
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
@@ -47,31 +64,31 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
         tox_base_dep = '-e../datadog_checks_base[deps]'
+    elif repo_choice == 'marketplace':
+        check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
+        # Updated by the kwargs passed in
+        author = ''
+        email = ''
+        email_packages = ''
+        install_info = third_party_install_info
+        # Static fields
+        license_header = ''
+        support_type = 'partner'
+        test_dev_dep = 'datadog-checks-dev'
+        tox_base_dep = datadog_checks_base_req
     else:
+        check_name = normalized_integration_name
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
-        install_info = (
-            'To install the {integration_name} check on your host:\n\n'
-            '1. Install the [developer toolkit]'
-            '(https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit)'
-            ' on any machine.\n'
-            '2. Run `ddev release build {normalized_integration_name}` to build the package.\n'
-            '3. [Download the Datadog Agent](https://app.datadoghq.com/account/settings#agent).\n'
-            '4. Upload the build artifact to any host with an Agent and'
-            ' run `datadog-agent integration install -w'
-            ' path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl`.'.format(
-                integration_name=integration_name, normalized_integration_name=normalized_integration_name
-            )
-        )
+        install_info = third_party_install_info
         license_header = ''
         support_type = 'contrib'
         test_dev_dep = 'datadog-checks-dev'
-        tox_base_dep = 'datadog-checks-base[deps]>=6.6.0'
-
+        tox_base_dep = datadog_checks_base_req
     config = {
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
-        'check_name': normalized_integration_name,
+        'check_name': check_name,
         'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
         'email': email,
@@ -99,9 +116,14 @@ def create_template_files(template_name, new_root, config, read=False):
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
             if not template_file.endswith(('.pyc', '.pyo')):
-                template_path = path_join(root, template_file)
+                # Use a special README for the marketplace/partner support_type integrations
+                if template_file == 'README.md' and config.get('support_type') == 'partner':
+                    template_path = path_join(TEMPLATES_DIR, 'marketplace/', 'README.md')
+                    file_path = path_join("/", config.get('check_name'), "README.md")
+                else:
+                    template_path = path_join(root, template_file)
+                    file_path = template_path.replace(template_root, '')
 
-                file_path = template_path.replace(template_root, '')
                 file_path = f'{new_root}{file_path.format(**config)}'
 
                 files.append(File(file_path, template_path, config, read=read))

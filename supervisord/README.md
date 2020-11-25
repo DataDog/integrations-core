@@ -95,6 +95,28 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `supervisord.d/conf.yaml` file to start collecting your Supervisord Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: supervisord
+   ```
+
+   Change the `path` parameter value and configure it for your environment.
+   See the [sample supervisord.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `supervisord` under the Checks section.
@@ -111,12 +133,10 @@ The Supervisor check does not include any events.
 
 ### Service Checks
 
-**supervisord.can_connect**:
+**supervisord.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the HTTP server or UNIX socket you configured, otherwise `OK`.
 
-Returns CRITICAL if the Agent cannot connect to the HTTP server or UNIX socket you configured, otherwise OK.
-
-**supervisord.process.status**:
-
+**supervisord.process.status**:<br>
 The Agent submits this service check for all child processes of supervisord (if neither `proc_names` nor `proc_regex` is configured) OR a set of child processes (those configured in `proc_names` and/or `proc_regex`), tagging each service check with `supervisord_process:<process_name>`.
 
 This table shows the `supervisord.process.status` that results from each supervisord status:

@@ -81,9 +81,8 @@ The Cisco ACI check sends tenant faults as events.
 
 ### Service Checks
 
-`cisco_aci.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise OK.
+**cisco_aci.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

@@ -189,7 +189,7 @@ metrics:
 
 It is possible to add tags to metrics retrieved from a table in three ways:
 
-- Using a column within the same table:
+##### Using a column within the same table
 
 ```yaml
 metrics:
@@ -211,7 +211,7 @@ metrics:
           name: ifDescr
 ```
 
-- Using a column from a different table.
+##### Using a column from a different table with identical indexes
 
 ```yaml
 metrics:
@@ -232,7 +232,52 @@ metrics:
         tag: interface
 ```
 
-- Using an "index", i.e. one of the values in the `INDEX` field of the table MIB definition:
+##### Using a column from a different table with different indexes
+
+```yaml
+metrics:
+  - MIB: CPI-UNITY-MIB
+    table:
+      OID: 1.3.6.1.4.1.30932.1.10.1.3.110
+      name: cpiPduBranchTable
+    symbols:
+      - OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.3
+        name: cpiPduBranchCurrent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
+          name: cpiPduName
+        table: cpiPduTable
+        index_transform:
+          - start: 1
+            end: 7
+        tag: pdu_name
+```
+
+If the external table has different indexes, use `index_transform` to select a subset of the full index. `index_transform` is a list of `start`/`end` ranges to extract from the current table index to match the external table index. `start` and `end` are inclusive.
+
+External table indexes must be a subset of the indexes of the current table, or same indexes in a different order.
+
+!!! example
+
+    In the example above, the index of `cpiPduBranchTable` looks like `1.6.0.36.155.53.3.246`, the first digit is the `cpiPduBranchId` index and the rest is the `cpiPduBranchMac` index. The index of `cpiPduTable` looks like `6.0.36.155.53.3.246` and represents `cpiPduMac` (equivalent to `cpiPduBranchMac`).
+
+    By using the `index_transform` with start 1 and end 7, we extract `6.0.36.155.53.3.246` from `1.6.0.36.155.53.3.246` (`cpiPduBranchTable` full index), and then use it to match `6.0.36.155.53.3.246` (`cpiPduTable` full index).
+
+    `index_transform` can be more complex, the following definition will extract `2.3.5.6.7` from `1.2.3.4.5.6.7`.
+
+    ```yaml
+            index_transform:
+              - start: 1
+                end: 2
+              - start: 4
+                end: 6
+    ```
+
+
+##### Using an index
+
+Important: "_index_" refers to one digit of the index part of the row OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on.
 
 ```yaml
 metrics:
@@ -263,6 +308,38 @@ metrics:
       - tag: cpu
         index: 1
 ```
+
+##### Mapping index to tag string value
+
+You can use the following syntax to map indexes to tag string values.
+In the example below, the submitted metrics will be `snmp.ipSystemStatsHCInReceives` with tags like `ipversion:ipv6`.
+
+```yaml
+metrics:
+- MIB: IP-MIB
+  table:
+    OID: 1.3.6.1.2.1.4.31.1
+    name: ipSystemStatsTable
+  forced_type: monotonic_count
+  symbols:
+  - OID: 1.3.6.1.2.1.4.31.1.1.4
+    name: ipSystemStatsHCInReceives
+  metric_tags:
+  - index: 1
+    tag: ipversion
+    mapping:
+      0: unknown
+      1: ipv4
+      2: ipv6
+      3: ipv4z
+      4: ipv6z
+      16: dns
+```
+
+See meaning of index as used here in [Using an index](#using-an-index) section.
+
+
+##### Tagging tips
 
 !!! note
     General guidelines on [Datadog tagging](https://docs.datadoghq.com/tagging/) also apply to table metric tags.

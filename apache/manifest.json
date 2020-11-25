@@ -37,7 +37,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "apache": "assets/dashboards/apache_dashboard.json"
+    },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
       "5xx_errors": "assets/saved_views/5xx_errors.json",
@@ -47,6 +49,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "apache"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

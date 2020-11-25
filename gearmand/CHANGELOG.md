@@ -1,31 +1,40 @@
 # CHANGELOG - gearmand
 
-## 1.6.0 / 2020-05-17
+## 1.8.0 / 2020-10-31
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Added] Add log integration. See [#7616](https://github.com/DataDog/integrations-core/pull/7616).
+
+## 1.7.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config spec. See [#7612](https://github.com/DataDog/integrations-core/pull/7612).
+
+## 1.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.5.0 / 2020-04-04
+## 1.5.0 / 2020-04-04 / Agent 7.19.0
 
 * [Added] Collect version metadata. See [#5927](https://github.com/DataDog/integrations-core/pull/5927).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.4.0 / 2020-01-13
+## 1.4.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.3.1 / 2019-10-11
+## 1.3.1 / 2019-10-11 / Agent 6.15.0
 
 * [Fixed] Fix misleading gearman.workers metric (#4515). See [#4520](https://github.com/DataDog/integrations-core/pull/4520). Thanks [orgito](https://github.com/orgito).
 
-## 1.3.0 / 2019-05-14
+## 1.3.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3508](https://github.com/DataDog/integrations-core/pull/3508).
 
-## 1.2.0 / 2019-01-04
+## 1.2.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2738][1].
 
-## 1.1.1 / 2018-09-04
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 

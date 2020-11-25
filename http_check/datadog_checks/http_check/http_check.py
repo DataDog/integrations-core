@@ -30,7 +30,7 @@ DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
 DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
 
-DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
+DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 
 
 class HTTPCheck(AgentCheck):
@@ -117,7 +117,11 @@ class HTTPCheck(AgentCheck):
             if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
                 self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
 
-            r = getattr(self.http, method.lower())(
+            http_method = method.lower()
+            if http_method == 'options':
+                http_method = 'options_method'
+
+            r = getattr(self.http, http_method)(
                 addr,
                 persist=True,
                 allow_redirects=allow_redirects,

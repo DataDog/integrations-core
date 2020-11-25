@@ -20,7 +20,7 @@ Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of
 
 [Restart the Agent][5] to start sending vSphere metrics and events to Datadog.
 
-**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up -no matter what OS it's running on- to point to a vSphere appliance server. Update your `<VCENTER_HOSTNAME>` accordingly.
+**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up - no matter what OS it's running on - to point to a vSphere appliance server. Update your `<HOSTNAME>` for each instance accordingly.
 
 ### Compatibility
 
@@ -63,7 +63,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 ### Service Checks
 
 **vcenter.can_connect**:<br>
-Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to vCenter to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

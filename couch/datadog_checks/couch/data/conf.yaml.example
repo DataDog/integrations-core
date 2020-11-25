@@ -72,7 +72,7 @@ instances:
     #   - <DATABASE_1>
     #   - <DATABASE_2>
 
-    ## @param db_exclude - list of strings - optional - default: None
+    ## @param db_exclude - list of strings - optional
     ## The `db_exclude` should contain the names of any databases meant to be excluded
     ## from being checked. If a database is listed both as included and excluded,
     ## the exclusion takes precedence.
@@ -86,7 +86,7 @@ instances:
     #
     # max_dbs_per_check: 50
 
-    ## @param name - string - optional - default: None
+    ## @param name - string - optional
     ## CouchDB 2.x only. If not provided, the check scans up to max_nodes_per_check nodes of the cluster.
     #
     # name: <ERLANG_NAME>
@@ -253,6 +253,34 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 signing, set the region.
     ##
@@ -372,6 +400,8 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.

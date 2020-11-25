@@ -40,9 +40,25 @@ To configure this check for an Agent running on a host:
 
     **Notes**:
 
-      - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to true.
+      - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to `true`.
+      - [Agent-level tags][21] are not applied to hosts in a cluster that is not running the Agent. Use integration level tags in `<integration>.d/conf.yaml` to ensure **ALL** metrics have consistent tags. For example:
+
+        ```yaml
+        init_config:
+        instances:
+          - url: "%%env_MONITOR_ES_HOST%%"
+            username: "%%env_MONITOR_ES_USER%%"
+            password: *********
+            auth_type: basic
+            cluster_stats: true
+            tags:
+            - service.name:elasticsearch
+            - env:%%env_DD_ENV%%
+        ```
+
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
       - All requests to the Amazon ES configuration API must be signed. See the [AWS documentation][19] for details.
+      - The `aws` auth type relies on [boto3][20] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
 
 2. [Restart the Agent][5].
 
@@ -191,13 +207,11 @@ The Elasticsearch check emits an event to Datadog each time the overall status o
 
 ### Service checks
 
-`elasticsearch.cluster_health`:
+**elasticsearch.cluster_health**:<br>
+Returns `OK` if the cluster status is green, `WARNING` if yellow, and `CRITICAL` otherwise.
 
-Returns `OK` if the cluster status is green, `Warn` if yellow, and `Critical` otherwise.
-
-`elasticsearch.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metrics.
+**elasticsearch.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Elasticsearch to collect metrics.
 
 ## Troubleshooting
 
@@ -227,3 +241,5 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [17]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [18]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
 [19]: https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html#es-managedomains-signing-service-requests
+[20]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+[21]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location

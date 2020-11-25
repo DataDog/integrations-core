@@ -101,6 +101,7 @@ def instance_complex():
                 'field': 'age',
             },
         ],
+        'deep_database_monitoring': True,
     }
 
 

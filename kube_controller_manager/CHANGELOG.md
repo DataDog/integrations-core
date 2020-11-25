@@ -1,23 +1,23 @@
 # CHANGELOG - Kube_controller_manager
 
-## 1.7.0 / 2020-05-17
+## 1.7.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.6.1 / 2020-04-04
+## 1.6.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.6.0 / 2020-02-22
+## 1.6.0 / 2020-02-22 / Agent 7.18.0
 
 * [Added] Add auto_conf.yaml files. See [#5678](https://github.com/DataDog/integrations-core/pull/5678).
 
-## 1.5.0 / 2020-01-13
+## 1.5.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
 * [Fixed] Fix logger method bug. See [#5395](https://github.com/DataDog/integrations-core/pull/5395).
 
-## 1.4.0 / 2019-07-19
+## 1.4.0 / 2019-07-19 / Agent 6.13.0
 
 * [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).
 
@@ -25,12 +25,12 @@
 
 * [Added] Add support for new metrics introduced in kubernetes v1.14. See [#3905](https://github.com/DataDog/integrations-core/pull/3905).
 
-## 1.2.0 / 2019-05-14
+## 1.2.0 / 2019-05-14 / Agent 6.12.0
 
 * [Fixed] Fix the list of default rate limiters. See [#3724](https://github.com/DataDog/integrations-core/pull/3724).
 * [Added] Adhere to code style. See [#3527](https://github.com/DataDog/integrations-core/pull/3527).
 
-## 1.1.0 / 2019-02-18
+## 1.1.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Track leader election status. See [#3101](https://github.com/DataDog/integrations-core/pull/3101).
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).

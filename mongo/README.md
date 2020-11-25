@@ -145,7 +145,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `mongo`                                                                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"hosts": ["%%hosts%%:%%port%%], "username": "datadog", "password : "<UNIQUEPASSWORD>", "database": "<DATABASE>", "replica_check": true}` |
+| `<INSTANCE_CONFIG>`  | `{"hosts": ["%%host%%:%%port%%], "username": "datadog", "password : "<UNIQUEPASSWORD>", "database": "<DATABASE>", "replica_check": true}` |
 
 ##### Trace collection
 

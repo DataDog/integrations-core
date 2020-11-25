@@ -26,10 +26,13 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Active Directory": "assets/dashboards/active_directory.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ruby"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

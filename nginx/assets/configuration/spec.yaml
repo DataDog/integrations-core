@@ -45,7 +45,6 @@ files:
         type: boolean
         example: false
         default: true
-        default: true
     - name: plus_api_version
       description: Specify the version of the Plus API to use. The check supports versions 1 & 2.
       value:

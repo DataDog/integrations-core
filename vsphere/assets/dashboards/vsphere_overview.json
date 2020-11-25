@@ -248,7 +248,7 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:vsphere.host.count{$vcenter_server,$vcenter_datacenter,$host}",
+            "q": "sum:vsphere.host.count{$vcenter_server,$vcenter_datacenter,$host}.rollup(avg)",
             "aggregator": "last"
           }
         ],
@@ -267,7 +267,7 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:vsphere.vm.count{$vcenter_server,$vcenter_datacenter,$host}",
+            "q": "sum:vsphere.vm.count{$vcenter_server,$vcenter_datacenter,$host}.rollup(avg)",
             "aggregator": "last"
           }
         ],
@@ -300,7 +300,7 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:vsphere.datastore.count{$vcenter_server,$vcenter_datacenter,$host}",
+            "q": "sum:vsphere.datastore.count{$vcenter_server,$vcenter_datacenter,$host}.rollup(avg)",
             "aggregator": "last"
           }
         ],
@@ -318,7 +318,7 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:vsphere.cluster.count{$vcenter_server,$vcenter_datacenter,$host}",
+            "q": "sum:vsphere.cluster.count{$vcenter_server,$vcenter_datacenter,$host}.rollup(avg)",
             "aggregator": "last"
           }
         ],
@@ -337,7 +337,7 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:vsphere.datacenter.count{$vcenter_server,$vcenter_datacenter,$host}",
+            "q": "sum:vsphere.datacenter.count{$vcenter_server,$vcenter_datacenter,$host}.rollup(avg)",
             "aggregator": "last"
           }
         ],

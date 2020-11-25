@@ -173,7 +173,7 @@ class ESCheck(AgentCheck):
             for key, value in list(iteritems(index_data)):
                 if value is None:
                     del index_data[key]
-                    self.log.warning("The index metric data for %s was not found", key)
+                    self.log.warning("The index %s has no metric data for %s", idx['index'], key)
 
             for metric in index_stats_metrics:
                 # metric description

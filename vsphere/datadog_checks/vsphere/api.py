@@ -146,9 +146,9 @@ class VSphereAPI(object):
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
-    def check_health(self):
-        # type: () -> None
-        self._conn.CurrentTime()
+    def get_current_time(self):
+        # type: () -> dt.datetime
+        return self._conn.CurrentTime()
 
     @smart_retry
     def get_version(self):
@@ -285,6 +285,12 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
+        self.log.debug("Received %s values from QueryPerf", len(values))
+        self.log.trace(
+            "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
+            query_specs,
+            values,
+        )
         return values
 
     @smart_retry

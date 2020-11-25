@@ -80,19 +80,19 @@ instances:
     ##
     ## 1. true - `global_custom_queries` override `custom_queries`.
     ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
     #
     # use_global_custom_queries: 'true'
 
     ## @param custom_queries - list of mappings - optional
-    ## Each query must have 2 fields:
+    ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
     ##            Use the pipe `|` if you require a multi-line script.
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
     ##              The number of columns must equal the number of columns returned in the query.
     ##              There are 2 required pieces of data:
-    ##                a. name - The suffix to append to `clickhouse.` to form
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
     ##                          the full metric name. If `type` is `tag`, this column is
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
@@ -101,7 +101,7 @@ instances:
     ##                          with the name and value of the item in this column. You can
     ##                          use the `count` type to perform aggregation for queries that
     ##                          return multiple rows with the same or no tags.
-    ##              Columns without a name are ignored, use this for any column you wish to skip:
+    ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
     #
@@ -151,6 +151,8 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.

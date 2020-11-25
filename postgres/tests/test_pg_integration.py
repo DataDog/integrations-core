@@ -23,9 +23,25 @@ ACTIVITY_METRICS = [
     'postgresql.waiting_queries',
 ]
 
+STATEMENT_METRICS = [
+    'postgresql.queries.count',
+    'postgresql.queries.time',
+    'postgresql.queries.rows',
+    'postgresql.queries.shared_blks_hit',
+    'postgresql.queries.shared_blks_read',
+    'postgresql.queries.shared_blks_dirtied',
+    'postgresql.queries.shared_blks_written',
+    'postgresql.queries.local_blks_hit',
+    'postgresql.queries.local_blks_read',
+    'postgresql.queries.local_blks_dirtied',
+    'postgresql.queries.local_blks_written',
+    'postgresql.queries.temp_blks_read',
+    'postgresql.queries.temp_blks_written',
+]
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
+
 def test_common_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -37,8 +53,6 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_common_metrics(aggregator, expected_tags=expected_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_common_metrics_without_size(aggregator, integration_check, pg_instance):
     pg_instance['collect_database_size_metrics'] = False
     check = integration_check(pg_instance)
@@ -46,11 +60,8 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_unsupported_replication(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-
     unpatched_fmt = PartialFormatter()
 
     called = []
@@ -76,8 +87,6 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     check_common_metrics(aggregator, expected_tags=expected_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
@@ -105,8 +114,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_schema_metrics(aggregator, integration_check, pg_instance):
     pg_instance['table_count_limit'] = 1
     check = integration_check(pg_instance)
@@ -122,8 +129,6 @@ def test_schema_metrics(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.db.count', value=2, count=1)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_connections_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -135,8 +140,6 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     """
     Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
@@ -150,8 +153,6 @@ def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.locks', count=0)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_activity_metrics(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -163,8 +164,6 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
 
 
 @requires_over_10
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_wrong_version(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     # Enforce to cache wrong version
@@ -177,8 +176,6 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
     assert_state_set(check)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(integration_check, pg_instance, datadog_agent):
     check = integration_check(pg_instance)
     check.check_id = 'test:123'
@@ -196,8 +193,6 @@ def test_version_metadata(integration_check, pg_instance, datadog_agent):
     datadog_agent.assert_metadata_count(5)  # for raw and patch
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_state_clears_on_connection_error(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -218,8 +213,6 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     assert_state_clean(check)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_query_timeout(aggregator, integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
@@ -229,8 +222,6 @@ def test_query_timeout(aggregator, integration_check, pg_instance):
         cursor.execute("select pg_sleep(2000)")
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
@@ -242,12 +233,45 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         assert check.config.tags == expected_tags
 
 
+def test_statement_metrics(aggregator, integration_check, pg_instance):
+    pg_instance['deep_database_monitoring'] = True
+    # The query signature should match the query and consistency of this tag has product impact. Do not change
+    # the query signature for this test unless you know what you're doing.
+    QUERY = 'select * from pg_stat_activity'
+    QUERY_SIGNATURE = '7cde606dbf8eaa17'
+
+    check = integration_check(pg_instance)
+    check._connect()
+    cursor = check.db.cursor()
+
+    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+    # This should result in a count of 1
+    cursor.execute(QUERY)
+    check.check(pg_instance)
+    cursor.execute(QUERY)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'user:datadog',
+        'query:{}'.format(QUERY),
+        'query_signature:{}'.format(QUERY_SIGNATURE),
+        'resource_hash:{}'.format(QUERY_SIGNATURE),
+    ]
+
+    for name in STATEMENT_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
 def assert_state_clean(check):
     assert check.metrics_cache.instance_metrics is None
     assert check.metrics_cache.bgw_metrics is None
     assert check.metrics_cache.archiver_metrics is None
     assert check.metrics_cache.replication_metrics is None
     assert check.metrics_cache.activity_metrics is None
+    assert check._is_aurora is None
 
 
 def assert_state_set(check):
@@ -256,3 +280,4 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
+    assert check._is_aurora is False

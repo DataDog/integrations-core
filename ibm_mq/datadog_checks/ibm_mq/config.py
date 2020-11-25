@@ -109,6 +109,8 @@ class IBMMQConfig:
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
 
+        self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
+
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
         self._queue_tag_re = instance.get('queue_tag_re', {})  # type: Dict[str, str]

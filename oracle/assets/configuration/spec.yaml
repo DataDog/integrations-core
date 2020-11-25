@@ -1,0 +1,47 @@
+name: Oracle Database
+files:
+- name: oracle.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/db
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: server
+      description: The IP address or hostname of the Oracle Database Server.
+      required: true
+      value:
+        type: string
+        example: localhost:1521
+    - name: service_name
+      description: |
+        The Oracle Database service name. To view the services available on your server,
+        run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
+      required: true
+      value:
+        type: string
+    - name: user
+      description: The username for the Datadog user account.
+      required: true
+      value:
+        type: string
+    - name: password
+      description: The password for the Datadog user account.
+      required: true
+      value:
+        type: string
+    - name: jdbc_driver_path
+      description: |
+        Set this parameter if you are not using the oracle native client.
+        You can also add it to your $CLASSPATH instead.
+      value:
+        type: string
+        example: <DRIVER_PATH>.jar
+    - name: only_custom_queries
+      description: Set this parameter to `true` if you want to skip default system, process, and tablespace metrics checks.
+      value:
+        type: boolean
+        example: false
+    - template: instances/db
+    - template: init_config/default

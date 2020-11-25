@@ -1,6 +1,14 @@
 # CHANGELOG - directory
 
-## 1.8.0 / 2020-06-24
+## 1.9.1 / 2020-11-04
+
+* [Fixed] Add tags to the new `system.disk.directory.exists` service check. See [#7929](https://github.com/DataDog/integrations-core/pull/7929).
+
+## 1.9.0 / 2020-10-31
+
+* [Added] Add a service check for missing directories. See [#7714](https://github.com/DataDog/integrations-core/pull/7714).
+
+## 1.8.0 / 2020-06-24 / Agent 7.21.0
 
 * [Added] Add option to not follow symlinks for stat. See [#6960](https://github.com/DataDog/integrations-core/pull/6960).
 * [Added] Make max file count configurable in the directory check. See [#6847](https://github.com/DataDog/integrations-core/pull/6847).
@@ -11,33 +19,33 @@
 
 * [Added] Add `follow_symlinks` config option. See [#6800](https://github.com/DataDog/integrations-core/pull/6800).
 
-## 1.6.0 / 2020-05-17
+## 1.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Skip matched_files loop if countonly is set. See [#6477](https://github.com/DataDog/integrations-core/pull/6477).
 
-## 1.5.1 / 2020-04-04
+## 1.5.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Fix filegauge inconsistencies. See [#6060](https://github.com/DataDog/integrations-core/pull/6060).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.5.0 / 2020-01-13
+## 1.5.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 
-## 1.4.1 / 2019-10-09
+## 1.4.1 / 2019-10-09 / Agent 6.15.0
 
 * [Fixed] Explain filetagname logic in the example config file. See [#4524](https://github.com/DataDog/integrations-core/pull/4524).
 
-## 1.4.0 / 2019-05-14
+## 1.4.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3499](https://github.com/DataDog/integrations-core/pull/3499).
 
-## 1.3.1 / 2018-10-12
+## 1.3.1 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Make the error message more clear in case a path is not accessible. See [#2369][1].
 
-## 1.3.0 / 2018-09-04
+## 1.3.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Add option to pattern-match full directory path. See [#2026][2].
 * [Added] Upgrade scandir to latest version. See [#2024][3].
