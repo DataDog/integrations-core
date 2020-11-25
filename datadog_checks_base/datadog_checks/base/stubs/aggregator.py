@@ -68,8 +68,8 @@ class AggregatorStub(object):
         'count': 'count',
         'monotonic_count': 'count',
         'counter': 'rate',
-        'histogram': 'rate', # Checking .count only, the other are gauges
-        'historate': 'rate', # Checking .count only, the other are gauges
+        'histogram': 'rate',  # Checking .count only, the other are gauges
+        'historate': 'rate',  # Checking .count only, the other are gauges
     }
 
     def __init__(self):
