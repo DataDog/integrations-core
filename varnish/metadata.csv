@@ -312,7 +312,7 @@ varnish.MGT.child_exit,gauge,,process,second,Child processes the were cleanly st
 varnish.MGT.child_panic,gauge,,process,second,Child processes that panicked. This metric is only provided by varnish >=4.x.,0,varnish,mgt child panic
 varnish.MGT.child_start,gauge,,process,second,Child processes that started. This metric is only provided by varnish >=4.x.,0,varnish,mgt child start
 varnish.MGT.child_stop,gauge,,process,second,Child processes that exited with an unexpected return code. This metric is only provided by varnish >=4.x.,0,varnish,mgt child stop
-varnish.MGT.uptime,gauge,,second,second,Management process uptime. This metric is only provided by varnish >=4.x.,0,varnish,mgt uptime
+varnish.MGT.uptime,gauge,,second,,Management process uptime. This metric is only provided by varnish >=4.x.,0,varnish,mgt uptime
 varnish.n_backend,gauge,,,,Number of backends.,0,varnish,n backend
 varnish.n_ban,gauge,,object,second,Active bans. This metric is only provided by varnish 3.x.,0,varnish,n ban
 varnish.n_ban_add,gauge,,object,second,New bans added. This metric is only provided by varnish 3.x.,0,varnish,n ban add
@@ -436,7 +436,7 @@ varnish.threads_created,gauge,,thread,second,Threads created. This metric is onl
 varnish.threads_destroyed,gauge,,thread,second,Threads destroyed. This metric is only provided by varnish >=4.x.,0,varnish,threads destroyed
 varnish.threads_failed,gauge,,thread,second,Threads that failed to get created. This metric is only provided by varnish >=4.x.,-1,varnish,threads failed
 varnish.threads_limited,gauge,,thread,second,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish >=4.x.,-1,varnish,threads limited
-varnish.uptime,gauge,,second,second,stat summ operations,0,varnish,uptime
+varnish.uptime,gauge,,second,,stat summ operations,0,varnish,uptime
 varnish.VBE.boot.default.bereq_bodybytes,gauge,,byte,second,Request body bytes,0,varnish,vbe boot default bereq_bodybytes
 varnish.VBE.boot.default.bereq_hdrbytes,gauge,,byte,second,Request header bytes,0,varnish,vbe boot default bereq_hdrbytes
 varnish.VBE.boot.default.beresp_bodybytes,gauge,,byte,second,Response body bytes,0,varnish,vbe boot default beresp_bodybytes
