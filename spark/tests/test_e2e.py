@@ -20,10 +20,9 @@ def test_e2e(dd_agent_check):
     aggregator.assert_service_check(
         'spark.application_master.can_connect',
         status=SparkCheck.OK,
-        tags=['cluster_name:SparkCluster', 'url:http://{}:4040'.format(common.HOST)],
     )
     aggregator.assert_service_check(
         'spark.standalone_master.can_connect',
         status=SparkCheck.OK,
-        tags=['cluster_name:SparkCluster', 'url:http://{}:8080'.format(common.HOST)],
+        tags=['cluster_name:SparkCluster', 'url:http://spark-master:8080'],
     )

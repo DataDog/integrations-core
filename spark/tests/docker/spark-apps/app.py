@@ -22,8 +22,9 @@ def main():
     reducedStream.pprint()
 
     ssc.start()
-    time.sleep(6)
-    ssc.stop(stopSparkContext=True, stopGraceFully=True)
+    while True:
+        time.sleep(60)
+    # ssc.stop(stopSparkContext=True, stopGraceFully=True)
 
 
 if __name__ == '__main__':

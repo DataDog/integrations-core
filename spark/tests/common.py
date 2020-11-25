@@ -56,6 +56,23 @@ EXPECTED_E2E_METRICS = [
     'spark.job.num_completed_tasks',
     'spark.job.num_skipped_stages',
     'spark.job.num_failed_tasks',
+    'spark.executor.active_tasks',
+    'spark.executor.completed_tasks',
+    'spark.executor.disk_used',
+    'spark.executor.failed_tasks',
+    'spark.executor.max_memory',
+    'spark.executor.memory_used',
+    'spark.executor.rdd_blocks',
+    'spark.executor.total_duration',
+    'spark.executor.total_input_bytes',
+    'spark.executor.total_shuffle_read',
+    'spark.executor.total_shuffle_write',
+    'spark.executor.total_tasks',
+    'spark.structured_streaming.input_rate',
+    'spark.structured_streaming.latency',
+    'spark.structured_streaming.processing_rate',
+    'spark.structured_streaming.rows_count',
+    'spark.structured_streaming.used_bytes',
 ]
 
 
