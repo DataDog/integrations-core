@@ -47,7 +47,7 @@ instances:
 
   -
     ## @param use_prometheus - boolean - optional - default: false
-    ## Enable to preview the new version of the check which supports HAProxy version 2 or higher 
+    ## Enable to preview the new version of the check which supports HAProxy version 2+ 
     ## or environments using the HAProxy exporter.
     ##
     ## Prometheus-related options take effect only when this is set to `true`.
