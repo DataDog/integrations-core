@@ -1,1 +1,38 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+otel.system.cpu.time,gauge,,second,,Total CPU seconds broken down by different states,0,opentelemetry,cpu time
+otel.system.cpu.load_average.1m,gauge,,,,Average CPU Load over 1 minute,0,opentelemetry,load norm 1
+otel.system.cpu.load_average.5m,gauge,,,,Average CPU Load over 5 minutes,0,opentelemetry,load norm 5
+otel.system.cpu.load_average.15m,gauge,,,,Average CPU Load over 15 minutes,0,opentelemetry,load norm 15
+otel.system.memory.usage,gauge,,bytes,,Bytes of memory in use,0,opentelemetry,mem usage
+otel.system.disk.io,gauge,,bytes,,Disk bytes transferred.,0,opentelemetry,disk io
+otel.system.disk.operations,gauge,,,,Disk operations count,0,opentelemetry,disk ops
+otel.system.disk.io_time,gauge,,second,,Time disk spent activated,0,opentelemetry,disk io time
+otel.system.disk.operation_time,gauge,,second,,Time spent in disk operations,0,opentelemetry,disk ops time
+otel.system.disk.merged,gauge,,request,,The number of disk reads merged into single physical disk access operations.,0,opentelemetry,disk merged
+otel.system.disk.pending_operations,gauge,,,,The queue size of pending I/O operations.,0,opentelemetry,disk pending ops
+otel.system.filesystem.system.usage,gauge,,bytes,,Filesystem bytes used.,0,opentelemetry,fs in use
+otel.system.filesystem.system.inodes.usage,,,inode,,Filesystem inodes used,0,opentelemetry,inodes in use
+otel.system.network.dropped,gauge,,packet,,Count of packets that are dropped or discarded even though there was no error,-1,opentelemetry,packets dropped
+otel.system.network.dropped_packets,,,packet,,The number of packets dropped,-1,opentelemetry,packets dropped
+otel.system.network.packets,gauge,,packet,,The number of packets transferred,0,opentelemetry,packets
+otel.system.network.errors,gauge,,error,,The number of errors encountered,-1,opentelemetry,packets err
+otel.system.network.io,gauge,,bytes,,The number of bytes transmitted and received,0,opentelemetry,bytes sent
+otel.system.network.connections,gauge,,connection,,The number of connections,0,opentelemetry,conns
+otel.system.network.tcp_connections,gauge,,connection,,The number of TCP connections,0,opentelemetry,tcp conns
+otel.system.process.count,gauge,,process,,Total number of processes in each state,0,opentelemetry,processes count
+otel.system.processes.running,gauge,,process,,Total number of running processes,0,opentelemetry,processes running count
+otel.system.processes.blocked,gauge,,process,,Total number of blocked processes,0,opentelemetry,processes running blocked
+otel.process.cpu.time,gauge,,second,,Total CPU seconds broken down by different states.,0,opentelemetry,processes cpu time
+otel.process.memory.physical_usage,gauge,,bytes,,The amount of physical memory in use,0,opentelemetry,processes mem Rhys
+otel.process.memory.virtual_usage,gauge,,bytes,,Virtual memory size,0,opentelemetry,processes mem virtual
+otel.process.disk.io,gauge,,bytes,,Disk bytes transferred,0,opentelemetry,processes disk io
+otel.system.swap.usage,gauge,,bytes,,Swap (unix) or pagefile (windows) usage,0,opentelemetry,swap in use
+otel.system.swap.paging_ops,gauge,,occurrence,,The number of paging operations,0,opentelemetry,swap paging ops
+otel.system.swap.page_faults,gauge,,occurrence,,The number of paging faults,-1,opentelemetry,swap page faults
+otel.system.paging.usage,gauge,,bytes,,Unix swap or windows pagefile usage,0,opentelemetry,paging in use
+otel.system.paging.faults,gauge,,occurrence,,The number of paging faults,0,opentelemetry,paging faults
+otel.system.paging.operations,gauge,,,,The number of paging operations,0,opentelemetry,paging ops
+otel.system.filesystem.system.utilization,gauge,,,,Filesystem utilisation,0,opentelemetry,fs utilization
+otel.system.cpu.utilization,gauge,,,,CPU utilization,0,opentelemetry,cpu utilization
+otel.system.memory.utilization,gauge,,,,Memory utilization,0,opentelemetry,mem utilization
+otel.system.paging.utilization,gauge,,,,Paging utilization,0,opentelemetry,paging utilization
