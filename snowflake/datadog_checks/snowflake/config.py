@@ -63,7 +63,7 @@ class Config(object):
             raise ConfigurationError('If using OAuth, you must specify a token')
 
         if role == 'ACCOUNTADMIN':
-            self.log.warning('Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously. Please refer to docs to set up a custom role.')
+            self.log.info('Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously. Please refer to docs to set up a custom role.')
 
         self.account = account  # type: str
         self.user = user  # type: str
