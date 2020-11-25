@@ -176,6 +176,7 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
+        self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(list)
@@ -183,15 +184,17 @@ class SQLServer(AgentCheck):
 
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
+        self.custom_metrics = init_config.get('custom_metrics', [])
 
         # use QueryManager to process custom queries
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.instance.get("tags", []))
         self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.append(self.initialize_connection)
 
-        self.connection = Connection(init_config, self.instance, self.handle_service_check, self.log)
+    def initialize_connection(self):
+        self.connection = Connection(self.init_config, self.instance, self.handle_service_check, self.log)
 
         # Pre-process the list of metrics to collect
-        self.custom_metrics = init_config.get('custom_metrics', [])
         try:
             # check to see if the database exists before we try any connections to it
             db_exists, context = self.connection.check_database()
@@ -214,8 +217,6 @@ class SQLServer(AgentCheck):
                     )
                     raise ConfigurationError(msg)
 
-        # Historically, the check does not raise exceptions on init failures
-        # We continue that here for backwards compatibility, aside from the new Config exception
         except SQLConnectionError as e:
             self.log.exception("Error connecting to database: %s", e)
         except ConfigurationError:
