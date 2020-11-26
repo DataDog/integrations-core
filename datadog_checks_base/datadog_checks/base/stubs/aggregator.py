@@ -338,7 +338,7 @@ class AggregatorStub(object):
         Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
         asserting this type make sense for e2e (metrics collected from agent).
         For integrations tests, we can check the submission type with `check_submission_type=True`, or
-        use `check_metric_type=True` not to check types.
+        use `check_metric_type=False` not to check types.
 
         Usage:
 
