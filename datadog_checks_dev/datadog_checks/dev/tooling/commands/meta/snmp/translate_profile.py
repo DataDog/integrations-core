@@ -9,7 +9,12 @@ import yaml
 from ...console import CONTEXT_SETTINGS
 
 
-def fetch_mib(mib):
+def fetch_mib(mib, source_url):
+    try:
+        from urllib.parse import urlparse
+    except ImportError:
+        from urlparse import urlparse
+
     import pysnmp_mibs
     from pysmi.codegen import PySnmpCodeGen
     from pysmi.compiler import MibCompiler
@@ -19,9 +24,8 @@ def fetch_mib(mib):
 
     target_directory = os.path.dirname(pysnmp_mibs.__file__)
 
-    # As mibs.snmplabs.com is down, use a copy
-    # https://github.com/etingof/pysnmp/issues/376
-    reader = HttpReader('raw.githubusercontent.com', 80, '/projx/snmp-mibs/master/@mib@')
+    parsed_url = urlparse(source_url)
+    reader = HttpReader(parsed_url.netloc, 80, parsed_url.path)
     mibCompiler = MibCompiler(SmiStarParser(), PySnmpCodeGen(), PyFileWriter(target_directory))
 
     mibCompiler.addSources(reader)
@@ -31,8 +35,13 @@ def fetch_mib(mib):
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Translate MIB name to OIDs in SNMP profiles')
 @click.argument('profile_path')
+@click.option(
+    '--mib_source_url',
+    default='https://raw.githubusercontent.com/projx/snmp-mibs/master/@mib@',
+    help='Source url to fetch missing MIBS',
+)
 @click.pass_context
-def translate_profile(ctx, profile_path):
+def translate_profile(ctx, profile_path, mib_source_url):
     """
     Do OID translation in a SNMP profile. This isn't a plain replacement, as it
     doesn't preserve comments and indent, but it should automate most of the
@@ -59,7 +68,7 @@ def translate_profile(ctx, profile_path):
         try:
             mib_view_controller.mibBuilder.loadModule(mib)
         except MibNotFoundError:
-            fetch_mib(mib)
+            fetch_mib(mib, source_url=mib_source_url)
         if 'table' in metric:
             table = metric['table']
             node = mib_view_controller.mibBuilder.importSymbols(mib, table)[0]
