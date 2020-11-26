@@ -1,0 +1,82 @@
+name: OpenLDAP
+files:
+- name: openldap.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: url
+      description: |
+        Full URL of your ldap server. Use `ldaps` or `ldap` as the scheme to
+        use TLS or not, or `ldapi` to connect to a UNIX socket.
+      required: True
+      value:
+        example: ldaps://localhost:636
+        type: string
+    - name: username
+      description: The Distinguished Name of the user that can read the monitor database.
+      value:
+        type: string
+        example: <USER_DISTINGUISHED_NAME>
+    - name: password
+      description: Password associated with `username`
+      value:
+        type: string
+    - name: ssl_verify
+      description: Whether or not to perform server certificate validation.
+      value:
+        type: boolean
+        example: true
+    - name: ssl_key
+      description: Path to the client private key file, in PEM format.
+      value:
+        type: string
+        example: <KEY_PEM_PATH>
+    - name: ssl_cert
+      description: |
+        Path to the client certificate file in PEM format.
+        If you don't specify a key, it's taken from the certificate file.
+      value:
+        type: string
+        example: <CLIENT_CERT_PATH>
+    - name: ssl_ca_certs
+      description: |
+        Path to a directory containing CA certificates,
+        or a file containing a bundle of certificates, in PEM format.
+      value:
+        type: string
+        example: <CA_CERT_PATH>
+    - name: custom_queries
+      description: |
+        Specifies custom search queries that are run by the check, which then sends the duration of
+        the query, and the number of results to Datadog.
+        Each custom queries have the following parameters:
+        * `name` - string - required: A name to identify your query. It's used to tag the metrics for this query.
+        * `search_base` - string - required: The search base for the query.
+        * `search_filter` - string - required: The search filter for your query.
+        * `search_scope` - string - optional - default: subtree : One of `base`, `level`, `subtree`.
+        * `attributes` - list of strings - optional: List of attributes to query.
+        * `username` - string - optional: The user you want to bind to perform the query.
+                                          Don't specify the option if you want to use the same user as
+                                          for the monitor backend. Set to empty string `""` for an anonymous bind.
+        * `password` - string - optional: The password associated with `username`.
+      value:
+        type: array
+        items:
+          type: object
+        example:
+        - name: <CUSTOM_QUERY_NAME>
+          search_base: <SEARCH_BASE>
+          search_filter: (objectClass=*)
+          search_scope: subtree
+          attributes: []
+          username: <USER_DISTINGUISHED_NAME>
+          password: <PASSWORD>
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/slapd.log
+      source: openldap
