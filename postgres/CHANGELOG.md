@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 5.3.0 / 2020-11-26
+
+* [Added] Add new metrics for WAL based logical replication. See [#8026](https://github.com/DataDog/integrations-core/pull/8026).
+
 ## 5.2.1 / 2020-11-10
 
 * [Fixed] Fix query tag to use the normalized query. See [#7982](https://github.com/DataDog/integrations-core/pull/7982).
