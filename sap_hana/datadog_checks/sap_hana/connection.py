@@ -1,6 +1,6 @@
 import socket
 
-from pyhdb.connection import Connection, INITIALIZATION_BYTES, version_struct
+from pyhdb.connection import INITIALIZATION_BYTES, Connection, version_struct
 
 
 class HanaConnection(Connection):
