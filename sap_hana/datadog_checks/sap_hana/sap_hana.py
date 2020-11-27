@@ -15,8 +15,8 @@ from datadog_checks.base.utils.common import total_time_to_temporal_percent
 from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
-from .connection import HanaConnection
 from . import queries
+from .connection import HanaConnection
 from .exceptions import QueryExecutionError
 from .utils import compute_percent, positive
 
@@ -551,7 +551,7 @@ class SapHanaCheck(AgentCheck):
                 user=self._username,
                 password=self._password,
                 tls_context=tls_context,
-                timeout=self._timeout
+                timeout=self._timeout,
             )
             connection.connect()
         except Exception as e:
