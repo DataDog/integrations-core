@@ -1,5 +1,8 @@
 # CHANGELOG - SAP HANA
 
+## 1.4.0-rc.1 / 2020-11-27
+
+
 ## 1.3.0 / 2020-10-31
 
 * [Added] Add config spec. See [#7715](https://github.com/DataDog/integrations-core/pull/7715).
