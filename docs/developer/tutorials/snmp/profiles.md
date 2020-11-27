@@ -91,7 +91,7 @@ This script requires a list of ASN1 MIB files as input argument, and copies to t
 
 #### Options
 
-`-f, --filter-path-oids` is an option to provide the path to a YAML file to be used as a filter to exclude some nodes within a MIB.
+`-f, --filters` is an option to provide the path to a YAML file containing a collection of MIB names and their list of node names to be included.
 
 For example:
 
@@ -104,6 +104,8 @@ CISCO-SYSLOG-MIB: []
 SNMP-FRAMEWORK-MIB:
 - snmpEngine
 ```
+
+Will include `system`, `interfaces` and `ip` nodes from `RFC1213-MIB`, no node fro, `CISCO-SYSLOG-MIB` and node `snmpEngine` from `SNMP-FRAMEWORK-MIB`.
 
 Note that each `MIB:node_name` correspond to exactly one and only one OID. However, some MIBs report legacy nodes that are overwritten.
 
