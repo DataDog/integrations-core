@@ -50,3 +50,5 @@ def assert_python_vs_core(dd_agent_check, instance):
     for (name, mtype, tags), count in expected_metrics.items():
         print("metric:", name, mtype, tags, count)
         aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
+
+    aggregator.assert_all_metrics_covered()
