@@ -7,10 +7,133 @@ from collections import namedtuple
 from tempfile import gettempdir
 
 import click
-import pyperclip
 import yaml
 
 from ...console import CONTEXT_SETTINGS
+
+
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
+@click.argument('mib_files', nargs=-1)
+@click.option('-f', '--filters', help='Path to OIDs filter', default=None)
+@click.option('-a', '--aliases', help='Path to metric tag aliases', default=None)
+@click.pass_context
+def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
+    """
+    Generate an SNMP profile from MIBs. Accepts a directory path containing mib files
+    to be used as source to generate the profile, along with a filter if a device or
+    family of devices support only a subset of oids from a mib.
+
+    filters is the path to a yaml file containing a collection of MIBs, with their list of
+    MIB node names to be included. For example:
+    ```yaml
+    RFC1213-MIB:
+    - system
+    - interfaces
+    - ip
+    CISCO-SYSLOG-MIB: []
+    SNMP-FRAMEWORK-MIB:
+    - snmpEngine
+    ```
+    Note that each `MIB:node_name` correspond to exactly one and only one OID. However, some MIBs report legacy nodes
+    that are overwritten.
+
+    To resolve, edit the MIB by removing legacy values manually before loading them with this profile generator. If a
+    MIB is fully supported, it can be omitted from the filter as MIBs not found in a filter will be fully loaded.
+    If a MIB is *not* fully supported, it can be listed with an empty node list, as `CISCO-SYSLOG-MIB` in the example.
+
+    `-a, --aliases` is an option to provide the path to a YAML file containing a list of aliases to be
+    used as metric tags for tables, in the following format:
+    ```yaml
+    aliases:
+    - from:
+        MIB: ENTITY-MIB
+        name: entPhysicalIndex
+      to:
+        MIB: ENTITY-MIB
+        name: entPhysicalName
+    ```
+    MIBs tables most of the time define a column OID within the table, or from a different table and even different MIB,
+    which value can be used to index entries. This is the `INDEX` field in row nodes. As an example,
+    entPhysicalContainsTable in ENTITY-MIB
+    ```txt
+    entPhysicalContainsEntry OBJECT-TYPE
+    SYNTAX      EntPhysicalContainsEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A single container/'containee' relationship."
+    INDEX       { entPhysicalIndex, entPhysicalChildIndex }
+    ::= { entPhysicalContainsTable 1 }
+    ```
+    or its json dump, where `INDEX` is replaced by indices
+    ```json
+    "entPhysicalContainsEntry": {
+        "name": "entPhysicalContainsEntry",
+        "oid": "1.3.6.1.2.1.47.1.3.3.1",
+        "nodetype": "row",
+        "class": "objecttype",
+        "maxaccess": "not-accessible",
+        "indices": [
+          {
+            "module": "ENTITY-MIB",
+            "object": "entPhysicalIndex",
+            "implied": 0
+          },
+          {
+            "module": "ENTITY-MIB",
+            "object": "entPhysicalChildIndex",
+            "implied": 0
+          }
+        ],
+        "status": "current",
+        "description": "A single container/'containee' relationship."
+      },
+    ```
+    Sometimes indexes are columns from another table, and we might want to use another column as it could have more
+    human readable information - we might prefer to see the interface name vs its numerical table index. This can be
+    achieved using metric_tag_aliases
+
+
+    Return a list of SNMP metrics and copy its yaml dump to the clipboard
+    Metric tags need to be added manually
+    """
+    # ensure at least one mib file is provided
+    if len(mib_files) == 0:
+        print('🙄 no mib file provided, need at least one mib file to generate a profile')
+        return
+
+    # create a list of all mib files directories and mib names
+    source_directories = set()
+    mibs = set()
+    for file in mib_files:
+        source_directories.add(os.path.dirname(file))
+        mibs.add(os.path.splitext(os.path.basename(file))[0])
+    # create a tmp dir for compiled json mibs
+    json_destination_directory = os.path.join(gettempdir(), 'mibs')
+    if not os.path.exists(json_destination_directory):
+        os.mkdir(json_destination_directory)
+
+    profile_oid_collection = {}
+    # build profile
+    for oid_node in _extract_oids_from_mibs(list(mibs), list(source_directories), json_destination_directory, filters):
+        if oid_node.node_type == 'table':
+            _add_profile_table_node(profile_oid_collection, oid_node)
+        elif oid_node.node_type == 'row':
+            # requires
+            _add_profile_row_node(
+                profile_oid_collection,
+                oid_node,
+                os.path.dirname(mib_files[0]),
+                metric_tag_aliases_path=aliases,
+                json_mib_directory=json_destination_directory,
+            )
+        elif oid_node.node_type == 'column':
+            _add_profile_column_node(profile_oid_collection, oid_node)
+        elif oid_node.node_type == 'scalar':
+            _add_profile_scalar_node(profile_oid_collection, oid_node)
+
+    print('📋 Profile yaml:')
+    print(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
 
 
 class OidNodeInvalid(Exception):
@@ -20,7 +143,6 @@ class OidNodeInvalid(Exception):
 
 
 OidTableIndex = namedtuple('OidIndex', ['index_module', 'index_name'])
-
 
 JSON_NODE_PROP_CLASS = 'class'
 JSON_NODE_PROP_DESCRIPTION = 'description'
@@ -500,162 +622,3 @@ def _add_profile_scalar_node(profile_oid_collection, oid_node):
         symbol['description'] = oid_node.description
     profile_node['symbol'] = symbol
     profile_oid_collection[oid] = profile_node
-
-
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
-@click.argument('mib_files', nargs=-1)
-@click.option('-f', '--filter-path-oids', help='Path to OIDs filter', default=None)
-@click.option('-a', '--aliases_metric_tag_path', help='Path to metric tag aliases', default=None)
-@click.pass_context
-def generate_profile_from_mibs(ctx, mib_files, filter_path_oids, aliases_metric_tag_path):
-    """
-    Generate an SNMP profile from MIBs. Accepts a directory path containing mib files
-    to be used as source to generate the profile, along with a filter if a device or
-    family of devices support only a subset of oids from a mib.
-
-    filter_path_oids is the path to a yaml file containing a collection of MIBs, with their list of
-    supported node names. For example:
-    ```yaml
-    RFC1213-MIB:
-    - system
-    - interfaces
-    - ip
-    CISCO-SYSLOG-MIB: []
-    SNMP-FRAMEWORK-MIB:
-    - snmpEngine
-    ```
-    Note that each MIB:node_name correspond to exactly one and only one OID. Well, not always. Some MIBs report legacy
-    nodes that are overwritten. Current solution is to edit the MIB removing legacy values manually before loading them
-    with this profile generator.
-    If a MIB is fully supported it can be omitted from the filter, as MIBs not found in filter
-    will be fully loaded. If a MIB is fully not supported it can be listed with an empty node list, as CISCO-SYSLOG-MIB
-    in the example.
-
-    aliases_metric_tag_path is the path to a yaml file containing a list of aliases to be used as metric tags for
-    tables. For example:
-    ```yaml
-    aliases:
-    - from:
-        MIB: ENTITY-MIB
-        name: entPhysicalIndex
-      to:
-        MIB: ENTITY-MIB
-        name: entPhysicalName
-    ```
-    MIBs tables most of the time define a column OID within the table, or from a different table and even different MIB,
-    which value can be used to index entries. This is the `INDEX` field in row nodes. As an example,
-    entPhysicalContainsTable in ENTITY-MIB
-    ```txt
-    entPhysicalContainsEntry OBJECT-TYPE
-    SYNTAX      EntPhysicalContainsEntry
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-            "A single container/'containee' relationship."
-    INDEX       { entPhysicalIndex, entPhysicalChildIndex }
-    ::= { entPhysicalContainsTable 1 }
-    ```
-    or its json dump, where `INDEX` is replaced by indices
-    ```json
-    "entPhysicalContainsEntry": {
-        "name": "entPhysicalContainsEntry",
-        "oid": "1.3.6.1.2.1.47.1.3.3.1",
-        "nodetype": "row",
-        "class": "objecttype",
-        "maxaccess": "not-accessible",
-        "indices": [
-          {
-            "module": "ENTITY-MIB",
-            "object": "entPhysicalIndex",
-            "implied": 0
-          },
-          {
-            "module": "ENTITY-MIB",
-            "object": "entPhysicalChildIndex",
-            "implied": 0
-          }
-        ],
-        "status": "current",
-        "description": "A single container/'containee' relationship."
-      },
-    ```
-    Sometimes indexes are columns from another table, and we might want to use another column as it could have more
-    human readable information - we might prefer to see the interface name vs its numerical table index. This can be
-    achieved using metric_tag_aliases
-
-
-    Return a list of SNMP metrics and copy its yaml dump to the clipboard
-    Metric tags need to be added manually
-    """
-    # create a list of all mib files directories and mib names
-    source_directories = set()
-    mibs = set()
-    for file in mib_files:
-        source_directories.add(os.path.dirname(file))
-        mibs.add(os.path.splitext(os.path.basename(file))[0])
-    # create a tmp dir for compiled json mibs
-    json_destination_directory = os.path.join(gettempdir(), 'mibs')
-    if not os.path.exists(json_destination_directory):
-        os.mkdir(json_destination_directory)
-
-    profile_oid_collection = {}
-    # build profile
-    for oid_node in _extract_oids_from_mibs(
-        list(mibs), list(source_directories), json_destination_directory, filter_path_oids
-    ):
-        if oid_node.node_type == 'table':
-            _add_profile_table_node(profile_oid_collection, oid_node)
-        elif oid_node.node_type == 'row':
-            # requires
-            _add_profile_row_node(
-                profile_oid_collection,
-                oid_node,
-                os.path.dirname(mib_files[0]),
-                metric_tag_aliases_path=aliases_metric_tag_path,
-                json_mib_directory=json_destination_directory,
-            )
-        elif oid_node.node_type == 'column':
-            _add_profile_column_node(profile_oid_collection, oid_node)
-        elif oid_node.node_type == 'scalar':
-            _add_profile_scalar_node(profile_oid_collection, oid_node)
-
-    pyperclip.copy(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
-    print('📋 Profile yaml dump copied to your clipboard')
-
-
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Join two SNMP profiles including unique nodes')
-@click.argument('profile_a')
-@click.argument('profile_b')
-@click.pass_context
-def join_profiles(ctx, profile_a, profile_b):
-    """
-    Joins two SNMP profiles, including unique metrics.
-    Returns a list of metrics, and prints its yaml dump.
-    """
-
-    # load data from profile_a
-    profile_a_data = {}
-    _recursively_expand_profile(profile_a, profile_a_data)
-    # index profile data by oids
-    profile_a_oid_collection = _extract_oid_collection_from_profile_data(profile_a_data)
-
-    # load metrics from profile_b
-    profile_b_data = {}
-    _recursively_expand_profile(profile_b, profile_b_data)
-
-    joined_metrics = profile_a_data['metrics']
-    for oid_node in profile_b_data['metrics']:
-        if 'table' in oid_node:
-            oid = oid_node['table']['OID']
-        elif 'symbol' in oid_node:
-            oid = oid_node['symbol']['OID']
-        else:
-            continue
-
-        if oid not in profile_a_oid_collection:
-            joined_metrics.append(oid_node)
-        else:
-            pass
-
-    pyperclip.copy(yaml.dump({'metrics': joined_metrics}, sort_keys=False))
-    print('📋 Joined metrics yaml dump copied to your clipboard')

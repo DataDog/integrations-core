@@ -111,7 +111,7 @@ Note that each `MIB:node_name` correspond to exactly one and only one OID. Howev
 
 To resolve, edit the MIB by removing legacy values manually before loading them with this profile generator. If a MIB is fully supported, it can be omitted from the filter as MIBs not found in a filter will be fully loaded. If a MIB is *not* fully supported, it can be listed with an empty node list, as `CISCO-SYSLOG-MIB` in the example.
 
-`-a, --aliases_metric_tag_path` is an option to provide the path to a YAML file containing a list of aliases to be used as metric tags for tables, in the following format:
+`-a, --aliases` is an option to provide the path to a YAML file containing a list of aliases to be used as metric tags for tables, in the following format:
 
 ```yaml
 aliases:
