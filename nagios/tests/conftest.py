@@ -23,13 +23,22 @@ def dd_environment():
             ]
         }
 
+        configuration = {
+            "init_config": {},
+            "instances": [INSTANCE_INTEGRATION],
+            "logs": {
+                "type": "file",
+                "path": os.path.join(nagios_var_log, 'nagios.log'),
+                "source": "nagios",
+            }
+        }
+
         with docker_run(
             os.path.join(HERE, 'compose', 'docker-compose.yaml'),
             env_vars={'NAGIOS_LOGS_PATH': nagios_var_log},
             build=True,
-            mount_logs=True,
         ):
-            yield INSTANCE_INTEGRATION, e2e_metadata
+            yield configuration, e2e_metadata
 
 
 @pytest.fixture
