@@ -22,6 +22,11 @@ def test_e2e_metric_types(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
+def test_e2e_profile(dd_agent_check):
+    instance = common.generate_container_profile_instance_config('f5-big-ip')
+    assert_python_vs_core(dd_agent_check, instance)
+
+
 def assert_python_vs_core(dd_agent_check, instance):
     python_instance = instance.copy()
     python_instance['loader'] = 'python'
