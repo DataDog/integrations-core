@@ -57,6 +57,27 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 With the default configuration, the Nagios check doesn't collect any metrics. But if you set `collect_host_performance_data` and/or `collect_service_performance_data` to `True`, the check watches for Nagios performance data and submits it as gauge metrics to Datadog.
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `nagios.d/conf.yaml` file to start collecting your Nagios logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /opt/nagios/var/log/nagios.log
+        source: nagios
+    ```
+
+    Change the `path` parameter value based on your environment, see `log_file` value in your nagios configuration file. See the [sample nagios.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][4].
+
 ### Events
 
 The check watches the Nagios events log for log lines containing these strings, emitting an event for each line:
