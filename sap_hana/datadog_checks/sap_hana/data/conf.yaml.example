@@ -101,7 +101,7 @@ instances:
     #     - test:<INTEGRATION>
 
     ## @param use_tls - boolean - optional - default: false
-    ## This instructs the SAP HANA integration to connect using TLS.
+    ## Instructs the SAP HANA integration to connect using TLS.
     #
     # use_tls: false
 
