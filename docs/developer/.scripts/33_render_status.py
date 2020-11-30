@@ -136,19 +136,28 @@ def render_metadata_progress():
 
 
 def render_logs_progress():
+    # List of integrations where is not possible or it does not make sense to have its own log integration
     not_possible = {
         'sap_hana',  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
         'ntp',  # the integration is for a remote ntp server
         'btrfs',  # it emits to the system log
+        'directory',
+        'external_dns',
         'http_check',  # Its not a service
+        'linux_proc_extras',
         'snmp',  # remote connection to the devices
         'openmetrics',  # base class
         'pdh_check',   # base class
+        'process',
         'prometheus',  # base class
+        'tcp_check',
+        'tls',
         'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
-        'vsphere',
+        'ssh_check',
+        'system_core',
+        'system_swap',
         'windows_service',
-        'wmi_check',  # base class
+        'wmi_check',  # base classs
     }
     # Also excluding all the kube_ integrations
     valid_checks = sorted(x for x in set(get_valid_checks()).difference(not_possible) if not x.startswith('kube'))
