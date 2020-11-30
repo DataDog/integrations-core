@@ -13,17 +13,12 @@ class HanaConnection(Connection):
         Original implementation here can be found here:
         https://github.com/SAP/PyHDB/blob/v0.3.4/pyhdb/connection.py#L65"""
 
-        # CREATE SOCKET
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(self._timeout)
+        # Create socket
+        self._socket = socket.create_connection((self.host, self.port), self._timeout)
 
-        # WRAP SOCKET
+        # Wrap socket if tls_context is set
         if self.tls_context:
-            self._socket = self.tls_context.wrap_socket(sock, server_hostname=self.host)
-        else:
-            self._socket = sock
-
-        self._socket.connect((self.host, self.port))
+            self._socket = self.tls_context.wrap_socket(self._socket, server_hostname=self.host)
 
         # Initialization Handshake
         self._socket.sendall(INITIALIZATION_BYTES)
