@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 import os
+import sys
 from collections import namedtuple
 from tempfile import gettempdir
 
@@ -99,7 +100,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
     """
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
-        print('🙄 no mib file provided, need at least one mib file to generate a profile')
+        print('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
         return
 
     # create a list of all mib files directories and mib names
@@ -132,7 +133,6 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
         elif oid_node.node_type == 'scalar':
             _add_profile_scalar_node(profile_oid_collection, oid_node)
 
-    print('📋 Profile yaml:')
     print(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
 
 
@@ -296,7 +296,6 @@ def _load_module_or_compile(mib, source_directories, json_mib_directory):
 
     # compile and reload
     processed = _compile_mib_to_json(mib, source_directories, json_mib_directory)
-    print('🏗️ {} module compiled with result: {}'.format(mib, processed[mib]))
     if processed[mib] != 'missing':
         mib_json = _load_json_module(json_mib_directory, mib)
         return mib_json
@@ -388,7 +387,7 @@ def _extract_oids_from_mibs(mibs, source_directories, json_destination_directory
                 continue
 
             if oid_node.is_unknown_type:
-                print('🤷 Unknown node type: {}:{} [{}]'.format(oid_node.mib, oid_node.name, oid_node.oid))
+                continue
 
             oid_list.append(oid_node)
 
