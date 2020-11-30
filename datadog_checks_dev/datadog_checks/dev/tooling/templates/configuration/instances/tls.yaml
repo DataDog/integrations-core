@@ -3,7 +3,7 @@
     example: true
     type: boolean
   description: |
-    Instructs the check to validate the TLS certificate of services.
+    Instructs the check to validate the TLS certificate(s) of the service(s).
 - name: tls_ca_cert
   value:
     example: <CA_CERT_PATH>
