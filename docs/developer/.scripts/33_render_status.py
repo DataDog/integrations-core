@@ -141,23 +141,23 @@ def render_logs_progress():
         'sap_hana',  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
         'ntp',  # the integration is for a remote ntp server
         'btrfs',  # it emits to the system log
-        'directory',
-        'external_dns',
+        'directory',  # OS
+        'external_dns',  # remote connection
         'http_check',  # Its not a service
         'linux_proc_extras',
         'snmp',  # remote connection to the devices
         'openmetrics',  # base class
         'pdh_check',   # base class
-        'process',
+        'process',  # system
         'prometheus',  # base class
-        'tcp_check',
-        'tls',
+        'tcp_check',  # remote connection
+        'tls',  # remote connection
         'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
-        'ssh_check',
-        'system_core',
-        'system_swap',
-        'windows_service',
-        'wmi_check',  # base classs
+        'ssh_check',  # remote connection
+        'system_core',  # system
+        'system_swap',  # system
+        'windows_service',  # OS
+        'wmi_check',  # base class
     }
     # Also excluding all the kube_ integrations
     valid_checks = sorted(x for x in set(get_valid_checks()).difference(not_possible) if not x.startswith('kube'))
