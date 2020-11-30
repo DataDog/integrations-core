@@ -4,9 +4,10 @@
 import click
 
 from ...console import CONTEXT_SETTINGS
+from .generate_profile import generate_profile_from_mibs
 from .translate_profile import translate_profile
 
-ALL_COMMANDS = [translate_profile]
+ALL_COMMANDS = [generate_profile_from_mibs, translate_profile]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='SNMP utilities')
