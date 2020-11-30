@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import pytest
 
 from datadog_checks.mongo import MongoDb
@@ -156,6 +158,31 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:xyz1', count=1)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
+
+
+def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog):
+    instance_user['custom_queries'] = [
+        {
+            'metric_prefix': 'dd.custom.mongo.query_a',
+            'query': {'find': 'INVALID_COLLECTION', 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
+            'fields': [
+                {'field_name': 'cust_id', 'name': 'cluster_id', 'type': 'tag'},
+                {'field_name': 'status', 'name': 'status_tag', 'type': 'tag'},
+                {'field_name': 'amount', 'name': 'amount', 'type': 'count'},
+                {'field_name': 'elements', 'name': 'el', 'type': 'count'},
+            ],
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ]
+    check = check(instance_user)
+
+    with caplog.at_level(logging.DEBUG):
+        check.check(None)
+
+    assert 'Errors while collecting custom metrics with prefix dd.custom.mongo.query_a' in caplog.text
+    assert 'Exception: Custom query returned an empty result set.' in caplog.text
+
+    aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
 def test_metadata(check, instance, datadog_agent):
