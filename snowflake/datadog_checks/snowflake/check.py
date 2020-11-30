@@ -49,6 +49,12 @@ class SnowflakeCheck(AgentCheck):
         if self.config.password:
             self.register_secret(self.config.password)
 
+        if self.config.role == 'ACCOUNTADMIN':
+            self.log.info(
+                'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
+                'refer to docs about custom roles.'
+            )
+
         self.metric_queries = []
         self.errors = []
         for mgroup in self.config.metric_groups:

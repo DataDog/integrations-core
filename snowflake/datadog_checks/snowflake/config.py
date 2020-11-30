@@ -64,11 +64,6 @@ class Config(object):
 
         if role is None:
             raise ConfigurationError('Must specify a role')
-        elif role == 'ACCOUNTADMIN':
-            log.info(
-                'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
-                'refer to docs about custom roles.'
-            )
 
         self.account = account  # type: str
         self.user = user  # type: str
