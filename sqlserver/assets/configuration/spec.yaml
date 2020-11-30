@@ -61,6 +61,8 @@ files:
         therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
 
         When conflicts arise, included databases will take precedence.
+
+        Defaults to `.*` to include everything.
       value:
         type: array
         items:

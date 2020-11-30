@@ -194,12 +194,11 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(list)
         self.do_check = True
 
-        # autodiscovery parameters
         self.autodiscovery = self.instance.get('database_autodiscovery')
         if self.autodiscovery and self.instance.get('database'):
-            self.log.warning('sqlserver `database_autodiscovery` and `database` options defined in same instance '
+            self.log.warning('sqlserver `database_autodiscovery` and `database` options defined in same instance - '
                              'autodiscovery will take precedence.')
-        self.autodiscovery_include = self.instance.get('autodiscovery_include', [])
+        self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
         self._compile_patterns()
         self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
@@ -281,23 +280,32 @@ class SQLServer(AgentCheck):
 
         if valid_patterns:
             return re.compile('|'.join(valid_patterns), re.IGNORECASE)
+        else:
+            # create unmatchable regex - https://stackoverflow.com/a/1845097/2157429
+            return re.compile(r'(?!x)x')
 
     def autodiscover_databases(self, cursor):
         if not self.autodiscovery:
             return False
 
         now = time.time()
-        if now - self.ad_last_check < self.autodiscovery_interval:
+        if now - self.ad_last_check > self.autodiscovery_interval:
+            self.log.info('Performing database autodiscovery')
             cursor.execute(AUTODISCOVERY_QUERY)
-            all_dbs = set(cursor.fetchall())
-            excluded_dbs = set([d for d in all_dbs if not self._exclude_patterns.match(d)])
+            all_dbs = set(row.name for row in cursor.fetchall())
+            excluded_dbs = set([d for d in all_dbs if self._exclude_patterns.match(d)])
             included_dbs = set([d for d in all_dbs if self._include_patterns.match(d)])
 
+            self.log.debug('Found databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs)
+
             # remove all excluded dbs, but add back in any specifically included ones via `union`
+            # TODO need to revisit in case of .* for included and specifics for excluded
             filtered_dbs = (all_dbs - excluded_dbs).union(all_dbs.intersection(included_dbs))
+            self.log.debug('Resulting database filter: %s', filtered_dbs)
             self.ad_last_check = now
 
             if filtered_dbs != self.databases:
+                self.log.debug('Databases updated from previous check.')
                 self.databases = filtered_dbs
                 return True
         return False
