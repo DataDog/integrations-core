@@ -40,7 +40,7 @@ class SnowflakeCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
-        self.config = Config(self.instance, self.log)
+        self.config = Config(self.instance)
         self._conn = None
 
         # Add default tags like account to all metrics
@@ -156,9 +156,10 @@ class SnowflakeCheck(AgentCheck):
             try:
                 return method(*args, **kwargs)
             except Exception as e:
-                self.log.error(
-                    "Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e)
-                )
+                if proxies:
+                    self.log.error(
+                        "Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e)
+                    )
                 return
 
         return _request_exec

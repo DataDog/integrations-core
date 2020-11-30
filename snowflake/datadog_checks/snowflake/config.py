@@ -21,7 +21,7 @@ class Config(object):
 
     AUTHENTICATION_MODES = ['snowflake', 'oauth']
 
-    def __init__(self, log, instance=None):
+    def __init__(self, instance=None):
         if instance is None:
             instance = {}
 
