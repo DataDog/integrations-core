@@ -53,25 +53,41 @@ BRICK_STATS.update(GENERAL_STATS)
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
+GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
+INSTALL_PATH = '/usr/local/bin/gstatus'
+
 
 class GlusterfsCheck(AgentCheck):
     __NAMESPACE__ = 'glusterfs'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, init_config, instances):
         # type: (*Any, **Any) -> None
-        super(GlusterfsCheck, self).__init__(*args, **kwargs)
+        super(GlusterfsCheck, self).__init__(init_config, instances)
         self._tags = self.instance.get('tags', [])
 
+        # Check if customer set gstatus path
+        if init_config.get('gstatus_path'):
+            self.gstatus_cmd = init_config.get('gstatus_path')
+        else:
+            if os.path.exists(GSTATUS_PATH):
+                self.gstatus_cmd = GSTATUS_PATH
+            elif os.path.exists(INSTALL_PATH):
+                self.gstatus_cmd = INSTALL_PATH
+            else:
+                raise Exception(
+                    'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
+                )
+
+
     def check(self, _):
-        gstatus_cmd = 'gstatus'
         use_sudo = _is_affirmative(self.instance.get('use_sudo', False))
         if use_sudo:
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
                 raise Exception('The dd-agent user does not have sudo access')
-            gluster_args = ['sudo', gstatus_cmd]
+            gluster_args = ['sudo', self.gstatus_cmd]
         else:
-            gluster_args = [gstatus_cmd]
+            gluster_args = [self.gstatus_cmd]
 
         gluster_args += ['-a', '-o', 'json']
         output, _, _ = get_subprocess_output(gluster_args, self.log)
