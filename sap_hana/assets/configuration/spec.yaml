@@ -48,7 +48,7 @@ files:
       - template: instances/db
       - name: use_tls
         description: |
-          This instructs the SAP HANA integration to connect using TLS.
+          Instructs the SAP HANA integration to connect using TLS.
         value:
           example: false
           type: boolean
