@@ -106,7 +106,7 @@ instances:
     # use_tls: false
 
     ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate of services.
+    ## Instructs the check to validate the TLS certificate(s) of the service(s).
     #
     # tls_verify: true
 
