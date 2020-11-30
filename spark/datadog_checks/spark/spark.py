@@ -656,7 +656,10 @@ class SparkCheck(AgentCheck):
                     tags = ['app_name:%s' % str(app_name)]
                     tags.extend(addl_tags)
                     self._set_metric(metric_name, submission_type, value, tags=tags)
-            except HTTPError:
+            except HTTPError as e:
+                self.log.debug(
+                    "No structured streaming metrics to collect from" " app %s. %s", app_name, e, exc_info=True
+                )
                 pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):

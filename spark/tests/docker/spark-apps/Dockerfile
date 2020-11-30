@@ -1,5 +1,5 @@
-ARG SPARK_VERSION
-FROM bde2020/spark-python-template:${SPARK_VERSION}
+ARG SPARK_IMAGE
+FROM bde2020/spark-python-template:${SPARK_IMAGE}
 
 COPY requirements.txt /app/requirements.txt
 COPY app.py /app/app.py
