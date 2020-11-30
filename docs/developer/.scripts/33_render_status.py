@@ -137,9 +137,21 @@ def render_metadata_progress():
 
 def render_logs_progress():
     not_possible = {
-        'sap_hana'  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
+        'sap_hana',  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
+        'ntp',  # the integration is for a remote ntp server
+        'btrfs',  # it emits to the system log
+        'http_check',  # Its not a service
+        'snmp',  # remote connection to the devices
+        'openmetrics',  # base class
+        'pdh_check',   # base class
+        'prometheus',  # base class
+        'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
+        'vsphere',
+        'windows_service',
+        'wmi_check',  # base class
     }
-    valid_checks = sorted(set(get_valid_checks()).difference(not_possible))
+    # Also excluding all the kube_ integrations
+    valid_checks = sorted(x for x in set(get_valid_checks()).difference(not_possible) if not x.startswith('kube'))
     total_checks = len(valid_checks)
     checks_with_logs = 0
 
