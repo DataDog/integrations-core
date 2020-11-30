@@ -32,7 +32,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
     <div class="alert alert-warning">Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
     
-    We recommend creating a `DATADOG` role with access to `ACCOUNT_USAGE`. Read more about controlling [ACCOUNTADMIN role][12] for more information.
+    We recommend creating a `DATADOG` role with access to `ACCOUNT_USAGE`. Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.
     </div>
     
     ```text
@@ -204,4 +204,3 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
 [11]: https://docs.datadoghq.com/metrics/summary/
-[12]: https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users
