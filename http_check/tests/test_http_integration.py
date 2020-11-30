@@ -40,16 +40,16 @@ def test_check_cert_expiration(http_check):
     instance = {'url': 'https://wronghost.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
     assert status == AgentCheck.CRITICAL
-    assert days_left == 0
-    assert seconds_left == 0
+    assert days_left == -1
+    assert seconds_left == -1
     assert 'Hostname mismatch' in msg or "doesn't match" in msg
 
     # site is down
     instance = {'url': 'https://this.does.not.exist.foo'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
     assert status == AgentCheck.CRITICAL
-    assert days_left == 0
-    assert seconds_left == 0
+    assert days_left == -1
+    assert seconds_left == -1
 
     # cert expired
     instance = {'url': 'https://expired.mock/'}
