@@ -114,7 +114,7 @@ instances:
     ##   1. https://spark.apache.org/docs/latest/monitoring.html#metrics
     ##   2. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#reporting-metrics-using-dropwizard 
     ## Note that if the MetricsServlet is not serving the JSON metrics payload on the default path (/metrics/json)
-    ## you also need to set the `metricsservlet_path`.
+    ## you also need to set the `metricsservlet_path` option below.
     #
     # streaming_metrics: true
 
