@@ -1,7 +1,7 @@
 - name: host
   required: false
   description: |
-    The host the Datadog Active Directory check connects to.
+    The host the current check connects to.
     "." means the current host
   value:
     example: .
