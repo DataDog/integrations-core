@@ -36,7 +36,7 @@ instances:
       - localhost:9092
       - <KAFKA_BROKER_ENDPOINT>:9092
 
-    ## @param kafka_client_api_version - string - optional - default: 2.3.0
+    ## @param kafka_client_api_version - string - optional
     ## Specify the highest client protocol version supported by all brokers in the cluster.
     ##
     ## This is a performance optimization. If this is not set, then the check automatically probes
@@ -107,7 +107,7 @@ instances:
     #
     # security_protocol: PLAINTEXT
 
-    ## @param sasl_mechanism - string - optional - default: PLAIN
+    ## @param sasl_mechanism - string - optional
     ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
     ## Valid values are: PLAIN, GSSAPI, OAUTHBEARER, SCRAM-SHA-256, SCRAM-SHA-512.
     #
@@ -128,7 +128,7 @@ instances:
     #
     # sasl_kerberos_service_name: kafka
 
-    ## @param sasl_kerberos_domain_name - string - optional - default: localhost
+    ## @param sasl_kerberos_domain_name - string - optional
     ## Kerberos domain name to use in GSSAPI sasl mechanism handshake.
     #
     # sasl_kerberos_domain_name: localhost

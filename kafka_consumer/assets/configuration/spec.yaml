@@ -60,6 +60,7 @@ files:
         value:
           type: string
           example: "2.3.0"
+          default: null
       - name: consumer_groups
         description: |
           Each level is optional. Any empty values are fetched from the Kafka cluster.
@@ -131,6 +132,7 @@ files:
         value:
           type: string
           example: PLAIN
+          default: null
       - name: sasl_plain_username
         description: Username for sasl PLAIN or SCRAM authentication.
         value:
@@ -148,10 +150,10 @@ files:
           example: kafka
       - name: sasl_kerberos_domain_name
         description: Kerberos domain name to use in GSSAPI sasl mechanism handshake.
-        default: one of the bootstrap servers
         value:
           type: string
           example: localhost
+          default: null
       - name: ssl_context
         description: |
           Pre-configured SSLContext for wrapping socket connections.
