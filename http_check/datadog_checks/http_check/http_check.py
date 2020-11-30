@@ -320,7 +320,7 @@ class HTTPCheck(AgentCheck):
 
         except Exception as e:
             msg = str(e)
-            if 'expiration' in msg:
+            if any(word in msg for word in ['expired', 'expiration']):
                 self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
