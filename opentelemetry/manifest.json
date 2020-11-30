@@ -9,7 +9,7 @@
     "otel.datadog_exporter.traces.running"
   ],
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Get telemetry data from the OpenTelemetry Collector",
   "guid": "7e87e1cc-df3b-4aa1-a6c0-3489f8296f86",
   "support": "core",
   "supported_os": [
@@ -31,6 +31,7 @@
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

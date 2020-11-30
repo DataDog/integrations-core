@@ -36,3 +36,5 @@ otel.system.filesystem.system.utilization,gauge,,,,Filesystem utilisation,0,open
 otel.system.cpu.utilization,gauge,,,,CPU utilization,0,opentelemetry,cpu utilization
 otel.system.memory.utilization,gauge,,,,Memory utilization,0,opentelemetry,mem utilization
 otel.system.paging.utilization,gauge,,,,Paging utilization,0,opentelemetry,paging utilization
+otel.datadog_exporter.metrics.running,gauge,,,,Reports that the Datadog metrics exporter is successfully sending metrics,0,opentelemetry,metrics running
+otel.datadog_exporter.traces.running,gauge,,,,Reports that the Datadog traces exporter is successfully sending metrics,0,opentelemetry,traces running
