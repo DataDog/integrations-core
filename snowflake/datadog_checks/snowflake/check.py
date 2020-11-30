@@ -40,7 +40,7 @@ class SnowflakeCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
-        self.config = Config(self.instance)
+        self.config = Config(self.instance, self.log)
         self._conn = None
 
         # Add default tags like account to all metrics

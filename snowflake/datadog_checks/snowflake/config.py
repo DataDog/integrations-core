@@ -21,7 +21,7 @@ class Config(object):
 
     AUTHENTICATION_MODES = ['snowflake', 'oauth']
 
-    def __init__(self, instance=None):
+    def __init__(self, log, instance=None):
         if instance is None:
             instance = {}
 
@@ -64,9 +64,11 @@ class Config(object):
 
         if role is None:
             raise ConfigurationError('Must specify a role')
-
-        if role == 'ACCOUNTADMIN':
-            self.log.info('Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously. Please refer to docs to set up a custom role.')
+        elif role == 'ACCOUNTADMIN':
+            log.info(
+                'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
+                'refer to docs about custom roles.'
+            )
 
         self.account = account  # type: str
         self.user = user  # type: str
