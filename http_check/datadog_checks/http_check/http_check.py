@@ -243,8 +243,10 @@ class HTTPCheck(AgentCheck):
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             tags_list.append("instance:{}".format(instance_name))
-            self.gauge('http.ssl.days_left', days_left, tags=tags_list)
-            self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
+            if days_left >=0:
+                self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+            if seconds_left >=0:
+                self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
@@ -323,10 +325,10 @@ class HTTPCheck(AgentCheck):
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
+                return AgentCheck.CRITICAL, -1, -1, msg
             else:
                 self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
+                return AgentCheck.CRITICAL, -1, -1, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
