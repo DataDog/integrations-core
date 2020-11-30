@@ -70,8 +70,11 @@ class PgBouncer(AgentCheck):
 
                         rows = cursor.fetchall()
 
-                    except pg.Error:
+                    except Exception as e:
+                        self.log.debug("There was an error running query %s", query)
                         self.log.exception("Not all metrics may be available")
+                        if not isinstance(e, pg.Error):
+                            raise
 
                     else:
                         for row in rows:
