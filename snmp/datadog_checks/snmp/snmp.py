@@ -489,6 +489,8 @@ class SnmpCheck(AgentCheck):
                 for index, val in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
                     self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                    if self.is_bandwidth_metric(name):
+                        self.submit_bandwidth_usage_metric(name, index, results, metric_tags)
             else:
                 result = list(results[name].items())
                 if len(result) > 1:
@@ -567,7 +569,7 @@ class SnmpCheck(AgentCheck):
             return
 
         try:
-            bandwidth_usage_value = bits_value / (if_high_speed * (10 ** 6))
+            bandwidth_usage_value = (bits_value / (if_high_speed * (10 ** 6))) * 100
         except ZeroDivisionError:
             self.log.debug('Zero value at ifHighSpeed, skipping this row. index=%s', index)
             return
