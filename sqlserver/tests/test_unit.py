@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+from collections import namedtuple
 
 import mock
 import pytest
@@ -45,6 +46,57 @@ def test_missing_db(instance_sql2017, dd_run_check):
         check.initialize_connection()
         dd_run_check(check)
         assert check.do_check is False
+
+
+@mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
+@mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
+def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
+    Row = namedtuple('Row', 'name,collation_name')
+    db_results = [
+        Row('master', 'SQL_Latin1_General_CP1_CI_AS'),
+        Row('tempdb', 'SQL_Latin1_General_CP1_CI_AS'),
+        Row('AdventureWorks2017', 'SQL_Latin1_General_CP1_CI_AS'),
+        Row('CaseSensitive2018', 'SQL_Latin1_General_CP1_CS_AS'),
+    ]
+
+    mock_connect.__enter__ = mock.Mock(return_value='foo')
+
+    mock_results = mock.MagicMock()
+    mock_results.__iter__.return_value = db_results
+    get_cursor.return_value = mock_results
+
+    instance = copy.copy(instance_sql2017)
+    # make sure check doesn't try to add metrics
+    instance['stored_procedure'] = 'fake_proc'
+
+    # check base case of lowercase for lowercase and case-insensitive db
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+    assert check.do_check is True
+
+    # check all caps for case insensitive db
+    instance['database'] = 'MASTER'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+    assert check.do_check is True
+
+    # check mixed case against mixed case but case-insensitive db
+    instance['database'] = 'AdventureWORKS2017'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+    assert check.do_check is True
+
+    # check case sensitive but matched db
+    instance['database'] = 'CaseSensitive2018'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+    assert check.do_check is True
+
+    # check case sensitive but mismatched db
+    instance['database'] = 'cASEsENSITIVE2018'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.initialize_connection()
 
 
 def test_set_default_driver_conf():
