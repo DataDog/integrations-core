@@ -68,8 +68,8 @@ instances:
     ## Defaults to `.*` to include everything.
     #
     # autodiscovery_include:
-    #   - master
-    #   - AdventureWorks2017
+    #   - master$
+    #   - AdventureWorks.*
 
     ## @param autodiscovery_exclude - list of strings - optional
     ## Regular expression for specific database names to always exclude as part of `database_autodiscovery`.
