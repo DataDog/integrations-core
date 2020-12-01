@@ -2,16 +2,19 @@ name: Kafka Consumer
 files:
 - name: kafka_consumer.yaml
   options:
-  - name: init_config
-    description: |
-      WARNING: To avoid blindly collecting offsets and lag for an unbounded number
-      of partitions (as could be the case after enabling monitor_unlisted_consumer_groups
-      or monitor_all_broker_highwatermarks) the check collects metrics for at most 500 partitions.
+  - template: init_config
+    overrides:
+      description: |
+        All options defined here are available to all instances.
 
-      DEPRECATION NOTICE: In the early days of Kafka, consumer offsets were stored in Zookeeper.
-      So this check currently supports fetching consumer offsets from both Kafka and Zookeeper.
-      However, Kafka 0.9 (released in 2015) deprecated Zookeeper storage. As a result, we have also
-      deprecated fetching consumer offsets from Zookeeper.
+        WARNING: To avoid blindly collecting offsets and lag for an unbounded number
+        of partitions (as could be the case after enabling monitor_unlisted_consumer_groups
+        or monitor_all_broker_highwatermarks) the check collects metrics for at most 500 partitions.
+
+        DEPRECATION NOTICE: In the early days of Kafka, consumer offsets were stored in Zookeeper.
+        So this check currently supports fetching consumer offsets from both Kafka and Zookeeper.
+        However, Kafka 0.9 (released in 2015) deprecated Zookeeper storage. As a result, we have also
+        deprecated fetching consumer offsets from Zookeeper.
     options:
     - name: kafka_timeout
       description: Customizes the Kafka connection timeout.
@@ -26,9 +29,7 @@ files:
         type: integer
         example: 5
       default: 5
-  - name: instances
-    description: |
-      
+  - template: instances
     options:
       - name: kafka_connect_str
         description: |
@@ -46,7 +47,6 @@ files:
             type: string
           example: 
             - localhost:9092
-            - <KAFKA_BROKER_ENDPOINT>:9092
       - name: kafka_client_api_version
         description: |
           Specify the highest client protocol version supported by all brokers in the cluster.
