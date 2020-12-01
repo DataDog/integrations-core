@@ -68,8 +68,8 @@ files:
         items:
           type: string
         example:
-          - master
-          - AdventureWorks2017
+          - master$
+          - AdventureWorks.*
     - name: autodiscovery_exclude
       description: |
         Regular expression for specific database names to always exclude as part of `database_autodiscovery`.

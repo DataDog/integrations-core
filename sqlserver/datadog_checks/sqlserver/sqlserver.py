@@ -299,8 +299,12 @@ class SQLServer(AgentCheck):
             self.log.debug('Found databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs)
 
             # remove all excluded dbs, but add back in any specifically included ones via `union`
-            # TODO need to revisit in case of .* for included and specifics for excluded
             filtered_dbs = (all_dbs - excluded_dbs).union(all_dbs.intersection(included_dbs))
+
+            # the case of excluding all, but including specific dbs
+            if all_dbs == excluded_dbs:
+                filtered_dbs = all_dbs.intersection(included_dbs)
+
             self.log.debug('Resulting database filter: %s', filtered_dbs)
             self.ad_last_check = now
 
