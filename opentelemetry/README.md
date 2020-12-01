@@ -56,7 +56,7 @@ For further information on the Datadog exporter settings and how to configure th
 
 ### Validation
 
-Check the OpenTelemetry Collector logs. You should see the Datadog exporter being enabled and started correctly.
+Check the OpenTelemetry Collector logs to see the Datadog exporter being enabled and started correctly.
 For example, with the configuration above you should find logging messages similar to the following.
 
 ``` 
