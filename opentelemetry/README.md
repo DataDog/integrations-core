@@ -57,6 +57,14 @@ For further information on the Datadog exporter settings and how to configure th
 ### Validation
 
 Check the OpenTelemetry Collector logs. You should see the Datadog exporter being enabled and started correctly.
+For example, with the configuration above you should find logging messages similar to the following.
+
+``` 
+Exporter is enabled.	{"component_kind": "exporter", "exporter": "datadog"}
+Exporter is starting...	{"component_kind": "exporter", "component_type": "datadog", "component_name": "datadog"}
+Exporter started.	{"component_kind": "exporter", "component_type": "datadog", "component_name": "datadog"}
+Everything is ready. Begin running and processing data.
+```
 
 ## Data Collected
 
@@ -84,7 +92,7 @@ Need help? Contact [Datadog support][1].
 [1]: https://docs.datadoghq.com/help/
 [2]: https://opentelemetry.io/docs/collector/getting-started/
 [3]: https://app.datadoghq.com/account/settings#api
-[4]: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/master/exporter/datadogexporter/README.md
+[4]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#opentelemetry-collector-datadog-exporter
 [5]: https://opentelemetry.io/docs/collector/getting-started/
 [6]: https://github.com/DataDog/integrations-core/blob/master/opentelemetry/metadata.csv
 [7]: https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver
