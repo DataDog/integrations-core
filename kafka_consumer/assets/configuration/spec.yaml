@@ -11,8 +11,7 @@ files:
       DEPRECATION NOTICE: In the early days of Kafka, consumer offsets were stored in Zookeeper.
       So this check currently supports fetching consumer offsets from both Kafka and Zookeeper.
       However, Kafka 0.9 (released in 2015) deprecated Zookeeper storage. As a result, we have also
-      deprecated fetching consumer offsets from Zookeeper and at some point in the future that
-      functionality will be removed from this check.
+      deprecated fetching consumer offsets from Zookeeper.
     options:
     - name: kafka_timeout
       description: Customizes the Kafka connection timeout.
@@ -68,8 +67,7 @@ files:
           and even consumer_groups. If you omit consumer_groups, you must set `monitor_unlisted_consumer_groups` to true.
 
           Deprecation notice: Omitting various levels works for zookeeper-based consumers. However, all
-          functionality related to fetching offsets from Zookeeper is deprecated and will be removed from this
-          check in the future.
+          functionality related to fetching offsets from Zookeeper is deprecated.
         value: 
           type: object
           example:
@@ -89,8 +87,7 @@ files:
           must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
 
           Deprecation notice: This feature works for Zookeeper-based consumers. However, all
-          functionality related to fetching offsets from Zookeeper is deprecated and will be removed from this
-          check in the future.
+          functionality related to fetching offsets from Zookeeper is deprecated.
         value:
           type: boolean
           example: false
