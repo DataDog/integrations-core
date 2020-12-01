@@ -18,7 +18,7 @@ try:
 except ImportError:
     pyodbc = None
 
-DATABASE_EXISTS_QUERY = 'select name from sys.databases;'
+DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 
 
 class SQLConnectionError(Exception):
@@ -191,9 +191,13 @@ class Connection(object):
 
     def _check_db_exists(self):
         """
-        Check if the database we're targeting actually exists
-        If not then we won't do any checks
-        This allows the same config to be installed on many servers but fail gracefully
+        Check for existence of a database, but take into consideration whether the db is case-sensitive or not.
+
+        If not case-sensitive, then we normalize the database name to lowercase on both sides and check.
+        If so, then we only accept exact-name matches.
+
+        If the check fails, then we either won't do any checks if `ignore_missing_database` is enabled, or will fail
+        with a ConfigurationError.
         """
 
         dsn, host, username, password, database, driver = self._get_access_info(self.DEFAULT_DB_KEY)
@@ -205,7 +209,7 @@ class Connection(object):
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
                 for row in cursor:
-                    self.existing_databases[row.name] = True
+                    self.existing_databases[row.name.lower()] = 'CI' in row.collation_name, row.name
 
             except Exception as e:
                 self.log.error("Failed to check if database %s exists: %s", database, e)
@@ -213,7 +217,13 @@ class Connection(object):
             finally:
                 self.close_cursor(cursor)
 
-        return database in self.existing_databases, context
+        exists = False
+        if database.lower() in self.existing_databases:
+            case_insensitive, cased_name = self.existing_databases[database.lower()]
+            if case_insensitive or database == cased_name:
+                exists = True
+
+        return exists, context
 
     def get_connector(self):
         connector = self.instance.get('connector', self.connector)
