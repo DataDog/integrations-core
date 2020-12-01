@@ -54,7 +54,7 @@ instances:
     #   - <APP_POOL_2>
 
     ## @param is_2008 - boolean - optional - default: false
-    ## Necause of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as
+    ## Because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as
     ## TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
     #
     # is_2008: false

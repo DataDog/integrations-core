@@ -43,7 +43,7 @@ files:
       required: false
       display_priority: 1
       description: |
-        Necause of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as
+        Because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as
         TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
       value:
         example: false
