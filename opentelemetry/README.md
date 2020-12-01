@@ -2,20 +2,20 @@
 
 ## Overview
 
-The OpenTelemetry Collector is a vendor-agnostic software that can export telemetry data directly to Datadog servers. 
-It can report arbitrary metrics and traces from instrumented applications and general system metrics.
+The OpenTelemetry Collector is a vendor-agnostic agent process that, via the Datadog exporter, exports telemetry data directly to Datadog servers. 
+It reports metrics and traces from instrumented applications and general system metrics.
 
 ## Setup
 
 ### Installation
 
-Please follow the [OpenTelemetry Collector documentation][2] to install the `opentelemetry-collector-contrib` distribution, or any other distribution that includes the Datadog exporter.
+Follow the [OpenTelemetry Collector documentation][2] to install the `opentelemetry-collector-contrib` distribution, or any other distribution that includes the Datadog exporter.
 
 The Datadog Agent is **not** needed to export telemetry data to Datadog.
 
 ### Configuration
 
-To export telemetry data to Datadog from the OpenTelemetry Collector add the Datadog exporter to your metrics and traces pipelines.
+To export telemetry data to Datadog from the OpenTelemetry Collector, add the Datadog exporter to your metrics and traces pipelines.
 The only required setting is [your API key][3].
 
 
@@ -51,10 +51,8 @@ service:
       exporters: [datadog]
 ```
 
-For further information on the Datadog exporter settings visit the [Datadog exporter documentation][4].
+For further information on the Datadog exporter settings and how to configure the pipeline, visit the [Datadog exporter for OpenTelemetry Collector documentation][4].
 
-Note that to instrument your custom applications you will need to add suitable receivers to this configuration.
-For more details on how pipelines and different components work, visit the [OpenTelemetry Collector documentation][5].
 
 ### Validation
 
@@ -64,10 +62,12 @@ Check the OpenTelemetry Collector logs. You should see the Datadog exporter bein
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check (if using the `hostmetrics` receiver as in the sample configuration above).
+The following metrics are provided by this check, if you're using the `hostmetrics` receiver as in the sample configuration above.
 
-Different groups of metrics can be enabled and customized by following the [hostmetrics receiver instructions](https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver).
+Different groups of metrics can be enabled and customized by following the [hostmetrics receiver instructions][7].
 CPU and disk metrics are not available on macOS.
+
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -87,3 +87,4 @@ Need help? Contact [Datadog support][1].
 [4]: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/master/exporter/datadogexporter/README.md
 [5]: https://opentelemetry.io/docs/collector/getting-started/
 [6]: https://github.com/DataDog/integrations-core/blob/master/opentelemetry/metadata.csv
+[7]: https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver
