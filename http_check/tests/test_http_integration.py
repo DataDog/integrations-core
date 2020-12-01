@@ -117,7 +117,7 @@ def test_check_ssl(aggregator, http_check):
 
     connection_err_tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=connection_err_tags, count=1)
-    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=connection_err_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=connection_err_tags, count=1)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -153,7 +153,7 @@ def test_check_ssl_expire_error(aggregator, http_check):
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
-    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=expired_cert_tags, count=1)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -164,7 +164,7 @@ def test_check_ssl_expire_error_secs(aggregator, http_check):
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert_seconds']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
-    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=expired_cert_tags, count=1)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -177,7 +177,7 @@ def test_check_hostname_override(aggregator, http_check):
     cert_validation_fail_tags = ['url:https://valid.mock:443', 'instance:cert_validation_fails']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=cert_validation_fail_tags, count=1)
     aggregator.assert_service_check(
-        HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=cert_validation_fail_tags, count=1
+        HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=cert_validation_fail_tags, count=1
     )
 
     cert_validation_pass_tags = ['url:https://valid.mock:443', 'instance:cert_validation_passes']
@@ -203,7 +203,14 @@ def test_mock_case(aggregator, http_check):
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
-    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
+    if sys.version_info[0] < 3:
+        aggregator.assert_service_check(
+            HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=expired_cert_tags, count=1
+        )
+    else:
+        aggregator.assert_service_check(
+            HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1
+        )
 
 
 @pytest.mark.usefixtures("dd_environment")
