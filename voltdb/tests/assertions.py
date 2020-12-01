@@ -4,6 +4,7 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import ServiceCheckStatus
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.types import Instance
 
 from . import common
@@ -17,6 +18,6 @@ def assert_service_checks(aggregator, instance, connect_status=AgentCheck.OK):
 def assert_metrics(aggregator):
     # type: (AggregatorStub) -> None
     for metric in common.METRICS:
-        aggregator.assert_metric(metric)  # TODO check types and tags.
+        aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())  # TODO
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=common.METADATA_EXCLUDE_METRICS)

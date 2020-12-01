@@ -111,7 +111,7 @@ ProcedureMetrics = {
         {
             'name': 'procedure.successes',
             'expression': 'procedure.invocations - procedure.aborts - procedure.failures',
-            'submit_type': 'gauge',
+            'submit_type': 'monotonic_count',
         },
     ],
 }
@@ -169,7 +169,7 @@ StatementMetrics = {
         {
             'name': 'statement.successes',
             'expression': 'statement.invocations - statement.aborts - statement.failures',
-            'submit_type': 'gauge',
+            'submit_type': 'monotonic_count',
         },
     ],
 }

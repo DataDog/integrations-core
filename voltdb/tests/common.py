@@ -100,6 +100,12 @@ METRICS = [
     'voltdb.custom.heroes.avg_name_length',
 ]
 
+METADATA_EXCLUDE_METRICS = [
+    # Custom queries
+    'voltdb.custom.heroes.count',
+    'voltdb.custom.heroes.avg_name_length',
+]
+
 TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))
 TLS_OUTPUT_DIR = os.path.join(HERE, 'tlsoutput')
 TLS_CLIENT_CERT = os.path.join(TLS_OUTPUT_DIR, 'client.pem')  # type: str
