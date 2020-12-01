@@ -285,6 +285,12 @@ class VSphereCheck(AgentCheck):
             raise Exception("Must define a unique 'name' per vCenter instance")
         return i_key
 
+    def _instance_host(self,instance):
+        i_host = instance.get('host')
+        if i_host is None:
+            raise Exception("Must define a 'host' per vCenter instance")
+        return i_host
+
     def _should_cache(self, instance, entity):
         i_key = self._instance_key(instance)
         now = time.time()
@@ -498,12 +504,13 @@ class VSphereCheck(AgentCheck):
 
     def addClusterUuid(self,instance,cluster_mor,cluster_name):
         i_key = self._instance_key(instance)
+        i_host = self._instance_host(instance)
         cluster_cache = self.cache_uuids[i_key].get(vim.ClusterComputeResource)
         cluster_uuid = cluster_cache.get(cluster_mor,None)
         if cluster_uuid is None:
             if cluster_name:
                 try:
-                    cluster_id = i_key + cluster_name
+                    cluster_id = i_host + cluster_name
                     cluster_id_bytes = cluster_id.encode('utf-8')
                     cluster_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, cluster_id_bytes))
 
