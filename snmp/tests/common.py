@@ -211,6 +211,13 @@ def generate_container_profile_instance_config(profile):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
     conf['profile'] = profile
+
+    # TODO: Remove when default profile loading is implemented in corecheck snmp
+    conf['profiles'] = {
+        profile: {
+            'definition_file': '{}.yaml'.format(profile)
+        }
+    }
     return generate_instance_config([], template=conf)
 
 
