@@ -194,15 +194,17 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(list)
         self.do_check = True
 
-        self.autodiscovery = self.instance.get('database_autodiscovery')
+        self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         if self.autodiscovery and self.instance.get('database'):
-            self.log.warning('sqlserver `database_autodiscovery` and `database` options defined in same instance - '
-                             'autodiscovery will take precedence.')
+            self.log.warning(
+                'sqlserver `database_autodiscovery` and `database` options defined in same instance - '
+                'autodiscovery will take precedence.'
+            )
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
         self._compile_patterns()
         self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
-        self.databases = None
+        self.databases = set()
         self.ad_last_check = 0
 
         self.proc = self.instance.get('stored_procedure')
@@ -296,7 +298,9 @@ class SQLServer(AgentCheck):
             excluded_dbs = set([d for d in all_dbs if self._exclude_patterns.match(d)])
             included_dbs = set([d for d in all_dbs if self._include_patterns.match(d)])
 
-            self.log.debug('Found databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs)
+            self.log.debug(
+                'Autodiscovered databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs
+            )
 
             # remove all excluded dbs, but add back in any specifically included ones via `union`
             filtered_dbs = (all_dbs - excluded_dbs).union(all_dbs.intersection(included_dbs))
@@ -305,11 +309,11 @@ class SQLServer(AgentCheck):
             if all_dbs == excluded_dbs:
                 filtered_dbs = all_dbs.intersection(included_dbs)
 
-            self.log.debug('Resulting database filter: %s', filtered_dbs)
+            self.log.debug('Resulting filtered databases: %s', filtered_dbs)
             self.ad_last_check = now
 
             if filtered_dbs != self.databases:
-                self.log.debug('Databases updated from previous check.')
+                self.log.debug('Databases updated from previous autodiscovery check.')
                 self.databases = filtered_dbs
                 return True
         return False
@@ -332,7 +336,7 @@ class SQLServer(AgentCheck):
             )
 
         # populated through autodiscovery
-        if self.databases is not None:
+        if self.databases:
             for db in self.databases:
                 self._add_performance_counters(self.INSTANCE_METRICS_TOTAL, metrics_to_collect, tags, db=db)
 
