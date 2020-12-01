@@ -15,7 +15,7 @@ instances:
 
   -
     ## @param host - string - optional - default: .
-    ## The host the Datadog Active Directory check connects to.
+    ## The host the current check connects to.
     ## "." means the current host
     #
     # host: .

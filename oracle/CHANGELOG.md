@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 3.1.0 / 2020-11-25
+
+* [Added] Cache the client connection when there are no errors. See [#8083](https://github.com/DataDog/integrations-core/pull/8083).
+* [Fixed] Add config spec. See [#7988](https://github.com/DataDog/integrations-core/pull/7988).
+
 ## 3.0.0 / 2020-10-31
 
 * [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).

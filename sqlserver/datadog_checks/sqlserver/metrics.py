@@ -7,6 +7,7 @@ Collection of metric classes for specific SQL Server tables.
 from __future__ import division
 
 from collections import defaultdict
+from functools import partial
 
 # Queries
 ALL_INSTANCES = 'ALL'
@@ -36,7 +37,7 @@ class BaseSqlServerMetric(object):
         self.datadog_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
-        self.report_function = report_function
+        self.report_function = partial(report_function, raw=True)
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
@@ -509,6 +510,40 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# sys.dm_os_cluster_nodes
+#
+# Returns one row for each node in the failover cluster instance configuration.
+# If the current server instance is not a failover clustered instance, it
+# returns an empty rowset.
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-cluster-nodes-transact-sql?view=sql-server-ver15
+class SqlFailoverClusteringInstance(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.dm_os_cluster_nodes'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """select * from {table}""".format(table=TABLE)
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        value_column_index = columns.index(self.column)
+        node_name_index = columns.index("NodeName")
+
+        for row in rows:
+            column_val = row[value_column_index]
+            node_name = row[node_name_index]
+            metric_tags = ['node_name:{}'.format(str(node_name))]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+        # report dummy metric
+        metric_name = '{}'.format(self.datadog_name)
+        column_val = 10
+        self.report_function(metric_name, column_val, tags=self.tags)
 
 
 # sys.dm_db_index_physical_stats

@@ -867,6 +867,7 @@ def test_different_tables(aggregator):
             'metric_tags': [
                 {'tag': 'interface', 'column': 'ifDescr'},
                 {'tag': 'speed', 'column': 'ifHighSpeed', 'table': 'ifXTable'},
+                {'tag': 'interface_alias', 'column': 'ifAlias', 'table': 'ifXTable'},
             ],
         }
     ]
@@ -1075,7 +1076,6 @@ def test_timeout(aggregator, caplog):
     # Some metrics still arrived
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
-    aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 

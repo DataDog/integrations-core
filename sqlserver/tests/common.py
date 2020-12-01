@@ -36,6 +36,7 @@ EXPECTED_METRICS = [
     + SQLServer.TASK_SCHEDULER_METRICS
     + SQLServer.DATABASE_METRICS
     + SQLServer.DATABASE_FRAGMENTATION_METRICS
+    + SQLServer.FCI_METRICS
 ] + CUSTOM_METRICS
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS_PRIMARY]
@@ -51,6 +52,8 @@ INSTANCE_DOCKER = {
     'tags': ['optional:tag1'],
     'include_task_scheduler_metrics': True,
     'include_db_fragmentation_metrics': True,
+    'include_fci_metrics': True,
+    'include_ao_metrics': False,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
@@ -61,6 +64,18 @@ INSTANCE_AO_DOCKER_SECONDARY = {
     'password': 'Password123',
     'tags': ['optional:tag1'],
     'include_ao_metrics': True,
+}
+
+CUSTOM_QUERY_A = {
+    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
+    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+    'tags': ['query:custom'],
+}
+
+CUSTOM_QUERY_B = {
+    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
+    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+    'tags': ['query:another_custom_one'],
 }
 
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
@@ -74,6 +89,7 @@ INSTANCE_SQL2017 = {
     'driver': '{ODBC Driver 17 for SQL Server}',
     'include_task_scheduler_metrics': True,
     'include_db_fragmentation_metrics': True,
+    'include_fci_metrics': True,
 }
 
 INIT_CONFIG = {

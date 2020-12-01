@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 
 import mock
+import pytest
 
 from . import common
 
@@ -484,3 +485,26 @@ def test_enterprise_version_collection(datadog_agent, check, haproxy_mock_enterp
         'version.release': '1.0.0',
     }
     datadog_agent.assert_metadata('test:123', expected_version_metadata)
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        pytest.param("Key: 0\n\n# attr1,attr2\n", id="normal"),
+        pytest.param("Key: 0\n\n# attr1,attr2\n\n", id="extra-newline"),
+        pytest.param("Key: 0\n\n# attr1,attr2", id="missing-newline"),
+    ],
+)
+def test_response_parsing(check, response):
+    """
+    The Unix socket response parsing logic must be lenient enough on missing or extra newlines.
+    """
+    instance = {
+        'url': 'unix:///tmp/mock.sock',
+        'collect_aggregates_only': False,
+    }
+    check = check(instance)
+    sock = mock.Mock()
+    sock.recv.side_effect = [response.encode('utf-8'), b'']
+    with mock.patch('socket.socket', return_value=sock):
+        check.check(instance)

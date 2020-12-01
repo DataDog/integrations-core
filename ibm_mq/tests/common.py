@@ -215,6 +215,27 @@ CHANNEL_STATS_METRICS = [
 
 QUEUE_STATS_METRICS = [
     ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+    ('ibm_mq.stats.queue.q_max_depth', GAUGE),
+    ('ibm_mq.stats.queue.put_fail_count', COUNT),
+    ('ibm_mq.stats.queue.get_fail_count', COUNT),
+    ('ibm_mq.stats.queue.put1_fail_count', COUNT),
+    ('ibm_mq.stats.queue.browse_fail_count', COUNT),
+    ('ibm_mq.stats.queue.non_queued_msg_count', COUNT),
+    ('ibm_mq.stats.queue.expired_msg_count', COUNT),
+    ('ibm_mq.stats.queue.purge_count', COUNT),
+]
+
+# These are Queue Stat metrics that return a list containing both persistent and non-persistent metrics
+# These metrics have an extra tag for `persistent`.
+QUEUE_STATS_LIST_METRICS = [
+    ('ibm_mq.stats.queue.avg_q_time', GAUGE),
+    ('ibm_mq.stats.queue.put_count', COUNT),
+    ('ibm_mq.stats.queue.get_count', COUNT),
+    ('ibm_mq.stats.queue.browse_bytes', GAUGE),
+    ('ibm_mq.stats.queue.browse_count', COUNT),
+    ('ibm_mq.stats.queue.get_bytes', COUNT),
+    ('ibm_mq.stats.queue.put_bytes', COUNT),
+    ('ibm_mq.stats.queue.put1_count', COUNT),
 ]
 
 if IS_CLUSTER:
@@ -249,6 +270,7 @@ OPTIONAL_METRICS = [
 # stats metrics are not always present at each check run
 OPTIONAL_METRICS.extend(CHANNEL_STATS_METRICS)
 OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_LIST_METRICS)
 
 
 def assert_all_metrics(aggregator):

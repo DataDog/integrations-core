@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.18.0 / 2020-11-23
+
+* [Added] Add more granular executor metrics. See [#8028](https://github.com/DataDog/integrations-core/pull/8028).
+
 ## 1.17.0 / 2020-11-06
 
 * [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).

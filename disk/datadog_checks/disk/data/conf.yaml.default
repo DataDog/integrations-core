@@ -33,7 +33,8 @@ init_config:
 instances:
 
     ## @param use_mount - boolean - required
-    ## Instruct the check to collect using mount points instead of volumes.
+    ## If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
+    ## (for example `device:/dev/disk1s5`).
     #
   - use_mount: false
 

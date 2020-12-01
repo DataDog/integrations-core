@@ -370,6 +370,9 @@ jobs:
     - checkName: solr
       displayName: Solr
       os: linux
+    - checkName: sonarqube
+      displayName: SonarQube
+      os: linux
     - checkName: spark
       displayName: Spark
       os: linux

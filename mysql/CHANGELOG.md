@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 2.1.2 / 2020-11-17
+
+* [Fixed] Add debug log line for replication status. See [#8040](https://github.com/DataDog/integrations-core/pull/8040).
+
 ## 2.1.1 / 2020-11-10
 
 * [Fixed] Change `deep_database_monitoring` language from BETA to ALPHA. See [#7948](https://github.com/DataDog/integrations-core/pull/7948).
