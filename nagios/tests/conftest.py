@@ -30,7 +30,7 @@ def dd_environment():
                 "type": "file",
                 "path": os.path.join(nagios_var_log, 'nagios.log'),
                 "source": "nagios",
-            }
+            },
         }
 
         with docker_run(
