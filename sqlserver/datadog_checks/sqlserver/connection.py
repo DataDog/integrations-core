@@ -209,7 +209,8 @@ class Connection(object):
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
                 for row in cursor:
-                    self.existing_databases[row.name.lower()] = 'CI' in row.collation_name, row.name
+                    case_insensitive = 'CI' in row.collation_name
+                    self.existing_databases[row.name.lower()] = case_insensitive, row.name
 
             except Exception as e:
                 self.log.error("Failed to check if database %s exists: %s", database, e)
