@@ -194,10 +194,10 @@ class Connection(object):
         Check for existence of a database, but take into consideration whether the db is case-sensitive or not.
 
         If not case-sensitive, then we normalize the database name to lowercase on both sides and check.
-        If so, then we only accept exact-name matches.
+        If case-sensitive, then we only accept exact-name matches.
 
-        If the check fails, then we either won't do any checks if `ignore_missing_database` is enabled, or will fail
-        with a ConfigurationError.
+        If the check fails, then we won't do any checks if `ignore_missing_database` is enabled, or we will fail
+        with a ConfigurationError otherwise.
         """
 
         dsn, host, username, password, database, driver = self._get_access_info(self.DEFAULT_DB_KEY)
