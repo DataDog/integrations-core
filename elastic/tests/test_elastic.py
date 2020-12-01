@@ -7,6 +7,7 @@ import pytest
 import requests
 from six import iteritems
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
@@ -193,7 +194,6 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
 @pytest.mark.parametrize(
     'instance, expected_aws_host, expected_aws_service',
     [
-        pytest.param({}, None, None, id='not aws auth'),
         pytest.param(
             {'auth_type': 'aws', 'aws_region': 'foo', 'url': 'http://example.com'},
             'example.com',
@@ -207,12 +207,6 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
             id='aws_host_custom_with_url',
         ),
         pytest.param(
-            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
-            'foo.com',
-            'es',
-            id='aws_host_custom_no_url',
-        ),
-        pytest.param(
             {'auth_type': 'aws', 'aws_region': 'foo', 'aws_service': 'es-foo', 'url': 'http://example.com'},
             'example.com',
             'es-foo',
@@ -220,7 +214,7 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
         ),
     ],
 )
-def test_aws_auth(instance, expected_aws_host, expected_aws_service):
+def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
     check = ESCheck('elastic', {}, instances=[instance])
 
     assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
@@ -229,6 +223,28 @@ def test_aws_auth(instance, expected_aws_host, expected_aws_service):
     # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
     assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'instance, expected_aws_host, expected_aws_service',
+    [
+        pytest.param({}, None, None, id='not aws auth'),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
+            'foo.com',
+            'es',
+            id='aws_host_custom_no_url',
+        ),
+    ]
+)
+def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
+    with pytest.raises(ConfigurationError):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
+        assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
+
+        # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
+        assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
