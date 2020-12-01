@@ -32,24 +32,37 @@ def assert_python_vs_core(dd_agent_check, instance):
     python_instance['loader'] = 'python'
     core_instance = instance.copy()
     core_instance['loader'] = 'core'
-    print(">>> python instance:", python_instance)
-    print(">>> core instance  :", core_instance)
     aggregator = dd_agent_check(python_instance, rate=True)
     expected_metrics = defaultdict(int)
-    print(">>> python metrics:")
-    for metric_name, metrics in aggregator._metrics.items():
-        print("{}: {}".format(metric_name, metrics))
+    for _, metrics in aggregator._metrics.items():
         for metric in metrics:
             expected_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
+
     aggregator.reset()
     aggregator = dd_agent_check(core_instance, rate=True)
-    print(">>> core metrics:")
-    for metric_name, metrics in aggregator._metrics.items():
-        print("{}: {}".format(metric_name, metrics))
-    print(">>> expected metrics:")
+
+    actual_metrics = defaultdict(int)
+    for _, metrics in aggregator._metrics.items():
+        for metric in metrics:
+            actual_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
+
+    print("Python metrics not found in Corecheck metrics")
+    for key in expected_metrics:
+        (name, mtype, tags) = key
+        if has_index_mapping_tag(tags):
+            continue
+        if key not in actual_metrics:
+            print("\t{}".format(key))
+
+    print("Corecheck metrics not found in Python metrics")
+    for key in actual_metrics:
+        (name, mtype, tags) = key
+        if has_index_mapping_tag(tags):
+            continue
+        if key not in expected_metrics:
+            print("\t{}".format(key))
 
     for (name, mtype, tags), count in expected_metrics.items():
-        print("metric:", name, mtype, tags, count)
         # TODO: to delete when index mapping support is added to corecheck snmp
         if has_index_mapping_tag(tags):
             aggregator.assert_metric(name, metric_type=mtype)
