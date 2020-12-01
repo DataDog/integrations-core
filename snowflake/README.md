@@ -32,8 +32,17 @@ datadog-agent integration install datadog-snowflake==2.0.1
     <div class="alert alert-warning">Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
     
-    We recommend creating a `DATADOG` role with access to `ACCOUNT_USAGE`. Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.
+    Snowflake recommends granting permissions to an alternate role like `SYSADMIN`.
+    Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.
     </div>
+    ```text
+    use role ACCOUNTADMIN;
+    grant imported privileges on database snowflake to role SYSADMIN;
+    
+    use role SYSADMIN;
+    ```
+    
+    Alternatively, you can create a `DATADOG` custom role with access to `ACCOUNT_USAGE`.
     
     ```text
     -- Create a new role intended to monitor Snowflake usage.
