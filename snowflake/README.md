@@ -87,8 +87,8 @@ datadog-agent integration install datadog-snowflake==2.0.1
         ## @param role - string - required
         ## Name of the role to use.
         ##
-        ## By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. However, we recommend
-        ## to configure a role specific for monitoring:
+        ## By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. Snowflake recommends
+        ## configuring a role specific for monitoring:
         ## https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
         #
         role: <ROLE>
