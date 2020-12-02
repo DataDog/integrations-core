@@ -74,7 +74,8 @@ files:
         Character casing is ignored. The regular expressions start matching from the beginning, so
         to match anywhere, prepend `.*`. For exact matches append `$`.
 
-        In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over those found via `autodiscovery_include`.
+        In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over
+        those found via `autodiscovery_include`.
       value:
         type: array
         items:

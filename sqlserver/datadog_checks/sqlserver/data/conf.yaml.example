@@ -56,12 +56,11 @@ instances:
     # database_autodiscovery: false
 
     ## @param autodiscovery_include - list of strings - optional
-    ## Regular expression for specific database names to always include as part of `database_autodiscovery`.
-    ## Will only report metrics for databases that are actually found in this instance, so missing
-    ## databases from this option should be harmless.
+    ## Regular expression for database names to include as part of `database_autodiscovery`.
+    ## Will report metrics for databases that are found in this instance, ignores databases listed but not found.
     ##
-    ## Character casing is ignored. For convenience, the regular expressions start matching from the beginning and
-    ## therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so 
+    ## to match anywhere, prepend `.*`. For exact matches append `$`. 
     ##
     ## Defaults to `.*` to include everything.
     #
@@ -70,12 +69,13 @@ instances:
     #   - AdventureWorks.*
 
     ## @param autodiscovery_exclude - list of strings - optional
-    ## Regular expression for specific database names to always exclude as part of `database_autodiscovery`.
+    ## Regular expression for database names to exclude as part of `database_autodiscovery`.
     ##
-    ## Character casing is ignored. For convenience, the regular expressions start matching from the beginning and
-    ## therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so
+    ## to match anywhere, prepend `.*`. For exact matches append `$`.
     ##
-    ## When conflicts arise, excluded databases will take precedence over any found from `autodiscovery_include`.
+    ## In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over
+    ## those found via `autodiscovery_include`.
     #
     # autodiscovery_exclude:
     #   - model
