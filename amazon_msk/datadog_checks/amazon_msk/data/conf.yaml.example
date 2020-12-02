@@ -57,6 +57,13 @@ instances:
     #
     # region_name: <REGION_NAME>
 
+    ## @param assume_role - string - optional
+    ## The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
+    ## the default permissions used by boto3 will follow the rules according to:
+    ## https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+    #
+    # assume_role: <ASSUME_ROLE>
+
     ## @param jmx_exporter_port - integer - optional - default: 11001
     ## The port on which the JMX Exporter serves metrics.
     #
