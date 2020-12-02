@@ -39,7 +39,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "postgresql": "assets/dashboards/postgresql_dashboard.json",
+      "postgresql_screenboard": "assets/dashboards/postgresql_screenboard_dashboard.json"
+    },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
       "slow_operations": "assets/saved_views/slow_operations.json",
