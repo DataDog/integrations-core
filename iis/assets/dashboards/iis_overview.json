@@ -1,546 +1,561 @@
 {
+    "author_name": "Datadog",
+    "description": "This dashboard provides a high-level view of your IIS sites' status, plus breakdowns of requests and detailed views into network metrics. Further reading on IIS monitoring:\n\n- [Datadog's IIS integration docs](https://docs.datadoghq.com/integrations/iis/)\n\n- [Key IIS metrics to monitor](https://www.datadoghq.com/blog/iis-metrics/)\n\n- [Collecting metrics with IIS monitoring tools](https://www.datadoghq.com/blog/iis-monitoring-tools/)\n\n- [IIS monitoring with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets. \n",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        },
+        {
+            "default": "*",
+            "name": "var",
+            "prefix": null
+        }
+    ],
     "title": "IIS - Overview",
-    "description": "This dashboard provides a high-level view of your IIS sites' status, plus breakdowns of requests and detailed views into network metrics. Further reading on IIS monitoring:\n\n- [Datadog's IIS integration docs](https://docs.datadoghq.com/integrations/iis/)\n\n- [Key IIS metrics to monitor](https://www.datadoghq.com/blog/iis-metrics/)\n\n- [Collecting metrics with IIS monitoring tools](https://www.datadoghq.com/blog/iis-monitoring-tools/)\n\n- [IIS monitoring with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
-            "id": 0,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.users.anon{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Anonymous",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 0,
             "layout": {
-                "x": 98,
-                "y": 51,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 134,
+                "y": 13
             }
         },
         {
-            "id": 1,
             "definition": {
-                "type": "note",
+                "background_color": "vivid_blue",
                 "content": "Requests per second",
-                "background_color": "gray",
                 "font_size": "18",
+                "show_tick": false,
                 "text_align": "center",
-                "show_tick": true,
+                "tick_edge": "bottom",
                 "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "type": "note"
             },
+            "id": 1,
             "layout": {
-                "x": 98,
-                "y": 0,
-                "width": 95,
-                "height": 6
+                "height": 6,
+                "width": 73,
+                "x": 97,
+                "y": 0
             }
         },
         {
-            "id": 2,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.requests.cgi{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "CGI",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 2,
             "layout": {
-                "x": 98,
-                "y": 13,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 134,
+                "y": 51
             }
         },
         {
-            "id": 3,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.requests.isapi{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "ISAPI",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 3,
             "layout": {
-                "x": 98,
-                "y": 29,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 134,
+                "y": 67
             }
         },
         {
-            "id": 4,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.httpd_request_method.get{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "GET",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 4,
             "layout": {
-                "x": 146,
-                "y": 29,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 97,
+                "y": 29
             }
         },
         {
+            "definition": {
+                "background_color": "blue",
+                "content": "By Interface",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
             "id": 5,
-            "definition": {
-                "type": "note",
-                "content": "...by interface",
-                "background_color": "blue",
-                "font_size": "16",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
             "layout": {
-                "x": 98,
-                "y": 7,
-                "width": 47,
-                "height": 5
+                "height": 5,
+                "width": 36,
+                "x": 134,
+                "y": 45
             }
         },
         {
+            "definition": {
+                "background_color": "blue",
+                "content": "By HTTP method",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
             "id": 6,
-            "definition": {
-                "type": "note",
-                "content": "...by HTTP method",
-                "background_color": "blue",
-                "font_size": "16",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
             "layout": {
-                "x": 146,
-                "y": 7,
-                "width": 47,
-                "height": 5
+                "height": 5,
+                "width": 36,
+                "x": 97,
+                "y": 23
             }
         },
         {
+            "definition": {
+                "background_color": "blue",
+                "content": "By User Type",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
             "id": 7,
-            "definition": {
-                "type": "note",
-                "content": "...by user type",
-                "background_color": "blue",
-                "font_size": "16",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
             "layout": {
-                "x": 98,
-                "y": 45,
-                "width": 47,
-                "height": 5
+                "height": 5,
+                "width": 36,
+                "x": 134,
+                "y": 7
             }
         },
         {
-            "id": 8,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.httpd_request_method.put{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "PUT",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 8,
             "layout": {
-                "x": 146,
-                "y": 45,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 97,
+                "y": 45
             }
         },
         {
-            "id": 9,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.httpd_request_method.post{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "POST",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 9,
             "layout": {
-                "x": 146,
-                "y": 61,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 97,
+                "y": 61
             }
         },
         {
-            "id": 10,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.httpd_request_method.delete{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "DELETE",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 10,
             "layout": {
-                "x": 146,
-                "y": 77,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 97,
+                "y": 77
             }
         },
         {
-            "id": 11,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.users.nonanon{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Non-anonymous",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 11,
             "layout": {
-                "x": 98,
-                "y": 67,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 134,
+                "y": 29
             }
         },
         {
-            "id": 12,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "avg:iis.net.num_connections{$scope,!site:total} by {site}",
                         "display_type": "bars",
+                        "q": "avg:iis.net.num_connections{$scope,!site:total} by {site}",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Current active connections by site",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 12,
             "layout": {
-                "x": 49,
-                "y": 23,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 38,
+                "x": 58,
+                "y": 23
             }
         },
         {
-            "id": 13,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.net.bytes_sent{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Bytes sent by site",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 13,
             "layout": {
-                "x": 49,
-                "y": 39,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 38,
+                "x": 58,
+                "y": 39
             }
         },
         {
-            "id": 14,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "avg:iis.net.bytes_rcvd{$scope,!site:total} by {site}",
                         "display_type": "line",
+                        "q": "avg:iis.net.bytes_rcvd{$scope,!site:total} by {site}",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
-                "title": "Bytes received by site",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Bytes received by site",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 14,
             "layout": {
-                "x": 49,
-                "y": 55,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 38,
+                "x": 58,
+                "y": 55
             }
         },
         {
-            "id": 15,
             "definition": {
-                "type": "query_value",
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
                 "requests": [
                     {
-                        "q": "sum:iis.net.num_connections{$scope}",
-                        "aggregator": "avg"
+                        "aggregator": "avg",
+                        "q": "sum:iis.net.num_connections{$scope}"
                     }
                 ],
-                "custom_links": [],
+                "time": {
+                    "live_span": "10m"
+                },
                 "title": "Current total number of active connections",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "10m"
-                },
-                "autoscale": true,
-                "precision": 2
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 15,
             "layout": {
-                "x": 49,
-                "y": 7,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 38,
+                "x": 58,
+                "y": 7
             }
         },
         {
-            "id": 16,
             "definition": {
-                "type": "query_value",
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 2,
                 "requests": [
                     {
-                        "q": "sum:iis.httpd_request_method.put{$scope}+sum:iis.httpd_request_method.get{$scope}+sum:iis.httpd_request_method.post{$scope}+sum:iis.httpd_request_method.delete{$scope}",
-                        "aggregator": "avg"
+                        "aggregator": "avg",
+                        "q": "sum:iis.httpd_request_method.put{$scope}+sum:iis.httpd_request_method.get{$scope}+sum:iis.httpd_request_method.post{$scope}+sum:iis.httpd_request_method.delete{$scope}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Current requests volume (all methods)",
-                "title_size": "16",
-                "title_align": "left",
                 "time": {
                     "live_span": "10m"
                 },
-                "autoscale": true,
-                "precision": 2
+                "title": "Current requests volume (all methods)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 16,
             "layout": {
-                "x": 146,
-                "y": 13,
-                "width": 46,
-                "height": 15
+                "height": 15,
+                "width": 36,
+                "x": 97,
+                "y": 7
             }
         },
         {
-            "id": 17,
             "definition": {
-                "type": "check_status",
-                "title": "Sites up",
-                "title_size": "16",
-                "title_align": "center",
                 "check": "iis.site_up",
-                "grouping": "cluster",
                 "group": "$scope",
                 "group_by": [],
-                "tags": ["$scope"]
+                "grouping": "cluster",
+                "tags": [
+                    "$scope"
+                ],
+                "title": "Sites up",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
             },
+            "id": 17,
             "layout": {
-                "x": 24,
-                "y": 0,
-                "width": 23,
-                "height": 12
+                "height": 12,
+                "width": 28,
+                "x": 29,
+                "y": 0
             }
         },
         {
-            "id": 18,
             "definition": {
-                "type": "note",
+                "background_color": "vivid_blue",
                 "content": "Network traffic",
-                "background_color": "gray",
                 "font_size": "18",
+                "show_tick": false,
                 "text_align": "center",
-                "show_tick": true,
+                "tick_edge": "bottom",
                 "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "type": "note"
             },
+            "id": 18,
             "layout": {
-                "x": 49,
-                "y": 0,
-                "width": 47,
-                "height": 6
+                "height": 6,
+                "width": 38,
+                "x": 58,
+                "y": 0
             }
         },
         {
-            "id": 19,
             "definition": {
+                "sizing": "center",
                 "type": "image",
-                "url": "/static/images/saas_logos/small/iis@2x.png",
-                "sizing": "center"
+                "url": "/static/images/saas_logos/small/iis@2x.png"
             },
+            "id": 19,
             "layout": {
+                "height": 13,
+                "width": 28,
                 "x": 0,
-                "y": 0,
-                "width": 22,
-                "height": 12
+                "y": 0
             }
         },
         {
-            "id": 20,
             "definition": {
-                "type": "toplist",
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:iis.uptime{$scope,!site:total} by {site}, 10, 'mean', 'desc')",
@@ -549,146 +564,225 @@
                         }
                     }
                 ],
-                "custom_links": [],
-                "title": "IIS sites by uptime",
-                "title_size": "16",
-                "title_align": "left",
                 "time": {
                     "live_span": "10m"
-                }
+                },
+                "title": "IIS sites by uptime",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
             },
+            "id": 20,
             "layout": {
-                "x": 0,
-                "y": 13,
-                "width": 47,
-                "height": 23
+                "height": 23,
+                "width": 28,
+                "x": 29,
+                "y": 13
             }
         },
         {
-            "id": 21,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.errors.not_found{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "warm",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "warm"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "404 (Not found) responses by site",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 21,
             "layout": {
-                "x": 0,
-                "y": 81,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 28,
+                "x": 29,
+                "y": 52
             }
         },
         {
-            "id": 22,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
+                        "display_type": "line",
                         "q": "avg:iis.net.files_sent{$scope,!site:total} by {site}",
-                        "display_type": "line",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
-                "title": "Files sent by site",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Files sent by site",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 22,
             "layout": {
-                "x": 49,
-                "y": 71,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 38,
+                "x": 58,
+                "y": 71
             }
         },
         {
-            "id": 23,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "avg:iis.net.files_rcvd{$scope,!site:total} by {site}",
                         "display_type": "line",
+                        "q": "avg:iis.net.files_rcvd{$scope,!site:total} by {site}",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "normal"
+                            "line_width": "normal",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
-                "title": "Files received by site",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Files received by site",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 23,
             "layout": {
-                "x": 49,
-                "y": 87,
-                "width": 47,
-                "height": 15
+                "height": 15,
+                "width": 38,
+                "x": 58,
+                "y": 87
             }
         },
         {
-            "id": 24,
             "definition": {
-                "type": "note",
-                "content": "This chart assumes that you have edited the configuration file for the IIS integration to collect metrics per site. Find out how in our [documentation](https://docs.datadoghq.com/integrations/iis/#metric-collection).",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "top"
+                "columns": [
+                    "core_host",
+                    "core_service",
+                    "log_http.response_time"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "\"iis\"",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "Log Stream",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
             },
+            "id": 695270390750234,
             "layout": {
+                "height": 50,
+                "width": 48,
+                "x": 171,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "IIS Log Events",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1325149753070404,
+            "layout": {
+                "height": 6,
+                "width": 48,
+                "x": 171,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Internet Information Services (IIS) is a flexible, general-purpose web server from Microsoft that runs on Windows systems to serve requested HTML pages or files.\n\nThis dashboard provides a high-level view of your IIS sites' status, plus breakdowns of requests and detailed views into network metrics. The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, install the Agent on your IIS servers. Further reading on IIS monitoring and integrations:\n\n[Datadog's IIS integration docs](https://docs.datadoghq.com/integrations/iis/?tab=host)\n\n[Key IIS metrics to monitor](https://www.datadoghq.com/blog/iis-metrics/)\n\n[Collecting metrics with IIS monitoring tools](https://www.datadoghq.com/blog/iis-monitoring-tools/)\n\n[IIS monitoring with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.\n",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4233242180206356,
+            "layout": {
+                "height": 41,
+                "width": 28,
                 "x": 0,
-                "y": 37,
-                "width": 47,
-                "height": 6
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Since several key IIS metrics are only available from logs, it\u2019s important to collect and analyze your logs in order to get full visibility into your deployment. You can configure the Datadog Agent to collect logs from IIS, parse them, and send them to Datadog. Once Datadog is ingesting your logs, you can use that data to identify trends and get alerted to IIS performance issues. You can check out our blog regarding [IIS Log Configuration with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/#configure-iis-log-collection), or jump to our documentation on [IIS log collection](https://docs.datadoghq.com/integrations/iis/?tab=host#log-collection).",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "top",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1097058623080560,
+            "layout": {
+                "height": 14,
+                "width": 48,
+                "x": 171,
+                "y": 59
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:iis.net.num_connections{$scope,!site:total}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "IIS connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 215670117005800,
+            "layout": {
+                "height": 14,
+                "width": 28,
+                "x": 29,
+                "y": 37
             }
         }
-    ],
-    "template_variables": [
-        {
-            "name": "scope",
-            "default": "*",
-            "prefix": null
-        }
-    ],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 243
+    ]
 }
