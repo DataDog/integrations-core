@@ -92,6 +92,21 @@ class TestCheck:
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
         aggregator.assert_all_metrics_covered()  # No metrics collected.
 
+    def test_custom_tags(self, aggregator, instance):
+        instance = instance.copy()
+        instance['tags'] = ['env:test']
+
+        check = VoltDBCheck('voltdb', {}, [instance])
+        check.run()
+
+        metrics_without_custom_tags = []
+        for metric_name in common.METRICS:
+            for metric in aggregator.metrics(metric_name):
+                if 'env:test' not in metric.tags:
+                    metrics_without_custom_tags.append(metric_name)
+
+        assert not metrics_without_custom_tags
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
