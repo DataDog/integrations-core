@@ -489,8 +489,7 @@ class SnmpCheck(AgentCheck):
                 for index, val in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
                     self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
-                    if self.is_bandwidth_metric(name):
-                        self.submit_bandwidth_usage_metric(name, index, results, metric_tags)
+                    self.try_submit_bandwidth_usage_metric_if_bandwidth_metric(name, index, results, metric_tags)
             else:
                 result = list(results[name].items())
                 if len(result) > 1:
@@ -502,17 +501,37 @@ class SnmpCheck(AgentCheck):
                 metric_tags = tags + metric.tags
                 self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
 
+    BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING = {
+        'ifHCInOctets': 'ifBandwidthInUsage',
+        'ifHCOutOctets': 'ifBandwidthOutUsage',
+    }
+
     @staticmethod
     def is_bandwidth_metric(name):
         # type: (str) -> bool
-        return name in ['ifHCInOctets', 'ifHCOutOctets']
+        return name in SnmpCheck.BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING
 
-    @staticmethod
-    def bandwidth_metric_name_to_bandwidth_usage_metric_name(name):
-        # type: (str) -> str
-        return 'ifBandwidthInUsage' if name == 'ifHCInOctets' else 'ifBandwidthOutUsage'
+    def try_submit_bandwidth_usage_metric_if_bandwidth_metric(
+        self,
+        name,  # type: str
+        index,  # type: Tuple[str, ...]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
+        tags,  # type: List[str]
+    ):
+        # type: (...) -> None
+        """
+        Safely send bandwidth usage metrics if name is a bandwidth metric
+        """
+        try:
+            self.submit_bandwidth_usage_metric_if_bandwidth_metric(name, index, results, tags)
+        except Exception as e:
+            msg = 'Unable submit bandwidth usage metric with name=`{}`, index=`{}`, tags=`{}`: {}'.format(
+                name, index, tags, e
+            )
+            self.log.warning(msg)
+            self.log.debug(msg, exc_info=True)
 
-    def submit_bandwidth_usage_metric(
+    def submit_bandwidth_usage_metric_if_bandwidth_metric(
         self,
         name,  # type: str
         index,  # type: Tuple[str, ...]
@@ -575,7 +594,7 @@ class SnmpCheck(AgentCheck):
             return
 
         self.rate(
-            "snmp.{}.rate".format(self.bandwidth_metric_name_to_bandwidth_usage_metric_name(name)),
+            "snmp.{}.rate".format(SnmpCheck.BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING[name]),
             bandwidth_usage_value,
             tags,
         )
