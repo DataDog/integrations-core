@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 
 import mock
@@ -50,7 +51,7 @@ def elastic_check():
 
 @pytest.fixture(scope='session')
 def instance():
-    return INSTANCE
+    return copy.deepcopy(INSTANCE)
 
 
 @pytest.fixture(scope='session')
