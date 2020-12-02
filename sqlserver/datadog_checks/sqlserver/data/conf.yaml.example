@@ -63,8 +63,6 @@ instances:
     ## Character casing is ignored. For convenience, the regular expressions start matching from the beginning and
     ## therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
     ##
-    ## When conflicts arise, included databases will take precedence.
-    ##
     ## Defaults to `.*` to include everything.
     #
     # autodiscovery_include:
@@ -77,7 +75,7 @@ instances:
     ## Character casing is ignored. For convenience, the regular expressions start matching from the beginning and
     ## therefore to match anywhere you must prepend `.*`. For exact matches append `$`. Casing is ignored.
     ##
-    ## Can use expression `.*` to exclude everything, then selectively include databases from `autodiscovery_include`.
+    ## When conflicts arise, excluded databases will take precedence over any found from `autodiscovery_include`.
     #
     # autodiscovery_exclude:
     #   - model

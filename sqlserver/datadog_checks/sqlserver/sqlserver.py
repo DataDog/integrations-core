@@ -302,12 +302,8 @@ class SQLServer(AgentCheck):
                 'Autodiscovered databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs
             )
 
-            # remove all excluded dbs, but add back in any specifically included ones via `union`
-            filtered_dbs = (all_dbs - excluded_dbs).union(all_dbs.intersection(included_dbs))
-
-            # the case of excluding all, but including specific dbs
-            if all_dbs == excluded_dbs:
-                filtered_dbs = all_dbs.intersection(included_dbs)
+            # keep included dbs but remove any that were explicitly excluded
+            filtered_dbs = all_dbs.intersection(included_dbs) - excluded_dbs
 
             self.log.debug('Resulting filtered databases: %s', filtered_dbs)
             self.ad_last_check = now

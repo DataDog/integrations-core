@@ -127,31 +127,30 @@ def test_autodiscovery_patterns(instance_autodiscovery, dd_run_check):
     instance['autodiscovery_include'] = ['missingdb', 'fakedb']
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.autodiscover_databases(mock_cursor)
-    assert check.databases == all_dbs
+    assert check.databases == set()
 
     # check included found and missing additions
     mock_cursor.fetchall.return_value = iter(fetchall_results)
     instance['autodiscovery_include'] = ['master', 'fancy2020db', 'missingdb', 'fakedb']
-    instance['autodiscovery_exclude'] = ['.*']
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.autodiscover_databases(mock_cursor)
     assert check.databases == set(['master', 'Fancy2020db'])
 
     # check excluded dbs
     mock_cursor.fetchall.return_value = iter(fetchall_results)
-    instance['autodiscovery_include'] = []  # remove default `.*`
+    instance['autodiscovery_include'] = ['.*']  # replace default `.*`
     instance['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.autodiscover_databases(mock_cursor)
     assert check.databases == set(['tempdb', 'AdventureWorks2017', 'CaseSensitive2018'])
 
-    # check included overrides excluded
+    # check excluded overrides included
     mock_cursor.fetchall.return_value = iter(fetchall_results)
-    instance['autodiscovery_include'] = ['master']  # remove default `.*`
+    instance['autodiscovery_include'] = ['t.*', 'master']  # remove default `.*`
     instance['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.autodiscover_databases(mock_cursor)
-    assert check.databases == set(['master', 'tempdb', 'AdventureWorks2017', 'CaseSensitive2018'])
+    assert check.databases == set(['tempdb'])
 
 
 def test_set_default_driver_conf():
