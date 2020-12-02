@@ -60,9 +60,9 @@ INSTALL_PATH = '/usr/local/bin/gstatus'
 class GlusterfsCheck(AgentCheck):
     __NAMESPACE__ = 'glusterfs'
 
-    def __init__(self, init_config, instances):
+    def __init__(self, name, init_config, instances):
         # type: (*Any, **Any) -> None
-        super(GlusterfsCheck, self).__init__(init_config, instances)
+        super(GlusterfsCheck, self).__init__(name, init_config, instances)
         self._tags = self.instance.get('tags', [])
 
         # Check if customer set gstatus path
@@ -77,6 +77,7 @@ class GlusterfsCheck(AgentCheck):
                 raise Exception(
                     'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
                 )
+        self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
 
 
     def check(self, _):
@@ -90,6 +91,7 @@ class GlusterfsCheck(AgentCheck):
             gluster_args = [self.gstatus_cmd]
 
         gluster_args += ['-a', '-o', 'json']
+        self.log.debug("gstatus command: %s", gluster_args)
         output, _, _ = get_subprocess_output(gluster_args, self.log)
         gstatus = json.loads(output)
         if 'data' in gstatus:
