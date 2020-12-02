@@ -103,7 +103,8 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
         for hist_suffix in ['count', 'sum', 'quantile']:
             aggregator.assert_metric_has_tag('consul.http.request.{}'.format(hist_suffix), 'method:GET', at_least=0)
             for metric in common.PROMETHEUS_HIST_METRICS:
-                aggregator.assert_metric_has_tag(metric + hist_suffix, 'foo:bar', at_least=1)
+                for tag in common_tags:
+                    aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
 
         aggregator.assert_all_metrics_covered()
 
