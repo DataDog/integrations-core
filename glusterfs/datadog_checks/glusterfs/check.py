@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import Any
 import os
+from typing import Any
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
@@ -13,7 +13,7 @@ CLUSTER_STATS = {
     'node_count': 'nodes.count',
     'nodes_active': 'nodes.active',
     'volumes_started': 'volumes.started',
-    'volume_count': 'volumes.count'
+    'volume_count': 'volumes.count',
 }
 
 
@@ -25,7 +25,6 @@ GENERAL_STATS = {
     'inodes_used': 'inodes.used',
     'inodes_total': 'inodes.total',
     'online': 'online',
-
 }
 
 VOL_SUBVOL_STATS = {
@@ -38,27 +37,30 @@ VOLUME_STATS = {
     'v_used_percent': 'used.percent',
     'num_bricks': 'bricks.count',
     'distribute': 'distribute',
-#    'v_size_used': 'size.used', # strip GiB from value
-#    'v_size': 'size.total', # strip GiB from value
+    #    'v_size_used': 'size.used', # strip GiB from value
+    #    'v_size': 'size.total', # strip GiB from value
     'snapshot_count': 'snapshot.count',
 }
 VOLUME_STATS.update(GENERAL_STATS)
 VOLUME_STATS.update(VOL_SUBVOL_STATS)
 
-BRICK_STATS = {
-    'block_size': 'block_size'
-}
+BRICK_STATS = {'block_size': 'block_size'}
 BRICK_STATS.update(GENERAL_STATS)
 
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
+
 GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
 INSTALL_PATH = '/usr/local/bin/gstatus'
 
 
 class GlusterfsCheck(AgentCheck):
     __NAMESPACE__ = 'glusterfs'
+
+    CLUSTER_SC = "cluster.health"
+    VOLUME_SC = "volume.health"
+    BRICK_SC = "brick.health"
 
     def __init__(self, name, init_config, instances):
         # type: (*Any, **Any) -> None
@@ -79,7 +81,6 @@ class GlusterfsCheck(AgentCheck):
                 )
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
 
-
     def check(self, _):
         use_sudo = _is_affirmative(self.instance.get('use_sudo', False))
         if use_sudo:
@@ -94,6 +95,7 @@ class GlusterfsCheck(AgentCheck):
         self.log.debug("gstatus command: %s", gluster_args)
         output, _, _ = get_subprocess_output(gluster_args, self.log)
         gstatus = json.loads(output)
+
         if 'data' in gstatus:
             data = gstatus['data']
             self.submit_metric(data, 'cluster', CLUSTER_STATS, self._tags)
@@ -102,6 +104,15 @@ class GlusterfsCheck(AgentCheck):
 
             if 'volume_summary' in output:
                 self.parse_volume_summary(data['volume_summary'])
+
+            if CLUSTER_STATUS in data:
+                status = data[CLUSTER_STATUS]
+                if status == 'Healthy':
+                    self.service_check(self.CLUSTER_SC, AgentCheck.OK, tags=self._tags)
+                else:
+                    self.service_check(
+                        self.CLUSTER_SC, AgentCheck.CRITICAL, tags=self._tags, message="Cluster status is %s" % status
+                    )
         else:
             self.log.warning("No data from gstatus")
 
@@ -119,24 +130,31 @@ class GlusterfsCheck(AgentCheck):
             if 'subvols' in volume:
                 self.parse_subvols_stats(volume['subvols'], volume_tags)
 
+            self.submit_service_check(self.VOLUME_SC, volume['health'], volume_tags)
+
     def parse_subvols_stats(self, subvols, volume_tags):
         for subvol in subvols:
             self.submit_metric(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
 
             if 'bricks' in subvol:
                 for brick in subvol['bricks']:
-                    # brick_name:172.29.187.90:/export/xvdf1/brick
-                    # split this tag into server + export tags
-                    brick_name = brick['name']
+                    brick_name = brick['name'].split(":")
+                    brick_server = brick_name[0]
+                    brick_export = brick_name[1]
                     brick_type = brick['type']
                     brick_device = brick['device']
                     fs_name = brick['fs_name']
-                    tags = ['brick_name:{}'.format(brick_name),
-                            'type:{}'.format(brick_type),
-                            'device:{}'.format(brick_device),
-                            'fs_name:{}'.format(fs_name)]
+                    tags = [
+                        'brick_server:{}'.format(brick_server),
+                        'brick_export:{}'.format(brick_export),
+                        'type:{}'.format(brick_type),
+                        'device:{}'.format(brick_device),
+                        'fs_name:{}'.format(fs_name),
+                    ]
                     tags.extend(self._tags)
                     self.submit_metric(brick, 'brick', BRICK_STATS, tags)
+
+            self.submit_service_check(self.BRICK_SC, subvol['health'], tags)
 
     def submit_metric(self, payload, prefix, metric_mapping, tags):
         for key, metric in metric_mapping.items():
@@ -144,3 +162,12 @@ class GlusterfsCheck(AgentCheck):
                 self.gauge('{}.'.format(prefix) + metric, payload[key], tags)
             else:
                 self.log.debug("Field not found in %s data: %s", prefix, key)
+
+    def submit_service_check(self, sc_name, status, tags):
+        msg = "Health in state: %s" % status
+        if status == 'up':
+            self.service_check(sc_name, AgentCheck.OK, tags=tags)
+        elif status == 'partial':
+            self.service_check(sc_name, AgentCheck.WARNING, tags=tags, message=msg)
+        else:
+            self.submit_service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
