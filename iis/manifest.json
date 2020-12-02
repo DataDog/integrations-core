@@ -22,6 +22,9 @@
   "type": "check",
   "integration_id": "iis",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
