@@ -29,7 +29,7 @@ instances:
     #
   - server: <SERVER>
 
-    ## @param port - integer - optional - default: 30015
+    ## @param port - integer - optional - default: 39015
     ## The port used to connect to the system.
     #
     # port: <PORT>
