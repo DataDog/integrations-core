@@ -446,16 +446,11 @@ Several collection methods are supported, as illustrated below:
 
 ```yaml
 metric_tags:
-  - # From a symbol
-    MIB: SNMPv2-MIB
-    symbol: sysName
-    tag: snmp_host
-  - # From an OID:
-    OID: 1.3.6.1.2.1.1.5.0
+  - OID: 1.3.6.1.2.1.1.5.0
     symbol: sysName
     tag: snmp_host
   - # With regular expression matching
-    MIB: SNMPv2-MIB
+    OID: 1.3.6.1.2.1.1.5.0
     symbol: sysName
     match: (.*)-(.*)
     tags:
