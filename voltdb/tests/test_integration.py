@@ -5,6 +5,7 @@ import hashlib
 
 import mock
 import pytest
+import requests
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
@@ -64,6 +65,32 @@ class TestCheck:
         assert '401 Client Error: Unauthorized' in error
 
         assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
+
+    def test_http_error(self, aggregator, instance):
+        # type: (AggregatorStub, Instance) -> None
+        check = VoltDBCheck('voltdb', {}, [instance])
+
+        with mock.patch('requests.get', side_effect=requests.RequestException('Something failed')):
+            error = check.run()
+
+        assert 'Something failed' in error
+
+        assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
+        aggregator.assert_all_metrics_covered()  # No metrics collected.
+
+    def test_http_response_error(self, aggregator, instance):
+        # type: (AggregatorStub, Instance) -> None
+        check = VoltDBCheck('voltdb', {}, [instance])
+
+        resp = requests.Response()
+        resp.status_code = 503
+        with mock.patch('requests.get', return_value=resp):
+            error = check.run()
+
+        assert '503 Server Error' in error
+
+        assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
+        aggregator.assert_all_metrics_covered()  # No metrics collected.
 
 
 @pytest.mark.integration
