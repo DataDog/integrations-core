@@ -125,7 +125,7 @@ def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
 @pytest.mark.integration
 def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregator, node_tags):
     elastic_check = ESCheck('elastic', {}, instances=[instance_normalize_hostname])
-    elastic_check.check()
+    elastic_check.check(None)
     node_name = node_tags[-1].split(':')[1]
 
     for m_name, _ in iteritems(STATS_METRICS):
