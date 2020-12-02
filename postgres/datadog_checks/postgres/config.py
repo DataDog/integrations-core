@@ -64,6 +64,21 @@ class PostgresConfig:
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
 
+        # Execution plans
+        self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
+        # defaults to true only if DBM is enabled, and it can optionally be disabled
+        self.collect_execution_plans = is_affirmative(instance.get('collect_execution_plans', True))
+        self.collect_exec_plans_rate_limit = is_affirmative(instance.get('collect_exec_plans_rate_limit', False))
+        self.collect_exec_plans_rate_limit = instance.get('collect_exec_plans_rate_limit', 10)
+        # plan collection time limit defaults to taking up most of the regular collection interval, leaving a one
+        # second buffer between each interval
+        self.collect_exec_plans_time_limit = instance.get(
+            'collect_exec_plans_time_limit', max(1, instance.get('min_collection_interval', 15) - 1)
+        )
+        self.collect_exec_plans_event_limit = instance.get('collect_exec_plans_event_limit', 100000)
+        self.collect_exec_plan_function = instance.get('collect_exec_plan_function', 'public.explain_statement')
+        self.collect_exec_plan_debug = instance.get('collect_exec_plan_debug', False)
+
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags

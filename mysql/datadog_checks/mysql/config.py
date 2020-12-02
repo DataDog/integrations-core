@@ -28,6 +28,10 @@ class MySQLConfig(object):
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
         self.configuration_checks()
 
+        # execution plans
+        self.min_collection_interval = self.options.get('min_collection_interval', 15)
+        self.collect_statement_samples = self.options.get('collect_statement_samples', True)
+
     def _build_tags(self, custom_tags):
         tags = list(set(custom_tags)) or []
 

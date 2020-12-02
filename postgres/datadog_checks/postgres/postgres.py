@@ -5,11 +5,11 @@ import copy
 from contextlib import closing
 
 import psycopg2
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.statement_samples import PostgresStatementSamples
+from six import iteritems
 
 from .config import PostgresConfig
 from .util import (
@@ -52,6 +52,7 @@ class PostgreSql(AgentCheck):
         self.config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self.config)
         self.statement_metrics = PostgresStatementMetrics(self.config)
+        self.statement_samples = PostgresStatementSamples(self.config)
         self._clean_state()
 
     def _clean_state(self):
@@ -208,7 +209,7 @@ class PostgreSql(AgentCheck):
                 )
 
             descriptor_values = row[: len(descriptors)]
-            column_values = row[len(descriptors) :]
+            column_values = row[len(descriptors):]
 
             # build a map of descriptors and their values
             desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
@@ -423,6 +424,9 @@ class PostgreSql(AgentCheck):
         for metric_name, metric_value, metrics_tags in metrics:
             self.count(metric_name, metric_value, tags=list(set(metrics_tags + tags)))
 
+    def _collect_statement_samples(self, tags):
+        self.statement_samples.collect_statement_samples(self.db, tags)
+
     def check(self, _):
         tags = copy.copy(self.config.tags)
         # Collect metrics
@@ -436,6 +440,9 @@ class PostgreSql(AgentCheck):
             self._collect_custom_queries(tags)
             if self.config.deep_database_monitoring:
                 self._collect_per_statement_metrics(tags)
+                if self.config.collect_statement_samples:
+                    self._collect_statement_samples(tags)
+
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()

@@ -44,6 +44,7 @@ from .queries import (
     SQL_WORKER_THREADS,
 )
 from .statements import MySQLStatementMetrics
+from .statement_samples import MySQLStatementSamples
 from .version_utils import get_version
 
 try:
@@ -74,6 +75,7 @@ class MySql(AgentCheck):
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.config.tags)
         self._statement_metrics = MySQLStatementMetrics(self.config)
+        self._statement_samples = MySQLStatementSamples(self.config)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self.config.configuration_checks)
@@ -110,6 +112,8 @@ class MySql(AgentCheck):
                 self._collect_system_metrics(self.config.host, db, self.config.tags)
                 if self.config.deep_database_monitoring:
                     self._collect_statement_metrics(db, self.config.tags)
+                    if self.config.collect_statement_samples:
+                        self._collect_statement_samples(db)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -355,6 +359,12 @@ class MySql(AgentCheck):
         metrics = self._statement_metrics.collect_per_statement_metrics(db)
         for metric_name, metric_value, metric_tags in metrics:
             self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
+
+    def _collect_statement_samples(self, db):
+        try:
+            self._statement_samples.collect_statement_samples(db, self.service_check_tags)
+        except:
+            self.log.exception('Unable to collect statement samples due to an error')
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
