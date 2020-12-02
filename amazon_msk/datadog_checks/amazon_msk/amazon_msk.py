@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import boto3
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
@@ -22,6 +24,7 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         )
         self._region_name = None
         self._cluster_arn = None
+        self._assume_role = None
         self._exporter_data = (
             (int(self.instance.get('jmx_exporter_port', 11001)), JMX_METRICS_MAP, JMX_METRICS_OVERRIDES),
             (int(self.instance.get('node_exporter_port', 11002)), NODE_METRICS_MAP, NODE_METRICS_OVERRIDES),
@@ -36,11 +39,30 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         self.check_initializations.append(self.parse_config)
 
     def check(self, _):
-        # Always create a new client to account for changes in auth
-        client = boto3.client('kafka', region_name=self._region_name)
+        # Create assume_role credentials if assume_role ARN is specified in config
+        if self._assume_role:
+            self.log.info('Assume role %s found. Creating temporary credentials using role...', self._assume_role)
+            sts = boto3.client('sts')
+            response = sts.assume_role(
+                RoleArn=self._assume_role, RoleSessionName='dd-msk-check-session', DurationSeconds=3600
+            )
+            access_key_id = response['Credentials']['AccessKeyId']
+            secret_access_key = response['Credentials']['SecretAccessKey']
+            session_token = response['Credentials']['SessionToken']
+            client = boto3.client(
+                'kafka',
+                aws_access_key_id=access_key_id,
+                aws_secret_access_key=secret_access_key,
+                aws_session_token=session_token,
+                region_name=self._region_name,
+            )
+        else:
+            # Always create a new client to account for changes in auth
+            client = boto3.client('kafka', region_name=self._region_name)
 
         try:
             response = client.list_nodes(ClusterArn=self._cluster_arn)
+            self.log.debug('Received list_nodes response: %s', json.dumps(response))
         except Exception as e:
             self.service_check(
                 self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=str(e), tags=self._scraper_config['custom_tags']
@@ -74,6 +96,9 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         else:
             region_name = cluster_arn.split(':')[3]
             self.log.info('No `region_name` was set, defaulting to `%s` based on the `cluster_arn`', region_name)
+
+        if 'assume_role' in self.instance:
+            self._assume_role = self.instance['assume_role']
 
         # Make a new list to avoid a memory leak when there are multiple instances
         self._scraper_config['custom_tags'] = list(self._scraper_config['custom_tags'])
