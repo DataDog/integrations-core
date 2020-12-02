@@ -57,7 +57,7 @@ class ESCheck(AgentCheck):
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
         try:
-            version = self._get_es_version(self.config)
+            version = self._get_es_version()
         except AuthenticationError:
             self.log.exception("The ElasticSearch credentials are incorrect")
             raise
@@ -73,14 +73,14 @@ class ESCheck(AgentCheck):
         # This must happen before other URL processing as the cluster name
         # is retrieved here, and added to the tag list.
         stats_url = self._join_url(self.config.url, stats_url, admin_forwarder)
-        stats_data = self._get_data(stats_url, self.config)
+        stats_data = self._get_data(stats_url)
         if stats_data.get('cluster_name'):
             # retrieve the cluster name from the data, and append it to the
             # master tag list.
             cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
             self.config.tags.append(cluster_name_tag)
             self.config.health_tags.append(cluster_name_tag)
-        self._process_stats_data(stats_data, stats_metrics, self.config)
+        self._process_stats_data(stats_data, stats_metrics)
 
         # Load cluster-wise data
         # Note: this is a cluster-wide query, might TO.
@@ -88,8 +88,8 @@ class ESCheck(AgentCheck):
             send_sc = bubble_ex = not self.config.pshard_graceful_to
             pshard_stats_url = self._join_url(self.config.url, pshard_stats_url, admin_forwarder)
             try:
-                pshard_stats_data = self._get_data(pshard_stats_url, self.config, send_sc=send_sc)
-                self._process_pshard_stats_data(pshard_stats_data, self.config, pshard_stats_metrics)
+                pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
+                self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics)
             except requests.ReadTimeout as e:
                 if bubble_ex:
                     raise
@@ -97,18 +97,18 @@ class ESCheck(AgentCheck):
 
         # Load the health data.
         health_url = self._join_url(self.config.url, health_url, admin_forwarder)
-        health_data = self._get_data(health_url, self.config)
-        self._process_health_data(health_data, self.config, version)
+        health_data = self._get_data(health_url)
+        self._process_health_data(health_data, version)
 
         if self.config.pending_task_stats:
             # Load the pending_tasks data.
             pending_tasks_url = self._join_url(self.config.url, pending_tasks_url, admin_forwarder)
-            pending_tasks_data = self._get_data(pending_tasks_url, self.config)
-            self._process_pending_tasks_data(pending_tasks_data, self.config)
+            pending_tasks_data = self._get_data(pending_tasks_url)
+            self._process_pending_tasks_data(pending_tasks_data)
 
         if self.config.index_stats and version >= [1, 0, 0]:
             try:
-                self._get_index_metrics(self.config, admin_forwarder, version)
+                self._get_index_metrics(admin_forwarder, version)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
@@ -120,7 +120,7 @@ class ESCheck(AgentCheck):
         Get the running version of elasticsearch.
         """
         try:
-            data = self._get_data(self.config.url, self.config, send_sc=False)
+            data = self._get_data(self.config.url, send_sc=False)
             raw_version = data['version']['number']
             self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
@@ -349,7 +349,10 @@ class ESCheck(AgentCheck):
         )
 
         self.service_check(
-            self.SERVICE_CHECK_CLUSTER_STATUS, status, message=msg, tags=self.config.service_check_tags + self.config.health_tags
+            self.SERVICE_CHECK_CLUSTER_STATUS,
+            status,
+            message=msg,
+            tags=self.config.service_check_tags + self.config.health_tags,
         )
 
     def _create_event(self, status, tags=None):
