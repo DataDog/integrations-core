@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## 1.7.0 / 2020-10-31
+## 1.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

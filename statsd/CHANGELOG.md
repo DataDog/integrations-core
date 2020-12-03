@@ -1,6 +1,6 @@
 # CHANGELOG - statsd
 
-## 1.6.0 / 2020-10-31
+## 1.6.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add statsd logs. See [#7773](https://github.com/DataDog/integrations-core/pull/7773).
 

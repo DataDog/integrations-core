@@ -1,6 +1,6 @@
 # CHANGELOG - ClickHouse
 
-## 2.0.0 / 2020-10-31
+## 2.0.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 * [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).

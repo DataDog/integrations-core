@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 3.9.0 / 2020-10-31
+## 3.9.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add 'device vendor' tag to metrics. See [#7871](https://github.com/DataDog/integrations-core/pull/7871).
 * [Added] Track fetch ID in debug logs. See [#7736](https://github.com/DataDog/integrations-core/pull/7736).

@@ -5,7 +5,7 @@
 * [Added] Add support for custom SQL queries. See [#8045](https://github.com/DataDog/integrations-core/pull/8045).
 * [Added] Add new database backup and fragmentation metrics for SQLServer. See [#7998](https://github.com/DataDog/integrations-core/pull/7998).
 
-## 2.1.0 / 2020-10-30
+## 2.1.0 / 2020-10-30 / Agent 7.24.0
 
 * [Added] Add AlwaysOn metrics for SQLServer. See [#7824](https://github.com/DataDog/integrations-core/pull/7824).
 * [Added] Support additional performance metrics . See [#7667](https://github.com/DataDog/integrations-core/pull/7667).
