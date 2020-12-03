@@ -22,6 +22,8 @@ CONSUL_VERSION = os.getenv('CONSUL_VERSION')
 PROMETHEUS_ENDPOINT_AVAILABLE = version.parse(CONSUL_VERSION) > version.parse('1.1.0')
 
 # Not all the metrics are exposed in this test environment.
+# raft.replication.installSnapshot and raft.replication.appendEntries.logs are not tested
+# since our testing environment does not easily expose them.
 PROMETHEUS_METRICS = [
     'consul.memberlist.msg.alive',
     'consul.memberlist.tcp.accept',
