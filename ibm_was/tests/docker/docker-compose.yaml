@@ -4,7 +4,6 @@ services:
   ibm_was:
     container_name: ibm_was
     image: ibmcom/websphere-traditional:${IBM_WAS_VERSION}
-    command: bash -c "/opt/IBM/WebSphere/AppServer/bin/setupCmdLine.sh && /work/start_server.sh"
     ports:
       - "9080:9080"
     volumes:
