@@ -4,6 +4,7 @@
 	"acl_default_policy": "deny",
 	"acl_master_token": "token",
 	"telemetry": {
-        "prometheus_retention_time": "12h"
+		"prometheus_retention_time": "12h",
+		"disable_compat_1.9": true
     }
 }
