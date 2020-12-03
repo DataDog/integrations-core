@@ -31,6 +31,7 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][6].
 
 #### Enabling SSL
+_Available for Agent versions >7.24.0_
 
 ZooKeeper 3.5 introduced the ability to use SSL authentication. For information about setting up SSL with ZooKeeper, see the [ZooKeeper SSL User Guide][13]. 
 
