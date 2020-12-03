@@ -42,13 +42,13 @@ VOLUME_STATS = {
     'snapshot_count': 'snapshot.count',
 }
 
-
 VOLUME_STATS.update(GENERAL_STATS)
 VOLUME_STATS.update(VOL_SUBVOL_STATS)
 
 BRICK_STATS = {'block_size': 'block_size'}
 BRICK_STATS.update(GENERAL_STATS)
 
+PARSE_METRICS = ['v_size_used', 'v_size']
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
@@ -166,18 +166,15 @@ class GlusterfsCheck(AgentCheck):
         for key, metric in metric_mapping.items():
             if key in payload:
                 value = payload[key]
-                try:
-                    metric_value = int(value)
-                except ValueError:
+
+                if key in PARSE_METRICS:
                     value_parsed = value.split(" ")
-                    if value_parsed == "GiB":
-                        metric_value = value_parsed[0]
+                    if value_parsed[1] == "GiB":
+                        value = value_parsed[0]
                     else:
                         self.log.debug("Measurement is not in GiB: %s", value)
-                except Exception as e:
-                    self.log.debug("Got invalid value for key `%s`: %s", key, e)
-
-                self.gauge('{}.'.format(prefix) + metric, metric_value, tags)
+                        continue
+                self.gauge('{}.'.format(prefix) + metric, value, tags)
             else:
                 self.log.debug("Field not found in %s data: %s", prefix, key)
 
