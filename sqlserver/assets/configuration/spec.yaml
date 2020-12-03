@@ -39,10 +39,56 @@ files:
       value:
         type: string
     - name: database
-      description: Database name to query
+      description: |
+        Database name to query.  Not compatible with `database_autodiscovery`.
       value:
         type: string
         example: master
+    - name: database_autodiscovery
+      description: |
+        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
+      value:
+        type: boolean
+        example: false
+    - name: autodiscovery_include
+      description: |
+        Regular expression for database names to include as part of `database_autodiscovery`.
+        Will report metrics for databases that are found in this instance, ignores databases listed but not found.
+
+        Character casing is ignored. The regular expressions start matching from the beginning, so 
+        to match anywhere, prepend `.*`. For exact matches append `$`. 
+
+        Defaults to `.*` to include everything.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - master$
+          - AdventureWorks.*
+    - name: autodiscovery_exclude
+      description: |
+        Regular expression for database names to exclude as part of `database_autodiscovery`.
+
+        Character casing is ignored. The regular expressions start matching from the beginning, so
+        to match anywhere, prepend `.*`. For exact matches append `$`.
+
+        In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over
+        those found via `autodiscovery_include`.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - model
+          - msdb
+    - name: database_autodiscovery_interval
+      description: |
+        Frequency in seconds of scans for new databases.  Defaults to `3600`.
+      value:
+        type: integer
+        example: 3600
     - name: include_ao_metrics
       description: |
         Include AlwaysOn availability group metrics.

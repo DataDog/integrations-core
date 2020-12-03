@@ -3,7 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import re
+import time
 from collections import defaultdict
+from itertools import chain
 
 import six
 
@@ -53,6 +56,9 @@ BASE_NAME_QUERY = (
     % PERF_LARGE_RAW_BASE
 )
 
+DEFAULT_AUTODISCOVERY_INTERVAL = 3600
+AUTODISCOVERY_QUERY = "select name from sys.databases"
+
 
 class SQLServer(AgentCheck):
     __NAMESPACE__ = 'sqlserver'
@@ -65,21 +71,8 @@ class SQLServer(AgentCheck):
         # SQLServer:General Statistics
         ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
-        # SQLServer:Locks
-        ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
         # SQLServer:Access Methods
         ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
-        # SQLServer:Plan Cache
-        ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
-        ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
-        # SQLServer:Databases
-        ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
-        ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
-        ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
-        ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
-        ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
-        ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
-        ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
         # SQLServer:Memory Manager
         ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
         ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
@@ -96,6 +89,25 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
         ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
         ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+    ]
+
+    # Performance table metrics, initially configured to track at instance-level only
+    # With auto-discovery enabled, these metrics will be extended accordingly
+    # datadog metric name, counter name, instance name
+    INSTANCE_METRICS_TOTAL = [
+        # SQLServer:Locks
+        ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
+        # SQLServer:Plan Cache
+        ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
+        ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+        # SQLServer:Databases
+        ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
+        ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
+        ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
+        ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
+        ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
+        ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
+        ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
     ]
 
     # AlwaysOn metrics
@@ -182,6 +194,19 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(list)
         self.do_check = True
 
+        self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
+        if self.autodiscovery and self.instance.get('database'):
+            self.log.warning(
+                'sqlserver `database_autodiscovery` and `database` options defined in same instance - '
+                'autodiscovery will take precedence.'
+            )
+        self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
+        self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self._compile_patterns()
+        self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
+        self.databases = set()
+        self.ad_last_check = 0
+
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
@@ -202,6 +227,8 @@ class SQLServer(AgentCheck):
             if db_exists:
                 if self.instance.get('stored_procedure') is None:
                     with self.connection.open_managed_default_connection():
+                        with self.connection.get_managed_cursor() as cursor:
+                            self.autodiscover_databases(cursor)
                         self._make_metric_list_to_collect(self.custom_metrics)
             else:
                 # How much do we care that the DB doesn't exist?
@@ -234,6 +261,59 @@ class SQLServer(AgentCheck):
 
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
+    def _compile_patterns(self):
+        self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
+        self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
+
+    def _compile_valid_patterns(self, patterns):
+        valid_patterns = []
+
+        for pattern in patterns:
+            # Ignore empty patterns as they match everything
+            if not pattern:
+                continue
+
+            try:
+                re.compile(pattern, re.IGNORECASE)
+            except Exception:
+                self.log.warning('%s is not a valid regular expression and will be ignored', pattern)
+            else:
+                valid_patterns.append(pattern)
+
+        if valid_patterns:
+            return re.compile('|'.join(valid_patterns), re.IGNORECASE)
+        else:
+            # create unmatchable regex - https://stackoverflow.com/a/1845097/2157429
+            return re.compile(r'(?!x)x')
+
+    def autodiscover_databases(self, cursor):
+        if not self.autodiscovery:
+            return False
+
+        now = time.time()
+        if now - self.ad_last_check > self.autodiscovery_interval:
+            self.log.info('Performing database autodiscovery')
+            cursor.execute(AUTODISCOVERY_QUERY)
+            all_dbs = set(row.name for row in cursor.fetchall())
+            excluded_dbs = set([d for d in all_dbs if self._exclude_patterns.match(d)])
+            included_dbs = set([d for d in all_dbs if self._include_patterns.match(d)])
+
+            self.log.debug(
+                'Autodiscovered databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs
+            )
+
+            # keep included dbs but remove any that were explicitly excluded
+            filtered_dbs = all_dbs.intersection(included_dbs) - excluded_dbs
+
+            self.log.debug('Resulting filtered databases: %s', filtered_dbs)
+            self.ad_last_check = now
+
+            if filtered_dbs != self.databases:
+                self.log.debug('Databases updated from previous autodiscovery check.')
+                self.databases = filtered_dbs
+                return True
+        return False
+
     def _make_metric_list_to_collect(self, custom_metrics):
         """
         Store the list of metrics to collect by instance_key.
@@ -247,33 +327,22 @@ class SQLServer(AgentCheck):
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
-            for name, counter_name, instance_name in self.INSTANCE_METRICS:
-                try:
-                    sql_type, base_name = self.get_sql_type(counter_name)
-                    cfg = {
-                        'name': name,
-                        'counter_name': counter_name,
-                        'instance_name': instance_name,
-                        'tags': tags,
-                    }
+            self._add_performance_counters(
+                chain(self.INSTANCE_METRICS, self.INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
+            )
 
-                    metrics_to_collect.append(
-                        self.typed_metric(
-                            cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
-                        )
-                    )
-                except SQLConnectionError:
-                    raise
-                except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
-                    continue
+        # populated through autodiscovery
+        if self.databases:
+            for db in self.databases:
+                self._add_performance_counters(self.INSTANCE_METRICS_TOTAL, metrics_to_collect, tags, db=db)
 
         # Load database statistics
         for name, table, column in self.DATABASE_METRICS:
             # include database as a filter option
-            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
-            metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+            db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            for db_name in db_names:
+                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
@@ -310,18 +379,19 @@ class SQLServer(AgentCheck):
 
         # Load DB Fragmentation metrics
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
-            db_name = self.instance.get('database', self.connection.DEFAULT_DATABASE)
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'instance_name': db_name,
-                    'tags': tags,
-                    'db_fragmentation_object_names': db_fragmentation_object_names,
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+            db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            for db_name in db_names:
+                for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
+                    cfg = {
+                        'name': name,
+                        'table': table,
+                        'column': column,
+                        'instance_name': db_name,
+                        'tags': tags,
+                        'db_fragmentation_object_names': db_fragmentation_object_names,
+                    }
+                    metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
@@ -383,6 +453,28 @@ class SQLServer(AgentCheck):
             self.instance_per_type_metrics[cls].append(name)
             if m.base_name:
                 self.instance_per_type_metrics[cls].append(m.base_name)
+
+    def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None):
+        for name, counter_name, instance_name in metrics:
+            try:
+                sql_type, base_name = self.get_sql_type(counter_name)
+                cfg = {
+                    'name': name,
+                    'counter_name': counter_name,
+                    'instance_name': db or instance_name,
+                    'tags': tags,
+                }
+
+                metrics_to_collect.append(
+                    self.typed_metric(
+                        cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
+                    )
+                )
+            except SQLConnectionError:
+                raise
+            except Exception:
+                self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
+                continue
 
     def get_sql_type(self, counter_name):
         """
@@ -459,12 +551,10 @@ class SQLServer(AgentCheck):
         """Fetch the metrics from all of the associated database tables."""
 
         with self.connection.open_managed_default_connection():
-            # if the server was down at check __init__ key could be missing.
-            if not self.instance_metrics:
-                self._make_metric_list_to_collect(self.custom_metrics)
-            metrics_to_collect = self.instance_metrics
-
             with self.connection.get_managed_cursor() as cursor:
+                # initiate autodiscovery or if the server was down at check __init__ key could be missing.
+                if self.autodiscover_databases(cursor) or not self.instance_metrics:
+                    self._make_metric_list_to_collect(self.custom_metrics)
 
                 instance_results = {}
 
@@ -477,7 +567,7 @@ class SQLServer(AgentCheck):
                         instance_results[cls] = rows, cols
 
                 # Using the cached data, extract and report individual metrics
-                for metric in metrics_to_collect:
+                for metric in self.instance_metrics:
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
                         rows, cols = instance_results['SqlFractionMetric']
