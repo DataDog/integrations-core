@@ -172,7 +172,7 @@ class LocalAgentInterface(object):
                 command += f' --json {as_json}'
 
             if as_table:
-                command += f' --table'
+                command += ' --table'
 
             if break_point is not None:
                 command += f' --breakpoint {break_point}'
