@@ -1,5 +1,8 @@
 # CHANGELOG - Squid
 
+## 1.10.0-beta.1 / 2020-12-03
+
+
 ## 1.9.0 / 2020-10-31
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
