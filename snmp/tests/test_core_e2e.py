@@ -46,16 +46,16 @@ def assert_python_vs_core(dd_agent_check, instance):
         for metric in metrics:
             actual_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
 
-    print("Python metrics not found in Corecheck metrics")
-    for key in expected_metrics:
+    print("Python metrics not found in Corecheck metrics:")
+    for key in sorted(expected_metrics):
         (name, mtype, tags) = key
         if has_index_mapping_tag(tags):
             continue
         if key not in actual_metrics:
             print("\t{}".format(key))
 
-    print("Corecheck metrics not found in Python metrics")
-    for key in actual_metrics:
+    print("Corecheck metrics not found in Python metrics:")
+    for key in sorted(actual_metrics):
         (name, mtype, tags) = key
         if has_index_mapping_tag(tags):
             continue
