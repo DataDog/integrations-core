@@ -1,5 +1,16 @@
 # CHANGELOG - snmp
 
+## 3.10.0 / 2020-12-03
+
+* [Added] Add snmp interface bandwidth usage metric. See [#8093](https://github.com/DataDog/integrations-core/pull/8093).
+* [Added] Add interface alias (ifAlias) as a tag to interface metrics. See [#8018](https://github.com/DataDog/integrations-core/pull/8018). Thanks [loganmc10](https://github.com/loganmc10).
+* [Added] Add generic Cisco ASA profile. See [#7971](https://github.com/DataDog/integrations-core/pull/7971).
+* [Fixed] Use MIB less syntax in example and link to profile format doc. See [#8073](https://github.com/DataDog/integrations-core/pull/8073).
+* [Fixed] Add back cisco-asa-5525.yaml. See [#8041](https://github.com/DataDog/integrations-core/pull/8041).
+* [Fixed] Improve symbol metric example. See [#8071](https://github.com/DataDog/integrations-core/pull/8071).
+* [Fixed] Add deprecation notice for metric[].name syntax. See [#8070](https://github.com/DataDog/integrations-core/pull/8070).
+* [Fixed] Add device_index to idrac (AI-938). See [#7525](https://github.com/DataDog/integrations-core/pull/7525).
+
 ## 3.9.0 / 2020-10-31
 
 * [Added] Add 'device vendor' tag to metrics. See [#7871](https://github.com/DataDog/integrations-core/pull/7871).
