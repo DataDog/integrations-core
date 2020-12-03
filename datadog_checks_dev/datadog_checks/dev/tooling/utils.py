@@ -575,6 +575,20 @@ def has_dashboard(check):
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
 
 
+def has_logs(check):
+    config_file = get_config_file(check)
+    if os.path.exists(config_file):
+        with open(config_file, 'r', encoding='utf-8') as f:
+            if '# logs:' in f.read():
+                return True
+
+    readme_file = get_readme_file(check)
+    if os.path.exists(readme_file):
+        with open(readme_file, 'r', encoding='utf-8') as f:
+            if '# Log collection' in f.read():
+                return True
+
+
 def find_legacy_signature(check):
     """
     Validate that the given check does not use the legacy agent signature (contains agentConfig)
