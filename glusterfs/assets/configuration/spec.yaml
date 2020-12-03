@@ -4,7 +4,6 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/default
     - name: gstatus_path
       description: |
         Path to the gstatus command.
@@ -14,6 +13,18 @@ files:
       value:
         type: string
         example: /path/to/gstatus
+    - template: init_config/default
   - template: instances
     options:
+    - name: use_sudo
+      description: |
+        GlusterFS requires sudo.Please be sure to add the following line to your sudoers file:
+
+        dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph
+
+        Enable the option for the check to run with sudo.
+      value:
+        type: boolean
+        example: false
+
     - template: instances/default
