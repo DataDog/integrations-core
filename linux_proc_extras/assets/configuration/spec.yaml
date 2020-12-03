@@ -5,7 +5,6 @@ files:
   - template: init_config
   - template: instances
     options:
-    - template: instances/tags
     - name: include_interrupt_metrics
       description: |
         Optionally include CPU/IRQ interrupt metrics.  This can dramatically increase cardinality
@@ -13,3 +12,4 @@ files:
       value:
         type: boolean
         example: false
+    - template: instances/default
