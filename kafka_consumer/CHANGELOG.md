@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.7.0 / 2020-10-31
+## 2.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Support Windows. See [#7781](https://github.com/DataDog/integrations-core/pull/7781).
 * [Added] Collect version metadata. See [#6556](https://github.com/DataDog/integrations-core/pull/6556).

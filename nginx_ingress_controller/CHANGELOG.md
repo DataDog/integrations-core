@@ -1,6 +1,6 @@
 # CHANGELOG - nginx-ingress-controller
 
-## 1.8.0 / 2020-10-31
+## 1.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
 * [Added] fix which prometheus metric is used for reload.success to properly monitor nginx config reload errors. See [#7595](https://github.com/DataDog/integrations-core/pull/7595). Thanks [rocktavious](https://github.com/rocktavious).

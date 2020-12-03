@@ -1,6 +1,6 @@
 # CHANGELOG - IBM Db2
 
-## 1.5.1 / 2020-10-31
+## 1.5.1 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Fix default port value. See [#7658](https://github.com/DataDog/integrations-core/pull/7658).
 

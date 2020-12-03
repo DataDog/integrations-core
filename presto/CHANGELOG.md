@@ -1,6 +1,6 @@
 # CHANGELOG - Presto
 
-## 2.2.0 / 2020-10-31
+## 2.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7745](https://github.com/DataDog/integrations-core/pull/7745).
 

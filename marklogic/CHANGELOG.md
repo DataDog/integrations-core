@@ -1,6 +1,6 @@
 # CHANGELOG - MarkLogic
 
-## 1.1.2 / 2020-11-10
+## 1.1.2 / 2020-11-10 / Agent 7.24.0
 
 * [Fixed] Handle unavailable specific resource information. See [#7944](https://github.com/DataDog/integrations-core/pull/7944).
 * [Fixed] Rename marklogic host tags. See [#7960](https://github.com/DataDog/integrations-core/pull/7960).

@@ -1,6 +1,6 @@
 # CHANGELOG - Vault
 
-## 2.9.1 / 2020-11-04
+## 2.9.1 / 2020-11-04 / Agent 7.24.0
 
 * [Fixed] Fix secondary mode detection logic. See [#7926](https://github.com/DataDog/integrations-core/pull/7926).
 
