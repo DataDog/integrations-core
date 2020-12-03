@@ -8,7 +8,7 @@ import requests
 from six import iteritems
 
 # project
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
@@ -104,8 +104,9 @@ class SquidCheck(AgentCheck):
             self.rate(counter, value, tags=tags + custom_tags)
 
     def get_counters(self, host, port, tags):
-
-        url = "http://%s:%s/squid-internal-mgr/counters" % (host, port)
+        if not (host.startswith('http://') or host.startswith('https://')):
+            host = 'http://%s' % host
+        url = "%s:%s/squid-internal-mgr/counters" % (host, port)
         try:
             res = self.http.get(url)
             res.raise_for_status()

@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import mock
 import pytest
-
 from datadog_checks.squid import SquidCheck
 
 from . import common
@@ -70,6 +69,25 @@ def test_get_counters(check):
             # we assert `parse_counter` was called only once despite the raw text
             # containing multiple `\n` chars
             check.parse_counter.assert_called_once()
+
+
+def test_host_without_protocol(check, instance):
+    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+            g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
+            check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+            check.check(instance)
+            assert g.call_args.args[0] == 'http://localhost:3128/squid-internal-mgr/counters'
+
+
+def test_host_https(check, instance):
+    instance['host'] = 'https://localhost'
+    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+            g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
+            check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+            check.check(instance)
+            assert g.call_args.args[0] == 'https://localhost:3128/squid-internal-mgr/counters'
 
 
 @pytest.mark.parametrize(
