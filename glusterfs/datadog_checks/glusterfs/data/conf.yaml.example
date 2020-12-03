@@ -2,13 +2,6 @@
 #
 init_config:
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
     ## @param gstatus_path - string - optional - default: /path/to/gstatus
     ## Path to the gstatus command.
     ##
@@ -17,11 +10,27 @@ init_config:
     #
     # gstatus_path: /path/to/gstatus
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
 ## Every instance is scheduled independent of the others.
 #
 instances:
 
   -
+    ## @param use_sudo - boolean - optional - default: false
+    ## GlusterFS requires sudo.Please be sure to add the following line to your sudoers file:
+    ##
+    ## dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph
+    ##
+    ## Enable the option for the check to run with sudo.
+    #
+    # use_sudo: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
