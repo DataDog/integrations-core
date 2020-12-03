@@ -93,7 +93,8 @@ class GlusterfsCheck(AgentCheck):
         else:
             gluster_args = [self.gstatus_cmd]
 
-        gluster_args += ['-a', '-o', 'json']
+        # Ensures units are universally the same by specifying the --units flag
+        gluster_args += ['-a', '-o', 'json', '-u', 'g']
         self.log.debug("gstatus command: %s", gluster_args)
         output, _, _ = get_subprocess_output(gluster_args, self.log)
         gstatus = json.loads(output)

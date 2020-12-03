@@ -9,6 +9,14 @@ init_config:
     #
     # service: <SERVICE>
 
+    ## @param gstatus_path - string - optional - default: /path/to/gstatus
+    ## Path to the gstatus command.
+    ##
+    ## A version of the gstatus is shipped with the Agent binary.
+    ## If you are using a source install, specify the location of gstatus.
+    #
+    # gstatus_path: /path/to/gstatus
+
 ## Every instance is scheduled independent of the others.
 #
 instances:
