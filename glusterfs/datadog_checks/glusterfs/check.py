@@ -37,10 +37,12 @@ VOLUME_STATS = {
     'v_used_percent': 'used.percent',
     'num_bricks': 'bricks.count',
     'distribute': 'distribute',
-    #    'v_size_used': 'size.used', # strip GiB from value
-    #    'v_size': 'size.total', # strip GiB from value
+    'v_size_used': 'size.used',
+    'v_size': 'size.total',
     'snapshot_count': 'snapshot.count',
 }
+
+
 VOLUME_STATS.update(GENERAL_STATS)
 VOLUME_STATS.update(VOL_SUBVOL_STATS)
 
@@ -157,9 +159,25 @@ class GlusterfsCheck(AgentCheck):
             self.submit_service_check(self.BRICK_SC, subvol['health'], tags)
 
     def submit_metric(self, payload, prefix, metric_mapping, tags):
+        """
+        Parse a payload with a given metric_mapping and submit metric for valid values.
+        Some values contain measurements like `GiB` which should be removed and only submitted if consistent
+        """
         for key, metric in metric_mapping.items():
             if key in payload:
-                self.gauge('{}.'.format(prefix) + metric, payload[key], tags)
+                value = payload[key]
+                try:
+                    metric_value = int(value)
+                except ValueError:
+                    value_parsed = value.split(" ")
+                    if value_parsed == "GiB":
+                        metric_value = value_parsed[0]
+                    else:
+                        self.log.debug("Measurement is not in GiB: %s", value)
+                except Exception as e:
+                    self.log.debug("Got invalid value for key `%s`: %s", key, e)
+
+                self.gauge('{}.'.format(prefix) + metric, metric_value, tags)
             else:
                 self.log.debug("Field not found in %s data: %s", prefix, key)
 
