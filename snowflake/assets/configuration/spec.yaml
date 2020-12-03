@@ -68,7 +68,6 @@ files:
           type: string
           example: <PASSWORD>
       - name: role
-        enable: true
         required: true
         description: |
           Name of the role to use.
