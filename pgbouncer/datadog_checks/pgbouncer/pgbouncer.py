@@ -67,10 +67,17 @@ class PgBouncer(AgentCheck):
                     try:
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
+                        if 'POOLS' not in query:
+                            rows = cursor.fetchall()
+                        else:
+                            rows = []
+                            row = cursor.fetchone()
+                            while row:
+                                self.log.debug("Processing POOLS row: %r", row)
+                                rows.append(row)
+                                row = cursor.fetchone()
 
-                        rows = cursor.fetchall()
-
-                    except pg.Error:
+                    except Exception:
                         self.log.exception("Not all metrics may be available")
 
                     else:

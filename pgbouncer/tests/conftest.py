@@ -32,7 +32,7 @@ def dd_environment():
     """
     compose_file = 'docker-compose.yml'
     env_version = common.get_version_from_env()
-    if env_version < version.parse('1.10'):
+    if env_version < version.parse('1.9'):
         compose_file = 'docker-compose-old.yml'
 
     with docker_run(
