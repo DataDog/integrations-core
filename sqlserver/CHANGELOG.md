@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+## 2.3.0 / 2020-12-04
+
+* [Added] Add support for database autodiscovery. See [#8115](https://github.com/DataDog/integrations-core/pull/8115).
+* [Added] Add FCI metrics for SQLServer. See [#8056](https://github.com/DataDog/integrations-core/pull/8056).
+* [Fixed] Handle case sensitivity on database names. See [#8113](https://github.com/DataDog/integrations-core/pull/8113).
+* [Fixed] Move connection initialization outside init function. See [#8064](https://github.com/DataDog/integrations-core/pull/8064).
+
 ## 2.2.0 / 2020-11-23
 
 * [Added] Add support for custom SQL queries. See [#8045](https://github.com/DataDog/integrations-core/pull/8045).
