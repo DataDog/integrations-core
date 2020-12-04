@@ -67,7 +67,7 @@ class PostgresConfig:
         # Execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         # defaults to true only if DBM is enabled, and it can optionally be disabled
-        self.collect_execution_plans = is_affirmative(instance.get('collect_execution_plans', True))
+        self.collect_statement_samples = is_affirmative(instance.get('collect_statement_samples', True))
         self.collect_exec_plans_rate_limit = is_affirmative(instance.get('collect_exec_plans_rate_limit', False))
         self.collect_exec_plans_rate_limit = instance.get('collect_exec_plans_rate_limit', 10)
         # plan collection time limit defaults to taking up most of the regular collection interval, leaving a one
