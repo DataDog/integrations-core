@@ -29,7 +29,7 @@ instances:
     # socket: <SOCKET>
 
     ## @param port - integer - optional - default: 11211
-    ## Port to use when connecting to "url".
+    ## Port to use when connecting to `url`.
     #
     # port: 11211
 
@@ -44,8 +44,8 @@ instances:
     # password: <PASSWORD>
 
     ## @param options - mapping - optional
-    ## Set "items" to true if you wish to collect items Mcache stats.
-    ## Set "slabs" to true if you wish to collect slabs Mcache stats.
+    ## Set `items` to true if you wish to collect items Mcache stats.
+    ## Set `slabs` to true if you wish to collect slabs Mcache stats.
     #
     # options:
     #   items: false
