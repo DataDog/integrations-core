@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "glusterfs",
   "metric_prefix": "glusterfs.",
-  "metric_to_check": "",
+  "metric_to_check": "glusterfs.nodes.count",
   "creates_events": false,
   "short_description": "",
   "guid": "1cb9a21c-8cc4-4727-a4b1-ab7015c7ae24",
