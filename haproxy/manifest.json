@@ -38,7 +38,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "haproxy": "assets/dashboard/overview.json",
+      "haproxy": "assets/dashboards/overview.json",
       "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json"
     },
     "saved_views": {
