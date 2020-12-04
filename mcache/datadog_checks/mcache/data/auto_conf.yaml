@@ -22,4 +22,4 @@ instances:
     ## @param port - integer - optional - default: 11211
     ## Port to use when connecting to `url`.
     #
-    # port: 11211
+    port: 11211

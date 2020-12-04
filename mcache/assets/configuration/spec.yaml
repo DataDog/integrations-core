@@ -68,6 +68,7 @@ files:
         example: "%%host%%"
     - name: port
       description: Port to use when connecting to `url`.
+      enabled: true
       value:
         type: integer
         default: 11211
