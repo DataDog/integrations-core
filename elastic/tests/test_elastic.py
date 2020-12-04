@@ -240,13 +240,7 @@ def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
 )
 def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
     with pytest.raises(ConfigurationError):
-        check = ESCheck('elastic', {}, instances=[instance])
-
-        assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
-        assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
-
-        # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
-        assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
+        ESCheck('elastic', {}, instances=[instance])
 
 
 @pytest.mark.e2e
