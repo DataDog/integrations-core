@@ -1,148 +1,148 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from . import operations
-from .document_db import DocumentQuery, transformers
+from . import queries_impl
 
-# System configuration.
-
-# See: https://rethinkdb.com/docs/system-tables/#configuration-tables
-config_summary = DocumentQuery(
-    source=operations.get_config_summary,
-    name='config_summary',
-    prefix='rethinkdb.config',
-    metrics=[{'type': 'gauge', 'path': 'servers'}, {'type': 'gauge', 'path': 'databases'}],
-    groups=[
-        {'type': 'gauge', 'path': 'tables_per_database', 'key_tag': 'database'},
-        {'type': 'gauge', 'path': 'secondary_indexes_per_table', 'key_tag': 'table'},
+ClusterMetrics = {
+    'name': 'cluster',
+    'query': queries_impl.get_cluster_metrics,
+    'columns': [
+        {'name': 'config.servers', 'type': 'gauge'},
+        {'name': 'config.databases', 'type': 'gauge'},
+        {'name': 'stats.cluster.query_engine.queries_per_sec', 'type': 'gauge'},
+        {'name': 'stats.cluster.query_engine.read_docs_per_sec', 'type': 'gauge'},
+        {'name': 'stats.cluster.query_engine.written_docs_per_sec', 'type': 'gauge'},
     ],
-)
+}
 
-
-# System statistics.
-
-# See: https://rethinkdb.com/docs/system-stats#cluster
-cluster_statistics = DocumentQuery(
-    source=operations.get_cluster_statistics,
-    name='cluster_statistics',
-    prefix='rethinkdb.stats.cluster',
-    metrics=[
-        {'type': 'gauge', 'path': 'query_engine.queries_per_sec'},
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
+ServerMetrics = {
+    'name': 'server',
+    'query': queries_impl.get_server_metrics,
+    'columns': [
+        {'name': 'server', 'type': 'tag'},
+        {'name': 'stats.server.query_engine.client_connections', 'type': 'gauge'},
+        {'name': 'stats.server.query_engine.clients_active', 'type': 'gauge'},
+        {'name': 'stats.server.query_engine.queries_per_sec', 'type': 'gauge'},
+        {'name': 'stats.server.query_engine.queries_total', 'type': 'monotonic_count'},
+        {'name': 'stats.server.query_engine.read_docs_per_sec', 'type': 'gauge'},
+        {'name': 'stats.server.query_engine.read_docs_total', 'type': 'monotonic_count'},
+        {'name': 'stats.server.query_engine.written_docs_per_sec', 'type': 'gauge'},
+        {'name': 'stats.server.query_engine.written_docs_total', 'type': 'monotonic_count'},
+        {'name': 'server_status.network.time_connected', 'type': 'gauge'},
+        {'name': 'server_status.network.connected_to', 'type': 'gauge'},
+        {'name': 'server_status.process.time_started', 'type': 'gauge'},
     ],
-)
+}
 
-# See: https://rethinkdb.com/docs/system-stats#server
-server_statistics = DocumentQuery(
-    source=operations.get_servers_statistics,
-    name='server_statistics',
-    prefix='rethinkdb.stats.server',
-    metrics=[
-        {'type': 'gauge', 'path': 'query_engine.client_connections'},
-        {'type': 'gauge', 'path': 'query_engine.clients_active'},
-        {'type': 'gauge', 'path': 'query_engine.queries_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.queries_total'},
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.read_docs_total'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.written_docs_total'},
+DatabaseMetrics = {
+    'name': 'database',
+    'query': queries_impl.get_database_metrics,
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'config.tables_per_database', 'type': 'gauge'},
     ],
-)
+}
 
-# See: https://rethinkdb.com/docs/system-stats#table
-table_statistics = DocumentQuery(
-    source=operations.get_tables_statistics,
-    name='table_statistics',
-    prefix='rethinkdb.stats.table',
-    metrics=[
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-    ],
-)
-
-# See: https://rethinkdb.com/docs/system-stats#replica
-replica_statistics = DocumentQuery(
-    source=operations.get_replicas_statistics,
-    name='replica_statistics',
-    prefix='rethinkdb.stats.table_server',
-    metrics=[
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.read_docs_total'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.written_docs_total'},
-        {'type': 'gauge', 'path': 'storage_engine.cache.in_use_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.read_bytes_per_sec'},
-        {'type': 'monotonic_count', 'path': 'storage_engine.disk.read_bytes_total'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.written_bytes_per_sec'},
-        {'type': 'monotonic_count', 'path': 'storage_engine.disk.written_bytes_total'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.metadata_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.data_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.garbage_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.preallocated_bytes'},
-    ],
-)
-
-
-# System status.
-
-# See: https://rethinkdb.com/docs/system-tables/#table_status
-table_statuses = DocumentQuery(
-    source=operations.get_table_statuses,
-    name='table_status',
-    prefix='rethinkdb.table_status',
-    metrics=[
-        {'type': 'service_check', 'path': 'status.ready_for_outdated_reads', 'transformer': transformers.ok_warning},
-        {'type': 'service_check', 'path': 'status.ready_for_reads', 'transformer': transformers.ok_warning},
-        {'type': 'service_check', 'path': 'status.ready_for_writes', 'transformer': transformers.ok_warning},
-        {'type': 'service_check', 'path': 'status.all_replicas_ready', 'transformer': transformers.ok_warning},
-        {'type': 'gauge', 'path': 'shards', 'transformer': transformers.length},
-    ],
-    enumerations=[
+DatabaseTableMetrics = {
+    'name': 'database_table',
+    'query': queries_impl.get_database_table_metrics,
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'stats.table.query_engine.read_docs_per_sec', 'type': 'gauge'},
+        {'name': 'stats.table.query_engine.written_docs_per_sec', 'type': 'gauge'},
+        {'name': 'table_status.shards', 'type': 'gauge'},
         {
-            'path': 'shards',
-            'index_tag': 'shard',
-            'metrics': [
-                {'type': 'gauge', 'path': 'replicas', 'transformer': transformers.length},
-                {'type': 'gauge', 'path': 'primary_replicas', 'transformer': transformers.length},
-            ],
-        }
+            'name': 'table_status.status.ready_for_outdated_reads',
+            'type': 'service_check',
+            'status_map': {True: 'OK', False: 'WARNING'},
+        },
+        {
+            'name': 'table_status.status.ready_for_reads',
+            'type': 'service_check',
+            'status_map': {True: 'OK', False: 'WARNING'},
+        },
+        {
+            'name': 'table_status.status.ready_for_writes',
+            'type': 'service_check',
+            'status_map': {True: 'OK', False: 'WARNING'},
+        },
+        {
+            'name': 'table_status.status.all_replicas_ready',
+            'type': 'service_check',
+            'status_map': {True: 'OK', False: 'WARNING'},
+        },
     ],
-)
+}
 
-# See: https://rethinkdb.com/docs/system-tables/#server_status
-server_statuses = DocumentQuery(
-    source=operations.get_server_statuses,
-    name='server_status',
-    prefix='rethinkdb.server_status',
-    metrics=[
-        {'type': 'gauge', 'path': 'network.time_connected', 'transformer': transformers.to_time_elapsed},
-        {'type': 'gauge', 'path': 'network.connected_to', 'transformer': transformers.length},
-        {'type': 'gauge', 'path': 'process.time_started', 'transformer': transformers.to_time_elapsed},
+TableMetrics = {
+    'name': 'table',
+    'query': queries_impl.get_table_metrics,
+    'columns': [
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'config.secondary_indexes_per_table', 'type': 'gauge'},
     ],
-)
+}
 
-
-# System jobs.
-
-# See: https://rethinkdb.com/docs/system-jobs/
-jobs_summary = DocumentQuery(
-    source=operations.get_jobs_summary,
-    name='jobs',
-    prefix='rethinkdb.system_jobs',
-    groups=[{'type': 'gauge', 'path': 'jobs', 'key_tag': 'job_type'}],
-)
-
-
-# System current issues.
-
-# See: https://rethinkdb.com/docs/system-issues/
-current_issues_summary = DocumentQuery(
-    source=operations.get_current_issues_summary,
-    name='current_issues',
-    prefix='rethinkdb.current_issues',
-    groups=[
-        {'type': 'gauge', 'path': 'issues', 'key_tag': 'issue_type'},
-        {'type': 'gauge', 'path': 'critical_issues', 'key_tag': 'issue_type'},
+ReplicaMetrics = {
+    'name': 'replica',
+    'query': queries_impl.get_replica_metrics,
+    'columns': [
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'server', 'type': 'tag'},
+        {'name': 'state', 'type': 'tag'},
+        {'name': 'stats.table_server.query_engine.read_docs_per_sec', 'type': 'gauge'},
+        {'name': 'stats.table_server.query_engine.read_docs_total', 'type': 'monotonic_count'},
+        {'name': 'stats.table_server.query_engine.written_docs_per_sec', 'type': 'gauge'},
+        {'name': 'stats.table_server.query_engine.written_docs_total', 'type': 'monotonic_count'},
+        {'name': 'stats.table_server.storage_engine.cache.in_use_bytes', 'type': 'gauge'},
+        {'name': 'stats.table_server.storage_engine.disk.read_bytes_per_sec', 'type': 'gauge'},
+        {'name': 'stats.table_server.storage_engine.disk.read_bytes_total', 'type': 'monotonic_count'},
+        {'name': 'stats.table_server.storage_engine.disk.written_bytes_per_sec', 'type': 'gauge'},
+        {'name': 'stats.table_server.storage_engine.disk.written_bytes_total', 'type': 'monotonic_count'},
+        {'name': 'stats.table_server.storage_engine.disk.space_usage.metadata_bytes', 'type': 'gauge'},
+        {'name': 'stats.table_server.storage_engine.disk.space_usage.data_bytes', 'type': 'gauge'},
+        {'name': 'stats.table_server.storage_engine.disk.space_usage.garbage_bytes', 'type': 'gauge'},
+        {'name': 'stats.table_server.storage_engine.disk.space_usage.preallocated_bytes', 'type': 'gauge'},
     ],
-)
+}
+
+ShardMetrics = {
+    'name': 'shard',
+    'query': queries_impl.get_shard_metrics,
+    'columns': [
+        {'name': 'shard', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'table_status.shards.replicas', 'type': 'gauge'},
+        {'name': 'table_status.shards.primary_replicas', 'type': 'gauge'},
+    ],
+}
+
+JobMetrics = {
+    'name': 'job',
+    'query': queries_impl.get_job_metrics,
+    'columns': [
+        {'name': 'job_type', 'type': 'tag'},
+        {'name': 'system_jobs.jobs', 'type': 'gauge'},
+    ],
+}
+
+CurrentIssuesMetrics = {
+    'name': 'current_issues',
+    'query': queries_impl.get_current_issues_metrics,
+    'columns': [
+        {'name': 'issue_type', 'type': 'tag'},
+        {'name': 'current_issues.issues', 'type': 'gauge'},
+        {'name': 'current_issues.critical_issues', 'type': 'gauge'},
+    ],
+}
+
+VersionMetadata = {
+    'name': 'version_metadata',
+    'query': queries_impl.get_version_metadata,
+    'columns': [
+        {'name': 'version', 'type': 'metadata'},
+    ],
+}
