@@ -119,10 +119,34 @@ class GlusterfsCheck(AgentCheck):
         else:
             self.log.warning("No data from gstatus")
 
+    @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
-        if GLUSTER_VERSION in data:
-            version = data[GLUSTER_VERSION]
-            self.set_metadata('version', version)
+        try:
+            raw_version = data[GLUSTER_VERSION]
+        except KeyError as e:
+            self.log.debug("Could not retrieve GlusterFS version: %s", str(e))
+
+        if raw_version:
+            version_parts = self.parse_version(raw_version)
+
+            self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
+            self.log.debug('Found GlusterFS version: %s', raw_version)
+        else:
+            self.log.warning('Could not retrieve GlusterFS version info: %s', raw_version)
+
+    def parse_version(self, version):
+        """
+        Raw version string is in format MM.mm.uuuu.
+        Parse version to MM.mm.xx.yy
+        where xx is the modification number and yy is the fix pack number
+        https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.wn.doc/doc/c0070229.html#c0070229
+        """
+        major, minor = version.split('.')
+
+        return {
+            'major': str(int(major)),
+            'minor': str(int(minor))
+        }
 
     def parse_volume_summary(self, output):
         for volume in output:
