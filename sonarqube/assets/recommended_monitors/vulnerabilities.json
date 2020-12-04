@@ -20,5 +20,8 @@
 			"critical": 0
 		}
 	},
-	"priority": 2
+	"priority": 2,
+	"recommended_monitor_metadata": {
+		"description": "Resolve potential vulnerabilities."
+	}
 }
