@@ -1,5 +1,4 @@
 {
-	"id": 0,
 	"name": "[SonarQube] Vulnerabilities",
 	"type": "metric alert",
 	"query": "max(last_5m):avg:sonarqube.security.vulnerabilities{*} > 0",
