@@ -216,7 +216,7 @@ class MySQLStatementSamples(object):
                 self.log.debug('failed to enable performance_schema consumer %s: %s', name, e)
         return False
 
-    def _get_plan_collection_strategy(self, db):
+    def _get_sample_collection_strategy(self, db):
         """
         Decides on the plan collection strategy:
         - which events_statement_history-* table are we using
@@ -302,7 +302,7 @@ class MySQLStatementSamples(object):
             events_statements_table,
             collect_exec_plans_time_limit,
             collect_exec_plans_rate_limit,
-        ) = self._get_plan_collection_strategy(db)
+        ) = self._get_sample_collection_strategy(db)
 
         if not events_statements_table:
             return
