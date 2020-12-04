@@ -49,6 +49,12 @@ class SnowflakeCheck(AgentCheck):
         if self.config.password:
             self.register_secret(self.config.password)
 
+        if self.config.role == 'ACCOUNTADMIN':
+            self.log.info(
+                'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
+                'refer to docs about custom roles.'
+            )
+
         self.metric_queries = []
         self.errors = []
         for mgroup in self.config.metric_groups:
@@ -150,9 +156,11 @@ class SnowflakeCheck(AgentCheck):
             try:
                 return method(*args, **kwargs)
             except Exception as e:
-                self.log.error(
-                    "Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e)
-                )
+                msg = "Encountered error while attempting to connect to Snowflake "
+                if proxies:
+                    self.log.error("%s via proxy settings: %s", msg, str(e))
+                else:
+                    self.log.error("%s: %s", msg, str(e))
                 return
 
         return _request_exec

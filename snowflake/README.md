@@ -27,12 +27,45 @@ datadog-agent integration install datadog-snowflake==2.0.1
 </div>
 
 ### Configuration
+1. Create a Datadog specific role and user to monitor Snowflake. In Snowflake, run the following to create a custom role with access to the ACCOUNT_USAGE schema.
+
+    <div class="alert alert-warning">Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
+    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
+    
+    Snowflake recommends granting permissions to an alternate role like `SYSADMIN`.
+    Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.
+    </div>
+    ```text
+    use role ACCOUNTADMIN;
+    grant imported privileges on database snowflake to role SYSADMIN;
+    
+    use role SYSADMIN;
+    ```
+    
+    Alternatively, you can create a `DATADOG` custom role with access to `ACCOUNT_USAGE`.
+    
+    ```text
+    -- Create a new role intended to monitor Snowflake usage.
+    create role DATADOG;
+   
+    -- Grant privileges on the SNOWFLAKE database to the new role.
+    grant imported privileges on database SNOWFLAKE to role DATADOG;
+
+    -- Create a user, skip this step if you are using an existing user.
+    create user DATADOG_USER
+    LOGIN_NAME = DATADOG_USER
+    password = '<PASSWORD>'
+    default_warehouse = <WAREHOUSE>
+    default_role = DATADOG
+    default_namespace = SNOWFLAKE.ACCOUNT_USAGE;
+   
+    -- Grant the monitor role to the user.
+    grant role DATADOG to user <USER>;
+    ```
+   
 
 1. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
 
-    **Note**: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
-    This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
-    
     ```yaml
         ## @param account - string - required
         ## Name of your account (provided by Snowflake), including the platform and region if applicable.
@@ -51,6 +84,15 @@ datadog-agent integration install datadog-snowflake==2.0.1
         #
         password: <PASSWORD>
    
+        ## @param role - string - required
+        ## Name of the role to use.
+        ##
+        ## By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. Snowflake recommends
+        ## configuring a role specific for monitoring:
+        ## https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+        #
+        role: <ROLE>
+   
         ## @param min_collection_interval - number - optional - default: 3600
         ## This changes the collection interval of the check. For more information, see:
         ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
@@ -58,7 +100,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
         ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
         ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
         #
-        # min_collection_interval: 3600
+        min_collection_interval: 3600
     ```
 
     <div class="alert alert-info">By default, the <code>min_collection_interval</code> is 1 hour. 
