@@ -178,7 +178,7 @@ class GlusterfsCheck(AgentCheck):
                     tags.extend(self._tags)
                     self.submit_metric(brick, 'brick', BRICK_STATS, tags)
 
-            self.submit_service_check(self.BRICK_SC, subvol['health'], tags)
+            self.submit_service_check(self.BRICK_SC, subvol['health'], volume_tags)
 
     def submit_metric(self, payload, prefix, metric_mapping, tags):
         """
@@ -207,4 +207,4 @@ class GlusterfsCheck(AgentCheck):
         elif status == 'partial':
             self.service_check(sc_name, AgentCheck.WARNING, tags=tags, message=msg)
         else:
-            self.submit_service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
+            self.service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)

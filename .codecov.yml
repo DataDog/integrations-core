@@ -171,6 +171,10 @@ coverage:
         target: 75
         flags:
         - gitlab_runner
+      GlusterFS:
+        target: 75
+        flags:
+        - glusterfs
       Go-Expvar:
         target: 75
         flags:
@@ -739,6 +743,11 @@ flags:
     paths:
     - gitlab_runner/datadog_checks/gitlab_runner
     - gitlab_runner/tests
+  glusterfs:
+    carryforward: true
+    paths:
+    - glusterfs/datadog_checks/glusterfs
+    - glusterfs/tests
   go_expvar:
     carryforward: true
     paths:
