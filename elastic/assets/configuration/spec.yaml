@@ -74,6 +74,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: gc_collectors_as_rate
+      description: |
+        Submit `jvm.gc.collectors` metrics as rate.
+        Note: Only for ES versions 0.9.10 or higher.
+      value:
+        type: boolean
+        example: false
     - template: instances/default
     - template: instances/http
   - template: logs
