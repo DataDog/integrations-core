@@ -3,7 +3,9 @@
 	"type": "metric alert",
 	"query": "max(last_5m):avg:sonarqube.security.vulnerabilities{*} > 0",
 	"message": "At least one vulnerability has been detected.",
-	"tags": [],
+	"tags": [
+		"integration:sonarqube"
+	],
 	"options": {
 		"notify_audit": true,
 		"locked": false,
