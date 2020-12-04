@@ -23,7 +23,7 @@ files:
       value:
         type: string
     - name: port
-      description: Port to use when connecting to "url".
+      description: Port to use when connecting to `url`.
       value:
         type: integer
         default: 11211
@@ -38,8 +38,8 @@ files:
         type: string
     - name: options
       description: |
-        Set "items" to true if you wish to collect items Mcache stats.
-        Set "slabs" to true if you wish to collect slabs Mcache stats.
+        Set `items` to true if you wish to collect items Mcache stats.
+        Set `slabs` to true if you wish to collect slabs Mcache stats.
       value:
         type: object
         example:
@@ -67,7 +67,7 @@ files:
         type: string
         example: "%%host%%"
     - name: port
-      description: Port to use when connecting to "url".
+      description: Port to use when connecting to `url`.
       value:
         type: integer
         default: 11211
