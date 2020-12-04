@@ -1,0 +1,74 @@
+name: Memcached
+files:
+- name: mcache.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: url
+      description: |
+        Url used to connect to the memcached instance.
+
+        Either `url` or `socket` configuration must be provided. If both are provided, `socket` is used.
+      value:
+        type: string
+        example: localhost
+    - name: socket
+      description: |
+        The socket to use. 'dd-agent' user must have read/write permission.
+
+        Either `url` or `socket` configuration must be provided. If both are provided, `socket` is used.
+      value:
+        type: string
+    - name: port
+      description: Port to use when connecting to "url".
+      value:
+        type: integer
+        default: 11211
+        example: 11211
+    - name: username
+      description: Username for the Mcache status endpoint authentication.
+      value:
+        type: string
+    - name: password
+      description: Password for the Mcache status endpoint authentication.
+      value:
+        type: string
+    - name: options
+      description: |
+        Set "items" to true if you wish to collect items Mcache stats.
+        Set "slabs" to true if you wish to collect slabs Mcache stats.
+      value:
+        type: object
+        example:
+          items: false
+          slabs: false
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/memcached.log
+      source: memcached
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example: [memcached]
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: url
+      description: Url used to connect to the memcached instance.
+      required: true
+      value:
+        type: string
+        example: "%%host%%"
+    - name: port
+      description: Port to use when connecting to "url".
+      value:
+        type: integer
+        default: 11211
+        example: 11211
