@@ -1,0 +1,694 @@
+{
+    "title": "IIS - Overview",
+    "description": "This dashboard provides a high-level view of your IIS sites' status, plus breakdowns of requests and detailed views into network metrics. Further reading on IIS monitoring:\n\n- [Datadog's IIS integration docs](https://docs.datadoghq.com/integrations/iis/)\n\n- [Key IIS metrics to monitor](https://www.datadoghq.com/blog/iis-metrics/)\n\n- [Collecting metrics with IIS monitoring tools](https://www.datadoghq.com/blog/iis-monitoring-tools/)\n\n- [IIS monitoring with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.users.anon{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Anonymous",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 51,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "note",
+                "content": "Requests per second",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 98,
+                "y": 0,
+                "width": 95,
+                "height": 6
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.requests.cgi{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "CGI",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 13,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.requests.isapi{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "ISAPI",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 29,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.httpd_request_method.get{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "GET",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 146,
+                "y": 29,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "note",
+                "content": "...by interface",
+                "background_color": "blue",
+                "font_size": "16",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 98,
+                "y": 7,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "note",
+                "content": "...by HTTP method",
+                "background_color": "blue",
+                "font_size": "16",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 146,
+                "y": 7,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "note",
+                "content": "...by user type",
+                "background_color": "blue",
+                "font_size": "16",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 98,
+                "y": 45,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.httpd_request_method.put{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "PUT",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 146,
+                "y": 45,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.httpd_request_method.post{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "POST",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 146,
+                "y": 61,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.httpd_request_method.delete{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "DELETE",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 146,
+                "y": 77,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.users.nonanon{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Non-anonymous",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 67,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.net.num_connections{$scope,!site:total} by {site}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Current active connections by site",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 23,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.net.bytes_sent{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Bytes sent by site",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 39,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.net.bytes_rcvd{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Bytes received by site",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 55,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:iis.net.num_connections{$scope}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Current total number of active connections",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "10m"
+                },
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 49,
+                "y": 7,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:iis.httpd_request_method.put{$scope}+sum:iis.httpd_request_method.get{$scope}+sum:iis.httpd_request_method.post{$scope}+sum:iis.httpd_request_method.delete{$scope}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Current requests volume (all methods)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "10m"
+                },
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 146,
+                "y": 13,
+                "width": 46,
+                "height": 15
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "check_status",
+                "title": "Sites up",
+                "title_size": "16",
+                "title_align": "center",
+                "check": "iis.site_up",
+                "grouping": "cluster",
+                "group": "$scope",
+                "group_by": [],
+                "tags": ["$scope"]
+            },
+            "layout": {
+                "x": 24,
+                "y": 0,
+                "width": 23,
+                "height": 12
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "note",
+                "content": "Network traffic",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 49,
+                "y": 0,
+                "width": 47,
+                "height": 6
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/saas_logos/small/iis@2x.png",
+                "sizing": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 22,
+                "height": 12
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:iis.uptime{$scope,!site:total} by {site}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "IIS sites by uptime",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "10m"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 47,
+                "height": 23
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.errors.not_found{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "404 (Not found) responses by site",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 81,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.net.files_sent{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Files sent by site",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 71,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:iis.net.files_rcvd{$scope,!site:total} by {site}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Files received by site",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 87,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 24,
+            "definition": {
+                "type": "note",
+                "content": "This chart assumes that you have edited the configuration file for the IIS integration to collect metrics per site. Find out how in our [documentation](https://docs.datadoghq.com/integrations/iis/#metric-collection).",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top"
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 47,
+                "height": 6
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 243
+}
