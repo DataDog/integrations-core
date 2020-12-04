@@ -5,7 +5,7 @@ import json
 import os
 from typing import Any
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
@@ -78,7 +78,7 @@ class GlusterfsCheck(AgentCheck):
             elif os.path.exists(INSTALL_PATH):
                 self.gstatus_cmd = INSTALL_PATH
             else:
-                raise Exception(
+                raise ConfigurationError(
                     'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
                 )
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
