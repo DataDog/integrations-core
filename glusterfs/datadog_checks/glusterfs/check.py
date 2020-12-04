@@ -136,10 +136,7 @@ class GlusterfsCheck(AgentCheck):
 
     def parse_version(self, version):
         """
-        Raw version string is in format MM.mm.uuuu.
-        Parse version to MM.mm.xx.yy
-        where xx is the modification number and yy is the fix pack number
-        https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.wn.doc/doc/c0070229.html#c0070229
+        GlusterFS versions are in format <major>.<minor>
         """
         major, minor = version.split('.')
 
