@@ -439,7 +439,7 @@ metrics:
 
 ##### Forced metric type: Flag Stream
 
-When the value are flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flags as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
+When the value is a flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flags as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
 
 - `options.placement`: position of the flag in the flag stream.
 - `options.metric_suffix`: suffix appended to the metric name for this flag, usually matching the name of the flag. 
@@ -467,6 +467,8 @@ metrics:
 ```
 
 This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and `snmp.upsBasicStateOutputState.ReplaceBattery` with value `0` or `1`.
+
+[Example of flag_stream usage in a profile](https://github.com/DataDog/integrations-core/blob/e64e2d18529c6c106f02435c5fdf2621667c16ad/snmp/datadog_checks/snmp/data/profiles/apc_ups.yaml#L60-L127).
 
 ### `metric_tags`
 
