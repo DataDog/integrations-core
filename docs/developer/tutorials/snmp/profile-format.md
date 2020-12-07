@@ -442,7 +442,7 @@ metrics:
 When the value is a flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
 
 - `options.placement`: position of the flag in the flag stream (1-based indexing, first element is placement 1).
-- `options.metric_suffix`: suffix appended to the metric name for this flag, usually matching the name of the flag. 
+- `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag. 
 
 Example:
 
