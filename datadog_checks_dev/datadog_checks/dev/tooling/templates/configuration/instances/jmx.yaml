@@ -104,6 +104,12 @@
     will give up on that connection and retry.
   value:
     example: 15000
-    type: number
+    type: number 
+
+- name: collect_default_jvm_metrics
+  description: Allows disabling the collection of default JVM metrics
+  value:
+    example: false
+    type: boolean
 
 - template: instances/default
