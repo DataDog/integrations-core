@@ -370,14 +370,14 @@ Sometimes the inferred type may not be what you want. Typically, OIDs that repre
 
 For such cases, you can define a `forced_type`. Possible values and their effect are listed below.
 
-| Forced type                | Description                                                                                         |
-| -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `gauge`                    | Submit as a gauge.                                                                                  |
-| `rate`                     | Submit as a rate.                                                                                   |
-| `percent`                  | Multiply by 100 and submit as a rate.                                                               |
-| `monotonic_count`          | Submit as a monotonic count.                                                                        |
-| `monotonic_count_and_rate` | Submit 2 copies of the metric: one as a monotonic count, and one as a rate (suffixed with `.rate`). |
-| `flag_stream`              | Submit each flags like `010101` as individual metric with value `0` or `1`. See Flag Stream section.|
+| Forced type                | Description                                                                                           |
+| -------------------------- | ------------------------------------------------------------------------------------------------------|
+| `gauge`                    | Submit as a gauge.                                                                                    |
+| `rate`                     | Submit as a rate.                                                                                     |
+| `percent`                  | Multiply by 100 and submit as a rate.                                                                 |
+| `monotonic_count`          | Submit as a monotonic count.                                                                          |
+| `monotonic_count_and_rate` | Submit 2 copies of the metric: one as a monotonic count, and one as a rate (suffixed with `.rate`).   |
+| `flag_stream`              | Submit each flag of a flag stream as individual metric with value `0` or `1`. See Flag Stream section.|
 
 This works on both symbol and table metrics:
 
