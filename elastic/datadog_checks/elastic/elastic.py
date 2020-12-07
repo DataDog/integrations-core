@@ -72,7 +72,7 @@ class ESCheck(AgentCheck):
         # Load stats data.
         # This must happen before other URL processing as the cluster name
         # is retrieved here, and added to the tag list.
-        stats_url = self._join_url(self.config.url, stats_url, admin_forwarder)
+        stats_url = self._join_url(stats_url, admin_forwarder)
         stats_data = self._get_data(stats_url)
         if stats_data.get('cluster_name'):
             # retrieve the cluster name from the data, and append it to the
@@ -86,7 +86,7 @@ class ESCheck(AgentCheck):
         # Note: this is a cluster-wide query, might TO.
         if self.config.pshard_stats:
             send_sc = bubble_ex = not self.config.pshard_graceful_to
-            pshard_stats_url = self._join_url(self.config.url, pshard_stats_url, admin_forwarder)
+            pshard_stats_url = self._join_url(pshard_stats_url, admin_forwarder)
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
                 self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics)
@@ -96,13 +96,13 @@ class ESCheck(AgentCheck):
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
 
         # Load the health data.
-        health_url = self._join_url(self.config.url, health_url, admin_forwarder)
+        health_url = self._join_url(health_url, admin_forwarder)
         health_data = self._get_data(health_url)
         self._process_health_data(health_data, version)
 
         if self.config.pending_task_stats:
             # Load the pending_tasks data.
-            pending_tasks_url = self._join_url(self.config.url, pending_tasks_url, admin_forwarder)
+            pending_tasks_url = self._join_url(pending_tasks_url, admin_forwarder)
             pending_tasks_data = self._get_data(pending_tasks_url)
             self._process_pending_tasks_data(pending_tasks_data)
 
@@ -136,19 +136,19 @@ class ESCheck(AgentCheck):
         self.log.debug("Elasticsearch version is %s", version)
         return version
 
-    def _join_url(self, base, url, admin_forwarder=False):
+    def _join_url(self, url, admin_forwarder=False):
         """
         overrides `urlparse.urljoin` since it removes base url path
         https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
         """
         if admin_forwarder:
-            return base + url
+            return self.config.url + url
         else:
-            return urljoin(base, url)
+            return urljoin(self.config.url, url)
 
     def _get_index_metrics(self, admin_forwarder, version):
         cat_url = '/_cat/indices?format=json&bytes=b'
-        index_url = self._join_url(self.config.url, cat_url, admin_forwarder)
+        index_url = self._join_url(cat_url, admin_forwarder)
         index_resp = self._get_data(index_url)
         index_stats_metrics = index_stats_for_version(version)
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
