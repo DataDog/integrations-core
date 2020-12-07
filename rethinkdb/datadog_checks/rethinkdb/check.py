@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import importlib
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, List, Optional, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, cast
 
 import rethinkdb
 
@@ -54,12 +55,20 @@ class RethinkDBCheck(AgentCheck):
             queries=manager_queries,
             tags=self.config.tags,
         )
+        self._query_funcs = {}  # type: Dict[str, Callable]
 
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def _execute_raw_query(self, query):
-        # type: (Callable[[rethinkdb.net.Connection], List[tuple]]) -> List[tuple]
-        query_func = query
+        # type: (str) -> List[tuple]
+        # TODO: change this once datadog_checks_base.utils.db supports `'query': <callable>`
+        if query not in self._query_funcs:
+            module_name, _, func_name = query.partition(':')
+            module = importlib.import_module(module_name, package='datadog_checks.rethinkdb')
+            query_func = getattr(module, func_name)
+            self._query_funcs[query] = query_func
+
+        query_func = self._query_funcs[query]
         return query_func(self._conn)
 
     @contextmanager

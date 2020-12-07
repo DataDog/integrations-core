@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from . import queries_impl
 
 ClusterMetrics = {
     'name': 'cluster',
-    'query': queries_impl.get_cluster_metrics,
+    'query': '.queries_impl:get_cluster_metrics',
     'columns': [
         {'name': 'config.servers', 'type': 'gauge'},
         {'name': 'config.databases', 'type': 'gauge'},
@@ -17,7 +16,7 @@ ClusterMetrics = {
 
 ServerMetrics = {
     'name': 'server',
-    'query': queries_impl.get_server_metrics,
+    'query': '.queries_impl:get_server_metrics',
     'columns': [
         {'name': 'server', 'type': 'tag'},
         {'name': 'stats.server.query_engine.client_connections', 'type': 'gauge'},
@@ -36,7 +35,7 @@ ServerMetrics = {
 
 DatabaseMetrics = {
     'name': 'database',
-    'query': queries_impl.get_database_metrics,
+    'query': '.queries_impl:get_database_metrics',
     'columns': [
         {'name': 'database', 'type': 'tag'},
         {'name': 'config.tables_per_database', 'type': 'gauge'},
@@ -45,7 +44,7 @@ DatabaseMetrics = {
 
 DatabaseTableMetrics = {
     'name': 'database_table',
-    'query': queries_impl.get_database_table_metrics,
+    'query': '.queries_impl:get_database_table_metrics',
     'columns': [
         {'name': 'database', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
@@ -77,7 +76,7 @@ DatabaseTableMetrics = {
 
 TableMetrics = {
     'name': 'table',
-    'query': queries_impl.get_table_metrics,
+    'query': '.queries_impl:get_table_metrics',
     'columns': [
         {'name': 'table', 'type': 'tag'},
         {'name': 'config.secondary_indexes_per_table', 'type': 'gauge'},
@@ -86,7 +85,7 @@ TableMetrics = {
 
 ReplicaMetrics = {
     'name': 'replica',
-    'query': queries_impl.get_replica_metrics,
+    'query': '.queries_impl:get_replica_metrics',
     'columns': [
         {'name': 'table', 'type': 'tag'},
         {'name': 'database', 'type': 'tag'},
@@ -110,7 +109,7 @@ ReplicaMetrics = {
 
 ShardMetrics = {
     'name': 'shard',
-    'query': queries_impl.get_shard_metrics,
+    'query': '.queries_impl:get_shard_metrics',
     'columns': [
         {'name': 'shard', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
@@ -122,7 +121,7 @@ ShardMetrics = {
 
 JobMetrics = {
     'name': 'job',
-    'query': queries_impl.get_job_metrics,
+    'query': '.queries_impl:get_job_metrics',
     'columns': [
         {'name': 'job_type', 'type': 'tag'},
         {'name': 'system_jobs.jobs', 'type': 'gauge'},
@@ -131,7 +130,7 @@ JobMetrics = {
 
 CurrentIssuesMetrics = {
     'name': 'current_issues',
-    'query': queries_impl.get_current_issues_metrics,
+    'query': '.queries_impl:get_current_issues_metrics',
     'columns': [
         {'name': 'issue_type', 'type': 'tag'},
         {'name': 'current_issues.issues', 'type': 'gauge'},
@@ -141,7 +140,7 @@ CurrentIssuesMetrics = {
 
 VersionMetadata = {
     'name': 'version_metadata',
-    'query': queries_impl.get_version_metadata,
+    'query': '.queries_impl:get_version_metadata',
     'columns': [
         {'name': 'version', 'type': 'metadata'},
     ],
