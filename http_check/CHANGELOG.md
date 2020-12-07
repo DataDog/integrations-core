@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 4.12.0 / 2020-10-31
+## 4.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add support for OPTIONS method. See [#7894](https://github.com/DataDog/integrations-core/pull/7894).
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

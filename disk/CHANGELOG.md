@@ -1,6 +1,6 @@
 # CHANGELOG - disk
 
-## 4.0.0 / 2020-10-31
+## 4.0.0 / 2020-10-31 / Agent 7.24.0
 
 * [Changed] Rename whitelist/blacklist to include/exclude. See [#7627](https://github.com/DataDog/integrations-core/pull/7627).
 

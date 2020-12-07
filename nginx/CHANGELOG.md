@@ -4,7 +4,7 @@
 
 * [Fixed] Fix version metadata collection. See [#7972](https://github.com/DataDog/integrations-core/pull/7972).
 
-## 3.10.0 / 2020-10-31
+## 3.10.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

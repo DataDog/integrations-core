@@ -1,6 +1,6 @@
 # CHANGELOG - twemproxy
 
-## 1.8.0 / 2020-10-31
+## 1.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7709](https://github.com/DataDog/integrations-core/pull/7709).
 

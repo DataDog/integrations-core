@@ -28,7 +28,7 @@ class Config(object):
         account = instance.get('account')
         user = instance.get('user')
         password = instance.get('password')
-        role = instance.get('role', 'ACCOUNTADMIN')
+        role = instance.get('role')
         database = instance.get('database', 'SNOWFLAKE')
         schema = instance.get('schema', 'ACCOUNT_USAGE')
         warehouse = instance.get('warehouse')
@@ -61,6 +61,9 @@ class Config(object):
 
         if authenticator == 'oauth' and token is None:
             raise ConfigurationError('If using OAuth, you must specify a token')
+
+        if role is None:
+            raise ConfigurationError('Must specify a role')
 
         self.account = account  # type: str
         self.user = user  # type: str

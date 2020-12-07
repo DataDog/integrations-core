@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## 15.6.1 / 2020-11-10
+## 15.6.1 / 2020-11-10 / Agent 7.24.0
 
 * [Fixed] Change DB utils behavior when a truncated row is found to only drop the row. See [#7983](https://github.com/DataDog/integrations-core/pull/7983).
 

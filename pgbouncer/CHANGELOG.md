@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 1.12.0 / 2020-10-31
+## 1.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 

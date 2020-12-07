@@ -134,23 +134,23 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
            match_type: "regex"
            name: "consul.http.request"
            tags:
-             http_method: "$1"
+             method: "$1"
              path: "$2"
          - match: 'consul\.raft\.replication\.appendEntries\.logs\.([0-9a-f-]+)'
            match_type: "regex"
            name: "consul.raft.replication.appendEntries.logs"
            tags:
-             consul_node_id: "$1"
+             peer_id: "$1"
          - match: 'consul\.raft\.replication\.appendEntries\.rpc\.([0-9a-f-]+)'
            match_type: "regex"
            name: "consul.raft.replication.appendEntries.rpc"
            tags:
-             consul_node_id: "$1"
+             peer_id: "$1"
          - match: 'consul\.raft\.replication\.heartbeat\.([0-9a-f-]+)'
            match_type: "regex"
            name: "consul.raft.replication.heartbeat"
            tags:
-             consul_node_id: "$1"
+             peer_id: "$1"
    ```
 
 3. [Restart the Agent][6].

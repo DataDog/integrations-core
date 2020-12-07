@@ -60,8 +60,8 @@ class DockerInterface(object):
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
-        # If we use a default build, and it's missing the py suffix, adds it
-        if default_agent and self.agent_build and 'py' not in self.agent_build:
+        # If we use a default non-RC build, and it's missing the py suffix, adds it
+        if default_agent and self.agent_build and 'rc' not in self.agent_build and 'py' not in self.agent_build:
             # Agent 6 image no longer supports -pyX
             if self.agent_build != 'datadog/agent:6':
                 self.agent_build = f'{self.agent_build}-py{self.python_version}'
@@ -108,6 +108,7 @@ class DockerInterface(object):
         delay=None,
         log_level=None,
         as_json=False,
+        as_table=False,
         break_point=None,
         jmx_list=None,
     ):
@@ -133,6 +134,9 @@ class DockerInterface(object):
 
             if as_json:
                 command += f' --json {as_json}'
+
+            if as_table:
+                command += ' --table'
 
             if break_point is not None:
                 command += f' --breakpoint {break_point}'

@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 2.1.0 / 2020-11-10
+## 2.1.0 / 2020-11-10 / Agent 7.24.0
 
 * [Added] Add mongodb.connection_pool.totalinuse. See [#7986](https://github.com/DataDog/integrations-core/pull/7986).
 * [Fixed] Ignore startup nodes for lagtime. See [#7990](https://github.com/DataDog/integrations-core/pull/7990).

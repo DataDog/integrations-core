@@ -18,7 +18,21 @@ The Haproxy check is included in the [Datadog Agent][2] package, so you don't ne
 
 #### Prepare HAProxy
 
-##### Versions < 2
+##### Using Prometheus
+
+The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][17], or alternatively set up the legacy socket-based integration described in the next section.
+
+1. Configure your `haproxy.conf` using the [official guide][16].
+
+2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
+
+3. [Restart HAProxy to enable the Prometheus endpoint][3].
+
+4. [Restart the Agent][6].
+
+##### Using the stats endpoint
+
+**Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
 
 The Agent collects metrics via a stats endpoint:
 
@@ -36,16 +50,6 @@ The Agent collects metrics via a stats endpoint:
    ```
 
 2. [Restart HAProxy to enable the stats endpoint][3].
-
-##### Versions >= 2
-
-The check supports a newer implementation starting with HAProxy version 2 that is based on a Prometheus endpoint:
-
-1. Configure your `haproxy.conf` using the [official guide][16].
-
-2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
-
-3. [Restart HAProxy to enable the stats endpoint][3].
 
 ### Configuration
 
@@ -198,3 +202,4 @@ Need help? Contact [Datadog support][11].
 [14]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
 [15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
 [16]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
+[17]: https://github.com/prometheus/haproxy_exporter

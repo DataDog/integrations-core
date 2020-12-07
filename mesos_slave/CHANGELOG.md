@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_slave
 
-## 2.7.0 / 2020-11-06
+## 2.7.0 / 2020-11-06 / Agent 7.24.0
 
 * [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
 

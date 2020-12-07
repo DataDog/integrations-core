@@ -1,6 +1,6 @@
 # CHANGELOG - vsphere
 
-## 5.7.1 / 2020-10-31
+## 5.7.1 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Re-add empty_default_hostname to configuration by default. See [#7732](https://github.com/DataDog/integrations-core/pull/7732).
 

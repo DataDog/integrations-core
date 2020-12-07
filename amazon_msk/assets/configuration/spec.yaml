@@ -19,6 +19,13 @@ files:
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
       value:
         type: string
+    - name: assume_role
+      description: |
+        The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
+        the default permissions used by boto3 will follow the rules according to:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+      value:
+        type: string
     - name: jmx_exporter_port
       description: The port on which the JMX Exporter serves metrics.
       value:

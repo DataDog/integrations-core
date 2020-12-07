@@ -4,7 +4,7 @@
 
 * [Fixed] Add debug log line for replication status. See [#8040](https://github.com/DataDog/integrations-core/pull/8040).
 
-## 2.1.1 / 2020-11-10
+## 2.1.1 / 2020-11-10 / Agent 7.24.0
 
 * [Fixed] Change `deep_database_monitoring` language from BETA to ALPHA. See [#7948](https://github.com/DataDog/integrations-core/pull/7948).
 * [Fixed] Fix configuration typo. See [#7911](https://github.com/DataDog/integrations-core/pull/7911).

@@ -1,6 +1,6 @@
 # CHANGELOG - riakcs
 
-## 2.4.0 / 2020-10-31
+## 2.4.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7753](https://github.com/DataDog/integrations-core/pull/7753).
 
