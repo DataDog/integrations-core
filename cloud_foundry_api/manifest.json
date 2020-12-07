@@ -20,7 +20,7 @@
     "orchestration"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "cloud-foundry-api",
   "assets": {
     "configuration": {

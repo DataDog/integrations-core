@@ -52,6 +52,7 @@ class ESCheck(AgentCheck):
     def check(self, instance):
         config = from_instance(instance)
         admin_forwarder = config.admin_forwarder
+        jvm_rate = instance.get('gc_collectors_as_rate', False)
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
@@ -62,7 +63,7 @@ class ESCheck(AgentCheck):
             raise
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version, config.cluster_stats)
-        stats_metrics = stats_for_version(version)
+        stats_metrics = stats_for_version(version, jvm_rate)
         if config.cluster_stats:
             # Include Node System metrics
             stats_metrics.update(node_system_stats_for_version(version))

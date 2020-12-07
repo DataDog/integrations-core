@@ -55,8 +55,8 @@ def get_tag_list(transformers, column_name, **modifiers):
     Tag name is determined by `column_name`. The column value represents a list of values. It is expected to be either
     a list of strings, or a comma-separated string.
 
-    For example, if the column is named `server_tag` and the column returned the value 'us,primary', then all
-    submissions for that row will be tagged by 'server_tag:us' and 'server_tag:primary'.
+    For example, if the column is named `server_tag` and the column returned the value `'us,primary'`, then all
+    submissions for that row will be tagged by `server_tag:us` and `server_tag:primary`.
     """
     template = '%s:{}' % column_name
 

@@ -19,7 +19,7 @@ from datadog_checks.elastic.metrics import (
     stats_for_version,
 )
 
-from .common import CLUSTER_TAG, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, JVM_RATES, PASSWORD, URL, USER
 
 log = logging.getLogger('test_elastic')
 
@@ -77,6 +77,16 @@ def test__get_urls(elastic_check):
 @pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(instance)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+
+
+@pytest.mark.integration
+def test_jvm_gc_rate_metrics(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
+    instance['gc_collectors_as_rate'] = True
+    elastic_check.check(instance)
+    for metric in JVM_RATES:
+        aggregator.assert_metric(metric, at_least=1, tags=node_tags)
+
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
 

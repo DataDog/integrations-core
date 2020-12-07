@@ -43,3 +43,8 @@ files:
               type: boolean
               example: false
           - template: instances/default
+      - template: logs
+        example:
+          - type: file
+            path: /opt/nagios/var/log/nagios.log
+            source: nagios

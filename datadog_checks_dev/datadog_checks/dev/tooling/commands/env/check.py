@@ -26,6 +26,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--log-level', '-l', help='Set the log level (default `off`)')
 @click.option('--json', 'as_json', is_flag=True, help='Format the aggregator and check runner output as JSON')
+@click.option('--table', 'as_table', is_flag=True, help='Format the aggregator and check runner output as tabular')
 @click.option(
     '--breakpoint',
     '-b',
@@ -35,7 +36,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--config', 'config_file', help='Path to a JSON check configuration to use')
 @click.option('--jmx-list', 'jmx_list', help='JMX metrics listing method')
-def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point, config_file, jmx_list):
+def check_run(check, env, rate, times, pause, delay, log_level, as_json, as_table, break_point, config_file, jmx_list):
     """Run an Agent check."""
     envs = get_configured_envs(check)
     if not envs:
@@ -64,6 +65,7 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
         delay=delay,
         log_level=log_level,
         as_json=as_json,
+        as_table=as_table,
         break_point=break_point,
         jmx_list=jmx_list,
     )
