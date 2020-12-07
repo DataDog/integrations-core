@@ -82,13 +82,14 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
 
 
 @pytest.mark.integration
-def test_jvm_gc_rate_metrics(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
+def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags, node_tags):
     instance['gc_collectors_as_rate'] = True
-    elastic_check.check(instance)
+    check = ESCheck('elastic', {}, instances=[instance])
+    check.check(instance)
     for metric in JVM_RATES:
         aggregator.assert_metric(metric, at_least=1, tags=node_tags)
 
-    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+    _test_check(check, instance, aggregator, cluster_tags, node_tags)
 
 
 def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
