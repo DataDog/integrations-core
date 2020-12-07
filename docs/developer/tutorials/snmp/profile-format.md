@@ -377,6 +377,7 @@ For such cases, you can define a `forced_type`. Possible values and their effect
 | `percent`                  | Multiply by 100 and submit as a rate.                                                               |
 | `monotonic_count`          | Submit as a monotonic count.                                                                        |
 | `monotonic_count_and_rate` | Submit 2 copies of the metric: one as a monotonic count, and one as a rate (suffixed with `.rate`). |
+| `flag_stream`              | Submit each flags like `010101` as individual metric with value `0` or `1`. See Flag Stream section.|
 
 This works on both symbol and table metrics:
 
@@ -435,6 +436,37 @@ metrics:
             name: ltmPoolStatConnqServiced
           # ...
     ```
+
+##### Forced metric type: Flag Stream
+
+When the value are flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flags as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
+
+- `options.placement`: position of the flag in the flag stream.
+- `options.metric_suffix`: suffix appended to the metric name for this flag, usually matching the name of the flag. 
+
+Example:
+
+```yaml
+metrics:
+  - MIB: PowerNet-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
+      name: upsBasicStateOutputState
+    forced_type: flag_stream
+    options:
+      placement: 4
+      metric_suffix: OnLine
+  - MIB: PowerNet-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
+      name: upsBasicStateOutputState
+    forced_type: flag_stream
+    options:
+      placement: 5
+      metric_suffix: ReplaceBattery
+```
+
+This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and `snmp.upsBasicStateOutputState.ReplaceBattery` with value `0` or `1`.
 
 ### `metric_tags`
 
