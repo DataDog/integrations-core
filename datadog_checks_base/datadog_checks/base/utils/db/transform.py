@@ -51,8 +51,10 @@ def get_tag(transformers, column_name, **modifiers):
 def get_tag_list(transformers, column_name, **modifiers):
     """
     Convert a column to a list of tags that will be used in every submission.
+
     Tag name is determined by `column_name`. The column value represents a list of values. It is expected to be either
     a list of strings, or a comma-separated string.
+
     For example, if the column is named `server_tag` and the column returned the value 'us,primary', then all
     submissions for that row will be tagged by 'server_tag:us' and 'server_tag:primary'.
     """
