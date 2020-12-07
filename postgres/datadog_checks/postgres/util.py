@@ -132,7 +132,6 @@ SELECT mode,
 
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-    # This field contains old metrics that need to be deprecated. For now we keep sending them.
     'metrics': {
         'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
         'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
