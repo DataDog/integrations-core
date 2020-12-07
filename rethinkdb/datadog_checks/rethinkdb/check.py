@@ -61,8 +61,10 @@ class RethinkDBCheck(AgentCheck):
 
     def _execute_raw_query(self, query):
         # type: (str) -> List[tuple]
-        # TODO: change this once datadog_checks_base.utils.db supports `'query': <callable>`
         if query not in self._query_funcs:
+            # QueryManager only supports `str` queries.
+            # So here's the workaround: we make `query` refer to the import paths of query functions, then import here.
+            # Cache the results so imports only happen on the first check run.
             module_name, _, func_name = query.partition(':')
             module = importlib.import_module(module_name, package='datadog_checks.rethinkdb')
             query_func = getattr(module, func_name)
