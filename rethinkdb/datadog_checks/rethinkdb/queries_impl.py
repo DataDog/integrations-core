@@ -70,7 +70,7 @@ def get_server_metrics(conn):
 
         row = (
             server['name'],
-            # TODO: include `server['tags']` (how?)
+            server['tags'],
             server_stats['query_engine']['client_connections'],
             server_stats['query_engine']['clients_active'],
             server_stats['query_engine']['queries_per_sec'],
@@ -198,6 +198,7 @@ def get_replica_metrics(conn):
             document['table']['name'],
             document['table']['db'],
             document['server']['name'],
+            document['server']['tags'],
             document['replica']['state'],
             document['stats']['query_engine']['read_docs_per_sec'],
             document['stats']['query_engine']['read_docs_total'],

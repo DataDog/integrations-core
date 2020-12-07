@@ -19,6 +19,7 @@ ServerMetrics = {
     'query': '.queries_impl:get_server_metrics',
     'columns': [
         {'name': 'server', 'type': 'tag'},
+        {'name': 'server_tag', 'type': 'tag_list'},
         {'name': 'stats.server.query_engine.client_connections', 'type': 'gauge'},
         {'name': 'stats.server.query_engine.clients_active', 'type': 'gauge'},
         {'name': 'stats.server.query_engine.queries_per_sec', 'type': 'gauge'},
@@ -90,6 +91,7 @@ ReplicaMetrics = {
         {'name': 'table', 'type': 'tag'},
         {'name': 'database', 'type': 'tag'},
         {'name': 'server', 'type': 'tag'},
+        {'name': 'server_tag', 'type': 'tag_list'},
         {'name': 'state', 'type': 'tag'},
         {'name': 'stats.table_server.query_engine.read_docs_per_sec', 'type': 'gauge'},
         {'name': 'stats.table_server.query_engine.read_docs_total', 'type': 'monotonic_count'},
