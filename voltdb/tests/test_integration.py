@@ -40,7 +40,7 @@ class TestCheck:
     def test_failure_connection_refused(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
-        instance['url'] = instance['url'].replace(common.HOST, 'doesnotexist')
+        instance['url'] = 'http://doesnotexist:8080'
 
         check = VoltDBCheck('voltdb', {}, [instance])
 
@@ -49,7 +49,8 @@ class TestCheck:
         error = str(ctx.value)
         assert error
 
-        assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL)
+        tags = ['host:doesnotexist', 'port:8080']
+        assertions.assert_service_checks(aggregator, instance, connect_status=VoltDBCheck.CRITICAL, tags=tags)
 
     def test_failure_unauthorized(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None

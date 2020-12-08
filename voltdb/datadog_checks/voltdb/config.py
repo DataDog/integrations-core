@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 
 import requests
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -32,7 +32,19 @@ class Config(object):
 
         auth = VoltDBAuth(username, password, password_hashed) if username and password else None
 
+        parsed_url = urlparse(url)
+
+        host = parsed_url.hostname
+        if not host:  # pragma: no cover  # Mostly just type safety.
+            raise ConfigurationError('URL must contain a host')
+
+        port = parsed_url.port
+        if not port:
+            port = 443 if parsed_url.scheme == 'https' else 79
+
         self._url = url
+        self._host = host
+        self._port = port
         self._auth = auth
         self.tags = tags
 
@@ -40,6 +52,11 @@ class Config(object):
     def api_url(self):
         # type: () -> str
         return urljoin(self._url, '/api/1.0/')
+
+    @property
+    def netloc(self):
+        # type: () -> Tuple[str, int]
+        return self._host, self._port
 
     @property
     def auth(self):

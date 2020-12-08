@@ -90,14 +90,18 @@ class VoltDBCheck(AgentCheck):
             return None
 
     def _check_can_connect_and_submit_version(self):
+        # type () -> None
+        host, port = self._config.netloc
+        tags = ['host:{}'.format(host), 'port:{}'.format(port)] + self._config.tags
+
         try:
             version = self._fetch_version()
         except Exception as exc:
             message = 'Unable to connect to VoltDB: {}'.format(exc)
-            self.service_check('can_connect', self.CRITICAL, message=message, tags=self._config.tags)
+            self.service_check('can_connect', self.CRITICAL, message=message, tags=tags)
             raise
 
-        self.service_check('can_connect', self.OK, tags=self._config.tags)
+        self.service_check('can_connect', self.OK, tags=tags)
 
         if version is not None:
             self.set_metadata('version', version)

@@ -10,6 +10,8 @@ from datadog_checks.dev import get_docker_hostname, get_here
 HERE = get_here()
 HOST = get_docker_hostname()
 
+COMMON_TAGS = ['test:voltdb']
+
 METRICS = [
     (
         # CPU
@@ -17,7 +19,6 @@ METRICS = [
             'voltdb.cpu.percent_used',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
         },
@@ -38,7 +39,6 @@ METRICS = [
             'voltdb.memory.tuple_data',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
         },
@@ -51,7 +51,6 @@ METRICS = [
             'voltdb.snapshot_status.throughput',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
             'table',
@@ -69,7 +68,6 @@ METRICS = [
             'voltdb.commandlog.segment_count',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
         },
@@ -93,7 +91,6 @@ METRICS = [
             'voltdb.procedure.successes',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
             'site_id',
@@ -116,7 +113,6 @@ METRICS = [
             'voltdb.latency.transactions_per_sec',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
         },
@@ -140,7 +136,6 @@ METRICS = [
             'voltdb.statement.successes',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
             'site_id',
@@ -158,7 +153,6 @@ METRICS = [
             'voltdb.gc.oldgen_gc_count',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
         },
@@ -172,7 +166,6 @@ METRICS = [
             'voltdb.io.messages_written',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
             'connection_hostname',
@@ -189,7 +182,6 @@ METRICS = [
             'voltdb.table.percent_full',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
             'site_id',
@@ -205,7 +197,6 @@ METRICS = [
             'voltdb.index.memory_estimate',
         ],
         {
-            'test',
             'voltdb_host_id',
             'voltdb_host',
             'site_id',
@@ -224,7 +215,6 @@ METRICS = [
             'voltdb.custom.heroes.avg_name_length',
         ],
         {
-            'test',
             'custom',
         },
     ),
@@ -246,6 +236,8 @@ VOLTDB_DEPLOYMENT = os.path.join(HERE, 'compose', 'deployment-tls.xml' if TLS_EN
 VOLTDB_SCHEME = 'https' if TLS_ENABLED else 'http'
 VOLTDB_CLIENT_PORT = 8443 if TLS_ENABLED else 8080
 VOLTDB_URL = '{}://{}:{}'.format(VOLTDB_SCHEME, HOST, VOLTDB_CLIENT_PORT)
+
+SERVICE_CHECK_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(VOLTDB_CLIENT_PORT)]
 
 VOLTDB_VERSION = os.environ['VOLTDB_VERSION']
 VOLTDB_IMAGE = os.environ['VOLTDB_IMAGE']
