@@ -26,13 +26,17 @@ log = logging.getLogger('test_elastic')
 
 
 @pytest.mark.unit
-def test__join_url(elastic_check):
-    adm_forwarder_joined_url = elastic_check._join_url(
-        "https://localhost:9444/elasticsearch-admin", "/stats", admin_forwarder=True
-    )
+def test__join_url():
+    instance = {
+        "url": "https://localhost:9444/elasticsearch-admin",
+        "admin_forwarder": True,
+    }
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    adm_forwarder_joined_url = check._join_url("/stats", admin_forwarder=True)
     assert adm_forwarder_joined_url == "https://localhost:9444/elasticsearch-admin/stats"
 
-    joined_url = elastic_check._join_url("https://localhost:9444/elasticsearch-admin", "/stats")
+    joined_url = check._join_url("/stats", admin_forwarder=False)
     assert joined_url == "https://localhost:9444/stats"
 
 
