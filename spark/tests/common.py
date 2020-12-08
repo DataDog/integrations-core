@@ -66,11 +66,16 @@ EXPECTED_E2E_METRICS = [
     'spark.executor.total_shuffle_read',
     'spark.executor.total_shuffle_write',
     'spark.executor.total_tasks',
-    'spark.structured_streaming.input_rate',
     'spark.structured_streaming.latency',
     'spark.structured_streaming.processing_rate',
     'spark.structured_streaming.rows_count',
     'spark.structured_streaming.used_bytes',
+]
+
+FLAKY_E2E_METRICS = [
+    'spark.structured_streaming.input_rate',
+    'spark.streaming.statistics.avg_input_rate',
+    'spark.streaming.statistics.avg_scheduling_delay',
 ]
 
 
