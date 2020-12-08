@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "glusterfs",
   "metric_prefix": "glusterfs.",
-  "metric_to_check": "glusterfs.nodes.count",
+  "metric_to_check": "glusterfs.cluster.nodes.count",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor GlusterFS cluster node, volume, and brick status metrics.",
   "guid": "1cb9a21c-8cc4-4727-a4b1-ab7015c7ae24",
   "support": "core",
   "supported_os": [
@@ -16,7 +16,7 @@
   ],
   "public_title": "Red Hat Gluster Storage",
   "categories": [
-    ""
+    "data store"
   ],
   "type": "check",
   "is_public": false,
@@ -29,6 +29,7 @@
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }
