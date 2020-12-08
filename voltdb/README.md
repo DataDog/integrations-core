@@ -51,12 +51,7 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
     openssl pkcs12 -in mydb.keystore -out /path/to/voltdb.cert
     ```
 
-    **Note**: passphrase-protected certificates are not supported. If your keystore is protected behind a passphrase, consider exporting a password-protected certificate, then removing its password:
-
-    ```bash
-    openssl pkcs12 -in mydb.keystore -password "pass:<PASSWORD>" -out /path/to/voltdb.cert -passout pass:temp
-    openssl rsa -in /path/to/voltdb.cert -passin pass:temp -out /path/to/voltdb.cert
-    ```
+    **Note**: passphrase-protected certificates are not supported.
 
 2. In your instance configuration, point `url` to the TLS-enabled client endpoint, and set the `tls_cert` option. For example:
 
