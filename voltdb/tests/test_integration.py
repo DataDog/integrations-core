@@ -100,10 +100,11 @@ class TestCheck:
         check.run()
 
         metrics_without_custom_tags = []
-        for metric_name in common.METRICS:
-            for metric in aggregator.metrics(metric_name):
-                if 'env:test' not in metric.tags:
-                    metrics_without_custom_tags.append(metric_name)
+        for metric_names, _ in common.METRICS:
+            for metric_name in metric_names:
+                for metric in aggregator.metrics(metric_name):
+                    if 'env:test' not in metric.tags:
+                        metrics_without_custom_tags.append(metric_name)
 
         assert not metrics_without_custom_tags
 

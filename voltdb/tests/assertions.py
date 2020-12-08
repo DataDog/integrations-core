@@ -17,7 +17,12 @@ def assert_service_checks(aggregator, instance, connect_status=AgentCheck.OK):
 
 def assert_metrics(aggregator):
     # type: (AggregatorStub) -> None
-    for metric in common.METRICS:
-        aggregator.assert_metric(metric)
+    for metric_names, tagnames in common.METRICS:
+        for metric_name in metric_names:
+            aggregator.assert_metric(metric_name)
+            for m in aggregator.metrics(metric_name):
+                metric_tagnames = {tag.split(':')[0] for tag in m.tags}
+                assert set(tagnames) <= set(metric_tagnames)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=common.METADATA_EXCLUDE_METRICS)

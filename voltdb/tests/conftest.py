@@ -53,9 +53,10 @@ def instance():
                     {'name': 'custom.heroes.count', 'type': 'gauge'},
                     {'name': 'custom.heroes.avg_name_length', 'type': 'gauge'},
                 ],
-                'tags': ['test:voltdb'],
+                'tags': ['custom:voltdb'],
             },
         ],
+        'tags': ['test:voltdb'],
     }  # type: Instance
 
     if common.TLS_ENABLED:
