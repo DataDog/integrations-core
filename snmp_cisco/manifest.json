@@ -1,0 +1,40 @@
+{
+  "display_name": "Cisco",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "snmp_cisco",
+  "metric_prefix": "snmp.",
+  "metric_to_check": [
+    "snmp.cefcFRUPowerAdminStatus",
+    "snmp.devClientCount"
+  ],
+  "creates_events": false,
+  "short_description": "Collect SNMP metrics from your Cisco network devices.",
+  "guid": "4109f288-7460-4ed2-b0c3-04e708fbd5bd",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Cisco Integration",
+  "categories": [ 
+    "monitoring", 
+    "notification", 
+    "network", 
+    "autodiscovery",
+    "snmp"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "snmp-cisco",
+  "assets": {
+    "configuration": {},
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": ""
+  }
+}

@@ -1,0 +1,3 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+snmp.cefcFRUPowerAdminStatus,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] Administratively desired FRU power state.,0,snmp,
+snmp.devClientCount,gauge,,,,[Cisco Meraki] The number of clients currently associated with the device.,0,snmp,
