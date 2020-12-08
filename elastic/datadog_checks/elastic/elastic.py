@@ -62,7 +62,7 @@ class ESCheck(AgentCheck):
             self.log.exception("The ElasticSearch credentials are incorrect")
             raise
 
-        health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version, self.config.cluster_stats)
+        health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version)
         stats_metrics = stats_for_version(version, jvm_rate)
         if self.config.cluster_stats:
             # Include Node System metrics
@@ -181,7 +181,7 @@ class ESCheck(AgentCheck):
                 desc = index_stats_metrics[metric]
                 self._process_metric(index_data, metric, *desc, tags=tags)
 
-    def _get_urls(self, version, cluster_stats):
+    def _get_urls(self, version):
         """
         Compute the URLs we need to hit depending on the running ES version
         """
@@ -190,14 +190,18 @@ class ESCheck(AgentCheck):
 
         if version >= [0, 90, 10]:
             pending_tasks_url = "/_cluster/pending_tasks"
-            stats_url = "/_nodes/stats" if cluster_stats else "/_nodes/_local/stats"
+            stats_url = "/_nodes/stats" if self.config.cluster_stats else "/_nodes/_local/stats"
             if version < [5, 0, 0]:
                 # version 5 errors out if the `all` parameter is set
                 stats_url += "?all=true"
         else:
             # legacy
             pending_tasks_url = None
-            stats_url = "/_cluster/nodes/stats?all=true" if cluster_stats else "/_cluster/nodes/_local/stats?all=true"
+            stats_url = (
+                "/_cluster/nodes/stats?all=true"
+                if self.config.cluster_stats
+                else "/_cluster/nodes/_local/stats?all=true"
+            )
 
         return health_url, stats_url, pshard_stats_url, pending_tasks_url
 

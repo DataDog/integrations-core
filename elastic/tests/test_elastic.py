@@ -41,40 +41,45 @@ def test__join_url():
 
 
 @pytest.mark.unit
-def test__get_urls(elastic_check):
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([], True)
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_cluster/nodes/stats?all=true'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url is None
+def test__get_urls():
+    instance = {'url': URL}
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([], False)
+    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([])
     assert health_url == '/_cluster/health'
     assert stats_url == '/_cluster/nodes/_local/stats?all=true'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url is None
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0], True)
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/stats?all=true'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url == '/_cluster/pending_tasks'
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0], False)
+    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0])
     assert health_url == '/_cluster/health'
     assert stats_url == '/_nodes/_local/stats?all=true'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0], True)
+    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/stats'
+    assert stats_url == '/_nodes/_local/stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0], False)
+    instance["cluster_stats"] = True
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/_local/stats'
+    assert stats_url == '/_cluster/nodes/stats?all=true'
+    assert pshard_stats_url == '/_stats'
+    assert pending_tasks_url is None
+
+    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0])
+    assert health_url == '/_cluster/health'
+    assert stats_url == '/_nodes/stats?all=true'
+    assert pshard_stats_url == '/_stats'
+    assert pending_tasks_url == '/_cluster/pending_tasks'
+
+    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0])
+    assert health_url == '/_cluster/health'
+    assert stats_url == '/_nodes/stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
 
