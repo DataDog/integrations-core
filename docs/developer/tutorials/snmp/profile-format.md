@@ -370,13 +370,14 @@ Sometimes the inferred type may not be what you want. Typically, OIDs that repre
 
 For such cases, you can define a `forced_type`. Possible values and their effect are listed below.
 
-| Forced type                | Description                                                                                         |
-| -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `gauge`                    | Submit as a gauge.                                                                                  |
-| `rate`                     | Submit as a rate.                                                                                   |
-| `percent`                  | Multiply by 100 and submit as a rate.                                                               |
-| `monotonic_count`          | Submit as a monotonic count.                                                                        |
+| Forced type                | Description                                                  |
+| -------------------------- | ------------------------------------------------------------ |
+| `gauge`                    | Submit as a gauge.                                           |
+| `rate`                     | Submit as a rate.                                            |
+| `percent`                  | Multiply by 100 and submit as a rate.                        |
+| `monotonic_count`          | Submit as a monotonic count.                                 |
 | `monotonic_count_and_rate` | Submit 2 copies of the metric: one as a monotonic count, and one as a rate (suffixed with `.rate`). |
+| `flag_stream`              | Submit each flag of a flag stream as individual metric with value `0` or `1`. See [Flag Stream section](#flag-stream). |
 
 This works on both symbol and table metrics:
 
@@ -435,6 +436,39 @@ metrics:
             name: ltmPoolStatConnqServiced
           # ...
     ```
+
+##### Flag stream
+
+When the value is a flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
+
+- `options.placement`: position of the flag in the flag stream (1-based indexing, first element is placement 1).
+- `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag. 
+
+Example:
+
+```yaml
+metrics:
+  - MIB: PowerNet-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
+      name: upsBasicStateOutputState
+    forced_type: flag_stream
+    options:
+      placement: 4
+      metric_suffix: OnLine
+  - MIB: PowerNet-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
+      name: upsBasicStateOutputState
+    forced_type: flag_stream
+    options:
+      placement: 5
+      metric_suffix: ReplaceBattery
+```
+
+This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and `snmp.upsBasicStateOutputState.ReplaceBattery` with value `0` or `1`.
+
+[Example of flag_stream usage in a profile](https://github.com/DataDog/integrations-core/blob/e64e2d18529c6c106f02435c5fdf2621667c16ad/snmp/datadog_checks/snmp/data/profiles/apc_ups.yaml#L60-L127).
 
 ### `metric_tags`
 
