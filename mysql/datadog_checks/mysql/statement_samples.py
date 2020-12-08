@@ -29,6 +29,7 @@ DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS = {
 
 
 class MySQLStatementSamples(object):
+
     """
     Mixin for collecting statement samples from query samples. Where defined, the user will attempt
     to use the stored procedure `explain_statement` which allows collection of statement samples

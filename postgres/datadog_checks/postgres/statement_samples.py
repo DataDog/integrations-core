@@ -11,6 +11,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog import statsd
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from datadog_checks.base.utils.db.sql import submit_statement_sample_events, compute_exec_plan_signature, compute_sql_signature
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter
@@ -32,13 +33,35 @@ pg_stat_activity_sample_keys = [
 
 
 class PostgresStatementSamples(object):
-    """Collects telemetry for SQL statements"""
+    # TODO: see what we should set max_workers to
+    executor = ThreadPoolExecutor()
 
-    def __init__(self, config):
-        self.config = config
+    """Collects telemetry for SQL statements"""
+    def __init__(self, postgres_check):
+        self.postgres_check = postgres_check
+        self.config = postgres_check.config
         self.log = get_check_logger()
-        self._rate_limiter = ConstantRateLimiter(config.collect_exec_plans_rate_limit)
+        self._rate_limiter = ConstantRateLimiter(self.config.collect_exec_plans_rate_limit)
         self._activity_last_query_start = None
+        self._last_check_run = None
+        self._stop_after_inactivity_seconds = 60
+        self._future = None
+        self._tags = None
+        # avoid reprocessing the exact same statement
+        self.seen_statements = set()
+        # keep only one sample per unique (query, plan)
+        self.seen_statement_plan_sigs = set()
+
+    def run_sampler(self, tags):
+        # update tags and last check run
+        # TODO: should these assignments be behind locks?
+        self._tags = tags
+        self._last_check_run = time.time()
+        if self._future is None:
+            self.log.info("starting postgres statement sampler")
+            self._future = PostgresStatementSamples.executor.submit(self.collection_loop)
+        else:
+            self.log.debug("postgres statement sampler already running")
 
     def _get_new_pg_stat_activity(self, db, instance_tags=None):
         start_time = time.time()
@@ -70,31 +93,38 @@ class PostgresStatementSamples(object):
         statsd.increment("dd.postgres.get_new_pg_stat_activity.total_rows", len(rows), tags=instance_tags)
         return rows
 
-    def collect_statement_samples(self, db, instance_tags):
-        start_time = time.time()
-        # avoid reprocessing the exact same statement
-        seen_statements = set()
-        # keep only one sample per unique (query, plan)
-        seen_statement_plan_sigs = set()
-        while time.time() - start_time < self.config.collect_exec_plans_time_limit:
-            if len(seen_statement_plan_sigs) > self.config.collect_exec_plans_event_limit:
+    def collection_loop(self):
+        while True:
+            self.log.info("START: collection_loop")
+            self.collect_statement_samples()
+            if time.time() - self._last_check_run > self._stop_after_inactivity_seconds:
+                self.log.info("sampler collection_loop stopping due to check inactivity")
                 break
-            self._rate_limiter.sleep()
-            samples = self._get_new_pg_stat_activity(db, instance_tags=instance_tags)
-            events = self._explain_new_pg_stat_activity(
-                db, samples, seen_statements, seen_statement_plan_sigs, instance_tags
-            )
-            if events:
-                submit_statement_sample_events(events, instance_tags, "postgres")
+            self.log.info("END: collection_loop")
 
-        statsd.gauge(
-            "dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000, tags=instance_tags
+    def collect_statement_samples(self):
+        start_time = time.time()
+        # TODO: age these out after some time
+        # while time.time() - start_time < self.config.collect_exec_plans_time_limit:
+        # if len(seen_statement_plan_sigs) > self.config.collect_exec_plans_event_limit:
+        #     break
+        self._rate_limiter.sleep()
+        samples = self._get_new_pg_stat_activity(self.postgres_check.db, instance_tags=self._tags)
+        events = self._explain_new_pg_stat_activity(
+            self.postgres_check.db, samples, self._tags
         )
-        statsd.gauge("dd.postgres.collect_execution_plans.seen_statements", len(seen_statements), tags=instance_tags)
+        if events:
+            submit_statement_sample_events(events, self._tags, "postgres")
+
+        self.log.debug("collected statement samples")
+        statsd.gauge(
+            "dd.postgres.collect_execution_plans.time", (time.time() - start_time) * 1000, tags=self._tags
+        )
+        statsd.gauge("dd.postgres.collect_execution_plans.seen_statements", len(self.seen_statements), tags=self._tags)
         statsd.gauge(
             "dd.postgres.collect_execution_plans.seen_statement_plan_sigs",
-            len(seen_statement_plan_sigs),
-            tags=instance_tags,
+            len(self.seen_statement_plan_sigs),
+            tags=self._tags,
         )
 
     def can_explain_statement(self, statement):
@@ -135,14 +165,14 @@ class PostgresStatementSamples(object):
             return None
         return result[0][0]
 
-    def _explain_new_pg_stat_activity(self, db, samples, seen_statements, seen_statement_plan_sigs, instance_tags):
+    def _explain_new_pg_stat_activity(self, db, samples, instance_tags):
         start_time = time.time()
         events = []
         for row in samples:
             original_statement = row['query']
-            if original_statement in seen_statements:
+            if original_statement in self.seen_statements:
                 continue
-            seen_statements.add(original_statement)
+            self.seen_statements.add(original_statement)
 
             plan_dict = None
             try:
@@ -174,8 +204,8 @@ class PostgresStatementSamples(object):
             apm_resource_hash = query_signature
             statement_plan_sig = (query_signature, plan_signature)
 
-            if statement_plan_sig not in seen_statement_plan_sigs:
-                seen_statement_plan_sigs.add(statement_plan_sig)
+            if statement_plan_sig not in self.seen_statement_plan_sigs:
+                self.seen_statement_plan_sigs.add(statement_plan_sig)
                 event = {
                     'db': {
                         'instance': row['datname'],
