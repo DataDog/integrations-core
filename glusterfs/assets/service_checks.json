@@ -2,7 +2,7 @@
     {
         "agent_version": "7.26.0",
         "integration": "GlusterFS",
-        "check": "gluster.brick.health",
+        "check": "glusterfs.brick.health",
         "statuses": [
             "ok",
             "critical",
@@ -18,7 +18,7 @@
     {
         "agent_version": "7.26.0",
         "integration": "GlusterFS",
-        "check": "gluster.volume.health",
+        "check": "glusterfs.volume.health",
         "statuses": [
             "ok",
             "critical",
@@ -34,7 +34,7 @@
     {
         "agent_version": "7.26.0",
         "integration": "GlusterFS",
-        "check": "gluster.cluster.health",
+        "check": "glusterfs.cluster.health",
         "statuses": [
             "ok",
             "critical",
