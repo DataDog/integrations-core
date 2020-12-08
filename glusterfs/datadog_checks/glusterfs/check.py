@@ -140,10 +140,7 @@ class GlusterfsCheck(AgentCheck):
         """
         major, minor = version.split('.')
 
-        return {
-            'major': str(int(major)),
-            'minor': str(int(minor))
-        }
+        return {'major': str(int(major)), 'minor': str(int(minor))}
 
     def parse_volume_summary(self, output):
         for volume in output:
