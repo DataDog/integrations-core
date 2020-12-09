@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Red Hat Gluster Storage][1] cluster health, volume and brick status through the Datadog Agent. 
+This check monitors [Red Hat Gluster Storage][1] cluster health, volume, and brick status through the Datadog Agent. 
 This GlusterFS integration is compatible with both Red Hat vendored and open-source versions of GlusterFS.
 
 ## Setup
@@ -16,7 +16,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `glusterfs.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your glusterfs performance data. See the [sample glusterfs.d/conf.yaml][3] for all available configuration options.
+1. Edit the `glusterfs.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GlusterFS performance data. See the [sample glusterfs.d/conf.yaml][3] for all available configuration options.
    
    ```yaml
    init_config:
@@ -34,7 +34,7 @@ No additional installation is needed on your server.
         ## @param use_sudo - boolean - optional - default: false
         ## GlusterFS requires sudo.Please be sure to add the following line to your sudoers file:
         ##
-        ## dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph
+        ## dd-agent ALL=(ALL) NOPASSWD:/usr/bin/gstatus
         ##
         ## Enable the option for the check to run with sudo.
         #
@@ -69,7 +69,7 @@ Returns `CRITICAL` if the sub volume is 'degraded'. Returns `OK` if 'up'.
 Returns `CRITICAL` if the volume is 'degraded'. Returns `OK` if 'up'.
 
 **glusterfs.cluster.health**:<br>
-Returns `CRITICAL` if the volume is 'degraded'. Returns `OK` otherwise.
+Returns `CRITICAL` if the cluster is 'degraded'. Returns `OK` otherwise.
 
 ### Events
 

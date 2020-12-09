@@ -10,9 +10,7 @@
   "guid": "1cb9a21c-8cc4-4727-a4b1-ab7015c7ae24",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
+    "linux"
   ],
   "public_title": "Red Hat Gluster Storage",
   "categories": [

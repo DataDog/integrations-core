@@ -5,56 +5,18 @@ import json
 import os
 from typing import Any
 
+from six import iteritems
+
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
-CLUSTER_STATS = {
-    'node_count': 'nodes.count',
-    'nodes_active': 'nodes.active',
-    'volumes_started': 'volumes.started',
-    'volume_count': 'volumes.count',
-}
-
-
-GENERAL_STATS = {
-    'size_used': 'size.used',
-    'inodes_free': 'inodes.free',
-    'size_free': 'size.free',
-    'size_total': 'size.total',
-    'inodes_used': 'inodes.used',
-    'inodes_total': 'inodes.total',
-    'online': 'online',
-}
-
-VOL_SUBVOL_STATS = {
-    'disperse': 'disperse',
-    'disperse_redundancy': 'disperse_redundancy',
-    'replica': 'replica',
-}
-
-VOLUME_STATS = {
-    'v_used_percent': 'used.percent',
-    'num_bricks': 'bricks.count',
-    'distribute': 'distribute',
-    'v_size_used': 'size.used',
-    'v_size': 'size.total',
-    'snapshot_count': 'snapshot.count',
-}
-
-VOLUME_STATS.update(GENERAL_STATS)
-VOLUME_STATS.update(VOL_SUBVOL_STATS)
-
-BRICK_STATS = {'block_size': 'block_size'}
-BRICK_STATS.update(GENERAL_STATS)
-
-PARSE_METRICS = ['v_size_used', 'v_size']
+from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
 
 GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
-INSTALL_PATH = '/usr/local/bin/gstatus'
 
 
 class GlusterfsCheck(AgentCheck):
@@ -75,8 +37,6 @@ class GlusterfsCheck(AgentCheck):
         else:
             if os.path.exists(GSTATUS_PATH):
                 self.gstatus_cmd = GSTATUS_PATH
-            elif os.path.exists(INSTALL_PATH):
-                self.gstatus_cmd = INSTALL_PATH
             else:
                 raise ConfigurationError(
                     'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
@@ -84,7 +44,7 @@ class GlusterfsCheck(AgentCheck):
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
 
     def check(self, _):
-        use_sudo = _is_affirmative(self.instance.get('use_sudo', False))
+        use_sudo = is_affirmative(self.instance.get('use_sudo', False))
         if use_sudo:
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
@@ -97,11 +57,15 @@ class GlusterfsCheck(AgentCheck):
         gluster_args += ['-a', '-o', 'json', '-u', 'g']
         self.log.debug("gstatus command: %s", gluster_args)
         output, _, _ = get_subprocess_output(gluster_args, self.log)
-        gstatus = json.loads(output)
+        try:
+            gstatus = json.loads(output)
+        except json.JSONDecoderError as e:
+            self.log.debug("Unable to decode gstatus output: %s", str(e))
+            raise
 
         if 'data' in gstatus:
             data = gstatus['data']
-            self.submit_metric(data, 'cluster', CLUSTER_STATS, self._tags)
+            self.submit_metrics(data, 'cluster', CLUSTER_STATS, self._tags)
 
             self.submit_version_metadata(data)
 
@@ -109,15 +73,20 @@ class GlusterfsCheck(AgentCheck):
                 self.parse_volume_summary(data['volume_summary'])
 
             if CLUSTER_STATUS in data:
-                status = data[CLUSTER_STATUS]
-                if status == 'Healthy':
+                status = data[CLUSTER_STATUS].lower()
+                if status == 'healthy':
                     self.service_check(self.CLUSTER_SC, AgentCheck.OK, tags=self._tags)
-                else:
+                elif status == 'degraded':
                     self.service_check(
                         self.CLUSTER_SC, AgentCheck.CRITICAL, tags=self._tags, message="Cluster status is %s" % status
                     )
+                else:
+                    self.service_check(
+                        self.CLUSTER_SC, AgentCheck.WARNING, tags=self._tags, message="Cluster status is %s" % status
+                    )
+
         else:
-            self.log.warning("No data from gstatus")
+            self.log.warning("No data from gstatus: %s", gstatus)
 
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
@@ -138,18 +107,21 @@ class GlusterfsCheck(AgentCheck):
         """
         GlusterFS versions are in format <major>.<minor>
         """
-        major, minor = version.split('.')
-
-        return {'major': str(int(major)), 'minor': str(int(minor))}
+        try:
+            major, minor = version.split('.')
+        except ValueError as e:
+            self.log.debug("Unable to parse GlusterFS version: %s", str(e))
+        else:
+            return {'major': str(int(major)), 'minor': str(int(minor))}
 
     def parse_volume_summary(self, output):
         for volume in output:
             volume_tags = ["vol_name:{}".format(volume['name']), "vol_type:{}".format(volume['type'])]
             volume_tags.extend(self._tags)
-            self.submit_metric(volume, 'volume', VOLUME_STATS, volume_tags)
+            self.submit_metrics(volume, 'volume', VOLUME_STATS, volume_tags)
 
             if 'subvols' in volume:
-                self.parse_subvols_stats(volume['subvols'], volume_tags)
+                self.parse_subvols_stats(volume['subvols'], volume)
 
             self.submit_service_check(self.VOLUME_SC, volume['health'], volume_tags)
 
@@ -157,51 +129,52 @@ class GlusterfsCheck(AgentCheck):
         for subvol in subvols:
             self.submit_metric(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
 
-            if 'bricks' in subvol:
-                for brick in subvol['bricks']:
-                    brick_name = brick['name'].split(":")
-                    brick_server = brick_name[0]
-                    brick_export = brick_name[1]
-                    brick_type = brick['type']
-                    brick_device = brick['device']
-                    fs_name = brick['fs_name']
-                    tags = [
-                        'brick_server:{}'.format(brick_server),
-                        'brick_export:{}'.format(brick_export),
-                        'type:{}'.format(brick_type),
-                        'device:{}'.format(brick_device),
-                        'fs_name:{}'.format(fs_name),
-                    ]
-                    tags.extend(self._tags)
-                    self.submit_metric(brick, 'brick', BRICK_STATS, tags)
+            for brick in subvol.get('bricks', []):
+                brick_name = brick['name'].split(":")
+                brick_server = brick_name[0]
+                brick_export = brick_name[1]
+                brick_type = brick['type']
+                brick_device = brick['device']
+                fs_name = brick['fs_name']
+                tags = [
+                    'brick_server:{}'.format(brick_server),
+                    'brick_export:{}'.format(brick_export),
+                    'type:{}'.format(brick_type),
+                    'device:{}'.format(brick_device),
+                    'fs_name:{}'.format(fs_name),
+                ]
+                tags.extend(self._tags)
+                self.submit_metrics(brick, 'brick', BRICK_STATS, tags)
 
             self.submit_service_check(self.BRICK_SC, subvol['health'], volume_tags)
 
-    def submit_metric(self, payload, prefix, metric_mapping, tags):
+    def submit_metrics(self, payload, prefix, metric_mapping, tags):
         """
         Parse a payload with a given metric_mapping and submit metric for valid values.
         Some values contain measurements like `GiB` which should be removed and only submitted if consistent
         """
-        for key, metric in metric_mapping.items():
+        for key, metric in iteritems(metric_mapping):
             if key in payload:
                 value = payload[key]
 
                 if key in PARSE_METRICS:
-                    value_parsed = value.split(" ")
-                    if value_parsed[1] == "GiB":
-                        value = value_parsed[0]
-                    else:
-                        self.log.debug("Measurement is not in GiB: %s", value)
+                    try:
+                        value_parsed = value.split(" ")
+                        value = int(value_parsed[0])
+                    except ValueError as e:
+                        self.log.debug("Unable to parse value for %s: %s", key, str(e))
                         continue
                 self.gauge('{}.'.format(prefix) + metric, value, tags)
             else:
                 self.log.debug("Field not found in %s data: %s", prefix, key)
 
-    def submit_service_check(self, sc_name, status, tags):
-        msg = "Health in state: %s" % status
+    def submit_service_check(self, sc_name, val, tags):
+        msg = "Health in state: %s" % val
+        status = val.lower()
         if status == 'up':
             self.service_check(sc_name, AgentCheck.OK, tags=tags)
         elif status == 'partial':
             self.service_check(sc_name, AgentCheck.WARNING, tags=tags, message=msg)
         else:
+            # Degraded or Down
             self.service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
