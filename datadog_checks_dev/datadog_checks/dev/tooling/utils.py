@@ -89,6 +89,7 @@ DOGWEB_CODE_GENERATED_DASHBOARDS = (
     'zk',
 )
 
+
 def format_commit_id(commit_id):
     if commit_id:
         if commit_id.isdigit():
@@ -421,10 +422,10 @@ def get_available_logs_integrations():
         'linux_proc_extras',
         'ntp',  # the integration is for a remote ntp server
         'openmetrics',  # base class
-        'pdh_check',   # base class
+        'pdh_check',  # base class
         'process',  # system
         'prometheus',  # base class
-        'sap_hana',  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
+        'sap_hana',  # see open questions in the architecture rfc
         'snmp',  # remote connection to the devices
         'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
         'ssh_check',  # remote connection
@@ -438,6 +439,7 @@ def get_available_logs_integrations():
     # Also excluding all the kube_ integrations
     checks = sorted(x for x in set(get_valid_checks()).difference(not_possible) if not x.startswith('kube'))
     return checks
+
 
 def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
