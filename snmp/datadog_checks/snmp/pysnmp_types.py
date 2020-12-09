@@ -21,8 +21,10 @@ from pysnmp.hlapi import (
 from pysnmp.hlapi.asyncore.cmdgen import lcd
 from pysnmp.hlapi.transport import AbstractTransportTarget
 from pysnmp.proto.rfc1902 import ObjectName, Opaque
-from pysnmp.smi.builder import DirMibSource
+from pysnmp.proto.rfc3412 import MsgAndPduDispatcher
+from pysnmp.smi.builder import DirMibSource, MibBuilder
 from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
+from pysnmp.smi.instrum import MibInstrumController
 from pysnmp.smi.view import MibViewController
 
 __all__ = [
@@ -34,7 +36,10 @@ __all__ = [
     'endOfMibView',
     'hlapi',
     'lcd',
+    'MibBuilder',
+    'MibInstrumController',
     'MibViewController',
+    'MsgAndPduDispatcher',
     'noSuchInstance',
     'noSuchObject',
     'ObjectIdentity',

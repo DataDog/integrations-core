@@ -26,6 +26,7 @@ from .common import (
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
+    YARN_CONFIG_SPLIT_APPLICATION_TAGS,
     YARN_CONFIG_STATUS_MAPPING,
     YARN_NODE_METRICS_TAGS,
     YARN_NODE_METRICS_VALUES,
@@ -182,6 +183,43 @@ def test_custom_mapping(aggregator, mocked_request):
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.UNKNOWN,
         tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
+
+def test_check_splits_yarn_application_tags(aggregator, mocked_request):
+    instance = YARN_CONFIG_SPLIT_APPLICATION_TAGS['instances'][0]
+
+    # Instantiate YarnCheck
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    # Run the check once
+    yarn.check(instance)
+
+    # Check that the YARN application tags have been split for properly formatted tags
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=[
+            'app_queue:default',
+            'app_name:word count',
+            'app_key1:value1',
+            'app_key2:value2',
+            'optional:tag1',
+            'cluster_name:SparkCluster',
+        ],
+    )
+
+    # And check that the YARN application tags have not been split for other tags
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.WARNING,
+        tags=[
+            'app_queue:default',
+            'app_name:dead app',
+            'app_tags:tag1,tag2',
+            'optional:tag1',
+            'cluster_name:SparkCluster',
+        ],
     )
 
 

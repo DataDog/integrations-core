@@ -1,0 +1,183 @@
+name: HAProxy
+files:
+- name: haproxy.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: use_prometheus
+      value:
+        example: false
+        type: boolean
+      description: |
+        Enable to preview the new version of the check which supports HAProxy version 2+ 
+        or environments using the HAProxy exporter.
+
+        Prometheus-related options take effect only when this is set to `true`.
+    - name: url
+      required: true
+      value:
+        default: null
+        example: http://localhost/admin?stats
+        type: string
+      description: |
+        Haproxy URL to connect to gather metrics.
+        Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
+        or admin socket: unix:///var/run/haproxy.sock
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: status_check
+      value:
+        example: false
+        type: boolean
+      description: |
+        This paramater instructs the check to send events on status changes in the backend.
+        This is DEPRECATED in favor of the creation of a monitor on the service check status
+        and will be removed in a future version.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: collect_aggregates_only
+      value:
+        example: true
+        type: boolean
+      description: |
+        This parameter instructs the check to collect metrics only from the aggregate frontend/backend
+        status lines from the stats output instead of for each backend. With this parameter set to false the agent
+        collects data for each backend but ignores the aggregated data for backends. Because some metrics are only
+        available for aggregates, you can also set this parameter to the string 'both' to collect everything.
+        Please note that this mean that if if you have queries like computing the sum of all requests being made, the
+        result will be twice as expected. To get the correct result, you have to explicitly add some filters to the
+        query.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: collect_status_metrics
+      value:
+        example: false
+        type: boolean
+      description: |
+        This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: collect_status_metrics_by_host
+      value:
+        example: false
+        type: boolean
+      description: |
+        This parameter instructs the check to collect status metrics per host instead of per service.
+        This only applies if `collect_status_metrics` is true.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: collate_status_tags_per_host
+      value:
+        example: true
+        type: boolean
+      description: |
+        This parameter collects `status` tags for `haproxy.count_per_status` up to one of
+        (`available`, `unavailable`) for each discovered backend.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: count_status_by_service
+      value:
+        example: true
+        type: boolean
+      description: |
+        This parameter instructs the check to tag the status counts it collects by service in addition to by host.
+        This only applies if `collect_status_metrics` is `true`.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: tag_service_check_by_host
+      value:
+        example: false
+        type: boolean
+      description: |
+        This parameter instructs the check to tag the service check status by host on top of other tags.
+        The default case will only tag by backend and service.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: services_include
+      value:
+        example:
+        - <SERVICE_NAME_1>
+        - <SERVICE_NAME_2>
+        type: array
+        items:
+          type: string
+      description: |
+        Filter metrics by services. If a tag matches an exclude rule, it won't be included
+        unless it also matches an include rule.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: services_exclude
+      value:
+        example:
+        - .*
+        type: array
+        items:
+          type: string
+      description: |
+        Filter metrics by services. If a service name matches an exclude rule, it won't be included
+        unless it also matches an include rule.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: disable_legacy_service_tag
+      value:
+        example: false
+        type: boolean
+      description: |
+        Whether or not to stop submitting the tag `service` that has been renamed
+        to `haproxy_service` and disable the associated deprecation warning.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: active_tag
+      value:
+        example: false
+        type: boolean
+      description: |
+        Includes the 'active' tag to metrics to denote whether a backend belongs to the
+        "active" pool of connections normally used for servicing requests.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: enable_service_check
+      value:
+        example: false
+        type: boolean
+      description: |
+        Enable the Haproxy service check.
+    - name: tags_regex
+      value:
+        type: string
+      description: |
+        This parameter instructs the check to use the defined named regex for creating
+        additional tags based on the name of the HAProxy service.
+
+         tags_regex: 'be_edge_http_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
+
+        would match service name be_edge_http_sre-prod_elk and include additional
+        tags: ['team:sre','env:prod','app:elk']
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - name: startup_grace_seconds
+      value:
+        example: 0
+        type: number
+      description: |
+        Time to wait on startup or reload of haproxy before sending metrics
+
+        When haproxy reloads, if there is a `grace` period on some proxies, 2
+        haproxies will stay running for that period, possibly including the
+        stats endpoint. Stats returned by haproxy during this period will only
+        refer to one of the multiple instances of haproxy, and will not
+        accurately reflect the state of the system.
+        If this parameter is >0, no datapoints will be sent until the uptime of
+        haproxy reaches this many seconds.
+
+        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+    - template: instances/openmetrics
+  - template: logs
+    example:
+    - type: udp
+      port: 514
+      service: haproxy
+      source: haproxy

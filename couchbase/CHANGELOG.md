@@ -1,16 +1,33 @@
 # CHANGELOG - couchbase
 
-## 1.13.0 / 2020-05-17
+## 1.16.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 1.15.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config specs. See [#7466](https://github.com/DataDog/integrations-core/pull/7466).
+
+## 1.14.1 / 2020-08-10 / Agent 7.22.0
+
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 1.14.0 / 2020-06-29 / Agent 7.21.0
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.13.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.12.2 / 2020-04-04
+## 1.12.2 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 * [Fixed] Update `conf.yaml.example` log collection section. See [#5977](https://github.com/DataDog/integrations-core/pull/5977).
 
-## 1.12.1 / 2019-12-06
+## 1.12.1 / 2019-12-06 / Agent 7.16.0
 
 * [Fixed] Fix version metadata parsing. See [#5148](https://github.com/DataDog/integrations-core/pull/5148).
 
@@ -20,7 +37,7 @@
 * [Added] Standardize logging format. See [#4905](https://github.com/DataDog/integrations-core/pull/4905).
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
 
-## 1.11.0 / 2019-09-23
+## 1.11.0 / 2019-09-23 / Agent 6.15.0
 
 * [Fixed] Fix typo for couchbase.by_node.cluster_membership service check. See [#4565](https://github.com/DataDog/integrations-core/pull/4565).
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
@@ -29,7 +46,7 @@
 
 * [Added] Add log documentation in the example configuration file. See [#4537](https://github.com/DataDog/integrations-core/pull/4537).
 
-## 1.9.1 / 2019-08-30
+## 1.9.1 / 2019-08-30 / Agent 6.14.0
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
 
@@ -37,24 +54,24 @@
 
 * [Added] Add RequestsWrapper to couchbase. See [#4119](https://github.com/DataDog/integrations-core/pull/4119).
 
-## 1.8.1 / 2019-07-12
+## 1.8.1 / 2019-07-12 / Agent 6.13.0
 
 * [Fixed] Change `couchbase.by_bucket.avg_bg_wait_time` metric unit from second to microsecond. See [#4078](https://github.com/DataDog/integrations-core/pull/4078).
 
-## 1.8.0 / 2019-05-14
+## 1.8.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3494](https://github.com/DataDog/integrations-core/pull/3494).
 
-## 1.7.1 / 2019-03-29
+## 1.7.1 / 2019-03-29 / Agent 6.11.0
 
 * [Fixed] Fixed a typo in the example config file. See [#3173](https://github.com/DataDog/integrations-core/pull/3173).
 
-## 1.7.0 / 2019-01-04
+## 1.7.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2851][1].
 * [Fixed] Stop using deprecated 'device_name' parameter.. See [#2847][2].
 
-## 1.6.1 / 2018-11-23
+## 1.6.1 / 2018-11-23 / Agent 6.8.0
 
 * [Fixed] Keep running the check when one endpoint fails. See [#2638][3].
 
@@ -63,11 +80,11 @@
 * [Added] Add ssl_verify option. See [#2584][4].
 * [Fixed] Use raw string literals when \ is present. See [#2465][5].
 
-## 1.5.1 / 2018-09-04
+## 1.5.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][6].
 
-## 1.5.0 / 2018-06-20
+## 1.5.0 / 2018-06-20 / Agent 6.4.0
 
 * [Added] Add Couchbase health and cluster membership service checks and alerts. See [#1593][7].
 
@@ -106,7 +123,7 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1593
 [8]: https://github.com/DataDog/integrations-core/pull/1664
 [9]: https://github.com/DataDog/integrations-core/pull/1571
-[10]: 
+[10]: https://github.com/DataDog/integrations-core/pull/1444
 [11]: https://github.com/DataDog/integrations-core/issues/860
 [12]: https://github.com/DataDog/integrations-core/issues/705
 [13]: https://github.com/DataDog/integrations-core/issues/405

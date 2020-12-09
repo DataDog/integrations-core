@@ -2,35 +2,26 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import datetime as dt
 import logging
 import re
-from typing import Dict, List, Pattern
 
+from dateutil.tz import UTC
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 
 try:
-    import pymqi
+    from typing import Dict, List, Pattern
 except ImportError:
-    pymqi = None
-else:
-    # Since pymqi is not be available/installed on win/macOS when running e2e,
-    # we load the following constants only pymqi import succeed
+    pass
 
-    DEFAULT_CHANNEL_STATUS_MAPPING = {
-        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
-        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
-    }
+try:
+    import pymqi
+except ImportError as e:
+    pymqiException = e
+    pymqi = None
 
 
 log = logging.getLogger(__file__)
@@ -83,6 +74,10 @@ class IBMMQConfig:
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
+        self.collect_statistics_metrics = is_affirmative(
+            instance.get('collect_statistics_metrics', False)
+        )  # type: bool
+
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             log.warning(
                 "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
@@ -114,6 +109,8 @@ class IBMMQConfig:
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
 
+        self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
+
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
         self._queue_tag_re = instance.get('queue_tag_re', {})  # type: Dict[str, str]
@@ -126,6 +123,8 @@ class IBMMQConfig:
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
+
+        self.instance_creation_datetime = dt.datetime.now(UTC)
 
     def add_queues(self, new_queues):
         # add queues without duplication
@@ -145,6 +144,8 @@ class IBMMQConfig:
 
     @staticmethod
     def get_channel_status_mapping(channel_status_mapping_raw):
+        if pymqi is None:
+            raise pymqiException
         if channel_status_mapping_raw:
             custom_mapping = {}
             for ibm_mq_status_raw, service_check_status_raw in channel_status_mapping_raw.items():
@@ -162,4 +163,16 @@ class IBMMQConfig:
                     raise ConfigurationError("Invalid mapping: {}".format(e))
             return custom_mapping
         else:
-            return DEFAULT_CHANNEL_STATUS_MAPPING
+            # Use a default mapping. (Can't be defined at top-level because pymqi may not be installed.)
+            return {
+                pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
+                pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
+            }

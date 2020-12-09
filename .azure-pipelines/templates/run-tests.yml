@@ -6,13 +6,18 @@ parameters:
   benchmark: false
   latest_metrics: false
   repo: ''
+  coverage: true
 
 steps:
-- ${{ if eq(parameters.test, 'true') }}:
+- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true')) }}:
   - script: ddev test --cov --junit ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
+
+- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
+    - script: ddev test --junit ${{ parameters.check }}
+      displayName: 'Run Unit/Integration tests (no coverage)'
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |

@@ -17,8 +17,6 @@ instances:
     ## The hostname to connect to.
     ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
     ## provide a value for the sock key.
-    ## If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
-    ## otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
     #
   - host: localhost
 
@@ -43,7 +41,7 @@ instances:
     #
     # dbname: <DBNAME>
 
-    ## @param ssl - string - optional - default: False
+    ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
@@ -58,14 +56,15 @@ instances:
     ##
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
     ##
-    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`
+    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
     #
     # ssl: 'false'
 
     ## @param query_timeout - integer - optional
-    ## Abort any statement that takes more than the specified number of milliseconds, starting from the time the command
-    ## arrives at the server from the client. A value of zero (the default) turns this off.
-    ## Cancelled queries won't log any metrics
+    ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+    ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+    ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
+    ## Cancelled queries won't log any metrics.
     #
     # query_timeout: 1000
 
@@ -74,7 +73,7 @@ instances:
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
     ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
-    ## Each relation generates many metrics (10 + 10 per index)
+    ## Each relation generates many metrics (10 + 10 per index).
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
     ##
@@ -91,17 +90,17 @@ instances:
     #   - relation_regex: <TABLE_PATTERN>
 
     ## @param max_relations - integer - optional - default: 300
-    ## Determines the maximum number of relations to fetch
+    ## Determines the maximum number of relations to fetch.
     #
     # max_relations: 300
 
     ## @param collect_function_metrics - boolean - optional - default: false
-    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
+    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
     #
     # collect_function_metrics: false
 
     ## @param collect_count_metrics - boolean - optional - default: true
-    ## Collect count metrics.
+    ## Collect count of user tables up to max_relations size from pg_stat_user_tables.
     #
     # collect_count_metrics: true
 
@@ -127,7 +126,7 @@ instances:
     # tag_replication_role: false
 
     ## @param table_count_limit - integer - optional - default: 200
-    ## The maximum number of tables to collect metrics from
+    ## The maximum number of tables to collect metrics from.
     #
     # table_count_limit: 200
 
@@ -146,6 +145,28 @@ instances:
     #       type: <COLUMNS_2_TYPE>
     #     tags:
     #     - <TAG_KEY>:<TAG_VALUE>
+
+    ## @param application_name - string - optional - default: datadog-agent
+    ## The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
+    ## It is typically set by an application upon connection to the server.
+    ## The name is displayed in the pg_stat_activity view and included in CSV log entries.
+    #
+    # application_name: datadog-agent
+
+    ## @param deep_database_monitoring - boolean - optional - default: false
+    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+    ##
+    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+    ## success manager or Datadog support.
+    #
+    # deep_database_monitoring: true
+
+    ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
+    ## Set this value if you want to define a custom view or function to allow the datadog user to query the
+    ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
+    ## Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+    #
+    # pg_stat_statements_view: show_pg_stat_statements()
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -182,10 +203,12 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
-## service - required - The name of the service that generates the log.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #

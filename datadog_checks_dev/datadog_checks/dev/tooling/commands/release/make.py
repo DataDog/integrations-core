@@ -23,8 +23,9 @@ from .show import changes
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.option('--exclude', help='Comma-separated list of checks to skip')
+@click.option('--allow-master', is_flag=True, help='Allow ddev to commit directly to master. Forbidden for core.')
 @click.pass_context
-def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
+def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, allow_master):
     """Perform a set of operations needed to release checks:
 
     \b
@@ -42,7 +43,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
       - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
-    from ...signing import update_link_metadata, YubikeyException
+    from ...signing import YubikeyException, update_link_metadata
 
     releasing_all = 'all' in checks
 
@@ -51,10 +52,6 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         for check in checks:
             if check not in valid_checks:
                 abort(f'Check `{check}` is not an Agent-based Integration')
-
-    # don't run the task on the master branch
-    if get_current_branch() == 'master':
-        abort('Please create a release branch, you do not want to commit to master directly.')
 
     if releasing_all:
         if version:
@@ -70,6 +67,16 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
 
     if initial_release:
         version = '1.0.0'
+
+    repo_choice = ctx.obj['repo_choice']
+    core_workflow = repo_choice == 'core'
+
+    if get_current_branch() == 'master' and (core_workflow or not allow_master):
+        abort('Please create a release branch, you do not want to commit to master directly.')
+
+    # Signing is done by a pipeline in a separate commit
+    if not core_workflow and not sign_only:
+        skip_sign = True
 
     # Keep track of the list of checks that have been updated.
     updated_checks = []
@@ -143,7 +150,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         commit_targets = [check]
         updated_checks.append(check)
         # update the list of integrations to be shipped with the Agent
-        if check not in NOT_CHECKS:
+        if repo_choice == 'core' and check not in NOT_CHECKS:
             req_file = get_agent_release_requirements()
             commit_targets.append(os.path.basename(req_file))
             echo_waiting('Updating the Agent requirements file... ', nl=False)
@@ -165,9 +172,10 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         if not updated_checks:
             abort('There are no new checks to sign and release!')
         echo_waiting('Updating release metadata...')
-        echo_info('Please touch your Yubikey immediately after entering your PIN!')
+        if core_workflow:
+            echo_info('Please touch your Yubikey immediately after entering your PIN!')
         try:
-            commit_targets = update_link_metadata(updated_checks)
+            commit_targets = update_link_metadata(updated_checks, core_workflow=core_workflow)
             git_commit(commit_targets, '[Release] Update metadata', force=True)
         except YubikeyException as e:
             abort(f'A problem occurred while signing metadata: {e}')

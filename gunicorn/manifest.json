@@ -25,6 +25,9 @@
   "type": "check",
   "integration_id": "gunicorn",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -33,6 +36,10 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "gunicorn"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

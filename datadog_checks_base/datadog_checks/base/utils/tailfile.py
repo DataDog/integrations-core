@@ -41,6 +41,17 @@ class TailFile(object):
             data = ensure_bytes(tmp_file.read(self.CRC_SIZE))
             crc = binascii.crc32(data)
 
+        self._log.debug(
+            "Open file. path=%s, cur_inode=%s, new_inode=%s, cur_size=%s, new_size=%s, move_end=%s, pos=%s",
+            self._path,
+            self._inode,
+            inode,
+            self._size,
+            size,
+            move_end,
+            pos,
+        )
+
         if already_open:
             # Check if file has been removed
             if self._inode is not None and inode != self._inode:
@@ -105,3 +116,8 @@ class TailFile(object):
             # log but survive
             self._log.exception(e)
             raise StopIteration(e)
+
+    def close(self):
+        if self._f:
+            self._f.close()
+            self._f = None

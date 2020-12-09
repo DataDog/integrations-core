@@ -13,7 +13,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "gitlab.",
-  "metric_to_check": ["gitlab.process_max_fds", "gitlab.ruby.process_start_time_seconds"],
+  "metric_to_check": [
+    "gitlab.process_max_fds",
+    "gitlab.ruby.process_start_time_seconds"
+  ],
   "name": "gitlab",
   "public_title": "Datadog-Gitlab Integration",
   "short_description": "Track all your Gitlab metrics with Datadog",
@@ -33,6 +36,10 @@
     "dashboards": {
       "Gitlab Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "gitlab"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

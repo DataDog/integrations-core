@@ -111,11 +111,15 @@ class TestLoadBranches:
             templates.load('instances/http.skip_proxy.value.example.foo')
 
 
-class TestLoadOverride:
+class TestApplyOverrides:
     def test_mapping(self):
         templates = ConfigTemplates()
 
-        assert templates.load('init_config/tags', parameters={'overrides': {'value.example': ['foo', 'bar']}}) == {
+        template = templates.load('init_config/tags')
+        errors = templates.apply_overrides(template, {'value.example': ['foo', 'bar']})
+        assert not errors
+
+        assert template == {
             'name': 'tags',
             'value': {'example': ['foo', 'bar'], 'type': 'array', 'items': {'type': 'string'}},
             'description': (
@@ -125,55 +129,31 @@ class TestLoadOverride:
             ),
         }
 
-    def test_mapping_create(self):
-        templates = ConfigTemplates()
-
-        assert templates.load('init_config/tags', parameters={'overrides': {'foo': 'foo'}}) == {
-            'name': 'tags',
-            'value': {
-                'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'],
-                'type': 'array',
-                'items': {'type': 'string'},
-            },
-            'description': (
-                'A list of tags to attach to every metric and service check emitted by this integration.\n'
-                '\n'
-                'Learn more about tagging at https://docs.datadoghq.com/tagging\n'
-            ),
-            'foo': 'foo',
-        }
-
-    def test_mapping_create_nested(self):
-        templates = ConfigTemplates()
-
-        assert templates.load('init_config/tags', parameters={'overrides': {'foo.bar': 'foobar'}}) == {
-            'name': 'tags',
-            'value': {
-                'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'],
-                'type': 'array',
-                'items': {'type': 'string'},
-            },
-            'description': (
-                'A list of tags to attach to every metric and service check emitted by this integration.\n'
-                '\n'
-                'Learn more about tagging at https://docs.datadoghq.com/tagging\n'
-            ),
-            'foo': {'bar': 'foobar'},
-        }
-
     def test_mapping_with_branches(self):
         templates = ConfigTemplates()
 
-        assert templates.load('init_config/tags.value', parameters={'overrides': {'example': ['foo', 'bar']}}) == {
-            'example': ['foo', 'bar'],
-            'type': 'array',
-            'items': {'type': 'string'},
-        }
+        template = templates.load('init_config/tags.value')
+        errors = templates.apply_overrides(template, {'example': ['foo', 'bar']})
+        assert not errors
+
+        assert template == {'example': ['foo', 'bar'], 'type': 'array', 'items': {'type': 'string'}}
+
+    def test_mapping_with_name(self):
+        templates = ConfigTemplates()
+
+        template = templates.load('instances/tags')
+        overrides = {'tags.required': True}
+        templates.apply_overrides(template, overrides)
+        assert not overrides
+
+        assert template.get('required') is True
 
     def test_list(self):
         templates = ConfigTemplates()
 
-        template = templates.load('instances/http', parameters={'overrides': {'skip_proxy.description': 'foobar'}})
+        template = templates.load('instances/http')
+        errors = templates.apply_overrides(template, {'skip_proxy.description': 'foobar'})
+        assert not errors
 
         assert {
             'name': 'skip_proxy',
@@ -184,7 +164,9 @@ class TestLoadOverride:
     def test_list_with_branches(self):
         templates = ConfigTemplates()
 
-        template = templates.load('instances/http.skip_proxy', parameters={'overrides': {'description': 'foobar'}})
+        template = templates.load('instances/http.skip_proxy')
+        errors = templates.apply_overrides(template, {'description': 'foobar'})
+        assert not errors
 
         assert template == {
             'name': 'skip_proxy',
@@ -198,7 +180,9 @@ class TestLoadOverride:
         original_template = templates.load('instances/http')
         index = next(i for i, item in enumerate(original_template) if item.get('name') == 'skip_proxy')  # no cov
 
-        template = templates.load('instances/http', parameters={'overrides': {'skip_proxy': 'foobar'}})
+        template = templates.load('instances/http')
+        errors = templates.apply_overrides(template, {'skip_proxy': 'foobar'})
+        assert not errors
 
         assert 'foobar' in template
         assert template.index('foobar') == index
@@ -210,23 +194,35 @@ class TestLoadOverride:
     def test_list_not_found(self):
         templates = ConfigTemplates()
 
-        with pytest.raises(ValueError, match='^Template override `proxy.value.properties` has no named mapping `foo`$'):
-            templates.load('instances/http', parameters={'overrides': {'proxy.value.properties.foo.foo': 'bar'}})
+        template = templates.load('instances/http')
+        errors = templates.apply_overrides(template, {'proxy.value.properties.foo.foo': 'bar'})
+
+        assert len(errors) == 1
+        assert errors[0] == 'Template override `proxy.value.properties` has no named mapping `foo`'
 
     def test_list_not_found_root(self):
         templates = ConfigTemplates()
 
-        with pytest.raises(ValueError, match='^Template override has no named mapping `foo`$'):
-            templates.load('instances/http', parameters={'overrides': {'foo': 'bar'}})
+        template = templates.load('instances/http')
+        errors = templates.apply_overrides(template, {'foo': 'bar'})
+
+        assert len(errors) == 1
+        assert errors[0] == 'Template override has no named mapping `foo`'
 
     def test_primitive(self):
         templates = ConfigTemplates()
 
-        with pytest.raises(ValueError, match='^Template override `proxy.description` does not refer to a mapping$'):
-            templates.load('instances/http', parameters={'overrides': {'proxy.description.foo': 'bar'}})
+        template = templates.load('instances/http')
+        errors = templates.apply_overrides(template, {'proxy.description.foo': 'bar'})
+
+        assert len(errors) == 1
+        assert errors[0] == 'Template override `proxy.description` does not refer to a mapping'
 
     def test_primitive_recurse(self):
         templates = ConfigTemplates()
 
-        with pytest.raises(ValueError, match='^Template override `proxy.description` does not refer to a mapping$'):
-            templates.load('instances/http', parameters={'overrides': {'proxy.description.foo.foo': 'bar'}})
+        template = templates.load('instances/http')
+        errors = templates.apply_overrides(template, {'proxy.description.foo.foo': 'bar'})
+
+        assert len(errors) == 1
+        assert errors[0] == 'Template override `proxy.description` does not refer to a mapping'

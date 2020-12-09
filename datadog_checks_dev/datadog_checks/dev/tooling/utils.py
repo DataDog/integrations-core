@@ -7,17 +7,87 @@ import json
 import os
 import re
 from ast import literal_eval
+from json.decoder import JSONDecodeError
 
 import requests
 import semver
+import yaml
 
-from ..utils import dir_exists, file_exists, read_file, write_file
+from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
+DOGWEB_JSON_DASHBOARDS = (
+    'btrfs',
+    'cassandra',
+    'couchbase',
+    'elastic',
+    'fluentd',
+    'gearmand',
+    'iis',
+    'ibm_was',
+    'immunio',
+    'kong',
+    'kyoto_tycoon',
+    'marathon',
+    'mcached',
+    'mysql',
+    'nginx',
+    'pgbouncer',
+    'php_fpm',
+    'postfix',
+    'postgres',
+    'sqlserver',
+    'rabbitmq',
+    'riak',
+    'riakcs',
+    'solr',
+    'sqlserver',
+    'tokumx',
+    'tomcat',
+    'varnish',
+)
+DOGWEB_CODE_GENERATED_DASHBOARDS = (
+    'activemq',
+    'apache',
+    'ceph',
+    'cisco_aci',
+    'consul',
+    'couchdb',
+    'cri',
+    'crio',
+    'etcd',
+    'gunicorn',
+    'haproxy',
+    'hdfs_datanode',
+    'hdfs_namenode',
+    'hyperv',
+    'ibm_mq',
+    'kafka',
+    'kube_controller_manager',
+    'kube_scheduler',
+    'kubernetes',
+    'lighttpd',
+    'mapreduce',
+    'marathon',
+    'mesos',
+    'mongo',
+    'nginx',
+    'nginx_ingress_controller',
+    'openstack',
+    'powerdns_recursor',
+    'rabbitmq',
+    'redisdb',
+    'sigsci',
+    'spark',
+    'twistlock',
+    'wmi_check',
+    'yarn',
+    'zk',
+)
 
 
 def format_commit_id(commit_id):
@@ -51,6 +121,17 @@ def normalize_package_name(package_name):
     return re.sub(r'[-_. ]+', '_', package_name).lower()
 
 
+def kebab_case_name(name):
+    return re.sub('[_ ]', '-', name.lower())
+
+
+def normalize_display_name(display_name):
+    normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+    normalized_integration = re.sub("_+", "_", normalized_integration)
+    normalized_integration = normalized_integration.strip("_")
+    return normalized_integration.lower()
+
+
 def string_to_toml_type(s):
     if s.isdigit():
         s = int(s)
@@ -72,6 +153,10 @@ def get_readme_file(check_name):
     return os.path.join(get_root(), check_name, 'README.md')
 
 
+def get_setup_file(check_name):
+    return os.path.join(get_root(), check_name, 'setup.py')
+
+
 def check_root():
     """Check if root has already been set."""
     existing_root = get_root()
@@ -85,25 +170,43 @@ def check_root():
     return False
 
 
-def initialize_root(config, agent=False, core=False, extras=False, here=False):
+def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False):
     """Initialize root directory based on config and options"""
     if check_root():
         return
 
-    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
+    repo_choice = (
+        'core'
+        if core
+        else 'extras'
+        if extras
+        else 'agent'
+        if agent
+        else 'marketplace'
+        if marketplace
+        else config.get('repo', 'core')
+    )
     config['repo_choice'] = repo_choice
-    config['repo_name'] = REPO_CHOICES[repo_choice]
-
+    config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
     root = os.path.expanduser(legacy_option or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
-            repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
+            repo = (
+                'datadog-agent'
+                if repo_choice == 'agent'
+                else 'marketplace'
+                if repo_choice == 'marketplace'
+                else f'integrations-{repo_choice}'
+            )
             message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
 
         root = os.getcwd()
+        if here:
+            # Repo choices use the integration repo name without the `integrations-` prefix
+            config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
 
     set_root(root)
     return message
@@ -168,7 +271,34 @@ def get_tox_file(check_name):
 
 
 def get_metadata_file(check_name):
-    return os.path.join(get_root(), check_name, 'metadata.csv')
+    path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
+    return os.path.join(get_root(), check_name, path)
+
+
+def get_eula_from_manifest(check_name):
+    path = load_manifest(check_name).get('terms', {}).get('eula', '')
+    path = os.path.join(get_root(), check_name, *path.split('/'))
+    return path, file_exists(path)
+
+
+def get_jmx_metrics_file(check_name):
+    path = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'metrics.yaml')
+    return path, file_exists(path)
+
+
+def get_assets_from_manifest(check_name, asset_type):
+    paths = load_manifest(check_name).get('assets', {}).get(asset_type, {})
+    assets = []
+    nonexistent_assets = []
+    for path in paths.values():
+        asset = os.path.join(get_root(), check_name, *path.split('/'))
+
+        if not file_exists(asset):
+            nonexistent_assets.append(path)
+            continue
+        else:
+            assets.append(asset)
+    return sorted(assets), nonexistent_assets
 
 
 def get_config_file(check_name):
@@ -206,6 +336,12 @@ def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
 
 
+def get_codeowners():
+    codeowners_file = os.path.join(get_root(), '.github', 'CODEOWNERS')
+    contents = read_file_lines(codeowners_file)
+    return contents
+
+
 def get_config_files(check_name):
     """TODO: Remove this function when all specs are finished"""
     if check_name == 'agent':
@@ -233,13 +369,15 @@ def get_config_files(check_name):
     return sorted(files)
 
 
-def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_dirs=None):
+def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_tests=True, include_dirs=None):
     """Return generator of filenames from within a given check.
 
     By default, only includes files within 'datadog_checks' and 'tests' directories, this
-    can be expanded by adding to the `include_dirs` arg.
+    can be expanded by adding to the `include_dirs` arg. 'tests' can also be removed.
     """
-    base_dirs = ['datadog_checks', 'tests']
+    base_dirs = ['datadog_checks']
+    if include_tests:
+        base_dirs.append('tests')
     if include_dirs is not None:
         base_dirs += include_dirs
 
@@ -289,6 +427,16 @@ def read_metadata_rows(metadata_file):
             yield line_no, row
 
 
+def read_readme_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
+        yield line_no, line
+
+
+def read_setup_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_setup_file(check_name))):
+        yield line_no, line
+
+
 def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
@@ -314,6 +462,15 @@ def load_manifest(check_name):
     manifest_path = get_manifest_file(check_name)
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path).strip())
+    return {}
+
+
+def load_saved_views(path):
+    """
+    Load the saved view file into a dictionary
+    """
+    if file_exists(path):
+        return json.loads(read_file(path).strip())
     return {}
 
 
@@ -372,6 +529,50 @@ def has_e2e(check):
                     if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
+
+
+def has_process_signature(check):
+    manifest_file = get_manifest_file(check)
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+    return len(manifest.get('process_signatures', [])) > 0
+
+
+def has_agent_8_check_signature(check):
+    for path, _, files in os.walk(get_check_directory(check)):
+        for fn in files:
+            if fn.endswith('.py'):
+                if 'def check(self, instance):' in read_file(os.path.join(path, fn)):
+                    return False
+    return True
+
+
+def is_tile_only(check):
+    config_file = get_config_file(check)
+    return not os.path.exists(config_file)
+
+
+def is_jmx_integration(check_name):
+    config_file = get_config_file(check_name)
+    if not file_exists(config_file):
+        return False
+    config_content = yaml.safe_load(read_file(config_file))
+    if not config_content:
+        return False
+    init_config = config_content.get('init_config', None)
+    if not init_config:
+        return False
+    return init_config.get('is_jmx', False)
+
+
+def has_dashboard(check):
+    if check in DOGWEB_JSON_DASHBOARDS or check in DOGWEB_CODE_GENERATED_DASHBOARDS:
+        return True
+    dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
+    return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
 
 
 def find_legacy_signature(check):

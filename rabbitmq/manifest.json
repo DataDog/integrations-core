@@ -27,12 +27,19 @@
   "type": "check",
   "integration_id": "rabbitmq",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
       "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "rabbitmq"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

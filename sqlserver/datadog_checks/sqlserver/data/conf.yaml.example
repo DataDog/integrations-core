@@ -12,6 +12,17 @@ init_config:
     #   - name: sqlserver.clr.execution
     #     counter_name: CLR Execution
 
+    ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ##
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
+
 ## Every instance is scheduled independent of the others.
 ##
 ## Note: All '%' characters must be escaped as '%%'.
@@ -34,9 +45,100 @@ instances:
     # password: <PASSWORD>
 
     ## @param database - string - optional - default: master
-    ## Database name to query
+    ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
     # database: master
+
+    ## @param database_autodiscovery - boolean - optional - default: false
+    ## Auto-discover and monitor databases.  If `true`, overrides `database` option.
+    ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
+    #
+    # database_autodiscovery: false
+
+    ## @param autodiscovery_include - list of strings - optional
+    ## Regular expression for database names to include as part of `database_autodiscovery`.
+    ## Will report metrics for databases that are found in this instance, ignores databases listed but not found.
+    ##
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so 
+    ## to match anywhere, prepend `.*`. For exact matches append `$`. 
+    ##
+    ## Defaults to `.*` to include everything.
+    #
+    # autodiscovery_include:
+    #   - master$
+    #   - AdventureWorks.*
+
+    ## @param autodiscovery_exclude - list of strings - optional
+    ## Regular expression for database names to exclude as part of `database_autodiscovery`.
+    ##
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so
+    ## to match anywhere, prepend `.*`. For exact matches append `$`.
+    ##
+    ## In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over
+    ## those found via `autodiscovery_include`.
+    #
+    # autodiscovery_exclude:
+    #   - model
+    #   - msdb
+
+    ## @param database_autodiscovery_interval - integer - optional - default: 3600
+    ## Frequency in seconds of scans for new databases.  Defaults to `3600`.
+    #
+    # database_autodiscovery_interval: 3600
+
+    ## @param include_ao_metrics - boolean - optional - default: false
+    ## Include AlwaysOn availability group metrics.
+    #
+    # include_ao_metrics: false
+
+    ## @param availability_group - string - optional
+    ## You can specify an availability group when `include_ao_metrics`
+    ## is enabled to monitor a specific availability group.
+    ## If no availability group is specified, then all availability
+    ## groups on the current replica will output metrics.
+    #
+    # availability_group: <AVAILABILITY_GROUP>
+
+    ## @param only_emit_local - boolean - optional - default: false
+    ## Primary replicas may emit metrics for remote secondary replicas
+    ## in the same availability group. If this option is set to true,
+    ## the primary replica will only emit information local to itself.
+    #
+    # only_emit_local: false
+
+    ## @param ao_database - string - optional
+    ## AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
+    #
+    # ao_database: <AO_DATABASE>
+
+    ## @param include_fci_metrics - boolean - optional - default: false
+    ## Include Failover Cluster Instance metrics. Note that these metrics
+    ## requires a SQLServer set up with Failover Clustering enabled.
+    #
+    # include_fci_metrics: false
+
+    ## @param include_instance_metrics - boolean - optional - default: true
+    ## Include server-level instance metrics.  When setting up multiple instances for
+    ## different databases on the same host these metrics will be duplicated unless this option is turned off.
+    #
+    # include_instance_metrics: true
+
+    ## @param include_task_scheduler_metrics - boolean - optional - default: false
+    ## Include additional Task and Scheduler metrics.
+    #
+    # include_task_scheduler_metrics: false
+
+    ## @param include_db_fragmentation_metrics - boolean - optional - default: false
+    ## Include database fragmentation metrics.
+    #
+    # include_db_fragmentation_metrics: false
+
+    ## @param db_fragmentation_object_names - list of strings - optional
+    ## Fragmentation metrics normally emit metrics for all objects within a database.
+    ## This option allows you to specify database object names to query for fragmentation metrics.
+    ## Note: Each object name is unique to each database.
+    #
+    # db_fragmentation_object_names: []
 
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
@@ -71,10 +173,50 @@ instances:
     #
     # connection_string: <CONNECTION_STRING>
 
-    ## @param command_timeout - integer - optional - default: 30
+    ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 30
+    # command_timeout: 5
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column. You can
+    ##                          use the `count` type to perform aggregation for queries that
+    ##                          return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:<INTEGRATION>
 
     ## @param stored_procedure - string - optional
     ## Get metrics from custom proc in MyDB but only if the database is writable
@@ -113,10 +255,12 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
-## service - required - The name of the service that generates the log.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
@@ -124,6 +268,7 @@ instances:
 #   - type: file
 #     path: /var/opt/mssql/log/errorlog
 #     source: sqlserver
+#     encoding: utf-16-le
 #     service: <SERVICE_NAME>
 #     log_processing_rules:
 #     - type: multi_line

@@ -13,8 +13,6 @@ files:
         The hostname to connect to.
         NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
         provide a value for the sock key.
-        If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
-        otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
       value:
         example: localhost
         type: string
@@ -56,16 +54,17 @@ files:
 
         For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
 
-        Note: `true` is an alias for `require`, and `false` is an alias for `disable`
+        Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
         default: false
         example: "false"
     - name: query_timeout
       description: |
-        Abort any statement that takes more than the specified number of milliseconds, starting from the time the command
-        arrives at the server from the client. A value of zero (the default) turns this off.
-        Cancelled queries won't log any metrics
+        Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+        to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+        starting from the time the command arrives at the server from the client. A value of zero turns this off.
+        Cancelled queries won't log any metrics.
       value:
         type: integer
         example: 1000
@@ -76,7 +75,7 @@ files:
         If enabled, `dbname` should be specified to collect database-specific relations metrics.
         You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
         from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
-        Each relation generates many metrics (10 + 10 per index)
+        Each relation generates many metrics (10 + 10 per index).
         By default all schemas are included. To track relations from specific schemas only,
         you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
 
@@ -107,18 +106,18 @@ files:
                - <SCHEMA_NAME1>
           - relation_regex: <TABLE_PATTERN>
     - name: max_relations
-      description: Determines the maximum number of relations to fetch
+      description: Determines the maximum number of relations to fetch.
       value:
         type: integer
         example: 300
     - name: collect_function_metrics
       description: |
-        If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
+        If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
       value:
         type: boolean
         example: false
     - name: collect_count_metrics
-      description: Collect count metrics.
+      description: Collect count of user tables up to max_relations size from pg_stat_user_tables.
       value:
         type: boolean
         example: true
@@ -145,7 +144,7 @@ files:
         type: boolean
         example: false
     - name: table_count_limit
-      description: The maximum number of tables to collect metrics from
+      description: The maximum number of tables to collect metrics from.
       value:
         type: integer
         default: 200
@@ -170,6 +169,32 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
+    - name: application_name
+      description: |
+        The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
+        It is typically set by an application upon connection to the server.
+        The name is displayed in the pg_stat_activity view and included in CSV log entries.
+      value:
+        type: string
+        example: "datadog-agent"
+    - name: deep_database_monitoring
+      description: |
+        Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+
+        If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+        success manager or Datadog support.
+      value:
+        type: boolean
+        example: true
+        default: false
+    - name: pg_stat_statements_view
+      description: |
+        Set this value if you want to define a custom view or function to allow the datadog user to query the
+        `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
+        Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+      value:
+        type: string
+        example: show_pg_stat_statements()
     - template: instances/default
   - template: logs
     example:

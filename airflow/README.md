@@ -17,15 +17,26 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 
 ### Installation
 
-All three steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][9] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
+All steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][9] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
 
-#### Step 1: Configure Airflow to collect health metrics and service checks
+### Configuration
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+##### Configure Airflow
 
 Configure the Airflow check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
-Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
+(Optional) Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
 
-#### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
+##### Connect Airflow to DogStatsD
+
+Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics:
+
+**Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][13].
 
 1. Install the [Airflow StatsD plugin][1].
 
@@ -38,8 +49,8 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    ```conf
    [scheduler]
    statsd_on = True
-   statsd_host = localhost
-   statsd_port = 8125
+   statsd_host = localhost  # Hostname or IP of server running the Datadog Agent
+   statsd_port = 8125       # DogStatsD port configured in the Datadog Agent
    statsd_prefix = airflow
    ```
 
@@ -86,6 +97,14 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.pool.open_slots"
            tags:
              pool_name: "$1"
+         - match: "pool.queued_slots.*"
+           name: "airflow.pool.queued_slots"
+           tags:
+             pool_name: "$1"
+         - match: "pool.running_slots.*"
+           name: "airflow.pool.running_slots"
+           tags:
+             pool_name: "$1"
          - match: "airflow.pool.used_slots.*"
            name: "airflow.pool.used_slots"
            tags:
@@ -125,6 +144,12 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
+         - match: 'scheduler.tasks.running'
+           name: "airflow.scheduler.tasks.running"
+         - match: 'scheduler.tasks.starving'
+           name: "airflow.scheduler.tasks.starving"
+         - match: sla_email_notification_failure
+           name: 'airflow.sla_email_notification_failure'
          - match: 'airflow\.task_removed_from_dag\.(.*)'
            match_type: "regex"
            name: "airflow.dag.task_removed"
@@ -139,18 +164,29 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
+         - match: "ti.start.*.*"
+           name: "airflow.ti.start"
+           tags:
+             dagid: "$1"
+             taskid: "$2"
+         - match: "ti.finish.*.*.*"
+           name: "airflow.ti.finish"
+           tags:
+             dagid: "$1"
+             taskid: "$2"
+             state: "$3"
    ```
 
-#### Step 3: Restart Datadog Agent and Airflow
+##### Restart Datadog Agent and Airflow
 
 1. [Restart the Agent][4].
 2. Restart Airflow to start sending your Airflow metrics to the Agent DogStatsD endpoint.
 
-#### Integration Service Checks
+##### Integration service checks
 
-Use the default configuration of your `airflow.d/conf.yaml` file to activate the collection of your Airflow service checks. See the sample [airflow.d/conf.yaml][3] for all available configuration options.
+Use the default configuration in your `airflow.d/conf.yaml` file to activate your Airflow service checks. See the sample [airflow.d/conf.yaml][3] for all available configuration options.
 
-#### Log collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -161,64 +197,99 @@ _Available for Agent versions >6.0_
    ```
 
 2. Uncomment and edit this configuration block at the bottom of your `airflow.d/conf.yaml`:
+  Change the `path` and `service` parameter values and configure them for your environment.
 
-   Change the `path` and `service` parameter values and configure them for your environment.
+   - Configuration for DAG processor manager and Scheduler logs:
 
-   a. Configuration for DAG processor manager and Scheduler logs:
+      ```yaml
+      logs:
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/scheduler/*/*.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+      ```
 
-     ```yaml
-     logs:
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/scheduler/*/*.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-     ```
+        Regular clean up is recommended for scheduler logs with daily log rotation.
 
-     Regular clean up is recommended for scheduler logs with daily log rotation.
+   - Additional configuration for DAG tasks logs:
 
-   b. Additional configuration for DAG tasks logs:
+      ```yaml
+      logs:
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/*/*/*/*.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+      ```
 
-     ```yaml
-     logs:
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/*/*/*/*.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-     ```
+      Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{ try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
 
-     Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{   try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
+      If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
 
-     If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
-
-     ```yaml
-     logs:
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/dag_tasks.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-     ```
+      ```yaml
+      logs:
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/dag_tasks.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+      ```
 
 3. [Restart the Agent][7].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][13] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                 |
+|----------------------|-----------------------|
+| `<INTEGRATION_NAME>` | `airflow`             |
+| `<INIT_CONFIG>`      | blank or `{}`         |
+| `<INSTANCE_CONFIG>`  | `{"url": "%%host%%"}` |
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][14].
+
+| Parameter      | Value                                                 |
+|----------------|-------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "airflow", "service": "<YOUR_APP_NAME>"}` |
+
+##### Kubernetes
+
+Tips for Kubernetes installations:
+
+- Customize the Airflow configuration with [pod annotations][14].
+- When modifying `airflow.cfg`, `statsd_host` should be set to the IP address of the Kubernetes node.
+- See the Datadog `integrations-core` repo for an [example setup][15].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -232,12 +303,10 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**airflow.can_connect**:
-
+**airflow.can_connect**:<br>
 Returns `CRITICAL` if unable to connect to Airflow. Returns `OK` otherwise.
 
-**airflow.healthy**:
-
+**airflow.healthy**:<br>
 Returns `CRITICAL` if Airflow is not healthy. Returns `OK` otherwise.
 
 ### Events
@@ -269,3 +338,7 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[15]: https://github.com/DataDog/integrations-core/tree/master/airflow/tests/k8s_sample

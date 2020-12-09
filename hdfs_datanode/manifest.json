@@ -24,8 +24,15 @@
   "type": "check",
   "integration_id": "hdfs-datanode",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "hdfs_datanode"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

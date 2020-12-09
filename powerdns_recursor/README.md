@@ -38,9 +38,12 @@ If you're running pdns_recursor >= 4.1, just set `api-key`.
 
 Restart the recursor to enable the statistics API.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options:
 
@@ -81,6 +84,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][4].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
@@ -90,6 +96,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INTEGRATION_NAME>` | `powerdns_recursor`                                                              |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":8082, "api_key":"<POWERDNS_API_KEY>", "version": 3}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -107,9 +116,8 @@ The PowerDNS Recursor check does not include any events.
 
 ### Service Checks
 
-**`powerdns.recursor.can_connect`**:
-
-Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
+**powerdns.recursor.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the recursor's statistics API, otherwise `OK`.
 
 ## Troubleshooting
 

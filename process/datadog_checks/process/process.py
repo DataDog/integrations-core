@@ -18,6 +18,12 @@ from datadog_checks.base.utils.platform import Platform
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
@@ -59,8 +65,8 @@ class ProcessCheck(AgentCheck):
     # Shared process list
     process_list_cache = ProcessListCache()
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        super(ProcessCheck, self).__init__(name, init_config, instances)
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -83,7 +89,8 @@ class ProcessCheck(AgentCheck):
         if Platform.is_linux():
             procfs_path = init_config.get('procfs_path')
             if procfs_path:
-                if 'procfs_path' in agentConfig and procfs_path != agentConfig.get('procfs_path').rstrip('/'):
+                agent_procfs_path = datadog_agent.get_config('procfs_path')
+                if agent_procfs_path and procfs_path != agent_procfs_path.rstrip('/'):
                     self._conflicting_procfs = True
                 else:
                     self._deprecated_init_procfs = True
@@ -160,7 +167,10 @@ class ProcessCheck(AgentCheck):
                                 if re.search(string, ' '.join(cmdline)):
                                     found = True
                     except psutil.NoSuchProcess:
-                        self.log.warning('Process disappeared while scanning')
+                        # As the process list isn't necessarily scanned right after it's created
+                        # (since we're using a shared cache), there can be cases where processes
+                        # in the list are dead when an instance of the check tries to scan them.
+                        self.log.debug('Process disappeared while scanning')
                     except psutil.AccessDenied as e:
                         ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
                         ad_error_logger('Error: {}'.format(e))
@@ -176,11 +186,16 @@ class ProcessCheck(AgentCheck):
                             break
 
             if not matching_pids:
-                self.log.debug(
-                    "Unable to find process named %s among processes: %s",
-                    search_string,
-                    ', '.join(sorted(proc.name() for proc in self.process_list_cache.elements)),
-                )
+                # Allow debug logging while preserving warning check state.
+                # Uncaught psutil exceptions trigger an Error state
+                try:
+                    processes = sorted(proc.name() for proc in self.process_list_cache.elements)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+                else:
+                    self.log.debug(
+                        "Unable to find process named %s among processes: %s", search_string, ', '.join(processes)
+                    )
 
         self.pid_cache[name] = matching_pids
         self.last_pid_cache_ts[name] = time.time()

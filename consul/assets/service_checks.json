@@ -47,5 +47,20 @@
         ],
         "name": "Can Connect",
         "description": "Returns OK if the Agent can make HTTP requests to consul, CRITICAL otherwise."
+    },
+    {
+        "agent_version": "7.23.0",
+        "integration": "Consul",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "consul.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Consul Prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint, otherwise returns `OK`."
     }
 ]

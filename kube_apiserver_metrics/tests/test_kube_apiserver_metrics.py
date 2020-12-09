@@ -49,9 +49,7 @@ def mock_get():
 
 @pytest.fixture()
 def mock_read_bearer_token():
-    with mock.patch(
-        'datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX",
-    ):
+    with mock.patch('datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX"):
         yield
 
 
@@ -97,7 +95,7 @@ class TestKubeAPIServerMetrics:
         Testing kube_apiserver_metrics metrics collection.
         """
 
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also
@@ -118,7 +116,7 @@ class TestKubeAPIServerMetrics:
             f.write("XXX")
         instanceSecure["bearer_token_path"] = temp_bearer_file
 
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instanceSecure])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instanceSecure])
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instanceSecure)
         configured_instance = check.get_scraper_config(apiserver_instance)
 
@@ -129,7 +127,7 @@ class TestKubeAPIServerMetrics:
         """
         Testing the default configuration.
         """
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [minimal_instance])
 
         check.process = mock.MagicMock()
         check.check(minimal_instance)
@@ -144,7 +142,7 @@ class TestKubeAPIServerMetrics:
         """
         Testing the default legacy configuration.
         """
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance_legacy])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [minimal_instance_legacy])
         check.process = mock.MagicMock()
         check.check(minimal_instance_legacy)
 

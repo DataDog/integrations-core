@@ -581,12 +581,16 @@ aerospike.namespace.xdr_from_proxy_write_success,gauge,,transaction,,The number 
 aerospike.namespace.xdr_from_proxy_write_timeout,gauge,,transaction,,The number of timeouts for XDR write transactions proxied from another node.,0,aerospike,
 aerospike.namespace.latency.read_ops_sec,gauge,,transaction,,The read operations per sec.,-1,aerospike,read ops sec
 aerospike.namespace.latency.read_over_1ms,gauge,,transaction,,The read latency over 1ms.,-1,aerospike,read latency 1ms
-aerospike.namespace.latency.read_over_64ms,gauge,,transaction,,The read latency over 4ms.,-1,aerospike,read latency 4ms
+aerospike.namespace.latency.read_over_64ms,gauge,,transaction,,The read latency over 64ms.,-1,aerospike,read latency 64ms
 aerospike.namespace.latency.read_over_8ms,gauge,,transaction,,The read latency over 8ms.,-1,aerospike,read latency 8ms
 aerospike.namespace.latency.write_ops_sec,gauge,,transaction,,The write operations per sec.,-1,aerospike,write ops sec
 aerospike.namespace.latency.write_over_1ms,gauge,,transaction,,The write latency over 1ms.,-1,aerospike,write latency 1ms
-aerospike.namespace.latency.write_over_64ms,gauge,,transaction,,The write latency over 4ms.,-1,aerospike,write latency 4ms
+aerospike.namespace.latency.write_over_64ms,gauge,,transaction,,The write latency over 64ms.,-1,aerospike,write latency 64ms
 aerospike.namespace.latency.write_over_8ms,gauge,,transaction,,The write latency over 8ms.,-1,aerospike,write latency 8ms
+aerospike.namespace.latency.batch_index_ops_sec,gauge,,transaction,,The batch read operations per sec.,-1,aerospike,batch read ops sec
+aerospike.namespace.latency.batch_index_over_1ms,gauge,,transaction,,The batch read latency over 1ms.,-1,aerospike,batch read latency 1ms
+aerospike.namespace.latency.batch_index_over_64ms,gauge,,transaction,,The batch read latency over 64ms.,-1,aerospike,batch read latency 64ms
+aerospike.namespace.latency.batch_index_over_8ms,gauge,,transaction,,The batch read latency over 8ms.,-1,aerospike,batch read latency 8ms
 aerospike.namespace.migrate_order,gauge,,,,The number between 1 and 10 which determines the order namespaces are to be processed when migrating.,0,aerospike,
 aerospike.namespace.geo2dsphere_within.strict,gauge,,,,"An additional sanity check from Aerospike to validate whether the points returned by S2 falls under the user's query region. When set to false, Aerospike does not do this additional check and send the results as it is.",0,aerospike,
 aerospike.namespace.geo2dsphere_within.earth_radius_meters,gauge,,,,"Earth's radius in meters, since the workspace here is the complete earth.",0,aerospike,

@@ -53,9 +53,12 @@ The TokuMX check is included in the [Datadog Agent][2] package, so you don't nee
 
 For more details about creating and managing users in MongoDB, see [the MongoDB documentation][3].
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
    See the [sample tokumx.d/conf.yaml][5] for all available configuration options:
@@ -69,6 +72,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][6] to start sending TokuMX metrics to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -78,6 +84,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `tokumx`                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
 | `<INSTANCE_CONFIG>`  | `{"server": "mongodb://<USER>:<PASSWORD>@%%host%%:27017"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -97,9 +106,8 @@ This check emits an event each time a TokuMX node has a change in its replicatio
 
 ### Service Checks
 
-`tokumx.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to TokuMX to collect metrics, otherwise OK.
+**tokumx.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to TokuMX to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

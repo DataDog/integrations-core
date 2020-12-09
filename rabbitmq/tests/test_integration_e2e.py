@@ -51,8 +51,6 @@ def assert_metric_covered(aggregator):
     # Exchange attributes, should be only one exchange fetched
     for mname in metrics.E_METRICS:
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', count=1)
-    for mname in metrics.E_METRICS_35:
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', at_least=0)
     # Overview attributes
     for mname in metrics.OVERVIEW_METRICS_TOTALS:
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
@@ -89,10 +87,6 @@ def test_regex(aggregator, check):
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', count=1)
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test5', count=1)
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:tralala', count=0)
-    for mname in metrics.E_METRICS_35:
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', at_least=0)
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test5', at_least=0)
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:tralala', at_least=0)
 
     # Queue attributes
     for mname in metrics.Q_METRICS:
@@ -134,8 +128,6 @@ def test_limit_vhosts(aggregator, check):
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:tralala', count=0)
     for mname in metrics.E_METRICS:
         aggregator.assert_metric(mname, count=2)
-    for mname in metrics.E_METRICS_35:
-        aggregator.assert_metric(mname, at_least=0)
 
     # Overview attributes
     for mname in metrics.OVERVIEW_METRICS_TOTALS:
@@ -167,12 +159,43 @@ def test_family_tagging(aggregator, check):
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
     for mname in metrics.E_METRICS:
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family:test', count=2)
-    for mname in metrics.E_METRICS_35:
-        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family:test', at_least=0)
 
     for mname in metrics.Q_METRICS:
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue_family:test', count=6)
+    # Overview attributes
+    for mname in metrics.OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in metrics.OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
 
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:/'], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myvhost'], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myothervhost'], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.status', status=RabbitMQ.OK)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_family_tagging_with_named_groups(aggregator, check):
+    check.check(common.CONFIG_WITH_FAMILY_NAMED_GROUP)
+
+    # Node attributes
+    for mname in metrics.COMMON_METRICS:
+        aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
+
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
+    for mname in metrics.E_METRICS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family_first_group:test', count=2)
+
+    for mname in metrics.Q_METRICS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue_family_first_group:test', count=6)
     # Overview attributes
     for mname in metrics.OVERVIEW_METRICS_TOTALS:
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)

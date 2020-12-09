@@ -1,0 +1,13 @@
+{
+  "links": {
+    "cloud_controller_v3": {
+      "href": "https://api.sys.domain.com/v3",
+      "meta": {
+        "version": "3.60.0"
+      }
+    },
+    "uaa": {
+      "href": "https://uaa.sys.domain.com"
+    }
+  }
+}

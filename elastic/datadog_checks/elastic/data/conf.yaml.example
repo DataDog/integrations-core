@@ -51,7 +51,7 @@ instances:
     #
   - url: http://localhost:9200
 
-    ## @param node_name_as_host - boolean - optional - default: False
+    ## @param node_name_as_host - boolean - optional - default: false
     ## If each machine only runs a single Elasticsearch node per cluster, you
     ## want to set each Elasticsearch `node.name` to the machine hostname. You may
     ## then set `node_name_as_host` to `true` to avoid duplicate hostnames.
@@ -59,7 +59,7 @@ instances:
     #
     # node_name_as_host: false
 
-    ## @param cluster_stats - boolean - optional - default: False
+    ## @param cluster_stats - boolean - optional - default: false
     ## If your cluster is hosted externally (i.e., you're not pointing to localhost)
     ## you must to set `cluster_stats` to true otherwise the check only
     ## submits metrics of the local node.
@@ -68,12 +68,12 @@ instances:
     #
     # cluster_stats: false
 
-    ## @param index_stats - boolean - optional - default: False
+    ## @param index_stats - boolean - optional - default: false
     ## Set "index_stats" to true to collect metrics for individual indices.
     #
     # index_stats: false
 
-    ## @param pshard_stats - boolean - optional - default: False
+    ## @param pshard_stats - boolean - optional - default: false
     ## If you enable the "pshard_stats" flag, statistics over primary shards
     ## are collected by the check and sent to the backend with the
     ## 'elasticsearch.primary' prefix. It is particularly useful if you want to
@@ -84,12 +84,12 @@ instances:
     #
     # pshard_stats: false
 
-    ## @param pshard_graceful_timeout - boolean - optional - default: False
+    ## @param pshard_graceful_timeout - boolean - optional - default: false
     ## Continue gracefully if pshard stats TO
     #
     # pshard_graceful_timeout: false
 
-    ## @param pending_task_stats - boolean - optional - default: True
+    ## @param pending_task_stats - boolean - optional - default: true
     ## It specifies whether to collect data exposed by the `pending_tasks` cluster endpoint.
     ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-pending.html
     ## Some managed ElasticSearch services (e.g. AWS ElasticSearch) do not expose this endpoint.
@@ -97,12 +97,18 @@ instances:
     #
     # pending_task_stats: true
 
-    ## @param admin_forwarder - boolean - optional - default: False
+    ## @param admin_forwarder - boolean - optional - default: false
     ## It is used to signify a URL that includes a context root
     ## needed for a forwarder application to access Elasticsearch REST services for example
     ## https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
     #
     # admin_forwarder: false
+
+    ## @param gc_collectors_as_rate - boolean - optional - default: false
+    ## Submit `jvm.gc.collectors` metrics as rate.
+    ## Note: Only for ES versions 0.9.10 or higher.
+    #
+    # gc_collectors_as_rate: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -136,10 +142,10 @@ instances:
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported like so:
+    ## The SOCKS protocol is also supported, for example:
     ##
     ##   socks5://user:pass@host:port
     ##
@@ -170,6 +176,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -189,10 +196,15 @@ instances:
     ##     |__ aws_host
     ##     |__ aws_service
     ##
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
@@ -205,11 +217,11 @@ instances:
     # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
-    ## If your services use NTLM authentication, you can specify
-    ## a domain that is used in the check. For NTLM Auth, append
+    ## If your services use NTLM authentication, specify
+    ## the domain used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
-    # ntlm_domain: <NTLM_DOMAIN>/<USERNAME>
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
 
     ## @param kerberos_auth - string - optional - default: disabled
     ## If your services use Kerberos authentication, you can specify the Kerberos
@@ -230,7 +242,7 @@ instances:
     # kerberos_cache: <KERBEROS_CACHE>
 
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
     ##
     ## See https://github.com/requests/requests-kerberos#delegation
     #
@@ -246,7 +258,7 @@ instances:
 
     ## @param kerberos_hostname - string - optional
     ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    ## match its kerberos hostname (e.g. behind a content switch or load balancer).
+    ## match its Kerberos hostname, for example: behind a content switch or load balancer.
     ##
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
@@ -265,27 +277,55 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+
     ## @param aws_region - string - optional
-    ## If your services require AWS Signature Version 4 Signing, set the region.
+    ## If your services require AWS Signature Version 4 signing, set the region.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
     # aws_region: <AWS_REGION>
 
     ## @param aws_host - string - optional
-    ## If your services require AWS Signature Version 4 Signing, set the host.
+    ## If your services require AWS Signature Version 4 signing, set the host.
     ##
-    ## Note that this setting is not necessary for official integrations.
+    ## Note: This setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
     # aws_host: <AWS_HOST>
 
     ## @param aws_service - string - optional
-    ## If your services require AWS Signature Version 4 Signing, set the service code. For a list
+    ## If your services require AWS Signature Version 4 signing, set the service code. For a list
     ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
     ##
-    ## Note that this setting is not necessary for official integrations.
+    ## Note: This setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
@@ -304,6 +344,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -379,10 +423,12 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
-## service - required - The name of the service that generates the log.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #

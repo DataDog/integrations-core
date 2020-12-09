@@ -73,3 +73,13 @@ instances:
     ## Name of your context (optional SNMP v3-only parameter).
     #
     context_name: "%%extra_context_name%%"
+
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    tags:
+      # The autodiscovery subnet the device is part of.
+      # Used by Agent autodiscovery to pass subnet name.
+      - "autodiscovery_subnet:%%extra_autodiscovery_subnet%%"

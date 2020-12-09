@@ -5,11 +5,13 @@
 import re
 
 import pytest
+from mock import MagicMock
 from pyVmomi import vim
 from tests.mocked_api import MockedAPI
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.resource_filters import make_inventory_path
 from datadog_checks.vsphere.utils import (
     is_metric_excluded_by_filters,
@@ -88,7 +90,8 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
 
     formatted_filters = check.config.resource_filters
 
-    infra = MockedAPI(realtime_instance).get_infrastructure()
+    config = VSphereConfig(realtime_instance, MagicMock())
+    infra = MockedAPI(config).get_infrastructure()
     resources = [m for m in infra if m.__class__ in (vim.VirtualMachine, vim.HostSystem)]
     VM2_1 = next(r for r in resources if infra.get(r).get('name') == 'VM2-1')
     check.infrastructure_cache.set_all_tags({vim.VirtualMachine: {VM2_1._moId: ['env:production', 'tag:2']}})
@@ -115,4 +118,20 @@ def test_error_disabled_tags(realtime_instance):
 
     # collecting tags should not raise a configuration error
     realtime_instance['collect_tags'] = True
+    VSphereCheck('vsphere', {}, [realtime_instance])
+
+
+def test_error_disabled_attributes(realtime_instance):
+    realtime_instance['collect_attributes'] = False
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'name', 'patterns': [r'^\$VM5$', r'^VM4-2\d$']},
+        {'resource': 'vm', 'property': 'attribute', 'patterns': [r'env:production']},
+    ]
+
+    # Filtering on attributes without collecting them should not be possible
+    with pytest.raises(ConfigurationError):
+        VSphereCheck('vsphere', {}, [realtime_instance])
+
+    # Now that attributes are enabled, no configuration error should be raised.
+    realtime_instance['collect_attributes'] = True
     VSphereCheck('vsphere', {}, [realtime_instance])

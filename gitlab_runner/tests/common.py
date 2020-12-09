@@ -20,6 +20,8 @@ GITLAB_RUNNER_URL = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_RUNNER_PORT
 
 GITLAB_RUNNER_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_MASTER_PORT)]
 
+GITLAB_RUNNER_VERSION = os.environ['GITLAB_RUNNER_VERSION']
+
 CUSTOM_TAGS = ['optional:tag1']
 
 # Note that this is a subset of the ones defined in GitlabCheck
@@ -44,6 +46,12 @@ CONFIG = {
             'send_monotonic_counter': True,
             'disable_ssl_validation': True,
             'tags': list(CUSTOM_TAGS),
+        }
+    ],
+    'logs': [
+        {
+            "type": "docker",
+            "source": "gitlab-runner",
         }
     ],
 }

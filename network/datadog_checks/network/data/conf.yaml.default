@@ -1,11 +1,11 @@
 ## This file is overwritten upon Agent upgrade.
 ## To make modifications to the check configuration, please copy this file
 ## to `network.yaml` and make your changes on that file.
-
-init_config:
+#
+init_config: {}
 
 ## Network check only supports one configured instance
-
+#
 instances:
 
     ## @param collect_connection_state - boolean - required
@@ -14,6 +14,15 @@ instances:
     ## the command `netstat` from the system package `net-tools` to be installed
     #
   - collect_connection_state: false
+
+    ## @param collect_connection_queues - boolean - optional - default: false
+    ## Set to true to enable connection queues collection
+    ## Note: connection queues collections require both
+    ## `collect_connection_state` and `collect_connection_queues` to be true
+    ## because it also requires the command `ss` from system package `iproute2` or
+    ## the command `netstat` from the system package `net-tools` to be installed
+    #
+    # collect_connection_queues: false
 
     ## @param excluded_interfaces - list of strings - optional
     ## List of interface to exclude from the check.
@@ -65,7 +74,7 @@ instances:
     #
     # use_sudo_conntrack: true
 
-    ## @param whitelist_conntrack_metrics - list of string - optional - default: ["max", "count"]
+    ## @param whitelist_conntrack_metrics - list of strings - optional - default: ['max', 'count']
     ## Linux only.
     ## Names of the conntrack metrics to whitelist for monitoring. The metric value is in the file
     ## /${proc}/sys/net/netfilter/nf_conntrack_${metric_name}.
@@ -81,7 +90,7 @@ instances:
     ## Linux only.
     ## Names of the conntrack metrics to blacklist for monitoring. The metric value is in the file
     ## /${proc}/sys/net/netfilter/nf_conntrack_${metric_name}.
-    ## If set, whitelist default value is reset to []
+    ## If set, whitelist default value is reset to [].
     ## Regex expressions for the project names are supported.
     ## Blacklist takes precedence over whitelist in case of overlap.
     #
@@ -89,10 +98,10 @@ instances:
     #   - <METRIC_NAME>
     #   - <METRIC_PREFIX>.*
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>

@@ -1,0 +1,118 @@
+name: Spark
+files:
+- name: spark.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/http
+      - template: init_config/default
+  - template: instances
+    options:
+      - name: spark_url
+        required: true
+        description: |
+          The Spark check can retrieve metrics from Standalone Spark, YARN and Mesos.
+
+          For Spark Standalone, `spark_url` must be set to the Spark master's web UI.
+          This is "http://localhost:8080" by default.
+
+          For YARN, `spark_url` must be set to YARN's resource manager address. The
+          ResourceManager host name can be found in the yarn-site.xml conf file
+          under the `property yarn.resourcemanager.address` The ResourceManager port
+          can be found in the yarn-site.xml conf file under the property
+          `yarn.resourcemanager.webapp.address`. This is "http://localhost:8088"
+          by default.
+
+          For Mesos, `spark_url` must be set to the Mesos master's web UI. This is
+          "http://<master_ip>:5050" by default, where `<master_ip>` is the IP
+          address or resolvable host name for the Mesos master.
+
+          For Kubernetes or a standalone spark driver, `spark_url` must be set to the spark application driver IP.
+          "http://<driver_ip>:4040" by default, where `<driver_ip>` is the IP
+          address or resolvable spark driver service name.
+        value:
+          type: string
+          example: http://localhost:8080
+      - name: cluster_name
+        required: true
+        description: A friendly name for the cluster.
+        value:
+          type: string
+      - name: spark_cluster_mode
+        description: |
+          To enable monitoring of a Standalone Spark cluster, the spark cluster
+          mode must be set. Choose the cluster mode between :
+           * `spark_yarn_mode`
+           * `spark_standalone_mode`
+           * `spark_mesos_mode`
+           * `spark_driver_mode`
+        value:
+          type: string
+          example: spark_yarn_mode
+      - name: spark_ui_ports
+        description: |
+          If you're using multiple frameworks with Mesos, you can specify which
+          port(s) the Spark Web UI runs on and the check filters out the frameworks
+          whose port don't match. If the check attempts to connect to a framework that
+          requires authentication it will fail; this is to prevent that.
+        value:
+          type: array
+          items:
+            type: integer
+          example:
+            - <PORT_1>
+            - <PORT_2>
+      - name: spark_pre_20_mode
+        description: |
+          To use an older (versions prior to 2.0) Standalone Spark cluster,
+          the 'spark_pre_20_mode' must be set to true
+        value:
+          type: boolean
+          example: false
+      - name: spark_proxy_enabled
+        description: If you have enabled the spark UI proxy, set this to `true`
+        value:
+          type: boolean
+          example: false
+      - name: streaming_metrics
+        description: Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
+        value:
+          type: boolean
+          example: true
+      - name: executor_level_metrics
+        description: Enable collection of more granular executor metrics.
+        value:
+          type: boolean
+          example: false
+      - template: instances/http
+        overrides:
+          auth_token.description: |
+            This allows for the use of authentication information from dynamic sources.
+            Both a reader and writer must be configured.
+
+            The available readers are:
+
+              - type: file
+                path (required): The absolute path for the file to read from.
+                pattern: A regular expression pattern with a single capture group used to find the
+                         token rather than using the entire file, for example: Your secret is (.+)
+
+              - type: dcos_auth
+                login_url (required): DC/OS login endpoint
+                service_account (required): The DC/OS service account to authenticate.
+                private_key_path (required): The absolute path for the DC/OS service account.
+                expiration: Token expiration in seconds, defaults to 300 (5 min).
+
+            The available writers are:
+
+              - type: header
+                name (required): The name of the field, for example: Authorization
+                value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+                placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+      - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/spark/*.log
+      source: spark
+      service: <SERVICE_NAME>

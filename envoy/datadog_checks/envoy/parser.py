@@ -1,5 +1,6 @@
 import re
 from math import isnan
+from typing import Any, Dict, List, Tuple
 
 from six.moves import range, zip
 
@@ -21,6 +22,7 @@ PERCENTILE_SUFFIX = {
 
 
 def parse_metric(metric, metric_mapping=METRIC_TREE):
+    # type: (str, Dict[str, Any]) -> Tuple[str, List[str], str]
     """Takes a metric formatted by Envoy and splits it into a unique
     metric name. Returns the unique metric name, a list of tags, and
     the name of the submission method.
@@ -32,53 +34,59 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
     metric_parts = []
     tag_names = []
     tag_values = []
-    tag_builder = []
+    tag_value_builder = []
     unknown_tags = []
-    num_tags = 0
+    tags_to_build = 0
     minimum_tag_length = 0
 
+    # From the split metric name, any part that is not in the mapping it will become part of the tag value
     for metric_part in metric.split('.'):
-        if metric_part in metric_mapping and num_tags >= minimum_tag_length:
+        if metric_part in metric_mapping and tags_to_build >= minimum_tag_length:
             # Rebuild any built up tags whenever we encounter a known metric part.
-            if tag_builder:
-                for tags in metric_mapping['|_tags_|']:
-                    if num_tags >= len(tags):
-                        break
+            if tag_value_builder:
+                # Edge case where we hit a known metric part after a sequence of all unknown parts
+                if '|_tags_|' not in metric_mapping:
+                    raise UnknownMetric
 
-                constructed_tags = construct_tags(tag_builder, len(tags))
+                tags = next(
+                    (mapped_tags for mapped_tags in metric_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)),
+                    tuple(),
+                )
+                constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
+                # Once the builder has been used, clear its contents.
+                tag_value_builder = []
 
                 if tags:
                     tag_names.extend(tags)
-                    tag_values.extend(constructed_tags)
+                    tag_values.extend(constructed_tag_values)
                 else:
-                    unknown_tags.extend(constructed_tags)
+                    unknown_tags.extend(constructed_tag_values)
 
-                num_tags = 0
+                tags_to_build = 0
 
             metric_parts.append(metric_part)
             metric_mapping = metric_mapping[metric_part]
             minimum_tag_length = len(metric_mapping['|_tags_|'][-1])
         else:
-            tag_builder.append(metric_part)
-            num_tags += 1
+            tag_value_builder.append(metric_part)
+            tags_to_build += 1
 
     metric = '.'.join(metric_parts)
     if metric not in METRICS:
         raise UnknownMetric
 
     # Rebuild any trailing tags
-    if tag_builder:
-        for tags in metric_mapping['|_tags_|']:
-            if num_tags >= len(tags):
-                break
-
-        constructed_tags = construct_tags(tag_builder, len(tags))
+    if tag_value_builder:
+        tags = next(
+            (mapped_tags for mapped_tags in metric_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), tuple()
+        )
+        constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
 
         if tags:
             tag_names.extend(tags)
-            tag_values.extend(constructed_tags)
+            tag_values.extend(constructed_tag_values)
         else:
-            unknown_tags.extend(constructed_tags)
+            unknown_tags.extend(constructed_tag_values)
 
     if unknown_tags:
         raise UnknownTags('{}'.format('|||'.join(unknown_tags)))
@@ -88,16 +96,15 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
     return METRIC_PREFIX + metric, tags, METRICS[metric]['method']
 
 
-def construct_tags(tag_builder, num_tags):
+def construct_tag_values(tag_builder, num_tags):
+    # type: (List[str], int) -> List[str]
+
     # First fill in all trailing slots with one tag.
     tags = [tag_builder.pop() for _ in range(num_tags - 1)]
 
     # Merge any excess tag parts.
     if tag_builder:
         tags.append('.'.join(tag_builder))
-
-    # Once the builder has been used, clear its contents.
-    del tag_builder[:]
 
     # Return an iterator in the original order.
     return reversed(tags)

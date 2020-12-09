@@ -63,7 +63,7 @@ files:
       description: The optional WMI namespace to connect to.
       value:
         type: string
-        example: cimv2
+        example: 'root\cimv2'
     - name: filters
       description: |
         A list of filters on the WMI query you may want.

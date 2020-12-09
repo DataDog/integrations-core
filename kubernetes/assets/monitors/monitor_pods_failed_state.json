@@ -1,0 +1,29 @@
+{
+	"name": "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces",
+	"type": "query alert",
+	"query": "change(avg(last_5m),last_5m):sum:kubernetes_state.pod.status_phase{phase:failed} by {kubernetes_cluster,kube_namespace} > 10",
+	"message": "More than ten pods are failing in ({{kubernetes_cluster.name}} cluster). \n The threshold of ten pods varies depending on your infrastructure. Change the threshold to suit your needs.",
+	"tags": [
+		"integration:kubernetes"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 10,
+			"warning": 5
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when more than 10 pods are failing for a given Kubernetes cluster. "
+	}
+
+}

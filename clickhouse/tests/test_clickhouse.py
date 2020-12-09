@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
+from clickhouse_driver.errors import Error, NetworkError
 
 from datadog_checks.clickhouse import ClickhouseCheck
 
@@ -28,6 +30,41 @@ def test_check(aggregator, instance):
     aggregator.assert_metric(
         'clickhouse.dictionary.item.current', tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test']
     )
+    aggregator.assert_service_check("clickhouse.can_connect", count=1)
+
+
+def test_can_connect(aggregator, instance):
+    """
+    Regression test: a copy of the `can_connect` service check must be submitted for each check run.
+    (It used to be submitted only once on check init, which led to customer seeing "no data" in the UI.)
+    """
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    # Test for consecutive healthy clickhouse.can_connect statuses
+    num_runs = 3
+    for _ in range(num_runs):
+        check.run()
+    aggregator.assert_service_check("clickhouse.can_connect", count=num_runs, status=check.OK)
+    aggregator.reset()
+
+    # Test 1 healthy connection --> 2 Unhealthy service checks --> 1 healthy connection. Recovered
+    check.run()
+    with mock.patch('clickhouse_driver.Client', side_effect=NetworkError('Connection refused')):
+        with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', return_value=False):
+            check.run()
+            check.run()
+    check.run()
+    aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.CRITICAL)
+    aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.OK)
+    aggregator.reset()
+
+    # Test Exception in ping_clickhouse(), but reestablishes connection.
+    check.run()
+    with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', side_effect=Error()):
+        # connect() should be able to handle an exception in ping_clickhouse() and attempt reconnection
+        check.run()
+    check.run()
+    aggregator.assert_service_check("clickhouse.can_connect", count=3, status=check.OK)
 
 
 def test_custom_queries(aggregator, instance):

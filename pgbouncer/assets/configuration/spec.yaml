@@ -1,0 +1,49 @@
+name: PGBouncer
+files:
+- name: pgbouncer.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/default
+  - template: instances
+    options:
+      - name: database_url
+        description: |
+          The PgBouncer stats database URL.
+
+          If the password contains special characters, be sure to escape them using percent encoding.
+
+          See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
+        required: true
+        value:
+          example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
+          type: string
+      - name: host
+        description: If `database_url` is not used, set up the host to connect to with the `host` parameter.
+        value:
+          type: string
+      - name: port
+        description: If `database_url` is not used, set up the port to connect to with the `port` parameter.
+        value:
+          type: integer
+      - name: username
+        description: If `database_url` is not used, set up the user name to use with the `username` parameter.
+        value:
+          type: string
+      - name: password
+        description: |
+          If `database_url` is not used, set up the password to use with the `password` parameter.
+        value:
+          type: string
+      - name: use_cached
+        description: Cache and re-use PostgreSQL connection or create a new one at each check run.
+        value:
+          default: true
+          example: true
+          type: boolean
+      - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/postgresql/pgbouncer.log
+        source: pgbouncer

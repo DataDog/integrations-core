@@ -1,0 +1,22 @@
+name: nginx-ingress-controller
+files:
+  - name: nginx_ingress_controller.yaml
+    options:
+    - template: init_config
+      options:
+        - template: init_config/openmetrics
+    - template: instances
+      options:
+        - name: collect_nginx_histograms
+          description: |
+            Enable to collect histogram metrics that are known to have high tag cardinality.
+            Recommended to use with distribution metrics tag whitelist, please enable `send_distribution_buckets`.
+            For more information about distribution metrics and tags,
+            see https://docs.datadoghq.com/metrics/distributions/#customize-tagging.
+          value:
+            example: false
+            type: boolean
+        - template: instances/openmetrics
+          overrides:
+            prometheus_url.value.example: http://localhost:10254/metrics
+            prometheus_url.display_priority: 1

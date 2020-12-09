@@ -18,7 +18,7 @@ oracle.sorts_per_user_call,gauge,,,,sorts per user call,0,oracle_database,sorts 
 oracle.rows_per_sort,gauge,,row,operation,rows per sort,0,oracle_database,rows per sort
 oracle.disk_sorts,gauge,,operation,second,disk sorts per second,0,oracle_database,disk sorts
 oracle.memory_sorts_ratio,gauge,,fraction,,memory sorts ratio,0,oracle_database,memory sort ratio
-oracle.database_wait_time_ratio,gauge,,fraction,,memory sorts per second,0,oracle_database,db wait-time ratio
+oracle.database_wait_time_ratio,gauge,,percent,,memory sorts per second,0,oracle_database,db wait-time ratio
 oracle.session_limit_usage,gauge,,percent,,session limit usage,0,oracle_database,session lim usage %
 oracle.session_count,gauge,,,,session count,0,oracle_database,session count
 oracle.process.pga_used_memory,gauge,,byte,,PGA memory used by process,0,oracle_database,pga memory used

@@ -20,5 +20,4 @@ CONFIG = {
     'password': 'monitor',
     'timeout': 10,
     'tags': ['foo:bar'],
-    'client_lib_log_level': 'DEBUG',
 }

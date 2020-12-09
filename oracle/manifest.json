@@ -23,10 +23,15 @@
   "type": "check",
   "integration_id": "oracle",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "oracle": "assets/dashboards/oracle_overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

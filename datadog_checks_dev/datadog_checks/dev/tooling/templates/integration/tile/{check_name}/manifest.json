@@ -14,17 +14,18 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-{integration_name} Integration",
+  "public_title": "{integration_name}",
   "categories": [
     ""
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "{check_name_kebab}",
+  "integration_id": "{integration_id}",{pricing_plan}{terms}{author_info}
   "assets": {{
     "dashboards": {{}},
     "saved_views": {{}},
     "monitors": {{}},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {{}}
   }}
 }}

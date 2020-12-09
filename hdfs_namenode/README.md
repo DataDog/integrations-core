@@ -33,9 +33,12 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 
 #### Connect the Agent
 
-##### Host
+#<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+#### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample hdfs_namenode.d/conf.yaml][115] for all available configuration options:
 
@@ -56,6 +59,9 @@ Follow the instructions below to configure this check for an Agent running on a 
    ```
 
 2. [Restart the Agent][116].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -91,6 +97,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][117] and look for `hdfs_namenode` under the Checks section.
@@ -108,7 +117,7 @@ The HDFS-namenode check does not include any events.
 ### Service Checks
 
 **hdfs.namenode.jmx.can_connect**:<br>
-Returns `Critical` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
+Returns `CRITICAL` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
 ## Troubleshooting
 
@@ -121,7 +130,7 @@ Need help? Contact [Datadog support][119].
 - [How to collect Hadoop metrics][1112]
 - [How to monitor Hadoop with Datadog][1113]
 
-[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
+[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_namenode/images/hadoop_dashboard.png
 [112]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [113]: https://app.datadoghq.com/account/settings#agent
 [114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

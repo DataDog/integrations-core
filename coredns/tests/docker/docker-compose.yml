@@ -9,4 +9,4 @@ services:
       - "54:53/tcp"
       - "9153:9153/tcp"
     volumes:
-      - ${COREDNS_CONFIG_FOLDER}:/data
+      - ${COREDNS_CONFIG_FILE}:/data/Corefile

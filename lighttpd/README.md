@@ -16,9 +16,12 @@ In addition, install `mod_status` on your Lighttpd servers.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample lighttpd.d/conf.yaml][4] for all available configuration options:
 
@@ -34,6 +37,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
@@ -43,6 +49,32 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INTEGRATION_NAME>` | `lighttpd`                                                      |
 | `<INIT_CONFIG>`      | blank or `{}`                                                   |
 | `<INSTANCE_CONFIG>`  | `{"lighttpd_status_url": "http://%%host%%/server-status?auto"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `lighttpd.d/conf.yaml` file to start collecting your lighttpd Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: lighttpd
+   ```
+
+   Change the `path` parameter value and configure it for your environment.
+   See the [sample lighttpd.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 
 ### Validation
 
@@ -60,9 +92,8 @@ The Lighttpd check does not include any events.
 
 ### Service Checks
 
-`- lighttpd.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, otherwise OK.
+**lighttpd.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to lighttpd to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

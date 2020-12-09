@@ -33,6 +33,10 @@
     },
     "monitors": {},
     "saved_views": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "confluent_platform"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -8,7 +8,7 @@ from datadog_checks.hyperv.metrics import DEFAULT_COUNTERS
 
 
 def test_check(aggregator, instance_refresh):
-    check = HypervCheck('hyperv', {}, {}, [instance_refresh])
+    check = HypervCheck('hyperv', {}, [instance_refresh])
     check.check(instance_refresh)
 
     for counter_data in DEFAULT_COUNTERS:

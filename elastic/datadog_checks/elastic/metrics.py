@@ -258,6 +258,22 @@ JVM_METRICS_POST_0_90_10 = {
     ),
 }
 
+JVM_METRICS_RATE = {
+    # Submit metrics as rate
+    'jvm.gc.collectors.young.rate': ('rate', 'jvm.gc.collectors.young.collection_count'),
+    'jvm.gc.collectors.young.collection_time.rate': (
+        'rate',
+        'jvm.gc.collectors.young.collection_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+    'jvm.gc.collectors.old.rate': ('rate', 'jvm.gc.collectors.old.collection_count'),
+    'jvm.gc.collectors.old.collection_time.rate': (
+        'rate',
+        'jvm.gc.collectors.old.collection_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+}
+
 JVM_METRICS_PRE_0_90_10 = {
     'jvm.gc.concurrent_mark_sweep.count': ('gauge', 'jvm.gc.collectors.ConcurrentMarkSweep.collection_count'),
     'jvm.gc.concurrent_mark_sweep.collection_time': (
@@ -469,8 +485,30 @@ CLUSTER_PENDING_TASKS = {
     'elasticsearch.pending_tasks_time_in_queue': ('gauge', 'pending_tasks_time_in_queue'),
 }
 
+NODE_SYSTEM_METRICS = {
+    'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
+    'system.mem.usable': ('gauge', 'os.mem.free_in_bytes'),
+    'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
+    'system.swap.free': ('gauge', 'os.swap.free_in_bytes'),
+    'system.swap.used': ('gauge', 'os.swap.used_in_bytes'),
+    'system.net.bytes_rcvd': ('gauge', 'transport.rx_size_in_bytes'),
+    'system.net.bytes_sent': ('gauge', 'transport.tx_size_in_bytes'),
+}
 
-def stats_for_version(version):
+NODE_SYSTEM_METRICS_POST_1 = {
+    'system.mem.total': ('gauge', 'os.mem.total_in_bytes'),
+    'system.swap.total': ('gauge', 'os.swap.total_in_bytes'),
+}
+
+NODE_SYSTEM_METRICS_POST_5 = {
+    'system.cpu.idle': ('gauge', 'os.cpu.percent', lambda v: (100 - v)),
+    'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
+    'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
+    'system.load.15': ('gauge', 'os.cpu.load_average.15m'),
+}
+
+
+def stats_for_version(version, jvm_rate=False):
     """
     Get the proper set of stats metrics for the specified ES version
     """
@@ -479,6 +517,8 @@ def stats_for_version(version):
     # JVM additional metrics
     if version >= [0, 90, 10]:
         metrics.update(JVM_METRICS_POST_0_90_10)
+        if jvm_rate:
+            metrics.update(JVM_METRICS_RATE)
     else:
         metrics.update(JVM_METRICS_PRE_0_90_10)
 
@@ -571,3 +611,17 @@ def index_stats_for_version(version):
         index_stats.update(INDEX_STATS_METRICS)
 
     return index_stats
+
+
+def node_system_stats_for_version(version):
+    """
+    Get the proper set of os metrics for the specified ES version
+    """
+    node_system_stats = dict(NODE_SYSTEM_METRICS)
+
+    if version >= [1, 0, 0]:
+        node_system_stats.update(NODE_SYSTEM_METRICS_POST_1)
+    if version >= [5, 0, 0]:
+        node_system_stats.update(NODE_SYSTEM_METRICS_POST_5)
+
+    return node_system_stats

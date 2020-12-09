@@ -24,8 +24,17 @@
   "is_public": true,
   "integration_id": "twistlock",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "Twistlock": "assets/dashboards/overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "twistlock"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

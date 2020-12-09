@@ -21,9 +21,12 @@ The Spark check is included in the [Datadog Agent][3] package. No additional ins
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. The following parameters may require updating. See the [sample spark.d/conf.yaml][5] for all available configuration options.
 
@@ -35,7 +38,7 @@ Follow the instructions below to configure this check for an Agent running on a 
        #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
        #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
-       spark_cluster_mode: spark_standalone_mode # default
+       spark_cluster_mode: spark_yarn_mode # default
        #   spark_cluster_mode: spark_mesos_mode
        #   spark_cluster_mode: spark_yarn_mode
        #   spark_cluster_mode: spark_driver_mode
@@ -48,6 +51,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -57,6 +63,36 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INTEGRATION_NAME>` | `spark`                                                           |
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+      ```yaml
+       logs_enabled: true
+     ```
+
+2. Uncomment and edit the logs configuration block in your `spark.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample spark.d/conf.yaml][5] for all available configuration options.
+
+      ```yaml
+       logs:
+         - type: file
+           path: <LOG_FILE_PATH>
+           source: spark
+           service: <SERVICE_NAME>
+           # To handle multi line that starts with yyyy-mm-dd use the following pattern
+           # log_processing_rules:
+           #   - type: multi_line
+           #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+           #     name: new_log_start_with_date
+     ```
+
+3. [Restart the Agent][6].
+
+See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
 
 ### Validation
 
@@ -116,3 +152,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [12]: https://www.datadoghq.com/blog/monitoring-spark
 [13]: https://spark.apache.org/
+[14]:  https://docs.datadoghq.com/agent/docker/log/

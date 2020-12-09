@@ -12,6 +12,16 @@ init_config:
     #
     collect_default_metrics: true
 
+    ## @param new_gc_metrics - boolean - optional - default: false
+    ## Set to true to use better metric names for garbage collection metrics.
+    ## jvm.gc.cms.count   => jvm.gc.minor_collection_count
+    ##                       jvm.gc.major_collection_count
+    ## jvm.gc.parnew.time => jvm.gc.minor_collection_time
+    ##                       jvm.gc.major_collection_time
+    ## The default value is false to ensure backward compatibility.
+    #
+    # new_gc_metrics: false
+
     ## @param service_check_prefix - string - optional
     ## Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
     ## If not set, the default service check used is the integration name.
@@ -73,7 +83,7 @@ instances:
 
     ## @param tools_jar_path - string - optional
     ## The tool.jar path to be used with the `process_name_regex` parameter,
-    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## for example: /usr/lib/jvm/java-11-openjdk-amd64/lib/tools.jar
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
@@ -121,17 +131,17 @@ instances:
     #
     # rmi_registry_ssl: false
 
-    ## @param rmi_connection_timeout - number - optional - default: 30
-    ## The connection timeout, in seconds, when connecting to a remote JVM.
+    ## @param rmi_connection_timeout - number - optional - default: 20000
+    ## The connection timeout, in milliseconds, when connecting to a remote JVM.
     #
-    # rmi_connection_timeout: 30
+    # rmi_connection_timeout: 20000
 
-    ## @param rmi_client_timeout - number - optional - default: 30
+    ## @param rmi_client_timeout - number - optional - default: 15000
     ## The timeout to consider a remote connection, already successfully established, as lost.
-    ## If a connected remote JVM does not reply after `rmi_client_timeout` seconds jmxfetch
+    ## If a connected remote JVM does not reply after `rmi_client_timeout` milliseconds jmxfetch
     ## will give up on that connection and retry.
     #
-    # rmi_client_timeout: 30
+    # rmi_client_timeout: 15000
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -168,16 +178,26 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
-## service - required - The name of the service that generates the log.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
 #   - type: file
 #     path: /var/log/hivemq.log
+#     source: hivemq
+#     service: <SERVICE>
+#     log_processing_rules:
+#     - type: multi_line
+#       name: log_start_with_date
+#       pattern: \d{4}-\d{2}-\d{2}
+#   - type: file
+#     path: /var/log/hivemq_event.log
 #     source: hivemq
 #     service: <SERVICE>
 #     log_processing_rules:

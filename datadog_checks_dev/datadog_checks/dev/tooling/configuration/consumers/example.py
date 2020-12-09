@@ -78,13 +78,15 @@ def write_description(option, writer, indent, option_type):
     for line in description.splitlines():
         if line:
             line = f'{indent}## {line}'
-            if len(line) > DESCRIPTION_LINE_LENGTH_LIMIT:
+            if len(line) > DESCRIPTION_LINE_LENGTH_LIMIT and ' /noqa' not in line:
                 extra_characters = len(line) - DESCRIPTION_LINE_LENGTH_LIMIT
                 writer.new_error(
                     'Description line length of {} `{}` was over the limit by {} character{}'.format(
                         option_type, option['name'], extra_characters, 's' if extra_characters > 1 else ''
                     )
                 )
+            elif ' /noqa' in line:
+                line = line.replace(' /noqa', '')
             writer.write(line)
         else:
             writer.write(indent, '##')
@@ -112,9 +114,12 @@ def write_option(option, writer, indent='', start_list=False):
         if not required:
             if 'default' in value:
                 default = value['default']
-                if default is not None:
-                    if type(default) is str:
+                default_type = type(default)
+                if default is not None and str(default).lower() != 'none':
+                    if default_type is str:
                         writer.write(' - default: ', default)
+                    elif default_type is bool:
+                        writer.write(' - default: ', 'true' if default else 'false')
                     else:
                         writer.write(' - default: ', repr(default))
             else:
@@ -143,7 +148,8 @@ def write_option(option, writer, indent='', start_list=False):
                     if isinstance(item, str):
                         compacted_item = construct_yaml(item, default_flow_style=True, default_style='"')
                     else:
-                        compacted_item = construct_yaml(item, default_flow_style=True)
+                        # Compact examples should stay on one line to prevent weird line wraps.
+                        compacted_item = construct_yaml(item, default_flow_style=True, width=float('inf'))
 
                     option_yaml_lines.append(f'- {compacted_item.strip()}')
 

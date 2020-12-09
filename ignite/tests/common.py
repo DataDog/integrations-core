@@ -1,32 +1,21 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
+
+from pkg_resources import parse_version
+
+from datadog_checks.dev import get_here
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
+
+HERE = get_here()
+
+IGNITE_IMAGE = os.environ['IGNITE_IMAGE']
+IGNITE_VERSION = os.environ.get('IGNITE_VERSION', '')
+
+IS_PRE_2_9 = False if not IGNITE_VERSION else parse_version(IGNITE_VERSION) < parse_version('2.9')
 
 GAUGES = [
-    'jvm.thread_count',
-    'jvm.gc.survivor_size',
-    'jvm.heap_memory_committed',
-    'jvm.non_heap_memory_committed',
-    'jvm.buffer_pool.direct.count',
-    'jvm.cpu_load.process',
-    'jvm.non_heap_memory_max',
-    'jvm.gc.cms.count',
-    'jvm.gc.eden_size',
-    'jvm.heap_memory',
-    'jvm.buffer_pool.mapped.count',
-    'jvm.buffer_pool.mapped.capacity',
-    'jvm.non_heap_memory_init',
-    'jvm.buffer_pool.direct.capacity',
-    'jvm.os.open_file_descriptors',
-    'jvm.loaded_classes',
-    'jvm.gc.parnew.time',
-    'jvm.non_heap_memory',
-    'jvm.buffer_pool.direct.used',
-    'jvm.buffer_pool.mapped.used',
-    'jvm.heap_memory_init',
-    'jvm.gc.old_gen_size',
-    'jvm.cpu_load.system',
-    'jvm.heap_memory_max',
     'ignite.cache.offheap_miss_percentage',
     'ignite.jobs.wait_time.maximum',
     'ignite.cache.size',
@@ -45,7 +34,6 @@ GAUGES = [
     'ignite.heap_memory_committed',
     'ignite.cache.rebalancing_keys_rate',
     'ignite.total_server_nodes',
-    'ignite.cache.cluster_owning_partitions',
     'ignite.checkpoint.last_pages_write_duration',
     'ignite.cache.offheap_allocated_size',
     'ignite.cache.thread_map_size',
@@ -162,7 +150,6 @@ GAUGES = [
     'ignite.jobs.maximum_failover',
     'ignite.cache.committed_versions_size',
     'ignite.total_baseline_nodes',
-    'ignite.cache.cluster_moving_partitions',
     'ignite.cache.offheap_hit_percentage',
     'ignite.jobs.active.average',
     'ignite.cache.dht_xid_map_size',
@@ -176,9 +163,15 @@ GAUGES = [
     'ignite.jobs.waiting.average',
     'ignite.checkpoint.last_copied_on_write_pages',
     'ignite.wal.last_rollover',
-]
+] + JVM_E2E_METRICS
 
-COUNTS = [
+if IS_PRE_2_9:
+    GAUGES += [
+        'ignite.cache.cluster_owning_partitions',
+        'ignite.cache.cluster_moving_partitions',
+    ]
+
+MONOTONIC_COUNTS = [
     "ignite.cache.commits",
     "ignite.cache.entry_processor.hits",
     "ignite.cache.entry_processor.invocations",

@@ -1,0 +1,54 @@
+name: Riak
+files:
+- name: riak.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+      - name: url
+        description: The Riak stats URL to connect to.
+        required: true
+        value:
+          type: string
+          example: http://127.0.0.1:8098/stats
+      - template: instances/http
+      - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/riak/console.log
+        source: riak
+      - type: file
+        path: /var/log/riak/error.log
+        source: riak
+        log_processing_rules:
+          - type: multi_line
+            name: new_log_start_with_date
+            pattern: \d{4}\-\d{2}\-\d{2}
+      - type: file
+        path: /var/log/riak/crash.log
+        source: riak
+        log_processing_rules:
+          - type: multi_line
+            name: new_log_start_with_date
+            pattern: \d{4}\-\d{2}\-\d{2}
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - riak
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: url
+      description: The Riak stats URL to connect to.
+      required: true
+      value:
+        type: string
+        example: http://%%host%%:8098/stats

@@ -1,0 +1,40 @@
+name: Gearman
+files:
+- name: gearmand.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+      - name: server
+        description: Server to connect to.
+        required: true
+        value:
+          example: localhost
+          type: string
+      - name: port
+        description: Port to use when connecting to "server".
+        required: true
+        value:
+          example: 4730
+          type: integer
+      - name: tasks
+        description: |
+          Use the `tasks` parameter to specify the tasks you'd like to
+          collect metrics on (up to 200 tasks).
+          If you have fewer than 200 tasks, you don't have to set this parameter,
+          the metrics are collected on all the tasks by default.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <TASK_1>
+            - <TASK_2>
+      - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/gearmand.log
+        source: gearman

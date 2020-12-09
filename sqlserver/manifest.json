@@ -17,6 +17,7 @@
   "support": "core",
   "supported_os": [
     "linux",
+    "mac_os",
     "windows"
   ],
   "type": "check",
@@ -27,6 +28,10 @@
     },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "sqlserver"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

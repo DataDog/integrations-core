@@ -1,8 +1,17 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - cilium-agent
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param agent_endpoint - string - required
@@ -12,12 +21,12 @@ instances:
     #
   - agent_endpoint: http://%%host%%:9090/metrics
 
-    ## @param tags - list of key:value elements - optional
+    ## @param tags - list of strings - optional
     ## List of tags to attach to every metrics, events and service checks emitted by this integration.
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     tags:
-      - "cilium-pod:%%host%%"
+      - cilium-pod:%%host%%
 
     ## @param timeout - integer - optional - default: 10
     ## Overrides the default timeout value in second

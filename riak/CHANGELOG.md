@@ -1,36 +1,52 @@
 # CHANGELOG - riak
 
-## 1.9.0 / 2020-05-20
+## 2.2.0 / 2020-10-31 / Agent 7.24.0
 
-* [Added] Upgrade httplib2 to 0.18.0. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 2.1.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
+## 2.0.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Add config specs. See [#7068](https://github.com/DataDog/integrations-core/pull/7068).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Changed] Use requests wrapper and remove httplib2 dependency. See [#7247](https://github.com/DataDog/integrations-core/pull/7247).
+
+## 1.9.0 / 2020-05-20 / Agent 7.20.0
+
+* [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
 
 ## 1.8.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Use Agent 6 signature. See [#6448](https://github.com/DataDog/integrations-core/pull/6448).
 
-## 1.7.1 / 2020-04-04
+## 1.7.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.7.0 / 2020-01-13
+## 1.7.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 
-## 1.6.0 / 2019-07-12
+## 1.6.0 / 2019-07-12 / Agent 6.13.0
 
 * [Added] Add logs section. See [#3995](https://github.com/DataDog/integrations-core/pull/3995).
 
-## 1.5.0 / 2019-05-14
+## 1.5.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3563](https://github.com/DataDog/integrations-core/pull/3563).
 
-## 1.4.0 / 2019-01-04
+## 1.4.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2774][1].
 
-## 1.3.1 / 2018-09-04
+## 1.3.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
@@ -54,5 +70,5 @@
 [1]: https://github.com/DataDog/integrations-core/pull/2774
 [2]: https://github.com/DataDog/integrations-core/pull/1727
 [3]: https://github.com/DataDog/integrations-core/pull/1664
-[4]: 
+[4]: https://github.com/DataDog/integrations-core/pull/1444
 [5]: https://github.com/DataDog/integrations-core/issues/860

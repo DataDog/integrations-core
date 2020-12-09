@@ -1,0 +1,38 @@
+{
+    "cursor": {
+        "firstBatch": [
+            {
+                "_id": "abc1",
+                "total": 375
+            },
+            {
+                "_id": "xyz1",
+                "total": 125
+            }
+        ],
+        "id": 0,
+        "ns": "test.orders"
+    },
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600331947,
+            "i": 1
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600331952,
+                "i": 1
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    }
+}

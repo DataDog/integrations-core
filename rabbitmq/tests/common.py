@@ -4,10 +4,15 @@
 
 import os
 
+from packaging import version
+
 from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+
+RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
+RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
 
 CHECK_NAME = 'rabbitmq'
 
@@ -57,6 +62,15 @@ CONFIG_WITH_FAMILY = {
     'tag_families': True,
     'queues_regexes': [r'(test)\d+'],
     'exchanges_regexes': [r'(test)\d+'],
+}
+
+CONFIG_WITH_FAMILY_NAMED_GROUP = {
+    'rabbitmq_api_url': URL,
+    'rabbitmq_user': 'guest',
+    'rabbitmq_pass': 'guest',
+    'tag_families': True,
+    'queues_regexes': [r'(?P<first_group>test)\d+'],
+    'exchanges_regexes': [r'(?P<first_group>test)\d+'],
 }
 
 CONFIG_DEFAULT_VHOSTS = {

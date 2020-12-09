@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+import logging
+
 from .util import (
     ACTIVITY_DD_METRICS,
     ACTIVITY_METRICS_8_3,
@@ -21,8 +23,11 @@ from .util import (
     REPLICATION_METRICS_9_1,
     REPLICATION_METRICS_9_2,
     REPLICATION_METRICS_10,
+    REPLICATION_STATS_METRICS,
 )
 from .version_utils import V8_3, V9_1, V9_2, V9_4, V9_6, V10
+
+logger = logging.getLogger(__name__)
 
 
 class PostgresMetricsCache:
@@ -34,6 +39,7 @@ class PostgresMetricsCache:
         self.bgw_metrics = None
         self.archiver_metrics = None
         self.replication_metrics = None
+        self.replication_stats_metrics = None
         self.activity_metrics = None
         self._count_metrics = None
 
@@ -42,6 +48,7 @@ class PostgresMetricsCache:
         self.bgw_metrics = None
         self.archiver_metrics = None
         self.replication_metrics = None
+        self.replication_stats_metrics = None
         self.activity_metrics = None
 
     def get_instance_metrics(self, version):
@@ -141,25 +148,34 @@ class PostgresMetricsCache:
             'relation': False,
         }
 
-    def get_replication_metrics(self, version):
-        """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
+    def get_replication_metrics(self, version, is_aurora):
+        """Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         metrics = self.replication_metrics
         if version >= V10 and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
             metrics = self.replication_metrics
         elif version >= V9_1 and metrics is None:
-            self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-            if version >= V9_2:
-                self.replication_metrics.update(REPLICATION_METRICS_9_2)
+            if is_aurora:
+                logger.debug("Detected Aurora {}. Won't collect replication metrics", version)
+                self.replication_metrics = {}
+            else:
+                self.replication_metrics = dict(REPLICATION_METRICS_9_1)
+                if version >= V9_2:
+                    self.replication_metrics.update(REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics
         return metrics
 
+    def get_replication_stats_metrics(self, version):
+        if version >= V10 and self.replication_stats_metrics is None:
+            self.replication_stats_metrics = dict(REPLICATION_STATS_METRICS)
+        return self.replication_stats_metrics
+
     def get_activity_metrics(self, version):
-        """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
+        """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
         Uses a dictionnary to save the result for each instance
         """

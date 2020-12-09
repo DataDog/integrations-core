@@ -30,8 +30,15 @@
   "type": "check",
   "integration_id": "memcached",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "memcached"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

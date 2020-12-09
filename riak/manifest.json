@@ -24,8 +24,15 @@
   "type": "check",
   "integration_id": "riak",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "riak"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

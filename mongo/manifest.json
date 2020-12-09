@@ -33,14 +33,22 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
-    "dashboards": {},
+    "monitors": {
+      "[MongoDB] High incoming connections": "assets/monitors/high_connections.json"
+    },
+    "dashboards": {
+      "mongodb": "assets/dashboards/overview.json"
+    },
     "saved_views": {
       "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",
       "queries": "assets/saved_views/queries.json",
       "queries_by_type_overview": "assets/saved_views/queries_by_type_overview.json",
       "slow_queries": "assets/saved_views/slow_queries.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "mongodb"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -1,10 +1,14 @@
 extends:
   - _base.yaml
-  - _generic-router-if.yaml
-  - _generic-router-tcp.yaml
-  - _generic-router-udp.yaml
-  - _generic-router-ip.yaml
-  
+  - _hp-compaq-health.yaml
+  - _generic-if.yaml
+  - _generic-tcp.yaml
+  - _generic-udp.yaml
+  - _generic-ip.yaml
+
+device:
+  vendor: "hp"
+
 sysobjectid: 1.3.6.1.4.1.232.*
 
 metrics:
@@ -157,18 +161,6 @@ metrics:
           OID: 1.3.6.1.4.1.232.3.2.5.1.1.2
           name: cpqDaPhyDrvIndex
         tag: drive_index
-  - MIB: CPQHLTH-MIB
-    table:
-      OID: 1.3.6.1.4.1.232.6.2.14.13
-      name: cpqHeResMem2ModuleTable
-    symbols:
-      - OID: 1.3.6.1.4.1.232.6.2.14.13.1.20
-        name: cpqHeResMem2ModuleCondition
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.232.6.2.14.13.1.15
-          name: cpqHeResMem2ModuleCellTablePtr
-        tag: mem_board_index
   - MIB: CPQNIC-MIB
     table:
       OID: 1.3.6.1.4.1.232.18.2.3.1
@@ -187,22 +179,6 @@ metrics:
           OID: 1.3.6.1.4.1.232.18.2.3.1.1.39
           name: cpqNicIfPhysAdapterName
         tag: adapter_name
-  - MIB: CPQHLTH-MIB
-    table:
-      OID: 1.3.6.1.4.1.232.6.2.9.3
-      name: cpqHeFltTolPowerSupplyTable
-    symbols:
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
-        name: cpqHeFltTolPowerSupplyStatus
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.7
-        name: cpqHeFltTolPowerSupplyCapacityUsed
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.8
-        name: cpqHeFltTolPowerSupplyCapacityMaximum
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.232.6.2.9.3.1.1
-          name: cpqHeFltTolPowerSupplyChassis
-        tag: chassis_num
   - MIB: CPQIDA-MIB
     table:
       OID: 1.3.6.1.4.1.232.3.2.2.1
@@ -215,15 +191,3 @@ metrics:
           OID: 1.3.6.1.4.1.232.3.2.2.1.1.1
           name: cpqDaCntlrIndex
         tag: controller_index
-  - MIB: CPQHLTH-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.232.6.2.6.1
-      name: cpqHeThermalCondition
-  - MIB: CPQHLTH-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.232.6.2.8.1
-      name: cpqHeSysUtilLifeTime
-  - MIB: CPQHLTH-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.232.6.2.9.2
-      name: cpqHeFltTolPwrSupplyStatus

@@ -16,6 +16,7 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL,
     DEFAULT_TAGS_COLLECTOR_SIZE,
     DEFAULT_THREAD_COUNT,
+    DEFAULT_VSPHERE_ATTR_PREFIX,
     DEFAULT_VSPHERE_TAG_PREFIX,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL_RESOURCES,
@@ -55,6 +56,8 @@ class VSphereConfig(object):
         self.use_collect_events_fallback = instance.get("use_collect_events_fallback", False)
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
+        self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
+        self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
@@ -83,7 +86,7 @@ class VSphereConfig(object):
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             instance.get("collect_per_instance_filters", {})
         )
-
+        self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.validate_config()
 
     def is_historical(self):
@@ -134,6 +137,11 @@ class VSphereConfig(object):
                 raise ConfigurationError(
                     'Your configuration is incorrectly attempting to filter resources '
                     'by the `tag` property but `collect_tags` is disabled.'
+                )
+            if resource_filter['property'] == 'attribute' and not self.should_collect_attributes:
+                raise ConfigurationError(
+                    'Your configuration is incorrectly attempting to filter resources '
+                    'by the `attribute` property but `collect_attributes` is disabled.'
                 )
 
             # Check required fields and their types

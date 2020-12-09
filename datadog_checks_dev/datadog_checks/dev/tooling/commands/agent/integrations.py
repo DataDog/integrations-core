@@ -15,7 +15,7 @@ from .common import get_agent_tags
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS, short_help="Generate a markdown file of integrations in an Agent release",
+    context_settings=CONTEXT_SETTINGS, short_help="Generate a markdown file of integrations in an Agent release"
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")

@@ -1,0 +1,31 @@
+[
+  {
+    "agent_version": "7.21.0",
+    "integration": "Cloud Foundry API",
+    "check": "cloud_foundry_api.api.can_connect",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "api_url"
+    ],
+    "name": "Can Connect",
+    "description": "Returns `OK` if the check is able to connect to the API and collect audit events, `CRITICAL` otherwise."
+  },
+  {
+    "agent_version": "7.21.0",
+    "integration": "Cloud Foundry API",
+    "check": "cloud_foundry_api.uaa.can_authenticate",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "uaa_url",
+      "api_url"
+    ],
+    "name": "Can Authenticate with UAA",
+    "description": "Returns `OK` if the check is able to authenticate with the UAA server and obtain an oauth token, `CRITICAL` otherwise."
+  }
+]

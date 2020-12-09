@@ -1,0 +1,127 @@
+name: Network
+files:
+  - name: network.yaml
+    example_name: conf.yaml.default
+    options:
+      - template: init_config
+        description: |
+          This file is overwritten upon Agent upgrade.
+          To make modifications to the check configuration, please copy this file
+          to `network.yaml` and make your changes on that file.
+        required: true
+      - template: instances
+        description: Network check only supports one configured instance
+        options:
+          - name: collect_connection_state
+            required: true
+            description: |
+              Set to true to collect connection states for your interfaces
+              Note: this will require either the command `ss` from system package `iproute2` or
+              the command `netstat` from the system package `net-tools` to be installed
+            value:
+              example: false
+              type: boolean
+          - name: collect_connection_queues
+            description: |
+              Set to true to enable connection queues collection
+              Note: connection queues collections require both
+              `collect_connection_state` and `collect_connection_queues` to be true
+              because it also requires the command `ss` from system package `iproute2` or
+              the command `netstat` from the system package `net-tools` to be installed
+            value:
+              example: false
+              type: boolean
+          - name: excluded_interfaces
+            description: List of interface to exclude from the check.
+            value:
+              example:
+                - lo
+                - lo0
+              type: array
+              items:
+                type: string
+          - name: excluded_interface_re
+            description: Completely ignore any network interface matching the given regex.
+            value:
+              default:
+              example: <NETWORK_INTERFACE_NAME>.*
+              type: string
+          - name: combine_connection_states
+            description: |
+              Set to false to not combine connection states.
+              By default we combine states like fin_wait_1 and fin_wait_2
+              together into one state: 'closing' disable this option to get more granular data.
+            value:
+              example: true
+              type: boolean
+          - name: collect_rate_metrics
+            description: |
+              By default, most metrics are submitted as rates.
+              However, some metrics like tcp/udp retransmissions and errors are
+              better handled as counts.
+              Choose to disable rate metrics by setting collect_rate_metrics to false.
+            value:
+              example: true
+              type: boolean
+          - name: collect_count_metrics
+            description: |
+              By default, most metrics are submitted as rates.
+              However, some metrics like tcp/udp retransmissions and errors are
+              better handled as counts.
+              Choose to enable count metrics by setting collect_count_metrics to true.
+              Count metrics have '.count' added to the metric name.
+            value:
+              example: false
+              type: boolean
+          - name: conntrack_path
+            description: |
+              Linux only.
+              The location of the conntrack executable in order to get the stats from conntrack -S.
+              It will be run with sudo by default, so an entry needs to be added to the sudoers file.
+              By default, these metrics will not be sent.
+            value:
+              default:
+              example: /usr/sbin/conntrack
+              type: string
+          - name: use_sudo_conntrack
+            description: |
+              Set to False to disable sudo when running `conntrack -S`
+              (`sudo` isn't normally available in containers)
+            value:
+              example: true
+              type: boolean
+          - name: whitelist_conntrack_metrics
+            description: |
+              Linux only.
+              Names of the conntrack metrics to whitelist for monitoring. The metric value is in the file
+              /${proc}/sys/net/netfilter/nf_conntrack_${metric_name}.
+              By default the agent collects only max and count.
+              Regex expressions for the project names are supported.
+              Blacklist takes precedence over whitelist in case of overlap.
+            value:
+              example:
+                - <METRIC_NAME>
+                - <METRIC_PREFIX>.*
+              default:
+                - max
+                - count
+              type: array
+              items: 
+                type: string
+          - name: blacklist_conntrack_metrics
+            description: |
+              Linux only.
+              Names of the conntrack metrics to blacklist for monitoring. The metric value is in the file
+              /${proc}/sys/net/netfilter/nf_conntrack_${metric_name}.
+              If set, whitelist default value is reset to [].
+              Regex expressions for the project names are supported.
+              Blacklist takes precedence over whitelist in case of overlap.
+            value:
+              default: []
+              example:
+                - <METRIC_NAME>
+                - <METRIC_PREFIX>.*
+              type: array
+              items: 
+                type: string
+          - template: instances/tags

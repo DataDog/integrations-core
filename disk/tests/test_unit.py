@@ -9,10 +9,12 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.disk import Disk
+from datadog_checks.disk.disk import IGNORE_CASE
 
 from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockDiskMetrics, mock_blkid_output
+from .mocks import MockDiskMetrics, MockPart, mock_blkid_output
 
 
 def test_default_options():
@@ -20,16 +22,17 @@ def test_default_options():
 
     assert check._use_mount is False
     assert check._all_partitions is False
-    assert check._file_system_whitelist is None
-    assert check._file_system_blacklist == re.compile('iso9660$', re.I)
-    assert check._device_whitelist is None
-    assert check._device_blacklist is None
-    assert check._mount_point_whitelist is None
-    assert check._mount_point_blacklist is None
+    assert check._file_system_include is None
+    assert check._file_system_exclude == re.compile('iso9660$', re.I)
+    assert check._device_include is None
+    assert check._device_exclude is None
+    assert check._mount_point_include is None
+    assert check._mount_point_exclude == re.compile('(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE)
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False
     assert check._min_disk_size == 0
+    assert check._timeout == 5
 
 
 def test_bad_config():
@@ -211,3 +214,78 @@ def test_blkid_cache_file_contains_no_labels(
     c.check(instance_blkid_cache_file_no_label)
     for metric in chain(gauge_metrics, rate_metrics):
         aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1'])
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_timeout_config(aggregator, gauge_metrics, rate_metrics):
+    """Test timeout configuration value is used on every timeout on the check."""
+
+    # Arbitrary value
+    TIMEOUT_VALUE = 42
+    instance = {'timeout': TIMEOUT_VALUE}
+    c = Disk('disk', {}, [instance])
+
+    # Mock timeout version
+    def no_timeout(fun):
+        return lambda *args: fun(args)
+
+    with mock.patch('psutil.disk_partitions', return_value=[MockPart()]), mock.patch(
+        'datadog_checks.disk.disk.timeout', return_value=no_timeout
+    ) as mock_timeout:
+        c.check(instance)
+
+    mock_timeout.assert_called_with(TIMEOUT_VALUE)
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
+    """Test a warning is raised when there is a Timeout exception."""
+
+    # Raise exception for "/faulty" mountpoint
+    def faulty_timeout(fun):
+        def f(mountpoint):
+            if mountpoint == "/faulty":
+                raise TimeoutException
+            else:
+                return fun(mountpoint)
+
+        return f
+
+    c = Disk('disk', {}, [{}])
+    c.log = mock.MagicMock()
+    m = MockDiskMetrics()
+    m.total = 0
+
+    with mock.patch('psutil.disk_partitions', return_value=[MockPart(), MockPart(mountpoint="/faulty")]), mock.patch(
+        'psutil.disk_usage', return_value=m, __name__='disk_usage'
+    ), mock.patch('datadog_checks.disk.disk.timeout', return_value=faulty_timeout):
+        c.check({})
+
+    # Check that the warning is called once for the faulty disk
+    c.log.warning.assert_called_once()
+
+    for name in gauge_metrics:
+        aggregator.assert_metric(name, count=0)
+
+    for name in rate_metrics:
+        aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+        aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_include_all_devices(aggregator, gauge_metrics, rate_metrics):
+    c = Disk('disk', {}, [{}])
+
+    with mock.patch('psutil.disk_partitions', return_value=[]) as m:
+        c.check({})
+        # By default, we include all devices
+        m.assert_called_with(all=True)
+
+    instance = {'include_all_devices': False}
+    c = Disk('disk', {}, [instance])
+
+    with mock.patch('psutil.disk_partitions', return_value=[]) as m:
+        c.check({})
+        m.assert_called_with(all=False)

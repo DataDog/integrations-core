@@ -1,18 +1,40 @@
 # CHANGELOG - mesos_slave
 
-## 2.2.0 / 2020-05-17
+## 2.7.0 / 2020-11-06 / Agent 7.24.0
+
+* [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
+
+## 2.6.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+
+## 2.5.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
+## 2.4.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Add config specs. See [#7292](https://github.com/DataDog/integrations-core/pull/7292).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 2.3.0 / 2020-06-29 / Agent 7.21.0
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 2.2.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 2.1.1 / 2020-04-04
+## 2.1.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 2.1.0 / 2020-01-13
+## 2.1.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 2.0.1 / 2019-12-04
+## 2.0.1 / 2019-12-04 / Agent 7.16.0
 
 * [Fixed] Propagate tags properly to stats metrics. See [#5140](https://github.com/DataDog/integrations-core/pull/5140).
 
@@ -21,11 +43,11 @@
 * [Changed] Refactor code and properly send a service check for each endpoint. See [#4891](https://github.com/DataDog/integrations-core/pull/4891).
 * [Fixed] Fix service check message. See [#4771](https://github.com/DataDog/integrations-core/pull/4771).
 
-## 1.6.0 / 2019-10-11
+## 1.6.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.5.1 / 2019-08-28
+## 1.5.1 / 2019-08-28 / Agent 6.14.0
 
 * [Fixed] Fix mesos_slave service check. See [#4448](https://github.com/DataDog/integrations-core/pull/4448).
 
@@ -34,7 +56,7 @@
 * [Added] Add requests wrapper to mesos_slave. See [#4222](https://github.com/DataDog/integrations-core/pull/4222).
 * [Added] Add support for /state endpoint. See [#4054](https://github.com/DataDog/integrations-core/pull/4054).
 
-## 1.4.1 / 2019-06-01
+## 1.4.1 / 2019-06-01 / Agent 6.12.0
 
 * [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).
 
@@ -42,11 +64,11 @@
 
 * [Added] Adhere to code style. See [#3539](https://github.com/DataDog/integrations-core/pull/3539).
 
-## 1.3.0 / 2019-02-18
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2874](https://github.com/DataDog/integrations-core/pull/2874).
 
-## 1.2.1 / 2018-09-04
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].
 

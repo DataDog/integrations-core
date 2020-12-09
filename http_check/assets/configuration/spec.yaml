@@ -1,0 +1,166 @@
+name: HTTP
+files:
+- name: http_check.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: name
+      required: true
+      description: Name of your Http check instance.
+      value:
+        example: My first service
+        type: string
+    - name: url
+      required: true
+      description: |
+        Url to check
+        Non-standard ports are supported using http://hostname:port syntax
+      value:
+        type: string
+        example: http://some.url.example.com
+    - name: method
+      description: The method parameter allows you to change the HTTP method used in the request.
+      value:
+        type: string
+        example: get
+    - name: data
+      description: |
+        If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
+        request with the data parameter.
+        SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
+      value:
+        type: object
+        enabled: false
+        example:
+          <KEY>: <VALUE>
+    - name: content_match
+      description: |
+        The content_match parameter allows the check
+        to look for a particular string within the response. The check
+        will report as DOWN if the string is not found.
+
+        content_match uses Python regular expressions which means that
+        you will have to escape the following "special" characters with
+        a backslash (\) if you're trying to match them in your content:
+         . ^ $ * + ? { } [ ] \ | ( )
+
+        Examples:
+        content_match: 'In Stock'
+        content_match: '^(Bread|Apples|Very small rocks|Cider|Gravy|Cherries|Mud|Churches|Lead) float(s)? in water'
+      value:
+        type: string
+        example: '<REGEX>'
+        default: None
+    - name: reverse_content_match
+      description: |
+        The reverse_content_match parameter will allow the content_match
+        to work the other way around. That means that the check will report
+        as DOWN if the string is found.
+      value:
+        type: boolean
+        example: false
+    - name: http_response_status_code
+      description: |
+        The http_response_status_code parameter will instruct the check
+        to look for a particular HTTP response status code or a Regex identifying
+        a set of possible status codes.
+        The check will report as DOWN if status code returned differs.
+        This defaults to 1xx, 2xx and 3xx HTTP status code.
+      value:
+        type: string
+        example: (1|2|3)\d\d
+    - name: include_content
+      description: |
+        The include_content parameter will instruct the check
+        to include the first 500 characters of the HTTP response body
+        in notifications sent by this plugin. This is best used with
+        "healthcheck"-type URLs, where the body contains a brief, human-
+        readable summary of failure reasons in the case of errors.
+      value:
+        type: boolean
+        example: false
+    - name: collect_response_time
+      description: |
+        Set collect_response_time parameter to true to instruct the check to
+        create a metric 'network.http.response_time', tagged with
+        the url, reporting the response time in seconds.
+      value:
+        type: boolean
+        example: true
+    - name: check_certificate_expiration
+      description: |
+        The check_certificate_expiration will instruct the check
+        to create a service check that checks the expiration of the
+        ssl certificate. Allow for a warning to occur when x days are
+        left in the certificate, and alternatively raise a critical
+        warning if the certificate is y days from the expiration date.
+
+        When "days" doesn't provide enough granularity (e.g. when a certificate is
+        expected to expire in less than 24h) "seconds" can be used. Please note
+        that configuration parameters expressed in seconds take precedence over
+        the corresponding ones expressed in days.
+
+        The SSL certificate will always be validated for this additional
+        service check regardless of the value of `tls_verify`.
+        By default, for the expiration check, the Agent validates the SSL certificate
+        hostname against the host of the provided url.
+      value:
+        type: boolean
+        example: true
+    - name: days_warning
+      description: Express warning threshold for the HTTP check in days
+      value:
+        type: integer
+    - name: days_critical
+      description: Express critical threshold for the HTTP check in days
+      value:
+        type: integer
+    - name: seconds_warning
+      description: |
+        Alternatively to days_warning, seconds_warning expresses
+        the warning threshold for the HTTP check in second
+      value:
+        type: integer
+    - name: seconds_critical
+      description: |
+        Alternatively to days_critical, seconds_warning expresses
+        the critical threshold for the HTTP check in second
+      value:
+        type: integer
+    - name: check_hostname
+      description: Set check_hostname to false to disable the verification check for matching hostnames.
+      value:
+        type: boolean
+        example: true
+    - name: ssl_server_name
+      description: |
+        If necessary and check_hostname is set to true,
+        override the hostname to match with ssl_server_name.
+      value:
+        type: string
+    - name: allow_redirects
+      description: The allow_redirects parameter can enable redirection for the HTTP check.
+      value:
+        type: boolean
+        example: true
+    - name: stream
+      description: |
+        The stream parameter can be used to check the status code and/or
+        response time of URLs that return an endless stream of data.
+      value:
+        type: boolean
+        example: false
+    - name: include_default_headers
+      description: |
+        The (optional) include_default_headers parameter instructs the check to include the default headers.
+        Default headers can be found at:
+        https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/utils/headers.py
+      value:
+        type: boolean
+        example: true
+    - template: instances/default
+    - template: instances/http

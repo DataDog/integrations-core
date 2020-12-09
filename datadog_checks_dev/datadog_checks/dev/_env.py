@@ -18,6 +18,14 @@ E2E_FIXTURE_NAME = 'dd_environment'
 TESTING_PLUGIN = 'DDEV_TESTING_PLUGIN'
 SKIP_ENVIRONMENT = 'DDEV_SKIP_ENV'
 
+JMX_TO_INAPP_TYPES = {
+    'counter': 'gauge',  # JMX counter -> DSD gauge -> in-app gauge
+    'rate': 'gauge',  # JMX rate -> DSD gauge -> in-app gauge
+    'monotonic_count': 'rate',  # JMX monotonic_count -> DSD count -> in-app rate
+    # TODO: Support JMX histogram
+    #       JMX histogram -> DSD histogram -> multiple in-app metrics (max, median, avg, count)
+}
+
 
 def e2e_active():
     return any(ev.startswith(E2E_PREFIX) for ev in os.environ)
@@ -84,17 +92,25 @@ def format_config(config):
     return config
 
 
-def replay_check_run(agent_collector, stub_aggregator):
+def replay_check_run(agent_collector, stub_aggregator, stub_agent):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
+        inventories = collector.get('inventories')
         runner = collector.get('runner', {})
         check_id = runner.get('CheckID', '')
         check_name = runner.get('CheckName', '')
 
+        if inventories:
+            for metadata in inventories.values():
+                for meta_key, meta_val in metadata.items():
+                    stub_agent.set_check_metadata(check_name, meta_key, meta_val)
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
-                metric_type = stub_aggregator.METRIC_ENUM_MAP[data['type']]
+                raw_metric_type = data['type']
+                if data.get('source_type_name') == 'JMX':
+                    raw_metric_type = JMX_TO_INAPP_TYPES.get(raw_metric_type, raw_metric_type)
+                metric_type = stub_aggregator.METRIC_ENUM_MAP[raw_metric_type]
                 stub_aggregator.submit_metric_e2e(
                     # device is only present when replaying e2e tests. In integration tests it will be a tag
                     check_name,

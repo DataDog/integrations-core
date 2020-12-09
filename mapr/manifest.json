@@ -23,10 +23,17 @@
   "is_public": true,
   "integration_id": "mapr",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "MapR - Overview": "assets/dashboards/mapr_overview.json"
     },
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "mapr"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -1,24 +1,28 @@
 # CHANGELOG - postfix
 
-## 1.7.0 / 2020-05-17
+## 1.8.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] Add config specs. See [#7760](https://github.com/DataDog/integrations-core/pull/7760).
+
+## 1.7.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.6.2 / 2020-04-04
+## 1.6.2 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.6.1 / 2020-02-22
+## 1.6.1 / 2020-02-22 / Agent 7.18.0
 
 * [Fixed] Fix possible IndexError. See [#5494](https://github.com/DataDog/integrations-core/pull/5494).
 
-## 1.6.0 / 2020-01-13
+## 1.6.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.5.1 / 2019-12-04
+## 1.5.1 / 2019-12-04 / Agent 7.16.0
 
 * [Fixed] Properly collect metadata when `postqueue` is false. See [#5142](https://github.com/DataDog/integrations-core/pull/5142).
 
@@ -26,24 +30,24 @@
 
 * [Added] Add version metadata. See [#4949](https://github.com/DataDog/integrations-core/pull/4949).
 
-## 1.4.0 / 2019-05-14
+## 1.4.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3556](https://github.com/DataDog/integrations-core/pull/3556).
 
-## 1.3.0 / 2019-02-18
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add logs section. See [#3097](https://github.com/DataDog/integrations-core/pull/3097).
 * [Added] Support Python 3. See [#3038](https://github.com/DataDog/integrations-core/pull/3038).
 
-## 1.2.3 / 2018-10-12
+## 1.2.3 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Use subprocess to get sudo capabilities instead of system(). See [#2353][1].
 
-## 1.2.2 / 2018-09-04
+## 1.2.2 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][2].
 
-## 1.2.1 / 2018-06-20
+## 1.2.1 / 2018-06-20 / Agent 6.4.0
 
 * [Tooling] Bump check to be in sync with new release tooling.
 

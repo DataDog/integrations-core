@@ -13,6 +13,10 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+*Note*: This integration attached sample configuration works only for Kafka >= 0.8.2.
+If you are running a version older than that, you can refer to agent 5.2.x released
+sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+
 ## Setup
 
 ### Installation
@@ -23,9 +27,12 @@ The check collects metrics via JMX, so you need a JVM on each kafka node so the 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -81,6 +88,9 @@ _Available for Agent versions >6.0_
 
 5. [Restart the Agent][8].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 ##### Metric collection
@@ -96,6 +106,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "kafka", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

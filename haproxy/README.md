@@ -18,6 +18,22 @@ The Haproxy check is included in the [Datadog Agent][2] package, so you don't ne
 
 #### Prepare HAProxy
 
+##### Using Prometheus
+
+The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][17], or alternatively set up the legacy socket-based integration described in the next section.
+
+1. Configure your `haproxy.conf` using the [official guide][16].
+
+2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
+
+3. [Restart HAProxy to enable the Prometheus endpoint][3].
+
+4. [Restart the Agent][6].
+
+##### Using the stats endpoint
+
+**Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
+
 The Agent collects metrics via a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
@@ -37,9 +53,12 @@ The Agent collects metrics via a stats endpoint:
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection). See the [sample haproxy.d/conf.yaml][5] for all available configuration options.
 
@@ -90,21 +109,24 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
     ```bash
     sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
     ```
-    
+
     Verify the setup is correct by running the `getcap` command:
-    
+
     ```bash
     sudo getcap /opt/datadog-agent/bin/agent/agent
     ```
-    
+
     With the expected output:
     ```bash
     /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
     ```
-    
+
     **Note:** Re-run this `setcap` command every time you upgrade the Agent.
-    
+
 4. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -127,6 +149,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "haproxy", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -161,7 +186,7 @@ Need help? Contact [Datadog support][11].
 - [HA Proxy Multi Process Configuration][15]
 - [How to collect HAProxy metrics][13]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.haproxy.org/download/1.7/doc/management.txt
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -176,3 +201,5 @@ Need help? Contact [Datadog support][11].
 [13]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
 [14]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
 [15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
+[16]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
+[17]: https://github.com/prometheus/haproxy_exporter

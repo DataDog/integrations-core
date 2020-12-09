@@ -8,7 +8,9 @@ parameters:
   latest_metrics: false
   validate: false
   repo: 'core'
+  run_py2_tests: true  # Whether or not to run python2 tests.
   pip_cache_config: null
+  coverage: true
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
@@ -17,6 +19,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
 
+  variables:
+    ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
+      TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+
   steps:
   - template: './checkout-code.yml'
 
@@ -24,6 +30,7 @@ jobs:
     parameters:
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
+      run_py2_tests: ${{ parameters.run_py2_tests }}
 
   - template: './set-up-integrations.yml'
     parameters:
@@ -43,3 +50,4 @@ jobs:
       benchmark: ${{ parameters.benchmark }}
       latest_metrics: ${{ parameters.latest_metrics }}
       repo: ${{ parameters.repo }}
+      coverage: ${{ parameters.coverage }}

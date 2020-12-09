@@ -71,15 +71,16 @@ def test_bad_config(aggregator, check, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_couch_whitelist(aggregator, check, instance):
-    DB_WHITELIST = ["_users"]
-    instance["db_whitelist"] = DB_WHITELIST
+@pytest.mark.parametrize('param_name', ["db_whitelist", "db_include"])
+def test_couch_inclusion(aggregator, check, instance, param_name):
+    DB_INCLUDE = ["_users"]
+    instance[param_name] = DB_INCLUDE
     check.check(instance)
 
     for db_name in common.DB_NAMES:
         expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
         for gauge in common.CHECK_GAUGES:
-            if db_name in DB_WHITELIST:
+            if db_name in DB_INCLUDE:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
             else:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
@@ -87,15 +88,16 @@ def test_couch_whitelist(aggregator, check, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_couch_blacklist(aggregator, check, instance):
-    DB_BLACKLIST = ["_replicator"]
-    instance["db_blacklist"] = DB_BLACKLIST
+@pytest.mark.parametrize('param_name', ["db_blacklist", "db_exclude"])
+def test_couch_exclusion(aggregator, check, instance, param_name):
+    DB_EXCLUDE = ["_replicator"]
+    instance[param_name] = DB_EXCLUDE
     check.check(instance)
 
     for db_name in common.DB_NAMES:
         expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
         for gauge in common.CHECK_GAUGES:
-            if db_name in DB_BLACKLIST:
+            if db_name in DB_EXCLUDE:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
             else:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)

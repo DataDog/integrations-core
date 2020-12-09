@@ -14,6 +14,16 @@ STYLE_FLAG = 'dd_check_style'
 TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
+FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
+
+# Style deps:
+# We pin deps in order to make CI more stable/reliable.
+ISORT_DEP = 'isort[pyproject]==5.5.1'
+BLACK_DEP = 'black==20.8b1'
+FLAKE8_DEP = 'flake8==3.8.3'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
+FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
+MYPY_DEP = 'mypy==0.770'
 
 
 @tox.hookimpl
@@ -23,11 +33,12 @@ def tox_configure(config):
     For an example, see: https://github.com/tox-dev/tox-travis
     """
     sections = config._cfg.sections
+    base_testenv = sections.get('testenv', {})
 
     # Default to false so:
     # 1. we don't affect other projects using tox
     # 2. check migrations can happen gradually
-    if str(sections.get('testenv', {}).get(STYLE_FLAG, 'false')).lower() == 'true':
+    if str(base_testenv.get(STYLE_FLAG, 'false')).lower() == 'true':
         # Disable flake8 since we already include that
         config.envlist[:] = [env for env in config.envlist if not env.endswith('flake8')]
 
@@ -37,8 +48,18 @@ def tox_configure(config):
         add_style_checker(config, sections, make_envconfig, reader)
         add_style_formatter(config, sections, make_envconfig, reader)
 
+    # Workaround for https://github.com/tox-dev/tox/issues/1593
+    #
+    # Do this only after all dynamic environments have been created
+    if str(base_testenv.get(FIX_DEFAULT_ENVDIR_FLAG, 'false')).lower() == 'true':
+        for env_name, env_config in config.envconfigs.items():
+            if env_config.envdir == config.toxinidir:
+                env_config.envdir = config.toxworkdir / env_name
+                env_config.envlogdir = env_config.envdir / 'log'
+                env_config.envtmpdir = env_config.envdir / 'tmp'
+
     # Conditionally set 'e2e ready' depending on env variables
-    description = sections.get('testenv', {}).get('description')
+    description = base_testenv.get('description')
     if description and E2E_READY_CONDITION in description:
         data, var = description.split(' if ')
         if var in os.environ:
@@ -55,17 +76,17 @@ def add_style_checker(config, sections, make_envconfig, reader):
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
 
     dependencies = [
-        'flake8',
-        'flake8-bugbear',
-        'flake8-logging-format',
-        'black',
-        'isort[pyproject]>=4.3.15',
+        FLAKE8_DEP,
+        FLAKE8_BUGBEAR_DEP,
+        FLAKE8_LOGGING_FORMAT_DEP,
+        BLACK_DEP,
+        ISORT_DEP,
     ]
 
     commands = [
         'flake8 --config=../.flake8 .',
         'black --check --diff .',
-        'isort --check-only --diff --recursive .',
+        'isort --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -77,7 +98,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
         mypy_args = mypy_args.replace('\n', ' ')
 
-        dependencies.append('mypy==0.770')  # Use a pinned version to avoid large-scale CI breakage on new releases.
+        dependencies.append(MYPY_DEP)
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
     sections[section] = {
@@ -103,17 +124,22 @@ def add_style_checker(config, sections, make_envconfig, reader):
 def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
+    dependencies = [
+        FLAKE8_DEP,
+        BLACK_DEP,
+        ISORT_DEP,
+    ]
     sections[section] = {
         'platform': 'linux|darwin|win32',
         # These tools require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'flake8\nblack\nisort[pyproject]>=4.3.15',
+        'deps': '\n'.join(dependencies),
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort --recursive .',
+                'isort .',
                 'black .',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',

@@ -4,15 +4,47 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import re
 import traceback
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from contextlib import closing, contextmanager
 
 import pymysql
-from six import PY3, iteritems, itervalues, text_type
+from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.db import QueryManager
+
+from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
+from .config import MySQLConfig
+from .const import (
+    BINLOG_VARS,
+    COUNT,
+    GALERA_VARS,
+    GAUGE,
+    INNODB_VARS,
+    MONOTONIC,
+    OPTIONAL_STATUS_VARS,
+    OPTIONAL_STATUS_VARS_5_6_6,
+    PERFORMANCE_VARS,
+    PROC_NAME,
+    RATE,
+    REPLICA_VARS,
+    SCHEMA_VARS,
+    STATUS_VARS,
+    SYNTHETIC_VARS,
+    VARIABLES_VARS,
+)
+from .innodb_metrics import InnoDBMetrics
+from .queries import (
+    SQL_95TH_PERCENTILE,
+    SQL_AVG_QUERY_RUN_TIME,
+    SQL_INNODB_ENGINES,
+    SQL_PROCESS_LIST,
+    SQL_QUERY_SCHEMA_SIZE,
+    SQL_WORKER_THREADS,
+)
+from .statements import MySQLStatementMetrics
+from .version_utils import get_version
 
 try:
     import psutil
@@ -25,259 +57,6 @@ except ImportError:
 if PY3:
     long = int
 
-GAUGE = "gauge"
-RATE = "rate"
-COUNT = "count"
-MONOTONIC = "monotonic_count"
-PROC_NAME = 'mysqld'
-
-# Vars found in "SHOW STATUS;"
-STATUS_VARS = {
-    # Command Metrics
-    'Slow_queries': ('mysql.performance.slow_queries', RATE),
-    'Questions': ('mysql.performance.questions', RATE),
-    'Queries': ('mysql.performance.queries', RATE),
-    'Com_select': ('mysql.performance.com_select', RATE),
-    'Com_insert': ('mysql.performance.com_insert', RATE),
-    'Com_update': ('mysql.performance.com_update', RATE),
-    'Com_delete': ('mysql.performance.com_delete', RATE),
-    'Com_replace': ('mysql.performance.com_replace', RATE),
-    'Com_load': ('mysql.performance.com_load', RATE),
-    'Com_insert_select': ('mysql.performance.com_insert_select', RATE),
-    'Com_update_multi': ('mysql.performance.com_update_multi', RATE),
-    'Com_delete_multi': ('mysql.performance.com_delete_multi', RATE),
-    'Com_replace_select': ('mysql.performance.com_replace_select', RATE),
-    # Connection Metrics
-    'Connections': ('mysql.net.connections', RATE),
-    'Max_used_connections': ('mysql.net.max_connections', GAUGE),
-    'Aborted_clients': ('mysql.net.aborted_clients', RATE),
-    'Aborted_connects': ('mysql.net.aborted_connects', RATE),
-    # Table Cache Metrics
-    'Open_files': ('mysql.performance.open_files', GAUGE),
-    'Open_tables': ('mysql.performance.open_tables', GAUGE),
-    # Network Metrics
-    'Bytes_sent': ('mysql.performance.bytes_sent', RATE),
-    'Bytes_received': ('mysql.performance.bytes_received', RATE),
-    # Query Cache Metrics
-    'Qcache_hits': ('mysql.performance.qcache_hits', RATE),
-    'Qcache_inserts': ('mysql.performance.qcache_inserts', RATE),
-    'Qcache_lowmem_prunes': ('mysql.performance.qcache_lowmem_prunes', RATE),
-    # Table Lock Metrics
-    'Table_locks_waited': ('mysql.performance.table_locks_waited', GAUGE),
-    'Table_locks_waited_rate': ('mysql.performance.table_locks_waited.rate', RATE),
-    # Temporary Table Metrics
-    'Created_tmp_tables': ('mysql.performance.created_tmp_tables', RATE),
-    'Created_tmp_disk_tables': ('mysql.performance.created_tmp_disk_tables', RATE),
-    'Created_tmp_files': ('mysql.performance.created_tmp_files', RATE),
-    # Thread Metrics
-    'Threads_connected': ('mysql.performance.threads_connected', GAUGE),
-    'Threads_running': ('mysql.performance.threads_running', GAUGE),
-    # MyISAM Metrics
-    'Key_buffer_bytes_unflushed': ('mysql.myisam.key_buffer_bytes_unflushed', GAUGE),
-    'Key_buffer_bytes_used': ('mysql.myisam.key_buffer_bytes_used', GAUGE),
-    'Key_read_requests': ('mysql.myisam.key_read_requests', RATE),
-    'Key_reads': ('mysql.myisam.key_reads', RATE),
-    'Key_write_requests': ('mysql.myisam.key_write_requests', RATE),
-    'Key_writes': ('mysql.myisam.key_writes', RATE),
-}
-
-# Possibly from SHOW GLOBAL VARIABLES
-VARIABLES_VARS = {
-    'Key_buffer_size': ('mysql.myisam.key_buffer_size', GAUGE),
-    'Key_cache_utilization': ('mysql.performance.key_cache_utilization', GAUGE),
-    'max_connections': ('mysql.net.max_connections_available', GAUGE),
-    'query_cache_size': ('mysql.performance.qcache_size', GAUGE),
-    'table_open_cache': ('mysql.performance.table_open_cache', GAUGE),
-    'thread_cache_size': ('mysql.performance.thread_cache_size', GAUGE),
-}
-
-INNODB_VARS = {
-    # InnoDB metrics
-    'Innodb_data_reads': ('mysql.innodb.data_reads', RATE),
-    'Innodb_data_writes': ('mysql.innodb.data_writes', RATE),
-    'Innodb_os_log_fsyncs': ('mysql.innodb.os_log_fsyncs', RATE),
-    'Innodb_mutex_spin_waits': ('mysql.innodb.mutex_spin_waits', RATE),
-    'Innodb_mutex_spin_rounds': ('mysql.innodb.mutex_spin_rounds', RATE),
-    'Innodb_mutex_os_waits': ('mysql.innodb.mutex_os_waits', RATE),
-    'Innodb_row_lock_waits': ('mysql.innodb.row_lock_waits', RATE),
-    'Innodb_row_lock_time': ('mysql.innodb.row_lock_time', RATE),
-    'Innodb_row_lock_current_waits': ('mysql.innodb.row_lock_current_waits', GAUGE),
-    'Innodb_current_row_locks': ('mysql.innodb.current_row_locks', GAUGE),
-    'Innodb_buffer_pool_bytes_dirty': ('mysql.innodb.buffer_pool_dirty', GAUGE),
-    'Innodb_buffer_pool_bytes_free': ('mysql.innodb.buffer_pool_free', GAUGE),
-    'Innodb_buffer_pool_bytes_used': ('mysql.innodb.buffer_pool_used', GAUGE),
-    'Innodb_buffer_pool_bytes_total': ('mysql.innodb.buffer_pool_total', GAUGE),
-    'Innodb_buffer_pool_read_requests': ('mysql.innodb.buffer_pool_read_requests', RATE),
-    'Innodb_buffer_pool_reads': ('mysql.innodb.buffer_pool_reads', RATE),
-    'Innodb_buffer_pool_pages_utilization': ('mysql.innodb.buffer_pool_utilization', GAUGE),
-}
-
-
-# Calculated from "SHOW MASTER LOGS;"
-BINLOG_VARS = {'Binlog_space_usage_bytes': ('mysql.binlog.disk_use', GAUGE)}
-
-# Additional Vars found in "SHOW STATUS;"
-# Will collect if [FLAG NAME] is True
-OPTIONAL_STATUS_VARS = {
-    'Binlog_cache_disk_use': ('mysql.binlog.cache_disk_use', GAUGE),
-    'Binlog_cache_use': ('mysql.binlog.cache_use', GAUGE),
-    'Handler_commit': ('mysql.performance.handler_commit', RATE),
-    'Handler_delete': ('mysql.performance.handler_delete', RATE),
-    'Handler_prepare': ('mysql.performance.handler_prepare', RATE),
-    'Handler_read_first': ('mysql.performance.handler_read_first', RATE),
-    'Handler_read_key': ('mysql.performance.handler_read_key', RATE),
-    'Handler_read_next': ('mysql.performance.handler_read_next', RATE),
-    'Handler_read_prev': ('mysql.performance.handler_read_prev', RATE),
-    'Handler_read_rnd': ('mysql.performance.handler_read_rnd', RATE),
-    'Handler_read_rnd_next': ('mysql.performance.handler_read_rnd_next', RATE),
-    'Handler_rollback': ('mysql.performance.handler_rollback', RATE),
-    'Handler_update': ('mysql.performance.handler_update', RATE),
-    'Handler_write': ('mysql.performance.handler_write', RATE),
-    'Opened_tables': ('mysql.performance.opened_tables', RATE),
-    'Qcache_total_blocks': ('mysql.performance.qcache_total_blocks', GAUGE),
-    'Qcache_free_blocks': ('mysql.performance.qcache_free_blocks', GAUGE),
-    'Qcache_free_memory': ('mysql.performance.qcache_free_memory', GAUGE),
-    'Qcache_not_cached': ('mysql.performance.qcache_not_cached', RATE),
-    'Qcache_queries_in_cache': ('mysql.performance.qcache_queries_in_cache', GAUGE),
-    'Select_full_join': ('mysql.performance.select_full_join', RATE),
-    'Select_full_range_join': ('mysql.performance.select_full_range_join', RATE),
-    'Select_range': ('mysql.performance.select_range', RATE),
-    'Select_range_check': ('mysql.performance.select_range_check', RATE),
-    'Select_scan': ('mysql.performance.select_scan', RATE),
-    'Sort_merge_passes': ('mysql.performance.sort_merge_passes', RATE),
-    'Sort_range': ('mysql.performance.sort_range', RATE),
-    'Sort_rows': ('mysql.performance.sort_rows', RATE),
-    'Sort_scan': ('mysql.performance.sort_scan', RATE),
-    'Table_locks_immediate': ('mysql.performance.table_locks_immediate', GAUGE),
-    'Table_locks_immediate_rate': ('mysql.performance.table_locks_immediate.rate', RATE),
-    'Threads_cached': ('mysql.performance.threads_cached', GAUGE),
-    'Threads_created': ('mysql.performance.threads_created', MONOTONIC),
-}
-
-# Status Vars added in Mysql 5.6.6
-OPTIONAL_STATUS_VARS_5_6_6 = {
-    'Table_open_cache_hits': ('mysql.performance.table_cache_hits', RATE),
-    'Table_open_cache_misses': ('mysql.performance.table_cache_misses', RATE),
-}
-
-# Will collect if [extra_innodb_metrics] is True
-OPTIONAL_INNODB_VARS = {
-    'Innodb_active_transactions': ('mysql.innodb.active_transactions', GAUGE),
-    'Innodb_buffer_pool_bytes_data': ('mysql.innodb.buffer_pool_data', GAUGE),
-    'Innodb_buffer_pool_pages_data': ('mysql.innodb.buffer_pool_pages_data', GAUGE),
-    'Innodb_buffer_pool_pages_dirty': ('mysql.innodb.buffer_pool_pages_dirty', GAUGE),
-    'Innodb_buffer_pool_pages_flushed': ('mysql.innodb.buffer_pool_pages_flushed', RATE),
-    'Innodb_buffer_pool_pages_free': ('mysql.innodb.buffer_pool_pages_free', GAUGE),
-    'Innodb_buffer_pool_pages_total': ('mysql.innodb.buffer_pool_pages_total', GAUGE),
-    'Innodb_buffer_pool_read_ahead': ('mysql.innodb.buffer_pool_read_ahead', RATE),
-    'Innodb_buffer_pool_read_ahead_evicted': ('mysql.innodb.buffer_pool_read_ahead_evicted', RATE),
-    'Innodb_buffer_pool_read_ahead_rnd': ('mysql.innodb.buffer_pool_read_ahead_rnd', GAUGE),
-    'Innodb_buffer_pool_wait_free': ('mysql.innodb.buffer_pool_wait_free', MONOTONIC),
-    'Innodb_buffer_pool_write_requests': ('mysql.innodb.buffer_pool_write_requests', RATE),
-    'Innodb_checkpoint_age': ('mysql.innodb.checkpoint_age', GAUGE),
-    'Innodb_current_transactions': ('mysql.innodb.current_transactions', GAUGE),
-    'Innodb_data_fsyncs': ('mysql.innodb.data_fsyncs', RATE),
-    'Innodb_data_pending_fsyncs': ('mysql.innodb.data_pending_fsyncs', GAUGE),
-    'Innodb_data_pending_reads': ('mysql.innodb.data_pending_reads', GAUGE),
-    'Innodb_data_pending_writes': ('mysql.innodb.data_pending_writes', GAUGE),
-    'Innodb_data_read': ('mysql.innodb.data_read', RATE),
-    'Innodb_data_written': ('mysql.innodb.data_written', RATE),
-    'Innodb_dblwr_pages_written': ('mysql.innodb.dblwr_pages_written', RATE),
-    'Innodb_dblwr_writes': ('mysql.innodb.dblwr_writes', RATE),
-    'Innodb_hash_index_cells_total': ('mysql.innodb.hash_index_cells_total', GAUGE),
-    'Innodb_hash_index_cells_used': ('mysql.innodb.hash_index_cells_used', GAUGE),
-    'Innodb_history_list_length': ('mysql.innodb.history_list_length', GAUGE),
-    'Innodb_ibuf_free_list': ('mysql.innodb.ibuf_free_list', GAUGE),
-    'Innodb_ibuf_merged': ('mysql.innodb.ibuf_merged', RATE),
-    'Innodb_ibuf_merged_delete_marks': ('mysql.innodb.ibuf_merged_delete_marks', RATE),
-    'Innodb_ibuf_merged_deletes': ('mysql.innodb.ibuf_merged_deletes', RATE),
-    'Innodb_ibuf_merged_inserts': ('mysql.innodb.ibuf_merged_inserts', RATE),
-    'Innodb_ibuf_merges': ('mysql.innodb.ibuf_merges', RATE),
-    'Innodb_ibuf_segment_size': ('mysql.innodb.ibuf_segment_size', GAUGE),
-    'Innodb_ibuf_size': ('mysql.innodb.ibuf_size', GAUGE),
-    'Innodb_lock_structs': ('mysql.innodb.lock_structs', RATE),
-    'Innodb_locked_tables': ('mysql.innodb.locked_tables', GAUGE),
-    'Innodb_locked_transactions': ('mysql.innodb.locked_transactions', GAUGE),
-    'Innodb_log_waits': ('mysql.innodb.log_waits', RATE),
-    'Innodb_log_write_requests': ('mysql.innodb.log_write_requests', RATE),
-    'Innodb_log_writes': ('mysql.innodb.log_writes', RATE),
-    'Innodb_lsn_current': ('mysql.innodb.lsn_current', RATE),
-    'Innodb_lsn_flushed': ('mysql.innodb.lsn_flushed', RATE),
-    'Innodb_lsn_last_checkpoint': ('mysql.innodb.lsn_last_checkpoint', RATE),
-    'Innodb_mem_adaptive_hash': ('mysql.innodb.mem_adaptive_hash', GAUGE),
-    'Innodb_mem_additional_pool': ('mysql.innodb.mem_additional_pool', GAUGE),
-    'Innodb_mem_dictionary': ('mysql.innodb.mem_dictionary', GAUGE),
-    'Innodb_mem_file_system': ('mysql.innodb.mem_file_system', GAUGE),
-    'Innodb_mem_lock_system': ('mysql.innodb.mem_lock_system', GAUGE),
-    'Innodb_mem_page_hash': ('mysql.innodb.mem_page_hash', GAUGE),
-    'Innodb_mem_recovery_system': ('mysql.innodb.mem_recovery_system', GAUGE),
-    'Innodb_mem_thread_hash': ('mysql.innodb.mem_thread_hash', GAUGE),
-    'Innodb_mem_total': ('mysql.innodb.mem_total', GAUGE),
-    'Innodb_os_file_fsyncs': ('mysql.innodb.os_file_fsyncs', RATE),
-    'Innodb_os_file_reads': ('mysql.innodb.os_file_reads', RATE),
-    'Innodb_os_file_writes': ('mysql.innodb.os_file_writes', RATE),
-    'Innodb_os_log_pending_fsyncs': ('mysql.innodb.os_log_pending_fsyncs', GAUGE),
-    'Innodb_os_log_pending_writes': ('mysql.innodb.os_log_pending_writes', GAUGE),
-    'Innodb_os_log_written': ('mysql.innodb.os_log_written', RATE),
-    'Innodb_pages_created': ('mysql.innodb.pages_created', RATE),
-    'Innodb_pages_read': ('mysql.innodb.pages_read', RATE),
-    'Innodb_pages_written': ('mysql.innodb.pages_written', RATE),
-    'Innodb_pending_aio_log_ios': ('mysql.innodb.pending_aio_log_ios', GAUGE),
-    'Innodb_pending_aio_sync_ios': ('mysql.innodb.pending_aio_sync_ios', GAUGE),
-    'Innodb_pending_buffer_pool_flushes': ('mysql.innodb.pending_buffer_pool_flushes', GAUGE),
-    'Innodb_pending_checkpoint_writes': ('mysql.innodb.pending_checkpoint_writes', GAUGE),
-    'Innodb_pending_ibuf_aio_reads': ('mysql.innodb.pending_ibuf_aio_reads', GAUGE),
-    'Innodb_pending_log_flushes': ('mysql.innodb.pending_log_flushes', GAUGE),
-    'Innodb_pending_log_writes': ('mysql.innodb.pending_log_writes', GAUGE),
-    'Innodb_pending_normal_aio_reads': ('mysql.innodb.pending_normal_aio_reads', GAUGE),
-    'Innodb_pending_normal_aio_writes': ('mysql.innodb.pending_normal_aio_writes', GAUGE),
-    'Innodb_queries_inside': ('mysql.innodb.queries_inside', GAUGE),
-    'Innodb_queries_queued': ('mysql.innodb.queries_queued', GAUGE),
-    'Innodb_read_views': ('mysql.innodb.read_views', GAUGE),
-    'Innodb_rows_deleted': ('mysql.innodb.rows_deleted', RATE),
-    'Innodb_rows_inserted': ('mysql.innodb.rows_inserted', RATE),
-    'Innodb_rows_read': ('mysql.innodb.rows_read', RATE),
-    'Innodb_rows_updated': ('mysql.innodb.rows_updated', RATE),
-    'Innodb_s_lock_os_waits': ('mysql.innodb.s_lock_os_waits', RATE),
-    'Innodb_s_lock_spin_rounds': ('mysql.innodb.s_lock_spin_rounds', RATE),
-    'Innodb_s_lock_spin_waits': ('mysql.innodb.s_lock_spin_waits', RATE),
-    'Innodb_semaphore_wait_time': ('mysql.innodb.semaphore_wait_time', GAUGE),
-    'Innodb_semaphore_waits': ('mysql.innodb.semaphore_waits', GAUGE),
-    'Innodb_tables_in_use': ('mysql.innodb.tables_in_use', GAUGE),
-    'Innodb_x_lock_os_waits': ('mysql.innodb.x_lock_os_waits', RATE),
-    'Innodb_x_lock_spin_rounds': ('mysql.innodb.x_lock_spin_rounds', RATE),
-    'Innodb_x_lock_spin_waits': ('mysql.innodb.x_lock_spin_waits', RATE),
-}
-
-GALERA_VARS = {
-    'wsrep_cluster_size': ('mysql.galera.wsrep_cluster_size', GAUGE),
-    'wsrep_local_recv_queue_avg': ('mysql.galera.wsrep_local_recv_queue_avg', GAUGE),
-    'wsrep_flow_control_paused': ('mysql.galera.wsrep_flow_control_paused', GAUGE),
-    'wsrep_cert_deps_distance': ('mysql.galera.wsrep_cert_deps_distance', GAUGE),
-    'wsrep_local_send_queue_avg': ('mysql.galera.wsrep_local_send_queue_avg', GAUGE),
-}
-
-PERFORMANCE_VARS = {
-    'query_run_time_avg': ('mysql.performance.query_run_time.avg', GAUGE),
-    'perf_digest_95th_percentile_avg_us': ('mysql.performance.digest_95th_percentile.avg_us', GAUGE),
-}
-
-SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
-
-REPLICA_VARS = {
-    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
-    'Slaves_connected': ('mysql.replication.slaves_connected', GAUGE),
-}
-
-SYNTHETIC_VARS = {
-    'Qcache_utilization': ('mysql.performance.qcache.utilization', GAUGE),
-    'Qcache_instant_utilization': ('mysql.performance.qcache.utilization.instant', GAUGE),
-}
-
-BUILDS = ('log', 'standard', 'debug', 'valgrind', 'embedded')
-
-MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
-
 
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
@@ -287,107 +66,62 @@ class MySql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
-        self.metadata = None
+        self.version = None
+        self.config = MySQLConfig(self.instance)
 
-    def _get_metadata(self, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION()')
-            result = cursor.fetchone()
+        # Create a new connection on every check run
+        self._conn = None
 
-            # Version might include a build, a flavor, or both
-            # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
-            # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            # https://mariadb.com/kb/en/library/version/
-            # and https://mariadb.com/kb/en/library/server-system-variables/#version
-            parts = result[0].split('-')
-            version, flavor, build = [parts[0], '', '']
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.config.tags)
+        self._statement_metrics = MySQLStatementMetrics(self.config)
+        self.check_initializations.append(self._query_manager.compile_queries)
+        self.innodb_stats = InnoDBMetrics()
+        self.check_initializations.append(self.config.configuration_checks)
 
-            for data in parts:
-                if data == "MariaDB":
-                    flavor = "MariaDB"
-                if data != "MariaDB" and flavor == '':
-                    flavor = "MySQL"
-                if data in BUILDS:
-                    build = data
-            if build == '':
-                build = 'unspecified'
+    def execute_query_raw(self, query):
+        with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+            cursor.execute(query)
+            for row in cursor.fetchall_unbuffered():
+                yield row
 
-            return MySQLMetadata(version, flavor, build)
-
+    @AgentCheck.metadata_entrypoint
     def _send_metadata(self):
-        self.set_metadata('version', self.metadata.version + '+' + self.metadata.build)
-        self.set_metadata('flavor', self.metadata.flavor)
+        self.set_metadata('version', self.version.version + '+' + self.version.build)
+        self.set_metadata('flavor', self.version.flavor)
 
     @classmethod
     def get_library_versions(cls):
         return {'pymysql': pymysql.__version__}
 
-    def check(self, instance):
-        (
-            host,
-            port,
-            user,
-            password,
-            mysql_sock,
-            defaults_file,
-            tags,
-            options,
-            queries,
-            ssl,
-            connect_timeout,
-            max_custom_queries,
-        ) = self._get_config(instance)
-
+    def check(self, _):
         self._set_qcache_stats()
-
-        if not (host and user) and not defaults_file:
-            raise Exception("Mysql host and user are needed.")
-
-        with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
+        with self._connect() as db:
             try:
-                # metadata collection
-                self.metadata = self._get_metadata(db)
+                self._conn = db
+
+                # version collection
+                self.version = get_version(db)
                 self._send_metadata()
 
                 # Metric collection
-                self._collect_metrics(db, tags, options, queries, max_custom_queries)
-                self._collect_system_metrics(host, db, tags)
+                self._collect_metrics(
+                    db, self.config.tags, self.config.options, self.config.queries, self.config.max_custom_queries
+                )
+                self._collect_system_metrics(self.config.host, db, self.config.tags)
+                if self.config.deep_database_monitoring:
+                    self._collect_statement_metrics(db, self.config.tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
 
+                # Custom queries
+                self._query_manager.execute()
+
             except Exception as e:
                 self.log.exception("error!")
                 raise e
-
-    def _get_config(self, instance):
-        self.host = instance.get('server', '')
-        self.port = int(instance.get('port', 0))
-        self.mysql_sock = instance.get('sock', '')
-        self.defaults_file = instance.get('defaults_file', '')
-        user = instance.get('user', '')
-        password = str(instance.get('pass', ''))
-        tags = instance.get('tags', [])
-        options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
-        queries = instance.get('queries', [])
-        ssl = instance.get('ssl', {})
-        connect_timeout = instance.get('connect_timeout', 10)
-        max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
-
-        return (
-            self.host,
-            self.port,
-            user,
-            password,
-            self.mysql_sock,
-            self.defaults_file,
-            tags,
-            options,
-            queries,
-            ssl,
-            connect_timeout,
-            max_custom_queries,
-        )
+            finally:
+                self._conn = None
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -402,50 +136,60 @@ class MySql(AgentCheck):
         self.qcache_stats[host_key] = (self._qcache_hits, self._qcache_inserts, self._qcache_not_cached)
 
     def _get_host_key(self):
-        if self.defaults_file:
-            return self.defaults_file
+        if self.config.defaults_file:
+            return self.config.defaults_file
 
-        hostkey = self.host
-        if self.mysql_sock:
-            hostkey = "{0}:{1}".format(hostkey, self.mysql_sock)
-        elif self.port:
-            hostkey = "{0}:{1}".format(hostkey, self.port)
+        hostkey = self.config.host
+        if self.config.mysql_sock:
+            hostkey = "{0}:{1}".format(hostkey, self.config.mysql_sock)
+        elif self.config.port:
+            hostkey = "{0}:{1}".format(hostkey, self.config.port)
 
         return hostkey
 
+    def _get_connection_args(self):
+        ssl = dict(self.config.ssl) if self.config.ssl else None
+        connection_args = {
+            'ssl': ssl,
+            'connect_timeout': self.config.connect_timeout,
+        }
+        if self.config.charset:
+            connection_args['charset'] = self.config.charset
+
+        if self.config.defaults_file != '':
+            connection_args['read_default_file'] = self.config.defaults_file
+            return connection_args
+
+        connection_args.update({'user': self.config.user, 'passwd': self.config.password})
+        if self.config.mysql_sock != '':
+            self.service_check_tags = [
+                'server:{0}'.format(self.config.mysql_sock),
+                'port:unix_socket',
+            ] + self.config.tags
+            connection_args.update({'unix_socket': self.config.mysql_sock})
+        else:
+            connection_args.update({'host': self.config.host})
+
+        if self.config.port:
+            connection_args.update({'port': self.config.port})
+        return connection_args
+
     @contextmanager
-    def _connect(self, host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags):
-        self.service_check_tags = [
-            'server:%s' % (mysql_sock if mysql_sock != '' else host),
-            'port:%s' % ('unix_socket' if port == 0 else port),
-        ]
-
-        if tags is not None:
-            self.service_check_tags.extend(tags)
-
+    def _connect(self):
+        service_check_tags = [
+            'server:{0}'.format((self.config.mysql_sock if self.config.mysql_sock != '' else self.config.host)),
+            'port:{}'.format(self.config.port if self.config.port else 'unix_socket'),
+        ] + self.config.tags
         db = None
         try:
-            ssl = dict(ssl) if ssl else None
-
-            if defaults_file != '':
-                db = pymysql.connect(read_default_file=defaults_file, ssl=ssl, connect_timeout=connect_timeout)
-            elif mysql_sock != '':
-                self.service_check_tags = ['server:{0}'.format(mysql_sock), 'port:unix_socket'] + tags
-                db = pymysql.connect(
-                    unix_socket=mysql_sock, user=user, passwd=password, connect_timeout=connect_timeout
-                )
-            elif port:
-                db = pymysql.connect(
-                    host=host, port=port, user=user, passwd=password, ssl=ssl, connect_timeout=connect_timeout
-                )
-            else:
-                db = pymysql.connect(host=host, user=user, passwd=password, ssl=ssl, connect_timeout=connect_timeout)
+            connect_args = self._get_connection_args()
+            db = pymysql.connect(**connect_args)
             self.log.debug("Connected to MySQL")
-            self.service_check_tags = list(set(self.service_check_tags))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
+            self.service_check_tags = list(set(service_check_tags))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
             yield db
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
         finally:
             if db:
@@ -461,67 +205,17 @@ class MySql(AgentCheck):
         results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(options.get('disable_innodb_metrics', False)) and self._is_innodb_engine_enabled(db):
-            results.update(self._get_stats_from_innodb_status(db))
-
-            innodb_keys = [
-                'Innodb_page_size',
-                'Innodb_buffer_pool_pages_data',
-                'Innodb_buffer_pool_pages_dirty',
-                'Innodb_buffer_pool_pages_total',
-                'Innodb_buffer_pool_pages_free',
-            ]
-
-            for inno_k in innodb_keys:
-                results[inno_k] = self._collect_scalar(inno_k, results)
-
-            try:
-                innodb_page_size = results['Innodb_page_size']
-                innodb_buffer_pool_pages_used = (
-                    results['Innodb_buffer_pool_pages_total'] - results['Innodb_buffer_pool_pages_free']
-                )
-
-                if 'Innodb_buffer_pool_bytes_data' not in results:
-                    results['Innodb_buffer_pool_bytes_data'] = (
-                        results['Innodb_buffer_pool_pages_data'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_bytes_dirty' not in results:
-                    results['Innodb_buffer_pool_bytes_dirty'] = (
-                        results['Innodb_buffer_pool_pages_dirty'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_bytes_free' not in results:
-                    results['Innodb_buffer_pool_bytes_free'] = (
-                        results['Innodb_buffer_pool_pages_free'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_bytes_total' not in results:
-                    results['Innodb_buffer_pool_bytes_total'] = (
-                        results['Innodb_buffer_pool_pages_total'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_pages_utilization' not in results:
-                    results['Innodb_buffer_pool_pages_utilization'] = (
-                        innodb_buffer_pool_pages_used / results['Innodb_buffer_pool_pages_total']
-                    )
-
-                if 'Innodb_buffer_pool_bytes_used' not in results:
-                    results['Innodb_buffer_pool_bytes_used'] = innodb_buffer_pool_pages_used * innodb_page_size
-            except (KeyError, TypeError) as e:
-                self.log.error("Not all InnoDB buffer pool metrics are available, unable to compute: %s", e)
-
-            if is_affirmative(options.get('extra_innodb_metrics', False)):
-                self.log.debug("Collecting Extra Innodb Metrics")
-                metrics.update(OPTIONAL_INNODB_VARS)
+            results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+            self.innodb_stats.process_innodb_stats(results, options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
             results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
-        key_blocks_unused = self._collect_scalar('Key_blocks_unused', results)
-        key_cache_block_size = self._collect_scalar('key_cache_block_size', results)
-        key_buffer_size = self._collect_scalar('key_buffer_size', results)
+        key_blocks_unused = collect_scalar('Key_blocks_unused', results)
+        key_cache_block_size = collect_scalar('key_cache_block_size', results)
+        key_buffer_size = collect_scalar('key_buffer_size', results)
         results['Key_buffer_size'] = key_buffer_size
 
         try:
@@ -530,9 +224,9 @@ class MySql(AgentCheck):
                 key_cache_utilization = 1 - ((key_blocks_unused * key_cache_block_size) / key_buffer_size)
                 results['Key_cache_utilization'] = key_cache_utilization
 
-            results['Key_buffer_bytes_used'] = self._collect_scalar('Key_blocks_used', results) * key_cache_block_size
+            results['Key_buffer_bytes_used'] = collect_scalar('Key_blocks_used', results) * key_cache_block_size
             results['Key_buffer_bytes_unflushed'] = (
-                self._collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
+                collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
             )
         except TypeError as e:
             self.log.error("Not all Key metrics are available, unable to compute: %s", e)
@@ -545,7 +239,7 @@ class MySql(AgentCheck):
             self.log.debug("Collecting Extra Status Metrics")
             metrics.update(OPTIONAL_STATUS_VARS)
 
-            if self._version_compatible(db, (5, 6, 6)):
+            if self.version.version_compatible((5, 6, 6)):
                 metrics.update(OPTIONAL_STATUS_VARS_5_6_6)
 
         if is_affirmative(options.get('galera_cluster', False)):
@@ -554,7 +248,7 @@ class MySql(AgentCheck):
             metrics.update(GALERA_VARS)
 
         performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
-        above_560 = self._version_compatible(db, (5, 6, 0))
+        above_560 = self.version.version_compatible((5, 6, 0))
         if is_affirmative(options.get('extra_performance_metrics', False)) and above_560 and performance_schema_enabled:
             # report avg query response time per schema to Datadog
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
@@ -568,7 +262,7 @@ class MySql(AgentCheck):
 
         if is_affirmative(options.get('replication', False)):
             # Get replica stats
-            is_mariadb = self.metadata.flavor == "MariaDB"
+            is_mariadb = self.version.flavor == "MariaDB"
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
@@ -580,12 +274,12 @@ class MySql(AgentCheck):
 
             # get slave running form global status page
             slave_running_status = AgentCheck.UNKNOWN
-            slave_running = self._collect_string('Slave_running', results)
+            slave_running = collect_string('Slave_running', results)
             binlog_running = results.get('Binlog_enabled', False)
             # slaves will only be collected iff user has PROCESS privileges.
-            slaves = self._collect_scalar('Slaves_connected', results)
-            slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
-            slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
+            slaves = collect_scalar('Slaves_connected', results)
+            slave_io_running = collect_type('Slave_IO_Running', results, dict)
+            slave_sql_running = collect_type('Slave_SQL_Running', results, dict)
             if slave_io_running:
                 slave_io_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_io_running))
             if slave_sql_running:
@@ -593,7 +287,7 @@ class MySql(AgentCheck):
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
-            if self._version_compatible(db, (5, 7, 0)):
+            if self.version.version_compatible((5, 7, 0)):
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
                         slave_running_status = AgentCheck.OK
@@ -656,9 +350,15 @@ class MySql(AgentCheck):
             if len(queries) > max_custom_queries:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest.", max_custom_queries)
 
+    def _collect_statement_metrics(self, db, tags):
+        tags = self.service_check_tags + tags
+        metrics = self._statement_metrics.collect_per_statement_metrics(db)
+        for metric_name, metric_value, metric_tags in metrics:
+            self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
+
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
-        master_host = self._collect_string('Master_Host', results)
+        master_host = collect_string('Master_Host', results)
         if slaves > 0 or not master_host:
             return True
 
@@ -667,7 +367,7 @@ class MySql(AgentCheck):
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
             metric_name, metric_type = metric
-            for tag, value in self._collect_all_scalars(variable, db_results):
+            for tag, value in collect_all_scalars(variable, db_results):
                 metric_tags = list(tags)
                 if tag:
                     metric_tags.append(tag)
@@ -680,45 +380,6 @@ class MySql(AgentCheck):
                         self.count(metric_name, value, tags=metric_tags)
                     elif metric_type == MONOTONIC:
                         self.monotonic_count(metric_name, value, tags=metric_tags)
-
-    def _version_compatible(self, db, compat_version):
-        # some patch version numbers contain letters (e.g. 5.0.51a)
-        # so let's be careful when we compute the version number
-
-        try:
-            mysql_version = self.metadata.version.split('.')
-        except Exception as e:
-            self.warning("Cannot compute mysql version, assuming it's older.: %s", e)
-            return False
-        self.log.debug("MySQL version %s", mysql_version)
-
-        patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
-        version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
-
-        return version >= compat_version
-
-    def _collect_all_scalars(self, key, dictionary):
-        if key not in dictionary or dictionary[key] is None:
-            yield None, None
-        elif isinstance(dictionary[key], dict):
-            for tag, _ in iteritems(dictionary[key]):
-                yield tag, self._collect_type(tag, dictionary[key], float)
-        else:
-            yield None, self._collect_type(key, dictionary, float)
-
-    def _collect_scalar(self, key, mapping):
-        return self._collect_type(key, mapping, float)
-
-    def _collect_string(self, key, mapping):
-        return self._collect_type(key, mapping, text_type)
-
-    def _collect_type(self, key, mapping, the_type):
-        self.log.debug("Collecting data with %s", key)
-        if key not in mapping:
-            self.log.debug("%s returned None", key)
-            return None
-        self.log.debug("Collecting done, value %s", mapping[key])
-        return the_type(mapping[key])
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
@@ -862,11 +523,7 @@ class MySql(AgentCheck):
         # table. Later is choosen because that involves no string parsing.
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(
-                    "select engine from information_schema.ENGINES where engine='InnoDB' and \
-                    support != 'no' and support != 'disabled'"
-                )
-
+                cursor.execute(SQL_INNODB_ENGINES)
                 return cursor.rowcount > 0
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
@@ -885,7 +542,9 @@ class MySql(AgentCheck):
                 else:
                     cursor.execute("SHOW SLAVE STATUS;")
 
-                for slave_result in cursor.fetchall():
+                results = cursor.fetchall()
+                self.log.debug("Getting replication status: %s", results)
+                for slave_result in results:
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
                     channel = replication_channel or slave_result.get('Channel_Name') or 'default'
@@ -925,9 +584,9 @@ class MySql(AgentCheck):
                 if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
-                    cursor.execute("SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'")
+                    cursor.execute(SQL_WORKER_THREADS)
                 else:
-                    cursor.execute("SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'")
+                    cursor.execute(SQL_PROCESS_LIST)
                 slave_results = cursor.fetchall()
                 slaves = 0
                 for _ in slave_results:
@@ -943,353 +602,16 @@ class MySql(AgentCheck):
     def _are_values_numeric(cls, array):
         return all(v.isdigit() for v in array)
 
-    def _get_stats_from_innodb_status(self, db):
-        # There are a number of important InnoDB metrics that are reported in
-        # InnoDB status but are not otherwise present as part of the STATUS
-        # variables in MySQL. Majority of these metrics are reported though
-        # as a part of STATUS variables in Percona Server and MariaDB.
-        # Requires querying user to have PROCESS privileges.
-        try:
-            with closing(db.cursor()) as cursor:
-                cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
-        except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
-            self.warning(
-                "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e,
-            )
-            return {}
-
-        if cursor.rowcount < 1:
-            # No data from SHOW ENGINE STATUS, even though the engine is enabled.
-            # EG: This could be an Aurora Read Instance
-            self.warning(
-                """'SHOW ENGINE INNODB STATUS' returned no data.
-                If you are running an Aurora Read Instance, \
-                this is expected and you should disable the innodb metrics collection"""
-            )
-            return {}
-
-        innodb_status = cursor.fetchone()
-        innodb_status_text = innodb_status[2]
-
-        results = defaultdict(int)
-
-        # Here we now parse InnoDB STATUS one line at a time
-        # This is heavily inspired by the Percona monitoring plugins work
-        txn_seen = False
-        prev_line = ''
-        # Only return aggregated buffer pool metrics
-        buffer_id = -1
-        for line in innodb_status_text.splitlines():
-            line = line.strip()
-            row = re.split(" +", line)
-            row = [item.strip(',') for item in row]
-            row = [item.strip(';') for item in row]
-            row = [item.strip('[') for item in row]
-            row = [item.strip(']') for item in row]
-
-            if line.startswith('---BUFFER POOL'):
-                buffer_id = long(row[2])
-
-            # SEMAPHORES
-            if line.find('Mutex spin waits') == 0:
-                # Mutex spin waits 79626940, rounds 157459864, OS waits 698719
-                # Mutex spin waits 0, rounds 247280272495, OS waits 316513438
-                results['Innodb_mutex_spin_waits'] = long(row[3])
-                results['Innodb_mutex_spin_rounds'] = long(row[5])
-                results['Innodb_mutex_os_waits'] = long(row[8])
-            elif line.find('RW-shared spins') == 0 and line.find(';') > 0:
-                # RW-shared spins 3859028, OS waits 2100750; RW-excl spins
-                # 4641946, OS waits 1530310
-                results['Innodb_s_lock_spin_waits'] = long(row[2])
-                results['Innodb_x_lock_spin_waits'] = long(row[8])
-                results['Innodb_s_lock_os_waits'] = long(row[5])
-                results['Innodb_x_lock_os_waits'] = long(row[11])
-            elif line.find('RW-shared spins') == 0 and line.find('; RW-excl spins') == -1:
-                # Post 5.5.17 SHOW ENGINE INNODB STATUS syntax
-                # RW-shared spins 604733, rounds 8107431, OS waits 241268
-                results['Innodb_s_lock_spin_waits'] = long(row[2])
-                results['Innodb_s_lock_spin_rounds'] = long(row[4])
-                results['Innodb_s_lock_os_waits'] = long(row[7])
-            elif line.find('RW-excl spins') == 0:
-                # Post 5.5.17 SHOW ENGINE INNODB STATUS syntax
-                # RW-excl spins 604733, rounds 8107431, OS waits 241268
-                results['Innodb_x_lock_spin_waits'] = long(row[2])
-                results['Innodb_x_lock_spin_rounds'] = long(row[4])
-                results['Innodb_x_lock_os_waits'] = long(row[7])
-            elif line.find('seconds the semaphore:') > 0:
-                # --Thread 907205 has waited at handler/ha_innodb.cc line 7156 for 1.00 seconds the semaphore:
-                results['Innodb_semaphore_waits'] += 1
-                results['Innodb_semaphore_wait_time'] += long(float(row[9])) * 1000
-
-            # TRANSACTIONS
-            elif line.find('Trx id counter') == 0:
-                # The beginning of the TRANSACTIONS section: start counting
-                # transactions
-                # Trx id counter 0 1170664159
-                # Trx id counter 861B144C
-                txn_seen = True
-            elif line.find('History list length') == 0:
-                # History list length 132
-                results['Innodb_history_list_length'] = long(row[3])
-            elif txn_seen and line.find('---TRANSACTION') == 0:
-                # ---TRANSACTION 0, not started, process no 13510, OS thread id 1170446656
-                results['Innodb_current_transactions'] += 1
-                if line.find('ACTIVE') > 0:
-                    results['Innodb_active_transactions'] += 1
-            elif txn_seen and line.find('------- TRX HAS BEEN') == 0:
-                # ------- TRX HAS BEEN WAITING 32 SEC FOR THIS LOCK TO BE GRANTED:
-                results['Innodb_row_lock_time'] += long(row[5]) * 1000
-            elif line.find('read views open inside InnoDB') > 0:
-                # 1 read views open inside InnoDB
-                results['Innodb_read_views'] = long(row[0])
-            elif line.find('mysql tables in use') == 0:
-                # mysql tables in use 2, locked 2
-                results['Innodb_tables_in_use'] += long(row[4])
-                results['Innodb_locked_tables'] += long(row[6])
-            elif txn_seen and line.find('lock struct(s)') > 0:
-                # 23 lock struct(s), heap size 3024, undo log entries 27
-                # LOCK WAIT 12 lock struct(s), heap size 3024, undo log entries 5
-                # LOCK WAIT 2 lock struct(s), heap size 368
-                if line.find('LOCK WAIT') == 0:
-                    results['Innodb_lock_structs'] += long(row[2])
-                    results['Innodb_locked_transactions'] += 1
-                elif line.find('ROLLING BACK') == 0:
-                    # ROLLING BACK 127539 lock struct(s), heap size 15201832,
-                    # 4411492 row lock(s), undo log entries 1042488
-                    results['Innodb_lock_structs'] += long(row[2])
-                else:
-                    results['Innodb_lock_structs'] += long(row[0])
-
-            # FILE I/O
-            elif line.find(' OS file reads, ') > 0:
-                # 8782182 OS file reads, 15635445 OS file writes, 947800 OS
-                # fsyncs
-                results['Innodb_os_file_reads'] = long(row[0])
-                results['Innodb_os_file_writes'] = long(row[4])
-                results['Innodb_os_file_fsyncs'] = long(row[8])
-            elif line.find('Pending normal aio reads:') == 0:
-                try:
-                    if len(row) == 8:
-                        # (len(row) == 8)  Pending normal aio reads: 0, aio writes: 0,
-                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                        results['Innodb_pending_normal_aio_writes'] = long(row[7])
-                    elif len(row) == 14:
-                        # (len(row) == 14) Pending normal aio reads: 0 [0, 0] , aio writes: 0 [0, 0] ,
-                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                        results['Innodb_pending_normal_aio_writes'] = long(row[10])
-                    elif len(row) == 16:
-                        # (len(row) == 16) Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
-                        if self._are_values_numeric(row[4:8]) and self._are_values_numeric(row[11:15]):
-                            results['Innodb_pending_normal_aio_reads'] = (
-                                long(row[4]) + long(row[5]) + long(row[6]) + long(row[7])
-                            )
-                            results['Innodb_pending_normal_aio_writes'] = (
-                                long(row[11]) + long(row[12]) + long(row[13]) + long(row[14])
-                            )
-
-                        # (len(row) == 16) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
-                        elif self._are_values_numeric(row[4:9]) and self._are_values_numeric(row[12:15]):
-                            results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                            results['Innodb_pending_normal_aio_writes'] = long(row[12])
-                        else:
-                            self.log.warning("Can't parse result line %s", line)
-                    elif len(row) == 18:
-                        # (len(row) == 18) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
-                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                        results['Innodb_pending_normal_aio_writes'] = long(row[12])
-                    elif len(row) == 22:
-                        # (len(row) == 22)
-                        # Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
-                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                        results['Innodb_pending_normal_aio_writes'] = long(row[16])
-                except ValueError as e:
-                    self.log.warning("Can't parse result line %s: %s", line, e)
-            elif line.find('ibuf aio reads') == 0:
-                #  ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
-                #  or ibuf aio reads:, log i/o's:, sync i/o's:
-                if len(row) == 10:
-                    results['Innodb_pending_ibuf_aio_reads'] = long(row[3])
-                    results['Innodb_pending_aio_log_ios'] = long(row[6])
-                    results['Innodb_pending_aio_sync_ios'] = long(row[9])
-                elif len(row) == 7:
-                    results['Innodb_pending_ibuf_aio_reads'] = 0
-                    results['Innodb_pending_aio_log_ios'] = 0
-                    results['Innodb_pending_aio_sync_ios'] = 0
-            elif line.find('Pending flushes (fsync)') == 0:
-                # Pending flushes (fsync) log: 0; buffer pool: 0
-                results['Innodb_pending_log_flushes'] = long(row[4])
-                results['Innodb_pending_buffer_pool_flushes'] = long(row[7])
-
-            # INSERT BUFFER AND ADAPTIVE HASH INDEX
-            elif line.find('Ibuf for space 0: size ') == 0:
-                # Older InnoDB code seemed to be ready for an ibuf per tablespace.  It
-                # had two lines in the output.  Newer has just one line, see below.
-                # Ibuf for space 0: size 1, free list len 887, seg size 889, is not empty
-                # Ibuf for space 0: size 1, free list len 887, seg size 889,
-                results['Innodb_ibuf_size'] = long(row[5])
-                results['Innodb_ibuf_free_list'] = long(row[9])
-                results['Innodb_ibuf_segment_size'] = long(row[12])
-            elif line.find('Ibuf: size ') == 0:
-                # Ibuf: size 1, free list len 4634, seg size 4636,
-                results['Innodb_ibuf_size'] = long(row[2])
-                results['Innodb_ibuf_free_list'] = long(row[6])
-                results['Innodb_ibuf_segment_size'] = long(row[9])
-
-                if line.find('merges') > -1:
-                    results['Innodb_ibuf_merges'] = long(row[10])
-            elif line.find(', delete mark ') > 0 and prev_line.find('merged operations:') == 0:
-                # Output of show engine innodb status has changed in 5.5
-                # merged operations:
-                # insert 593983, delete mark 387006, delete 73092
-                results['Innodb_ibuf_merged_inserts'] = long(row[1])
-                results['Innodb_ibuf_merged_delete_marks'] = long(row[4])
-                results['Innodb_ibuf_merged_deletes'] = long(row[6])
-                results['Innodb_ibuf_merged'] = (
-                    results['Innodb_ibuf_merged_inserts']
-                    + results['Innodb_ibuf_merged_delete_marks']
-                    + results['Innodb_ibuf_merged_deletes']
-                )
-            elif line.find(' merged recs, ') > 0:
-                # 19817685 inserts, 19817684 merged recs, 3552620 merges
-                results['Innodb_ibuf_merged_inserts'] = long(row[0])
-                results['Innodb_ibuf_merged'] = long(row[2])
-                results['Innodb_ibuf_merges'] = long(row[5])
-            elif line.find('Hash table size ') == 0:
-                # In some versions of InnoDB, the used cells is omitted.
-                # Hash table size 4425293, used cells 4229064, ....
-                # Hash table size 57374437, node heap has 72964 buffer(s) <--
-                # no used cells
-                results['Innodb_hash_index_cells_total'] = long(row[3])
-                results['Innodb_hash_index_cells_used'] = long(row[6]) if line.find('used cells') > 0 else 0
-
-            # LOG
-            elif line.find(" log i/o's done, ") > 0:
-                # 3430041 log i/o's done, 17.44 log i/o's/second
-                # 520835887 log i/o's done, 17.28 log i/o's/second, 518724686
-                # syncs, 2980893 checkpoints
-                results['Innodb_log_writes'] = long(row[0])
-            elif line.find(" pending log writes, ") > 0:
-                # 0 pending log writes, 0 pending chkp writes
-                results['Innodb_pending_log_writes'] = long(row[0])
-                results['Innodb_pending_checkpoint_writes'] = long(row[4])
-            elif line.find("Log sequence number") == 0:
-                # This number is NOT printed in hex in InnoDB plugin.
-                # Log sequence number 272588624
-                results['Innodb_lsn_current'] = long(row[3])
-            elif line.find("Log flushed up to") == 0:
-                # This number is NOT printed in hex in InnoDB plugin.
-                # Log flushed up to   272588624
-                results['Innodb_lsn_flushed'] = long(row[4])
-            elif line.find("Last checkpoint at") == 0:
-                # Last checkpoint at  272588624
-                results['Innodb_lsn_last_checkpoint'] = long(row[3])
-
-            # BUFFER POOL AND MEMORY
-            elif line.find("Total memory allocated") == 0 and line.find("in additional pool allocated") > 0:
-                # Total memory allocated 29642194944; in additional pool allocated 0
-                # Total memory allocated by read views 96
-                results['Innodb_mem_total'] = long(row[3])
-                results['Innodb_mem_additional_pool'] = long(row[8])
-            elif line.find('Adaptive hash index ') == 0:
-                #   Adaptive hash index 1538240664     (186998824 + 1351241840)
-                results['Innodb_mem_adaptive_hash'] = long(row[3])
-            elif line.find('Page hash           ') == 0:
-                #   Page hash           11688584
-                results['Innodb_mem_page_hash'] = long(row[2])
-            elif line.find('Dictionary cache    ') == 0:
-                #   Dictionary cache    145525560      (140250984 + 5274576)
-                results['Innodb_mem_dictionary'] = long(row[2])
-            elif line.find('File system         ') == 0:
-                #   File system         313848         (82672 + 231176)
-                results['Innodb_mem_file_system'] = long(row[2])
-            elif line.find('Lock system         ') == 0:
-                #   Lock system         29232616       (29219368 + 13248)
-                results['Innodb_mem_lock_system'] = long(row[2])
-            elif line.find('Recovery system     ') == 0:
-                #   Recovery system     0      (0 + 0)
-                results['Innodb_mem_recovery_system'] = long(row[2])
-            elif line.find('Threads             ') == 0:
-                #   Threads             409336         (406936 + 2400)
-                results['Innodb_mem_thread_hash'] = long(row[1])
-            elif line.find("Buffer pool size ") == 0:
-                # The " " after size is necessary to avoid matching the wrong line:
-                # Buffer pool size        1769471
-                # Buffer pool size, bytes 28991012864
-                if buffer_id == -1:
-                    results['Innodb_buffer_pool_pages_total'] = long(row[3])
-            elif line.find("Free buffers") == 0:
-                # Free buffers            0
-                if buffer_id == -1:
-                    results['Innodb_buffer_pool_pages_free'] = long(row[2])
-            elif line.find("Database pages") == 0:
-                # Database pages          1696503
-                if buffer_id == -1:
-                    results['Innodb_buffer_pool_pages_data'] = long(row[2])
-
-            elif line.find("Modified db pages") == 0:
-                # Modified db pages       160602
-                if buffer_id == -1:
-                    results['Innodb_buffer_pool_pages_dirty'] = long(row[3])
-            elif line.find("Pages read ahead") == 0:
-                # Must do this BEFORE the next test, otherwise it'll get fooled by this
-                # line from the new plugin:
-                # Pages read ahead 0.00/s, evicted without access 0.06/s
-                pass
-            elif line.find("Pages read") == 0:
-                # Pages read 15240822, created 1770238, written 21705836
-                if buffer_id == -1:
-                    results['Innodb_pages_read'] = long(row[2])
-                    results['Innodb_pages_created'] = long(row[4])
-                    results['Innodb_pages_written'] = long(row[6])
-
-            # ROW OPERATIONS
-            elif line.find('Number of rows inserted') == 0:
-                # Number of rows inserted 50678311, updated 66425915, deleted
-                # 20605903, read 454561562
-                results['Innodb_rows_inserted'] = long(row[4])
-                results['Innodb_rows_updated'] = long(row[6])
-                results['Innodb_rows_deleted'] = long(row[8])
-                results['Innodb_rows_read'] = long(row[10])
-            elif line.find(" queries inside InnoDB, ") > 0:
-                # 0 queries inside InnoDB, 0 queries in queue
-                results['Innodb_queries_inside'] = long(row[0])
-                results['Innodb_queries_queued'] = long(row[4])
-
-            prev_line = line
-
-        # We need to calculate this metric separately
-        try:
-            results['Innodb_checkpoint_age'] = results['Innodb_lsn_current'] - results['Innodb_lsn_last_checkpoint']
-        except KeyError as e:
-            self.log.error("Not all InnoDB LSN metrics available, unable to compute: %s", e)
-
-        # Finally we change back the metrics values to string to make the values
-        # consistent with how they are reported by SHOW GLOBAL STATUS
-        for metric, value in list(iteritems(results)):
-            results[metric] = str(value)
-
-        return results
-
     def _get_variable_enabled(self, results, var):
-        enabled = self._collect_string(var, results)
+        enabled = collect_string(var, results)
         return enabled and enabled.lower().strip() == 'on'
 
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
         # in microseconds
-        sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM
-            (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM
-                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us`
-                    FROM performance_schema.events_statements_summary_by_digest
-                    ORDER BY `avg_us` ASC) p,
-                (SELECT @rownum := 0) r) q
-            WHERE q.`ro` > ROUND(.95*@rownum)
-            ORDER BY `percentile` ASC
-            LIMIT 1"""
-
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(sql_95th_percentile)
+                cursor.execute(SQL_95TH_PERCENTILE)
 
                 if cursor.rowcount < 1:
                     self.warning(
@@ -1309,16 +631,9 @@ class MySql(AgentCheck):
     def _query_exec_time_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
-
-        sql_avg_query_run_time = """\
-            SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
-            FROM performance_schema.events_statements_summary_by_digest
-            WHERE schema_name IS NOT NULL
-            GROUP BY schema_name"""
-
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(sql_avg_query_run_time)
+                cursor.execute(SQL_AVG_QUERY_RUN_TIME)
 
                 if cursor.rowcount < 1:
                     self.warning(
@@ -1343,17 +658,9 @@ class MySql(AgentCheck):
     def _query_size_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
-
-        sql_query_schema_size = """
-        SELECT   table_schema,
-                 IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
-                 FROM     information_schema.tables
-                 GROUP BY table_schema;
-        """
-
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(sql_query_schema_size)
+                cursor.execute(SQL_QUERY_SCHEMA_SIZE)
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the information schema 'tables' table.")

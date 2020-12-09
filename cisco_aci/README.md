@@ -16,9 +16,12 @@ The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2]
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample cisco_aci.d/conf.yaml][4] for all available configuration options:
 
@@ -46,6 +49,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5] to begin sending Cisco ACI metrics to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -55,6 +61,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `teamcity`                                                             |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
 | `<INSTANCE_CONFIG>`  | `{"aci_url":"%%host%%", "username":"<USERNAME>", "pwd": "<PASSWORD>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -72,9 +81,8 @@ The Cisco ACI check sends tenant faults as events.
 
 ### Service Checks
 
-`cisco_aci.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise OK.
+**cisco_aci.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

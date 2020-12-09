@@ -14,7 +14,12 @@ The ProxySQL integration is included in the [Datadog Agent][3] package, so you d
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `proxysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your ProxySQL performance data. See the [sample proxysql.d/conf.yaml][5] for all available configuration options.
 
@@ -55,6 +60,9 @@ The ProxySQL integration is included in the [Datadog Agent][3] package, so you d
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -75,6 +83,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "proxysql", "service": "<SERVICE_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -88,9 +98,11 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-`proxysql.can_connect`: Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`. This service check is tagged by `server` and `port`
+**proxysql.can_connect**:<br>
+Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`. This service check is tagged by `server` and `port`
 
-`proxysql.backend.status`: Returns `CRITICAL` if ProxySQL considers the backend host as SHUNNED or OFFLINE_HARD. Returns `WARNING` if the backend host is `OFFLINE_SOFT`. Returns `OK` otherwise. This service check is tagged by `hostgroup`, `srv_host` and `srv_port`.
+**proxysql.backend.status**:<br>
+Returns `CRITICAL` if ProxySQL considers the backend host as SHUNNED or OFFLINE_HARD. Returns `WARNING` if the backend host is `OFFLINE_SOFT`. Returns `OK` otherwise. This service check is tagged by `hostgroup`, `srv_host` and `srv_port`.
 
 ### Events
 

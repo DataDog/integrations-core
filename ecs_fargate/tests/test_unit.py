@@ -133,6 +133,12 @@ def mocked_get_tags(entity, _):
     return tag_store.get(entity, [])
 
 
+def mocked_is_excluded(name, image):
+    if image.startswith("amazon/amazon-ecs-pause"):
+        return True
+    return False
+
+
 def test_failing_check(check, instance, aggregator):
     """
     Testing fargate metadata endpoint error.
@@ -159,7 +165,8 @@ def test_successful_check(check, instance, aggregator):
     """
     with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
-            check.check(instance)
+            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+                check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 
@@ -201,19 +208,6 @@ def test_successful_check(check, instance, aggregator):
             # Compat
             'docker_name:ecs-redis-datadog-1-redis-ce99d29f8ce998ed4a00',
         ],
-        [
-            # Tagger
-            "docker_image:amazon/amazon-ecs-pause:0.1.0",
-            "image_name:amazon/amazon-ecs-pause",
-            "short_image:amazon-ecs-pause",
-            "image_tag:0.1.0",
-            "ecs_container_name:~internal~ecs~pause",
-            "container_id:39e13ccc425e7777187a603fe33f466a18515030707c4063de1dc1b63d14d411",
-            "container_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01",
-            "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
-            # Compat
-            'docker_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01',
-        ],
     ]
 
     extra_expected_metrics_for_container = [
@@ -222,7 +216,7 @@ def test_successful_check(check, instance, aggregator):
         [],  # pause container get fewer metrics
     ]
 
-    for i in range(3):
+    for i in range(2):
         tags = common_tags + container_tags[i]
         for metric in EXPECTED_CONTAINER_METRICS:
             aggregator.assert_metric(metric, count=1, tags=tags)
@@ -230,7 +224,7 @@ def test_successful_check(check, instance, aggregator):
             aggregator.assert_metric(metric, count=1, tags=tags)
 
     for metric in EXTRA_NETWORK_METRICS:
-        aggregator.assert_metric(metric, count=3)  # 3 network interfaces
+        aggregator.assert_metric(metric, count=1)  # 1 network interfaces
 
     aggregator.assert_all_metrics_covered()
 

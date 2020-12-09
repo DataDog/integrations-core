@@ -1,6 +1,7 @@
 {
   "categories": [
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Nfsstat",
@@ -20,8 +21,15 @@
   "type": "check",
   "integration_id": "system",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "nfsstat"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

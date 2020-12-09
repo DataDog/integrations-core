@@ -76,12 +76,14 @@ class CouchDb(AgentCheck):
             except Exception as e:
                 raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
-            if version.startswith('1.'):
+            major_version = int(version.split('.')[0])
+            if major_version == 0:
+                raise errors.BadVersionError("Unknown version {}".format(version))
+            elif major_version <= 1:
                 self.checker = CouchDB1(self)
-            elif version.startswith('2.'):
-                self.checker = CouchDB2(self)
             else:
-                raise errors.BadVersionError("Unkown version {0}".format(version))
+                # v2 of the CouchDB check supports versions 2 and higher of Couch
+                self.checker = CouchDB2(self)
 
         self.checker.check(instance)
 
@@ -105,7 +107,7 @@ class CouchDB1:
     """
 
     def __init__(self, agent_check):
-        self.db_blacklist = {}
+        self.db_exclude = {}
         self.agent_check = agent_check
         self.gauge = agent_check.gauge
 
@@ -153,13 +155,13 @@ class CouchDB1:
 
         url = urljoin(server, endpoint)
 
-        # Get the list of whitelisted databases.
-        db_whitelist = instance.get('db_whitelist')
-        self.db_blacklist.setdefault(server, [])
-        self.db_blacklist[server].extend(instance.get('db_blacklist', []))
-        whitelist = set(db_whitelist) if db_whitelist else None
-        databases = set(self.agent_check.get(url, tags)) - set(self.db_blacklist[server])
-        databases = databases.intersection(whitelist) if whitelist else databases
+        # Get the list of included databases.
+        db_include = instance.get('db_include', instance.get('db_whitelist'))
+        db_include = set(db_include) if db_include else None
+        self.db_exclude.setdefault(server, [])
+        self.db_exclude[server].extend(instance.get('db_exclude', instance.get('db_blacklist', [])))
+        databases = set(self.agent_check.get(url, tags)) - set(self.db_exclude[server])
+        databases = databases.intersection(db_include) if db_include else databases
 
         max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
         if len(databases) > max_dbs_per_check:
@@ -173,11 +175,11 @@ class CouchDB1:
             except requests.exceptions.HTTPError as e:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
-                    self.db_blacklist[server].append(dbName)
+                    self.db_exclude[server].append(dbName)
 
                     self.warning(
                         'Database %s is not readable by the configured user. '
-                        'It will be added to the blacklist. Please restart the agent to clear.',
+                        'It will be added to the exclusion list. Please restart the agent to clear.',
                         dbName,
                     )
                     del couchdb['databases'][dbName]
@@ -188,6 +190,7 @@ class CouchDB1:
 
 
 class CouchDB2:
+    """v2 of the CouchDB check. Supports all versions of Couch > 2.X, including Couch v3"""
 
     MAX_NODES_PER_CHECK = 20
 
@@ -338,11 +341,11 @@ class CouchDB2:
             self._build_system_metrics(self._get_system_stats(server, name, tags), tags)
             self._build_active_tasks_metrics(self._get_active_tasks(server, name, tags), tags)
 
-            db_whitelist = instance.get('db_whitelist')
-            db_blacklist = instance.get('db_blacklist', [])
+            db_include = instance.get('db_include', instance.get('db_whitelist'))
+            db_exclude = instance.get('db_exclude', instance.get('db_blacklist', []))
             scanned_dbs = 0
             for db in self._get_dbs_to_scan(server, name, tags):
-                if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
+                if (db_include is None or db in db_include) and (db not in db_exclude):
                     db_tags = config_tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
                     self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)

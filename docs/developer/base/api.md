@@ -17,6 +17,7 @@
         - service_check
         - event
         - set_metadata
+        - metadata_entrypoint
 
 ## Stubs
 

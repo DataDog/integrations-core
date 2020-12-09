@@ -18,17 +18,24 @@ ERR_MULTIPLE_SOURCES = "The check has a log pipeline but documents multiple sour
 ERR_NOT_DEFINED_WEB_UI = "The check has a log pipeline but does not have a corresponding entry defined in web-ui."
 
 EXCEPTIONS = {
+    'amazon_eks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # eks is just a tile
+    'azure_active_directory': [
+        ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
+        ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
+    ],
     'cilium': [
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # cilium does not need a pipeline to automatically parse the logs
         ERR_UNEXPECTED_LOG_DOC  # The documentation says to use 'source: cilium'
     ],
-    'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
-    'amazon_eks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # eks is just a tile
     'eks_fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
     'fluentd': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # Fluentd is about log collection but we don't collect fluentd logs
     'kubernetes': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from kubernetes environment but there is no pipeline per se
+    'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
+    'linkerd': [
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # linkerd does not need a pipeline to automatically parse the logs
+        ERR_UNEXPECTED_LOG_DOC
+    ],
     'win32_event_log': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # win32_event_log is about log collection but we don't collect win32_event_log logs
-
 }
 
 
@@ -50,15 +57,12 @@ class CheckDefinition(object):
             content = json.load(manifest)
             # name of the integration
             self.name: str = content['name']
-            # id of the integration
-            self.integration_id: str = content['integration_id']
             # boolean: whether or not the integration supports log collection
             self.log_collection: bool = 'log collection' in content['categories']
             # boolean: whether or not the integration has public facing docs
             self.is_public: bool = content['is_public']
-
-        # The log source defined in the log pipeline for this integration. This is populated after parsing pipelines.
-        self.log_source_name: Optional[str] = None
+            # Log source defined in the manifest.json of the integration
+            self.log_source: Optional[str] = content.get("assets", {}).get("logs", {}).get("source")
 
         # Whether or not this check has a log to metrics mapping defined in web-ui
         self.is_defined_in_web_ui: bool = False
@@ -82,22 +86,12 @@ class CheckDefinition(object):
 
         return list(sources)
 
-    def is_self(self, other_check_name) -> bool:
-        candidates = [self.dir_name.lower(), self.name.lower(), self.integration_id.lower()]
-        for source in self.source_names_readme:
-            candidates.append(source.lower())
-        if other_check_name.lower() in candidates:
-            return True
-
-        return False
-
     def validate(self) -> List[str]:
-        # TODO: Check json file from web-ui
         if not self.is_public:
             return []
 
         errors = set()
-        if not self.log_source_name:
+        if not self.log_source:
             # This check doesn't appear to have a log pipeline.
             if self.log_collection:
                 errors.add(ERR_UNEXPECTED_LOG_COLLECTION_CAT)
@@ -158,12 +152,6 @@ def get_log_to_metric_map(file_path):
 
     return {x['logSourceName']: x['metricsPrefixes'] for x in mapping if 'logSourceName' in x}
 
-def get_check_for_pipeline(log_source_name, agt_intgs_checks):
-    for check in agt_intgs_checks:
-        if check.is_self(log_source_name):
-            return check
-    return None
-
 
 if len(sys.argv) != 2:
     print_err("This script requires a single JSON file as an argument.")
@@ -172,11 +160,9 @@ if len(sys.argv) != 2:
 logs_to_metrics_mapping = get_log_to_metric_map(sys.argv[1])
 
 all_checks = list(get_all_checks())
-for pipeline_id in get_all_log_pipelines_ids():
-    if check := get_check_for_pipeline(pipeline_id, all_checks):
-        check.log_source_name = pipeline_id
-        check.is_defined_in_web_ui = pipeline_id in logs_to_metrics_mapping
-
+for check in all_checks:
+    if check.log_source in logs_to_metrics_mapping:
+        check.is_defined_in_web_ui = True
 
 validation_errors_per_check = {}
 for check in all_checks:

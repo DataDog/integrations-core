@@ -1,0 +1,26 @@
+{
+	"name": "[kubernetes] Monitor Kubernetes Deployments Replica Pods",
+	"type": "query alert",
+	"query": "avg(last_15m):avg:kubernetes_state.deployment.replicas_desired{*} by {deployment} - avg:kubernetes_state.deployment.replicas_ready{*} by {deployment} >= 2",
+	"message": "More than one Deployments Replica's pods are down.",
+	"tags": [
+		"integration:kubernetes"
+	],
+	"options": {
+		"notify_audit": true,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"require_full_window": false,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 2
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when more than one replica pod is down for your Kubernetes integration."
+	}
+}

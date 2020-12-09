@@ -345,3 +345,32 @@ def test_invalid_excluded_interfaces(check):
     instance = {'excluded_interfaces': None}
     with pytest.raises(ConfigurationError):
         check.check(instance)
+
+
+@pytest.mark.parametrize(
+    "proc_location, ss_found, expected",
+    [("/proc", False, True), ("/something/proc", False, False), ("/something/proc", True, True)],
+)
+def test_is_collect_cx_state_runnable(aggregator, check, proc_location, ss_found, expected):
+    with mock.patch('distutils.spawn.find_executable', lambda x: "/bin/ss" if ss_found else None):
+        check._collect_cx_state = True
+        assert check._is_collect_cx_state_runnable(proc_location) == expected
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=False)
+@mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
+def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggregator, check):
+    instance = {'collect_connection_state': True}
+    with mock.patch(
+        'datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock
+    ) as get_subprocess_output:
+        check._get_net_proc_base_location = lambda x: "/something/proc"
+        check.check(instance)
+        get_subprocess_output.assert_called_with(
+            ["sh", "-c", "ss --numeric --udp --all --ipv6 | wc -l"],
+            check.log,
+            env={'PROC_ROOT': "/something/proc", 'PATH': os.environ["PATH"]},
+        )

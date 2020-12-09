@@ -1,0 +1,31 @@
+name: Nfsstat
+files:
+- name: nfsstat.yaml
+  options:
+  - template: init_config
+    options:
+    - name: nfsiostat_path
+      description: |
+        A version of nfsiostat is shipped with the Agent binary.
+        If you are using a source install, specify the location of nfsiostat
+        with the nfsiostat_path parameter.
+      value:
+        type: string
+        example: /usr/local/sbin/nfsiostat
+        default: null
+    - name: autofs_enabled
+      description: |
+        If your environment uses AutoFS, enable this option to only log DEBUG-level messages when there are no mounts.
+        See more information on AutoFS here: https://help.ubuntu.com/community/Autofs
+      value:
+        type: boolean
+        example: false
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/messages
+        source: nfsstat

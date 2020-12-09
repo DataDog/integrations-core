@@ -1,13 +1,52 @@
 name: Disk
 files:
   - name: disk.yaml
+    example_name: conf.yaml.default
     options:
       - template: init_config
+        options:
+          - name: file_system_global_exclude
+            description: |
+              Instruct the check to always add these patterns to `file_system_exclude`.
+
+              WARNING: Overriding these defaults could negatively impact your system or
+              the performance of the check.
+            value:
+              example:
+                - iso9660$
+              type: array
+              items:
+                type: string
+          - name: device_global_exclude
+            description: |
+              Instruct the check to always add these patterns to `device_exclude`.
+
+              WARNING: Overriding these defaults could negatively impact your system or
+              the performance of the check.
+            value:
+              example: []
+              type: array
+              items:
+                type: string
+          - name: mount_point_global_exclude
+            description: |
+              Instruct the check to always add these patterns to `mount_point_exclude`.
+
+              WARNING: Overriding these defaults could negatively impact your system or
+              the performance of the check.
+            value:
+              example:
+                - (/host)?/proc/sys/fs/binfmt_misc$
+              type: array
+              items:
+                type: string
       - template: instances
         options:
           - name: use_mount
             required: true
-            description: Instruct the check to collect using mount points instead of volumes.
+            description: |
+              If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
+              (for example `device:/dev/disk1s5`).
             value:
               example: false
               type: boolean
@@ -19,10 +58,10 @@ files:
               example: false
               type: boolean
           - template: instances/tags
-          - name: file_system_whitelist
+          - name: file_system_include
             description: |
               Instruct the check to only collect from matching file systems.
-             
+
               Character casing is ignored. For convenience, the regular expressions
               start matching from the beginning and therefore to match anywhere you
               must prepend `.*`. For exact matches append `$`.
@@ -33,7 +72,7 @@ files:
                 type: array
                 items:
                   type: string
-          - name: file_system_blacklist
+          - name: file_system_exclude
             description: |
               Instruct the check to not collect from matching file systems.
 
@@ -41,7 +80,10 @@ files:
               start matching from the beginning and therefore to match anywhere you
               must prepend `.*`. For exact matches append `$`.
 
-              When conflicts arise, this will override `file_system_whitelist`.
+              Devices from pseudo or memory-based file systems can be excluded by disabling the
+              `include_all_devices` option.
+
+              When conflicts arise, this will override `file_system_include`.
             value:
               example:
                 - tmpfs$
@@ -50,7 +92,7 @@ files:
               type: array
               items:
                 type: string
-          - name: device_whitelist
+          - name: device_include
             description: |
                 Instruct the check to only collect from matching devices.
 
@@ -64,7 +106,7 @@ files:
               type: array
               items:
                 type: string
-          - name: device_blacklist
+          - name: device_exclude
             description: |
               Instruct the check to not collect from matching devices.
 
@@ -72,7 +114,7 @@ files:
               expressions start matching from the beginning and therefore to match
               anywhere you must prepend `.*`. For exact matches append `$`.
 
-              When conflicts arise, this will override `device_whitelist`.
+              When conflicts arise, this will override `device_include`.
             value:
               example:
                - /dev/sde
@@ -80,7 +122,7 @@ files:
               type: array
               items:
                 type: string
-          - name: mount_point_whitelist
+          - name: mount_point_include
             description: |
                Instruct the check to only collect from matching mount points.
 
@@ -94,7 +136,7 @@ files:
               type: array
               items:
                 type: string
-          - name: mount_point_blacklist
+          - name: mount_point_exclude
             description: |
               Instruct the check to not collect from matching mount points.
 
@@ -109,6 +151,15 @@ files:
               type: array
               items:
                 type: string
+          - name: include_all_devices
+            description: |
+              Instruct the check to collect from all devices, including non-physical devices.
+              Set this to false to exclude pseudo, memory, duplicate or inaccessible file systems.
+
+              For more fine-grained control, use the inclusion and exclusion options.
+            value:
+              example: true
+              type: boolean
           - name: service_check_rw
             description: |
               Instruct the check to notify based on partition state.
@@ -159,3 +210,9 @@ files:
             value:
               example: 0
               type: number
+          - name: timeout
+            description: Timeout of the disk query in seconds
+            value:
+              example: 5
+              default: 5
+              type: integer

@@ -26,6 +26,7 @@ For PostgreSQL version 10 and above, run:
 ```shell
 create user datadog with password '<PASSWORD>';
 grant pg_monitor to datadog;
+grant SELECT ON pg_stat_database to datadog;
 ```
 
 For older PostgreSQL versions, run:
@@ -59,9 +60,12 @@ CREATE VIEW pg_stat_activity_dd AS SELECT * FROM pg_stat_activity();
 grant SELECT ON pg_stat_activity_dd to datadog;
 ```
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -75,9 +79,6 @@ Follow the instructions below to configure this check for an Agent running on a 
      ## The hostname to connect to.
      ## NOTE: Even if the server name is "localhost", the agent connects to
      ## PostgreSQL using TCP/IP, unless you also provide a value for the sock key.
-     ## If `use_psycopg2` is enabled, use the directory containing
-     ## the UNIX socket (ex: `/run/postgresql/`) otherwise, use the full path to
-     ##  the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
      #
      - host: localhost
 
@@ -171,6 +172,9 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
 
 5. [Restart the Agent][4].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
@@ -208,6 +212,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "postgresql", "service": "postgresql"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

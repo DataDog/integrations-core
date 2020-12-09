@@ -27,13 +27,24 @@
   "type": "check",
   "integration_id": "mysql",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "mysql": "assets/dashboards/overview.json",
+      "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
+
+    },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
       "operations_overview": "assets/saved_views/operations_overview.json",
       "slow_operations": "assets/saved_views/slow_operations.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "mysql"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

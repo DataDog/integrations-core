@@ -10,6 +10,7 @@ import pytest
 
 from datadog_checks.base import ensure_bytes
 from datadog_checks.dev import get_here
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 
 customtag = "custom:tag"
@@ -82,6 +83,7 @@ def test_check(aggregator, fixture_group):
         aggregator.assert_metric_has_tag(metric, customtag)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])

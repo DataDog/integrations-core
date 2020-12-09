@@ -47,8 +47,9 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--org-name', '-o', help='The org to use for data submission.')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
+@click.option('--dogstatsd', is_flag=True, help='Enable dogstatsd port on agent')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory):
+def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory, dogstatsd):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort(f'`{check}` is not a testable check.')
@@ -113,6 +114,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         profile_memory = False
         echo_warning('No API key is set; collecting metrics about memory usage will be disabled.')
 
+    if not dev and ctx.obj['repo_choice'] != 'core':
+        echo_warning('Be sure to run environment with --dev for extras or custom integrations.')
+
     echo_waiting(f'Setting up environment `{env}`... ', nl=False)
     config, metadata, error = start_environment(check, env)
 
@@ -130,7 +134,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     env_type = metadata['env_type']
 
     # TODO: remove this legacy fallback lookup in any future major version bump
-    legacy_fallback = ctx.obj.get('agent', '')
+    legacy_fallback = os.path.expanduser(ctx.obj.get('agent', ''))
     if os.path.isdir(legacy_fallback):
         legacy_fallback = ''
 
@@ -164,6 +168,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
 
+    if dogstatsd:
+        env_vars['DD_DOGSTATSD_NON_LOCAL_TRAFFIC'] = 'true'
+        env_vars['DD_DOGSTATSD_METRICS_STATS_ENABLE'] = 'true'
+
     if profile_memory:
         plat = platform.system()
         try:
@@ -173,7 +181,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             echo_warning(f'Unable to detect the current Git branch, defaulting to `{branch}`.')
 
         env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
-        env_vars['DD_TRACEMALLOC_WHITELIST'] = check
+        env_vars['DD_TRACEMALLOC_INCLUDE'] = check
 
         if on_ci:
             env_vars.setdefault('DD_AGGREGATOR_STOP_TIMEOUT', '10')
@@ -208,6 +216,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         log_url,
         python,
         not bool(agent),
+        dogstatsd,
     )
 
     echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
@@ -235,6 +244,13 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
+
+    # for example, to install some tools inside container:
+    # export DDEV_AGENT_START_COMMAND="bash -c 'apt update && apt install -y vim less'"
+    extra_commands = os.getenv('DDEV_AGENT_START_COMMAND', None)
+    if extra_commands:
+        start_commands.append(extra_commands)
+
     if start_commands:
         echo_waiting('Running extra start-up commands... ', nl=False)
 

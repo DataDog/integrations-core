@@ -29,6 +29,8 @@
     "dashboards": {
       "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

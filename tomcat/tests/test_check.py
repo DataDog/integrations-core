@@ -4,36 +4,10 @@
 
 import pytest
 
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import TOMCAT_E2E_METRICS
-
-JVM_METRICS = [
-    'jvm.buffer_pool.direct.capacity',
-    'jvm.buffer_pool.direct.count',
-    'jvm.buffer_pool.direct.used',
-    'jvm.buffer_pool.mapped.capacity',
-    'jvm.buffer_pool.mapped.count',
-    'jvm.buffer_pool.mapped.used',
-    'jvm.cpu_load.process',
-    'jvm.cpu_load.system',
-    'jvm.gc.cms.count',
-    'jvm.gc.eden_size',
-    'jvm.gc.old_gen_size',
-    'jvm.gc.parnew.time',
-    'jvm.gc.survivor_size',
-    'jvm.heap_memory_committed',
-    'jvm.heap_memory_init',
-    'jvm.heap_memory_max',
-    'jvm.heap_memory',
-    'jvm.loaded_classes',
-    'jvm.non_heap_memory_committed',
-    'jvm.non_heap_memory_init',
-    'jvm.non_heap_memory_max',
-    'jvm.non_heap_memory',
-    'jvm.os.open_file_descriptors',
-    'jvm.thread_count',
-]
 
 COUNTER_METRICS = [
     # TODO: JMXFetch is not reporting in-app type for JMX `counter` type.
@@ -65,4 +39,4 @@ def test(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_METRICS + COUNTER_METRICS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS + COUNTER_METRICS)

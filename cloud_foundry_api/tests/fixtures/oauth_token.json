@@ -1,0 +1,7 @@
+{
+  "access_token": "token",
+  "token_type": "bearer",
+  "expires_in": 1000,
+  "scope": "scope",
+  "jti": "jti"
+}

@@ -318,10 +318,12 @@ def test_section_example_indent():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs
-        ## service - required - The name of the service that generates the log.
+        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ##                       possible values are utf-16-le and utf-16-be.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## tags - optional - Add tags to the collected logs
+        ## tags - optional - Add tags to the collected logs.
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
         #
@@ -380,10 +382,12 @@ def test_section_example_indent_required():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs
-        ## service - required - The name of the service that generates the log.
+        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ##                       possible values are utf-16-le and utf-16-be.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## tags - optional - Add tags to the collected logs
+        ## tags - optional - Add tags to the collected logs.
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
         #
@@ -791,6 +795,68 @@ def test_option_string_type_not_default():
     )
 
 
+def test_option_string_type_not_default_example_default_value_none():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: None
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_string_type_not_default_example_default_value_null():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: null
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
 def test_section_description_length_limit():
     consumer = get_example_consumer(
         """
@@ -838,6 +904,40 @@ def test_option_description_length_limit():
     files = consumer.render()
     _, errors = files['test.yaml.example']
     assert 'Description line length of option `foo` was over the limit by 3 characters' in errors
+
+
+def test_option_description_length_limit_with_noqa():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: {}
+            value:
+              type: string
+              example: something
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa'
+        )
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: something
+        ## {}
+        #
+        # foo: something
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
+        )
+    )
 
 
 @pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
@@ -1080,6 +1180,50 @@ def test_compact_example():
         #   - {foo: bar, bar: baz}
         #   - [2, 3]
         """
+    )
+
+
+def test_compact_example_long_line():
+    long_str = "This string is very long and has 50 chars in it !!"
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: array
+              compact_example: true
+              example:
+                - - {0}
+                  - {0}
+                  - {0}
+                  - {0}
+              items:
+                type: array
+                items:
+                  type: string
+        """.format(
+            long_str
+        )
+    )
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - list of lists - optional
+        ## words
+        #
+        # foo:
+        #   - [{0}, {0}, {0}, {0}]
+        """.format(
+            long_str
+        )
     )
 
 

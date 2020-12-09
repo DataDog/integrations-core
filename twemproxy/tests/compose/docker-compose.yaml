@@ -34,6 +34,7 @@ services:
       - redis2
 
   twemproxy:
+    # Version 0.3.0
     image: jgoodall/twemproxy
     ports:
       - 6100:6100

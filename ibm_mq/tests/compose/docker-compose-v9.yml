@@ -1,11 +1,14 @@
 version: '3'
 
 services:
-  ibmmq:
-    container_name: ibm_mq
+  ibm_mq1:
+    container_name: ibm_mq1
     image: ibmcom/mq:${IBM_MQ_VERSION}
     environment:
-      - MQ_QMGR_NAME=datadog
+      - MQ_QMGR_NAME=QM1
       - LICENSE=accept
     ports:
       - "11414:1414"
+    volumes:
+      - './config.mqsc:/etc/mqm/config.mqsc'
+      - '../keys:/etc/mqm/pki/keys'

@@ -8,6 +8,7 @@ from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
 from pyVmomi import SoapAdapter, vim, vmodl
+from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
@@ -67,7 +68,7 @@ class APIResponseError(Exception):
 class VersionInfo(object):
     def __init__(self, about_info):
         # type: (vim.AboutInfo) -> None
-        # Semver formatted version string
+        # SemVer formatted version string
         self.version_str = "{}+{}".format(about_info.version, about_info.build)
 
         # Text based information i.e 'VMware vCenter Server 6.7.0 build-14792544'
@@ -105,15 +106,11 @@ class VSphereAPI(object):
         context = None
         if not self.config.ssl_verify:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(
-                ssl.PROTOCOL_TLS  # type: ignore
-            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(
-                ssl.PROTOCOL_TLS  # type: ignore
-            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_REQUIRED
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
             context.check_hostname = True
@@ -149,9 +146,9 @@ class VSphereAPI(object):
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
-    def check_health(self):
-        # type: () -> None
-        self._conn.CurrentTime()
+    def get_current_time(self):
+        # type: () -> dt.datetime
+        return self._conn.CurrentTime()
 
     @smart_retry
     def get_version(self):
@@ -169,18 +166,10 @@ class VSphereAPI(object):
         return self._conn.content.perfManager.QueryPerfCounterByLevel(collection_level)
 
     @smart_retry
-    def get_infrastructure(self):
-        # type: () -> InfrastructureData
-        """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
-
-        :return: {
-            'vim.VirtualMachine-VM0': {
-              'name': 'VM-0',
-              ...
-            }
-            ...
-        }
-        """
+    def _get_raw_infrastructure(self):
+        # type: () -> List[vmodl.query.PropertyCollector.ObjectContent]
+        """Traverse the whole vSphere infrastructure and returns the list of raw pyvmomi MOR objects with
+        the required pre-fetched attributes."""
         content = self._conn.content  # vim.ServiceInstanceContent reference from the connection
 
         property_specs = []
@@ -188,7 +177,9 @@ class VSphereAPI(object):
         for resource in ALL_RESOURCES:
             property_spec = vmodl.query.PropertyCollector.PropertySpec()
             property_spec.type = resource
-            property_spec.pathSet = ["name", "parent", "customValue"]
+            property_spec.pathSet = ["name", "parent"]
+            if self.config.should_collect_attributes:
+                property_spec.pathSet.append("customValue")
             if resource == vim.VirtualMachine:
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
@@ -230,6 +221,30 @@ class VSphereAPI(object):
         finally:
             view_ref.Destroy()
 
+        return obj_content_list
+
+    @smart_retry
+    def _fetch_all_attributes(self):
+        # type: () -> List[vim.CustomFieldsManager.FieldDef]
+        """Retrieves all attributes for every single resource in vSphere. It is not possible to fetch
+        only the one we needs.
+        Note: Code is in a separate method so that it can be 'smart_retried' if the API call fails."""
+        return self._conn.content.customFieldsManager.field
+
+    def get_infrastructure(self):
+        # type: () -> InfrastructureData
+        """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
+
+        :return: {
+            'vim.VirtualMachine-VM0': {
+              'name': 'VM-0',
+              ...
+            }
+            ...
+        }
+        """
+
+        obj_content_list = self._get_raw_infrastructure()
         # Build infrastructure data
         # Each `obj_content` contains the fields:
         #   - `obj`: `ManagedEntity` aka `mor`
@@ -240,8 +255,29 @@ class VSphereAPI(object):
             if obj_content.propSet
         }
 
+        # Add the root folder entity as it can't be fetched from the previous api calls.
         root_folder = self._conn.content.rootFolder
         infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
+
+        if self.config.should_collect_attributes:
+            # Clean up attributes in infrastructure_data,
+            # at this point they are custom pyvmomi objects and the attribute keys are not resolved.
+
+            attribute_keys = {x.key: x.name for x in self._fetch_all_attributes()}
+            for props in itervalues(infrastructure_data):
+                mor_attributes = []
+                if 'customValue' not in props:
+                    continue
+                for attribute in props.pop('customValue'):
+                    # The attribute key is always unique
+                    attr_key_name = attribute_keys.get(attribute.key)
+                    if attr_key_name is None:
+                        self.log.debug("Unable to resolve attribute key with ID: %s", attribute.key)
+                        continue
+                    attr_value = attribute.value
+                    mor_attributes.append("{}{}:{}".format(self.config.attr_prefix, attr_key_name, attr_value))
+
+                props['attributes'] = mor_attributes
         return cast(InfrastructureData, infrastructure_data)
 
     @smart_retry
@@ -249,6 +285,12 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
+        self.log.debug("Received %s values from QueryPerf", len(values))
+        self.log.trace(
+            "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
+            query_specs,
+            values,
+        )
         return values
 
     @smart_retry

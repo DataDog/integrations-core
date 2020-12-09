@@ -29,6 +29,10 @@
     },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "jboss_wildfly"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

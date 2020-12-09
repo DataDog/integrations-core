@@ -17,6 +17,7 @@ files:
         example:
           - name: sqlserver.clr.execution
             counter_name: CLR Execution
+    - template: init_config/db
   - template: instances
     description: |
       Every instance is scheduled independent of the others.
@@ -38,10 +39,116 @@ files:
       value:
         type: string
     - name: database
-      description: Database name to query
+      description: |
+        Database name to query.  Not compatible with `database_autodiscovery`.
       value:
         type: string
         example: master
+    - name: database_autodiscovery
+      description: |
+        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
+      value:
+        type: boolean
+        example: false
+    - name: autodiscovery_include
+      description: |
+        Regular expression for database names to include as part of `database_autodiscovery`.
+        Will report metrics for databases that are found in this instance, ignores databases listed but not found.
+
+        Character casing is ignored. The regular expressions start matching from the beginning, so 
+        to match anywhere, prepend `.*`. For exact matches append `$`. 
+
+        Defaults to `.*` to include everything.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - master$
+          - AdventureWorks.*
+    - name: autodiscovery_exclude
+      description: |
+        Regular expression for database names to exclude as part of `database_autodiscovery`.
+
+        Character casing is ignored. The regular expressions start matching from the beginning, so
+        to match anywhere, prepend `.*`. For exact matches append `$`.
+
+        In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over
+        those found via `autodiscovery_include`.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - model
+          - msdb
+    - name: database_autodiscovery_interval
+      description: |
+        Frequency in seconds of scans for new databases.  Defaults to `3600`.
+      value:
+        type: integer
+        example: 3600
+    - name: include_ao_metrics
+      description: |
+        Include AlwaysOn availability group metrics.
+      value:
+        type: boolean
+        example: false
+    - name: availability_group
+      description: |
+        You can specify an availability group when `include_ao_metrics`
+        is enabled to monitor a specific availability group.
+        If no availability group is specified, then all availability
+        groups on the current replica will output metrics.
+      value:
+        type: string
+    - name: only_emit_local
+      description: |
+        Primary replicas may emit metrics for remote secondary replicas
+        in the same availability group. If this option is set to true,
+        the primary replica will only emit information local to itself.
+      value:
+        type: boolean
+        example: false
+    - name: ao_database
+      description: |
+        AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
+      value:
+        type: string
+    - name: include_fci_metrics
+      description: |
+        Include Failover Cluster Instance metrics. Note that these metrics
+        requires a SQLServer set up with Failover Clustering enabled.
+      value:
+        type: boolean
+        example: false
+    - name: include_instance_metrics
+      description: |
+        Include server-level instance metrics.  When setting up multiple instances for
+        different databases on the same host these metrics will be duplicated unless this option is turned off.
+      value:
+        type: boolean
+        example: true
+    - name: include_task_scheduler_metrics
+      description: Include additional Task and Scheduler metrics.
+      value:
+        type: boolean
+        example: false
+    - name: include_db_fragmentation_metrics
+      description: Include database fragmentation metrics.
+      value:
+        type: boolean
+        example: false
+    - name: db_fragmentation_object_names
+      description: |
+        Fragmentation metrics normally emit metrics for all objects within a database.
+        This option allows you to specify database object names to query for fragmentation metrics.
+        Note: Each object name is unique to each database.
+      value:
+        type: array
+        items:
+          type: string
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -81,7 +188,8 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 30
+        example: 5
+    - template: instances/db
     - name: stored_procedure
       description: |
         Get metrics from custom proc in MyDB but only if the database is writable
@@ -112,6 +220,7 @@ files:
     - type: file
       path: /var/opt/mssql/log/errorlog
       source: sqlserver
+      encoding: utf-16-le
       service: <SERVICE_NAME>
       log_processing_rules:
       - type: multi_line

@@ -7,7 +7,7 @@ from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
 
-from .common import HARBOR_COMPONENTS, VERSION_1_5, VERSION_1_6, VERSION_1_8
+from .common import HARBOR_COMPONENTS, HARBOR_VERSION, VERSION_1_5, VERSION_1_6, VERSION_1_8
 from .conftest import MockResponse
 
 
@@ -50,6 +50,14 @@ def test_submit_disk_metrics(aggregator, harbor_check, harbor_api):
     harbor_check._submit_disk_metrics(harbor_api, tags)
     aggregator.assert_metric('harbor.disk.free', 5e5, tags=tags)
     aggregator.assert_metric('harbor.disk.total', 1e6, tags=tags)
+
+
+@pytest.mark.usefixture("patch_requests")
+@pytest.mark.skipif(HARBOR_VERSION < VERSION_1_5, reason="The registry.read_only metric is submitted for Harbor 1.5+")
+def test_submit_read_only_status(aggregator, harbor_check, harbor_api):
+    tags = ['tag1:val1', 'tag2']
+    harbor_check._submit_read_only_status(harbor_api, tags)
+    aggregator.assert_metric('harbor.registry.read_only', 0, tags=tags)
 
 
 def test_api__make_get_request(harbor_api):

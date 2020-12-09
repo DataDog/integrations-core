@@ -3,55 +3,251 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-import re
 import uuid
 
 import click
+import jsonschema
 
 from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
+from ...git import content_changed
 from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
-REQUIRED_ATTRIBUTES = {
-    'assets',
-    'categories',
-    'creates_events',
-    'display_name',
-    'guid',
-    'integration_id',
-    'is_public',
-    'maintainer',
-    'manifest_version',
-    'name',
-    'public_title',
-    'short_description',
-    'support',
-    'supported_os',
-    'type',
-}
-
-REQUIRED_ASSET_ATTRIBUTES = {'monitors', 'dashboards', 'service_checks'}
-
-OPTIONAL_ATTRIBUTES = {
-    'aliases',
-    'description',
-    'is_beta',
-    # Move these two below (metric_to_check, metric_prefix)
-    # to mandatory when all integration are fixed
-    'metric_to_check',
-    'metric_prefix',
-    'process_signatures',
-}
+FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
 
 METRIC_TO_CHECK_WHITELIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
 
-ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
-INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
+def get_manifest_schema():
+    return jsonschema.Draft7Validator(
+        {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "Integration Manifest Schema",
+            "description": "Defines the various components of an integration",
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "description": "The human readable name of this integration",
+                    "type": "string",
+                    "minLength": 1,
+                },
+                "maintainer": {
+                    "description": "The email address for the maintainer of this integration",
+                    "type": "string",
+                    "format": "email",
+                },
+                "manifest_version": {"description": "The schema version of this manifest", "type": "string"},
+                "name": {"description": "The name of this integration", "type": "string", "minLength": 1},
+                "metric_prefix": {
+                    "description": "The prefix for metrics being emitted from this integration",
+                    "type": "string",
+                },
+                "metric_to_check": {
+                    "description": "The metric to use to determine the health of this integration",
+                    "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                },
+                "creates_events": {"description": "Whether or not this integration emits events", "type": "boolean"},
+                "short_description": {
+                    "description": "Brief description of this integration",
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80,
+                },
+                "guid": {"description": "A GUID for this integration", "type": "string", "minLength": 1},
+                "support": {
+                    "description": "The support type for this integration, one of `core`, `contrib`, or `partner`",
+                    "type": "string",
+                    "enum": ["core", "contrib", "partner"],
+                },
+                "supported_os": {
+                    "description": "The supported Operating Systems for this integration",
+                    "type": "array",
+                    "items": {"type": "string", "enum": ["linux", "mac_os", "windows"]},
+                },
+                "public_title": {
+                    "description": "A human readable public title of this integration",
+                    "type": "string",
+                    "minLength": 1,
+                },
+                "categories": {
+                    "description": "The categories of this integration",
+                    "type": "array",
+                    "items": {"type": "string"},
+                },
+                "type": {"description": "The type of this integration", "type": "string", "enum": ["check", "crawler"]},
+                "is_public": {"description": "Whether or not this integration is public", "type": "boolean"},
+                "integration_id": {
+                    "description": "The string identifier for this integration",
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]{0,254}(?<!-)$",
+                },
+                "assets": {
+                    "description": "An object containing the assets for an integration",
+                    "type": "object",
+                    "properties": {
+                        "monitors": {"type": "object"},
+                        "dashboards": {"type": "object"},
+                        "service_checks": {
+                            "type": "string",
+                            "description": "Relative path to the json file containing service check metadata",
+                        },
+                        "metrics_metadata": {
+                            "type": "string",
+                            "description": "Relative path to the metrics metadata.csv file.",
+                        },
+                        "logs": {
+                            "type": "object",
+                            "properties": {
+                                "source": {
+                                    "type": "string",
+                                    "description": "The log pipeline identifier corresponding to this integration",
+                                }
+                            },
+                        },
+                    },
+                    "required": ["monitors", "dashboards", "service_checks"],
+                },
+            },
+            "allOf": [
+                {
+                    "if": {"properties": {"support": {"const": "core"}}},
+                    "then": {
+                        "properties": {"maintainer": {"pattern": "help@datadoghq.com"}},
+                        "not": {
+                            "anyOf": [{"required": ["author"]}, {"required": ["pricing"]}, {"required": ["terms"]}]
+                        },
+                    },
+                },
+                {
+                    "if": {"properties": {"support": {"const": "contrib"}}},
+                    "then": {"properties": {"maintainer": {"pattern": ".*"}}},
+                },
+                {
+                    "if": {"properties": {"support": {"const": "partner"}}},
+                    "then": {
+                        "properties": {
+                            "maintainer": {"pattern": ".*"},
+                            "author": {
+                                "description": "Information about the integration's author",
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the company that owns this integration",
+                                        "type": "string",
+                                    },
+                                    "homepage": {
+                                        "type": "string",
+                                        "description": "The homepage of the company/product for this integration",
+                                    },
+                                },
+                            },
+                            "pricing": {
+                                "description": "Available pricing options",
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {
+                                    "description": "Attributes of pricing plans available for this integration",
+                                    "type": "object",
+                                    "properties": {
+                                        "billing_type": {
+                                            "description": "The billing model for this integration",
+                                            "type": "string",
+                                            "enum": ["flat_fee", "free", "one_time", "tag_count"],
+                                        },
+                                        "unit_price": {
+                                            "description": "The price per unit for this integration",
+                                            "type": "number",
+                                        },
+                                        "unit_label": {
+                                            "description": "The friendly, human readable, description of the tag",
+                                            "type": "string",
+                                        },
+                                        "metric": {"description": "The metric to use for metering", "type": "string"},
+                                        "tag": {
+                                            "description": ("The tag to use to count the number of billable units"),
+                                            "type": "string",
+                                        },
+                                    },
+                                    "allOf": [
+                                        {
+                                            "if": {"properties": {"billing_type": {"const": "tag_count"}}},
+                                            "then": {"required": ["unit_price", "unit_label", "metric", "tag"]},
+                                        },
+                                        {
+                                            "if": {"properties": {"billing_type": {"const": "free"}}},
+                                            "then": {
+                                                "not": {
+                                                    "anyOf": [
+                                                        {"required": ["unit_label"]},
+                                                        {"required": ["metric"]},
+                                                        {"required": ["tag"]},
+                                                        {"required": ["unit_price"]},
+                                                    ]
+                                                }
+                                            },
+                                        },
+                                        {
+                                            "if": {"properties": {"billing_type": {"pattern": "flat_fee|one_time"}}},
+                                            "then": {
+                                                "not": {
+                                                    "anyOf": [
+                                                        {"required": ["unit_label"]},
+                                                        {"required": ["metric"]},
+                                                        {"required": ["tag"]},
+                                                    ]
+                                                },
+                                                "required": ["unit_price"],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            "terms": {
+                                "description": "Attributes about terms for an integration",
+                                "type": "object",
+                                "properties": {
+                                    "eula": {
+                                        "description": "A link to a PDF file containing the EULA for this integration",
+                                        "type": "string",
+                                    },
+                                    "legal_email": {
+                                        "description": "Email of the partner company to use for subscription purposes",
+                                        "type": "string",
+                                        "format": "email",
+                                        "minLength": 1,
+                                    },
+                                },
+                                "required": ["eula", "legal_email"],
+                            },
+                        },
+                        "required": ["author", "pricing", "terms"],
+                    },
+                },
+            ],
+            "required": [
+                # Make metric_to_check and metric_prefix mandatory when all integration are fixed
+                'assets',
+                'categories',
+                'creates_events',
+                'display_name',
+                'guid',
+                'integration_id',
+                'is_public',
+                'maintainer',
+                'manifest_version',
+                'name',
+                'public_title',
+                'short_description',
+                'support',
+                'supported_os',
+                'type',
+            ],
+        }
+    )
 
 
 def is_metric_in_metadata_file(metric, check):
@@ -59,6 +255,8 @@ def is_metric_in_metadata_file(metric, check):
     Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
     """
     metadata_file = get_metadata_file(check)
+    if not os.path.isfile(metadata_file):
+        return False
     for _, row in read_metadata_rows(metadata_file):
         if row['metric_name'] == metric:
             return True
@@ -67,18 +265,18 @@ def is_metric_in_metadata_file(metric, check):
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
-@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
 @click.pass_context
-def manifest(ctx, fix, include_extras):
+def manifest(ctx, fix):
     """Validate `manifest.json` files."""
     all_guids = {}
 
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
-
+    is_marketplace = ctx.obj['repo_choice'] == 'marketplace'
     ok_checks = 0
     failed_checks = 0
     fixed_checks = 0
+
     echo_info("Validating all manifest.json files...")
     for check_name in sorted(os.listdir(root)):
         manifest_file = os.path.join(root, check_name, 'manifest.json')
@@ -98,16 +296,11 @@ def manifest(ctx, fix, include_extras):
                 continue
 
             # attributes are valid
-            attrs = set(decoded)
-            for attr in sorted(attrs - ALL_ATTRIBUTES):
+            errors = sorted(get_manifest_schema().iter_errors(decoded), key=lambda e: e.path)
+            if errors:
                 file_failures += 1
-                display_queue.append((echo_failure, f'  Attribute `{attr}` is invalid'))
-            for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
-                file_failures += 1
-                display_queue.append((echo_failure, f'  Attribute `{attr}` is required'))
-            for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets', {}))):
-                file_failures += 1
-                display_queue.append((echo_failure, f' Attribute `{attr}` under `assets` is required'))
+                for error in errors:
+                    display_queue.append((echo_failure, f'  {"->".join(error.absolute_path)}:{error.message}'))
 
             # guid
             guid = decoded.get('guid')
@@ -217,15 +410,8 @@ def manifest(ctx, fix, include_extras):
                         else:
                             display_queue.append((echo_failure, f'  invalid `version`: {version}'))
 
-            # integration_id
-            integration_id = decoded.get('integration_id')
-            if not re.search(INTEGRATION_ID_REGEX, integration_id):
-                file_failures += 1
-                output = 'integration_id contains invalid characters'
-                display_queue.append((echo_failure, output))
-
             # maintainer
-            if not is_extras:
+            if not is_extras and not is_marketplace:
                 correct_maintainer = 'help@datadoghq.com'
                 maintainer = decoded.get('maintainer')
                 if maintainer != correct_maintainer:
@@ -261,14 +447,19 @@ def manifest(ctx, fix, include_extras):
                 else:
                     display_queue.append((echo_failure, output))
 
-            # short_description
-            short_description = decoded.get('short_description')
-            if not short_description or not isinstance(short_description, str):
+            # metrics_metadata
+            metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
+            metadata_file_exists = os.path.isfile(get_metadata_file(check_name))
+            if not metadata_in_manifest and metadata_file_exists:
+                # There is a metadata.csv file but no entry in the manifest.json
                 file_failures += 1
-                display_queue.append((echo_failure, '  required non-null string: short_description'))
-            if len(short_description) > 80:
+                display_queue.append((echo_failure, '  metadata.csv exists but not defined in the manifest.json'))
+            elif metadata_in_manifest and not metadata_file_exists:
+                # There is an entry in the manifest.json file but the referenced csv file does not exist.
                 file_failures += 1
-                display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
+                display_queue.append(
+                    (echo_failure, '  metrics_metadata in manifest.json references a non-existing file.')
+                )
 
             # metric_to_check
             metric_to_check = decoded.get('metric_to_check')
@@ -280,7 +471,13 @@ def manifest(ctx, fix, include_extras):
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
 
             # support
-            correct_support = 'contrib' if is_extras else 'core'
+            if is_extras:
+                correct_support = 'contrib'
+            elif is_marketplace:
+                correct_support = 'partner'
+            else:
+                correct_support = 'core'
+
             support = decoded.get('support')
             if support != correct_support:
                 file_failures += 1
@@ -297,74 +494,37 @@ def manifest(ctx, fix, include_extras):
                 else:
                     display_queue.append((echo_failure, output))
 
-            if include_extras:
-                # supported_os
-                supported_os = decoded.get('supported_os')
-                if not supported_os or not isinstance(supported_os, list):
-                    file_failures += 1
-                    display_queue.append((echo_failure, '  required non-null sequence: supported_os'))
+            # is_public
+            correct_is_public = True
+            is_public = decoded.get('is_public')
+            if not isinstance(is_public, bool):
+                file_failures += 1
+                output = '  required boolean: is_public'
+
+                if fix:
+                    decoded['is_public'] = correct_is_public
+
+                    display_queue.append((echo_warning, output))
+                    display_queue.append((echo_success, f'  new `is_public`: {correct_is_public}'))
+
+                    file_failures -= 1
+                    file_fixed = True
                 else:
-                    known_systems = {'linux', 'mac_os', 'windows'}
-                    unknown_systems = sorted(set(supported_os) - known_systems)
-                    if unknown_systems:
-                        file_failures += 1
-                        display_queue.append((echo_failure, f"  unknown `supported_os`: {', '.join(unknown_systems)}"))
-
-                # public_title
-                public_title = decoded.get('public_title')
-                if not public_title or not isinstance(public_title, str):
-                    file_failures += 1
-                    display_queue.append((echo_failure, '  required non-null string: public_title'))
-                else:
-                    title_start = 'Datadog-'
-                    title_end = ' Integration'
-                    section_char_set = set(public_title[len(title_start) : -len(title_end)].lower())
-                    check_name_char_set = set(check_name.lower())
-                    character_overlap = check_name_char_set & section_char_set
-
-                    correct_start = public_title.startswith(title_start)
-                    correct_end = public_title.endswith(title_end)
-                    overlap_enough = len(character_overlap) > int(len(check_name_char_set) * 0.5)
-
-                    if not (correct_start and correct_end and overlap_enough):
-                        file_failures += 1
-                        display_queue.append((echo_failure, f'  invalid `public_title`: {public_title}'))
-
-                # categories
-                categories = decoded.get('categories')
-                if not categories or not isinstance(categories, list):
-                    file_failures += 1
-                    display_queue.append((echo_failure, '  required non-null sequence: categories'))
-
-                # type
-                correct_integration_types = ['check', 'crawler']
-                integration_type = decoded.get('type')
-                if not integration_type or not isinstance(integration_type, str):
-                    file_failures += 1
-                    output = '  required non-null string: type'
-                    display_queue.append((echo_failure, output))
-                elif integration_type not in correct_integration_types:
-                    file_failures += 1
-                    output = f'  invalid `type`: {integration_type}'
                     display_queue.append((echo_failure, output))
 
-                # is_public
-                correct_is_public = True
-                is_public = decoded.get('is_public')
-                if not isinstance(is_public, bool):
-                    file_failures += 1
-                    output = '  required boolean: is_public'
-
-                    if fix:
-                        decoded['is_public'] = correct_is_public
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, f'  new `is_public`: {correct_is_public}'))
-
-                        file_failures -= 1
-                        file_fixed = True
-                    else:
+            # Ensure attributes haven't changed
+            # Skip if the manifest is a new file (i.e. new integration)
+            manifest_fields_changed = content_changed(file_glob=f"{check_name}/manifest.json")
+            if 'new file' not in manifest_fields_changed:
+                for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
+                    if field in manifest_fields_changed:
+                        output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
+                        file_failures += 1
                         display_queue.append((echo_failure, output))
+            else:
+                display_queue.append(
+                    (echo_info, "  skipping check for changed fields: integration not on default branch")
+                )
 
             if file_failures > 0:
                 failed_checks += 1

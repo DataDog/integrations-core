@@ -1,0 +1,105 @@
+name: Yarn
+files:
+  - name: yarn.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: resourcemanager_uri
+            description: |
+              The YARN check retrieves metrics from YARNS's ResourceManager. This
+              check must be run from the Master Node and the ResourceManager URI must
+              be specified below. The ResourceManager URI is composed of the
+              ResourceManager's hostname and port.
+              The ResourceManager hostname can be found in the yarn-site.xml conf file
+              under the property yarn.resourcemanager.address
+
+              The ResourceManager port can be found in the yarn-site.xml conf file under
+              the property yarn.resourcemanager.webapp.address
+            required: true
+            value:
+              example: http://localhost:8088
+              type: string
+          - name: cluster_name
+            description: A friendly name for the cluster.
+            required: true
+            value:
+              example: default_cluster
+              type: string
+          - name: application_tags
+            description: |
+              Set up tags retrieved from the application data to be applied to the
+              application metrics.
+
+              Available <YARN_KEY>: `applicationType`, `applicationTags`, `name`, `queue`, `user`
+
+              By default, the application name is collected with the tag key: `app_name`.
+            value:
+              example: 
+                "<TAG_KEY1>": "<YARN_KEY>"
+                "<TAG_KEY2>": "<YARN_KEY>"
+              type: object
+          - name: application_status_mapping
+            description: |
+              Custom application status mapping for service check `yarn.application.status`.
+
+              The key is the Yarn application channel status. Valid keys are: `ALL`, `NEW`,
+              `NEW_SAVING`, `SUBMITTED`, `ACCEPTED`, `RUNNING`, `FINISHED`, `FAILED` and `KILLED`.
+              The value is the Datadog service check level.
+              Valid values are: `ok`, `warning`, `critical`, and `unknown`.
+              If a channel status is not mapped, it is mapped to `unknown`.
+
+              Find below the default mapping configuration.
+            value:
+              example:
+                ALL: unknown
+                NEW: ok
+                NEW_SAVING: ok
+                SUBMITTED: ok
+                ACCEPTED: ok
+                RUNNING: ok
+                FINISHED: ok
+                FAILED: critical
+                KILLED: critical
+              type: object
+          - name: collect_app_metrics
+            description: Set this parameter to false to remove yarn.app metrics from metric collection.
+            value:
+              example: true
+              type: boolean
+          - name: queue_blacklist
+            description: |
+              Do not emit metrics for certain yarn capacityScheduler queues.
+              The check can send queue metrics on up to 100 queues.
+              If you have less than 100 queues, you don't have to set this parameter.
+              If you have more than 100 queues, please exclude queues with this parameter.
+            value:
+              example:
+                - "<QUEUE_NAME_1>"
+                - "<QUEUE_NAME_2>"
+              type: array
+              items:
+                type: string
+          - name: split_yarn_application_tags
+            description: |
+              Set this parameter to true to split YARN application tags string formatted as
+              `key1:value1,key2:value2,...` into Datadog application tags as such:
+              `app_key1: value1`, `app_key2: value2`, etc.
+            value:
+              example: false
+              type: boolean
+
+          - template: instances/http
+          - template: instances/default
+
+      - template: logs
+        example:
+        - type: file
+          path: /usr/local/hadoop/logs/yarn-root-nodemanager-yarn-container.log
+          source: yarn
+        - type: file
+          path: /usr/local/hadoop/logs/yarn--resourcemanager-yarn-container.log
+          source: yarn

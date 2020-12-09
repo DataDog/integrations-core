@@ -6,7 +6,14 @@ from collections import defaultdict
 
 import click
 
-from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
+from ...utils import (
+    complete_valid_checks,
+    get_metadata_file,
+    get_metric_sources,
+    load_manifest,
+    normalize_display_name,
+    read_metadata_rows,
+)
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
@@ -18,6 +25,29 @@ ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}
+
+EXCLUDE_INTEGRATIONS = [
+    'disk',
+    'go-expvar',  # This has a special case externally
+    'go-metro',
+    'hdfs_datanode',
+    'hdfs_namenode',
+    'http',
+    'kafka_consumer',
+    'kubelet',
+    'kubernetes',
+    'kubernetes_api_server_metrics',
+    'kubernetes_state',
+    'mesos_master',
+    'mesos_slave',
+    'network',
+    'ntp',
+    'process',
+    'riak_cs',
+    'system_core',
+    'system_swap',
+    'tcp',
+]
 
 # To easily derive these again in future, copy the contents of `integration/system/units_catalog.csv` then run:
 #
@@ -158,6 +188,9 @@ VALID_UNIT_NAMES = {
     'terawatt',
     'heap',
     'volume',
+    'milliwatt',
+    'microwatt',
+    'nanowatt',
 }
 
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
@@ -201,8 +234,9 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
+@click.option('--show-warnings', '-w', is_flag=True, help='Show warnings in addition to failures')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-def metadata(check, check_duplicates):
+def metadata(check, check_duplicates, show_warnings):
     """Validates metadata.csv files
 
     If `check` is specified, only the check will be validated,
@@ -229,6 +263,8 @@ def metadata(check, check_duplicates):
             metric_prefix = manifest['metric_prefix'].rstrip('.')
         except KeyError:
             metric_prefix = None
+
+        display_name = manifest['display_name']
 
         metadata_file = get_metadata_file(current_check)
 
@@ -306,6 +342,15 @@ def metadata(check, check_duplicates):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
 
+            # integration header
+            integration = row['integration']
+            normalized_integration = normalize_display_name(display_name)
+            if integration != normalized_integration and normalized_integration not in EXCLUDE_INTEGRATIONS:
+                errors = True
+                echo_failure(
+                    f"{current_check}:{line} integration: `{row['integration']}` should be: {normalized_integration}"
+                )
+
             # orientation header
             if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
                 errors = True
@@ -344,16 +389,17 @@ def metadata(check, check_duplicates):
             errors = True
             echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
-        for header, count in empty_warning_count.items():
-            echo_warning(f'{current_check}: {header} is empty in {count} rows.')
+        if show_warnings:
+            for header, count in empty_warning_count.items():
+                echo_warning(f'{current_check}: {header} is empty in {count} rows.')
 
-        for prefix, count in metric_prefix_count.items():
-            # Don't spam this warning when we're validating everything
-            if check:
-                echo_warning(
-                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
-                    "defined in the manifest."
-                )
+            for prefix, count in metric_prefix_count.items():
+                # Don't spam this warning when we're validating everything
+                if check:
+                    echo_warning(
+                        f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                        "defined in the manifest."
+                    )
 
     if errors:
         abort()

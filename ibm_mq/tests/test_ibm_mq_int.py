@@ -1,12 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime as dt
 import os
 
+import mock
 import pytest
+from pymqi import MQMIError
+from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import ensure_aware_datetime
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
@@ -122,7 +128,9 @@ def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
     }
 
     check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
-    check._submit_channel_count('my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"])
+    check.channel_metric_collector._submit_channel_count(
+        'my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"]
+    )
 
     for status, expected_value in iteritems(metrics_to_assert):
         aggregator.assert_metric(
@@ -147,7 +155,7 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
     }
 
     check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
-    check._submit_channel_count('my_channel', 123, ["channel:my_channel"])
+    check.channel_metric_collector._submit_channel_count('my_channel', 123, ["channel:my_channel"])
 
     for status, expected_value in iteritems(metrics_to_assert):
         aggregator.assert_metric(
@@ -171,3 +179,66 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
 
     for metric, _ in QUEUE_METRICS:
         aggregator.assert_metric(metric, tags=tags)
+
+
+def test_stats_metrics(aggregator, instance):
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    # make sure time is before fixture messages start time
+    check.config.instance_creation_datetime = ensure_aware_datetime(dt.datetime(year=2000, month=1, day=1))
+
+    with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as channel_file, open(
+        os.path.join(common.HERE, 'fixtures', 'statistics_queue.data'), 'rb'
+    ) as queue_file:
+        channel_data = channel_file.read()
+        queue_data = queue_file.read()
+        with mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.Queue') as queue:
+            queue().get.side_effect = [
+                channel_data,
+                queue_data,
+                MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE),
+            ]
+            check.check(instance)
+
+    common_tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'foo:bar',
+    ]
+    channel_tags = common_tags + [
+        'channel:GCP.A',
+        'channel_type:clusrcvr',
+        'remote_q_mgr_name:QM2',
+        'connection_name:192.168.32.2',
+    ]
+    for metric, metric_type in common.CHANNEL_STATS_METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=channel_tags)
+
+    queue_tags = common_tags + [
+        'definition_type:predefined',
+        'queue:SYSTEM.CHLAUTH.DATA.QUEUE',
+        'queue_type:local',
+    ]
+    for metric, metric_type in common.QUEUE_STATS_METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags)
+
+    queue_tags_persistent = queue_tags + ['persistent:true']
+
+    for metric, metric_type in common.QUEUE_STATS_LIST_METRICS:
+        aggregator.assert_metric(
+            metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags_persistent
+        )
+
+    queue_tags_nonpersistent = queue_tags + ['persistent:false']
+
+    for metric, metric_type in common.QUEUE_STATS_LIST_METRICS:
+        aggregator.assert_metric(
+            metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags_nonpersistent
+        )
+
+    assert_all_metrics(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

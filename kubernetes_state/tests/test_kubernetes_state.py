@@ -27,6 +27,7 @@ METRICS = [
     NAMESPACE + '.node.gpu.cards_allocatable',
     NAMESPACE + '.nodes.by_condition',
     # deployments
+    NAMESPACE + '.deployment.count',
     NAMESPACE + '.deployment.replicas',
     NAMESPACE + '.deployment.replicas_available',
     NAMESPACE + '.deployment.replicas_unavailable',
@@ -55,6 +56,7 @@ METRICS = [
     NAMESPACE + '.pdb.pods_healthy',
     NAMESPACE + '.pdb.pods_total',
     # pods
+    NAMESPACE + '.pod.count',
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
     NAMESPACE + '.pod.status_phase',
@@ -73,6 +75,7 @@ METRICS = [
     NAMESPACE + '.container.gpu.request',
     NAMESPACE + '.container.gpu.limit',
     # replicasets
+    NAMESPACE + '.replicaset.count',
     NAMESPACE + '.replicaset.replicas',
     NAMESPACE + '.replicaset.fully_labeled_replicas',
     NAMESPACE + '.replicaset.replicas_ready',
@@ -101,6 +104,7 @@ METRICS = [
     # services
     NAMESPACE + '.service.count',
     # jobs
+    NAMESPACE + '.job.count',
     NAMESPACE + '.job.failed',
     NAMESPACE + '.job.succeeded',
     # vpa
@@ -109,6 +113,8 @@ METRICS = [
     NAMESPACE + '.vpa.uncapped_target',
     NAMESPACE + '.vpa.upperbound',
     NAMESPACE + '.vpa.update_mode',
+    # namespaces
+    NAMESPACE + '.namespace.count',
 ]
 
 TAGS = {
@@ -142,6 +148,11 @@ TAGS = {
         'namespace:default',
         'namespace:kube-system',
     ],
+    NAMESPACE + '.pod.count': ['uid:b6fb4273-2dd6-4edb-9a23-7642bb121806', 'created_by_kind:daemonset'],
+    NAMESPACE + '.deployment.count': ['condition:progressing', 'condition:available', 'status:true'],
+    NAMESPACE + '.replicaset.count': ['owner_kind:deployment', 'owner_name:metrics-server-v0.3.6'],
+    NAMESPACE + '.namespace.count': ['phase:active', 'phase:terminating'],
+    NAMESPACE + '.job.count': ['owner_kind:cronjob', 'owner_name:a-cronjob'],
     NAMESPACE
     + '.container.status_report.count.waiting': [
         'reason:containercreating',
@@ -182,6 +193,11 @@ JOINED_METRICS = {
     + '.deployment.rollingupdate.max_unavailable': [
         'label_addonmanager_kubernetes_io_mode:reconcile',
         'deployment:kube-dns',
+    ],
+    NAMESPACE
+    + '.container.status_report.count.waiting': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'pod:registry-creds-hq249',
     ],
 }
 
@@ -240,7 +256,7 @@ def instance():
 
 
 def _check(instance, mock_file="prometheus.txt"):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file(mock_file), 'text/plain'))
     return check
 
@@ -257,7 +273,7 @@ def check_with_join_kube_labels(instance):
 
 
 @pytest.fixture
-def check_with_join_standard_tag_labels(instance,):
+def check_with_join_standard_tag_labels(instance):
     instance['join_standard_tags'] = True
     return _check(instance=instance, mock_file="ksm-standard-tags-gke.txt")
 
@@ -336,6 +352,12 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         NAMESPACE + '.persistentvolumes.by_phase',
         tags=['storageclass:local-data', 'phase:bound', 'optional:tag1'],
         value=2,
+    )
+    # No storage class
+    aggregator.assert_metric(
+        NAMESPACE + '.persistentvolumes.by_phase',
+        tags=['storageclass:unknown', 'phase:bound', 'optional:tag1'],
+        value=1,
     )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
@@ -546,9 +568,10 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
 def test_join_custom_labels(aggregator, instance, check):
     instance['label_joins'] = {
         'kube_deployment_labels': {
-            'label_to_match': 'deployment',
+            'labels_to_match': ['deployment'],
             'labels_to_get': ['label_addonmanager_kubernetes_io_mode'],
-        }
+        },
+        'kube_pod_labels': {'labels_to_match': ['pod'], 'labels_to_get': ['label_addonmanager_kubernetes_io_mode']},
     }
 
     endpoint = instance['kube_state_url']
@@ -571,12 +594,12 @@ def test_join_custom_labels(aggregator, instance, check):
 
 def test_disabling_hostname_override(instance):
     endpoint = instance['kube_state_url']
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     scraper_config = check.config_map[endpoint]
     assert scraper_config['label_to_hostname'] == "node"
 
     instance["hostname_override"] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     scraper_config = check.config_map[endpoint]
     assert scraper_config['label_to_hostname'] is None
 
@@ -609,7 +632,7 @@ def test_extract_timestamp(check):
 
 
 def test_job_counts(aggregator, instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     payload = mock_from_file("prometheus.txt")
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
 
@@ -731,7 +754,7 @@ def test_job_counts(aggregator, instance):
 
 def test_keep_ksm_labels_desactivated(aggregator, instance):
     instance['keep_ksm_labels'] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     check.check(instance)
     for _ in range(2):
@@ -742,7 +765,7 @@ def test_keep_ksm_labels_desactivated(aggregator, instance):
 
 
 def test_experimental_labels(aggregator, instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     for _ in range(2):
         check.check(instance)
@@ -750,7 +773,7 @@ def test_experimental_labels(aggregator, instance):
     assert aggregator.metrics(NAMESPACE + '.hpa.spec_target_metric') == []
 
     instance['experimental_metrics'] = True
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     for _ in range(2):
         check.check(instance)
@@ -773,7 +796,7 @@ def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
     instance['experimental_metrics'] = True
 
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
 
     endpoint = instance['kube_state_url']
@@ -782,15 +805,15 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90948.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=914.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1288.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=93895.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=998.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1326.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=328.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
-        value=540.0,
+        value=574.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',

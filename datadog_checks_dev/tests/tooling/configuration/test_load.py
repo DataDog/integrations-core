@@ -2718,6 +2718,7 @@ def test_template_array():
         'proxy',
         'skip_proxy',
         'auth_type',
+        'use_legacy_auth_encoding',
         'username',
         'password',
         'ntlm_domain',
@@ -2728,6 +2729,7 @@ def test_template_array():
         'kerberos_hostname',
         'kerberos_principal',
         'kerberos_keytab',
+        'auth_token',
         'aws_region',
         'aws_host',
         'aws_service',
@@ -2842,3 +2844,23 @@ def test_template_primitive():
     spec.load()
 
     assert 'test, test.yaml, instances, option #2: Template does not refer to a mapping object nor array' in spec.errors
+
+
+def test_template_hide_duplicate():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+            - template: instances/http
+            - template: instances/jmx
+              overrides:
+                password.hidden: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors

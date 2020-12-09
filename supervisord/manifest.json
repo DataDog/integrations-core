@@ -4,7 +4,8 @@
   ],
   "categories": [
     "os & system",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Supervisord",
@@ -30,8 +31,15 @@
   "type": "check",
   "integration_id": "supervisord",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "supervisord"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

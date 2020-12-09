@@ -1,43 +1,60 @@
 # CHANGELOG - kafka
 
-## 2.1.0 / 2020-05-17
+## 2.3.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 2.2.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
+## 2.2.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Add config specs. See [#7271](https://github.com/DataDog/integrations-core/pull/7271).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 2.1.1 / 2020-06-29 / Agent 7.21.0
+
+* [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).
+
+## 2.1.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 2.0.3 / 2020-04-04
+## 2.0.3 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 * [Fixed] Fix metric name for e2e test. See [#5985](https://github.com/DataDog/integrations-core/pull/5985).
 
-## 2.0.2 / 2019-10-11
+## 2.0.2 / 2019-10-11 / Agent 6.15.0
 
 * [Fixed] Fix the missing Kafka producer metrics. See [#4737](https://github.com/DataDog/integrations-core/pull/4737). Thanks [Epokhe](https://github.com/Epokhe).
 
-## 2.0.1 / 2019-08-24
+## 2.0.1 / 2019-08-24 / Agent 6.14.0
 
 * [Fixed] Treat `kafka.producer.compression_rate` as a ratio. See [#4293](https://github.com/DataDog/integrations-core/pull/4293).
 
-## 2.0.0 / 2019-06-01
+## 2.0.0 / 2019-06-01 / Agent 6.12.0
 
 * [Changed] Fix unit type of `kafka.request.produce.time.avg` & `kafka.request.produce.time.99percentile`. See [#3834](https://github.com/DataDog/integrations-core/pull/3834).
 
-## 1.4.0 / 2019-02-18
+## 1.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add extra Kafka broker metrics. See [#2484](https://github.com/DataDog/integrations-core/pull/2484). Thanks [jalaziz](https://github.com/jalaziz).
 
-## 1.3.0 / 2019-01-04
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Add Per Topic IncomingMessages metric for Kafka.. See [#2732][1].
 
-## 1.2.1 / 2018-11-30
+## 1.2.1 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Updated kafka.producer.record_error_rate to gauge. See [#2253][2].
 
-## 1.2.0 / 2018-10-12
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][3].
 
-## 1.1.1 / 2018-09-04
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 

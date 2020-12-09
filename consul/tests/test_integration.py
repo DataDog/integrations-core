@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import pytest
 from requests import HTTPError
 
@@ -77,6 +79,43 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
             got_error_403 = True
 
     assert got_error_403
+
+
+@pytest.mark.integration
+def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, caplog):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance_prometheus])
+    common_tags = instance_prometheus['tags']
+
+    if common.PROMETHEUS_ENDPOINT_AVAILABLE:
+        consul_check.check(instance_prometheus)
+
+        aggregator.assert_service_check(
+            'consul.prometheus.health',
+            tags=common_tags + ['endpoint:{}/v1/agent/metrics?format=prometheus'.format(common.URL)],
+        )
+
+        for metric in common.PROMETHEUS_METRICS:
+            aggregator.assert_metric(metric, tags=common_tags, count=1)
+
+        aggregator.assert_metric('consul.peers', value=3, count=1)
+        aggregator.assert_metric_has_tag_prefix('consul.raft.replication.appendEntries.logs', 'peer_id', count=2)
+
+        for hist_suffix in ['count', 'sum', 'quantile']:
+            aggregator.assert_metric_has_tag('consul.http.request.{}'.format(hist_suffix), 'method:GET', at_least=0)
+            for metric in common.PROMETHEUS_HIST_METRICS:
+                for tag in common_tags:
+                    aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
+
+        aggregator.assert_all_metrics_covered()
+
+    else:
+        caplog.at_level(logging.WARNING)
+        consul_check.check(instance_prometheus)
+
+        assert (
+            "does not support the prometheus endpoint. "
+            "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning." in caplog.text
+        )
 
 
 @pytest.mark.integration

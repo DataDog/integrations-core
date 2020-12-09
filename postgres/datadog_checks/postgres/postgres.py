@@ -9,6 +9,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
 from .util import (
@@ -25,7 +26,7 @@ from .util import (
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, get_raw_version, parse_version, transform_version
+from .version_utils import V9, get_raw_version, is_aurora, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -41,6 +42,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
+        self._is_aurora = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -49,10 +51,12 @@ class PostgreSql(AgentCheck):
             )
         self.config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self.config)
+        self.statement_metrics = PostgresStatementMetrics(self.config)
         self._clean_state()
 
     def _clean_state(self):
         self._version = None
+        self._is_aurora = None
         self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
@@ -70,9 +74,14 @@ class PostgreSql(AgentCheck):
             self.set_metadata('version', raw_version)
         return self._version
 
+    @property
+    def is_aurora(self):
+        if self._is_aurora is None:
+            self._is_aurora = is_aurora(self.db)
+        return self._is_aurora
+
     def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility
-        """
+        """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
 
         for element in yamlconfig:
@@ -125,10 +134,10 @@ class PostgreSql(AgentCheck):
 
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
-            # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignore it.
+            # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
+            self._is_aurora = None
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -227,9 +236,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self, instance_tags,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -252,11 +259,15 @@ class PostgreSql(AgentCheck):
             metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(self.config.relations)
 
-        replication_metrics = self.metrics_cache.get_replication_metrics(self.version)
-        if replication_metrics is not None:
+        replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
+        if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
+
+        replication_stats_metrics = self.metrics_cache.get_replication_stats_metrics(self.version)
+        if replication_stats_metrics:
+            metric_scope.append(replication_stats_metrics)
 
         cursor = self.db.cursor()
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False, relations_config)
@@ -288,10 +299,10 @@ class PostgreSql(AgentCheck):
         else:
             if self.config.host == 'localhost' and self.config.password == '':
                 # Use ident method
-                connection_string = "user=%s dbname=%s, application_name=%s" % (
+                connection_string = "user=%s dbname=%s application_name=%s" % (
                     self.config.user,
                     self.config.dbname,
-                    "datadog-agent",
+                    self.config.application_name,
                 )
                 if self.config.query_timeout:
                     connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
@@ -303,7 +314,7 @@ class PostgreSql(AgentCheck):
                     'password': self.config.password,
                     'database': self.config.dbname,
                     'sslmode': self.config.ssl_mode,
-                    'application_name': "datadog-agent",
+                    'application_name': self.config.application_name,
                 }
                 if self.config.port:
                     args['port'] = self.config.port
@@ -407,6 +418,11 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags))
 
+    def _collect_per_statement_metrics(self, tags):
+        metrics = self.statement_metrics.collect_per_statement_metrics(self.db)
+        for metric_name, metric_value, metrics_tags in metrics:
+            self.count(metric_name, metric_value, tags=list(set(metrics_tags + tags)))
+
     def check(self, _):
         tags = copy.copy(self.config.tags)
         # Collect metrics
@@ -418,6 +434,8 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s", str(self.version))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
+            if self.config.deep_database_monitoring:
+                self._collect_per_statement_metrics(tags)
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()

@@ -69,6 +69,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._kafka_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
+        contexts_limit = self._context_limit
 
         # For calculating consumer lag, we have to fetch both the consumer offset and the broker highwater offset.
         # There's a potential race condition because whichever one we check first may be outdated by the time we check
@@ -79,7 +80,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # Fetch consumer group offsets from Zookeeper
         if self._zk_hosts_ports is not None:
             try:
-                self._get_zk_consumer_offsets()
+                self._get_zk_consumer_offsets(contexts_limit)
+                contexts_limit -= len(self._zk_consumer_offsets)
             except Exception:
                 self.log.exception("There was a problem collecting consumer offsets from Zookeeper.")
                 # don't raise because we might get valid broker offsets
@@ -91,14 +93,15 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
-                self._get_kafka_consumer_offsets()
+                self._get_kafka_consumer_offsets(contexts_limit)
+                contexts_limit -= len(self._kafka_consumer_offsets)
             except Exception:
                 self.log.exception("There was a problem collecting consumer offsets from Kafka.")
                 # don't raise because we might get valid broker offsets
 
         # Fetch the broker highwater offsets
         try:
-            self._get_highwater_offsets()
+            self._get_highwater_offsets(contexts_limit)
         except Exception:
             self.log.exception('There was a problem collecting the highwater mark offsets')
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
@@ -115,12 +118,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 total_contexts,
                 self._context_limit,
             )
-
-        # Report the metics
+        # Report the metrics
         self._report_highwater_offsets()
         self._report_consumer_offsets_and_lag(self._kafka_consumer_offsets)
-        # if someone is in the middle of migrating their offset storage from zookeeper to kafka, they need to identify
-        # which source is reporting which offsets. So we tag zookeeper with 'source:zk'
+        # if someone is in the middle of migrating their offset storage from zookeeper to kafka,
+        # they need to identify which source is reporting which offsets. So we tag zookeeper with 'source:zk'
         self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, source='zk')
 
     def _create_kafka_client(self):
@@ -174,7 +176,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         response = future.value
         return response
 
-    def _get_highwater_offsets(self):
+    def _get_highwater_offsets(self, contexts_limit):
         """
         Fetch highwater offsets for topic_partitions in the Kafka cluster.
 
@@ -197,6 +199,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             tps_with_consumer_offset.update({(topic, partition) for (_, topic, partition) in self._zk_consumer_offsets})
 
         for broker in self._kafka_client.cluster.brokers():
+            if len(self._highwater_offsets) >= contexts_limit:
+                self.log.debug("Context limit reached. Skipping highwater offsets collection.")
+                return
             broker_led_partitions = self._kafka_client.cluster.partitions_for_broker(broker.nodeId)
             if broker_led_partitions is None:
                 continue
@@ -220,9 +225,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 ],
             )
             response = self._make_blocking_req(request, node_id=broker.nodeId)
-            self._process_highwater_offsets(response)
+            self._process_highwater_offsets(response, contexts_limit)
 
-    def _process_highwater_offsets(self, response):
+    def _process_highwater_offsets(self, response, contexts_limit):
         """Parse an OffsetFetchResponse and save it to the highwater_offsets dict."""
         if type(response) not in OffsetResponse:
             raise RuntimeError("response type should be OffsetResponse, but instead was %s." % type(response))
@@ -231,6 +236,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
+                    if len(self._highwater_offsets) >= contexts_limit:
+                        self.log.debug("Context limit reached. Skipping highwater offsets processing.")
+                        return
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
@@ -276,6 +284,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+
                 if (topic, partition) not in self._highwater_offsets:
                     self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
@@ -321,17 +330,12 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self.log.exception('Could not read %s from %s', name_for_error, zk_path)
         return children
 
-    def _get_zk_consumer_offsets(self):
+    def _get_zk_consumer_offsets(self, contexts_limit):
         """
         Fetch Consumer Group offsets from Zookeeper.
 
         Also fetch consumer_groups, topics, and partitions if not
         already specified in consumer_groups.
-
-        :param dict consumer_groups: The consumer groups, topics, and partitions
-            that you want to fetch offsets for. If consumer_groups is None, will
-            fetch offsets for all consumer_groups. For examples of what this
-            dict can look like, see _validate_explicit_consumer_groups().
         """
         # Construct the Zookeeper path pattern
         # /consumers/[groupId]/offsets/[topic]/[partitionId]
@@ -368,13 +372,17 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         consumer_offset = int(self._zk_client.get(zk_path)[0])
                         key = (consumer_group, topic, partition)
                         self._zk_consumer_offsets[key] = consumer_offset
+
+                        if len(self._zk_consumer_offsets) >= contexts_limit:
+                            self.log.debug("Context limit reached. Skipping zk consumer offsets collection.")
+                            return
                     except NoNodeError:
                         self.log.info('No zookeeper node at %s', zk_path)
                         continue
                     except Exception:
                         self.log.exception('Could not read consumer offset from %s', zk_path)
 
-    def _get_kafka_consumer_offsets(self):
+    def _get_kafka_consumer_offsets(self, contexts_limit):
         """
         Fetch Consumer Group offsets from Kafka.
 
@@ -414,6 +422,10 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                                 continue
                             key = (consumer_group, topic, partition)
                             self._kafka_consumer_offsets[key] = offset
+
+                            if len(self._kafka_consumer_offsets) >= contexts_limit:
+                                self.log.debug("Context limit reached. Skipping kafka consumer offsets collection.")
+                                return
                 else:
                     self.log.info("unable to find group coordinator for %s", consumer_group)
             except Exception:

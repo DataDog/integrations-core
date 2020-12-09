@@ -36,6 +36,37 @@ Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root o
 
 See [metadata.csv][117] for a list of metrics provided by this integration.
 
+### Log collection
+
+
+1. In your `gitlab_runner` [configuration file][119], change the log format to `json` (_Available for Gitlab Runner versions >=11.4.0_ ):
+   ```toml
+   log_format = "json"
+   ```
+
+2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+3. Add the `dd-agent` user to the `systemd-journal` group by running:
+   ```text
+   usermod -a -G systemd-journal dd-agent
+   ```
+
+4. Add this configuration block to your `gitlab_runner.d/conf.yaml` file to start collecting your Gitlab Runner Logs:
+
+   ```yaml
+   logs:
+     - type: journald
+       source: gitlab-runner
+   ```
+
+    See the [sample gitlab_runner.d/conf.yaml][4] for all available configuration options.
+
+5. [Restart the Agent][5].
+
 ### Events
 
 The Gitlab Runner check does not include any events.
@@ -57,3 +88,4 @@ Need help? Contact [Datadog support][118].
 [116]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [117]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/metadata.csv
 [118]: https://docs.datadoghq.com/help/
+[119]: https://docs.gitlab.com/runner/configuration/advanced-configuration.html

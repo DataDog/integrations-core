@@ -4,14 +4,15 @@
 import re
 
 import semver
+from semver import VersionInfo
 
-V8_3 = semver.parse("8.3.0")
-V9 = semver.parse("9.0.0")
-V9_1 = semver.parse("9.1.0")
-V9_2 = semver.parse("9.2.0")
-V9_4 = semver.parse("9.4.0")
-V9_6 = semver.parse("9.6.0")
-V10 = semver.parse("10.0.0")
+V8_3 = VersionInfo(**semver.parse("8.3.0"))
+V9 = VersionInfo(**semver.parse("9.0.0"))
+V9_1 = VersionInfo(**semver.parse("9.1.0"))
+V9_2 = VersionInfo(**semver.parse("9.2.0"))
+V9_4 = VersionInfo(**semver.parse("9.4.0"))
+V9_6 = VersionInfo(**semver.parse("9.6.0"))
+V10 = VersionInfo(**semver.parse("10.0.0"))
 
 
 def get_raw_version(db):
@@ -19,6 +20,16 @@ def get_raw_version(db):
     cursor.execute('SHOW SERVER_VERSION;')
     raw_version = cursor.fetchone()[0]
     return raw_version
+
+
+def is_aurora(db):
+    cursor = db.cursor()
+    try:
+        cursor.execute("select exists(select 1 from pg_proc where proname = 'aurora_version');")
+        return cursor.fetchone()[0]
+    except Exception:
+        db.rollback()
+        return False
 
 
 def parse_version(raw_version):
@@ -33,7 +44,7 @@ def parse_version(raw_version):
         version = [int(part) for part in version]
         while len(version) < 3:
             version.append(0)
-        return semver.VersionInfo(*version)
+        return VersionInfo(*version)
     except ValueError:
         # Postgres might be in development, with format \d+[beta|rc]\d+
         match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)

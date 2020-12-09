@@ -21,7 +21,11 @@
   "integration_id": "cri",
   "assets": {
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "cri": "assets/dashboards/overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -9,14 +9,15 @@ import click
 
 from ...utils import (
     complete_valid_checks,
-    get_assets_directory,
     get_check_file,
     get_config_file,
     get_data_directory,
     get_readme_file,
     get_testable_checks,
     get_valid_integrations,
+    has_dashboard,
     has_e2e,
+    is_tile_only,
 )
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 
@@ -32,7 +33,6 @@ CSV_COLUMNS = [
     'has_tests',
     'has_metadata',
 ]
-DOGWEB_DASHBOARDS = ('sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
@@ -75,13 +75,11 @@ def catalog(checks, out_file, markdown):
         has_logs = False
         is_prometheus = False
         is_http = False
-        tile_only = False
         has_metadata = False
+        tile_only = is_tile_only(check)
 
-        config_file = get_config_file(check)
-        if not os.path.exists(config_file):
-            tile_only = True
-        else:
+        if not is_tile_only:
+            config_file = get_config_file(check)
             with open(config_file) as f:
                 if '# logs:' in f.read():
                     has_logs = True
@@ -105,8 +103,7 @@ def catalog(checks, out_file, markdown):
 
         entry = {
             'name': check,
-            'has_dashboard': check in DOGWEB_DASHBOARDS
-            or os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
+            'has_dashboard': has_dashboard(check),
             'has_logs': has_logs,
             'is_jmx': os.path.exists(os.path.join(get_data_directory(check), 'metrics.yaml')),
             'is_prometheus': is_prometheus,

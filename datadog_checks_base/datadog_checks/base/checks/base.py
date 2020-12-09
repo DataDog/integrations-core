@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
-from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
 from six import binary_type, iteritems, text_type
@@ -33,11 +33,12 @@ from ..utils.common import ensure_bytes, to_native_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
-from ..utils.proxy import config_proxy_skip
 from ..utils.secrets import SecretsSanitizer
+from ..utils.tls import TlsContextWrapper
 
 try:
     import datadog_agent
+
     from ..log import CheckLoggingAdapter, init_logging
 
     init_logging()
@@ -62,6 +63,8 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
 
     monkey_patch_pyyaml()
 
+if TYPE_CHECKING:
+    import ssl
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
@@ -102,6 +105,9 @@ class AgentCheck(object):
 
     # Used by `self.http` for an instance of RequestsWrapper
     HTTP_CONFIG_REMAPPER = None
+
+    # Used by `create_tls_context` for an instance of RequestsWrapper
+    TLS_CONFIG_REMAPPER = None
 
     # Used by `self.set_metadata` for an instance of MetadataManager
     #
@@ -220,7 +226,7 @@ class AgentCheck(object):
                 False,
                 (
                     'DEPRECATION NOTICE: The `no_proxy` config option has been renamed '
-                    'to `skip_proxy` and will be removed in Agent version 6.13.'
+                    'to `skip_proxy` and will be removed in a future release.'
                 ),
             ),
             'service_tag': (
@@ -303,6 +309,21 @@ class AgentCheck(object):
 
         return self._http
 
+    def get_tls_context(self, refresh=False):
+        # type: (bool) -> ssl.SSLContext
+        """
+        Creates and cache an SSLContext instance based on user configuration.
+
+        Since: Agent 7.24
+        """
+        if not hasattr(self, '_tls_context_wrapper'):
+            self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER)
+
+        if refresh:
+            self._tls_context_wrapper.refresh_tls_context()
+
+        return self._tls_context_wrapper.tls_context
+
     @property
     def metadata_manager(self):
         # type: () -> MetadataManager
@@ -364,19 +385,6 @@ class AgentCheck(object):
         else:
             return sanitizer.sanitize(text)
 
-    def get_instance_proxy(self, instance, uri, proxies=None):
-        # type: (InstanceType, str, ProxySettings) -> ProxySettings
-        # TODO: Remove with Agent 5
-        proxies = proxies if proxies is not None else self.proxies.copy()
-
-        deprecated_skip = instance.get('no_proxy', None)
-        skip = is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or is_affirmative(deprecated_skip)
-
-        if deprecated_skip is not None:
-            self._log_deprecation('no_proxy')
-
-        return config_proxy_skip(proxies, uri, skip)
-
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
@@ -407,8 +415,10 @@ class AgentCheck(object):
             self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
         )
 
-    def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (int, str, float, Sequence[str], str, str, bool) -> None
+    def _submit_metric(
+        self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
+    ):
+        # type: (int, str, float, Sequence[str], str, str, bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -439,7 +449,9 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname)
+        aggregator.submit_metric(
+            self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname, flush_first_value
+        )
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -475,8 +487,10 @@ class AgentCheck(object):
             aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, Sequence[str], str, str, bool) -> None
+    def monotonic_count(
+        self, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
+    ):
+        # type: (str, float, Sequence[str], str, str, bool, bool) -> None
         """Sample an increasing counter metric.
 
         - **name** (_str_) - the name of the metric
@@ -486,9 +500,17 @@ class AgentCheck(object):
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        - **flush_first_value** (_bool_) - whether to sample the first value
         """
         self._submit_metric(
-            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+            aggregator.MONOTONIC_COUNT,
+            name,
+            value,
+            tags=tags,
+            hostname=hostname,
+            device_name=device_name,
+            raw=raw,
+            flush_first_value=flush_first_value,
         )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
@@ -641,9 +663,16 @@ class AgentCheck(object):
     def metadata_entrypoint(cls, method):
         # type: (Callable[..., None]) -> Callable[..., None]
         """
-        Mark a method as a metadata entrypoint.
+        Skip execution of the decorated method if metadata collection is disabled on the Agent.
 
-        This decorator provides automatic no-op behavior in case metadata collection is disabled on the Agent.
+        Usage:
+
+        ```python
+        class MyCheck(AgentCheck):
+            @AgentCheck.metadata_entrypoint
+            def collect_metadata(self):
+                ...
+        ```
         """
 
         @functools.wraps(method)
@@ -656,6 +685,31 @@ class AgentCheck(object):
             method(self, *args, **kwargs)
 
         return entrypoint
+
+    def _persistent_cache_id(self, key):
+        # type: (str) -> str
+        return '{}_{}'.format(self.check_id, key)
+
+    def read_persistent_cache(self, key):
+        # type: (str) -> str
+        """Returns the value previously stored with `write_persistent_cache` for the same `key`.
+
+        - **key** (_str_) - The key to retrieve
+        """
+        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+
+    def write_persistent_cache(self, key, value):
+        # type: (str, str) -> None
+        """Stores `value` in a persistent cache for this check instance.
+        The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
+            - `%ProgramData%\\Datadog\\run` on Windows.
+            - `/opt/datadog-agent/run` everywhere else.
+        The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
+
+        - **key** (_str_) - Identifier used to build the filename
+        - **value** (_str_) - Value to store
+        """
+        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None

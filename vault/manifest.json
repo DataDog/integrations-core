@@ -37,6 +37,10 @@
       "service_name_overview": "assets/saved_views/service_name_overview.json",
       "vault_patern": "assets/saved_views/vault_patern.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "vault"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

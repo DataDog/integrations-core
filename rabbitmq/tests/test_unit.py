@@ -72,12 +72,12 @@ def test__check_aliveness(check, aggregator):
     check._get_data = mock.MagicMock()
 
     # only one vhost should be OK
-    check._get_data.side_effect = [{"status": "ok"}, {}]
-    check._check_aliveness('', vhosts=['foo', 'bar'], custom_tags=[])
+    check._get_data.side_effect = [{"status": "ok"}, {}, {"status": "not_ok"}, Exception("foo")]
+    check._check_aliveness('', vhosts=['foo', 'bar', 'baz', 'xyz'], custom_tags=[])
     sc = aggregator.service_checks('rabbitmq.aliveness')
-    assert len(sc) == 2
+    assert len(sc) == 4
     aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.OK)
-    aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.CRITICAL)
+    aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.CRITICAL, count=3)
 
     # in case of connection errors, this check should stay silent
     check._get_data.side_effect = RabbitMQException
@@ -124,9 +124,9 @@ def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggre
         (
             "legacy auth config",
             {'rabbitmq_user': 'legacy_foo', 'rabbitmq_pass': 'legacy_bar'},
-            {'auth': ('legacy_foo', 'legacy_bar')},
+            {'auth': (b'legacy_foo', b'legacy_bar')},
         ),
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': (b'new_foo', b'new_bar')}),
         ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
         ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
     ],

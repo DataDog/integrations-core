@@ -1,0 +1,159 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard displays key throughput and activity metrics for your Tomcat architecture and helps you correlate Tomcat performance with infrastructure resources. Further reading on Tomcat monitoring:\n\n- [Datadog's Tomcat integration docs](https://docs.datadoghq.com/integrations/tomcat/)\n\n- [Datadog's guide to key Tomcat metrics](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n\n- [How to collect key Tomcat metrics using built-in tools](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n\n- [How to monitor Tomcat with Datadog](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        }
+    ],
+    "title": "Tomcat - Metrics",
+    "widgets": [
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:tomcat.threads.max{$scope}"
+                    },
+                    {
+                        "q": "sum:tomcat.threads.count{$scope}"
+                    },
+                    {
+                        "q": "sum:tomcat.threads.busy{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Tomcat threads",
+                "type": "timeseries"
+            },
+            "id": 0
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "avg:tomcat.processing_time{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Tomcat average processing time",
+                "type": "timeseries"
+            },
+            "id": 1
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:tomcat.bytes_sent{$scope}"
+                    },
+                    {
+                        "q": "-sum:tomcat.bytes_rcvd{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Tomcat bytes sent and received rate (per sec)",
+                "type": "timeseries"
+            },
+            "id": 2
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:tomcat.error_count{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Tomcat errors rate (per sec)",
+                "type": "timeseries"
+            },
+            "id": 3
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "System load",
+                "type": "timeseries"
+            },
+            "id": 4
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU usage (%)",
+                "type": "timeseries"
+            },
+            "id": 5
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "I/O wait (%)",
+                "type": "timeseries"
+            },
+            "id": 6
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "System memory",
+                "type": "timeseries"
+            },
+            "id": 7
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Network traffic (per sec)",
+                "type": "timeseries"
+            },
+            "id": 8
+        }
+    ]
+}

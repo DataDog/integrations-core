@@ -1,36 +1,46 @@
 # CHANGELOG - varnish
 
-## 1.7.0 / 2020-05-17
+## 1.9.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+* [Fixed] Fix parsing of varnishstat 6.5 JSON output. See [#7731](https://github.com/DataDog/integrations-core/pull/7731). Thanks [vcabbage](https://github.com/vcabbage).
+
+## 1.8.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config spec for varnish. See [#7538](https://github.com/DataDog/integrations-core/pull/7538).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
+## 1.7.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.6.1 / 2020-04-04
+## 1.6.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.6.0 / 2020-01-13
+## 1.6.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.5.0 / 2019-12-02
+## 1.5.0 / 2019-12-02 / Agent 7.16.0
 
 * [Fixed] Remove shlex. See [#5065](https://github.com/DataDog/integrations-core/pull/5065).
 * [Added] Add version metadata. See [#4952](https://github.com/DataDog/integrations-core/pull/4952).
 
-## 1.4.0 / 2019-05-14
+## 1.4.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3579](https://github.com/DataDog/integrations-core/pull/3579).
 
-## 1.3.1 / 2019-03-29
+## 1.3.1 / 2019-03-29 / Agent 6.11.0
 
 * [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
 
-## 1.3.0 / 2019-01-04
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2810][1].
 
-## 1.2.1 / 2018-09-04
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945][2].
 * [Fixed] Add data files to the wheel package. See [#1727][3].
@@ -85,8 +95,8 @@
 [2]: https://github.com/DataDog/integrations-core/pull/1945
 [3]: https://github.com/DataDog/integrations-core/pull/1727
 [4]: https://github.com/DataDog/integrations-core/issues/1130
-[5]: 
-[6]: 
+[5]: https://github.com/DataDog/integrations-core/pull/939
+[6]: https://github.com/DataDog/integrations-core/issues/805
 [7]: https://github.com/DataDog/integrations-core/issues/795
 [8]: https://github.com/DataDog/integrations-core/issues/739
 [9]: https://github.com/philipseidel

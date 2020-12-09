@@ -1,0 +1,30 @@
+{
+  "display_name": "OOM Kill",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "oom_kill",
+  "metric_prefix": "oom_kill.",
+  "metric_to_check": "oom_kill.oom_process.count",
+  "creates_events": true,
+  "short_description": "Track process OOM kills by the system or cgroup.",
+  "guid": "4b8e9c18-1a13-43b0-a03c-186eb3221147",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Datadog-OOM Kill Integration",
+  "categories": [
+    "os & system"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "oom-kill",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

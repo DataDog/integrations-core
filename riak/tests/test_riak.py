@@ -2,15 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import socket
-
 import pytest
+from requests import ConnectionError
 
 from datadog_checks.riak import Riak
 
 from . import common
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, check, instance):
     check.check(instance)
@@ -29,12 +29,12 @@ def test_check(aggregator, check, instance):
     aggregator.all_metrics_asserted()
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.unit
 def test_bad_config(aggregator, instance):
     instance.update({"url": "http://localhost:5985"})
     check = Riak('riak', {}, [instance])
 
-    with pytest.raises(socket.error):
+    with pytest.raises(ConnectionError):
         check.check(instance)
 
     sc_tags = ['my_tag', 'url:http://localhost:5985']

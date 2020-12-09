@@ -45,7 +45,7 @@ No additional installation is needed on your server.
           end
    ```
 
-    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][7] documentation for further configuration options.
+    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Dogstatsd Ruby][4] documentation for further configuration options.
 
 3. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 
@@ -63,7 +63,7 @@ No additional installation is needed on your server.
            match_type: "regex"
            tags:
              worker: "$1"
-        - match: 'sidekiq\.jobs\.(.*)\.(count|success|failure)'
+         - match: 'sidekiq\.jobs\.(.*)\.(count|success|failure)'
            name: "sidekiq.jobs.worker.$2"
            match_type: "regex"
            tags:
@@ -71,10 +71,6 @@ No additional installation is needed on your server.
     ```
 
 4. [Restart the Agent][8].
-
-### Validation
-
-[Run the Agent's `status` subcommand][10] and look for `sidekiq` under the Checks section.
 
 ## Data Collected
 

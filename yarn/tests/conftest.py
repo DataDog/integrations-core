@@ -30,6 +30,7 @@ from .common import (
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        mount_logs=True,
         conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240)],
     ):
         yield INSTANCE_INTEGRATION

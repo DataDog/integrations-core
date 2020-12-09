@@ -3,6 +3,7 @@ jmx_metrics:
 
   # Solr versions >= 7.0
   - include:
+      domain: solr
       category: SEARCHER
       name:
         - numDocs
@@ -14,6 +15,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: SEARCHER
       name: maxDoc
       scope:
@@ -24,6 +26,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: SEARCHER
       name: warmupTime
       scope:
@@ -34,6 +37,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: CACHE
       name: documentCache
       scope:
@@ -53,6 +57,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: CACHE
       name: queryResultCache
       scope:
@@ -72,6 +77,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: CACHE
       name: filterCache
       scope:
@@ -91,6 +97,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: requests
       attribute:
@@ -99,6 +106,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: timeouts
       attribute:
@@ -107,6 +115,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: errors
       attribute:
@@ -115,6 +124,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: totalTime
       attribute:
@@ -123,6 +133,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: requestTimes
       attribute:
@@ -157,6 +168,7 @@ jmx_metrics:
 
   # Solr versions < 7.0
   - include:
+      domain: solr/gettingstarted
       type: searcher
       attribute:
         maxDoc:
@@ -169,6 +181,7 @@ jmx_metrics:
           alias: solr.searcher.warmup
           metric_type: gauge
   - include:
+      domain: solr/gettingstarted
       id: org.apache.solr.search.FastLRUCache
       attribute:
         cumulative_lookups:
@@ -184,6 +197,7 @@ jmx_metrics:
           alias: solr.cache.evictions
           metric_type: counter
   - include:
+      domain: solr/gettingstarted
       id: org.apache.solr.search.LRUCache
       attribute:
         cumulative_lookups:
@@ -199,6 +213,7 @@ jmx_metrics:
           alias: solr.cache.evictions
           metric_type: counter
   - include:
+      domain: solr/gettingstarted
       id: org.apache.solr.handler.component.SearchHandler
       attribute:
         errors:

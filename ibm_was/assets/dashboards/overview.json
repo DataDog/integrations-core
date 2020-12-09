@@ -1,0 +1,680 @@
+{
+  "title": "IBM WebSphere Application Server - Overview",
+  "description": "This dashboard provides insight into your WebSphere Application server environment and collected PMI Counters, so you can view aggregated JDBC and JVM performance metrics and PerfServlet availability. Further reading on monitoring your IBM WebSphere Application Server:\n\n- [Datadog's IBM WAS integration docs](https://docs.datadoghq.com/integrations/ibm_was/#overview)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "image",
+        "url": "https://dd-integration-config-meta.s3.amazonaws.com/ibm_was/saas_logos-bot.png",
+        "sizing": "fit"
+      },
+      "layout": {
+        "x": 2,
+        "y": 2,
+        "width": 15,
+        "height": 12
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jvm.up_time{$host}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 18,
+        "y": 40,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "check_status",
+        "title": "Performance Servlet Can Connect",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "ibm_was.can_connect",
+        "grouping": "cluster",
+        "group": "url:http://localhost:9081/wasperftool/servlet/perfservlet,host:ibmwas",
+        "group_by": [
+          "host"
+        ],
+        "tags": [
+          "*"
+        ],
+        "time": {
+          "live_span": "10m"
+        }
+      },
+      "layout": {
+        "x": 2,
+        "y": 15,
+        "width": 15,
+        "height": 12
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jvm.heap_size{$host}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 18,
+        "y": 56,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "note",
+        "content": "JVM Performance",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 18,
+        "y": 2,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "note",
+        "content": "JDBC Connection Performance",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 66,
+        "y": 2,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jdbc.use_time{$host} by {provider,datasource}",
+            "display_type": "area",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 8,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jvm.process_cpu_usage{$host}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 18,
+        "y": 72,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jvm.used_memory{$host}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 18,
+        "y": 24,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jvm.free_memory{$host}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 18,
+        "y": 8,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jdbc.pool_size{$host} by {datasource,provider}",
+            "display_type": "area",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 24,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jdbc.waiting_thread_count{$host} by {datasource,provider}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 40,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jdbc.free_pool_size{$host} by {provider,datasource}",
+            "display_type": "area",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 114,
+        "y": 56,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jdbc.managed_connection_count{$host} by {provider}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 114,
+        "y": 72,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jdbc.fault_count{$host} by {datasource,provider}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 114,
+        "y": 40,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 15,
+      "definition": {
+        "type": "note",
+        "content": "Thread Pools",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 114,
+        "y": 2,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 16,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.thread_pools.active_time{$host} by {thread_pool}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 114,
+        "y": 8,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 17,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.thread_pools.pool_size{$host} by {thread_pool}",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 114,
+        "y": 24,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 18,
+      "definition": {
+        "type": "note",
+        "content": "Servlet Session",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 162,
+        "y": 2,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 19,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.servlet_session.life_time{$host} by {web_application}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 162,
+        "y": 8,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 20,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.servlet_session.live_count{$host} by {web_application}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 162,
+        "y": 24,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 21,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.servlet_session.no_room_for_new_session_count{$host} by {web_application}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 162,
+        "y": 40,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 22,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.servlet_session.activate_non_exist_session_count{$host} by {web_application}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 162,
+        "y": 56,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 23,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_was.servlet_session.session_object_size{$host} by {web_application}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 162,
+        "y": 72,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 24,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:ibm_was.jvm.up_time{$host}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 2,
+        "y": 28,
+        "width": 15,
+        "height": 12
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "default": "*",
+      "prefix": "host"
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 260
+}

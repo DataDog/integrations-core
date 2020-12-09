@@ -12,17 +12,32 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
-@click.option('--tag-pattern', default=None)
-@click.option('--tag-prefix', default=None)
-@click.option('--dry-run', '-n', is_flag=True)
+@click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
+@click.option(
+    '--tag-pattern',
+    default=None,
+    help="The regex pattern for the format of the tag. Required if the tag doesn't follow semver",
+)
+@click.option(
+    '--tag-prefix', default=None, help="Specify the prefix of the tag to use if the tag doesn't follow semver"
+)
+@click.option('--dry-run', '-n', is_flag=True, help="Run the command in dry-run mode")
+@click.option(
+    '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
+)
 @click.pass_context
-def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
+def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')
 
     # get the name of the current release tag
-    cur_version = get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
+    cur_version = since or get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
+    if not cur_version:
+        abort(
+            'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
+            'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
+        )
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
@@ -39,11 +54,10 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
 
         for pr_num in pr_numbers:
             try:
-                payload = get_pr(pr_num, user_config)
+                payload = get_pr(pr_num, user_config, org=organization)
             except Exception as e:
                 echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue
-
             current_changelog_types = get_changelog_types(payload)
             if not current_changelog_types:
                 abort(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
@@ -58,7 +72,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
     else:
         for pr_num in pr_numbers:
             try:
-                payload = get_pr(pr_num, user_config)
+                payload = get_pr(pr_num, user_config, org=organization)
             except Exception as e:
                 echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue

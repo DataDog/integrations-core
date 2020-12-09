@@ -89,7 +89,12 @@ Query OK, 0 rows affected (0.00 sec)
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample mysql.d/conf.yaml][7] for all available configuration options.
 
@@ -187,6 +192,13 @@ _Available for Agent versions >6.0_
            pattern: "# Time:"
            # If mysqld was started with `--log-short-format`, use:
            # pattern: "# Query_time:"
+           # If using mysql version <5.7, use the following rules instead:
+           # - type: multi_line
+           #   name: new_slow_query_log_entry
+           #   pattern: "# Time|# User@Host"
+           # - type: exclude_at_match
+           #   name: exclude_timestamp_only_line
+           #   pattern: "# Time:"
 
      - type: file
        path: "<GENERAL_LOG_FILE_PATH>"
@@ -197,11 +209,19 @@ _Available for Agent versions >6.0_
        #   - type: multi_line
        #     name: new_log_start_with_date
        #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+       # If the logs start with a date with the format yymmdd but include a timestamp with each new second, rather than with each log, uncomment the following processing rule
+       # log_processing_rules:
+       #   - type: multi_line
+       #     name: new_logs_do_not_always_start_with_timestamp
+       #     pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
    ```
 
     See our [sample mysql.yaml][9] for all available configuration options, including those for custom metrics.
 
 4. [Restart the Agent][10].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -226,6 +246,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                     |
 | -------------- | ----------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "mysql", "service": "mysql"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -432,5 +455,5 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [22]: https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi/
 [23]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [24]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
-[25]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure/
+[25]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [26]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics

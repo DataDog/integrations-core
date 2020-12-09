@@ -1,4 +1,5 @@
-{license_header}from codecs import open  # To use a consistent encoding
+{license_header}
+from codecs import open  # To use a consistent encoding
 from os import path
 
 from setuptools import setup

@@ -72,12 +72,99 @@ sysobjectid: 1.3.6.1.4.1.232.9.4.10
 metrics:
   - MIB: CPQHLTH-MIB
     symbol:
-      OID: 1.3.6.1.4.1.232.6.2.8.1
+      OID: 1.3.6.1.4.1.232.6.2.8.1.0
       name: cpqHeSysUtilLifeTime
 ```
 
 !!! tip
     `sysobjectid` can also be a wildcard pattern to match a sub-tree of devices, eg `1.3.6.1.131.12.4.*`.
+
+### Generate a profile file from a collection of MIBs
+
+You can use `ddev` to create a profile from a list of mibs.
+
+```console
+$  ddev meta snmp generate-profile-from-mibs --help
+```
+
+This script requires a list of ASN1 MIB files as input argument, and copies to the clipboard a list of metrics that can be used to create a profile.
+
+#### Options
+
+`-f, --filters` is an option to provide the path to a YAML file containing a collection of MIB names and their list of node names to be included.
+
+For example:
+
+```yaml
+RFC1213-MIB:
+- system
+- interfaces
+- ip
+CISCO-SYSLOG-MIB: []
+SNMP-FRAMEWORK-MIB:
+- snmpEngine
+```
+
+Will include `system`, `interfaces` and `ip` nodes from `RFC1213-MIB`, no node fro, `CISCO-SYSLOG-MIB` and node `snmpEngine` from `SNMP-FRAMEWORK-MIB`.
+
+Note that each `MIB:node_name` correspond to exactly one and only one OID. However, some MIBs report legacy nodes that are overwritten.
+
+To resolve, edit the MIB by removing legacy values manually before loading them with this profile generator. If a MIB is fully supported, it can be omitted from the filter as MIBs not found in a filter will be fully loaded. If a MIB is *not* fully supported, it can be listed with an empty node list, as `CISCO-SYSLOG-MIB` in the example.
+
+`-a, --aliases` is an option to provide the path to a YAML file containing a list of aliases to be used as metric tags for tables, in the following format:
+
+```yaml
+aliases:
+- from:
+    MIB: ENTITY-MIB
+    name: entPhysicalIndex
+  to:
+    MIB: ENTITY-MIB
+    name: entPhysicalName
+```
+
+MIBs tables most of the time define one or more indexes, as columns within the same table, or columns from a different table and even a different MIB. The index value can be used to tag table's metrics. This is defined in the `INDEX` field in `row` nodes.
+
+As an example, `entPhysicalContainsTable` in `ENTITY-MIB` is as follows:
+
+```txt
+entPhysicalContainsEntry OBJECT-TYPE
+SYNTAX      EntPhysicalContainsEntry
+MAX-ACCESS  not-accessible
+STATUS      current
+DESCRIPTION
+        "A single container/'containee' relationship."
+INDEX       { entPhysicalIndex, entPhysicalChildIndex }  <== this is the index definition
+::= { entPhysicalContainsTable 1 }
+```
+
+or its JSON dump, where `INDEX` is replaced by `indices`:
+
+```json
+"entPhysicalContainsEntry": {
+    "name": "entPhysicalContainsEntry",
+    "oid": "1.3.6.1.2.1.47.1.3.3.1",
+    "nodetype": "row",
+    "class": "objecttype",
+    "maxaccess": "not-accessible",
+    "indices": [
+      {
+        "module": "ENTITY-MIB",
+        "object": "entPhysicalIndex",
+        "implied": 0
+      },
+      {
+        "module": "ENTITY-MIB",
+        "object": "entPhysicalChildIndex",
+        "implied": 0
+      }
+    ],
+    "status": "current",
+    "description": "A single container/'containee' relationship."
+  },
+```
+
+Indexes can be replaced by another MIB symbol that is more human friendly. You might prefer to see the interface name versus its numerical table index. This can be achieved using `metric_tag_aliases`.
 
 ### Add unit tests
 
@@ -122,10 +209,11 @@ Add a `.snmprec` file named after the `community_string`, which is the value we 
 $ touch snmp/tests/compose/data/hp_ilo4.snmprec
 ```
 
-Then add a line there for the OID listed in the profile:
+Add lines to the `.snmprec` file to specify the `sysobjectid` and the OID listed in the profile:
 
 ```console
-1.3.6.1.4.1.232.6.2.8.1|2|1051200
+1.3.6.1.2.1.1.2.0|6|1.3.6.1.4.1.232.9.4.10
+1.3.6.1.4.1.232.6.2.8.1.0|2|1051200
 ```
 
 Run the test again, and make sure it passes this time:

@@ -12,15 +12,21 @@ The Prisma Cloud Compute Edition check is included in the [Datadog Agent][3] pac
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
 1. Edit the `twistlock.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your twistlock performance data. See the [sample twistlock.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -74,7 +80,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ###### Kubernetes
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][6]:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][6]:
 
    ```yaml
      #(...)
@@ -111,9 +117,12 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
    ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
    ```
 
-3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][8]
+3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][11].
 
 4. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -147,3 +156,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [9]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation

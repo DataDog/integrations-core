@@ -1,0 +1,1492 @@
+{
+    "title": "Kubernetes Nodes Overview",
+    "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host,!condition:ready} by {status,condition,cluster_name}, 10, 'last', 'desc')",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "markers": [
+                    {
+                        "value": "y = 0",
+                        "display_type": "error dashed",
+                        "label": "y = 0"
+                    }
+                ],
+                "title": "Nodes not in Ready condition",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 40,
+                "y": 36,
+                "width": 39,
+                "height": 16
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "check_status",
+                "title": "Kubelets up",
+                "title_size": "16",
+                "title_align": "center",
+                "check": "kubernetes.kubelet.check",
+                "grouping": "cluster",
+                "group_by": [],
+                "tags": [
+                    "$cluster",
+                    "$host"
+                ],
+                "time": {
+                    "live_span": "10m"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 19,
+                "height": 7
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "check_status",
+                "title": "Kubelet Ping",
+                "title_size": "16",
+                "title_align": "center",
+                "check": "kubernetes.kubelet.check.ping",
+                "grouping": "cluster",
+                "group_by": [],
+                "tags": [
+                    "$cluster",
+                    "$host"
+                ],
+                "time": {
+                    "live_span": "10m"
+                }
+            },
+            "layout": {
+                "x": 20,
+                "y": 22,
+                "width": 19,
+                "height": 7
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "note",
+                "content": "Nodes Utilization",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 53,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.memory.usage{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Memory usage per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 58,
+                "y": 76,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Total Kubernetes CPU requests per node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 93,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.memory.requests{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Total Kubernetes memory requests per node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 58,
+                "y": 93,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.cpu.usage.total{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "CPU usage per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 0,
+                "y": 76,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(sum:kubernetes.pods.running{$cluster,$host} by {host}, 50, 'mean', 'desc')",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of Pods per Node ",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 58,
+                "y": 173,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "note",
+                "content": "Disk I/O & Network",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 302,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.network.rx_bytes{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Network in per node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 308,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.network.tx_bytes{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "green",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Network out per node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 324,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.io.read_bytes{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "grey",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Disk reads per node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 58,
+                "y": 324,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.io.write_bytes{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "grey",
+                            "line_type": "solid",
+                            "line_width": "thick"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Disk writes per node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 58,
+                "y": 308,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host} by {condition,status}, 10, 'mean', 'desc')"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Node by condition",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 80,
+                "y": 36,
+                "width": 35,
+                "height": 16
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "event_timeline",
+                "query": "sources:kubernetes $host $cluster",
+                "tags_execution": "and",
+                "title": "",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 213,
+                "width": 57,
+                "height": 9
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "note",
+                "content": "[Events](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/#toc-correlate-with-events10)\nand certificates",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 207,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "event_stream",
+                "query": "sources:kubernetes $host $cluster",
+                "tags_execution": "and",
+                "event_size": "s",
+                "title": "",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 58,
+                "y": 213,
+                "width": 57,
+                "height": 34
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "include_zero": false
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "Memory utilization per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 58,
+                "y": 59,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes_state.node.cpu_allocatable{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Allocatable cpu cores per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true
+            },
+            "layout": {
+                "x": 58,
+                "y": 254,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "note",
+                "content": "Allocatable resources per Node",
+                "background_color": "gray",
+                "font_size": "16",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left"
+            },
+            "layout": {
+                "x": 0,
+                "y": 248,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Allocatable pods per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 254,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Allocatable memory per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 173,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.containers.running{$cluster,$host} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of containers per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 58,
+                "y": 190,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 24,
+            "definition": {
+                "type": "query_table",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes_state.node.cpu_allocatable{$host, $cluster} by {host}",
+                        "aggregator": "avg",
+                        "limit": 25,
+                        "order": "asc",
+                        "alias": "CPU Available"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocatable CPU sort ASC",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 0,
+                "y": 270,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 25,
+            "definition": {
+                "type": "query_table",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
+                        "aggregator": "avg",
+                        "limit": 25,
+                        "order": "asc",
+                        "alias": "Pods Available"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocatable Pods sort ASC",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 58,
+                "y": 270,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 26,
+            "definition": {
+                "type": "query_table",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
+                        "aggregator": "avg",
+                        "limit": 25,
+                        "order": "asc",
+                        "alias": "Memory Available"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocatable Memory sort ASC",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 0,
+                "y": 286,
+                "width": 57,
+                "height": 15
+            }
+        },
+        {
+            "id": 27,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes_state.nodes.by_condition{$cluster,$host,condition:ready,status:true} by {condition,status,cluster_name}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Nodes in Ready condition",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 39,
+                "height": 16
+            }
+        },
+        {
+            "id": 28,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(max:tls.seconds_left{kubelet:server,$cluster,$host} by {host}, 25, 'last', 'asc')",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 3600,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Kubelet certificates expirations (<1 hour left)",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 0,
+                "y": 225,
+                "width": 57,
+                "height": 22
+            }
+        },
+        {
+            "id": 29,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes_state.node.count{$cluster,$host}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "green_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Number of nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": false,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 19,
+                "height": 7
+            }
+        },
+        {
+            "id": 30,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {cluster_name}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {cluster_name}*100",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "Memory utilization per cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 0,
+                "y": 150,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 31,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {cluster_name}, sum:kubernetes.filesystem.usage_pct{$cluster,$host} by {cluster_name}*100",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Filesystem utilization per cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 58,
+                "y": 133,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 32,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {cluster_name}/sum:kubernetes.cpu.capacity{$cluster,$host} by {cluster_name}*100",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "CPU Allocation (requests / capacity) per cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 0,
+                "y": 133,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 33,
+            "definition": {
+                "type": "note",
+                "content": "Cluster Utilization",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 127,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 34,
+            "definition": {
+                "type": "note",
+                "content": "Pods and Containers",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 167,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 35,
+            "definition": {
+                "type": "note",
+                "content": "Nodes Conditions",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 36,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "CPU utilization per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 59,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 37,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {cluster_name}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "CPU utilization per cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 58,
+                "y": 150,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 38,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.cpu.requests{$cluster,$host} by {host}/sum:kubernetes.cpu.capacity{$cluster,$host} by {host}*100",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "Kubernetes (requests / capacity) per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 110,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 39,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes_state.node.cpu_capacity{$cluster,$host}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "green_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total CPU",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": false,
+                "precision": 0
+            },
+            "layout": {
+                "x": 20,
+                "y": 6,
+                "width": 19,
+                "height": 7
+            }
+        },
+        {
+            "id": 40,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes_state.node.memory_capacity{$cluster,$host}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "green_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total memory",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 20,
+                "y": 14,
+                "width": 19,
+                "height": 7
+            }
+        },
+        {
+            "id": 41,
+            "definition": {
+                "type": "note",
+                "content": "Overview",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": -3,
+                "y": 0,
+                "width": 115,
+                "height": 5
+            }
+        },
+        {
+            "id": 42,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:kubernetes_state.pod.ready{$cluster,condition:true,$host} by {host,pod_name}, 10, 'last', 'desc')"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Pods in Ready State per Node",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 0,
+                "y": 190,
+                "width": 57,
+                "height": 16
+            }
+        },
+        {
+            "id": 43,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100-avg:system.cpu.idle{$host,$cluster} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed",
+                        "label": "y = 100"
+                    },
+                    {
+                        "value": "y = 80",
+                        "display_type": "warning dashed",
+                        "label": "y = 80"
+                    }
+                ],
+                "title": "CPU % utilization per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 80,
+                "y": 6,
+                "width": 35,
+                "height": 23
+            }
+        },
+        {
+            "id": 44,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "include_zero": false
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed",
+                        "label": "y = 100"
+                    },
+                    {
+                        "value": "y = 80",
+                        "display_type": "warning dashed",
+                        "label": "y = 80"
+                    }
+                ],
+                "title": "Memory utilization % per node",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 40,
+                "y": 6,
+                "width": 39,
+                "height": 23
+            }
+        },
+        {
+            "id": 45,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:kubernetes_state.nodes.by_condition{$cluster,status:true,$host,!condition:ready}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "green_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Nodes not ready",
+                "title_size": "16",
+                "title_align": "left",
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 19,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "cluster",
+            "default": "*",
+            "prefix": "cluster_name"
+        },
+        {
+            "name": "host",
+            "default": "*",
+            "prefix": "host"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 30340
+}

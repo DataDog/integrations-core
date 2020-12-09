@@ -33,6 +33,10 @@
     },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "activemq"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

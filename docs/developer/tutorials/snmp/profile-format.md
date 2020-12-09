@@ -39,6 +39,14 @@ or a wildcard pattern to address multiple device models:
 sysobjectid: 1.3.6.1.131.12.4.*
 ```
 
+or a list of fully-defined OID / wildcard patterns:
+
+```yaml
+sysobjectid:
+  - 1.3.6.1.131.12.4.*
+  - 1.3.6.1.4.1.232.9.4.10
+```
+
 ### `extends`
 
 _(Optional)_
@@ -53,7 +61,7 @@ Example:
 ```yaml
 extends:
   - _base.yaml
-  - _generic-router-if.yaml  # Include basic metrics from IF-MIB.
+  - _generic-if.yaml  # Include basic metrics from IF-MIB.
 ```
 
 ### `metrics`
@@ -181,7 +189,7 @@ metrics:
 
 It is possible to add tags to metrics retrieved from a table in three ways:
 
-- Using a column within the same table:
+##### Using a column within the same table
 
 ```yaml
 metrics:
@@ -203,7 +211,7 @@ metrics:
           name: ifDescr
 ```
 
-- Using a column from a different table.
+##### Using a column from a different table with identical indexes
 
 ```yaml
 metrics:
@@ -224,7 +232,52 @@ metrics:
         tag: interface
 ```
 
-- Using an "index", i.e. one of the values in the `INDEX` field of the table MIB definition:
+##### Using a column from a different table with different indexes
+
+```yaml
+metrics:
+  - MIB: CPI-UNITY-MIB
+    table:
+      OID: 1.3.6.1.4.1.30932.1.10.1.3.110
+      name: cpiPduBranchTable
+    symbols:
+      - OID: 1.3.6.1.4.1.30932.1.10.1.3.110.1.3
+        name: cpiPduBranchCurrent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.30932.1.10.1.2.10.1.3
+          name: cpiPduName
+        table: cpiPduTable
+        index_transform:
+          - start: 1
+            end: 7
+        tag: pdu_name
+```
+
+If the external table has different indexes, use `index_transform` to select a subset of the full index. `index_transform` is a list of `start`/`end` ranges to extract from the current table index to match the external table index. `start` and `end` are inclusive.
+
+External table indexes must be a subset of the indexes of the current table, or same indexes in a different order.
+
+!!! example
+
+    In the example above, the index of `cpiPduBranchTable` looks like `1.6.0.36.155.53.3.246`, the first digit is the `cpiPduBranchId` index and the rest is the `cpiPduBranchMac` index. The index of `cpiPduTable` looks like `6.0.36.155.53.3.246` and represents `cpiPduMac` (equivalent to `cpiPduBranchMac`).
+
+    By using the `index_transform` with start 1 and end 7, we extract `6.0.36.155.53.3.246` from `1.6.0.36.155.53.3.246` (`cpiPduBranchTable` full index), and then use it to match `6.0.36.155.53.3.246` (`cpiPduTable` full index).
+
+    `index_transform` can be more complex, the following definition will extract `2.3.5.6.7` from `1.2.3.4.5.6.7`.
+
+    ```yaml
+            index_transform:
+              - start: 1
+                end: 2
+              - start: 4
+                end: 6
+    ```
+
+
+##### Using an index
+
+Important: "_index_" refers to one digit of the index part of the row OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on.
 
 ```yaml
 metrics:
@@ -256,6 +309,38 @@ metrics:
         index: 1
 ```
 
+##### Mapping index to tag string value
+
+You can use the following syntax to map indexes to tag string values.
+In the example below, the submitted metrics will be `snmp.ipSystemStatsHCInReceives` with tags like `ipversion:ipv6`.
+
+```yaml
+metrics:
+- MIB: IP-MIB
+  table:
+    OID: 1.3.6.1.2.1.4.31.1
+    name: ipSystemStatsTable
+  forced_type: monotonic_count
+  symbols:
+  - OID: 1.3.6.1.2.1.4.31.1.1.4
+    name: ipSystemStatsHCInReceives
+  metric_tags:
+  - index: 1
+    tag: ipversion
+    mapping:
+      0: unknown
+      1: ipv4
+      2: ipv6
+      3: ipv4z
+      4: ipv6z
+      16: dns
+```
+
+See meaning of index as used here in [Using an index](#using-an-index) section.
+
+
+##### Tagging tips
+
 !!! note
     General guidelines on [Datadog tagging](https://docs.datadoghq.com/tagging/) also apply to table metric tags.
 
@@ -285,13 +370,14 @@ Sometimes the inferred type may not be what you want. Typically, OIDs that repre
 
 For such cases, you can define a `forced_type`. Possible values and their effect are listed below.
 
-| Forced type                | Description                                                                                         |
-| -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `gauge`                    | Submit as a gauge.                                                                                  |
-| `rate`                     | Submit as a rate.                                                                                   |
-| `percent`                  | Multiply by 100 and submit as a rate.                                                               |
-| `monotonic_count`          | Submit as a monotonic count.                                                                        |
+| Forced type                | Description                                                  |
+| -------------------------- | ------------------------------------------------------------ |
+| `gauge`                    | Submit as a gauge.                                           |
+| `rate`                     | Submit as a rate.                                            |
+| `percent`                  | Multiply by 100 and submit as a rate.                        |
+| `monotonic_count`          | Submit as a monotonic count.                                 |
 | `monotonic_count_and_rate` | Submit 2 copies of the metric: one as a monotonic count, and one as a rate (suffixed with `.rate`). |
+| `flag_stream`              | Submit each flag of a flag stream as individual metric with value `0` or `1`. See [Flag Stream section](#flag-stream). |
 
 This works on both symbol and table metrics:
 
@@ -351,6 +437,39 @@ metrics:
           # ...
     ```
 
+##### Flag stream
+
+When the value is a flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
+
+- `options.placement`: position of the flag in the flag stream (1-based indexing, first element is placement 1).
+- `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag. 
+
+Example:
+
+```yaml
+metrics:
+  - MIB: PowerNet-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
+      name: upsBasicStateOutputState
+    forced_type: flag_stream
+    options:
+      placement: 4
+      metric_suffix: OnLine
+  - MIB: PowerNet-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
+      name: upsBasicStateOutputState
+    forced_type: flag_stream
+    options:
+      placement: 5
+      metric_suffix: ReplaceBattery
+```
+
+This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and `snmp.upsBasicStateOutputState.ReplaceBattery` with value `0` or `1`.
+
+[Example of flag_stream usage in a profile](https://github.com/DataDog/integrations-core/blob/e64e2d18529c6c106f02435c5fdf2621667c16ad/snmp/datadog_checks/snmp/data/profiles/apc_ups.yaml#L60-L127).
+
 ### `metric_tags`
 
 _(Optional)_
@@ -361,16 +480,11 @@ Several collection methods are supported, as illustrated below:
 
 ```yaml
 metric_tags:
-  - # From a symbol
-    MIB: SNMPv2-MIB
-    symbol: sysName
-    tag: snmp_host
-  - # From an OID:
-    OID: 1.3.6.1.2.1.1.5
+  - OID: 1.3.6.1.2.1.1.5.0
     symbol: sysName
     tag: snmp_host
   - # With regular expression matching
-    MIB: SNMPv2-MIB
+    OID: 1.3.6.1.2.1.1.5.0
     symbol: sysName
     match: (.*)-(.*)
     tags:

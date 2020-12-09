@@ -20,3 +20,11 @@ files:
       - type: multi_line
         name: log_start_with_date
         pattern: \d{4}-\d{2}-\d{2}
+    - type: file
+      path: /var/log/hivemq_event.log
+      source: hivemq
+      service: <SERVICE>
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}-\d{2}-\d{2}

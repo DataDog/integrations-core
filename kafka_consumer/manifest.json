@@ -18,13 +18,16 @@
   "support": "core",
   "supported_os": [
     "linux",
-    "mac_os"
+    "mac_os",
+    "windows"
   ],
   "type": "check",
   "integration_id": "kafka-consumer",
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

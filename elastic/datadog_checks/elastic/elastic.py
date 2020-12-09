@@ -15,6 +15,7 @@ from .metrics import (
     CLUSTER_PENDING_TASKS,
     health_stats_for_version,
     index_stats_for_version,
+    node_system_stats_for_version,
     pshard_stats_for_version,
     stats_for_version,
 )
@@ -51,6 +52,7 @@ class ESCheck(AgentCheck):
     def check(self, instance):
         config = from_instance(instance)
         admin_forwarder = config.admin_forwarder
+        jvm_rate = instance.get('gc_collectors_as_rate', False)
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
@@ -61,7 +63,10 @@ class ESCheck(AgentCheck):
             raise
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version, config.cluster_stats)
-        stats_metrics = stats_for_version(version)
+        stats_metrics = stats_for_version(version, jvm_rate)
+        if config.cluster_stats:
+            # Include Node System metrics
+            stats_metrics.update(node_system_stats_for_version(version))
         pshard_stats_metrics = pshard_stats_for_version(version)
 
         # Load stats data.
@@ -169,7 +174,7 @@ class ESCheck(AgentCheck):
             for key, value in list(iteritems(index_data)):
                 if value is None:
                     del index_data[key]
-                    self.log.warning("The index metric data for %s was not found", key)
+                    self.log.warning("The index %s has no metric data for %s", idx['index'], key)
 
             for metric in index_stats_metrics:
                 # metric description

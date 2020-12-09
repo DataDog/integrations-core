@@ -44,6 +44,8 @@ To collect data from your applications running in AWS EKS Fargate over a Fargate
 - [Deploy the Agent as a sidecar](#running-the-agent-as-a-side-car).
 - Set up Datadog [metrics](#metrics-collection), [events](#events-collection), and [traces](#traces-collection) collection.
 
+To have EKS Fargate containers in the Datadog Live Container View, enable `shareProcessNamespace` on your pod spec. See [Process Collection](#process-collection).
+
 #### AWS EKS Fargate RBAC
 
 Use the following Agent RBAC when deploying the Agent as a sidecar in AWS EKS Fargate:

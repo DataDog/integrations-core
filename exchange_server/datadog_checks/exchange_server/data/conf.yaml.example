@@ -1,16 +1,19 @@
-init_config:
+## All options defined here are available to all instances.
+#
+# init_config: {}
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param host - string - required
-    ## Host to connect to. "." means the current host, any other value have the Agent attempt to connect to a remote host.
-    ## Note: Remote access requires additional permissions -
-    ## https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun
+    ## Host to connect to. "." means the current host, any other value
+    ## have the Agent attempt to connect to a remote host.
+    ## Note: Remote access requires additional permissions
     #
   - host: .
 
     ## @param additional_metrics - list of strings - optional
-    ##
     ## The additional metrics is a list of additional counters to collect.  The
     ## list is formatted as follows:
     ## ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
@@ -24,4 +27,30 @@ instances:
     ##               rate, histogram or counter
     #
     # additional_metrics:
-    #   - ['MSExchange Content Filter Agent', none, 'Messages that Bypassed Scanning', exchange.content_filter.bypassed_messages, gauge]
+    #   - [MSExchange Content Filter Agent, none, Messages that Bypassed Scanning, exchange.content_filter.bypassed_messages, gauge]
+
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\CommonDiagnosticsLog\\*
+#     source: exchange-server
+#   - type: file
+#     path: C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\ThrottlingService\\*
+#     source: exchange-server
+#   - type: file
+#     path: C:\\Program Files\\Microsoft\\Exchange Server\\V15\\TransportRoles\\Logs\\Hub\\Connectivity\\*
+#     source: exchange-server

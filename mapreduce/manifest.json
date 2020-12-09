@@ -1,7 +1,8 @@
 {
   "categories": [
     "processing",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "MapReduce",
@@ -23,8 +24,15 @@
   "type": "check",
   "integration_id": "mapreduce",
   "assets": {
-    "monitors": {},
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "mapreduce"
+    },
+    "monitors": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

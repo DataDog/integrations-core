@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import copy
 
 import pytest
@@ -9,8 +8,9 @@ import pytest
 from .utils import requires_windows
 
 try:
-    from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
     from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
+
+    from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
 except ImportError:
     pass
 
@@ -77,6 +77,18 @@ def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture
     for t in ['test.processor_time_0', 'test.processor_time_1']:
         aggregator.assert_metric(t, tags=None, count=1)
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+@requires_windows
+def test_additional_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
+    instance = copy.deepcopy(DEFAULT_INSTANCE)
+    instance['additional_metrics'] = SINGLE_INSTANCE_COUNTER
+
+    c = PDHBaseCheck("testcheck", {}, [instance], counter_list=[])
+    c.check(instance)
+
+    aggregator.assert_metric("test.system.mem.available", tags=None, count=1)
 
 
 @requires_windows

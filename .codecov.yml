@@ -51,6 +51,10 @@ coverage:
         target: 75
         flags:
         - apache
+      Azure IoT Edge:
+        target: 75
+        flags:
+        - azure_iot_edge
       Btrfs:
         target: 75
         flags:
@@ -83,6 +87,10 @@ coverage:
         target: 75
         flags:
         - clickhouse
+      Cloud Foundry API:
+        target: 75
+        flags:
+        - cloud_foundry_api
       CockroachDB:
         target: 75
         flags:
@@ -283,6 +291,10 @@ coverage:
         target: 75
         flags:
         - marathon
+      MarkLogic:
+        target: 75
+        flags:
+        - marklogic
       Memcached:
         target: 75
         flags:
@@ -419,6 +431,14 @@ coverage:
         target: 75
         flags:
         - scylla
+      Snowflake:
+        target: 75
+        flags:
+        - snowflake
+      SonarQube:
+        target: 75
+        flags:
+        - sonarqube
       Spark:
         target: 75
         flags:
@@ -553,6 +573,11 @@ flags:
     paths:
     - aspdotnet/datadog_checks/aspdotnet
     - aspdotnet/tests
+  azure_iot_edge:
+    carryforward: true
+    paths:
+    - azure_iot_edge/datadog_checks/azure_iot_edge
+    - azure_iot_edge/tests
   btrfs:
     carryforward: true
     paths:
@@ -588,6 +613,11 @@ flags:
     paths:
     - clickhouse/datadog_checks/clickhouse
     - clickhouse/tests
+  cloud_foundry_api:
+    carryforward: true
+    paths:
+    - cloud_foundry_api/datadog_checks/cloud_foundry_api
+    - cloud_foundry_api/tests
   cockroachdb:
     carryforward: true
     paths:
@@ -863,6 +893,11 @@ flags:
     paths:
     - marathon/datadog_checks/marathon
     - marathon/tests
+  marklogic:
+    carryforward: true
+    paths:
+    - marklogic/datadog_checks/marklogic
+    - marklogic/tests
   mcache:
     carryforward: true
     paths:
@@ -1023,6 +1058,16 @@ flags:
     paths:
     - snmp/datadog_checks/snmp
     - snmp/tests
+  snowflake:
+    carryforward: true
+    paths:
+    - snowflake/datadog_checks/snowflake
+    - snowflake/tests
+  sonarqube:
+    carryforward: true
+    paths:
+    - sonarqube/datadog_checks/sonarqube
+    - sonarqube/tests
   spark:
     carryforward: true
     paths:

@@ -51,6 +51,8 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     packages=['datadog_checks.downloader'],
+    # Run-time dependencies
+    extras_require={'deps': get_dependencies()},
     # NOTE: Copy over TUF directories, and root metadata.
     package_data={
         'datadog_checks.downloader': [

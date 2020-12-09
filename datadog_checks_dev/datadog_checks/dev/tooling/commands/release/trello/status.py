@@ -28,8 +28,8 @@ def status(ctx: click.Context, as_json: bool, clipboard: bool) -> None:
 
     counts = trello.count_by_columns()
 
-    row_format = '{:15} | {:<8} | {:<8} | {:<8} | {:<8} | {}'
-    headers = ('Total', 'In Progress', 'Issues Found', 'Awaiting Build', 'Done')
+    row_format = '{:19} | {:<8} | {:<8} | {:<8} | {:<8} | {:<8} | {}'
+    headers = ('Total', 'Inbox', 'In Progress', 'Issues Found', 'Awaiting Build', 'Done')
 
     if as_json:
         print(json.dumps(counts, indent=2))
@@ -38,8 +38,8 @@ def status(ctx: click.Context, as_json: bool, clipboard: bool) -> None:
     totals = dict(zip(headers, [0] * len(headers)))
 
     output = []
-    output.append(row_format.format('', '', 'In', 'Issues', 'Awaiting', ''))
-    output.append(row_format.format('Team', 'Total', 'Progress', 'Found', 'Build', 'Done'))
+    output.append(row_format.format('', '', '', 'In', 'Issues', 'Awaiting', ''))
+    output.append(row_format.format('Team', 'Total', 'Inbox', 'Progress', 'Found', 'Build', 'Done'))
     output.append(row_format.format('--', *['--' for _ in headers]))
 
     for team, data in counts.items():

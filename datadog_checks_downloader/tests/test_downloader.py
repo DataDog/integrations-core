@@ -8,15 +8,20 @@ import logging
 import os
 import re
 import shutil
+import string
 import subprocess
+from collections import defaultdict, namedtuple
 
 import requests
-import six
+from packaging.version import parse as parse_version
+from six import iteritems
+from six.moves.urllib_parse import urljoin
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 
 log = logging.getLogger('test_downloader')
+IntegrationMetadata = namedtuple("IntegrationMetadata", ["version", "root_layout_type"])
 
 
 def delete_files(files):
@@ -51,7 +56,7 @@ def cleanup():
 
 
 @retry(wait=wait_exponential(min=2, max=60), stop=stop_after_attempt(10))
-def download(package):
+def download(package, version=None, root_layout_type='core'):
     """
     TODO: Flaky downloader
     Why we need a retry here?
@@ -73,27 +78,75 @@ def download(package):
     # -vvv:   WARNING
     # -vvvv:  INFO
     # -vvvvv: DEBUG
-    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', package]
+    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', '--type', root_layout_type]
+    if version:
+        cmd.extend(['--version', version])
+    cmd.append(package)
     out = subprocess.check_output(cmd)
     log.debug(' '.join(cmd))
     log.debug(out)
     log.debug('')
 
 
+def fetch_all_targets():
+    targets = {}
+    log.debug("Downloading wheels-signer data...")
+    for c in list(string.ascii_lowercase):
+        url = urljoin(REPOSITORY_URL_PREFIX, 'metadata.staged/wheels-signer-{}.json'.format(c))
+        r = requests.get(url)
+        r.raise_for_status()
+        targets.update(r.json()['signed']['targets'])
+    return targets
+
+
+def get_all_integrations_metadata():
+    """
+    This function parses the content of 'targets' in order to generate a list of integrations to test
+    with some metadata.
+    This metadata is a tuple of (version, root_layout_type):
+        - version: Is the latest (non-rc) version of an integration
+        - root_layout_type: 'extras' or 'core' based on the type of integration."""
+    PATTERN = r'simple/(datadog-[\w-]+?)/datadog_[\w-]+?-(.*)-py\d.*.whl'
+    results = defaultdict(lambda: IntegrationMetadata("0.0.0", "root"))
+    targets = fetch_all_targets()
+    for target, metadata in iteritems(targets):
+        match = re.match(PATTERN, target)
+        if not match:
+            # An html file, safe to ignore
+            continue
+        integration_name, version = match.groups()
+        root_layout_type = metadata['custom']['root-layout-type']
+        assert root_layout_type in ('core', 'extras')
+        known_version = results[integration_name].version
+        if parse_version(known_version) < parse_version(version):
+            # The test only downloads the latest integrations versions.
+            results[integration_name] = IntegrationMetadata(version, root_layout_type)
+
+    return dict(results)
+
+
 def test_downloader():
+    integrations_metadata = get_all_integrations_metadata()
     # The regex corresponding to package names in a global simple index.
-    PATTERN = r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />"
+    HTML_PATTERN = r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />"
 
     # Download the global simple index, which contains all known package names.
-    index = six.moves.urllib_parse.urljoin(REPOSITORY_URL_PREFIX, 'targets/simple/index.html')
+    index = urljoin(REPOSITORY_URL_PREFIX, 'targets/simple/index.html')
     r = requests.get(index)
     r.raise_for_status()
 
     try:
         for line in r.text.split('\n'):
-            match = re.match(PATTERN, line)
-
+            match = re.match(HTML_PATTERN, line)
+            if not match:
+                continue
+            integration_name = match.group(1)
+            if integration_name not in integrations_metadata:
+                raise Exception(
+                    "Integration '{}' is in the simple index but does not have tuf metadata.".format(integration_name)
+                )
+            version, root_layout_type = integrations_metadata[integration_name]
             if match:
-                download(match.group(1))
+                download(match.group(1), version, root_layout_type)
     finally:
         cleanup()

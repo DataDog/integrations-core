@@ -6,6 +6,8 @@ import copy
 import logging
 import os
 
+import pytest
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
@@ -17,6 +19,8 @@ HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
+AUTODISCOVERY_TYPE = os.environ['AUTODISCOVERY_TYPE']
+TOX_ENV_NAME = os.environ['TOX_ENV_NAME']
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
@@ -58,7 +62,7 @@ CAST_METRICS = [
     {'OID': "1.3.6.1.4.1.2021.10.1.6.1", 'name': "cpuload2"},  # Opaque
 ]
 
-CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
+CONSTRAINED_OID = [{"MIB": "TCP-MIB", "symbol": "tcpRtoAlgorithm"}]
 
 DUMMY_MIB_OID = [
     ({"MIB": "DUMMY-MIB", "symbol": "scalar"}, AggregatorStub.GAUGE, 10),  # Integer
@@ -70,6 +74,7 @@ DUMMY_MIB_OID = [
 FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32
     {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64", 'forced_type': 'gauge'},  # Counter32
+    {'OID': "1.3.6.1.4.1.123456789.1.0", 'name': "IAmAOctetStringFloat", 'forced_type': 'gauge'},  # OctetString float
 ]
 INVALID_FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32
@@ -151,10 +156,18 @@ BULK_TABULAR_OBJECTS = [
             "ipSystemStatsHCOutOctets",
             "ipSystemStatsInMcastPkts",
         ],
+        'metric_tags': [{'tag': "dumbindex", 'index': 1}],
     },
 ]
 
-INVALID_METRICS = [{'MIB': "IF-MIB", 'table': "noIdeaWhatIAmDoingHere", 'symbols': ["ImWrong", "MeToo"]}]
+INVALID_METRICS = [
+    {
+        'MIB': "IF-MIB",
+        'table': "noIdeaWhatIAmDoingHere",
+        'symbols': ["ImWrong", "MeToo"],
+        'metric_tags': [{'tag': "dumbindex", 'index': 1}],
+    }
+]
 
 PLAY_WITH_GET_NEXT_METRICS = [
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2", "name": "needFallback"},
@@ -175,6 +188,9 @@ RESOLVED_TABULAR_OBJECTS = [
         ],
     }
 ]
+
+agent_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'agent', reason='Agent discovery only')
+python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Python discovery only')
 
 
 def generate_instance_config(metrics, template=None):
@@ -212,3 +228,7 @@ def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_k
 
 def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
+
+
+def assert_common_metrics(aggregator, tags=None):
+    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)

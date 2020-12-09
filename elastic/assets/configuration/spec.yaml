@@ -24,7 +24,6 @@ files:
         See: https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
       value:
         type: boolean
-        default: false
         example: false
     - name: cluster_stats
       description: |
@@ -35,13 +34,11 @@ files:
         is removed in Agent version 6+.
       value:
         type: boolean
-        default: false
         example: false
     - name: index_stats
       description: Set "index_stats" to true to collect metrics for individual indices.
       value:
         type: boolean
-        default: false
         example: false
     - name: pshard_stats
       description: |
@@ -54,13 +51,11 @@ files:
         of replica shards in your ES cluster.
       value:
         type: boolean
-        default: false
         example: false
     - name: pshard_graceful_timeout
       description: Continue gracefully if pshard stats TO
       value:
         type: boolean
-        default: false
         example: false
     - name: pending_task_stats
       description: |
@@ -70,7 +65,6 @@ files:
         Set `pending_task_stats` to false if you use such a service.
       value:
         type: boolean
-        default: true
         example: true
     - name: admin_forwarder
       description: |
@@ -79,7 +73,13 @@ files:
         https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
       value:
         type: boolean
-        default: false
+        example: false
+    - name: gc_collectors_as_rate
+      description: |
+        Submit `jvm.gc.collectors` metrics as rate.
+        Note: Only for ES versions 0.9.10 or higher.
+      value:
+        type: boolean
         example: false
     - template: instances/default
     - template: instances/http
@@ -114,4 +114,3 @@ files:
       value:
         example: http://%%host%%:9200
         type: string
-

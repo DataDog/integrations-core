@@ -10,7 +10,7 @@ from .common import CASSANDRA_E2E_METRICS
 @pytest.mark.e2e
 def test(dd_agent_check):
     instance = {}
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
 
     for metric in CASSANDRA_E2E_METRICS:
         aggregator.assert_metric(metric)

@@ -9,6 +9,7 @@ from ...utils import find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
+    DEFAULT_DOGSTATSD_PORT,
     DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
@@ -38,6 +39,7 @@ class DockerInterface(object):
         log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
+        dogstatsd=False,
     ):
         self.check = check
         self.env = env
@@ -50,6 +52,7 @@ class DockerInterface(object):
         self.dd_url = dd_url
         self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
+        self.dogstatsd = dogstatsd
 
         self._agent_version = self.metadata.get('agent_version')
         self.container_name = f'dd_{self.check}_{self.env}'
@@ -57,8 +60,8 @@ class DockerInterface(object):
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
-        # If we use a default build, and it's missing the py suffix, adds it
-        if default_agent and self.agent_build and 'py' not in self.agent_build:
+        # If we use a default non-RC build, and it's missing the py suffix, adds it
+        if default_agent and self.agent_build and 'rc' not in self.agent_build and 'py' not in self.agent_build:
             # Agent 6 image no longer supports -pyX
             if self.agent_build != 'datadog/agent:6':
                 self.agent_build = f'{self.agent_build}-py{self.python_version}'
@@ -105,6 +108,7 @@ class DockerInterface(object):
         delay=None,
         log_level=None,
         as_json=False,
+        as_table=False,
         break_point=None,
         jmx_list=None,
     ):
@@ -130,6 +134,9 @@ class DockerInterface(object):
 
             if as_json:
                 command += f' --json {as_json}'
+
+            if as_table:
+                command += ' --table'
 
             if break_point is not None:
                 command += f' --breakpoint {break_point}'
@@ -255,6 +262,14 @@ class DockerInterface(object):
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
 
+        # The docker `--add-host` command will reliably create entries in the `/etc/hosts` file,
+        # otherwise, edits to that file will be overwritten on container restarts
+        for host, ip in self.metadata.get('custom_hosts', []):
+            command.extend(['--add-host', f'{host}:{ip}'])
+
+        if self.dogstatsd:
+            command.extend(['-p', f'{DEFAULT_DOGSTATSD_PORT}:{DEFAULT_DOGSTATSD_PORT}/udp'])
+
         if 'proxy' in self.metadata:
             if 'http' in self.metadata['proxy']:
                 command.extend(['-e', f"DD_PROXY_HTTP={self.metadata['proxy']['http']}"])
@@ -278,6 +293,9 @@ class DockerInterface(object):
 
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)
+
+    def shell(self):
+        return self.exec_command('/bin/bash', interactive=True)
 
 
 def get_docker_networks():

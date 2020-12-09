@@ -21,15 +21,21 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "ignite",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Ignite Overview": "assets/dashboards/ignite_overview.json"
+    },
     "saved_views": {},
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "ignite"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

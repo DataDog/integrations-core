@@ -33,9 +33,12 @@ The HDFS DataNode check is included in the [Datadog Agent][3] package, so you do
 
 #### Connect the Agent
 
-##### Host
+#<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+#### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `hdfs_datanode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample hdfs_datanode.d/conf.yaml][5] for all available configuration options:
 
@@ -56,6 +59,9 @@ Follow the instructions below to configure this check for an Agent running on a 
    ```
 
 2. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -91,6 +97,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `hdfs_datanode` under the Checks section.
@@ -108,7 +117,7 @@ The HDFS-datanode check does not include any events.
 ### Service Checks
 
 **hdfs.datanode.jmx.can_connect**:<br>
-Returns `Critical` if the Agent cannot connect to the DataNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
+Returns `CRITICAL` if the Agent cannot connect to the DataNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
 ## Troubleshooting
 

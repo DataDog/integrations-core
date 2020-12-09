@@ -17,5 +17,5 @@ twemproxy.server_timedout,gauge,,timeout,,number of timeouts on server connectio
 twemproxy.server_eof,gauge,,error,second,number of eof on server connections,-1,twemproxy,server eof err
 twemproxy.responses,gauge,,response,second,number of responses,0,twemproxy,resps
 twemproxy.requests,gauge,,request,second,number of requests,0,twemproxy,reqs
-twemproxy.response_bytes,gauge,,byte,second,number of responses,0,twemproxy,resp bytes
-twemproxy.request_bytes,gauge,,byte,second,number of requests,0,twemproxy,req bytes
+twemproxy.response_bytes,gauge,,byte,second,total response bytes,0,twemproxy,resp bytes
+twemproxy.request_bytes,gauge,,byte,second,total request bytes,0,twemproxy,req bytes

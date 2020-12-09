@@ -1,6 +1,7 @@
 {
   "categories": [
     "processing",
+    "log collection",
     "autodiscovery"
   ],
   "creates_events": false,
@@ -23,8 +24,15 @@
   "type": "check",
   "integration_id": "spark",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "spark"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

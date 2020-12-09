@@ -13,6 +13,8 @@ except ImportError:
 GAUGE = 'gauge'
 COUNT = 'count'
 
+METRIC_PREFIX = 'ibm_mq'
+
 
 def queue_metrics():
     return {
@@ -98,10 +100,50 @@ def channel_status_metrics():
         'mca_status': pymqi.CMQCFC.MQIACH_MCA_STATUS,
         'msgs': pymqi.CMQCFC.MQIACH_MSGS,
         'ssl_key_resets': pymqi.CMQCFC.MQIACH_SSL_KEY_RESETS,
-        # NOTE: Following metrics are NOT tested in e2e. I didn't managed to to get those metrics locally.
         'batches': pymqi.CMQCFC.MQIACH_BATCHES,
         'current_msgs': pymqi.CMQCFC.MQIACH_CURRENT_MSGS,
         'indoubt_status': pymqi.CMQCFC.MQIACH_INDOUBT_STATUS,
+    }
+
+
+def channel_stats_metrics():
+    return {
+        # Most stats metrics are count since we want to add up the values
+        # if there are multiple messages of same type for a single check run.
+        'msgs': (pymqi.CMQCFC.MQIAMO_MSGS, COUNT),
+        'bytes': (pymqi.CMQCFC.MQIAMO64_BYTES, COUNT),
+        'put_retries': (pymqi.CMQCFC.MQIAMO_PUT_RETRIES, COUNT),
+        # Following metrics are currently not covered by e2e tests
+        'full_batches': (pymqi.CMQCFC.MQIAMO_FULL_BATCHES, COUNT),
+        'incomplete_batches': (pymqi.CMQCFC.MQIAMO_INCOMPLETE_BATCHES, COUNT),
+        'avg_batch_size': (pymqi.CMQCFC.MQIAMO_AVG_BATCH_SIZE, GAUGE),
+    }
+
+
+def queue_stats_metrics():
+    return {
+        'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
+        'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
+        'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),
+        'get_fail_count': (pymqi.CMQCFC.MQIAMO_GETS_FAILED, COUNT),
+        'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),
+        'browse_fail_count': (pymqi.CMQCFC.MQIAMO_BROWSES_FAILED, COUNT),
+        'non_queued_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_NOT_QUEUED, COUNT),
+        'expired_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_EXPIRED, COUNT),
+        'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
+        # These metrics are returned as a list of two values.
+        # Index 0 = Contains the value for non-persistent messages
+        # Index 1 = Contains the value for persistent messages
+        # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.mon.doc/q037510_.htm#q037510___q037510_2
+        #
+        'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),
+        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT),
+        'get_count': (pymqi.CMQCFC.MQIAMO_GETS, COUNT),
+        'browse_bytes': (pymqi.CMQCFC.MQIAMO64_BROWSE_BYTES, GAUGE),
+        'browse_count': (pymqi.CMQCFC.MQIAMO_BROWSES, COUNT),
+        'get_bytes': (pymqi.CMQCFC.MQIAMO64_GET_BYTES, COUNT),
+        'put_bytes': (pymqi.CMQCFC.MQIAMO64_PUT_BYTES, COUNT),
+        'put1_count': (pymqi.CMQCFC.MQIAMO_PUT1S, COUNT),
     }
 
 
@@ -113,6 +155,6 @@ def depth_percent(queue_info):
     depth_max = queue_info[pymqi.CMQC.MQIA_MAX_Q_DEPTH]
 
     depth_fraction = depth_current / depth_max
-    depth_percent = depth_fraction * 100
+    depth_as_percent = depth_fraction * 100
 
-    return depth_percent
+    return depth_as_percent

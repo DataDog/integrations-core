@@ -1,0 +1,68 @@
+name: Marathon
+
+files:
+  - name: marathon.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: url
+            description: The API endpoint of your Marathon master.
+            required: True
+            value:
+              example: https://<SERVER>:<PORT>
+              type: string
+          - name: acs_url
+            description: The base ACS endpoint url if an ACS token is required to access the marathon API.
+            value:
+              default: 
+              example: https://<SERVER>:<PORT>
+              type: string
+          - name: group
+            description: Enter a Specific Application group name to get only it's related metrics.
+            value:
+              default: 
+              example: product
+              type: string
+          - name: label_tags
+            description: Dynamic tags for metrics. The tag value is taken from the label in marathon.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - <MARATHON_LABEL_NAME>
+          - template: instances/default
+          - template: instances/http
+            overrides:
+              auth_token.description: |
+                This allows for the use of authentication information from dynamic sources.
+                Both a reader and writer must be configured.
+
+                The available readers are:
+
+                  - type: file
+                    path (required): The absolute path for the file to read from.
+                    pattern: A regular expression pattern with a single capture group used to find the
+                             token rather than using the entire file, for example: Your secret is (.+)
+
+                  - type: dcos_auth
+                    login_url (required): DC/OS login endpoint
+                    service_account (required): The DC/OS service account to authenticate.
+                    private_key_path (required): The absolute path for the DC/OS service account.
+                    expiration: Token expiration in seconds, defaults to 300 (5 min).
+
+                The available writers are:
+
+                  - type: header
+                    name (required): The name of the field, for example: Authorization
+                    value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+                    placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/marathon.log
+            source: marathon

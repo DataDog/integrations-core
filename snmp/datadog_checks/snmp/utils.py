@@ -1,14 +1,28 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 import os
-from typing import Any, Dict, Mapping, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
 import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
-from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .pysnmp_types import (
+    ContextData,
+    ObjectIdentity,
+    ObjectName,
+    ObjectType,
+    SnmpEngine,
+    UdpTransportTarget,
+    endOfMibView,
+    lcd,
+    noSuchInstance,
+)
+from .types import T
+
+logger = logging.getLogger(__name__)
 
 
 def get_profile_definition(profile):
@@ -91,10 +105,8 @@ def recursively_expand_base_profiles(definition):
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
-def _load_default_profiles():
-    # type: () -> Dict[str, Any]
-    """Load all the profiles installed on the system."""
-    profiles = {}
+def _iter_default_profile_file_paths():
+    # type: () -> Iterator[str]
     paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
 
     for path in paths:
@@ -105,14 +117,38 @@ def _load_default_profiles():
             base, ext = os.path.splitext(filename)
             if ext != '.yaml':
                 continue
+            yield os.path.join(path, filename)
 
-            is_abstract = base.startswith('_')
-            if is_abstract:
-                continue
 
-            definition = _read_profile_definition(os.path.join(path, filename))
+def _get_profile_name(path):
+    # type: (str) -> str
+    base, _ = os.path.splitext(os.path.basename(path))
+    return base
+
+
+def _is_abstract_profile(name):
+    # type: (str) -> bool
+    return name.startswith('_')
+
+
+def _load_default_profiles():
+    # type: () -> Dict[str, Any]
+    """Load all the profiles installed on the system."""
+    profiles = {}
+
+    for path in _iter_default_profile_file_paths():
+        name = _get_profile_name(path)
+
+        if _is_abstract_profile(name):
+            continue
+
+        definition = _read_profile_definition(path)
+        try:
             recursively_expand_base_profiles(definition)
-            profiles[base] = {'definition': definition}
+        except Exception:
+            logger.error("Could not expand base profile %s", path)
+            raise
+        profiles[name] = {'definition': definition}
 
     return profiles
 
@@ -297,3 +333,55 @@ class OIDPrinter(object):
             return '{{{}}}'.format(', '.join(self.oid_str_value(oid) for oid in self.oids))
         else:
             return '({})'.format(', '.join("'{}'".format(self.oid_str(oid)) for oid in self.oids))
+
+
+def register_device_target(ip, port, timeout, retries, engine, auth_data, context_data):
+    # type: (str, int, float, int, SnmpEngine, Any, ContextData) -> str
+    """
+    Register a device by IP and port, and return an opaque string that can be used later to execute PySNMP commands.
+    """
+    transport = UdpTransportTarget((ip, port), timeout=timeout, retries=retries)
+    target, _ = lcd.configure(engine, auth_data, transport, context_data.contextName)
+    return target
+
+
+def batches(lst, size):
+    # type: (List[T], int) -> Iterator[List[T]]
+    """
+    Iterate through `lst` and yield batches of at most `size` items.
+
+    Example:
+
+    ```python
+    >>> xs = [1, 2, 3, 4, 5]
+    >>> list(batches(xs, size=2))
+    [[1, 2], [3, 4], [5]]
+    ```
+    """
+    if size <= 0:
+        raise ValueError('Batch size must be > 0')
+
+    for index in range(0, len(lst), size):
+        yield lst[index : index + size]
+
+
+def transform_index(src_index, index_slices):
+    # type: (Tuple[str, ...], List[slice]) -> Union[Tuple[str, ...], None]
+    """
+    Transform a source index into a new index using a list of transform rules.
+
+    A transform rule is slice and is used to extract a subset of the source index.
+
+    To avoid erroneous slices, None is returned if slice end is out of bound.
+
+    ```python
+    >>> transform_index(('10', '11', '12', '13'), [slice(2, 3), slice(0, 2)])
+    ('12', '10', '11')
+    ```
+    """
+    dst_index = []  # type: List[str]
+    for index_slice in index_slices:
+        if index_slice.stop > len(src_index):
+            return None
+        dst_index.extend(src_index[index_slice])
+    return tuple(dst_index)

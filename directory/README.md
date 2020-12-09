@@ -36,19 +36,15 @@ The Directory check is included in the [Datadog Agent][1] package, so you don't 
 
 2. [Restart the Agent][4].
 
-#### Metrics collection
-
-The Directory check can potentially emit [custom metrics][5], which may impact your [billing][6].
-
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `directory` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `directory` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -56,18 +52,18 @@ The Directory check does not include any events.
 
 ### Service Checks
 
-The Directory check does not include any service checks.
+**system.disk.directory.exists**:<br>
+Returns `WARNING` if the Agent is unable to find or access the directory to monitor, `OK` otherwise.
+
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/directory/datadog_checks/directory/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
-[6]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv
+[7]: https://docs.datadoghq.com/help/

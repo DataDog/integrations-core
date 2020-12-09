@@ -1,0 +1,39 @@
+name: Amazon Kafka
+files:
+- name: amazon_msk.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: cluster_arn
+      description: The Amazon Resource Name (ARN) that uniquely identifies the cluster.
+      required: true
+      value:
+        type: string
+    - name: region_name
+      description: |
+        The name of the region to associate with the API client. By default, the region will be derived
+        from the `cluster_arn`. Set explicitly to `null` to use additional fallback mechanisms, see:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+      value:
+        type: string
+    - name: assume_role
+      description: |
+        The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
+        the default permissions used by boto3 will follow the rules according to:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+      value:
+        type: string
+    - name: jmx_exporter_port
+      description: The port on which the JMX Exporter serves metrics.
+      value:
+        type: integer
+        example: 11001
+    - name: node_exporter_port
+      description: The port on which the Node Exporter serves metrics.
+      value:
+        type: integer
+        example: 11002
+    - template: instances/openmetrics

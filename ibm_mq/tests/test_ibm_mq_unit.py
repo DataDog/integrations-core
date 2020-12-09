@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import mock
 import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.ibm_mq import IbmMqCheck
 from datadog_checks.ibm_mq.config import IBMMQConfig
+from datadog_checks.ibm_mq.connection import get_queue_manager_connection
 
 pytestmark = pytest.mark.unit
 
@@ -32,7 +33,9 @@ def test_channel_status_service_check_default_mapping(aggregator, instance):
     }
 
     for status in service_check_map:
-        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)])
+        check.channel_metric_collector._submit_status_check(
+            'my_channel', status, ["channel:my_channel_{}".format(status)]
+        )
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
@@ -73,7 +76,9 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
     }
 
     for status in service_check_map:
-        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)])
+        check.channel_metric_collector._submit_status_check(
+            'my_channel', status, ["channel:my_channel_{}".format(status)]
+        )
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
@@ -168,3 +173,72 @@ def test_channel_queue_config_error(instance_config):
         IBMMQConfig(instance_config)
 
     assert 'channel, queue_manager are required configurations' in str(excinfo.value)
+
+
+def test_ssl_connection_creation(instance):
+    """
+    Test that we are not getting unicode/bytes type error.
+    """
+    # Late import to not require it for e2e
+    import pymqi
+
+    instance['ssl_auth'] = 'yes'
+    instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
+    instance['ssl_key_repository_location'] = '/dummy'
+
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    with pytest.raises(pymqi.MQMIError) as excinfo:
+        check.check(instance)
+
+    assert excinfo.value.reason == pymqi.CMQC.MQRC_KEY_REPOSITORY_ERROR
+
+    assert len(check.warnings) == 1
+    warning = check.warnings[0]
+
+    # Check that we are not getting a unicode/bytes type error but a MQRC_KEY_REPOSITORY_ERROR (dummy location)
+    assert 'bytes' not in warning
+    assert 'unicode' not in warning
+    assert 'MQRC_KEY_REPOSITORY_ERROR' in warning
+
+
+def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
+    import pymqi
+
+    config = IBMMQConfig(instance_ssl_dummy)
+
+    # normal connection failed with with MQRC_HOST_NOT_AVAILABLE
+    for error_reason in [pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME]:
+        error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, error_reason)
+        with mock.patch(
+            'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
+        ) as get_normal_connection, mock.patch(
+            'datadog_checks.ibm_mq.connection.get_ssl_connection'
+        ) as get_ssl_connection:
+
+            with pytest.raises(pymqi.MQMIError):
+                get_queue_manager_connection(config)
+
+            get_normal_connection.assert_called_with(config)
+            assert not get_ssl_connection.called
+
+    # normal connection failed with with error other those listed in get_queue_manager_connection
+    error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_SSL_CONFIG_ERROR)
+    with mock.patch(
+        'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
+    ) as get_normal_connection, mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection:
+
+        get_queue_manager_connection(config)
+
+        get_normal_connection.assert_called_with(config)
+        get_ssl_connection.assert_called_with(config)
+
+    # no issue with normal connection
+    with mock.patch('datadog_checks.ibm_mq.connection.get_normal_connection') as get_normal_connection, mock.patch(
+        'datadog_checks.ibm_mq.connection.get_ssl_connection'
+    ) as get_ssl_connection:
+
+        get_queue_manager_connection(config)
+
+        get_normal_connection.assert_called_with(config)
+        get_ssl_connection.assert_called_with(config)

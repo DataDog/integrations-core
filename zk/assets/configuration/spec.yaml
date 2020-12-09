@@ -1,0 +1,68 @@
+name: ZooKeeper
+
+files:
+  - name: zk.yaml
+
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+
+      - template: instances
+        options:
+          - name: host
+            required: true
+            description: Zookeeper host to connect to.
+            value:
+              example: localhost
+              type: string
+
+          - name: port
+            description: Zookeeper port to connect to.
+            value:
+              example: 2181
+              type: integer
+
+          - name: timeout
+            description: The read timeout in seconds.
+            value:
+              example: 3
+              type: integer
+
+          - name: expected_mode
+            description: |
+              If `expected_mode` is defined, a service check is sent where the
+              status is determined by whether the current mode matches the expected.
+
+              Available options are: `leader`, `follower`, `standalone`.
+            value:
+              type: string
+
+          - name: report_instance_mode
+            description: |
+              Whether to report the current instance mode as a 0/1 gauge.
+              For example if the current instance mode is `observer` - `zookeeper.instances.observer` reports as 1.
+              and `zookeeper.instances.(leader|follower|standalone|etc.)` reports as 0.
+            value:
+              example: true
+              type: boolean
+
+          - template: instances/default
+          - name: use_tls
+            description: |
+              This instructs the Zookeeper check to connect using TLS.
+            value:
+              example: false
+              type: boolean
+          - template: instances/tls
+
+
+      - template: logs
+        example:
+        - type: file
+          path: /var/log/zookeeper.log
+          source: zookeeper
+          log_processing_rules:
+          - type: multi_line
+            name: start_with_date
+            pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])

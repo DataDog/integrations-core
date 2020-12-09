@@ -127,6 +127,19 @@ kube_deployment_status_replicas_updated{deployment="failingtest",namespace="defa
 kube_deployment_status_replicas_updated{deployment="jaundiced-numbat-kube-state-metrics",namespace="default"} 1
 kube_deployment_status_replicas_updated{deployment="kube-dns",namespace="kube-system"} 1
 kube_deployment_status_replicas_updated{deployment="tiller-deploy",namespace="kube-system"} 1
+# HELP kube_deployment_status_condition The current status conditions of a deployment.
+# TYPE kube_deployment_status_condition gauge
+kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Progressing",status="true"} 1
+kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Progressing",status="false"} 0
+kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Progressing",status="unknown"} 0
+kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="true"} 1
+kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="false"} 0
+kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="unknown"} 0
+# HELP kube_replicaset_owner Information about the ReplicaSet's owner.
+# TYPE kube_replicaset_owner gauge
+kube_replicaset_owner{namespace="kube-system",replicaset="l7-default-backend-678889f899",owner_kind="Deployment",owner_name="l7-default-backend",owner_is_controller="true"} 1
+kube_replicaset_owner{namespace="kube-system",replicaset="metrics-server-v0.3.6-64655c969",owner_kind="Deployment",owner_name="metrics-server-v0.3.6",owner_is_controller="true"} 1
+kube_replicaset_owner{namespace="kube-system",replicaset="kube-dns-autoscaler-645f7d66cf",owner_kind="Deployment",owner_name="kube-dns-autoscaler",owner_is_controller="true"} 1
 # HELP kube_endpoint_address_available Number of addresses available in endpoint.
 # TYPE kube_endpoint_address_available gauge
 kube_endpoint_address_available{endpoint="test",namespace="default"} 0
@@ -200,6 +213,10 @@ kube_job_status_succeeded{job_name="hello2-1509998340",namespace="default"} 1
 kube_job_status_succeeded{job_name="hello2-1509998400",namespace="default"} 1
 kube_job_status_succeeded{job_name="hello2-1509998460",namespace="default"} 1
 kube_job_status_succeeded{job_name="test",namespace="default"} 1
+# HELP kube_job_owner Information about the Job's owner.
+# TYPE kube_job_owner gauge
+kube_job_owner{namespace="default",job_name="pi-job-fail",owner_kind="<none>",owner_name="<none>",owner_is_controller="<none>"} 1
+kube_job_owner{namespace="default",job_name="pi-job-succeed-after-sleep-0",owner_kind="CronJob",owner_name="a-cronjob"} 1
 # HELP kube_namespace_created Unix creation timestamp
 # TYPE kube_namespace_created gauge
 kube_namespace_created{namespace="default"} 1.508406437e+09
@@ -225,6 +242,10 @@ kube_namespace_status_phase{namespace="test",phase="Terminating"} 0
 # HELP kube_node_created Unix creation timestamp
 # TYPE kube_node_created gauge
 kube_node_created{node="minikube"} 1.508406442e+09
+# HELP kube_pod_info Information about pod.
+# TYPE kube_pod_info gauge
+kube_pod_info{namespace="default",pod="datadog-brl4p",host_ip="10.132.0.75",pod_ip="10.16.1.11",uid="b6fb4273-2dd6-4edb-9a23-7642bb121806",created_by_kind="DaemonSet",created_by_name="datadog",priority_class=""} 1
+kube_pod_info{namespace="kube-system",pod="fluentd-gke-2zdwh",host_ip="10.132.0.75",pod_ip="10.132.0.75",uid="70fb8207-612d-47ce-ae35-d7dce3c2fcfd",node="gke-nam-test-default-pool-d718e7e7-3pdj",created_by_kind="DaemonSet",created_by_name="fluentd-gke",priority_class="system-node-critical"} 1
 # HELP kube_node_info Information about a cluster node.
 # TYPE kube_node_info gauge
 kube_node_info{container_runtime_version="docker://1.12.6",kernel_version="4.9.13",kubelet_version="v1.8.0",kubeproxy_version="v1.8.0",node="minikube",os_image="Buildroot 2017.02",provider_id=""} 1
@@ -286,10 +307,16 @@ kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="B
 kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Failed"} 0
 kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Pending"} 0
 kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Released"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Available"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Bound"} 1
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Failed"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Pending"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-16d0a3a3",phase="Released"} 0
 # HELP kube_persistentvolume_info Information about persistentvolume.
 # TYPE kube_persistentvolume_info gauge
 kube_persistentvolume_info{persistentvolume="local-pv-103fef5d",storageclass="local-data"} 1
 kube_persistentvolume_info{persistentvolume="local-pv-15d0a3a3",storageclass="local-data"} 1
+kube_persistentvolume_info{persistentvolume="local-pv-16d0a3a3",storageclass=""} 1
 # HELP kube_persistentvolumeclaim_info Information about persistent volume claim.
 # TYPE kube_persistentvolumeclaim_info gauge
 kube_persistentvolumeclaim_info{namespace="default",persistentvolumeclaim="task-pv-claim",storageclass="manual"} 1

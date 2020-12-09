@@ -21,6 +21,19 @@ except ImportError:
         return []
 
 
+try:
+    from containers import is_excluded as c_is_excluded
+except ImportError:
+    # Don't fail on < 6.2
+    import logging
+
+    log = logging.getLogger(__name__)
+    log.info('Agent does not provide filtering logic, disabling container filtering')
+
+    def c_is_excluded(name, image, namespace=""):
+        return False
+
+
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
 API_ENDPOINT = 'http://169.254.170.2/v2'
@@ -83,7 +96,6 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg)
             return
 
-        metadata = {}
         try:
             metadata = request.json()
         except ValueError:
@@ -98,9 +110,15 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg)
             return
 
+        exlcuded_cid = set()
         container_tags = {}
         for container in metadata['Containers']:
             c_id = container['DockerId']
+            # Check if container is excluded
+            if c_is_excluded(container.get("Name", ""), container.get("Image", "")):
+                exlcuded_cid.add(c_id)
+                continue
+
             tagger_tags = get_tags('container_id://%s' % c_id, True) or []
 
             # Compatibility with previous versions of the check
@@ -146,7 +164,8 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in iteritems(stats):
-            self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
+            if container_id not in exlcuded_cid:
+                self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
 
         self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
 

@@ -101,7 +101,7 @@ class AerospikeCheck(AgentCheck):
         # We'll connect on the first check run
         self._client = None
 
-    def check(self, instance):
+    def check(self, _):
         if self._client is None:
             client = self.get_client()
             if client is None:
@@ -218,12 +218,21 @@ class AerospikeCheck(AgentCheck):
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         data = self._client.info_node(command, self._host, self._info_policies)
+        self.log.debug(
+            "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
+            command,
+            self._host,
+            self._info_policies,
+            data,
+        )
 
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
         if not separator:
             return data
+        if not data:
+            return []
 
         return data.split(separator)
 
@@ -279,6 +288,10 @@ class AerospikeCheck(AgentCheck):
             if ns_metric_name_match:
                 ns = ns_metric_name_match.groups()[0]
                 metric_name = ns_metric_name_match.groups()[1]
+            elif line.startswith("batch-index"):
+                # https://www.aerospike.com/docs/operations/monitor/latency/#batch-index
+                ns = None
+                metric_name = "batch-index"
             else:
                 self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
                 # Since the data come by pair and the order matters it's safer to return right away than submitting
@@ -303,7 +316,7 @@ class AerospikeCheck(AgentCheck):
         for ns, v in iteritems(ns_latencies):
             metric_names = v.get("metric_names", [])
             metric_values = v.get("metric_values", [])
-            namespace_tags = ['namespace:{}'.format(ns)]
+            namespace_tags = ['namespace:{}'.format(ns)] if ns else []
             namespace_tags.extend(self._tags)
             if len(metric_names) == len(metric_values):
                 for i in range(len(metric_names)):

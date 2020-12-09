@@ -28,7 +28,12 @@
   ],
   "assets": {
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "Device Dashboard": "assets/dashboards/device_dashboard.json",
+      "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

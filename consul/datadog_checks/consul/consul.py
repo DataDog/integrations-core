@@ -9,10 +9,11 @@ from itertools import islice
 from time import time as timestamp
 
 import requests
+from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.consul.common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
@@ -27,14 +28,58 @@ from datadog_checks.consul.common import (
     distance,
 )
 
+from .metrics import METRIC_MAP
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
-class ConsulCheck(AgentCheck):
+class ConsulCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
-        super(ConsulCheck, self).__init__(name, init_config, instances)
+        instance = instances[0]
+        self.url = instance.get('url')
+        if self.url is None:
+            raise ConfigurationError("`url` parameter is required.")
 
-        self.url = self.instance.get('url')
+        # Set the prometheus endpoint configuration
+        self.use_prometheus_endpoint = is_affirmative(instance.get('use_prometheus_endpoint', False))
+        instance.setdefault('prometheus_url', '')
+        if self.use_prometheus_endpoint:
+            # Check that the prometheus and the dogstatsd method are not both configured
+            if self._is_dogstatsd_configured():
+                raise ConfigurationError(
+                    'The DogStatsD method and the Prometheus method are both enabled. Please choose only one.'
+                )
+
+            instance['prometheus_url'] = '{}/v1/agent/metrics?format=prometheus'.format(self.url)
+
+            if 'headers' not in instance:
+                instance['headers'] = {'X-Consul-Token': instance.get('acl_token')}
+            else:
+                instance['headers'].setdefault('X-Consul-Token', instance.get('acl_token'))
+
+        default_instances = {
+            'consul': {
+                'namespace': 'consul',
+                'metrics': [METRIC_MAP],
+                'send_histograms_buckets': True,
+                'send_distribution_counts_as_monotonic': True,
+                'send_distribution_sums_as_monotonic': True,
+            }
+        }
+
+        super(ConsulCheck, self).__init__(
+            name, init_config, instances, default_instances=default_instances, default_namespace='consul'
+        )
+
+        # Get the scraper_config in the constructor
+        self.scraper_config = self.get_scraper_config(instance)
+
         self.base_tags = self.instance.get('tags', [])
 
         self.single_node_install = is_affirmative(self.instance.get('single_node_install', False))
@@ -66,6 +111,15 @@ class ConsulCheck(AgentCheck):
 
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+
+    def _is_dogstatsd_configured(self):
+        """ Check if the agent has a consul dogstatsd profile configured """
+        dogstatsd_mapper = datadog_agent.get_config('dogstatsd_mapper_profiles')
+        if dogstatsd_mapper:
+            for profile in dogstatsd_mapper:
+                if profile.get('name') == 'consul':
+                    return True
+        return False
 
     def consul_request(self, endpoint):
         url = urljoin(self.url, endpoint)
@@ -239,6 +293,9 @@ class ConsulCheck(AgentCheck):
         return service_tags
 
     def check(self, _):
+        # The Prometheus endpoint is available since Consul 1.1.0
+        if self.use_prometheus_endpoint:
+            self._check_prometheus_endpoint()
 
         self._check_for_leader_change()
         self._collect_metadata()
@@ -275,7 +332,7 @@ class ConsulCheck(AgentCheck):
                 sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
                 status = STATUS_SC.get(check['Status'])
                 if status is None:
-                    status = AgentCheck.UNKNOWN
+                    status = self.UNKNOWN
 
                 if sc_id not in sc:
                     tags = ["check:{}".format(check["CheckID"])]
@@ -296,9 +353,9 @@ class ConsulCheck(AgentCheck):
 
         except Exception as e:
             self.log.error(e)
-            self.service_check(CONSUL_CHECK, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(CONSUL_CHECK, self.CRITICAL, tags=service_check_tags)
         else:
-            self.service_check(CONSUL_CHECK, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(CONSUL_CHECK, self.OK, tags=service_check_tags)
 
         if self.perform_catalog_checks:
             # Collect node by service, and service by node counts for a whitelist of services
@@ -530,3 +587,23 @@ class ConsulCheck(AgentCheck):
         self.log.debug("Agent version is `%s`", agent_version)
         if agent_version:
             self.set_metadata('version', agent_version)
+
+    def _check_prometheus_endpoint(self):
+        try:
+            self.process(self.scraper_config)
+        # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
+        except ValueError as e:
+            self.log.warning(
+                "This Consul version probably does not support the prometheus endpoint. "
+                "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
+                str(e),
+            )
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                self.log.warning(
+                    "This Consul version (< 1.1.0) does not support the prometheus endpoint. "
+                    "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
+                    str(e),
+                )
+            else:
+                raise

@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # Generic TCP metrics for routers
-# _generic-router-tcp.yaml
+# _generic-tcp.yaml
 TCP_COUNTS = [
     'tcpActiveOpens',
     'tcpPassiveOpens',
@@ -18,11 +18,11 @@ TCP_COUNTS = [
 TCP_GAUGES = ['tcpCurrEstab']
 
 # Generic UDP metrics for routers
-# _generic-router-udp.yaml
+# _generic-udp.yaml
 UDP_COUNTS = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
 
 # Generic network interfaces metrics for routers.
-# _generic-router-if.yaml
+# _generic-if.yaml
 IF_COUNTS = [
     'ifInErrors',
     'ifInDiscards',
@@ -37,14 +37,12 @@ IF_COUNTS = [
     'ifHCOutMulticastPkts',
     'ifHCOutBroadcastPkts',
 ]
-IF_RATES = [
-    'ifHCInOctets.rate',
-    'ifHCOutOctets.rate',
-]
+IF_RATES = ['ifHCInOctets.rate', 'ifHCOutOctets.rate']
 IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
+IF_BANDWIDTH_USAGE = ['ifBandwidthInUsage.rate', 'ifBandwidthOutUsage.rate']
 
 # Generic IP metrics for routers
-# _generic-router-ip.yaml
+# _generic-ip.yaml
 IP_COUNTS = [
     'ipSystemStatsHCInReceives',
     'ipSystemStatsInHdrErrors',
@@ -295,7 +293,7 @@ LTM_POOL_MEMBER_RATES = [
 
 
 # Base profile metrics from BPG profile
-# _generic-router-bgp4.yaml
+# _generic-bgp4.yaml
 PEER_GAUGES = [
     'bgpPeerAdminStatus',
     'bgpPeerNegotiatedVersion',

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import os
 import tempfile
 import time
 
@@ -42,7 +43,7 @@ class TestEventLogTailer:
         counters = {}
 
         for line in open(NAGIOS_TEST_LOG).readlines():
-            parsed = nagios_tailer._parse_line(line)
+            parsed = nagios_tailer.parse_line(line)
             if parsed:
                 event = aggregator.events[-1]
                 t = event["event_type"]
@@ -97,7 +98,7 @@ class TestEventLogTailer:
         Make sure the tailer continues to parse nagios as the file grows
         """
         test_data = ensure_bytes(open(NAGIOS_TEST_LOG).read())
-        ITERATIONS = 1
+        ITERATIONS = 10
         log_file = tempfile.NamedTemporaryFile(mode="a+b")
 
         # Get the config
@@ -113,6 +114,43 @@ class TestEventLogTailer:
 
         log_file.close()
         assert len(aggregator.events) == ITERATIONS * 503
+
+    def test_recovers_from_deleted_file(self, aggregator):
+        """
+        Make sure the tailer continues to parse nagios as the file grows
+        """
+        test_data = ensure_bytes(open(NAGIOS_TEST_LOG).read())
+        log_file = tempfile.NamedTemporaryFile(mode="a+b")
+
+        # Get the config
+        config, nagios_cfg = get_config("log_file={}\n".format(log_file.name), events=True)
+
+        # Set up the check
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
+
+        def write_and_check():
+            log_file.write(test_data)
+            log_file.flush()
+            nagios.check(config['instances'][0])
+
+        # First call, will create events
+        write_and_check()
+        assert len(aggregator.events) == 503
+        os.rename(log_file.name, log_file.name + "_renamed")
+        # File has been renamed, the check will fail but should recover later.
+        write_and_check()
+        assert len(aggregator.events) == 503
+        os.rename(log_file.name + "_renamed", log_file.name)
+
+        # Check recovers but start from the EOF
+        write_and_check()
+        assert len(aggregator.events) == 503
+
+        # Check has fully recovered and submit events again
+        write_and_check()
+        assert len(aggregator.events) == 2 * 503
+
+        log_file.close()
 
 
 class TestPerfDataTailer:

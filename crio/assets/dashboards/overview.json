@@ -1,0 +1,249 @@
+{
+  "title": "CRI-O - Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "autosmooth(avg:crio.cpu.time{*} by {host}.as_count())",
+            "metadata": [
+              {
+                "expression": "autosmooth(avg:crio.cpu.time{*} by {host}.as_count())",
+                "alias_name": "CPU"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "CPU usage by host",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 41,
+        "y": 2,
+        "width": 48,
+        "height": 27
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:crio.mem.resident{*} by {host}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Resident memory usage by host",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 90,
+        "y": 2,
+        "width": 48,
+        "height": 27
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "image",
+        "url": "https://cri-o.io/logo/crio-logo.svg",
+        "sizing": "fit"
+      },
+      "layout": {
+        "x": 1,
+        "y": 2,
+        "width": 25,
+        "height": 12
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:crio.operations.latency.quantile{quantile:0.9} by {operation_type,host}, 100, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "0.9 percentile operation latency by host",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 90,
+        "y": 30,
+        "width": 48,
+        "height": 27
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:crio.operations.latency.quantile{quantile:0.9} by {host}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "0.9 percentile average operation latency by host",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 41,
+        "y": 58,
+        "width": 48,
+        "height": 26
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:crio.operations.count{*} by {operation_type}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg operation count by type",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 41,
+        "y": 30,
+        "width": 48,
+        "height": 27
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "note",
+        "content": "Runtime\nResources",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 27,
+        "y": 2,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "note",
+        "content": "Runtime\nOperations",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 27,
+        "y": 30,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "check_status",
+        "title": "Healthy CRI-O metrics endpoints",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "crio.prometheus.health",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": [
+          "*"
+        ]
+      },
+      "layout": {
+        "x": 1,
+        "y": 15,
+        "width": 25,
+        "height": 12
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "note",
+        "content": "*These metrics are about the CRI-O runtime itself, check the CRI/Kubelet integrations for containers metrics*",
+        "background_color": "yellow",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 1,
+        "y": 29,
+        "width": 25,
+        "height": 8
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 248
+}

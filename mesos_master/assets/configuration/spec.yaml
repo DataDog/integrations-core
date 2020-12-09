@@ -1,0 +1,43 @@
+name: Mesos Master
+
+files:
+  - name: mesos_master.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: url
+            description: URL used to connect to the Mesos Master instance.
+            required: true
+            value:
+              type: string
+              example: http://localhost:5050
+          - template: instances/http
+            overrides:
+              auth_token.description: |
+                This allows for the use of authentication information from dynamic sources.
+                Both a reader and writer must be configured.
+
+                The available readers are:
+
+                  - type: file
+                    path (required): The absolute path for the file to read from.
+                    pattern: A regular expression pattern with a single capture group used to find the
+                             token rather than using the entire file, for example: Your secret is (.+)
+
+                  - type: dcos_auth
+                    login_url (required): DC/OS login endpoint
+                    service_account (required): The DC/OS service account to authenticate.
+                    private_key_path (required): The absolute path for the DC/OS service account.
+                    expiration: Token expiration in seconds, defaults to 300 (5 min).
+
+                The available writers are:
+
+                  - type: header
+                    name (required): The name of the field, for example: Authorization
+                    value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+                    placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+          - template: instances/default

@@ -1,7 +1,8 @@
 {
   "categories": [
     "data store",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Solr",
@@ -31,6 +32,10 @@
     },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "solr"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

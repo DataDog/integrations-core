@@ -22,8 +22,14 @@
   "type": "check",
   "integration_id": "iis",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "iis": "assets/dashboards/iis_dashboard.json",
+      "IIS-Overview": "assets/dashboards/iis_overview.json"
+    },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
       "5xx_errors": "assets/saved_views/5xx_errors.json",
@@ -31,6 +37,10 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "iis"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

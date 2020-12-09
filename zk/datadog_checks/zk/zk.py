@@ -60,11 +60,12 @@ import re
 import socket
 import struct
 from collections import defaultdict
+from contextlib import closing
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
 from six import PY3, StringIO, iteritems
 
-from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
 
 if PY3:
     long = int
@@ -94,7 +95,7 @@ class ZookeeperCheck(AgentCheck):
     """
     ZooKeeper AgentCheck.
 
-    Parse content from `stat` and `mntr`(if available) commmands to retrieve health cluster metrics.
+    Parse content from `stat` and `mntr`(if available) commands to retrieve health cluster metrics.
     """
 
     # example match:
@@ -108,33 +109,34 @@ class ZookeeperCheck(AgentCheck):
     STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive']
 
     # `mntr` information to report as `rate`
-    _MNTR_RATES = set(['zk_packets_received', 'zk_packets_sent'])
+    _MNTR_RATES = {'zk_packets_received', 'zk_packets_sent'}
 
-    def check(self, instance):
-        host = instance.get('host', 'localhost')
-        port = int(instance.get('port', 2181))
-        timeout = float(instance.get('timeout', 3.0))
-        expected_mode = (instance.get('expected_mode') or '').strip()
-        tags = instance.get('tags', [])
-        cx_args = (host, port, timeout)
-        sc_tags = ["host:{0}".format(host), "port:{0}".format(port)] + list(set(tags))
-        hostname = self.hostname
-        report_instance_mode = instance.get("report_instance_mode", True)
+    def __init__(self, name, init_config, instances):
+        super(ZookeeperCheck, self).__init__(name, init_config, instances)
+        self.host = self.instance.get('host', 'localhost')
+        self.port = int(self.instance.get('port', 2181))
+        self.timeout = float(self.instance.get('timeout', 3.0))
+        self.expected_mode = (self.instance.get('expected_mode') or '').strip()
+        self.base_tags = list(set(self.instance.get('tags', [])))
+        self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
+        self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
+        self.use_tls = is_affirmative(self.instance.get('use_tls', False))
 
-        zk_version = None  # parse_stat will parse and set version string
-
+    def check(self, _):
         # Send a service check based on the `ruok` response.
         # Set instance status to down if not ok.
+        status = None
+        message = None
         try:
-            ruok_out = self._send_command('ruok', *cx_args)
+            ruok_out = self._send_command('ruok')
         except ZKConnectionFailure:
             # The server should not respond at all if it's not OK.
             status = AgentCheck.CRITICAL
             message = 'No response from `ruok` command'
             self.increment('zookeeper.timeouts')
 
-            if report_instance_mode:
-                self.report_instance_mode(hostname, 'down', tags)
+            if self.should_report_instance_mode:
+                self.report_instance_mode('down')
             raise
         else:
             ruok_out.seek(0)
@@ -145,21 +147,21 @@ class ZookeeperCheck(AgentCheck):
                 status = AgentCheck.WARNING
             message = u'Response from the server: %s' % ruok
         finally:
-            self.service_check('zookeeper.ruok', status, message=message, tags=sc_tags)
+            self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `stat` output
         try:
-            stat_out = self._send_command('stat', *cx_args)
+            stat_out = self._send_command('stat')
         except ZKConnectionFailure:
             self.increment('zookeeper.timeouts')
-            if report_instance_mode:
-                self.report_instance_mode(hostname, 'down', tags)
+            if self.should_report_instance_mode:
+                self.report_instance_mode('down')
             raise
         except Exception as e:
             self.warning(e)
             self.increment('zookeeper.datadog_client_exception')
-            if report_instance_mode:
-                self.report_instance_mode(hostname, 'unknown', tags)
+            if self.should_report_instance_mode:
+                self.report_instance_mode('unknown')
             raise
         else:
             # Parse the response
@@ -169,34 +171,34 @@ class ZookeeperCheck(AgentCheck):
             if mode != 'inactive':
                 for metric, value, m_type, m_tags in metrics:
                     submit_metric = getattr(self, m_type)
-                    submit_metric(metric, value, tags=tags + m_tags + new_tags)
+                    submit_metric(metric, value, tags=self.base_tags + m_tags + new_tags)
 
-            if report_instance_mode:
-                self.report_instance_mode(hostname, mode, tags)
+            if self.should_report_instance_mode:
+                self.report_instance_mode(mode)
 
-            if expected_mode:
-                if mode == expected_mode:
+            if self.expected_mode:
+                if mode == self.expected_mode:
                     status = AgentCheck.OK
                     message = u"Server is in %s mode" % mode
                 else:
                     status = AgentCheck.CRITICAL
-                    message = u"Server is in %s mode but check expects %s mode" % (mode, expected_mode)
-                self.service_check('zookeeper.mode', status, message=message, tags=sc_tags)
+                    message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
+                self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
         if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
             try:
-                mntr_out = self._send_command('mntr', *cx_args)
+                mntr_out = self._send_command('mntr')
             except ZKConnectionFailure:
                 self.increment('zookeeper.timeouts')
-                if report_instance_mode:
-                    self.report_instance_mode(hostname, 'down', tags)
+                if self.should_report_instance_mode:
+                    self.report_instance_mode('down')
                 raise
             except Exception as e:
-                self.warning(e)
+                self.warning(str(e))
                 self.increment('zookeeper.datadog_client_exception')
-                if report_instance_mode:
-                    self.report_instance_mode(hostname, 'unknown', tags)
+                if self.should_report_instance_mode:
+                    self.report_instance_mode('unknown')
                 raise
             else:
                 metrics, mode = self.parse_mntr(mntr_out)
@@ -204,17 +206,17 @@ class ZookeeperCheck(AgentCheck):
                 if mode != 'inactive':
                     for metric, value, m_type, m_tags in metrics:
                         submit_metric = getattr(self, m_type)
-                        submit_metric(metric, value, tags=tags + m_tags + [mode_tag])
+                        submit_metric(metric, value, tags=self.base_tags + m_tags + [mode_tag])
 
-                if report_instance_mode:
-                    self.report_instance_mode(hostname, mode, tags)
+                if self.should_report_instance_mode:
+                    self.report_instance_mode(mode)
 
-    def report_instance_mode(self, hostname, mode, tags):
+    def report_instance_mode(self, mode):
         gauges = defaultdict(int)
         if mode not in self.STATUS_TYPES:
             mode = "unknown"
 
-        tags = tags + ['mode:%s' % mode]
+        tags = self.base_tags + ['mode:%s' % mode]
         self.gauge('zookeeper.instances', 1, tags=tags)
         gauges[mode] = 1
         for k, v in iteritems(gauges):
@@ -222,35 +224,37 @@ class ZookeeperCheck(AgentCheck):
             self.gauge(gauge_name, v)
 
     @staticmethod
-    def _send_command(command, host, port, timeout):
-        sock = socket.socket()
-        sock.settimeout(timeout)
-        buf = StringIO()
+    def _get_data(sock, command):
         chunk_size = 1024
-        # try-finally and try-except to stay compatible with python 2.4
-        try:
-            try:
-                # Connect to the zk client port and send the stat command
-                sock.connect((host, port))
-                sock.sendall(ensure_bytes(command))
+        max_reads = 10000
+        buf = StringIO()
+        sock.sendall(ensure_bytes(command))
+        # Read the response into a StringIO buffer
+        chunk = ensure_unicode(sock.recv(chunk_size))
+        buf.write(chunk)
+        num_reads = 1
 
-                # Read the response into a StringIO buffer
-                chunk = ensure_unicode(sock.recv(chunk_size))
-                buf.write(chunk)
-                num_reads = 1
-                max_reads = 10000
-                while chunk:
-                    if num_reads > max_reads:
-                        # Safeguard against an infinite loop
-                        raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
-                    chunk = ensure_unicode(sock.recv(chunk_size))
-                    buf.write(chunk)
-                    num_reads += 1
-            except (socket.timeout, socket.error):
-                raise ZKConnectionFailure()
-        finally:
-            sock.close()
+        while chunk:
+            if num_reads > max_reads:
+                # Safeguard against an infinite loop
+                raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
+            chunk = ensure_unicode(sock.recv(chunk_size))
+            buf.write(chunk)
+            num_reads += 1
         return buf
+
+    def _send_command(self, command):
+        try:
+            with closing(socket.create_connection((self.host, self.port))) as sock:
+                sock.settimeout(self.timeout)
+                if self.use_tls:
+                    context = self.get_tls_context()
+                    with closing(context.wrap_socket(sock, server_hostname=self.host)) as ssock:
+                        return self._get_data(ssock, command)
+                else:
+                    return self._get_data(sock, command)
+        except (socket.timeout, socket.error):
+            raise ZKConnectionFailure()
 
     def parse_stat(self, buf):
         """
@@ -267,7 +271,7 @@ class ZookeeperCheck(AgentCheck):
         # this is to grab the additional version information
         total_match = self.METADATA_VERSION_PATTERN.search(start_line)
         if total_match is None:
-            return (None, None, "inactive", None)
+            return None, None, "inactive", None
         else:
             version = total_match.group(1).split("-")[0]
             # grabs the entire version number for inventories.

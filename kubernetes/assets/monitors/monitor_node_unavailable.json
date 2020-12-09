@@ -1,0 +1,27 @@
+{
+	"name": "[kubernetes] Monitor Unschedulable Kubernetes Nodes",
+	"type": "query alert",
+	"query": "max(last_15m):sum:kubernetes_state.node.status{status:schedulable} by {kubernetes_cluster} * 100 / sum:kubernetes_state.node.status{*} by {kubernetes_cluster} < 80",
+	"message": "More than 20% of nodes are unschedulable on ({{kubernetes_cluster.name}} cluster). \n Keep in mind that this might be expected based on your infrastructure.",
+	"tags": [
+		"integration:kubernetes"
+	],
+	"options": {
+		"notify_audit": true,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"require_full_window": false,
+		"new_host_delay": 300,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 80,
+			"warning": 90
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when nodes are unavailable for your Kubernetes integration."
+	}
+}

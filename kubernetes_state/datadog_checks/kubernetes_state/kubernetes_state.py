@@ -26,8 +26,8 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
-WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
+ALLOWED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
+ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
@@ -70,7 +70,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         # We do not support more than one instance of kube-state-metrics
         instance = instances[0]
         kubernetes_state_instance = self._create_kubernetes_state_prometheus_instance(instance)
@@ -81,7 +81,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.keep_ksm_labels = is_affirmative(kubernetes_state_instance.get('keep_ksm_labels', True))
 
         generic_instances = [kubernetes_state_instance]
-        super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
         self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
 
@@ -94,6 +94,17 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'allowed_labels': ['storageclass', 'phase'],
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
+            # is a count by namespace and phase <Active|Terminating>
+            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
+            'kube_replicaset_owner': {
+                'metric_name': 'replicaset.count',
+                'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
+            },
+            'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
+            'kube_deployment_status_condition': {
+                'metric_name': 'deployment.count',
+                'allowed_labels': ['namespace', 'condition', 'status'],
+            },
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -116,6 +127,11 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_limitrange': self.kube_limitrange,
             'kube_persistentvolume_status_phase': self.count_objects_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
+            'kube_namespace_status_phase': self.count_objects_by_tags,
+            'kube_replicaset_owner': self.count_objects_by_tags,
+            'kube_job_owner': self.count_objects_by_tags,
+            # to get overall count is to filter by Available
+            'kube_deployment_status_condition': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -206,6 +222,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_hpa_status_current_replicas': 'hpa.current_replicas',
                         'kube_hpa_status_condition': 'hpa.condition',
                         'kube_node_info': 'node.count',
+                        'kube_pod_info': 'pod.count',
                         'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
                         'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
                         'kube_node_status_allocatable_pods': 'node.pods_allocatable',
@@ -280,7 +297,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_node_labels',
                     'kube_pod_created',
                     'kube_pod_container_info',
-                    'kube_pod_info',
                     'kube_pod_owner',
                     'kube_pod_start_time',
                     'kube_pod_labels',
@@ -288,7 +304,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicaset_created',
                     'kube_replicationcontroller_created',
                     'kube_resourcequota_created',
-                    'kube_replicaset_owner',
                     'kube_service_created',
                     'kube_service_info',
                     'kube_service_labels',
@@ -311,8 +326,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_statefulset_metadata_generation',
                     'kube_statefulset_status_observed_generation',
                     'kube_hpa_metadata_generation',
-                    # kube_node_status_phase and kube_namespace_status_phase have no use case as a service check
-                    'kube_namespace_status_phase',
+                    # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
                     # These CronJob and Job metrics need use cases to determine how do implement
                     'kube_cronjob_status_active',
@@ -550,8 +564,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if ts.isdigit():
             return int(ts)
         else:
-            msg = 'Cannot extract ts from job name {}'
-            self.log.debug(msg, name)
+            self.log.debug("Cannot extract ts from job name %s", name)
             return None
 
     # Labels attached: namespace, pod
@@ -578,7 +591,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.gauge(metric_name, count, tags=list(tags))
 
     def _submit_metric_kube_pod_container_status_reason(
-        self, metric, metric_suffix, whitelisted_status_reasons, scraper_config
+        self, metric, metric_suffix, allowed_status_reasons, scraper_config
     ):
         metric_name = scraper_config['namespace'] + metric_suffix
 
@@ -586,21 +599,23 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
 
             reason = sample[self.SAMPLE_LABELS].get('reason')
-            if reason:
+            if reason and reason.lower() in allowed_status_reasons:
                 # Filtering according to the reason here is paramount to limit cardinality
-                if reason.lower() in whitelisted_status_reasons:
-                    tags += self._build_tags('reason', reason, scraper_config)
-                else:
+                tags += self._build_tags('reason', reason, scraper_config)
+            else:
+                continue
+
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                if label_name == "reason":
                     continue
 
-            if 'container' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('kube_container_name', sample[self.SAMPLE_LABELS]['container'], scraper_config)
+                elif label_name == 'container':
+                    tags += self._build_tags(
+                        'kube_container_name', sample[self.SAMPLE_LABELS]['container'], scraper_config
+                    )
 
-            if 'namespace' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('namespace', sample[self.SAMPLE_LABELS]['namespace'], scraper_config)
-
-            if 'pod' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('pod', sample[self.SAMPLE_LABELS]['pod'], scraper_config)
+                else:
+                    tags += self._build_tags(label_name, label_value, scraper_config)
 
             self.gauge(
                 metric_name,
@@ -611,12 +626,12 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_pod_container_status_waiting_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(
-            metric, '.container.status_report.count.waiting', WHITELISTED_WAITING_REASONS, scraper_config
+            metric, '.container.status_report.count.waiting', ALLOWED_WAITING_REASONS, scraper_config
         )
 
     def kube_pod_container_status_terminated_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(
-            metric, '.container.status_report.count.terminated', WHITELISTED_TERMINATED_REASONS, scraper_config
+            metric, '.container.status_report.count.terminated', ALLOWED_TERMINATED_REASONS, scraper_config
         )
 
     def kube_cronjob_next_schedule_time(self, metric, scraper_config):
@@ -855,15 +870,19 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def count_objects_by_tags(self, metric, scraper_config):
-        """ Count objects by whitelisted tags and submit counts as gauges. """
+        """ Count objects by allowed tags and submit counts as gauges. """
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = [
-                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
-            ] + scraper_config['custom_tags']
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+            tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):
@@ -871,7 +890,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
         """
-        Build a list of formated tags from `label_name` parameter. It also depend of the
+        Build a list of formatted tags from `label_name` parameter. It also depend of the
         check configuration ('keep_ksm_labels' parameter)
         """
         tags = []

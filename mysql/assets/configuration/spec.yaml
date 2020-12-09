@@ -1,0 +1,280 @@
+name: MySQL
+files:
+  - name: mysql.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/db
+            overrides:
+              global_custom_queries.value.example:
+                - metric_prefix: mysql
+                  query: <QUERY>
+                  columns: <COLUMNS>
+                  tags: <TAGS>
+          - template: init_config/default
+
+      - template: instances
+        options:
+          - name: host
+            description: |
+              MySQL host to connect to.
+              NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
+              provide a value for the sock key (below).
+            enabled: true
+            value:
+              type: string
+              example: localhost
+              default: null
+
+          - name: user
+            description: |
+              Username used to connect to MySQL.
+            enabled: true
+            value:
+              type: string
+              example: datadog
+              default: null
+
+          - name: pass
+            description: |
+              Password associated to the MySQL user.
+            enabled: true
+            value:
+              type: string
+
+          - name: port
+            description: |
+              Port to use when connecting to MySQL.
+            enabled: true
+            value:
+              type: number
+              example: 3306
+
+          - name: sock
+            description: |
+              Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
+              If you specify a socket you dont need to specify a host.
+            value:
+              type: string
+          - name: charset
+            description: Charset you want to use.
+            value:
+              type: string
+              example: utf8
+              default: None
+          - name: defaults_file
+            description: |
+              Path to an alternative configuration mechanism file.
+              If providing this then there is no need to specify host, port, user, pass or socket.
+            value:
+              type: string
+
+          - name: connect_timeout
+            description: |
+              Maximum number of seconds to wait before timing out when connecting to MySQL.
+            value:
+              type: number
+              example: 10
+
+          - name: ssl
+            description: |
+              Use this section to configure a TLS connection between the Agent and MySQL.
+
+              The following fields are supported:
+
+              key: Path to a key file.
+              cert: Path to a cert file.
+              ca: Path to a CA bundle file.
+            value:
+              type: object
+              properties:
+                - name: key
+                  type: string
+                - name: cert
+                  type: string
+                - name: ca
+                  type: string
+              example:
+                key: <KEY_FILE_PATH>
+                cert: <CERT_FILE_PATH>
+                ca: <CA_PATH_FILE>
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
+                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+                  columns:
+                    - name: foo
+                      type: tag
+                    - name: event.total
+                      type: gauge
+                  tags:
+                    - test:mysql
+
+          - name: max_custom_queries
+            description: |
+              Set the maximum number of custom queries to execute with this integration.
+
+              WARNING: This only applies to the deprecated `queries` option.
+            value:
+              type: integer
+              example: 20
+
+          - name: queries
+            description: |
+              Define custom queries to collect custom metrics from your MySQL database.
+
+              See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+
+              WARNING: This option is deprecated and will be removed in a future release.
+              Use the `custom_queries` option instead.
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - query: <QUERY>
+                  metric: <METRIC_NAME>
+                  tags:
+                    - <METRIC_TAG_KEY>:<METRIC_TAG_VALUE>
+                  type: <METRIC_TYPE>
+                  field: <FIELD_NAME>
+
+          - name: options
+            description: |
+              Enable options to collect extra metrics from your MySQL integration.
+
+            options:
+              - name: replication
+                description: |
+                  Set to `true` to collect replication metrics.
+                value:
+                  type: boolean
+                  example: false
+
+              - name: replication_channel
+                description: |
+                  If using multiple sources, set the channel name to monitor.
+                value:
+                  type: string
+
+              - name: replication_non_blocking_status
+                description: |
+                  Set to `true` to grab slave count in a non-blocking manner (requires `performance_schema`);
+                value:
+                  type: boolean
+                  example: false
+
+              - name: galera_cluster
+                description: |
+                  Set to `true` to collect Galera cluster metrics.
+                value:
+                  type: boolean
+                  example: false
+
+              - name: extra_status_metrics
+                description: |
+                  Set to `true` to enable extra status metrics.
+
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: extra_innodb_metrics
+                description: |
+                  Set to `true` to enable extra InnoDB metrics.
+
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: disable_innodb_metrics
+                description: |
+                  Set to `true` only if experiencing issues with older (unsupported) versions of MySQL
+                  that do not run or have InnoDB engine support.
+
+                  If this flag is enabled, you will only receive a small subset of metrics.
+
+                  see also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: schema_size_metrics
+                description: |
+                  Set to `true` to collect schema size metrics.
+
+                  Note that this runs a heavy query against your database to compute the relevant metrics
+                  for all your existing schemas. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
+
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: extra_performance_metrics
+                description: |
+                  These metrics are reported if `performance_schema` is enabled in the MySQL instance
+                  and if the version for that instance is >= 5.6.0.
+
+                  Note that this runs a heavy query against your database to compute the relevant metrics
+                  for all your existing schemas. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
+
+                  Metrics provided by the options:
+                    - mysql.info.schema.size (per schema)
+                    - mysql.performance.query_run_time.avg (per schema)
+                    - mysql.performance.digest_95th_percentile.avg_us
+
+                  Note that some of these require the `user` defined for this instance
+                  to have PROCESS and SELECT privileges. Take a look at the
+                  MySQL integration tile in the Datadog Web UI for further instructions.
+                value:
+                  type: boolean
+                  example: false
+
+          - name: deep_database_monitoring
+            description: |
+              Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+
+              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+              success manager or Datadog support.
+            enabled: false
+            value:
+              type: boolean
+              example: true
+              default: false
+
+          - template: instances/default
+
+      - template: logs
+        example:
+          - type: file
+            path: "<GENERAL_LOG_FILE_PATH>"
+            source: mysql
+            log_processing_rules:
+              - type: multi_line
+                name: new_log_start_with_date
+                pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+              # Useful when timestamp is only logged every second (not every log) and format is yymmdd. (This comment won't be present in the output.)
+              - type: multi_line
+                name: new_logs_do_not_always_start_with_timestamp
+                pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
+
+          - type: file
+            path: "<ERROR_LOG_FILE_PATH>"
+            source: mysql
+
+          - type: file
+            path: "<SLOW_QUERY_LOG_FILE_PATH>"
+            source: mysql
+            log_processing_rules:
+              - type: multi_line
+                name: new_slow_query_log_entry
+                pattern: "# Time:"
+              # If the user runs mysqld with `--log-short-format` enabled. (This comment won't be present in the output.)
+              - type: multi_line
+                name: mysqld_log_short_format_new_slow_query_log_entry
+                pattern: "# Query_time:"

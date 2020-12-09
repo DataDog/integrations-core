@@ -12,7 +12,7 @@ from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
+from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 
 
@@ -67,12 +67,21 @@ class KafkaCheck(AgentCheck):
             self.instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
+        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
+        self._kafka_client = None
 
-        kafka_version = self.instance.get('kafka_client_api_version')
-        if isinstance(kafka_version, str):
-            kafka_version = tuple(map(int, kafka_version.split(".")))
+    @property
+    def kafka_client(self):
+        if self._kafka_client is None:
+            # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
+            # broker version during the bootstrapping process. Note that this returns the first version found, so in
+            # a mixed-version cluster this will be a non-deterministic result.
+            kafka_version = self.instance.get('kafka_client_api_version')
+            if isinstance(kafka_version, str):
+                kafka_version = tuple(map(int, kafka_version.split(".")))
 
-        self._kafka_client = self._create_kafka_admin_client(api_version=kafka_version)
+            self._kafka_client = self._create_kafka_admin_client(api_version=kafka_version)
+        return self._kafka_client
 
     def check(self, instance):
         """The main entrypoint of the check."""
@@ -94,14 +103,17 @@ class KafkaCheck(AgentCheck):
 
         # Fetch the broker highwater offsets
         try:
-            self._get_highwater_offsets()
+            if len(self._consumer_offsets) < self._context_limit:
+                self._get_highwater_offsets()
+            else:
+                self.log.debug("Context limit reached. Skipping highwater offset collection.")
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
             raise
 
         total_contexts = len(self._consumer_offsets) + len(self._highwater_offsets)
-        if total_contexts > self._context_limit:
+        if total_contexts >= self._context_limit:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -110,9 +122,11 @@ class KafkaCheck(AgentCheck):
                 self._context_limit,
             )
 
-        # Report the metics
-        self._report_highwater_offsets()
-        self._report_consumer_offsets_and_lag()
+        # Report the metrics
+        self._report_highwater_offsets(self._context_limit)
+        self._report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
+
+        self._collect_broker_metadata()
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
@@ -179,36 +193,38 @@ class KafkaCheck(AgentCheck):
         if not self._monitor_all_broker_highwatermarks:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
 
-        for broker in self._kafka_client._client.cluster.brokers():
-            broker_led_partitions = self._kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
-            if broker_led_partitions is None:
-                continue
-            # Take the partitions for which this broker is the leader and group them by topic in order to construct the
-            # OffsetRequest while simultaneously filtering out partitions we want to exclude
-            partitions_grouped_by_topic = defaultdict(list)
-            for topic, partition in broker_led_partitions:
-                # No sense fetching highwater offsets for internal topics
-                if topic not in KAFKA_INTERNAL_TOPICS and (
-                    self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
-                ):
-                    partitions_grouped_by_topic[topic].append(partition)
+        for batch in self.batchify(self.kafka_client._client.cluster.brokers(), self._broker_requests_batch_size):
+            for broker in batch:
+                broker_led_partitions = self.kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
+                if broker_led_partitions is None:
+                    continue
 
-            # Construct the OffsetRequest
-            max_offsets = 1
-            request = OffsetRequest[0](
-                replica_id=-1,
-                topics=[
-                    (topic, [(partition, OffsetResetStrategy.LATEST, max_offsets) for partition in partitions])
-                    for topic, partitions in partitions_grouped_by_topic.items()
-                ],
-            )
+                # Take the partitions for which this broker is the leader and group them by topic in order to construct
+                # the OffsetRequest while simultaneously filtering out partitions we want to exclude
+                partitions_grouped_by_topic = defaultdict(list)
+                for topic, partition in broker_led_partitions:
+                    # No sense fetching highwater offsets for internal topics
+                    if topic not in KAFKA_INTERNAL_TOPICS and (
+                        self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
+                    ):
+                        partitions_grouped_by_topic[topic].append(partition)
 
-            highwater_future = self._kafka_client._send_request_to_node(node_id=broker.nodeId, request=request)
-            highwater_future.add_callback(self._highwater_offsets_callback)
-            highwater_futures.append(highwater_future)
+                # Construct the OffsetRequest
+                max_offsets = 1
+                request = OffsetRequest[0](
+                    replica_id=-1,
+                    topics=[
+                        (topic, [(partition, OffsetResetStrategy.LATEST, max_offsets) for partition in partitions])
+                        for topic, partitions in partitions_grouped_by_topic.items()
+                    ],
+                )
 
-        # Loop until all futures resolved.
-        self._kafka_client._wait_for_futures(highwater_futures)
+                highwater_future = self.kafka_client._send_request_to_node(node_id=broker.nodeId, request=request)
+                highwater_future.add_callback(self._highwater_offsets_callback)
+                highwater_futures.append(highwater_future)
+
+            # Loop until all futures resolved.
+            self.kafka_client._wait_for_futures(highwater_futures)
 
     def _highwater_offsets_callback(self, response):
         """Callback that parses an OffsetFetchResponse and saves it to the highwater_offsets dict."""
@@ -229,7 +245,7 @@ class KafkaCheck(AgentCheck):
                         topic,
                         partition,
                     )
-                    self._kafka_client._client.cluster.request_update()  # force metadata update on next poll()
+                    self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
@@ -246,22 +262,31 @@ class KafkaCheck(AgentCheck):
                         "partition: %s." % (topic, partition)
                     )
 
-    def _report_highwater_offsets(self):
+    def _report_highwater_offsets(self, contexts_limit):
         """Report the broker highwater offsets."""
+        reported_contexts = 0
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+            reported_contexts += 1
+            if reported_contexts == contexts_limit:
+                return
 
-    def _report_consumer_offsets_and_lag(self):
+    def _report_consumer_offsets_and_lag(self, contexts_limit):
         """Report the consumer offsets and consumer lag."""
+        reported_contexts = 0
         for (consumer_group, topic, partition), consumer_offset in self._consumer_offsets.items():
+            if reported_contexts >= contexts_limit:
+                return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self._custom_tags)
-            if partition in self._kafka_client._client.cluster.partitions_for_topic(topic):
+            if partition in self.kafka_client._client.cluster.partitions_for_topic(topic):
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                reported_contexts += 1
+
                 if (topic, partition) not in self._highwater_offsets:
                     self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
@@ -273,7 +298,9 @@ class KafkaCheck(AgentCheck):
                     continue
 
                 consumer_lag = self._highwater_offsets[(topic, partition)] - consumer_offset
-                self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                if reported_contexts < contexts_limit:
+                    self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                    reported_contexts += 1
 
                 if consumer_lag < 0:
                     # this will effectively result in data loss, so emit an event for max visibility
@@ -295,7 +322,7 @@ class KafkaCheck(AgentCheck):
                     topic,
                     partition,
                 )
-                self._kafka_client._client.cluster.request_update()  # force metadata update on next poll()
+                self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_consumer_offsets(self):
         """Fetch Consumer Group offsets from Kafka.
@@ -321,14 +348,14 @@ class KafkaCheck(AgentCheck):
         self._consumer_futures = []
 
         if self._monitor_unlisted_consumer_groups:
-            for broker in self._kafka_client._client.cluster.brokers():
-                list_groups_future = self._kafka_client._list_consumer_groups_send_request(broker.nodeId)
+            for broker in self.kafka_client._client.cluster.brokers():
+                list_groups_future = self.kafka_client._list_consumer_groups_send_request(broker.nodeId)
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self._consumer_groups:
             self._validate_listed_consumer_groups()
             for consumer_group in self._consumer_groups:
-                find_coordinator_future = self._kafka_client._find_coordinator_id_send_request(consumer_group)
+                find_coordinator_future = self.kafka_client._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
                 self._consumer_futures.append(find_coordinator_future)
         else:
@@ -338,7 +365,7 @@ class KafkaCheck(AgentCheck):
             )
 
         # Loop until all futures resolved.
-        self._kafka_client._wait_for_futures(self._consumer_futures)
+        self.kafka_client._wait_for_futures(self._consumer_futures)
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
 
     def _list_groups_callback(self, broker_id, response):
@@ -348,11 +375,11 @@ class KafkaCheck(AgentCheck):
         gave us this response lets us skip issuing FindCoordinatorRequests because Kafka brokers only include
         consumer groups in their ListGroupsResponse when they are the coordinator for that group.
         """
-        for consumer_group, group_type in self._kafka_client._list_consumer_groups_process_response(response):
+        for consumer_group, group_type in self.kafka_client._list_consumer_groups_process_response(response):
             # consumer groups from Kafka < 0.9 that store their offset in Kafka don't use Kafka for group-coordination
             # so their group_type is empty
             if group_type in ('consumer', ''):
-                single_group_offsets_future = self._kafka_client._list_consumer_group_offsets_send_request(
+                single_group_offsets_future = self.kafka_client._list_consumer_group_offsets_send_request(
                     group_id=consumer_group, group_coordinator_id=broker_id
                 )
                 single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group)
@@ -368,7 +395,7 @@ class KafkaCheck(AgentCheck):
         topics are unspecified, it will fetch all known offsets for that consumer group. Similiarly, if the partitions
         are unspecified for a topic listed in the config, offsets are fetched for all the partitions within that topic.
         """
-        coordinator_id = self._kafka_client._find_coordinator_id_process_response(response)
+        coordinator_id = self.kafka_client._find_coordinator_id_process_response(response)
         topics = self._consumer_groups[consumer_group]
         if not topics:
             topic_partitions = None  # None signals to fetch all known offsets for the consumer group
@@ -377,9 +404,9 @@ class KafkaCheck(AgentCheck):
             topic_partitions = []
             for topic, partitions in topics.items():
                 if not partitions:  # If partitions aren't specified, fetch all partitions in the topic
-                    partitions = self._kafka_client._client.cluster.partitions_for_topic(topic)
+                    partitions = self.kafka_client._client.cluster.partitions_for_topic(topic)
                 topic_partitions.extend([TopicPartition(topic, p) for p in partitions])
-        single_group_offsets_future = self._kafka_client._list_consumer_group_offsets_send_request(
+        single_group_offsets_future = self.kafka_client._list_consumer_group_offsets_send_request(
             group_id=consumer_group, group_coordinator_id=coordinator_id, partitions=topic_partitions
         )
         single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group)
@@ -391,13 +418,13 @@ class KafkaCheck(AgentCheck):
         consumer_group must be manually passed in because it is not present in the response, but we need it in order to
         associate these offsets to the proper consumer group.
         """
-        single_group_offsets = self._kafka_client._list_consumer_group_offsets_process_response(response)
+        single_group_offsets = self.kafka_client._list_consumer_group_offsets_process_response(response)
         for (topic, partition), (offset, _metadata) in single_group_offsets.items():
             # If the OffsetFetchRequest explicitly specified partitions, the offset could returned as -1, meaning there
             # is no recorded offset for that partition... for example, if the partition doesn't exist in the cluster.
             # So ignore it.
             if offset == -1:
-                self._kafka_client._client.cluster.request_update()  # force metadata update on next poll()
+                self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
                 continue
             key = (consumer_group, topic, partition)
             self._consumer_offsets[key] = offset
@@ -432,6 +459,15 @@ class KafkaCheck(AgentCheck):
             'aggregation_key': aggregation_key,
         }
         self.event(event_dict)
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_broker_metadata(self):
+        version_data = [str(part) for part in self.kafka_client._client.check_version()]
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+
+        self.set_metadata(
+            'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
+        )
 
     @classmethod
     def _determine_kafka_version(cls, init_config, instance):
@@ -473,3 +509,8 @@ class KafkaCheck(AgentCheck):
             # have multiple sections of code instantiating clients
             kafka_client.close()
         return kafka_version
+
+    @staticmethod
+    def batchify(iterable, batch_size):
+        iterable = list(iterable)
+        return (iterable[i : i + batch_size] for i in range(0, len(iterable), batch_size))

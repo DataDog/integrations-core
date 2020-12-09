@@ -1,41 +1,46 @@
 # CHANGELOG - Dotnetclr
 
-## 1.6.0 / 2020-05-17
+## 1.7.0 / 2020-06-29 / Agent 7.21.0
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Add config specs. See [#6727](https://github.com/DataDog/integrations-core/pull/6727).
+
+## 1.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Agent 6 signature. See [#6445](https://github.com/DataDog/integrations-core/pull/6445).
 
-## 1.5.0 / 2019-12-02
+## 1.5.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
 
-## 1.4.0 / 2019-10-11
+## 1.4.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
 
-## 1.3.1 / 2019-06-18
+## 1.3.1 / 2019-06-18 / Agent 6.13.0
 
 * [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
 
-## 1.3.0 / 2019-05-14
+## 1.3.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3502](https://github.com/DataDog/integrations-core/pull/3502).
 
-## 1.2.0 / 2019-02-18
+## 1.2.0 / 2019-02-18 / Agent 6.10.0
 
 * [Fixed] Fix flake8. See [#3077](https://github.com/DataDog/integrations-core/pull/3077).
 * [Added] Support Python 3. See [#2987](https://github.com/DataDog/integrations-core/pull/2987).
 
-## 1.1.1 / 2019-01-04
+## 1.1.1 / 2019-01-04 / Agent 6.9.0
 
 * [Fixed] Change example config from "localhost" to ".". See [#2779][1].
 
-## 1.1.0 / 2018-10-12
+## 1.1.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Pin pywin32 dependency. See [#2322][2].
 * [Fixed] Remove unused port config option for pdh checks. See [#2244][3].
 
-## 1.0.1 / 2018-09-04
+## 1.0.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 

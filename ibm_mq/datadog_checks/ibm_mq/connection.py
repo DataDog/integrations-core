@@ -20,6 +20,16 @@ def get_queue_manager_connection(config):
     Get the queue manager connection
     """
     if config.ssl:
+        # There is a memory leak when SSL connections fail.
+        # By testing with a normal connection first, we avoid making unnecessary SSL connections.
+        # This does not fix the memory leak but mitigate its likelihood.
+        # Details: https://github.com/dsuch/pymqi/issues/208
+        try:
+            get_normal_connection(config)
+        except pymqi.MQMIError as e:
+            log.debug("Tried normal connection before SSL connection. It failed with: %s", e)
+            if e.reason in [pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME]:
+                raise
         return get_ssl_connection(config)
     else:
         return get_normal_connection(config)
@@ -51,14 +61,36 @@ def get_ssl_connection(config):
     Get the connection with SSL
     """
     cd = _get_channel_definition(config)
-    cd.SSLCipherSpec = config.ssl_cipher_spec
+    cd.SSLCipherSpec = pymqi.ensure_bytes(config.ssl_cipher_spec)
 
     sco = pymqi.SCO()
-    sco.KeyRepository = config.ssl_key_repository_location
+    sco.KeyRepository = pymqi.ensure_bytes(config.ssl_key_repository_location)
 
+    if config.ssl_certificate_label:
+        sco.CertificateLabel = pymqi.ensure_bytes(config.ssl_certificate_label)
+
+    connect_options = {}
+    if config.username and config.password:
+        connect_options.update(
+            {
+                'user': config.username,
+                'password': config.password,
+            }
+        )
+
+    log.debug(
+        "Create SSL connection with ConnectionName=%s, ChannelName=%s, Version=%s, SSLCipherSpec=%s, "
+        "KeyRepository=%s, CertificateLabel=%s, user=%s",
+        cd.ConnectionName,
+        cd.ChannelName,
+        cd.Version,
+        cd.SSLCipherSpec,
+        sco.KeyRepository,
+        sco.CertificateLabel,
+        connect_options.get('user'),
+    )
     queue_manager = pymqi.QueueManager(None)
-    queue_manager.connect_with_options(config.queue_manager_name, cd, sco)
-
+    queue_manager.connect_with_options(config.queue_manager_name, cd, sco, **connect_options)
     return queue_manager
 
 

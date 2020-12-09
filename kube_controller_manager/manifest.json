@@ -24,7 +24,11 @@
   "integration_id": "kube-controller-manager",
   "assets": {
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "kube_controller_manager": "assets/dashboards/overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

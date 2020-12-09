@@ -23,6 +23,8 @@ FAKE_API_KEY = 'a' * 32
 
 MANIFEST_VERSION_PATTERN = r'agent (\d)'
 
+DEFAULT_DOGSTATSD_PORT = 8125
+
 
 def get_rate_flag(agent_version):
     if agent_version >= 6:

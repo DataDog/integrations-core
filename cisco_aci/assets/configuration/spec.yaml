@@ -107,9 +107,7 @@ files:
         aws_region.hidden: true
         aws_host.hidden: true
         aws_service.hidden: true
-    - template: instances/tags
-    - template: instances/service
-    - template: instances/global
+    - template: instances/default
       overrides:
         min_collection_interval.value.default: 15
         min_collection_interval.value.example: 180

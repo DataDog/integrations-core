@@ -16,8 +16,7 @@
   ],
   "public_title": "Datadog-Sidekiq Integration",
   "categories": [
-    "log collection",
-    "dogstatsd"
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
@@ -31,6 +30,10 @@
     },
     "saved_views": {},
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "sidekiq"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

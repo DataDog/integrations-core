@@ -23,7 +23,7 @@ def config_e2e():
 
     return {
         'init_config': {},
-        'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -75,7 +75,7 @@ def instance_basic(config_e2e):
 @pytest.fixture
 def instance_complex():
     return {
-        'server': common.HOST,
+        'host': common.HOST,
         'user': common.USER,
         'pass': common.PASS,
         'port': common.PORT,
@@ -101,12 +101,34 @@ def instance_complex():
                 'field': 'age',
             },
         ],
+        'deep_database_monitoring': True,
+    }
+
+
+@pytest.fixture
+def instance_custom_queries():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'custom_queries': [
+            {
+                'query': "SELECT * from testdb.users where name='Alice' limit 1;",
+                'columns': [{}, {'name': 'alice.age', 'type': 'gauge'}],
+            },
+            {
+                'query': "SELECT * from testdb.users where name='Bob' limit 1;",
+                'columns': [{}, {'name': 'bob.age', 'type': 'gauge'}],
+            },
+        ],
     }
 
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
+    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 
 @pytest.fixture(scope='session')
