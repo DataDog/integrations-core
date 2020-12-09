@@ -43,7 +43,7 @@
                 "custom_links": [
                     {
                         "label": "Interface Performance",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}"
                     }
                 ],
                 "has_search_bar": "auto",
@@ -84,7 +84,7 @@
                 "custom_links": [
                     {
                         "label": "Device Dashboard",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}"
                     }
                 ],
                 "legend_size": "0",
@@ -137,7 +137,7 @@
                 "custom_links": [
                     {
                         "label": "Device Performance",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
                     }
                 ],
                 "requests": [
@@ -182,7 +182,7 @@
                 "custom_links": [
                     {
                         "label": "Device Performance",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
                     }
                 ],
                 "requests": [
@@ -208,7 +208,7 @@
                 "custom_links": [
                     {
                         "label": "Device Performance",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
                     }
                 ],
                 "requests": [
@@ -253,7 +253,7 @@
                 "custom_links": [
                     {
                         "label": "Device Performance",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}"
                     }
                 ],
                 "requests": [
@@ -336,7 +336,7 @@
                 "custom_links": [
                     {
                         "label": "Device Dashboard",
-                        "link": "/screen/integration/30545/device-dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}"
+                        "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}"
                     }
                 ],
                 "legend_size": "0",
