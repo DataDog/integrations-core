@@ -1,10 +1,18 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime
+import threading
 import time
+from datetime import timedelta
 from itertools import chain
 
 import pytz
+
+try:
+    from functools import lru_cache, wraps
+except ImportError:
+    from backports.functools_lru_cache import lru_cache
 
 # AgentCheck methods to transformer name e.g. set_metadata -> metadata
 SUBMISSION_METHODS = {
@@ -84,12 +92,13 @@ class ConstantRateLimiter:
 
 class ExpiringCache(dict):
     """
-    Simple expiring key-value cache. Not thread safe.
+    Simple expiring key-value cache.
     """
 
     def __init__(self):
         super().__init__()
         self.cache = {}
+        self.lock = threading.Lock()
 
     def set(self, key, val, expire_seconds):
         """
@@ -101,6 +110,8 @@ class ExpiringCache(dict):
     def get(self, key, default=None):
         val, expire_at = self.cache.get(key, (default, -1))
         if 0 < expire_at < time.time():
-            del self.cache[key]
+            with self.lock:
+                if key in self.cache:
+                    del self.cache[key]
             return default
         return val

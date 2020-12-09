@@ -27,3 +27,4 @@ six==1.14.0
 typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
+cachetools==3.1.1
