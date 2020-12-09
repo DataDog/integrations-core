@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple, Union
 
 import requests
 from six.moves.urllib.parse import urljoin, urlparse
