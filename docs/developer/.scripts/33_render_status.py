@@ -1,6 +1,7 @@
 import os
 
 from datadog_checks.dev.tooling.utils import (
+    get_available_logs_integrations,
     get_check_file,
     get_config_file,
     get_default_config_spec,
@@ -11,6 +12,7 @@ from datadog_checks.dev.tooling.utils import (
     has_dashboard,
     has_e2e,
     has_process_signature,
+    has_saved_views,
     is_tile_only,
 )
 
@@ -33,6 +35,7 @@ def patch(lines):
         render_e2e_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
+        render_saved_views_progress,
     ):
         new_lines.extend(renderer())
         new_lines.append('')
@@ -136,31 +139,7 @@ def render_metadata_progress():
 
 
 def render_logs_progress():
-    # List of integrations where is not possible or it does not make sense to have its own log integration
-    not_possible = {
-        'sap_hana',  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
-        'ntp',  # the integration is for a remote ntp server
-        'btrfs',  # it emits to the system log
-        'directory',  # OS
-        'external_dns',  # remote connection
-        'http_check',  # Its not a service
-        'linux_proc_extras',
-        'snmp',  # remote connection to the devices
-        'openmetrics',  # base class
-        'pdh_check',   # base class
-        'process',  # system
-        'prometheus',  # base class
-        'tcp_check',  # remote connection
-        'tls',  # remote connection
-        'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
-        'ssh_check',  # remote connection
-        'system_core',  # system
-        'system_swap',  # system
-        'windows_service',  # OS
-        'wmi_check',  # base class
-    }
-    # Also excluding all the kube_ integrations
-    valid_checks = sorted(x for x in set(get_valid_checks()).difference(not_possible) if not x.startswith('kube'))
+    valid_checks = get_available_logs_integrations()
     total_checks = len(valid_checks)
     checks_with_logs = 0
 
@@ -258,6 +237,28 @@ def render_check_signatures_progress():
         lines.append(f'    - [{status}] {check}')
 
     percent = checks_with_cs / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    return lines
+
+
+def render_saved_views_progress():
+    valid_checks = get_available_logs_integrations()
+    total_checks = len(valid_checks)
+    checks_with_sv = 0
+
+    lines = ['## Default saved views', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if has_saved_views(check):
+            checks_with_sv += 1
+            status = 'X'
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_sv / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     return lines

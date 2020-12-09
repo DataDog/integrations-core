@@ -89,7 +89,6 @@ DOGWEB_CODE_GENERATED_DASHBOARDS = (
     'zk',
 )
 
-
 def format_commit_id(commit_id):
     if commit_id:
         if commit_id.isdigit():
@@ -409,6 +408,37 @@ def get_metric_sources():
     return {path for path in os.listdir(get_root()) if file_exists(get_metadata_file(path))}
 
 
+def get_available_logs_integrations():
+    # List of integrations where is not possible or it does not make sense to have its own log integration
+    not_possible = {
+        'btrfs',  # it emits to the system log
+        'datadog_checks_base',
+        'datadog_checks_dev',
+        'datadog_checks_downloader',
+        'directory',  # OS
+        'external_dns',  # remote connection
+        'http_check',  # Its not a service
+        'linux_proc_extras',
+        'ntp',  # the integration is for a remote ntp server
+        'openmetrics',  # base class
+        'pdh_check',   # base class
+        'process',  # system
+        'prometheus',  # base class
+        'sap_hana',  # https://github.com/DataDog/architecture/blob/master/rfcs/agent-integrations/sap_hana.md#open-questions
+        'snmp',  # remote connection to the devices
+        'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
+        'ssh_check',  # remote connection
+        'system_core',  # system
+        'system_swap',  # system
+        'tcp_check',  # remote connection
+        'tls',  # remote connection
+        'windows_service',  # OS
+        'wmi_check',  # base class
+    }
+    # Also excluding all the kube_ integrations
+    checks = sorted(x for x in set(get_valid_checks()).difference(not_possible) if not x.startswith('kube'))
+    return checks
+
 def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
 
@@ -548,6 +578,16 @@ def has_agent_8_check_signature(check):
                 if 'def check(self, instance):' in read_file(os.path.join(path, fn)):
                     return False
     return True
+
+
+def has_saved_views(check):
+    manifest_file = get_manifest_file(check)
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+    return len(manifest.get('assets', {}).get('saved_views', {})) > 0
 
 
 def is_tile_only(check):
