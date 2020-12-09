@@ -86,8 +86,7 @@ files:
           of consumer groups to topics. For details, see KIP-88. For older Kafka brokers, the consumer groups
           must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
 
-          Deprecation notice: This feature works for Zookeeper-based consumers. However, all
-          functionality related to fetching offsets from Zookeeper is deprecated.
+          Deprecation notice: Functionality related to consumers fetching offsets from Zookeeper is deprecated.
         value:
           type: boolean
           example: false
