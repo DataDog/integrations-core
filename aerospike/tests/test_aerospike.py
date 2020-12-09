@@ -19,7 +19,7 @@ def test_check(aggregator, instance):
     # sleep to make sure client is available
     time.sleep(30)
     for _ in range(10):
-        check.check(instance)
+        check.check(None)
         time.sleep(1)
     _test_check(aggregator)
 
@@ -32,7 +32,7 @@ def test_version_metadata(aggregator, instance, datadog_agent):
     # sleep to make sure client is available
     time.sleep(30)
     for _ in range(10):
-        check.check(instance)
+        check.check(None)
         time.sleep(1)
 
     raw_version = check.get_info("build")[0]
