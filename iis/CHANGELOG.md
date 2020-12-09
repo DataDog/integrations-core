@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.10.2 / 2020-10-31
+## 2.10.2 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Fix metrics collection on non-english systems. See [#7875](https://github.com/DataDog/integrations-core/pull/7875).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 1.19.0 / 2020-10-31
+## 1.19.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Collect receive and send queue metrics. See [#7861](https://github.com/DataDog/integrations-core/pull/7861).
 * [Added] Collect connection state metrics on BSD/OSX. See [#7659](https://github.com/DataDog/integrations-core/pull/7659).

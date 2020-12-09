@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 2.1.2 / 2020-11-06
+## 2.1.2 / 2020-11-06 / Agent 7.24.0
 
 * [Fixed] Add workaround for issue in platform.platform() on python 3.8 or later. See [#7932](https://github.com/DataDog/integrations-core/pull/7932). Thanks [kurochan](https://github.com/kurochan).
 

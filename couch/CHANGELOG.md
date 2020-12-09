@@ -1,6 +1,6 @@
 # CHANGELOG - couch
 
-## 3.13.1 / 2020-11-13
+## 3.13.1 / 2020-11-13 / Agent 7.24.0
 
 * [Fixed] Fix exception message. See [#7912](https://github.com/DataDog/integrations-core/pull/7912).
 

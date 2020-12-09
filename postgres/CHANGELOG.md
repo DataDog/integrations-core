@@ -4,7 +4,7 @@
 
 * [Added] Add new metrics for WAL based logical replication. See [#8026](https://github.com/DataDog/integrations-core/pull/8026).
 
-## 5.2.1 / 2020-11-10
+## 5.2.1 / 2020-11-10 / Agent 7.24.0
 
 * [Fixed] Fix query tag to use the normalized query. See [#7982](https://github.com/DataDog/integrations-core/pull/7982).
 * [Fixed] Change `deep_database_monitoring` language from BETA to ALPHA. See [#7947](https://github.com/DataDog/integrations-core/pull/7947).

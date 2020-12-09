@@ -48,76 +48,16 @@ init_config:
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-  ## i.e:
-  ## - MIB: UDP-MIB
-  ##   symbol: udpInDatagrams
   ##
-  ## If it's just a scalar, you can specify by OID and name it:
-  ##
-  ## - OID: 1.3.6.1.2.1.6.5
-  ##   name: tcpPassiveOpens
-  ##
-  ## Optional parameters:
-  ##
-  ## Use the 'metric_tags' parameter to specify a specific tag for a collected metric:
-  ##
-  ## - OID: 1.3.6.1.2.1.6.5
-  ##   name: tcpPassiveOpens
-  ##   metric_tags:
-  ##     - TCP
-  ##
-  ## User the 'forced_type' parameter to enforce a data type for OIDs if the
-  ## auto-detection for OID data types from the remote agent's response is failing.
-  ## Example: When a F5 Networks load balancer is queried for this OID, it returns
-  ## it as a Counter64 when it should be a gauge. So, this configuration forces
-  ## the data type to gauge:
-  ##
-  ## - OID: 1.3.6.1.4.1.3375.2.1.1.2.1.8.0
-  ##   name: F5_TotalCurrentConnections
-  ##   forced_type: gauge
-  ##
-  ## Query a table with the 'table' parameter and specify:
-  ##  - which columns to report as value with the 'symbols' parameter.
-  ##  - which columns / indexes to use as tags with the 'metric_tags' parameter.
-  ##  - which column to read the tag value from with the 'column' parameter.
-  ##  - which index you want to read the tag value from with the 'index' parameter.
-  ##  - which table and MIB are required if the tag is in a different table.
-  ##
-  ## Example:
-  ##
-  ##  - MIB: IF-MIB
-  ##    table: ifTable
-  ##    symbols:
-  ##      - ifInOctets
-  ##      - ifOutOctets
-  ##    metric_tags:
-  ##      - tag: interface
-  ##        column: ifDescr
-  ##  - MIB: IP-MIB
-  ##    table: ipSystemStatsTable
-  ##    symbols:
-  ##      - ipSystemStatsInReceives
-  ##    metric_tags:
-  ##      - tag: ipversion
-  ##        index: 1
-  ##  - MIB: ENTITY-SENSOR-MIB
-  ##    table: entitySensorObjects
-  ##    symbols:
-  ##      - entPhySensorValue
-  ##    metric_tags:
-  ##      - tag: description
-  ##        column: entLogicalDescr
-  ##        table: entLogicalTable
-  ##        MIB: ENTITY-MIB
+  ## Single scalar metrics and table metrics can be defined in this section.
+  ## Details on how to define metrics can be found here:
+  ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+  #
   #
   # global_metrics:
-  #   - MIB: UDP-MIB
-  #     symbol: udpInDatagrams
-  #   - MIB: TCP-MIB
-  #     symbol: tcpActiveOpens
-  #   - OID: 1.3.6.1.2.1.6.5
+  #   - OID: 1.3.6.1.2.1.6.5.0
   #     name: tcpPassiveOpens
-  #   - OID: 1.3.6.1.2.1.6.5
+  #   - OID: 1.3.6.1.2.1.6.5.0
   #     name: tcpPassiveOpens
   #     metric_tags:
   #       - TCP
@@ -301,73 +241,21 @@ instances:
     # profile: <PROFILE_NAME>
 
     ## @param metrics - list of elements - optional
-    ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
+    ## Specify metrics you want to monitor.
     ## metrics set here will override global_metrics set in the init_config section if use_global_metrics is set to false.
     ## Otherwise, they will be used in addition of global_metrics.
     ##
-    ## i.e:
-    ## - MIB: UDP-MIB
-    ##   symbol: udpInDatagrams
-    ##
-    ## If it's just a scalar, you can specify by OID and name it:
-    ##
-    ## - OID: 1.3.6.1.2.1.6.5
-    ##   name: tcpPassiveOpens
-    ##
-    ## Optional parameters:
-    ##
-    ## Use the 'metric_tags' parameter to specify a specific tag for a collected metric:
-    ##
-    ## - OID: 1.3.6.1.2.1.6.5
-    ##   name: tcpPassiveOpens
-    ##   metric_tags:
-    ##     - TCP
-    ##
-    ## User the 'forced_type' parameter to enforce a data type for OIDs if the
-    ## auto-detection for OID data types from the remote agent's response is failing.
-    ## Example: When a F5 Networks load balancer is queried for this OID, it returns
-    ## it as a Counter64 when it should be a gauge. So, this configuration forces
-    ## the data type to gauge:
-    ##
-    ## - OID: 1.3.6.1.4.1.3375.2.1.1.2.1.8.0
-    ##   name: F5_TotalCurrentConnections
-    ##   forced_type: gauge
-    ##
-    ## Query a table with the 'table' parameter and specify:
-    ##  - which columns to report as value with the 'symbols' parameter.
-    ##  - which columns / indexes to use as tags with the 'metric_tags' parameter.
-    ##  - which column to read the tag value from with the 'column' parameter.
-    ##  - which index you want to read the tag value from with the 'index' parameter.
-    ##
-    ## Example:
-    ##
-    ##  - MIB: IF-MIB
-    ##    table: ifTable
-    ##    symbols:
-    ##      - ifInOctets
-    ##      - ifOutOctets
-    ##    metric_tags:
-    ##      - tag: interface
-    ##        column: ifDescr
-    ##  - MIB: IP-MIB
-    ##    table: ipSystemStatsTable
-    ##    symbols:
-    ##      - ipSystemStatsInReceives
-    ##         metric_tags:
-    ##           - tag: ipversion
-    ##             index: 1
+    ## Single scalar metrics and table metrics can be defined in this section.
+    ## Details on how to define metrics can be found here:
+    ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
     #
-    metrics:
-      - MIB: UDP-MIB
-        symbol: udpInDatagrams
-      - MIB: TCP-MIB
-        symbol: tcpActiveOpens
-      - OID: 1.3.6.1.2.1.6.5.0
-        name: tcpPassiveOpens
-      - OID: 1.3.6.1.2.1.6.5.0
-        name: tcpPassiveOpens
-        metric_tags:
-          - TCP
+    # metrics:
+    #   - OID: 1.3.6.1.2.1.6.5.0
+    #     name: tcpPassiveOpens
+    #   - OID: 1.3.6.1.2.1.6.5.0
+    #     name: tcpPassiveOpens
+    #     metric_tags:
+    #       - TCP
 
     ## @param metric_tags - list of elements - optional
     ## Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
@@ -375,16 +263,11 @@ instances:
     ## substring using the regular Python engine: https://docs.python.org/3/library/re.html
     #
     # metric_tags:
-    #  - # From a symbol
-    #    MIB: SNMPv2-MIB
-    #    symbol: sysName
-    #    tag: snmp_host
-    #  - # From an OID:
-    #    OID: 1.3.6.1.2.1.1.5.0
+    #  - OID: 1.3.6.1.2.1.1.5.0
     #    symbol: sysName
     #    tag: snmp_host
     #  - # With regular expression matching
-    #    MIB: SNMPv2-MIB
+    #    OID: 1.3.6.1.2.1.1.5.0
     #    symbol: sysName
     #    match: (.*)-(.*)
     #    tags:

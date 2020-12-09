@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-## 1.17.0 / 2020-10-31
+## 1.17.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add support for named groups in regular expressions. See [#7814](https://github.com/DataDog/integrations-core/pull/7814). Thanks [lkobus](https://github.com/lkobus).
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

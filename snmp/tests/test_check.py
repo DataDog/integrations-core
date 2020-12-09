@@ -1069,24 +1069,23 @@ def test_timeout(aggregator, caplog):
     instance['community_string'] = 'public_delay'
     instance['timeout'] = 1
     instance['retries'] = 0
-    check = SnmpCheck('snmp', {}, [instance])
+    check = SnmpCheck('snmp', {'oid_batch_size': 1}, [instance])
     check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, at_least=1)
-    # Some metrics still arrived
+    # All metrics but `ifAdminStatus` should still arrive
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
+    aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
-    for record in caplog.records:
-        if "No SNMP response received before timeout" in record.message:
-            break
-    else:
-        pytest.fail()
+    assert (
+        len([record for record in caplog.records if "No SNMP response received before timeout" in record.message]) > 0
+    )
 
 
 def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):

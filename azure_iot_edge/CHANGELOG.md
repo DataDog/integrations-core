@@ -1,6 +1,6 @@
 # CHANGELOG - Azure IoT Edge
 
-## 1.1.0 / 2020-10-31
+## 1.1.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add logs support. See [#7877](https://github.com/DataDog/integrations-core/pull/7877).
 

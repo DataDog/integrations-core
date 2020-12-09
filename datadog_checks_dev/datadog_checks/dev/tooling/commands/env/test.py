@@ -43,8 +43,9 @@ from .stop import stop
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
+@click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, test_filter):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -101,6 +102,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,
+                        test_filter=test_filter,
                     )
             finally:
                 if new_env:

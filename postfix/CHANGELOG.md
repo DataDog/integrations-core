@@ -1,6 +1,6 @@
 # CHANGELOG - postfix
 
-## 1.8.0 / 2020-10-31
+## 1.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config specs. See [#7760](https://github.com/DataDog/integrations-core/pull/7760).
 

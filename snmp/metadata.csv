@@ -89,6 +89,8 @@ snmp.fgFwPol6ByteCount.rate,gauge,,packet,second,[Fortinet FortiGate] The number
 snmp.ifAdminStatus,gauge,,,,[Generic router] [F5 BIG-IP] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The desired state of the interface.,0,snmp,
 snmp.ifSpeed,gauge,,,,"[Generic router] An estimate of the interface's current bandwidth in bits per second, or the nominal bandwidth.",0,snmp,
 snmp.ifHighSpeed,gauge,,,,"[Generic router] An estimate of the interface's current bandwidth in units of 1,000,000 bits per second, or the nominal bandwidth.",0,snmp,
+snmp.ifBandwidthInUsage.rate,gauge,,percent,,"[Generic router] The percent rate of used received bandwidth.",0,snmp,
+snmp.ifBandwidthOutUsage.rate,gauge,,percent,,"[Generic router] The percent rate of used sent bandwidth.",0,snmp,
 snmp.ifHCInBroadcastPkts,count,,packet,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The number of packets delivered by this sub-layer to a higher (sub-)layer that were addressed to a broadcast address at this sub-layer.,0,snmp,
 snmp.ifHCInOctets,count,,,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The total number of octets received on the interface including framing characters.,0,snmp,
 snmp.ifHCInUcastPkts,count,,packet,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The number of packets delivered by this sub-layer to a higher (sub-)layer that were not addressed to a multicast or broadcast address at this sub-layer.,0,snmp,

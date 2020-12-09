@@ -17,6 +17,7 @@ kubernetes_state.daemonset.misscheduled,gauge,,,,The number of nodes running a d
 kubernetes_state.daemonset.desired,gauge,,,,The number of nodes that should be running the daemon pod,0,kubernetes,k8s_state.ds.desired
 kubernetes_state.daemonset.ready,gauge,,,,The number of nodes that should be running the daemon pod and have one or more running and ready,0,kubernetes,k8s_state.ds.ready
 kubernetes_state.daemonset.updated,gauge,,,,The number of nodes that run the updated daemon pod spec,0,kubernetes,k8s_state.ds.updated
+kubernetes_state.deployment.count,gauge,,,,The number of deployments,0,kubernetes,k8s_state.deployment.count
 kubernetes_state.deployment.replicas,gauge,,,,The number of replicas per deployment,0,kubernetes,k8s_state.deployment.replicas
 kubernetes_state.deployment.replicas_available,gauge,,,,The number of available replicas per deployment,0,kubernetes,k8s_state.deployment.replicas_available
 kubernetes_state.deployment.replicas_unavailable,gauge,,,,The number of unavailable replicas per deployment,0,kubernetes,k8s_state.deployment.replicas_unavailable
@@ -27,6 +28,7 @@ kubernetes_state.deployment.rollingupdate.max_unavailable,gauge,,,,Maximum numbe
 kubernetes_state.endpoint.address_available,gauge,,,,Number of addresses available in endpoint,0,kubernetes,k8s_state.endpoint.address_avail
 kubernetes_state.endpoint.address_not_ready,gauge,,,,Number of addresses not ready in endpoint,-1,kubernetes,k8s_state.endpoint.address_not_ready
 kubernetes_state.endpoint.created,gauge,,,,Unix creation timestamp,0,kubernetes,k8s_state.endpoint.creation_time
+kubernetes_state.job.count,gauge,,,,The number of jobs,0,kubernetes,k8s_state.job.count
 kubernetes_state.job.failed,count,,,,Observed number of failed pods in a job,0,kubernetes,k8s_state.job.failed
 kubernetes_state.job.succeeded,count,,,,Observed number of succeeded pods in a job,0,kubernetes,k8s_state.job.succeeded
 kubernetes_state.limitrange.cpu.min,gauge,,,,Minimum CPU request for this type,0,kubernetes,k8s_state.cpu.min
@@ -48,6 +50,7 @@ kubernetes_state.node.gpu.cards_capacity,gauge,,,,The total GPU resources of the
 kubernetes_state.persistentvolumeclaim.status,gauge,,,,The phase the persistent volume claim is currently in,-1,kubernetes,k8s_state.pvc.status
 kubernetes_state.persistentvolumeclaim.request_storage,gauge,,byte,,Storage space request for a given pvc,0,kubernetes,k8s_state.pvc.request
 kubernetes_state.persistentvolume.by_phase,gauge,,,,Number of persistent volumes to sum by phase and storageclass,0,kubernetes,k8s_state.pv.by_phase
+kubernetes_state.namespace.count,gauge,,cpu,,The number of namespaces,0,kubernetes,k8s_state.namespace.count
 kubernetes_state.node.cpu_allocatable,gauge,,cpu,,The CPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.cpu_allocatable
 kubernetes_state.node.memory_allocatable,gauge,,byte,,The memory resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.memory_allocatable
 kubernetes_state.node.pods_allocatable,gauge,,,,The pod resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.pods_allocatable
@@ -65,6 +68,7 @@ kubernetes_state.pod.ready,gauge,,,,"In association with the `condition` tag, wh
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
 kubernetes_state.pod.unschedulable,gauge,,,,Reports PODs that Kube scheduler cannot schedule on any node,0,kubernetes,k8s_state.pod.unschedulable
 kubernetes_state.pod.status_phase,gauge,,,,"To sum by `phase` to get number of pods in a given phase, and `namespace` to break this down by namespace",0,kubernetes,k8s_state.pod.status_phase
+kubernetes_state.replicaset.count,gauge,,,,The number of replicasets,0,kubernetes,k8s_state.rs.count
 kubernetes_state.replicaset.replicas,gauge,,,,The number of replicas per ReplicaSet,0,kubernetes,k8s_state.rs.replicas
 kubernetes_state.replicaset.fully_labeled_replicas,gauge,,,,The number of fully labeled replicas per ReplicaSet,0,kubernetes,k8s_state.rs.fully_labeled
 kubernetes_state.replicaset.replicas_ready,gauge,,,,The number of ready replicas per ReplicaSet,0,kubernetes,k8s_state.rs.replicas_rdy

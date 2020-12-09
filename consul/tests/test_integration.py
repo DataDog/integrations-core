@@ -98,6 +98,13 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
             aggregator.assert_metric(metric, tags=common_tags, count=1)
 
         aggregator.assert_metric('consul.peers', value=3, count=1)
+        aggregator.assert_metric_has_tag_prefix('consul.raft.replication.appendEntries.logs', 'peer_id', count=2)
+
+        for hist_suffix in ['count', 'sum', 'quantile']:
+            aggregator.assert_metric_has_tag('consul.http.request.{}'.format(hist_suffix), 'method:GET', at_least=0)
+            for metric in common.PROMETHEUS_HIST_METRICS:
+                for tag in common_tags:
+                    aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
 
         aggregator.assert_all_metrics_covered()
 

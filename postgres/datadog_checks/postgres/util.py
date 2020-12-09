@@ -132,12 +132,10 @@ SELECT mode,
 
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-    # This field contains old metrics that need to be deprecated. For now we keep sending them.
-    'deprecated_metrics': {'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate)},
     'metrics': {
         'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
         'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
-        'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
+        'idx_scan': ('postgresql.index_rel_scans', AgentCheck.rate),
         'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', AgentCheck.rate),
         'n_tup_ins': ('postgresql.rows_inserted', AgentCheck.rate),
         'n_tup_upd': ('postgresql.rows_updated', AgentCheck.rate),
