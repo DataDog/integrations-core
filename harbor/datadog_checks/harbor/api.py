@@ -17,8 +17,9 @@ from .common import (
 
 
 class HarborAPI(object):
-    def __init__(self, harbor_url, http):
+    def __init__(self, harbor_url, http, api_version=''):
         self.base_url = harbor_url
+        self.api_version = api_version
         self.http = http
         self._fetch_and_set_harbor_version()
 
@@ -92,4 +93,9 @@ class HarborAPI(object):
             return resp.json()
 
     def _resolve_url(self, url):
-        return url.format(base_url=self.base_url)
+        url = url.format(base_url=self.base_url)
+        if self.api_version:
+            api_path = '{}/api/'.format(url)
+            url = url.replace(api_path, api_path + self.api_version, 1)
+
+        return url

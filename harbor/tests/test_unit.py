@@ -6,6 +6,7 @@ from mock import MagicMock
 from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.harbor.api import HarborAPI
 
 from .common import HARBOR_COMPONENTS, HARBOR_VERSION, VERSION_1_5, VERSION_1_6, VERSION_1_8
 from .conftest import MockResponse
@@ -94,3 +95,16 @@ def test_api__make_post_request(harbor_api):
     harbor_api.http.post = MagicMock(return_value=MockResponse(None, 500))
     with pytest.raises(HTTPError):
         harbor_api._make_post_request('{base_url}/api/path')
+
+
+def test_api__resolve_url(mocker):
+    mocker.patch('datadog_checks.harbor.api.HarborAPI._fetch_and_set_harbor_version', side_effect=lambda: None)
+
+    harbor_api = HarborAPI('url', None)
+    assert harbor_api._resolve_url('{base_url}/path/path') == 'url/path/path'
+
+    harbor_api = HarborAPI('url', None)
+    assert harbor_api._resolve_url('{base_url}/api/path') == 'url/api/path'
+
+    harbor_api = HarborAPI('url', None, api_version='v2.0')
+    assert harbor_api._resolve_url('{base_url}/api/v2.0/path') == 'url/api/v2.0/path'
