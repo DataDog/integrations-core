@@ -69,8 +69,8 @@ class GlusterfsCheck(AgentCheck):
 
             self.submit_version_metadata(data)
 
-            if 'volume_summary' in output:
-                self.parse_volume_summary(data['volume_summary'])
+            volume_info = data.get('volume_summary', [])
+            self.parse_volume_summary(volume_info)
 
             if CLUSTER_STATUS in data:
                 status = data[CLUSTER_STATUS].lower()
@@ -127,7 +127,7 @@ class GlusterfsCheck(AgentCheck):
 
     def parse_subvols_stats(self, subvols, volume_tags):
         for subvol in subvols:
-            self.submit_metric(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
+            self.submit_metrics(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
 
             for brick in subvol.get('bricks', []):
                 brick_name = brick['name'].split(":")
