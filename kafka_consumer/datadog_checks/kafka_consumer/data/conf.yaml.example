@@ -1,25 +1,28 @@
+## All options defined here are available to all instances.
+##
 ## WARNING: To avoid blindly collecting offsets and lag for an unbounded number
 ## of partitions (as could be the case after enabling monitor_unlisted_consumer_groups
 ## or monitor_all_broker_highwatermarks) the check collects metrics for at most 500 partitions.
-
+##
 ## DEPRECATION NOTICE: In the early days of Kafka, consumer offsets were stored in Zookeeper.
 ## So this check currently supports fetching consumer offsets from both Kafka and Zookeeper.
 ## However, Kafka 0.9 (released in 2015) deprecated Zookeeper storage. As a result, we have also
-## deprecated fetching consumer offsets from Zookeeper and at some point in the future that
-## functionality will be removed from this check.
-
+## deprecated fetching consumer offsets from Zookeeper.
+#
 init_config:
 
-  ## @param kafka_timeout - integer - optional - default: 5
-  ## Customizes the Kafka connection timeout.
-  #
-  # kafka_timeout: 5
+    ## @param kafka_timeout - integer - optional - default: 5
+    ## Customizes the Kafka connection timeout.
+    #
+    # kafka_timeout: 5
 
-  ## @param zk_timeout - integer - optional - default: 5
-  ## DEPRECATED: Customizes the ZooKeeper connection timeout.
-  #
-  # zk_timeout: 5
+    ## @param zk_timeout - integer - optional - default: 5
+    ## DEPRECATED: Customizes the ZooKeeper connection timeout.
+    #
+    # zk_timeout: 5
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param kafka_connect_str - list of strings - required
@@ -32,8 +35,7 @@ instances:
     ## Details: https://github.com/DataDog/dd-agent/issues/2943
     #
   - kafka_connect_str:
-    - localhost:9092
-    # - <KAFKA_BROKER_ENDPOINT>:9092
+      - localhost:9092
 
     ## @param kafka_client_api_version - string - optional
     ## Specify the highest client protocol version supported by all brokers in the cluster.
@@ -44,25 +46,28 @@ instances:
     ## probing randomly picks a broker to probe, so in a mixed-version cluster, probing returns a
     ## non-deterministic result.
     #
-    # kafka_client_api_version: "2.3.0"
+    # kafka_client_api_version: 2.3.0
 
-    ## @param consumer_groups - object - optional
+    ## @param consumer_groups - mapping - optional
     ## Each level is optional. Any empty values are fetched from the Kafka cluster.
     ## You can have empty partitions (example: <CONSUMER_NAME_2>), topics (example: <CONSUMER_NAME_3>),
     ## and even consumer_groups. If you omit consumer_groups, you must set `monitor_unlisted_consumer_groups` to true.
     ##
     ## Deprecation notice: Omitting various levels works for zookeeper-based consumers. However, all
-    ## functionality related to fetching offsets from Zookeeper is deprecated and will be removed from this
-    ## check in the future.
+    ## functionality related to fetching offsets from Zookeeper is deprecated.
     #
     # consumer_groups:
     #   <CONSUMER_NAME_1>:
-    #     <TOPIC_NAME_1>: [0, 1, 4, 12]
+    #     <TOPIC_NAME_1>:
+    #     - 0
+    #     - 1
+    #     - 4
+    #     - 12
     #   <CONSUMER_NAME_2>:
     #     <TOPIC_NAME_2>: []
     #   <CONSUMER_NAME_3>: {}
 
-    ## @param monitor_unlisted_consumer_groups - boolean - optional
+    ## @param monitor_unlisted_consumer_groups - boolean - optional - default: false
     ## Setting monitor_unlisted_consumer_groups to `true` tells the check to discover all consumer groups
     ## and fetch all their known offsets. If this is not set to true, you must specify consumer_groups.
     ##
@@ -72,12 +77,11 @@ instances:
     ## must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
     ##
     ## Deprecation notice: This feature works for Zookeeper-based consumers. However, all
-    ## functionality related to fetching offsets from Zookeeper is deprecated and will be removed from this
-    ## check in the future.
+    ## functionality related to fetching offsets from Zookeeper is deprecated.
     #
     # monitor_unlisted_consumer_groups: false
 
-    ## @param monitor_all_broker_highwatermarks - boolean - optional
+    ## @param monitor_all_broker_highwatermarks - boolean - optional - default: false
     ## Setting monitor_all_broker_highwatermarks to `true` tells the check to
     ## discover and fetch the broker highwater mark offsets for all kafka topics in
     ## the cluster. Otherwise highwater mark offsets will only be fetched for topic
@@ -86,7 +90,7 @@ instances:
     #
     # monitor_all_broker_highwatermarks: false
 
-    ## @param tags - list of key:value string - optional
+    ## @param tags - list of strings - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
@@ -95,7 +99,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param security_protocol - string - optional
+    ## @param security_protocol - string - optional - default: PLAINTEXT
     ## Protocol used to communicate with brokers.
     ## Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
     ## Default: PLAINTEXT.
@@ -123,7 +127,7 @@ instances:
     #
     # sasl_kerberos_service_name: kafka
 
-    ## @param sasl_kerberos_domain_name - string - optional - default: one of the bootstrap servers
+    ## @param sasl_kerberos_domain_name - string - optional
     ## Kerberos domain name to use in GSSAPI sasl mechanism handshake.
     #
     # sasl_kerberos_domain_name: localhost
@@ -134,7 +138,7 @@ instances:
     #
     # ssl_context: <SSL_CONTEXT>
 
-    ## @param ssl_check_hostname - string - optional - default: true
+    ## @param ssl_check_hostname - boolean - optional - default: true
     ## Flag to configure whether SSL handshake should verify that the
     ## certificate matches the broker’s hostname.
     #
@@ -170,17 +174,16 @@ instances:
 
     ## @param broker_requests_batch_size - integer - optional - default: 30
     ## The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
-    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while running the wakeup calls.
+    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while 
+    ## running the wakeup calls.
     ## If the batch size is too small, the check will take longer to run.
     #
     # broker_requests_batch_size: 30
 
-    ## DEPRECATED:
-    ## The following settings are only used when fetching consumer offsets from Zookeeper.
-    ## This functionality is deprecated and will be removed at some point in the future.
-
-    ## @param zk_connect_str - list of objects - required
-    ## Deprecated: Zookeeper endpoints and port to connect to.
+    ## @param zk_connect_str - list of mappings - optional
+    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
+    ## from Zookeeper and is deprecated.  
+    ## Zookeeper endpoints and port to connect to.
     ## In a production environment, it's often useful to specify multiple
     ## Zookeeper nodes for a single check instance. This way you
     ## only generate a single check process, but if one host goes down,
@@ -188,17 +191,21 @@ instances:
     ## Details: https://github.com/DataDog/dd-agent/issues/2943
     #
     # zk_connect_str:
-    # - localhost:2181
-    # - <ZOOKEEPER_ENDPOINT>:2181
+    #   - localhost:2181
+    #   - <ZOOKEEPER_ENDPOINT>:2181
 
     ## @param zk_prefix - string - optional
-    ## Deprecated: Zookeeper chroot prefix under which kafka data is living in zookeeper.
+    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
+    ## from Zookeeper and is deprecated. 
+    ## Zookeeper chroot prefix under which kafka data is living in zookeeper.
     ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
     #
     # zk_prefix: <ZK_PREFIX>
 
     ## @param kafka_consumer_offsets - boolean - optional - default: false
-    ## Deprecated: This setting only applies if zk_connect_str is set
+    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
+    ## from Zookeeper and is deprecated. 
+    ## This setting only applies if zk_connect_str is set
     ## Set to true to fetch consumer offsets from both Zookeeper and Kafka
     ## Set to false to fetch consumer offsets only from Zookeeper.
     #
