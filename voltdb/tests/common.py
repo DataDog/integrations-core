@@ -15,13 +15,8 @@ COMMON_TAGS = ['test:voltdb']
 METRICS = [
     (
         # CPU
-        [
-            'voltdb.cpu.percent_used',
-        ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-        },
+        ['voltdb.cpu.percent_used'],
+        {'host_id', 'voltdb_hostname'},
     ),
     (
         # MEMORY
@@ -38,10 +33,7 @@ METRICS = [
             'voltdb.memory.tuple_count',
             'voltdb.memory.tuple_data',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-        },
+        {'host_id', 'voltdb_hostname'},
     ),
     (
         # SNAPSHOTSTATUS
@@ -50,13 +42,7 @@ METRICS = [
             'voltdb.snapshot_status.duration',
             'voltdb.snapshot_status.throughput',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-            'table',
-            'filename',
-            'type',
-        },
+        {'host_id', 'voltdb_hostname', 'table', 'filename', 'type'},
     ),
     (
         # COMMANDLOG
@@ -67,10 +53,7 @@ METRICS = [
             'voltdb.commandlog.outstanding_transactions',
             'voltdb.commandlog.segment_count',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-        },
+        {'host_id', 'voltdb_hostname'},
     ),
     (
         # PROCEDURE
@@ -90,13 +73,7 @@ METRICS = [
             'voltdb.procedure.failures',
             'voltdb.procedure.successes',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-            'site_id',
-            'partition_id',
-            'procedure',
-        },
+        {'host_id', 'voltdb_hostname', 'site_id', 'partition_id', 'procedure'},
     ),
     (
         # LATENCY
@@ -112,10 +89,7 @@ METRICS = [
             'voltdb.latency.p99999',
             'voltdb.latency.transactions_per_sec',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-        },
+        {'host_id', 'voltdb_hostname'},
     ),
     (
         # PROCEDUREDETAIL
@@ -135,14 +109,7 @@ METRICS = [
             'voltdb.statement.failures',
             'voltdb.statement.successes',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-            'site_id',
-            'partition_id',
-            'procedure',
-            'statement',
-        },
+        {'host_id', 'voltdb_hostname', 'site_id', 'partition_id', 'procedure', 'statement'},
     ),
     (
         # GC
@@ -152,10 +119,7 @@ METRICS = [
             'voltdb.gc.oldgen_avg_gc_time',
             'voltdb.gc.oldgen_gc_count',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-        },
+        {'host_id', 'voltdb_hostname'},
     ),
     (
         # IO
@@ -165,11 +129,7 @@ METRICS = [
             'voltdb.io.messages_read',
             'voltdb.io.messages_written',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-            'connection_hostname',
-        },
+        {'host_id', 'voltdb_hostname', 'connection_hostname'},
     ),
     (
         # TABLE
@@ -181,14 +141,7 @@ METRICS = [
             'voltdb.table.string_data_memory',
             'voltdb.table.percent_full',
         ],
-        {
-            'voltdb_host_id',
-            'voltdb_host',
-            'site_id',
-            'partition_id',
-            'table',
-            'table_type',
-        },
+        {'host_id', 'voltdb_hostname', 'site_id', 'partition_id', 'table', 'table_type'},
     ),
     (
         # INDEX
@@ -197,8 +150,8 @@ METRICS = [
             'voltdb.index.memory_estimate',
         ],
         {
-            'voltdb_host_id',
-            'voltdb_host',
+            'host_id',
+            'voltdb_hostname',
             'site_id',
             'partition_id',
             'index',
@@ -214,9 +167,7 @@ METRICS = [
             'voltdb.custom.heroes.count',
             'voltdb.custom.heroes.avg_name_length',
         ],
-        {
-            'custom',
-        },
+        {'custom'},
     ),
 ]  # type: List[Tuple[List[str], Set[str]]]
 

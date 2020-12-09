@@ -9,8 +9,8 @@ CPUMetrics = {
     'query': '@Statistics:[CPU]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'cpu.percent_used', 'type': 'gauge'},
     ],
 }
@@ -22,8 +22,8 @@ MemoryMetrics = {
     'query': '@Statistics:[MEMORY]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'memory.rss', 'type': 'gauge'},
         {'name': 'memory.java.used', 'type': 'gauge'},
         {'name': 'memory.java.unused', 'type': 'gauge'},
@@ -45,8 +45,8 @@ SnapshotStatusMetrics = {
     'query': '@Statistics:[SNAPSHOTSTATUS]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
         None,  # PATH
         {'name': 'filename', 'type': 'tag'},
@@ -70,8 +70,8 @@ CommandLogMetrics = {
     'query': '@Statistics:[COMMANDLOG]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'commandlog.outstanding_bytes', 'type': 'gauge'},
         {'name': 'commandlog.outstanding_transactions', 'type': 'gauge'},
         {'name': 'commandlog.in_use_segment_count', 'type': 'gauge'},
@@ -87,8 +87,8 @@ ProcedureMetrics = {
     'query': '@Statistics:[PROCEDURE]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'site_id', 'type': 'tag'},
         {'name': 'partition_id', 'type': 'tag'},
         {'name': 'procedure', 'type': 'tag'},
@@ -123,8 +123,8 @@ LatencyMetrics = {
     'query': '@Statistics:[LATENCY]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'latency.interval', 'type': 'gauge'},
         {'name': 'latency.count', 'type': 'gauge'},
         {'name': 'latency.transactions_per_sec', 'type': 'gauge'},
@@ -145,8 +145,8 @@ StatementMetrics = {
     'query': '@Statistics:[PROCEDUREDETAIL]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'site_id', 'type': 'tag'},
         {'name': 'partition_id', 'type': 'tag'},
         {'name': 'procedure', 'type': 'tag'},
@@ -181,8 +181,8 @@ GCMetrics = {
     'query': '@Statistics:[GC]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'gc.newgen_gc_count', 'type': 'monotonic_count'},
         {'name': 'gc.newgen_avg_gc_time', 'type': 'gauge'},
         {'name': 'gc.oldgen_gc_count', 'type': 'monotonic_count'},
@@ -197,8 +197,8 @@ IOStatsMetrics = {
     'query': '@Statistics:[IOSTATS]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         None,  # CONNECTION_ID
         {'name': 'connection_hostname', 'type': 'tag'},
         {'name': 'io.bytes_read', 'type': 'monotonic_count'},
@@ -215,8 +215,8 @@ TableMetrics = {
     'query': '@Statistics:[TABLE]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'site_id', 'type': 'tag'},
         {'name': 'partition_id', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
@@ -241,8 +241,8 @@ IndexMetrics = {
     'query': '@Statistics:[INDEX]',
     'columns': [
         None,  # TIMESTAMP
-        {'name': 'voltdb_host_id', 'type': 'tag'},
-        {'name': 'voltdb_host', 'type': 'tag'},
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
         {'name': 'site_id', 'type': 'tag'},
         {'name': 'partition_id', 'type': 'tag'},
         {'name': 'index', 'type': 'tag'},
