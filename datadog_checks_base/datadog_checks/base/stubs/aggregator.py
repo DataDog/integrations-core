@@ -329,9 +329,7 @@ class AggregatorStub(object):
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
-    def assert_metrics_using_metadata(
-        self, metadata_metrics, check_submission_type=False, exclude=None
-    ):
+    def assert_metrics_using_metadata(self, metadata_metrics, check_submission_type=False, exclude=None):
         """
         Assert metrics using metadata.csv
 
