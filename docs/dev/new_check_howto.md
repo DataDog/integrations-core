@@ -313,7 +313,7 @@ files:
         type: boolean
         example: false
     # Try uncommenting this template to see what happens!
-    #- template: instances/default
+    #- template: instances/http
 ```
 
 Generate `conf.yaml.example` using `ddev`:
