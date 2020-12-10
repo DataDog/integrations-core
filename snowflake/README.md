@@ -115,7 +115,7 @@ Snowflake recommends setting [environment variables for proxy configuration][12]
 
 You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_password` in the `init_config` in the [snowflake.d/conf.yaml][3].
 
-**NOTE**: Snowflake automatically formats the proxy configurations and [sets environment variables][13]. 
+**NOTE**: Snowflake automatically formats the proxy configurations and [sets standard proxy environment variables][13]. 
 These variables also impact every requests from integrations, including orchestrators like Docker, ECS, and Kubernetes.
 
 ### Snowflake Custom Queries
