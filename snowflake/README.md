@@ -223,4 +223,4 @@ Need help? Contact [Datadog support][7].
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
 [11]: https://docs.datadoghq.com/metrics/summary/
 [12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
-[13]: https://github.com/snowflakedb/snowflake-connector-python/blob/master/src/snowflake/connector/proxy.py#L40-L41
+[13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41

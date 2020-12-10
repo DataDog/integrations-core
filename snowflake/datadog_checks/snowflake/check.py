@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import threading
 from contextlib import closing
 
 import snowflake.connector as sf
@@ -34,8 +33,6 @@ class SnowflakeCheck(AgentCheck):
     __NAMESPACE__ = 'snowflake'
 
     SERVICE_CHECK_CONNECT = 'snowflake.can_connect'
-
-    MONKEY_PATCH_LOCK = threading.Lock()
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
