@@ -43,6 +43,11 @@
     "logs": {
       "source": "nginx-ingress-controller"
     },
+    "contextual_metrics": [
+      "nginx_ingress.controller.request.duration",
+      "nginx_ingress.controller.response.duration",
+      "nginx_ingress.controller.requests"
+    ],
     "metrics_metadata": "metadata.csv"
   }
 }
