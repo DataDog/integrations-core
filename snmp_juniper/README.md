@@ -10,8 +10,41 @@ Collect SNMP metrics from your Juniper appliances.
 
 The following devices are supported:
 
-* Juniper EX Series Ethernet Switches
+### Juniper EX Series Ethernet Switches
 
+* EX3200
+* EX4200
+* EX8208
+* EX8216
+* EX2200
+* EX4500
+* EX6210
+* EX3300
+
+### Juniper MS Series Routers
+
+* MX960
+* MX480
+* MX240
+* MX80
+* MX40
+* MX10
+* MX5
+
+### Juniper SRX Firewalls
+
+* SRX5800
+* RX5600
+* RX3600
+* RX3400
+* RX210
+* RX240
+* RX650
+* RX100
+* RX1400
+* RX220
+* RX110
+* SRX120
 
 ## Setup
 

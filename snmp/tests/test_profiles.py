@@ -2175,3 +2175,48 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_metric('snmp.devices_monitored', count=1)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixture("dd_environment")
+def test_juniper_ex(aggregator):
+    run_profile_check('juniper_ex')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:juniper-ex',
+        'device_vendor:juniper-networks',
+    ]
+
+    virtual_chassis_counts_and_rates = [
+        "jnxVirtualChassisPortInPkts",
+        "jnxVirtualChassisPortOutPkts",
+        "jnxVirtualChassisPortInOctets",
+        "jnxVirtualChassisPortOutOctets",
+        "jnxVirtualChassisPortInMcasts",
+        "jnxVirtualChassisPortOutMcasts",
+        "jnxVirtualChassisPortCarrierTrans",
+        "jnxVirtualChassisPortInCRCAlignErrors",
+        "jnxVirtualChassisPortUndersizePkts",
+        "jnxVirtualChassisPortCollisions",
+    ]
+
+    virtual_chassis_rates = [
+        "jnxVirtualChassisPortInPkts1secRate",
+        "jnxVirtualChassisPortOutPkts1secRate",
+        "jnxVirtualChassisPortInOctets1secRate",
+        "jnxVirtualChassisPortOutOctets1secRate",
+    ]
+
+    for count_and_rate_metric in virtual_chassis_counts_and_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(count_and_rate_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(count_and_rate_metric), metric_type=aggregator.RATE, tags=common_tags, count=1
+        )
+
+    for rate_metric in virtual_chassis_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(rate_metric), metric_type=aggregator.RATE, tags=common_tags, count=1
+        )
+
+    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    aggregator.assert_all_metrics_covered()

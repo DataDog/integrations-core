@@ -9,7 +9,7 @@ extends:
   - _generic-ip.yaml
   - _generic-tcp.yaml
   - _generic-ospf.yaml
-  _ _generic-host-resources.yaml
+  - _generic-host-resources.yaml
 
 device:
   vendor: "juniper-networks"
