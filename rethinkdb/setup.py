@@ -27,6 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
+# TODO: bump version
 CHECKS_BASE_REQ = 'datadog-checks-base>=11.2.0'
 
 

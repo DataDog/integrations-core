@@ -6,6 +6,7 @@ from typing import Set
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import ServiceCheckStatus
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rethinkdb.types import Instance
 
 from .common import (
@@ -63,6 +64,9 @@ def assert_metrics(aggregator, is_proxy=False, disconnected_servers=None):
     _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_jobs_metrics(aggregator, is_proxy=is_proxy)
     _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def _assert_config_metrics(aggregator, disconnected_servers):

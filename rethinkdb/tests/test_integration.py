@@ -35,7 +35,6 @@ class TestCheck:
         check = RethinkDBCheck('rethinkdb', {}, [instance])
         dd_run_check(check)
         assert_metrics(aggregator)
-        aggregator.assert_all_metrics_covered()
         assert_service_checks(aggregator, instance)
 
     def test_connect_proxy_ok(self, dd_run_check, aggregator, instance):
@@ -46,7 +45,6 @@ class TestCheck:
         check = RethinkDBCheck('rethinkdb', {}, [instance])
         dd_run_check(check)
         assert_metrics(aggregator, is_proxy=True)
-        aggregator.assert_all_metrics_covered()
         assert_service_checks(aggregator, instance)
 
     def test_connect_tls_ok(self, dd_run_check, aggregator, instance):
@@ -58,7 +56,6 @@ class TestCheck:
         check = RethinkDBCheck('rethinkdb', {}, [instance])
         dd_run_check(check)
         assert_metrics(aggregator)
-        aggregator.assert_all_metrics_covered()
         assert_service_checks(aggregator, instance)
 
     def test_no_credentials_ok(self, dd_run_check, aggregator, instance):
@@ -73,7 +70,6 @@ class TestCheck:
         check = RethinkDBCheck('rethinkdb', {}, [instance])
         dd_run_check(check)
         assert_metrics(aggregator)
-        aggregator.assert_all_metrics_covered()
         assert_service_checks(aggregator, instance)
 
     @pytest.mark.parametrize('server_with_data', list(HEROES_TABLE_SERVERS))
@@ -85,7 +81,6 @@ class TestCheck:
         with temporarily_disconnect_server(server_with_data):
             dd_run_check(check)
         assert_metrics(aggregator, disconnected_servers={server_with_data})
-        aggregator.assert_all_metrics_covered()
         assert_service_checks(aggregator, instance, disconnected_servers={server_with_data})
 
     def test_connection_failure(self, dd_run_check, aggregator, instance):
