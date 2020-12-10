@@ -112,18 +112,18 @@ def test_oauth_auth(instance):
 
 
 def test_proxy_settings(instance):
-    # Test oauth
-    proxy_inst = copy.deepcopy(instance)
-    proxy_inst['proxy_host'] = 'testhost'
-    proxy_inst['proxy_port'] = 8000
-    proxy_inst['proxy_user'] = 'proxyuser'
-    proxy_inst['proxy_password'] = 'proxypass'
+    init_config = {
+        'proxy_host': 'testhost',
+        'proxy_port': 8000,
+        'proxy_user': 'proxyuser',
+        'proxy_password': 'proxypass',
+    }
 
     with mock.patch('datadog_checks.snowflake.check.sf') as sf:
-        check = SnowflakeCheck(CHECK_NAME, {}, [proxy_inst])
+        check = SnowflakeCheck(CHECK_NAME, init_config, [instance])
         check._conn = mock.MagicMock()
         check._query_manager = mock.MagicMock()
-        check.check(proxy_inst)
+        check.check(instance)
         sf.connect.assert_called_with(
             user='testuser',
             password='pass',
