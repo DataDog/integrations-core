@@ -37,9 +37,9 @@ class RethinkDBCheck(AgentCheck):
         manager_queries = [
             queries.ClusterMetrics,
             queries.ServerMetrics,
-            queries.DatabaseMetrics,
+            queries.DatabaseConfigMetrics,
             queries.DatabaseTableMetrics,
-            queries.TableMetrics,
+            queries.TableConfigMetrics,
             queries.ReplicaMetrics,
             queries.ShardMetrics,
             queries.JobMetrics,

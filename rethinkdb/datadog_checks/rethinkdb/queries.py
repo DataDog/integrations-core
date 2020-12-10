@@ -2,12 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+# NOTE: these metrics don't map 1:1 with what RethinkDB exposes via system tables -- often times
+# it's a combination of parts of multiple tables.
+
 ClusterMetrics = {
     'name': 'cluster',
     'query': '.queries_impl:get_cluster_metrics',
     'columns': [
+        # https://rethinkdb.com/docs/system-tables/#server_config
         {'name': 'config.servers', 'type': 'gauge'},
+        # https://rethinkdb.com/docs/system-tables/#db_config
         {'name': 'config.databases', 'type': 'gauge'},
+        # https://rethinkdb.com/docs/system-stats#cluster
         {'name': 'stats.cluster.query_engine.queries_per_sec', 'type': 'gauge'},
         {'name': 'stats.cluster.query_engine.read_docs_per_sec', 'type': 'gauge'},
         {'name': 'stats.cluster.query_engine.written_docs_per_sec', 'type': 'gauge'},
@@ -20,6 +26,7 @@ ServerMetrics = {
     'columns': [
         {'name': 'server', 'type': 'tag'},
         {'name': 'server_tag', 'type': 'tag_list'},
+        # https://rethinkdb.com/docs/system-tables/#server_config
         {'name': 'stats.server.query_engine.client_connections', 'type': 'gauge'},
         {'name': 'stats.server.query_engine.clients_active', 'type': 'gauge'},
         {'name': 'stats.server.query_engine.queries_per_sec', 'type': 'gauge'},
@@ -28,17 +35,19 @@ ServerMetrics = {
         {'name': 'stats.server.query_engine.read_docs_total', 'type': 'monotonic_count'},
         {'name': 'stats.server.query_engine.written_docs_per_sec', 'type': 'gauge'},
         {'name': 'stats.server.query_engine.written_docs_total', 'type': 'monotonic_count'},
+        # https://rethinkdb.com/docs/system-tables/#server_status
         {'name': 'server_status.network.time_connected', 'type': 'gauge'},
         {'name': 'server_status.network.connected_to', 'type': 'gauge'},
         {'name': 'server_status.process.time_started', 'type': 'gauge'},
     ],
 }
 
-DatabaseMetrics = {
+DatabaseConfigMetrics = {
     'name': 'database',
-    'query': '.queries_impl:get_database_metrics',
+    'query': '.queries_impl:get_database_config_metrics',
     'columns': [
         {'name': 'database', 'type': 'tag'},
+        # Group on https://rethinkdb.com/docs/system-tables/#table_config
         {'name': 'config.tables_per_database', 'type': 'gauge'},
     ],
 }
@@ -49,8 +58,10 @@ DatabaseTableMetrics = {
     'columns': [
         {'name': 'database', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
+        # https://rethinkdb.com/docs/system-stats/#table
         {'name': 'stats.table.query_engine.read_docs_per_sec', 'type': 'gauge'},
         {'name': 'stats.table.query_engine.written_docs_per_sec', 'type': 'gauge'},
+        # https://rethinkdb.com/docs/system-tables/#table_status
         {'name': 'table_status.shards', 'type': 'gauge'},
         {
             'name': 'table_status.status.ready_for_outdated_reads',
@@ -75,11 +86,12 @@ DatabaseTableMetrics = {
     ],
 }
 
-TableMetrics = {
+TableConfigMetrics = {
     'name': 'table',
-    'query': '.queries_impl:get_table_metrics',
+    'query': '.queries_impl:get_table_config_metrics',
     'columns': [
         {'name': 'table', 'type': 'tag'},
+        # Obtained from https://rethinkdb.com/docs/system-tables/#table_config
         {'name': 'config.secondary_indexes_per_table', 'type': 'gauge'},
     ],
 }
@@ -93,6 +105,7 @@ ReplicaMetrics = {
         {'name': 'server', 'type': 'tag'},
         {'name': 'server_tag', 'type': 'tag_list'},
         {'name': 'state', 'type': 'tag'},
+        # https://rethinkdb.com/docs/system-stats/#replica-tableserver-pair
         {'name': 'stats.table_server.query_engine.read_docs_per_sec', 'type': 'gauge'},
         {'name': 'stats.table_server.query_engine.read_docs_total', 'type': 'monotonic_count'},
         {'name': 'stats.table_server.query_engine.written_docs_per_sec', 'type': 'gauge'},
@@ -116,6 +129,8 @@ ShardMetrics = {
         {'name': 'shard', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
         {'name': 'database', 'type': 'tag'},
+        # Combination of https://rethinkdb.com/docs/system-tables/#table_status
+        # and https://rethinkdb.com/docs/system-tables/#table_config
         {'name': 'table_status.shards.replicas', 'type': 'gauge'},
         {'name': 'table_status.shards.primary_replicas', 'type': 'gauge'},
     ],
@@ -126,6 +141,7 @@ JobMetrics = {
     'query': '.queries_impl:get_job_metrics',
     'columns': [
         {'name': 'job_type', 'type': 'tag'},
+        # https://rethinkdb.com/docs/system-tables/#jobs
         {'name': 'system_jobs.jobs', 'type': 'gauge'},
     ],
 }
@@ -135,6 +151,7 @@ CurrentIssuesMetrics = {
     'query': '.queries_impl:get_current_issues_metrics',
     'columns': [
         {'name': 'issue_type', 'type': 'tag'},
+        # https://rethinkdb.com/docs/system-issues/
         {'name': 'current_issues.issues', 'type': 'gauge'},
         {'name': 'current_issues.critical_issues', 'type': 'gauge'},
     ],

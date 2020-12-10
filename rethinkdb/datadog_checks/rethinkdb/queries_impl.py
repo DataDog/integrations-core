@@ -88,7 +88,7 @@ def get_server_metrics(conn):
     return rows
 
 
-def get_database_metrics(conn):
+def get_database_config_metrics(conn):
     # type: (rethinkdb.net.Connection) -> List[tuple]
     """
     Return metrics about each `db`.
@@ -133,7 +133,7 @@ def get_database_table_metrics(conn):
     return rows
 
 
-def get_table_metrics(conn):
+def get_table_config_metrics(conn):
     # type: (rethinkdb.net.Connection) -> List[tuple]
     """
     Return metrics about each `table`.
