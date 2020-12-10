@@ -2179,10 +2179,12 @@ def test_cisco_catalyst(aggregator):
 
 @pytest.mark.usefixture("dd_environment")
 def test_juniper_ex(aggregator):
-    run_profile_check('juniper_ex')
+    run_profile_check('juniper-ex')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-ex',
         'device_vendor:juniper-networks',
+        'virtualChassisId:987', 
+        'virtualChassisPortName:Sherlock Holmes'
     ]
 
     virtual_chassis_counts_and_rates = [
