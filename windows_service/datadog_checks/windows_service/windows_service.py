@@ -82,7 +82,8 @@ class WindowsService(AgentCheck):
 
         if 'ALL' not in services:
             for service in services_unseen:
-                status = self.CRITICAL
+                # if a name doesn't match anything (wrong name or no permission to access the service), report UNKNOWN
+                status = self.UNKNOWN
 
                 tags = ['windows_service:{}'.format(service)]
                 tags.extend(custom_tags)

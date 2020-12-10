@@ -29,7 +29,7 @@ def test_basic(aggregator, check, instance_basic):
     )
     aggregator.assert_service_check(
         c.SERVICE_CHECK_NAME,
-        status=c.CRITICAL,
+        status=c.UNKNOWN,
         tags=['service:NonExistentService', 'windows_service:NonExistentService', 'optional:tag1'],
         count=1,
     )
@@ -75,7 +75,7 @@ def test_basic_disable_service_tag(aggregator, check, instance_basic_disable_ser
         c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:Dnscache', 'optional:tag1'], count=1
     )
     aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.CRITICAL, tags=['windows_service:NonExistentService', 'optional:tag1'], count=1
+        c.SERVICE_CHECK_NAME, status=c.UNKNOWN, tags=['windows_service:NonExistentService', 'optional:tag1'], count=1
     )
 
 
@@ -91,7 +91,7 @@ def test_basic_e2e(dd_agent_check, check, instance_basic):
     )
     aggregator.assert_service_check(
         WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.CRITICAL,
+        status=WindowsService.UNKNOWN,
         tags=['service:NonExistentService', 'windows_service:NonExistentService', 'optional:tag1'],
         count=1,
     )
