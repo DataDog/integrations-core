@@ -1,8 +1,8 @@
 {
 	"name": "[Snowflake] Increased Failed Login Attempts",
-	"type": "metric alert",
-	"query": "sum(last_1d):avg:snowflake.logins.fail.count{*}.as_count() > 3",
-	"message": "There has been at least 3 failed login attempts in the past 24 hours. ",
+	"type": "query alert",
+	"query": "sum(last_1d):avg:snowflake.logins.fail.count{*}.as_count() > 10",
+	"message": "There has been at least 10 failed login attempts in the past 24 hours.",
 	"tags": [
 		"integration:snowflake"
 	],
