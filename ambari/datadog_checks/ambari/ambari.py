@@ -30,7 +30,7 @@ class AmbariCheck(AgentCheck):
         self.base_tags = self.instance.get("tags", [])
         self.included_services = self.instance.get("services", [])
 
-    def check(self, instance):
+    def check(self, _):
         clusters = self.get_clusters()
         self.get_host_metrics(clusters)
 
