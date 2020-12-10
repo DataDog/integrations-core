@@ -143,10 +143,10 @@ instances:
     #
     # rmi_client_timeout: 15000
 
-    ## @param collect_default_jvm_metrics - boolean - optional - default: false
-    ## Allows disabling the collection of default JVM metrics
+    ## @param collect_default_jvm_metrics - boolean - optional - default: true
+    ## Allows disabling the collection of default JVM metrics.
     #
-    # collect_default_jvm_metrics: false
+    # collect_default_jvm_metrics: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
