@@ -330,15 +330,14 @@ class AggregatorStub(object):
         assert condition, msg
 
     def assert_metrics_using_metadata(
-        self, metadata_metrics, check_metric_type=True, check_submission_type=False, exclude=None
+        self, metadata_metrics, check_submission_type=False, exclude=None
     ):
         """
         Assert metrics using metadata.csv
 
         Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
         asserting this type make sense for e2e (metrics collected from agent).
-        For integrations tests, we can check the submission type with `check_submission_type=True`, or
-        use `check_metric_type=False` not to check types.
+        For integrations tests, we can check the submission type with `check_submission_type=True`.
 
         Usage:
 
@@ -375,13 +374,12 @@ class AggregatorStub(object):
                     if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
                         actual_metric_type = 'count'
 
-                if check_metric_type:
-                    if expected_metric_type != actual_metric_type:
-                        errors.add(
-                            "Expect `{}` to have type `{}` but got `{}`.".format(
-                                metric_stub_name, expected_metric_type, actual_metric_type
-                            )
+                if expected_metric_type != actual_metric_type:
+                    errors.add(
+                        "Expect `{}` to have type `{}` but got `{}`.".format(
+                            metric_stub_name, expected_metric_type, actual_metric_type
                         )
+                    )
 
         assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 
