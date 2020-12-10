@@ -102,7 +102,7 @@ class SnowflakeCheck(AgentCheck):
     def connect(self):
         self.log.debug(
             "Establishing a new connection to Snowflake: account=%s, user=%s, database=%s, schema=%s, warehouse=%s, "
-            "role=%s, login_timeout=%s, authenticator=%s, ocsp_response_cache_filename=%s, proxy_host=%s, proxy_port=%s",
+            "role=%s, timeout=%s, authenticator=%s, ocsp_response_cache_filename=%s, proxy_host=%s, proxy_port=%s",
             self.config.account,
             self.config.user,
             self.config.database,
@@ -145,7 +145,6 @@ class SnowflakeCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
-
 
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):

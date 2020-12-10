@@ -6,7 +6,6 @@ import copy
 import mock
 import pytest
 
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .conftest import CHECK_NAME
@@ -111,6 +110,7 @@ def test_oauth_auth(instance):
             proxy_password=None,
         )
 
+
 def test_proxy_settings(instance):
     # Test oauth
     proxy_inst = copy.deepcopy(instance)
@@ -137,8 +137,8 @@ def test_proxy_settings(instance):
             client_prefetch_threads=4,
             login_timeout=60,
             ocsp_response_cache_filename=None,
-            authenticator='oauth',
-            token='testtoken',
+            authenticator='snowflake',
+            token=None,
             client_session_keep_alive=False,
             proxy_host='testhost',
             proxy_port=8000,
