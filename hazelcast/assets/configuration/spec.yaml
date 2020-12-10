@@ -6,7 +6,8 @@ files:
     options:
     - template: init_config/jmx
       overrides:
-        is_jmx.value.example: false
+        loader.required: false
+        loader.hidden: true
     - template: init_config/http
   - template: instances
     options:

@@ -1,1 +1,6 @@
 - template: init_config/service
+- name: loader
+  description: "Loader to use for all instances (e.g. core, python, jmx)."
+  hidden: true
+  value:
+    type: string

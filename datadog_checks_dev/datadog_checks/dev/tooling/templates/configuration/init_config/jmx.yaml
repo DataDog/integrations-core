@@ -1,5 +1,6 @@
 - name: is_jmx
-  required: true
+  required: false
+  hidden: true
   description: Whether or not this file is a configuration for a JMX integration.
   value:
     example: true
@@ -46,3 +47,11 @@
     items:
       type: object
 - template: init_config/default
+  overrides:
+    loader.required: true
+    loader.hidden: false
+    loader.description: |
+      Loader to use for all instances (e.g. core, python, jmx).
+      Use `loader: jmx` to indicate this file is a configuration for a JMX integration.
+    loader.display_priority: 100
+    loader.value.example: jmx

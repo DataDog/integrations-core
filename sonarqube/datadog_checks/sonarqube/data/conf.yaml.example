@@ -2,10 +2,11 @@
 #
 init_config:
 
-    ## @param is_jmx - boolean - required
-    ## Whether or not this file is a configuration for a JMX integration.
+    ## @param loader - string - required
+    ## Loader to use for all instances (e.g. core, python, jmx).
+    ## Use `loader: jmx` to indicate this file is a configuration for a JMX integration.
     #
-    is_jmx: false
+    loader: jmx
 
     ## @param collect_default_metrics - boolean - required
     ## Whether or not the check should collect all default metrics.
