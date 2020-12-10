@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.7.0 / 2020-12-10
+
+* [Added] Add `tag_list` column type, allowing to ingest variable-size database-provided tags. See [#8147](https://github.com/DataDog/integrations-core/pull/8147).
+* [Added] Update aerospike dependency. See [#8044](https://github.com/DataDog/integrations-core/pull/8044).
+* [Fixed] Remove unused 'tls_load_default_certs' option . See [#8013](https://github.com/DataDog/integrations-core/pull/8013).
+
 ## 15.6.1 / 2020-11-10 / Agent 7.24.0
 
 * [Fixed] Change DB utils behavior when a truncated row is found to only drop the row. See [#7983](https://github.com/DataDog/integrations-core/pull/7983).
