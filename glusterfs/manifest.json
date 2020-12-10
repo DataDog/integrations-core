@@ -1,8 +1,8 @@
 {
-  "display_name": "GlusterFS",
+  "display_name": "Red Hat Gluster Storage",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "glusterfs",
+  "name": "GlusterFS",
   "metric_prefix": "glusterfs.",
   "metric_to_check": "glusterfs.cluster.nodes.count",
   "creates_events": false,
@@ -18,7 +18,7 @@
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "glusterfs",
+  "integration_id": "red-hat-gluster-storage",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
