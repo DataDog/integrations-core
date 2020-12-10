@@ -33,7 +33,7 @@ def test_check(aggregator, check, instance):
 
     aggregator.assert_all_metrics_covered()
     metadata_metrics = get_metadata_metrics()
-    aggregator.assert_metrics_using_metadata(metadata_metrics, check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
 
 
 def test_inclusion_filter(aggregator, check, instance):

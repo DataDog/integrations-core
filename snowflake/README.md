@@ -27,22 +27,25 @@ datadog-agent integration install datadog-snowflake==2.0.1
 </div>
 
 ### Configuration
+<div class="alert alert-warning">Snowflake recommends granting permissions to an alternate role like `SYSADMIN`. Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.</div>
+
 1. Create a Datadog specific role and user to monitor Snowflake. In Snowflake, run the following to create a custom role with access to the ACCOUNT_USAGE schema.
 
-    <div class="alert alert-warning">Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
+    Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][8].
     
-    Snowflake recommends granting permissions to an alternate role like `SYSADMIN`.
-    Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.
-    </div>
+
     ```text
     use role ACCOUNTADMIN;
     grant imported privileges on database snowflake to role SYSADMIN;
     
     use role SYSADMIN;
+    
     ```
     
+    
     Alternatively, you can create a `DATADOG` custom role with access to `ACCOUNT_USAGE`.
+    
     
     ```text
     -- Create a new role intended to monitor Snowflake usage.
@@ -224,3 +227,4 @@ Need help? Contact [Datadog support][7].
 [11]: https://docs.datadoghq.com/metrics/summary/
 [12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
 [13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
+
