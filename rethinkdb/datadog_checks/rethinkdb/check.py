@@ -61,7 +61,9 @@ class RethinkDBCheck(AgentCheck):
 
     def _execute_raw_query(self, query):
         # type: (str) -> List[tuple]
-        if query not in self._query_funcs:
+        query_func = self._query_funcs.get(query)
+
+        if query_func is None:
             # QueryManager only supports `str` queries.
             # So here's the workaround: we make `query` refer to the import paths of query functions, then import here.
             # Cache the results so imports only happen on the first check run.
@@ -70,7 +72,6 @@ class RethinkDBCheck(AgentCheck):
             query_func = getattr(module, func_name)
             self._query_funcs[query] = query_func
 
-        query_func = self._query_funcs[query]
         return query_func(self._conn)
 
     @contextmanager
