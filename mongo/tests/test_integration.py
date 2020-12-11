@@ -190,7 +190,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         'replset_state:arbiter',
         'sharding_cluster_role:shardsvr',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'oplog']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     _assert_metrics(aggregator, metrics_categories, replica_tags)
 
@@ -448,7 +448,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check)
         mongo_check.check(None)
 
     replica_tags = ['replset_name:replset', 'replset_state:arbiter']
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'oplog']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     _assert_metrics(aggregator, metrics_categories, replica_tags)
 
