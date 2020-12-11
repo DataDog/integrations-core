@@ -1,5 +1,9 @@
 # CHANGELOG - Presto
 
+## 2.3.0 / 2020-12-11
+
+* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+
 ## 2.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7745](https://github.com/DataDog/integrations-core/pull/7745).
