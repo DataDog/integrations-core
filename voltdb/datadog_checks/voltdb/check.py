@@ -20,9 +20,9 @@ BASE_PARSED_VERSION = pkg_resources.get_distribution('datadog-checks-base').pars
 class VoltDBCheck(AgentCheck):
     __NAMESPACE__ = 'voltdb'
 
-    def __init__(self, *args, **kwargs):
-        # type: (*Any, **Any) -> None
-        super(VoltDBCheck, self).__init__(*args, **kwargs)
+    def __init__(self, name, init_config, instances):
+        # type: (str, dict, list) -> None
+        super(VoltDBCheck, self).__init__(name, init_config, instances)
         self._config = Config(cast(Instance, self.instance))
 
         if self._config.auth is not None:
