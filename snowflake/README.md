@@ -116,7 +116,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
 
 Snowflake recommends setting [environment variables for proxy configuration][12].
 
-You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_password` in the `init_config` in the [snowflake.d/conf.yaml][3].
+You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_password` under `init_config` in the [snowflake.d/conf.yaml][3].
 
 **NOTE**: Snowflake automatically formats the proxy configurations and [sets standard proxy environment variables][13]. 
 These variables also impact every requests from integrations, including orchestrators like Docker, ECS, and Kubernetes.
