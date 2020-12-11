@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.11.0 / 2020-12-11
+
+* [Added] Add config specs. See [#8140](https://github.com/DataDog/integrations-core/pull/8140).
+
 ## 1.10.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
