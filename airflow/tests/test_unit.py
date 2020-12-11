@@ -12,7 +12,7 @@ from . import common
 
 def test_service_checks_cannot_connect(aggregator):
     check = AirflowCheck('airflow', {}, [common.INSTANCE_WRONG_URL])
-    check.check(common.INSTANCE_WRONG_URL)
+    check.check(None)
 
     tags = ['key:my-tag', 'url:http://localhost:5555']
 
@@ -35,7 +35,7 @@ def test_service_checks_healthy(aggregator, json_resp, expected_healthy_status, 
         mock_resp.json.return_value = json_resp
         req.get.return_value = mock_resp
 
-        check.check(instance)
+        check.check(None)
 
     tags = ['key:my-tag', 'url:http://localhost:8080']
 
