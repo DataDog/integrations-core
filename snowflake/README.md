@@ -121,7 +121,7 @@ You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_passwo
 **NOTE**: Snowflake automatically formats the proxy configurations and sets [standard proxy environment variables][13]. 
 These variables also impact every requests from integrations, including orchestrators like Docker, ECS, and Kubernetes.
 
-### Snowflake Custom Queries
+### Snowflake custom queries
 
 The Snowflake integration supports custom queries. By default, the integration connects to the shared `SNOWFLAKE` database and `ACCOUNT_USAGE` schema. 
 
