@@ -21,7 +21,7 @@ class AirflowCheck(AgentCheck):
         # The configuration is only parsed once if it succeed, otherwise it's retried.
         self.check_initializations.append(self._parse_config)
 
-    def check(self, instance):
+    def check(self, _):
         tags = ['url:{}'.format(self._url)] + self._tags
         url = self._url + "/api/experimental/test"
 

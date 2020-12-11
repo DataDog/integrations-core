@@ -48,23 +48,23 @@ class ESCheck(AgentCheck):
                 'name': 'aws_host',
                 'default': urlparse(self.instance['url']).hostname,
             }
+        self.config = from_instance(self.instance)
 
-    def check(self, instance):
-        config = from_instance(instance)
-        admin_forwarder = config.admin_forwarder
-        jvm_rate = instance.get('gc_collectors_as_rate', False)
+    def check(self, _):
+        admin_forwarder = self.config.admin_forwarder
+        jvm_rate = self.instance.get('gc_collectors_as_rate', False)
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
         try:
-            version = self._get_es_version(config)
+            version = self._get_es_version()
         except AuthenticationError:
             self.log.exception("The ElasticSearch credentials are incorrect")
             raise
 
-        health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version, config.cluster_stats)
+        health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version)
         stats_metrics = stats_for_version(version, jvm_rate)
-        if config.cluster_stats:
+        if self.config.cluster_stats:
             # Include Node System metrics
             stats_metrics.update(node_system_stats_for_version(version))
         pshard_stats_metrics = pshard_stats_for_version(version)
@@ -72,55 +72,55 @@ class ESCheck(AgentCheck):
         # Load stats data.
         # This must happen before other URL processing as the cluster name
         # is retrieved here, and added to the tag list.
-        stats_url = self._join_url(config.url, stats_url, admin_forwarder)
-        stats_data = self._get_data(stats_url, config)
+        stats_url = self._join_url(stats_url, admin_forwarder)
+        stats_data = self._get_data(stats_url)
         if stats_data.get('cluster_name'):
             # retrieve the cluster name from the data, and append it to the
             # master tag list.
             cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
-            config.tags.append(cluster_name_tag)
-            config.health_tags.append(cluster_name_tag)
-        self._process_stats_data(stats_data, stats_metrics, config)
+            self.config.tags.append(cluster_name_tag)
+            self.config.health_tags.append(cluster_name_tag)
+        self._process_stats_data(stats_data, stats_metrics)
 
         # Load cluster-wise data
         # Note: this is a cluster-wide query, might TO.
-        if config.pshard_stats:
-            send_sc = bubble_ex = not config.pshard_graceful_to
-            pshard_stats_url = self._join_url(config.url, pshard_stats_url, admin_forwarder)
+        if self.config.pshard_stats:
+            send_sc = bubble_ex = not self.config.pshard_graceful_to
+            pshard_stats_url = self._join_url(pshard_stats_url, admin_forwarder)
             try:
-                pshard_stats_data = self._get_data(pshard_stats_url, config, send_sc=send_sc)
-                self._process_pshard_stats_data(pshard_stats_data, config, pshard_stats_metrics)
+                pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
+                self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics)
             except requests.ReadTimeout as e:
                 if bubble_ex:
                     raise
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
 
         # Load the health data.
-        health_url = self._join_url(config.url, health_url, admin_forwarder)
-        health_data = self._get_data(health_url, config)
-        self._process_health_data(health_data, config, version)
+        health_url = self._join_url(health_url, admin_forwarder)
+        health_data = self._get_data(health_url)
+        self._process_health_data(health_data, version)
 
-        if config.pending_task_stats:
+        if self.config.pending_task_stats:
             # Load the pending_tasks data.
-            pending_tasks_url = self._join_url(config.url, pending_tasks_url, admin_forwarder)
-            pending_tasks_data = self._get_data(pending_tasks_url, config)
-            self._process_pending_tasks_data(pending_tasks_data, config)
+            pending_tasks_url = self._join_url(pending_tasks_url, admin_forwarder)
+            pending_tasks_data = self._get_data(pending_tasks_url)
+            self._process_pending_tasks_data(pending_tasks_data)
 
-        if config.index_stats and version >= [1, 0, 0]:
+        if self.config.index_stats and version >= [1, 0, 0]:
             try:
-                self._get_index_metrics(config, admin_forwarder, version)
+                self._get_index_metrics(admin_forwarder, version)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
         # If we're here we did not have any ES conn issues
-        self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=config.service_check_tags)
+        self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=self.config.service_check_tags)
 
-    def _get_es_version(self, config):
+    def _get_es_version(self):
         """
         Get the running version of elasticsearch.
         """
         try:
-            data = self._get_data(config.url, config, send_sc=False)
+            data = self._get_data(self.config.url, send_sc=False)
             raw_version = data['version']['number']
             self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
@@ -130,30 +130,30 @@ class ESCheck(AgentCheck):
         except AuthenticationError:
             raise
         except Exception as e:
-            self.warning("Error while trying to get Elasticsearch version from %s %s", config.url, e)
+            self.warning("Error while trying to get Elasticsearch version from %s %s", self.config.url, e)
             version = [1, 0, 0]
 
         self.log.debug("Elasticsearch version is %s", version)
         return version
 
-    def _join_url(self, base, url, admin_forwarder=False):
+    def _join_url(self, url, admin_forwarder=False):
         """
         overrides `urlparse.urljoin` since it removes base url path
         https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
         """
         if admin_forwarder:
-            return base + url
+            return self.config.url + url
         else:
-            return urljoin(base, url)
+            return urljoin(self.config.url, url)
 
-    def _get_index_metrics(self, config, admin_forwarder, version):
+    def _get_index_metrics(self, admin_forwarder, version):
         cat_url = '/_cat/indices?format=json&bytes=b'
-        index_url = self._join_url(config.url, cat_url, admin_forwarder)
-        index_resp = self._get_data(index_url, config)
+        index_url = self._join_url(cat_url, admin_forwarder)
+        index_resp = self._get_data(index_url)
         index_stats_metrics = index_stats_for_version(version)
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
         for idx in index_resp:
-            tags = config.tags + ['index_name:' + idx['index']]
+            tags = self.config.tags + ['index_name:' + idx['index']]
             # we need to remap metric names because the ones from elastic
             # contain dots and that would confuse `_process_metric()` (sic)
             index_data = {
@@ -181,7 +181,7 @@ class ESCheck(AgentCheck):
                 desc = index_stats_metrics[metric]
                 self._process_metric(index_data, metric, *desc, tags=tags)
 
-    def _get_urls(self, version, cluster_stats):
+    def _get_urls(self, version):
         """
         Compute the URLs we need to hit depending on the running ES version
         """
@@ -190,18 +190,22 @@ class ESCheck(AgentCheck):
 
         if version >= [0, 90, 10]:
             pending_tasks_url = "/_cluster/pending_tasks"
-            stats_url = "/_nodes/stats" if cluster_stats else "/_nodes/_local/stats"
+            stats_url = "/_nodes/stats" if self.config.cluster_stats else "/_nodes/_local/stats"
             if version < [5, 0, 0]:
                 # version 5 errors out if the `all` parameter is set
                 stats_url += "?all=true"
         else:
             # legacy
             pending_tasks_url = None
-            stats_url = "/_cluster/nodes/stats?all=true" if cluster_stats else "/_cluster/nodes/_local/stats?all=true"
+            stats_url = (
+                "/_cluster/nodes/stats?all=true"
+                if self.config.cluster_stats
+                else "/_cluster/nodes/_local/stats?all=true"
+            )
 
         return health_url, stats_url, pshard_stats_url, pending_tasks_url
 
-    def _get_data(self, url, config, send_sc=True):
+    def _get_data(self, url, send_sc=True):
         """
         Hit a given URL and return the parsed json
         """
@@ -219,7 +223,7 @@ class ESCheck(AgentCheck):
                     self.SERVICE_CHECK_CONNECT_NAME,
                     AgentCheck.CRITICAL,
                     message="Error {} when hitting {}".format(e, url),
-                    tags=config.service_check_tags,
+                    tags=self.config.service_check_tags,
                 )
             raise
 
@@ -227,7 +231,7 @@ class ESCheck(AgentCheck):
 
         return resp.json()
 
-    def _process_pending_tasks_data(self, data, config):
+    def _process_pending_tasks_data(self, data):
         p_tasks = defaultdict(int)
         average_time_in_queue = 0
 
@@ -247,12 +251,12 @@ class ESCheck(AgentCheck):
         for metric in CLUSTER_PENDING_TASKS:
             # metric description
             desc = CLUSTER_PENDING_TASKS[metric]
-            self._process_metric(node_data, metric, *desc, tags=config.tags)
+            self._process_metric(node_data, metric, *desc, tags=self.config.tags)
 
-    def _process_stats_data(self, data, stats_metrics, config):
+    def _process_stats_data(self, data, stats_metrics):
         for node_data in itervalues(data.get('nodes', {})):
             metric_hostname = None
-            metrics_tags = list(config.tags)
+            metrics_tags = list(self.config.tags)
 
             # Resolve the node's name
             node_name = node_data.get('name')
@@ -260,10 +264,10 @@ class ESCheck(AgentCheck):
                 metrics_tags.append('node_name:{}'.format(node_name))
 
             # Resolve the node's hostname
-            if config.node_name_as_host:
+            if self.config.node_name_as_host:
                 if node_name:
                     metric_hostname = node_name
-            elif config.cluster_stats:
+            elif self.config.cluster_stats:
                 for k in ['hostname', 'host']:
                     if k in node_data:
                         metric_hostname = node_data[k]
@@ -272,9 +276,9 @@ class ESCheck(AgentCheck):
             for metric, desc in iteritems(stats_metrics):
                 self._process_metric(node_data, metric, *desc, tags=metrics_tags, hostname=metric_hostname)
 
-    def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
+    def _process_pshard_stats_data(self, data, pshard_stats_metrics):
         for metric, desc in iteritems(pshard_stats_metrics):
-            self._process_metric(data, metric, *desc, tags=config.tags)
+            self._process_metric(data, metric, *desc, tags=self.config.tags)
 
     def _process_metric(self, data, metric, xtype, path, xform=None, tags=None, hostname=None):
         """
@@ -302,23 +306,23 @@ class ESCheck(AgentCheck):
         else:
             self.log.debug("Metric not found: %s -> %s", path, metric)
 
-    def _process_health_data(self, data, config, version):
+    def _process_health_data(self, data, version):
         cluster_status = data.get('status')
-        if not self.cluster_status.get(config.url):
-            self.cluster_status[config.url] = cluster_status
+        if not self.cluster_status.get(self.config.url):
+            self.cluster_status[self.config.url] = cluster_status
             if cluster_status in ["yellow", "red"]:
-                event = self._create_event(cluster_status, tags=config.tags)
+                event = self._create_event(cluster_status, tags=self.config.tags)
                 self.event(event)
 
-        if cluster_status != self.cluster_status.get(config.url):
-            self.cluster_status[config.url] = cluster_status
-            event = self._create_event(cluster_status, tags=config.tags)
+        if cluster_status != self.cluster_status.get(self.config.url):
+            self.cluster_status[self.config.url] = cluster_status
+            event = self._create_event(cluster_status, tags=self.config.tags)
             self.event(event)
 
         cluster_health_metrics = health_stats_for_version(version)
 
         for metric, desc in iteritems(cluster_health_metrics):
-            self._process_metric(data, metric, *desc, tags=config.tags)
+            self._process_metric(data, metric, *desc, tags=self.config.tags)
 
         # Process the service check
         if cluster_status == 'green':
@@ -349,7 +353,10 @@ class ESCheck(AgentCheck):
         )
 
         self.service_check(
-            self.SERVICE_CHECK_CLUSTER_STATUS, status, message=msg, tags=config.service_check_tags + config.health_tags
+            self.SERVICE_CHECK_CLUSTER_STATUS,
+            status,
+            message=msg,
+            tags=self.config.service_check_tags + self.config.health_tags,
         )
 
     def _create_event(self, status, tags=None):

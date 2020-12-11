@@ -5,7 +5,8 @@
   "categories": [
     "web",
     "network",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "PowerDNS Recursor",
@@ -37,7 +38,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "powerdns"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

@@ -84,6 +84,31 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][4].
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add the `dd-agent` user to the `systemd-journal` group by running:
+   ```text
+   usermod -a -G systemd-journal dd-agent
+   ```
+
+3. Add this configuration block to your `powerdns_recursor.d/conf.yaml` file to start collecting your PowerDNS Recursor Logs:
+
+   ```yaml
+   logs:
+     - type: journald
+       source: powerdns
+   ```
+
+    See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options.
+
+4. [Restart the Agent][4].
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -97,6 +122,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":8082, "api_key":"<POWERDNS_API_KEY>", "version": 3}` |
 
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "powerdns"}`                  |
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -109,6 +142,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
+
 
 ### Events
 
@@ -131,3 +165,5 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
+
