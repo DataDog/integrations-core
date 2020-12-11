@@ -7,7 +7,7 @@ datadog-amazon-msk==1.4.0
 datadog-ambari==1.6.0; sys_platform != 'win32'
 datadog-apache==1.15.0
 datadog-aspdotnet==1.6.1; sys_platform == 'win32'
-datadog-azure-iot-edge==1.1.0
+datadog-azure-iot-edge==1.1.1
 datadog-btrfs==1.11.0; sys_platform != 'win32'
 datadog-cacti==1.8.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.7.0
