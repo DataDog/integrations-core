@@ -10,8 +10,14 @@ class ReplicationOpLogCollector(MongoCollector):
     compared to the primary."""
 
     def compatible_with(self, deployment):
-        # Can only be run on mongod that are part of a replica set.
-        return isinstance(deployment, ReplicaSetDeployment)
+        # Can only be run on mongod node that is part of a replica set. Not possible on arbiters.
+        if not isinstance(deployment, ReplicaSetDeployment):
+            return False
+
+        if deployment.is_arbiter:
+            return False
+
+        return True
 
     def collect(self, client):
         # Fetch information analogous to Mongo's db.getReplicationInfo()
@@ -24,7 +30,7 @@ class ReplicationOpLogCollector(MongoCollector):
                 if ol_options:
                     break
         except pymongo.errors.OperationFailure as e:
-            # In theory this error should only happen when connected to mongos.
+            # In theory this error should only happen when connected to mongos or arbiter.
             self.log.debug("Unable to collect oplog metrics from replica set member. Error is: %s", e)
             return
 
