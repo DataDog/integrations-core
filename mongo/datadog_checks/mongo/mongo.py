@@ -283,7 +283,8 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
-    def get_deployment(self, admindb):
+    @staticmethod
+    def get_deployment(admindb):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         options = admindb.command("getCmdLineOpts")['parsed']
