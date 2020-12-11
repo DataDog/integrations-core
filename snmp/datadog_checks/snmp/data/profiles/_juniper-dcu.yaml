@@ -1,0 +1,24 @@
+# Statistics for traffic that satisfies the rules in each configured Destination Class
+
+metrics:
+  - MIB: JUNIPER-DCU-MIB
+    table:
+      OID: 1.3.6.1.4.1.2636.3.6.2
+      name: jnxDcuStatsTable
+    forced_type: monotonic_count_and_rate
+    symbols:
+    # The number of packets received on this interface, belonging to this address family that match this Destination Class.
+    - OID: 1.3.6.1.4.1.2636.3.6.2.1.4
+      name: jnxDcuStatsPackets
+    # The number of bytes received on this interface, belonging to this address family that match this Destination Class.
+    - OID: 1.3.6.1.4.1.2636.3.6.2.1.5
+      name: jnxDcuStatsBytes
+    metric_tags:
+    - column:
+        OID: 1.3.6.1.4.1.2636.3.6.2.1.1
+        name: jnxDcuStatsSrcIfIndex
+      tag: ifIndex
+    - column:
+        OID: 1.3.6.1.4.1.2636.3.6.2.1.3
+        name: jnxDcuStatsClassName
+      tag: destinationClassName

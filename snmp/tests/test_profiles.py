@@ -2177,47 +2177,64 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixture("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_juniper_ex(aggregator):
     run_profile_check('juniper-ex')
+
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-ex',
         'device_vendor:juniper-networks',
-        'virtualChassisId:987', 
-        'virtualChassisPortName:Sherlock Holmes'
     ]
 
+    virtual_chassis_tags = ['virtualChassisId:987', 'virtualChassisPortName:Sherlock Holmes']
     virtual_chassis_counts_and_rates = [
-        "jnxVirtualChassisPortInPkts",
-        "jnxVirtualChassisPortOutPkts",
-        "jnxVirtualChassisPortInOctets",
-        "jnxVirtualChassisPortOutOctets",
-        "jnxVirtualChassisPortInMcasts",
-        "jnxVirtualChassisPortOutMcasts",
-        "jnxVirtualChassisPortCarrierTrans",
-        "jnxVirtualChassisPortInCRCAlignErrors",
-        "jnxVirtualChassisPortUndersizePkts",
-        "jnxVirtualChassisPortCollisions",
-    ]
-
-    virtual_chassis_rates = [
-        "jnxVirtualChassisPortInPkts1secRate",
-        "jnxVirtualChassisPortOutPkts1secRate",
-        "jnxVirtualChassisPortInOctets1secRate",
-        "jnxVirtualChassisPortOutOctets1secRate",
+        'jnxVirtualChassisPortInPkts',
+        'jnxVirtualChassisPortOutPkts',
+        'jnxVirtualChassisPortInOctets',
+        'jnxVirtualChassisPortOutOctets',
+        'jnxVirtualChassisPortInMcasts',
+        'jnxVirtualChassisPortOutMcasts',
+        'jnxVirtualChassisPortCarrierTrans',
+        'jnxVirtualChassisPortInCRCAlignErrors',
+        'jnxVirtualChassisPortUndersizePkts',
+        'jnxVirtualChassisPortCollisions',
     ]
 
     for count_and_rate_metric in virtual_chassis_counts_and_rates:
         aggregator.assert_metric(
-            'snmp.{}'.format(count_and_rate_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+            'snmp.{}'.format(count_and_rate_metric),
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=common_tags + virtual_chassis_tags,
+            count=1,
         )
         aggregator.assert_metric(
-            'snmp.{}.rate'.format(count_and_rate_metric), metric_type=aggregator.RATE, tags=common_tags, count=1
+            'snmp.{}.rate'.format(count_and_rate_metric),
+            metric_type=aggregator.RATE,
+            tags=common_tags + virtual_chassis_tags,
+            count=1,
         )
+
+    virtual_chassis_rates = [
+        'jnxVirtualChassisPortInPkts1secRate',
+        'jnxVirtualChassisPortOutPkts1secRate',
+        'jnxVirtualChassisPortOutOctets1secRate',
+        'jnxVirtualChassisPortInOctets1secRate',
+    ]
 
     for rate_metric in virtual_chassis_rates:
         aggregator.assert_metric(
-            'snmp.{}'.format(rate_metric), metric_type=aggregator.RATE, tags=common_tags, count=1
+            'snmp.{}'.format(rate_metric), metric_type=aggregator.RATE, tags=common_tags + virtual_chassis_tags, count=1
+        )
+
+    dcu_tags = ['ifIndex:654', 'destinationClassName:John Watson']
+    dcu_counts_and_rates = ['jnxDcuStatsPackets', 'jnxDcuStatsBytes']
+
+    for decu_metric in dcu_counts_and_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(decu_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + dcu_tags, count=1
+        )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(decu_metric), metric_type=aggregator.RATE, tags=common_tags + dcu_tags, count=1
         )
 
     aggregator.assert_metric('snmp.devices_monitored', count=1)

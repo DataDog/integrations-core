@@ -10,6 +10,7 @@ extends:
   - _generic-ospf.yaml
   - _generic-host-resources.yaml
   - _juniper-virtualchassis.yaml
+  - _juniper-dcu.yaml
 
 device:
   vendor: "juniper-networks"

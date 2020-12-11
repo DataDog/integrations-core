@@ -1,3 +1,5 @@
+# Virtual Chassis-related metrics
+
 metrics:
 
   # These metrics will be sent as monotonic counts and rates:
