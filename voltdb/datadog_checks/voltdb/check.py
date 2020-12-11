@@ -4,6 +4,7 @@
 from typing import Any, List, Optional, cast
 
 import pkg_resources
+import requests
 from six import raise_from
 
 from datadog_checks.base import AgentCheck
@@ -54,17 +55,24 @@ class VoltDBCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
-    def _fetch_version(self):
-        # type: () -> Optional[str]
+    def _get_system_information(self):  # Isolated for unit testing purposes.
+        # type: () -> requests.Response
         # See: https://docs.voltdb.com/UsingVoltDB/sysprocsysteminfo.php#sysprocsysinforetvalovervw
         url = self._config.api_url
         auth = self._config.auth
         params = self._config.build_api_params(procedure='@SystemInformation', parameters=['OVERVIEW'])
 
         try:
-            r = self.http.get(url, auth=auth, params=params)
+            return self.http.get(url, auth=auth, params=params)
         except Exception:
-            raise  # For explicitness.
+            raise
+
+    def _fetch_version(self):
+        # type: () -> Optional[str]
+        try:
+            r = self._get_system_information()
+        except Exception:
+            raise
 
         try:
             r.raise_for_status()
@@ -77,17 +85,29 @@ class VoltDBCheck(AgentCheck):
                 pass
             else:
                 message += ' (details: {})'.format(details)
-            raise_from(Exception(message), None)
+            raise_from(Exception(message), exc)
 
-        try:
-            data = r.json()
-            rows = data['results'][0]['data']  # type: List[tuple]
-            # NOTE: there will be one VERSION row per server in the cluster.
-            # Arbitrarily use the first one we see.
-            return next((value for _, column, value in rows if column == 'VERSION'), None)
-        except Exception as exc:
-            self.log.debug('Failed to parse version from SystemInformation response:', exc)
-            return None
+        data = r.json()
+        rows = data['results'][0]['data']  # type: List[tuple]
+
+        # NOTE: there will be one VERSION row per server in the cluster.
+        # Arbitrarily use the first one we see.
+        for _, column, value in rows:
+            if column == 'VERSION':
+                return self._transform_version(value)
+
+        self.log.debug('VERSION column not found: %s', [column for _, column, _ in rows])
+        return None
+
+    def _transform_version(self, raw):
+        # type: (str) -> str
+        # VoltDB does not include .0 patch numbers (eg 10.0, not 10.0.0).
+        # Need to ensure they're present so the version is always in 3 parts: major.minor.patch.
+        major, rest = raw.split('.', 1)
+        minor, found, patch = rest.partition('.')
+        if not found:
+            patch = '0'
+        return '{}.{}.{}'.format(major, minor, patch)
 
     def _check_can_connect_and_submit_version(self):
         # type () -> None

@@ -94,6 +94,7 @@ class TestCheck:
         aggregator.assert_all_metrics_covered()  # No metrics collected.
 
     def test_custom_tags(self, aggregator, instance):
+        # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
         instance['tags'] = ['env:test']
 
@@ -114,6 +115,7 @@ class TestCheck:
 @pytest.mark.usefixtures('dd_environment')
 class TestVersionMetadata:
     VERSION_MOCK_TARGET = 'datadog_checks.voltdb.VoltDBCheck._fetch_version'
+    SYSTEM_INFORMATION_MOCK = 'datadog_checks.voltdb.VoltDBCheck._get_system_information'
 
     def _run_test(self, instance, datadog_agent, metadata, error_contains=''):
         # type: (Instance, DatadogAgentStub, dict, str) -> None
@@ -125,6 +127,7 @@ class TestVersionMetadata:
             assert error_contains in error
         datadog_agent.assert_metadata(check_id, metadata)
 
+    @pytest.mark.integration
     def test_default(self, instance, datadog_agent):
         # type: (Instance, DatadogAgentStub) -> None
         version = common.VOLTDB_VERSION
@@ -151,3 +154,13 @@ class TestVersionMetadata:
         # type: (Instance, DatadogAgentStub) -> None
         with mock.patch(self.VERSION_MOCK_TARGET, side_effect=ValueError('Oops!')):
             self._run_test(instance, datadog_agent, metadata={}, error_contains='Oops!')
+
+    @pytest.mark.integration
+    def test_no_version_column(self, aggregator, instance, datadog_agent):
+        # type: (AggregatorStub, Instance, DatadogAgentStub) -> None
+        with mock.patch(self.SYSTEM_INFORMATION_MOCK) as m:
+            row = ('0', 'THIS_IS_NOT_VERSION', 'test')
+            r = mock.MagicMock()
+            r.json.return_value = {'results': [{'data': [row]}]}  # Respect response payload format.
+            m.return_value = r
+            self._run_test(instance, datadog_agent, metadata={})
