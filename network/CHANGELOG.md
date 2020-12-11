@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 2.0.0 / 2020-12-11
+
+* [Changed] [network] Set the collect_connection_queues parameter default value to false. See [#8059](https://github.com/DataDog/integrations-core/pull/8059).
+
 ## 1.19.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Collect receive and send queue metrics. See [#7861](https://github.com/DataDog/integrations-core/pull/7861).
