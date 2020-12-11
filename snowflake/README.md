@@ -67,7 +67,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
     ```
    
 
-2. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
+2. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
         ## @param account - string - required
@@ -227,4 +227,3 @@ Need help? Contact [Datadog support][7].
 [11]: https://docs.datadoghq.com/metrics/summary/
 [12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
 [13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
-
