@@ -27,10 +27,13 @@ DOGWEB_JSON_DASHBOARDS = (
     'cisco_aci',
     'consul',
     'couchbase',
+    'couchdb',
     'etcd',
     'fluentd',
     'gearmand',
     'gunicorn',
+    'hdfs_datanode',
+    'hdfs_namenode',
     'immunio', # Is this a core integration??
     'kafka',
     'kong',
@@ -39,6 +42,7 @@ DOGWEB_JSON_DASHBOARDS = (
     'lighttpd',
     'mapreduce',
     'marathon',
+    'mesos',
     'nginx',
     'openstack',
     'pgbouncer',
@@ -54,40 +58,6 @@ DOGWEB_JSON_DASHBOARDS = (
     'tokumx',
     'varnish',
     'vsphere',
-    'yarn',
-)
-
-
-DOGWEB_CODE_GENERATED_DASHBOARDS = (
-    'activemq',
-    'ceph',
-    'cisco_aci',
-    'consul',
-    'couchdb',
-    'cri',
-    'crio',
-    'gunicorn',
-    'hdfs_datanode',
-    'hdfs_namenode',
-    'hyperv',
-    'ibm_mq',
-    'kafka',
-    'kube_controller_manager',
-    'kube_scheduler',
-    'kubernetes',
-    'lighttpd',
-    'mapreduce',
-    'marathon',
-    'mesos',
-    'nginx',
-    'nginx_ingress_controller',
-    'openstack',
-    'powerdns_recursor',
-    'rabbitmq',
-    'redisdb',
-    'sigsci',
-    'spark',
-    'twistlock',
     'wmi_check',
     'yarn',
     'zk',
@@ -618,7 +588,7 @@ def is_jmx_integration(check_name):
 
 
 def has_dashboard(check):
-    if check in DOGWEB_JSON_DASHBOARDS or check in DOGWEB_CODE_GENERATED_DASHBOARDS:
+    if check in DOGWEB_JSON_DASHBOARDS:
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
