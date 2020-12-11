@@ -84,6 +84,7 @@ class MongoDb(AgentCheck):
                 'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
             }
         )
+        self.is_arbiter = is_affirmative(self.instance.get('is_arbiter', False))
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
@@ -117,6 +118,15 @@ class MongoDb(AgentCheck):
             self.auth_source,
         ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
 
+        if self.is_arbiter:
+            # For arbiters, removes the username and password from the connection string.
+            self.server = build_connection_string(
+                self.instance.get('hosts'),
+                scheme=self.instance.get('connection_scheme', 'mongodb'),
+                database=self.instance.get('database'),
+                options=self.instance.get('options'),
+            )
+
         self.additional_metrics = self.instance.get('additional_metrics', [])
 
         # Get the list of metrics to collect
@@ -148,6 +158,8 @@ class MongoDb(AgentCheck):
         if not self.username:
             self.log.debug(u"A username is required to authenticate to `%s`", self.server)
             self.do_auth = False
+        if self.is_arbiter:
+            self.do_auth = False
 
         self.replica_check = is_affirmative(self.instance.get('replica_check', True))
         self.collections_indexes_stats = is_affirmative(self.instance.get('collections_indexes_stats'))
@@ -163,47 +175,32 @@ class MongoDb(AgentCheck):
         return {'pymongo': pymongo.version}
 
     def refresh_collectors(self, mongo_version, all_dbs, tags):
-        collectors = []
-
-        if self.deployment.use_shards:
-            collectors.append(ConnPoolStatsCollector(self, tags))
-
-        if isinstance(self.deployment, ReplicaSetDeployment):
-            if self.replica_check:
-                collectors.append(ReplicaCollector(self, tags))
-            collectors.append(ReplicationOpLogCollector(self, tags))
-
-        if isinstance(self.deployment, MongosDeployment):
-            if 'jumbo_chunks' in self.additional_metrics:
-                collectors.append(JumboStatsCollector(self, tags))
-
-            if LooseVersion(mongo_version) >= LooseVersion("3.6"):
-                collectors.append(SessionStatsCollector(self, tags))
-        else:
-            # Some commands are not available on mongos. Also the 'local' database is
-            # different on each node and its statistics should be fetched on any mongod node.
-            collectors.append(DbStatCollector(self, "local", tags))
-            collectors.append(FsyncLockCollector(self, self.db_name, tags))
-            if 'top' in self.additional_metrics:
-                collectors.append(TopCollector(self, tags))
-
-        if self.deployment.is_principal():
-            if 'local' in all_dbs:
-                # Already monitored for all instances
-                all_dbs.remove('local')
-            for db_name in all_dbs:
-                collectors.append(DbStatCollector(self, db_name, tags))
-
-            if self.collections_indexes_stats:
-                if LooseVersion(mongo_version) >= LooseVersion("3.2"):
-                    collectors.append(IndexStatsCollector(self, self.db_name, tags, self.coll_names))
-                else:
-                    self.log.debug(
-                        "'collections_indexes_stats' is only available starting from mongo 3.2: "
-                        "your mongo version is %s",
-                        mongo_version,
-                    )
-            collectors.append(CollStatsCollector(self, self.db_name, tags, coll_names=self.coll_names))
+        potential_collectors = [
+            ConnPoolStatsCollector(self, tags),
+            ReplicationOpLogCollector(self, tags),
+            FsyncLockCollector(self, self.db_name, tags),
+            CollStatsCollector(self, self.db_name, tags, coll_names=self.coll_names),
+            ServerStatusCollector(self, self.db_name, tags, tcmalloc=self.collect_tcmalloc_metrics),
+        ]
+        if self.replica_check:
+            potential_collectors.append(ReplicaCollector(self, tags))
+        if 'jumbo_chunks' in self.additional_metrics:
+            potential_collectors.append(JumboStatsCollector(self, tags))
+        if 'top' in self.additional_metrics:
+            potential_collectors.append(TopCollector(self, tags))
+        if LooseVersion(mongo_version) >= LooseVersion("3.6"):
+            potential_collectors.append(SessionStatsCollector(self, tags))
+        if self.collections_indexes_stats:
+            if LooseVersion(mongo_version) >= LooseVersion("3.2"):
+                potential_collectors.append(IndexStatsCollector(self, self.db_name, tags, self.coll_names))
+            else:
+                self.log.debug(
+                    "'collections_indexes_stats' is only available starting from mongo 3.2: "
+                    "your mongo version is %s",
+                    mongo_version,
+                )
+        for db_name in all_dbs:
+            potential_collectors.append(DbStatCollector(self, db_name, tags))
 
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
@@ -222,10 +219,9 @@ class MongoDb(AgentCheck):
                     "duplicated information."
                 )
 
-        collectors.append(CustomQueriesCollector(self, self.db_name, tags, queries))
+        potential_collectors.append(CustomQueriesCollector(self, self.db_name, tags, queries))
 
-        collectors.append(ServerStatusCollector(self, self.db_name, tags, tcmalloc=self.collect_tcmalloc_metrics))
-        self.collectors = collectors
+        self.collectors = [coll for coll in potential_collectors if coll.compatible_with(self.deployment)]
 
     def _build_metric_list_to_collect(self):
         """
@@ -287,8 +283,7 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
-    @staticmethod
-    def get_deployment(admindb):
+    def get_deployment(self, admindb):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         options = admindb.command("getCmdLineOpts")['parsed']
@@ -308,19 +303,28 @@ class MongoDb(AgentCheck):
 
         return StandaloneDeployment()
 
+    def setup_connection(self, auth, replicaset=None):
+        server_string = "{}/{}".format(self.server, replicaset) if replicaset else self.server
+        self.log.debug("Connecting to '%s'...", server_string)
+        cli = pymongo.mongo_client.MongoClient(
+            self.server,
+            socketTimeoutMS=self.timeout,
+            connectTimeoutMS=self.timeout,
+            serverSelectionTimeoutMS=self.timeout,
+            read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
+            replicaset=replicaset,
+            **self.ssl_params
+        )
+
+        if auth:
+            self.log.info("Using '%s' as the authentication database", self.auth_source)
+            self._authenticate(cli[self.auth_source])
+
+        return cli
+
     def check(self, _):
         try:
-            cli = pymongo.mongo_client.MongoClient(
-                self.server,
-                socketTimeoutMS=self.timeout,
-                connectTimeoutMS=self.timeout,
-                serverSelectionTimeoutMS=self.timeout,
-                read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
-                **self.ssl_params
-            )
-            if self.do_auth:
-                self.log.info("Using '%s' as the authentication database", self.auth_source)
-                self._authenticate(cli[self.auth_source])
+            cli = self.setup_connection(self.do_auth)
         except Exception:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             raise
@@ -328,6 +332,7 @@ class MongoDb(AgentCheck):
         try:
             mongo_version = cli.server_info().get('version', '0.0')
             self.set_metadata('version', mongo_version)
+            self.log.debug("Connected!")
         except Exception:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             self.log.exception("Error when collecting the version from the mongo server.")
@@ -350,8 +355,17 @@ class MongoDb(AgentCheck):
         elif isinstance(self.deployment, MongosDeployment):
             tags.append('sharding_cluster_role:mongos')
 
-        dbnames = cli.list_database_names()
-        self.gauge('mongodb.dbs', len(dbnames), tags=tags)
+        if isinstance(self.deployment, ReplicaSetDeployment) and self.deployment.is_arbiter:
+            dbnames = []
+        else:
+            dbnames = cli.list_database_names()
+            self.gauge('mongodb.dbs', len(dbnames), tags=tags)
+
         self.refresh_collectors(mongo_version, dbnames, tags)
         for collector in self.collectors:
-            collector.collect(cli)
+            try:
+                collector.collect(cli)
+            except Exception:
+                self.log.info(
+                    "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
+                )

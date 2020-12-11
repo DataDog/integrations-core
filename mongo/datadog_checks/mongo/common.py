@@ -80,6 +80,7 @@ class ReplicaSetDeployment(Deployment):
         self.cluster_role = cluster_role
         self.is_primary = replset_state == 1
         self.is_secondary = replset_state == 2
+        self.is_arbiter = replset_state == 7
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.

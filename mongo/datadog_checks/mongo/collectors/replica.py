@@ -3,7 +3,7 @@ import time
 from six.moves.urllib.parse import urlsplit
 
 from datadog_checks.mongo.collectors.base import MongoCollector
-from datadog_checks.mongo.common import SOURCE_TYPE_NAME, get_long_state_name, get_state_name
+from datadog_checks.mongo.common import SOURCE_TYPE_NAME, ReplicaSetDeployment, get_long_state_name, get_state_name
 
 try:
     import datadog_agent
@@ -20,6 +20,10 @@ class ReplicaCollector(MongoCollector):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
         self.hostname = self.extract_hostname_for_event(self.check.clean_server_name)
+
+    def compatible_with(self, deployment):
+        # Can only be run on mongod that are part of a replica set.
+        return isinstance(deployment, ReplicaSetDeployment)
 
     @staticmethod
     def extract_hostname_for_event(server_uri):
@@ -88,6 +92,27 @@ class ReplicaCollector(MongoCollector):
                 event_payload['host'] = self.hostname
             self.check.event(event_payload)
 
+    def get_replset_config(self, client):
+        """On most nodes, simply runs `replSetGetConfig`.
+        Unfortunately when the agent is connected to an arbiter, running the `replSetGetConfig`
+        raises authentication errors. And because authenticating on an arbiter is not allowed, the workaround
+        in that case is to run the command directly on the primary."""
+
+        if self.check.deployment.is_arbiter:
+            try:
+                # Authenticates if the config specifies a username;
+                do_auth = self.check.username is not None
+                cli_primary = self.check.setup_connection(do_auth, replicaset=self.check.deployment.replset_name)
+            except Exception:
+                self.log.warning(
+                    "Current node is an arbiter, the extra connection to the primary was unsuccessful."
+                    " Votes metrics won't be reported."
+                )
+                return None
+            return cli_primary['admin'].command('replSetGetConfig')
+
+        return client['admin'].command('replSetGetConfig')
+
     def collect(self, client):
         db = client["admin"]
         status = db.command('replSetGetStatus')
@@ -114,7 +139,7 @@ class ReplicaCollector(MongoCollector):
             result['health'] = current['health']
 
         # Collect the number of votes
-        config = db.command('replSetGetConfig')
+        config = self.get_replset_config(client)
         votes = 0
         total = 0.0
         for member in config['config']['members']:

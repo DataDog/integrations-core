@@ -3,7 +3,11 @@ from copy import deepcopy
 import pymongo
 
 from datadog_checks.mongo.collectors.base import MongoCollector
-from datadog_checks.mongo.common import ALLOWED_CUSTOM_METRICS_TYPES, ALLOWED_CUSTOM_QUERIES_COMMANDS
+from datadog_checks.mongo.common import (
+    ALLOWED_CUSTOM_METRICS_TYPES,
+    ALLOWED_CUSTOM_QUERIES_COMMANDS,
+    ReplicaSetDeployment,
+)
 
 
 class CustomQueriesCollector(MongoCollector):
@@ -13,6 +17,13 @@ class CustomQueriesCollector(MongoCollector):
         super(CustomQueriesCollector, self).__init__(check, tags)
         self.custom_queries = custom_queries
         self.db_name = db_name
+
+    def compatible_with(self, deployment):
+        # Can theoretically be run on any node as long as it contains data.
+        # i.e Arbiters are ruled out
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            return False
+        return True
 
     @staticmethod
     def _extract_command_from_mongo_query(mongo_query):

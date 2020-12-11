@@ -62,6 +62,15 @@ instances:
     #
     # connection_scheme: mongodb
 
+    ## @param is_arbiter - boolean - optional - default: false
+    ## Whether or not the current node is an arbiter. When enabled the check:
+    ##   - skips authentication
+    ##   - only runs the allowed commands
+    ##   - creates an extra connection to the primary (using the provided username/password) to run additional
+    ##     monitoring commands.
+    #
+    # is_arbiter: false
+
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
     ## Disable this if any replicas are inaccessible to the Agent. This option is not supported for sharded clusters.

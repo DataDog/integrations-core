@@ -1,5 +1,6 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.collectors import MongoCollector
+from datadog_checks.mongo.common import MongosDeployment
 
 
 class JumboStatsCollector(MongoCollector):
@@ -7,6 +8,10 @@ class JumboStatsCollector(MongoCollector):
     MongoDB automatically splits chunks based on the shard key when they exceed the maximum size
     or number of documents.
     Sometimes, chunks grow beyond their maximum size but cannot be split they are considered 'jumbo'."""
+
+    def compatible_with(self, deployment):
+        # Can only be run on mongos nodes.
+        return isinstance(deployment, MongosDeployment)
 
     def collect(self, client):
         chunks = client['config']['chunks']
