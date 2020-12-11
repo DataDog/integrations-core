@@ -5,13 +5,8 @@
     "template_variables": [
         {
             "default": "*",
-            "name": "scope",
-            "prefix": null
-        },
-        {
-            "default": "*",
-            "name": "var",
-            "prefix": null
+            "name": "site",
+            "prefix": "site"
         }
     ],
     "title": "IIS - Overview",
@@ -23,7 +18,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.users.anon{$scope,!site:total} by {site}",
+                        "q": "avg:iis.users.anon{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -74,7 +69,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.requests.cgi{$scope,!site:total} by {site}",
+                        "q": "avg:iis.requests.cgi{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -106,7 +101,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.requests.isapi{$scope,!site:total} by {site}",
+                        "q": "avg:iis.requests.isapi{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -138,7 +133,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.httpd_request_method.get{$scope,!site:total} by {site}",
+                        "q": "avg:iis.httpd_request_method.get{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -227,7 +222,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.httpd_request_method.put{$scope,!site:total} by {site}",
+                        "q": "avg:iis.httpd_request_method.put{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -259,7 +254,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.httpd_request_method.post{$scope,!site:total} by {site}",
+                        "q": "avg:iis.httpd_request_method.post{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -291,7 +286,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.httpd_request_method.delete{$scope,!site:total} by {site}",
+                        "q": "avg:iis.httpd_request_method.delete{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -323,7 +318,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.users.nonanon{$scope,!site:total} by {site}",
+                        "q": "avg:iis.users.nonanon{!site:total} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -350,12 +345,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
                         "display_type": "bars",
-                        "q": "avg:iis.net.num_connections{$scope,!site:total} by {site}",
+                        "q": "avg:iis.net.num_connections{!site:total,$site} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -370,7 +365,14 @@
                 "title": "Current active connections by site",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 12,
             "layout": {
@@ -382,12 +384,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.net.bytes_sent{$scope,!site:total} by {site}",
+                        "q": "avg:iis.net.bytes_sent{!site:total,$site} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -402,7 +404,14 @@
                 "title": "Bytes sent by site",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 13,
             "layout": {
@@ -414,12 +423,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.net.bytes_rcvd{$scope,!site:total} by {site}",
+                        "q": "avg:iis.net.bytes_rcvd{!site:total,$site} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -434,7 +443,14 @@
                 "title": "Bytes received by site",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 14,
             "layout": {
@@ -447,12 +463,11 @@
         {
             "definition": {
                 "autoscale": true,
-                "custom_links": [],
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "sum:iis.net.num_connections{$scope}"
+                        "q": "sum:iis.net.num_connections{*}"
                     }
                 ],
                 "time": {
@@ -479,7 +494,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "sum:iis.httpd_request_method.put{$scope}+sum:iis.httpd_request_method.get{$scope}+sum:iis.httpd_request_method.post{$scope}+sum:iis.httpd_request_method.delete{$scope}"
+                        "q": "sum:iis.httpd_request_method.put{*}+sum:iis.httpd_request_method.get{*}+sum:iis.httpd_request_method.post{*}+sum:iis.httpd_request_method.delete{*}"
                     }
                 ],
                 "time": {
@@ -555,13 +570,9 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:iis.uptime{$scope,!site:total} by {site}, 10, 'mean', 'desc')",
-                        "style": {
-                            "palette": "dog_classic"
-                        }
+                        "q": "top(avg:iis.uptime{!site:total,$site} by {site}, 10, 'mean', 'desc')"
                     }
                 ],
                 "time": {
@@ -582,12 +593,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.errors.not_found{$scope,!site:total} by {site}",
+                        "q": "avg:iis.errors.not_found{!site:total,$site} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -602,7 +613,14 @@
                 "title": "404 (Not found) responses by site",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 21,
             "layout": {
@@ -614,12 +632,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.net.files_sent{$scope,!site:total} by {site}",
+                        "q": "avg:iis.net.files_sent{!site:total,$site} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -634,7 +652,14 @@
                 "title": "Files sent by site",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 22,
             "layout": {
@@ -646,12 +671,12 @@
         },
         {
             "definition": {
-                "custom_links": [],
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:iis.net.files_rcvd{$scope,!site:total} by {site}",
+                        "q": "avg:iis.net.files_rcvd{!site:total,$site} by {site}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -666,7 +691,14 @@
                 "title": "Files received by site",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 23,
             "layout": {
@@ -765,16 +797,31 @@
         {
             "definition": {
                 "legend_size": "0",
+                "markers": [],
                 "requests": [
                     {
-                        "q": "sum:iis.net.num_connections{$scope,!site:total}"
+                        "display_type": "line",
+                        "q": "sum:iis.net.num_connections{!site:total,$site}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
                 "show_legend": false,
+                "time": {},
                 "title": "IIS connections",
                 "title_align": "left",
                 "title_size": "16",
-                "type": "timeseries"
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "id": 215670117005800,
             "layout": {
