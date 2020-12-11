@@ -67,7 +67,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
     ```
    
 
-1. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
+2. Edit the `snowflake.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Snowflake performance data. See the [sample snowflake.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
         ## @param account - string - required
@@ -110,9 +110,18 @@ datadog-agent integration install datadog-snowflake==2.0.1
     Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.<br>
     <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 
-2. [Restart the Agent][4].
+3. [Restart the Agent][4].
 
-### Snowflake Custom Queries
+#### Proxy configuration
+
+Snowflake recommends setting [environment variables for proxy configuration][12].
+
+You can also set the `proxy_host`, `proxy_port`, `proxy_user`, and `proxy_password` under `init_config` in the [snowflake.d/conf.yaml][3].
+
+**NOTE**: Snowflake automatically formats the proxy configurations and sets [standard proxy environment variables][13]. 
+These variables also impact every requests from integrations, including orchestrators like Docker, ECS, and Kubernetes.
+
+### Snowflake custom queries
 
 The Snowflake integration supports custom queries. By default, the integration connects to the shared `SNOWFLAKE` database and `ACCOUNT_USAGE` schema. 
 
@@ -216,3 +225,5 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
 [11]: https://docs.datadoghq.com/metrics/summary/
+[12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
+[13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
