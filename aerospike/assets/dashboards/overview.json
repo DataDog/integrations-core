@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Aerospike Dashboard\n\nDatadog's integration for Aerospike gives you the visibility you need to identify performance issues and monitor the failovers and events.\n\nThis dashboard shows an overview of your Aerospike infrastructure, and provides more information about records or queries.\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "## Aerospike Dashboard\n\nDatadog's integration for Aerospike gives you the visibility you need to identify performance issues and monitor failovers and events.\n\nThis dashboard shows an overview of your Aerospike infrastructure, and provides more information about records or queries.\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "free",
     "template_variables": [
         {
@@ -372,7 +372,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Total number of object over $host",
+                "title": "Total number of objects over $host",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -503,7 +503,7 @@
         {
             "definition": {
                 "background_color": "white",
-                "content": "Datadog's integration for Aerospike gives you the visibility you need to identify performance issues and monitor the failovers and events.\n\nThis dashboard shows an overview of your Aerospike infrastructure, and provides more information about records or queries.\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "content": "Datadog's integration for Aerospike gives you the visibility you need to identify performance issues and monitor failovers and events.\n\nThis dashboard shows an overview of your Aerospike infrastructure, and provides more information about records or queries.\n\nClone this template dashboard to make changes and add your own graph widgets.",
                 "font_size": "14",
                 "show_tick": false,
                 "text_align": "left",
@@ -554,7 +554,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Transactions failed due to record too big over $host,$namespace",
+                "title": "Transactions failed due to oversized record over $host,$namespace",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -628,7 +628,7 @@
                 ],
                 "show_legend": false,
                 "time": {},
-                "title": "Numver of query requests over $host,$namespace",
+                "title": "Number of query requests over $host,$namespace",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
