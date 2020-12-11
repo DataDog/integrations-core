@@ -9,6 +9,10 @@ class ServerStatusCollector(MongoCollector):
         self.collect_tcmalloc_metrics = tcmalloc
         self.db_name = db_name
 
+    def compatible_with(self, deployment):
+        # Can be run on any node.
+        return True
+
     def collect(self, client):
         db = client[self.db_name]
         # No need to check for `result['ok']`, already handled by pymongo

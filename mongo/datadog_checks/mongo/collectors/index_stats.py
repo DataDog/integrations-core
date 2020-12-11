@@ -9,6 +9,10 @@ class IndexStatsCollector(MongoCollector):
         self.coll_names = coll_names
         self.db_name = db_name
 
+    def compatible_with(self, deployment):
+        # Can only be run once per cluster.
+        return deployment.is_principal()
+
     def collect(self, client):
         db = client[self.db_name]
         for coll_name in self.coll_names:

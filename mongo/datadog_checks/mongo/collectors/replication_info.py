@@ -2,11 +2,16 @@ import pymongo
 
 from datadog_checks.base.utils.common import round_value
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.common import ReplicaSetDeployment
 
 
 class ReplicationOpLogCollector(MongoCollector):
     """Additional replication metrics regarding the operation log. Useful to check how backed up is a secondary
     compared to the primary."""
+
+    def compatible_with(self, deployment):
+        # Can only be run on mongod that are part of a replica set.
+        return isinstance(deployment, ReplicaSetDeployment)
 
     def collect(self, client):
         # Fetch information analogous to Mongo's db.getReplicationInfo()

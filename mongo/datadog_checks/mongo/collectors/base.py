@@ -30,6 +30,10 @@ class MongoCollector(object):
         Performs the actual collection and submission of the metrics."""
         raise NotImplementedError()
 
+    def compatible_with(self, deployment):
+        """Whether or not this specific collector is compatible with this specific deployment type."""
+        raise NotImplementedError()
+
     def _normalize(self, metric_name, submit_method, prefix=None):
         """Replace case-sensitive metric name characters, normalize the metric name,
         prefix and suffix according to its type.
