@@ -35,8 +35,16 @@ def dd_environment(instance):
         'TLS_CONTAINER_LOCALCERT_PATH': common.TLS_CONTAINER_LOCALCERT_PATH,
     }
 
+    if common.TLS_ENABLED:
+        # Must refer to a path within the Agent container.
+        instance = instance.copy()
+        instance['tls_ca_cert'] = '/tmp/tlsoutput/client.pem'
+        e2e_metadata = {'docker_volumes': ['{}:/tmp/tlsoutput'.format(common.TLS_OUTPUT_DIR)]}
+    else:
+        e2e_metadata = {}
+
     with docker_run(compose_file, conditions=conditions, env_vars=env_vars):
-        yield instance
+        yield instance, e2e_metadata
 
 
 @pytest.fixture(scope='session')
@@ -60,7 +68,6 @@ def instance():
     }  # type: Instance
 
     if common.TLS_ENABLED:
-        instance['tls_verify'] = False  # We use self-signed certs.
-        # For some reason, no need to set 'tls_cert' for our custom cert.
+        instance['tls_ca_cert'] = common.TLS_CLIENT_CERT
 
     return instance

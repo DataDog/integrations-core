@@ -43,23 +43,30 @@ No additional installation is needed on your server.
 
 If [TLS/SSL][5] is enabled on the client HTTP port:
 
-1. Prepare your certificate so that it is in PEM format.
+1. Get a copy of your certificate in PEM format. It should contain the _unencrypted_ private key and the certificate:
 
-    If using a locally created PKCS12 keystore created via `keytool`, use following command to export the certificate to PEM:
-
-    ```bash
-    openssl pkcs12 -in mydb.keystore -out /path/to/voltdb.cert
+    ```
+    -----BEGIN PRIVATE KEY-----
+    <Private key contents...>
+    -----END PRIVATE KEY-----
+    -----BEGIN CERTIFICATE-----
+    <Certificate contents...>
+    -----END CERTIFICATE-----
     ```
 
-    **Note**: passphrase-protected certificates are not supported.
+    To export your VoltDB keystore to this format, this command may be useful:
 
-2. In your instance configuration, point `url` to the TLS-enabled client endpoint, and set the `tls_cert` option. For example:
+    ```bash
+    openssl pkcs12 -in <KEYSTORE> -nodes -out /path/to/voltdb.pem -password pass:<PASSWORD>
+    ```
+
+2. In your instance configuration, point `url` to the TLS-enabled client endpoint, and set the `tls_ca_cert` option. For example:
 
     ```yaml
     instances:
     - # ...
       url: https://localhost:8443
-      tls_cert: /path/to/voltdb.cert
+      tls_ca_cert: /path/to/voltdb.pem
     ```
 
 3. [Restart the Agent][4].

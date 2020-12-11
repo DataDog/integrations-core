@@ -179,7 +179,7 @@ METADATA_EXCLUDE_METRICS = [
 
 TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))
 TLS_OUTPUT_DIR = os.path.join(HERE, 'tlsoutput')
-TLS_CLIENT_CERT = os.path.join(TLS_OUTPUT_DIR, 'client.pem')  # type: str
+TLS_CLIENT_CERT = os.path.join(TLS_OUTPUT_DIR, 'client.pem')
 TLS_PASSWORD = 'tlspass'
 TLS_CONTAINER_LOCALCERT_PATH = '/tmp/localcert.properties'
 
