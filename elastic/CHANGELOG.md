@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.22.0 / 2020-12-11
+
+* [Added] Submit jvm.gc.collectors metrics as rate. See [#7924](https://github.com/DataDog/integrations-core/pull/7924).
+* [Fixed] Update check signature. See [#8114](https://github.com/DataDog/integrations-core/pull/8114).
+
 ## 1.21.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
