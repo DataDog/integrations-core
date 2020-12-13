@@ -1,5 +1,11 @@
 # CHANGELOG - Aerospike
 
+## 1.9.0 / 2020-12-11
+
+* [Added] Add log pipeline. See [#8068](https://github.com/DataDog/integrations-core/pull/8068).
+* [Added] Update aerospike dependency. See [#8044](https://github.com/DataDog/integrations-core/pull/8044).
+* [Fixed] Update check signature. See [#8157](https://github.com/DataDog/integrations-core/pull/8157).
+
 ## 1.8.3 / 2020-07-23 / Agent 7.22.0
 
 * [Fixed] Fix empty result case. See [#7192](https://github.com/DataDog/integrations-core/pull/7192).

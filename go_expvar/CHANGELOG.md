@@ -1,5 +1,9 @@
 # CHANGELOG - go_expvar
 
+## 1.11.0 / 2020-12-11
+
+* [Added] Add config specs. See [#8006](https://github.com/DataDog/integrations-core/pull/8006).
+
 ## 1.10.2 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
