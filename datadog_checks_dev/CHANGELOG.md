@@ -10,7 +10,7 @@
 * [Added] Add 'since' flag to manually specify tag to look from. See [#7950](https://github.com/DataDog/integrations-core/pull/7950).
 * [Added] Support inline comment to skip http validation. See [#8020](https://github.com/DataDog/integrations-core/pull/8020).
 * [Added] Add config template for TLS helper. See [#8014](https://github.com/DataDog/integrations-core/pull/8014).
-* [Fixed] Refactor has logs. See [#8123](https://github.com/DataDog/integrations-core/pull/8123).
+* [Fixed] Refactor `has_logs` utility. See [#8123](https://github.com/DataDog/integrations-core/pull/8123).
 * [Fixed] Build developer docs in strict mode. See [#8152](https://github.com/DataDog/integrations-core/pull/8152).
 * [Fixed] Skip auto-setting Python version suffix if using an RC build. See [#7653](https://github.com/DataDog/integrations-core/pull/7653).
 * [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
