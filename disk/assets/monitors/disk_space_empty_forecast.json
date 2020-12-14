@@ -1,0 +1,29 @@
+{
+	"name": "[disk] Device {{device.name}} is going to be full on host {{host.name}}",
+	"type": "metric alert",
+	"query": "max(next_3d):forecast(( 1 - avg:system.disk.free{*} by {host,device} / avg:system.disk.total{*} by {host,device} ) * 100, 'seasonal', 1, interval='60m', seasonality='weekly') >= 99",
+	"message": "Device {{device.name}} on {{host.name}} is projected to exceed  {{value}}% usage within the next 3 days.",
+	"tags": [
+		"integration:disk"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"evaluation_delay": 300,
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 99,
+			"critical_recovery": 89
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when your disk memory usage approaches maximum capacity."
+	}
+}
