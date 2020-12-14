@@ -26,7 +26,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {
-      "[disk] Device {{device.name}} is going to be full on host {{host.name}}": "assets/monitors/disk_space_empty_forecast.json"
+      "disk-space-forecast": "assets/monitors/disk_space_empty_forecast.json"
     },
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
