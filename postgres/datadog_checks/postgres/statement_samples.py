@@ -219,7 +219,7 @@ class PostgresStatementSamples(object):
                     "db": {
                         "instance": row['datname'],
                         "plan": {
-                            "definition": obfuscated_plan,
+                            "definition": json.loads(obfuscated_plan),
                             "cost": plan_cost,
                             "signature": plan_signature
                         },

@@ -237,7 +237,7 @@ class MySQLStatementSamples(object):
                     "db": {
                         "instance": schema,
                         "plan": {
-                            "definition": plan,
+                            "definition": json.loads(obfuscated_plan),
                             "cost": plan_cost,
                             "signature": plan_signature
                         },
