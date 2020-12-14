@@ -37,11 +37,13 @@ class MockRequestsWrapper:
 
 
 def test_url_is_correct_without_trailing_slash():
+    # type: () -> None
     api = MarkLogicApi(MockRequestsWrapper({'foo': 'bar'}), 'http://localhost:8002')
     assert api._base_url == 'http://localhost:8002/manage/v2'
 
 
 def test_url_is_correct_with_trailing_slash():
+    # type: () -> None
     api = MarkLogicApi(MockRequestsWrapper({'foo': 'bar'}), 'http://localhost:8002/')
     assert api._base_url == 'http://localhost:8002/manage/v2'
 
