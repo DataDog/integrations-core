@@ -22,11 +22,6 @@ VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 're
 # keys from pg_stat_activity to include along with each (sample & execution plan)
 pg_stat_activity_sample_keys = [
     'query_start',
-    'datname',
-    'usesysid',
-    'application_name',
-    'client_addr',
-    'client_port',
     'wait_event_type',
     'wait_event',
     'state',
@@ -170,6 +165,8 @@ class PostgresStatementSamples(object):
 
     def _explain_new_pg_stat_activity(self, db, samples, instance_tags):
         start_time = time.time()
+        ddtags = ','.join(self._tags)
+        service = next((t for t in self._tags if t.startswith('service:')), 'service:mysql')[len('service:'):]
         events = []
         for row in samples:
             original_statement = row['query']
@@ -204,19 +201,39 @@ class PostgresStatementSamples(object):
 
             if statement_plan_sig not in self.seen_statements_plan_sigs_cache:
                 self.seen_statements_plan_sigs_cache[statement_plan_sig] = True
-
-
                 event = {
-                    'db': {
-                        'instance': row['datname'],
-                        'statement': obfuscated_statement,
-                        'query_signature': query_signature,
-                        'resource_hash': apm_resource_hash,
-                        'plan': obfuscated_plan,
-                        'plan_cost': plan_cost,
-                        'plan_signature': plan_signature,
-                        'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
-                    }
+                    "timestamp": time.time() * 1000,
+                    # TODO: handle localhost correctly
+                    "host": self.config.host,
+                    "service": service,
+                    "ddsource": "postgres",
+                    "ddtags": ddtags,
+                    # no duration with postgres
+                    # "duration": ?,
+                    "network": {
+                        "client": {
+                            "ip": row['client_addr'],
+                            "port": row['client_port']
+                        }
+                    },
+                    "db": {
+                        "instance": row['datname'],
+                        "plan": {
+                            "definition": obfuscated_plan,
+                            "cost": plan_cost,
+                            "signature": plan_signature
+                        },
+                        "query_signature": query_signature,
+                        "resource_hash": apm_resource_hash,
+                        # Missing for now
+                        "application": row['application_name'],
+                        "user": row['usesysid'],
+                        # "table": "users",
+                        # "index": "idx1",
+                        # "operation": "SELECT",
+                        "statement": obfuscated_statement
+                    },
+                    'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
                 }
                 if self.config.collect_statement_samples_debug:
                     event['db']['debug'] = {
