@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "voltdb",
   "metric_prefix": "voltdb.",
-  "metric_to_check": "",
+  "metric_to_check": "voltdb.cpu.percent_used",
   "creates_events": false,
   "short_description": "Collect status, performance and other metrics from a VoltDB cluster.",
   "guid": "15abd7c6-1845-405a-8627-f83be1e48b11",

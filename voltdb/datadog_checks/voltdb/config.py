@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import requests
 from six.moves.urllib.parse import urljoin, urlparse
@@ -13,8 +13,10 @@ from .types import Instance
 
 
 class Config(object):
-    def __init__(self, instance):
-        # type: (Instance) -> None
+    def __init__(self, instance, debug=lambda *args: None):
+        # type: (Instance, Callable) -> None
+        self._debug = debug
+
         url = instance.get('url')  # type: Optional[str]
         username = instance.get('username')  # type: Optional[str]
         password = instance.get('password')  # type: Optional[str]
@@ -24,13 +26,10 @@ class Config(object):
         if not url:
             raise ConfigurationError('url is required')
 
-        if username and not password:
-            raise ConfigurationError('password is required')
+        if not username or not password:
+            raise ConfigurationError('username and password are required')
 
-        if password and not username:
-            raise ConfigurationError('username is required')
-
-        auth = VoltDBAuth(username, password, password_hashed) if username and password else None
+        auth = VoltDBAuth(username, password, password_hashed)
 
         parsed_url = urlparse(url)
 
@@ -40,7 +39,8 @@ class Config(object):
 
         port = parsed_url.port
         if not port:
-            port = 443 if parsed_url.scheme == 'https' else 79
+            port = 443 if parsed_url.scheme == 'https' else 80
+            self._debug('No port detected, defaulting to port %d', port)
 
         self._url = url
         self._host = host
@@ -51,6 +51,7 @@ class Config(object):
     @property
     def api_url(self):
         # type: () -> str
+        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
         return urljoin(self._url, '/api/1.0/')
 
     @property
@@ -85,7 +86,7 @@ class VoltDBAuth(requests.auth.AuthBase):
 
     def __call__(self, r):
         # type: (requests.PreparedRequest) -> requests.PreparedRequest
-        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php#JsonIntro
+        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
         params = {'User': self._username, 'Hashedpassword' if self._password_hashed else 'Password': self._password}
         r.prepare_url(r.url, params)
         return r

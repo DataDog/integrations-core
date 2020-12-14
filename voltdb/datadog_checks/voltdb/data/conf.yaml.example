@@ -61,15 +61,15 @@ instances:
     #
   - url: http://localhost:8080
 
-    ## @param username - string - optional
+    ## @param username - string - required
     ## The username to use to authenticate with VoltDB.
     #
-    # username: <USERNAME>
+    username: <USERNAME>
 
-    ## @param password - string - optional
+    ## @param password - string - required
     ## The password to use to authenticate with VoltDB.
     #
-    # password: <PASSWORD>
+    password: <PASSWORD>
 
     ## @param password_hashed - boolean - optional - default: false
     ## Set to true if the `password` value refers to a hashed version of the password.

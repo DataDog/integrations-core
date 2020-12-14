@@ -8,7 +8,7 @@ This check monitors [VoltDB][1] through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
-**Note**: this check should be installed on one Agent per cluster only. If monitoring a cluster spread across several hosts, feel free to install an Agent on each host, but make sure that the integration is only configured on a single Agent.
+**Note**: This check should only be configured on one Agent per cluster. If monitoring a cluster spread across several hosts, feel free to install an Agent on each host, but do not enable the VoltDB integration on more than one host, as this would result in duplicate metrics.
 
 ### Installation
 
@@ -26,7 +26,7 @@ No additional installation is needed on your server.
     </users>
     ```
 
-2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your voltdb performance data. See the [sample voltdb.d/conf.yaml][3] for all available configuration options.
+2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your VoltDB performance data. See the [sample voltdb.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
     init_config:

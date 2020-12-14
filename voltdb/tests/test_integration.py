@@ -55,8 +55,7 @@ class TestCheck:
     def test_failure_unauthorized(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
-        instance.pop('username')
-        instance.pop('password')
+        instance['password'] = 'wrongpass'
 
         check = VoltDBCheck('voltdb', {}, [instance])
 

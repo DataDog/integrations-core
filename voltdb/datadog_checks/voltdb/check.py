@@ -23,7 +23,7 @@ class VoltDBCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         # type: (str, dict, list) -> None
         super(VoltDBCheck, self).__init__(name, init_config, instances)
-        self._config = Config(cast(Instance, self.instance))
+        self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
 
         if self._config.auth is not None:
             password = self._config.auth._password
@@ -109,6 +109,11 @@ class VoltDBCheck(AgentCheck):
             patch = '0'
         return '{}.{}.{}'.format(major, minor, patch)
 
+    @AgentCheck.metadata_entrypoint
+    def _submit_version(self, version):
+        # type: (str) -> None
+        self.set_metadata('version', version)
+
     def _check_can_connect_and_submit_version(self):
         # type () -> None
         host, port = self._config.netloc
@@ -124,7 +129,7 @@ class VoltDBCheck(AgentCheck):
         self.service_check('can_connect', self.OK, tags=tags)
 
         if version is not None:
-            self.set_metadata('version', version)
+            self._submit_version(version)
 
     def _execute_query_raw(self, query):
         # type: (str) -> List[tuple]

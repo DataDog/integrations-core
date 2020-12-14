@@ -29,8 +29,10 @@ files:
           - template: instances/http
             overrides:
               username.display_priority: 2
+              username.required: true
               username.description: The username to use to authenticate with VoltDB.
               password.display_priority: 2
+              password.required: true
               password.description: The password to use to authenticate with VoltDB.
               auth_type.hidden: true
               ntlm_domain.hidden: true
