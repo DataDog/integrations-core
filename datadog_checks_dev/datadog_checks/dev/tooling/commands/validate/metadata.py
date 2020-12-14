@@ -281,7 +281,7 @@ def metadata(check, check_duplicates, show_warnings):
         metric_prefix_error_shown = False
         if os.stat(metadata_file).st_size == 0:
             errors = True
-            echo_failure(f"{current_check} metadata file is empty")
+            echo_failure(f"{current_check} metadata file is empty. This file needs the header row at minimum")
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
