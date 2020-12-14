@@ -14,7 +14,8 @@ from ...utils import (
     normalize_display_name,
     read_metadata_rows,
 )
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
+import os
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning, echo_debug
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -267,6 +268,7 @@ def metadata(check, check_duplicates, show_warnings):
         display_name = manifest['display_name']
 
         metadata_file = get_metadata_file(current_check)
+        echo_debug(f"Checking {metadata_file}")
 
         # To make logging less verbose, common errors are counted for current check
         metric_prefix_count = defaultdict(int)
@@ -277,6 +279,9 @@ def metadata(check, check_duplicates, show_warnings):
         duplicate_description_set = set()
 
         metric_prefix_error_shown = False
+        if os.stat(metadata_file).st_size == 0:
+            errors = True
+            echo_failure(f"{current_check} metadata file is empty")
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
