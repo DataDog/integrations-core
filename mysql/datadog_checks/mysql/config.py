@@ -29,7 +29,7 @@ class MySQLConfig(object):
         self.configuration_checks()
 
         # execution plans
-        self.min_collection_interval = self.options.get('min_collection_interval', 15)
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.collect_statement_samples = self.options.get('collect_statement_samples', True)
 
     def _build_tags(self, custom_tags):

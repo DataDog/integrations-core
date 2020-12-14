@@ -1,3 +1,4 @@
 cryptography==3.2.1
 pymysql==0.9.3
 datadog==0.37.1
+cachetools==3.1.1

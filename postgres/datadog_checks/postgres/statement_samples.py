@@ -61,7 +61,7 @@ class PostgresStatementSamples(object):
         """
         self._tags = tags
         self._last_check_run = time.time()
-        if self._future is None:
+        if self._future is None or not self._future.running():
             self.log.info("starting postgres statement sampler")
             self._future = PostgresStatementSamples.executor.submit(self.collection_loop)
         else:

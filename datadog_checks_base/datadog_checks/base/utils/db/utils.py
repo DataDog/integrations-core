@@ -77,6 +77,7 @@ class ConstantRateLimiter:
         """
         :param rate_limit_s: rate limit in seconds
         """
+        self.rate_limit_s = rate_limit_s
         self.period_s = 1 / rate_limit_s if rate_limit_s > 0 else 0
         self.last_event = 0
 
@@ -88,7 +89,6 @@ class ConstantRateLimiter:
         sleep_amount = max(self.period_s - elapsed_s, 0)
         time.sleep(sleep_amount)
         self.last_event = time.time()
-
 
 class ExpiringCache(dict):
     """
