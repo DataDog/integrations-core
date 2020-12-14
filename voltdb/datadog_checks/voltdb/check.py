@@ -12,6 +12,7 @@ from datadog_checks.base.utils.db import Query, QueryManager
 
 from . import queries
 from .config import Config
+from .client import Client
 from .types import Instance
 
 BASE_PARSED_VERSION = pkg_resources.get_distribution('datadog-checks-base').parsed_version
@@ -23,11 +24,16 @@ class VoltDBCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         # type: (str, dict, list) -> None
         super(VoltDBCheck, self).__init__(name, init_config, instances)
-        self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
 
-        if self._config.auth is not None:
-            password = self._config.auth._password
-            self.register_secret(password)
+        self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
+        self.register_secret(self._config.password)
+        self._client = Client(
+            url=self._config.url,
+            http_get=self.http.get,
+            username=self._config.username,
+            password=self._config.password,
+            password_hashed=self._config.password_hashed,
+        )
 
         manager_queries = [
             queries.CPUMetrics,
@@ -55,39 +61,28 @@ class VoltDBCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
-    def _get_system_information(self):  # Isolated for unit testing purposes.
-        # type: () -> requests.Response
-        # See: https://docs.voltdb.com/UsingVoltDB/sysprocsysteminfo.php#sysprocsysinforetvalovervw
-        url = self._config.api_url
-        auth = self._config.auth
-        params = self._config.build_api_params(procedure='@SystemInformation', parameters=['OVERVIEW'])
-
+    def _raise_for_status_with_details(self, response):
+        # type: (requests.Response) -> None
         try:
-            return self.http.get(url, auth=auth, params=params)
-        except Exception:
-            raise
-
-    def _fetch_version(self):
-        # type: () -> Optional[str]
-        try:
-            r = self._get_system_information()
-        except Exception:
-            raise
-
-        try:
-            r.raise_for_status()
+            response.raise_for_status()
         except Exception as exc:
             message = 'Error response from VoltDB: {}'.format(exc)
             try:
                 # Try including detailed error message from response.
-                details = r.json()['statusstring']
+                details = response.json()['statusstring']
             except Exception:
                 pass
             else:
                 message += ' (details: {})'.format(details)
             raise_from(Exception(message), exc)
 
-        data = r.json()
+    def _fetch_version(self):
+        # type: () -> Optional[str]
+        # See: https://docs.voltdb.com/UsingVoltDB/sysprocsysteminfo.php#sysprocsysinforetvalovervw
+        response = self._client.request('@SystemInformation', parameters=['OVERVIEW'])
+        self._raise_for_status_with_details(response)
+
+        data = response.json()
         rows = data['results'][0]['data']  # type: List[tuple]
 
         # NOTE: there will be one VERSION row per server in the cluster.
@@ -100,10 +95,14 @@ class VoltDBCheck(AgentCheck):
         return None
 
     def _transform_version(self, raw):
-        # type: (str) -> str
+        # type: (str) -> Optional[str]
         # VoltDB does not include .0 patch numbers (eg 10.0, not 10.0.0).
         # Need to ensure they're present so the version is always in 3 parts: major.minor.patch.
-        major, rest = raw.split('.', 1)
+        try:
+            major, rest = raw.split('.', 1)
+        except ValueError:
+            # Malformed version string.
+            return None
         minor, found, patch = rest.partition('.')
         if not found:
             patch = '0'
@@ -137,12 +136,8 @@ class VoltDBCheck(AgentCheck):
         # Eg 'A:[B, C]' -> '?Procedure=A&Parameters=[B, C]'
         procedure, _, parameters = query.partition(":")
 
-        url = self._config.api_url
-        auth = self._config.auth
-        params = self._config.build_api_params(procedure=procedure, parameters=parameters)
-
-        response = self.http.get(url, auth=auth, params=params)
-        response.raise_for_status()
+        response = self._client.request(procedure, parameters=parameters)
+        self._raise_for_status_with_details(response)
 
         data = response.json()
         return data['results'][0]['data']

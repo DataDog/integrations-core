@@ -10,6 +10,7 @@ from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.errors import SubprocessError
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.voltdb.config import Config
+from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.types import Instance
 
 from . import common
@@ -58,28 +59,18 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
 
     def __init__(self, instance):
         # type: (Instance) -> None
-        instance = instance.copy()
-        instance['username'] = 'admin'
-        instance['password'] = 'admin'
-        self._config = Config(instance)
-        self._http = RequestsWrapper(instance, {})
-
-    def _execute_procedure(self, procedure, parameters):
-        # type: (str, list) -> requests.Response
-        url = self._config.api_url
-        auth = self._config.auth
-        params = self._config.build_api_params(procedure=procedure, parameters=parameters)
-        return self._http.get(url, auth=auth, params=params)
+        http = RequestsWrapper(instance, {})
+        self._client = Client(url=instance['url'], http_get=http.get, username='admin', password='admin')
 
     def __call__(self):
         # type: () -> None
         # Call procedures to make PROCEDURE and PROCEDUREDETAIL metrics show up...
         # Built-in procedure.
-        r = self._execute_procedure('Hero.insert', parameters=[0, 'Bits'])
+        r = self._client.request('Hero.insert', parameters=[0, 'Bits'])
         assert r.status_code == 200
         assert r.json()["status"] == 1
         # Custom procedure.
-        r = self._execute_procedure('LookUpHero', parameters=[0])
+        r = self._client.request('LookUpHero', parameters=[0])
         assert r.status_code == 200
         data = r.json()
         assert data["status"] == 1
@@ -89,6 +80,6 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
         # Create a snapshot to make SNAPSHOTSTATUS metrics appear.
         # See: https://docs.voltdb.com/UsingVoltDB/sysprocsave.php
         block_transactions = 0  # We don't really care, but this is required.
-        r = self._execute_procedure('@SnapshotSave', parameters=['/tmp/voltdb/backup/', 'heroes', block_transactions])
+        r = self._client.request('@SnapshotSave', parameters=['/tmp/voltdb/backup/', 'heroes', block_transactions])
         assert r.status_code == 200
         assert r.json()["status"] == 1
