@@ -102,7 +102,30 @@ def _logs_input_url(host):
     return host + "/v1/input"
 
 
-def _get_logs_endpoints():
+default_logs_url = "http-intake.logs.datadoghq.com"
+default_dbm_url = "dbquery-http-intake.logs.datadoghq.com"
+
+
+def _load_event_endpoints_from_config(config_prefix, default_url):
+    url = _logs_input_url(datadog_agent.get_config('{}.dd_url'.format(config_prefix)) or default_url)
+    endpoints = [(_new_logs_session(datadog_agent.get_config('api_key')), url)]
+    LOGGER.debug("initializing event endpoints from %s. url=%s", config_prefix, url)
+
+    for additional_endpoint in datadog_agent.get_config('{}.additional_endpoints'.format(config_prefix)) or []:
+        api_key, host = additional_endpoint.get('api_key'), additional_endpoint.get('host')
+        missing_keys = [k for k, v in [('api_key', api_key), ('host', host)] if not v]
+        if missing_keys:
+            LOGGER.warning("invalid event endpoint found in %s.additional_endpoints. missing required keys %s",
+                           config_prefix, ', '.join(missing_keys))
+            continue
+        url = _logs_input_url(host)
+        endpoints.append((_new_logs_session(api_key), url))
+        LOGGER.debug("initializing additional event endpoint from %s. url=%s", config_prefix, url)
+
+    return endpoints
+
+
+def _get_event_endpoints():
     """
     Returns a list of requests sessions and their endpoint urls [(http, url), ...]
     Requests sessions are initialized the first time this is called and reused thereafter
@@ -112,22 +135,11 @@ def _get_logs_endpoints():
     if _logs_endpoints:
         return _logs_endpoints
 
+    endpoints = _load_event_endpoints_from_config("dbm_config", default_dbm_url)
+    if datadog_agent.get_config('dbm_config.double_write_to_logs'):
+        LOGGER.debug("DBM double writing to logs enabled")
+        endpoints.extend(_load_event_endpoints_from_config("logs_config", default_logs_url))
     # TODO: support other logs endpoint config options use_http, use_compression, compression_level
-
-    url = _logs_input_url(datadog_agent.get_config('logs_config.dd_url') or "http-intake.logs.datadoghq.com")
-    endpoints = [(_new_logs_session(datadog_agent.get_config('api_key')), url)]
-    LOGGER.debug("initializing logs endpoint for sql exec plans. url=%s", url)
-
-    for additional_endpoint in datadog_agent.get_config('logs_config.additional_endpoints') or []:
-        api_key, host = additional_endpoint.get('api_key'), additional_endpoint.get('host')
-        missing_keys = [k for k, v in [('api_key', api_key), ('host', host)] if not v]
-        if missing_keys:
-            LOGGER.warning("invalid endpoint found in logs_config.additional_endpoints. missing required keys %s",
-                           ', '.join(missing_keys))
-            continue
-        url = _logs_input_url(host)
-        endpoints.append((_new_logs_session(api_key), url))
-        LOGGER.debug("initializing additional logs endpoint for sql exec plans. url=%s", url)
 
     _logs_endpoints = endpoints
     return _logs_endpoints
@@ -153,7 +165,7 @@ def submit_statement_sample_events(events, tags, source):
             'timestamp': timestamp
         }
 
-    for http, url in _get_logs_endpoints():
+    for http, url in _get_event_endpoints():
         for chunk in chunks(events, 100):
             try:
                 r = http.request('post', url,
@@ -161,8 +173,8 @@ def submit_statement_sample_events(events, tags, source):
                                  timeout=5,
                                  headers={'Content-Type': 'application/json'})
                 r.raise_for_status()
-                LOGGER.debug("submitted %s exec plan events to %s", len(chunk), url)
+                LOGGER.debug("submitted %s statement samples to %s", len(chunk), url)
             except requests.HTTPError as e:
-                LOGGER.warning("failed to submit exec plan events to %s: %s", url, e)
+                LOGGER.warning("failed to submit statement samples to %s: %s", url, e)
             except Exception:
-                LOGGER.exception("failed to submit exec plan events to %s", url)
+                LOGGER.exception("failed to submit statement samples to %s", url)
