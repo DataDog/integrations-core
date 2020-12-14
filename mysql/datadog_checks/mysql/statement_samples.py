@@ -23,10 +23,28 @@ VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 're
 # rate limit is in samples/second
 # {table -> rate-limit}
 DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS = {
-    'events_statements_history_long': 1/10,
+    'events_statements_history_long': 1 / 10,
     'events_statements_history': 1,
     'events_statements_current': 10,
 }
+
+mysql_statement_sample_keys = [
+    'lock_time',
+    'rows_affected',
+    'rows_sent',
+    'rows_examined',
+    'select_full_join',
+    'select_full_range_join',
+    'select_range',
+    'select_range_check',
+    'select_scan',
+    'sort_merge_passes',
+    'sort_range',
+    'sort_rows',
+    'sort_scan',
+    'no_index_used',
+    'no_good_index_used',
+]
 
 
 class MySQLStatementSamples(object):
@@ -150,6 +168,9 @@ class MySQLStatementSamples(object):
     def _collect_plans_for_statements(self, rows):
         events = []
         num_truncated = 0
+        ddtags = ','.join(self._tags)
+        service = next((t for t in self._tags if t.startswith('service:')), 'service:mysql')[len('service:'):]
+        # service:apm-dbm-dev-aurora-postgres
 
         for row in rows:
             if not row or not all(row):
@@ -198,42 +219,41 @@ class MySQLStatementSamples(object):
 
             if statement_plan_sig not in self._seen_statements_cache:
                 self._seen_statements_cache[statement_plan_sig] = True
-                events.append(
-                    {
-                        'duration': duration_ns,
-                        'db': {
-                            'instance': schema,
-                            'statement': obfuscated_statement,
-                            'query_signature': query_signature,
-                            'resource_hash': apm_resource_hash,
-                            'plan': plan,
-                            'plan_cost': plan_cost,
-                            'plan_signature': plan_signature,
-                            'debug': {
-                                'normalized_plan': normalized_plan,
-                                'obfuscated_plan': obfuscated_plan,
-                                'digest_text': digest_text,
-                            },
-                            'mysql': {
-                                'lock_time': row['lock_time_ns'],
-                                'rows_affected': row['rows_affected'],
-                                'rows_sent': row['rows_sent'],
-                                'rows_examined': row['rows_examined'],
-                                'select_full_join': row['select_full_join'],
-                                'select_full_range_join': row['select_full_range_join'],
-                                'select_range': row['select_range'],
-                                'select_range_check': row['select_range_check'],
-                                'select_scan': row['select_scan'],
-                                'sort_merge_passes': row['sort_merge_passes'],
-                                'sort_range': row['sort_range'],
-                                'sort_rows': row['sort_rows'],
-                                'sort_scan': row['sort_scan'],
-                                'no_index_used': row['no_index_used'],
-                                'no_good_index_used': row['no_good_index_used'],
-                            },
+                events.append({
+                    "timestamp": time.time() * 1000,
+                    # TODO: handle localhost correctly
+                    "host": self._config.host,
+                    "service": service,
+                    "ddsource": "mysql",
+                    "ddtags": ddtags,
+                    "duration": duration_ns,
+                    # Missing for now
+                    # "network": {
+                    #     "client": {
+                    #         "ip": "10.10.10.10",
+                    #         "port": 5432
+                    #     }
+                    # },
+                    "db": {
+                        "instance": schema,
+                        "plan": {
+                            "definition": plan,
+                            "cost": plan_cost,
+                            "signature": plan_signature
                         },
-                    }
-                )
+                        "query_signature": query_signature,
+                        "resource_hash": apm_resource_hash,
+                        # Missing for now
+                        # "application": "mcnulty",
+                        # "user": "dog",
+                        # "table": "users",
+                        # "index": "idx1",
+                        # "operation": "SELECT",
+                        "statement": obfuscated_statement
+                    },
+                    'mysql': {k: row[k] for k in mysql_statement_sample_keys if k in row},
+                })
+                # TODO: add debug
 
         if num_truncated > 0:
             self._log.debug(
@@ -345,7 +365,8 @@ class MySQLStatementSamples(object):
         )
         events = self._collect_plans_for_statements(rows)
         if events:
-            submit_statement_sample_events(events, self._tags, "mysql")
+            host = self._config.host if self._config.host else datadog_agent.get_hostname()
+            submit_statement_sample_events(events, self._tags, "mysql", host)
 
         statsd.gauge("dd.mysql.collect_statement_samples.total.time",
                      (time.time() - start_time) * 1000,

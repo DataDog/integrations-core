@@ -115,7 +115,8 @@ class PostgresStatementSamples(object):
             self.postgres_check.db, samples, self._tags
         )
         if events:
-            submit_statement_sample_events(events, self._tags, "postgres")
+            host = self.config.host if self.config.host else datadog_agent.get_hostname()
+            submit_statement_sample_events(events, self._tags, "postgres", host)
         elapsed_ms = (time.time() - start_time) * 1000
         statsd.histogram(
             "dd.postgres.collect_statement_samples.time", elapsed_ms, tags=self._tags
@@ -203,6 +204,8 @@ class PostgresStatementSamples(object):
 
             if statement_plan_sig not in self.seen_statements_plan_sigs_cache:
                 self.seen_statements_plan_sigs_cache[statement_plan_sig] = True
+
+
                 event = {
                     'db': {
                         'instance': row['datname'],

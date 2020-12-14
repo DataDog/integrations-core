@@ -145,31 +145,32 @@ def _get_event_endpoints():
     return _logs_endpoints
 
 
-def submit_statement_sample_events(events, tags, source):
+logs_common_keys = {
+    'ddtags',
+    'host',
+    'service',
+    'ddsource',
+    'timestamp'
+}
+
+
+def submit_statement_sample_events(events, tags, source, host):
     """
     Submit the execution plan events to the event intake
     https://docs.datadoghq.com/api/v1/logs/#send-logs
     """
-    ddtags = ','.join(tags)
-    hostname = datadog_agent.get_hostname()
-    service = next((t for t in tags if t.startswith('service:')), 'service:{}'.format(source))[len('service:'):]
-    timestamp = time.time() * 1000
-
-    def _to_log_event(e):
-        return {
-            'ddtags': ddtags,
-            'hostname': hostname,
-            'message': json.dumps(e, cls=EventEncoder),
-            'service': service,
-            'ddsource': source,
-            'timestamp': timestamp
-        }
+    def to_logs_event(e):
+        m = {k: v for k, v in e.items() if k in logs_common_keys}
+        m['message'] = {k: v for k, v in e.items() if k not in logs_common_keys}
+        return m
 
     for http, url in _get_event_endpoints():
+        is_dbquery = 'dbquery' in url
         for chunk in chunks(events, 100):
             try:
                 r = http.request('post', url,
-                                 data=json.dumps([_to_log_event(e) for e in chunk]),
+                                 data=json.dumps([to_logs_event(e) if not is_dbquery else e for e in chunk],
+                                                 cls=EventEncoder),
                                  timeout=5,
                                  headers={'Content-Type': 'application/json'})
                 r.raise_for_status()
