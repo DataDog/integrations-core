@@ -67,7 +67,7 @@ files:
         Whether or not the current node is an arbiter. When enabled the check:
           - Skips authentication
           - only runs the allowed commands
-          - creates an extra connection to the primary (using the provided username/password) to run additional
+          - Creates an extra connection to the primary (using the provided username/password) to run additional
             monitoring commands.
       value:
         example: false
