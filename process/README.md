@@ -49,7 +49,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
 
 [Run the Agent's `status` subcommand][8] and look for `process` under the Checks section.
 
-### Metrics Notes
+### Metrics notes
 
 **Note**: Some metrics are not available on Linux or OSX:
 
