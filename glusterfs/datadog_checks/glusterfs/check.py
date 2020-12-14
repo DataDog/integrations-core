@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import sys
 from typing import Any
 
 from six import iteritems
@@ -160,7 +161,7 @@ class GlusterfsCheck(AgentCheck):
                 if key in PARSE_METRICS:
                     try:
                         value_parsed = value.split(" ")
-                        value = int(value_parsed[0])
+                        value = float(value_parsed[0])
                     except ValueError as e:
                         self.log.debug("Unable to parse value for %s: %s", key, str(e))
                         continue
