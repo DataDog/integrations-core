@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 2.2.0-rc.1 / 2020-12-14
+
+* [Fixed] Log custom queries which return an empty result set. See [#8105](https://github.com/DataDog/integrations-core/pull/8105).
+
 ## 2.1.0 / 2020-11-10 / Agent 7.24.0
 
 * [Added] Add mongodb.connection_pool.totalinuse. See [#7986](https://github.com/DataDog/integrations-core/pull/7986).
