@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from collections import defaultdict
 
@@ -14,8 +15,7 @@ from ...utils import (
     normalize_display_name,
     read_metadata_rows,
 )
-import os
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning, echo_debug
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
