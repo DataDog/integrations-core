@@ -2186,7 +2186,7 @@ def test_juniper_ex(aggregator):
         'device_vendor:juniper-networks',
     ]
 
-    virtual_chassis_tags = ['virtualChassisId:987', 'virtualChassisPortName:Sherlock Holmes']
+    virtual_chassis_tags = ['virtual_chassis_id:987', 'virtual_chassis_port_name:Sherlock Holmes']
     virtual_chassis_counts_and_rates = [
         'jnxVirtualChassisPortInPkts',
         'jnxVirtualChassisPortOutPkts',
@@ -2226,7 +2226,7 @@ def test_juniper_ex(aggregator):
             'snmp.{}'.format(rate_metric), metric_type=aggregator.RATE, tags=common_tags + virtual_chassis_tags, count=1
         )
 
-    dcu_tags = ['ifIndex:654', 'destinationClassName:John Watson']
+    dcu_tags = ['interface_index:654', 'destination_class_name:John Watson']
     dcu_counts_and_rates = ['jnxDcuStatsPackets', 'jnxDcuStatsBytes']
 
     for decu_metric in dcu_counts_and_rates:
@@ -2235,6 +2235,74 @@ def test_juniper_ex(aggregator):
         )
         aggregator.assert_metric(
             'snmp.{}.rate'.format(decu_metric), metric_type=aggregator.RATE, tags=common_tags + dcu_tags, count=1
+        )
+
+    cos_tags = ['interface_index:1234', 'queue_number:4321']
+
+    cos_counts = [
+        'jnxCosIfsetQstatQedPkts',
+        'jnxCosIfsetQstatQedBytes',
+        'jnxCosIfsetQstatTxedPkts',
+        'jnxCosIfsetQstatTxedBytes',
+        'jnxCosIfsetQstatTailDropPkts',
+        'jnxCosIfsetQstatTotalRedDropPkts',
+        'jnxCosIfsetQstatLpNonTcpRedDropPkts',
+        'jnxCosIfsetQstatLpTcpRedDropPkts',
+        'jnxCosIfsetQstatHpNonTcpRedDropPkts',
+        'jnxCosIfsetQstatHpTcpRedDropPkts',
+        'jnxCosIfsetQstatTotalRedDropBytes',
+        'jnxCosIfsetQstatLpNonTcpRedDropBytes',
+        'jnxCosIfsetQstatLpTcpRedDropBytes',
+        'jnxCosIfsetQstatHpNonTcpRedDropBytes',
+        'jnxCosIfsetQstatHpTcpRedDropBytes',
+        'jnxCosIfsetQstatLpRedDropPkts',
+        'jnxCosIfsetQstatMLpRedDropPkts',
+        'jnxCosIfsetQstatMHpRedDropPkts',
+        'jnxCosIfsetQstatHpRedDropPkts',
+        'jnxCosIfsetQstatLpRedDropBytes',
+        'jnxCosIfsetQstatMLpRedDropBytes',
+        'jnxCosIfsetQstatMHpRedDropBytes',
+        'jnxCosIfsetQstatHpRedDropBytes',
+        'jnxCosIfsetQstatRateLimitDropPkts',
+        'jnxCosIfsetQstatRateLimitDropBytes',
+    ]
+
+    for cos_metric in cos_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(cos_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + cos_tags, count=1
+        )
+
+    cos_rates = [
+        'jnxCosIfsetQstatQedPktRate',
+        'jnxCosIfsetQstatQedByteRate',
+        'jnxCosIfsetQstatTxedPktRate',
+        'jnxCosIfsetQstatTxedByteRate',
+        'jnxCosIfsetQstatTailDropPktRate',
+        'jnxCosIfsetQstatTotalRedDropPktRate',
+        'jnxCosIfsetQstatLpNonTcpRDropPktRate',
+        'jnxCosIfsetQstatLpTcpRedDropPktRate',
+        'jnxCosIfsetQstatHpNonTcpRDropPktRate',
+        'jnxCosIfsetQstatHpTcpRedDropPktRate',
+        'jnxCosIfsetQstatTotalRedDropByteRate',
+        'jnxCosIfsetQstatLpNonTcpRDropByteRate',
+        'jnxCosIfsetQstatLpTcpRedDropByteRate',
+        'jnxCosIfsetQstatHpNonTcpRDropByteRate',
+        'jnxCosIfsetQstatHpTcpRedDropByteRate',
+        'jnxCosIfsetQstatLpRedDropPktRate',
+        'jnxCosIfsetQstatMLpRedDropPktRate',
+        'jnxCosIfsetQstatMHpRedDropPktRate',
+        'jnxCosIfsetQstatHpRedDropPktRate',
+        'jnxCosIfsetQstatLpRedDropByteRate',
+        'jnxCosIfsetQstatMLpRedDropByteRate',
+        'jnxCosIfsetQstatMHpRedDropByteRate',
+        'jnxCosIfsetQstatHpRedDropByteRate',
+        'jnxCosIfsetQstatRateLimitDropPktRate',
+        'jnxCosIfsetQstatRateLimitDropByteRate',
+    ]
+
+    for cos_metric in cos_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(cos_metric), metric_type=aggregator.RATE, tags=common_tags + cos_tags, count=1
         )
 
     aggregator.assert_metric('snmp.devices_monitored', count=1)

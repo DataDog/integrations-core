@@ -43,11 +43,11 @@ metrics:
     - column:
         OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.1
         name: jnxVirtualChassisFpcId
-      tag: virtualChassisId
+      tag: virtual_chassis_id
     - column:
         OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.2
         name: jnxVirtualChassisPortName
-      tag: virtualChassisPortName
+      tag: virtual_chassis_port_name
 
   # These metrics will be sent as rates only (default for counter64 metrics):
   - MIB: UNIPER-VIRTUALCHASSIS-MIB
@@ -71,8 +71,8 @@ metrics:
     - column:
         OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.1
         name: jnxVirtualChassisFpcId
-      tag: virtualChassisId
+      tag: virtual_chassis_id
     - column:
         OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.2
         name: jnxVirtualChassisPortName
-      tag: virtualChassisPortName
+      tag: virtual_chassis_port_name

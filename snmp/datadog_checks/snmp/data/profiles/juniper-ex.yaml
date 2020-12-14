@@ -11,6 +11,7 @@ extends:
   - _generic-host-resources.yaml
   - _juniper-virtualchassis.yaml
   - _juniper-dcu.yaml
+  - _juniper-cos.yaml
 
 device:
   vendor: "juniper-networks"
