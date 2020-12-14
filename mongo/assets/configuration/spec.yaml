@@ -65,7 +65,7 @@ files:
     - name: is_arbiter
       description: |
         Whether or not the current node is an arbiter. When enabled the check:
-          - skips authentication
+          - Skips authentication
           - only runs the allowed commands
           - creates an extra connection to the primary (using the provided username/password) to run additional
             monitoring commands.
