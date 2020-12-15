@@ -135,7 +135,7 @@ def test_parse_server_config(check):
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
     check = check(instance)
-    assert check.server == 'mongodb://john+doe:p%40ss%5Cword@localhost,localhost:27018/test?replicaSet=bar%21baz'
+    assert check.server == 'mongodb://localhost,localhost:27018/test?replicaSet=bar%21baz'
     assert check.username == 'john doe'
     assert check.password == 'p@ss\\word'
     assert check.db_name == 'test'
@@ -154,7 +154,7 @@ def test_username_no_password(check):
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
     check = check(instance)
-    assert check.server == 'mongodb://john+doe@localhost,localhost:27018/test?replicaSet=bar%21baz'
+    assert check.server == 'mongodb://localhost,localhost:27018/test?replicaSet=bar%21baz'
     assert check.username == 'john doe'
     assert check.db_name == 'test'
     assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
