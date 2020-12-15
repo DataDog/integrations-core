@@ -62,16 +62,6 @@ files:
       value:
         example: mongodb
         type: string
-    - name: is_arbiter
-      description: |
-        Whether or not the current node is an arbiter. When enabled the check:
-          - Skips authentication
-          - Only runs the allowed commands
-          - Creates an extra connection to the primary (using the provided username/password) to run additional
-            monitoring commands.
-      value:
-        example: false
-        type: boolean
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

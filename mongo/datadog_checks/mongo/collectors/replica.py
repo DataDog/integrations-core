@@ -100,9 +100,7 @@ class ReplicaCollector(MongoCollector):
 
         if self.check.deployment.is_arbiter:
             try:
-                # Authenticates if the config specifies a username;
-                do_auth = self.check.username is not None
-                cli_primary = self.check.setup_connection(do_auth, replicaset=self.check.deployment.replset_name)
+                cli_primary = self.check.setup_connection(replicaset=self.check.deployment.replset_name)
             except Exception:
                 self.log.warning(
                     "Current node is an arbiter, the extra connection to the primary was unsuccessful."
