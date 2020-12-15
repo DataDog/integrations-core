@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import mock
 
 import pytest
 
@@ -30,16 +29,3 @@ def test_config_missing_user(instance):
     with pytest.raises(ConfigurationError):
         del instance['username']
         PgBouncer('pgbouncer', {}, [instance])
-
-
-# Not sure how to get the logger output
-# @pytest.mark.unit
-# def test_fail_collect_tests(instance):
-#     check = PgBouncer('pgbouncer', {}, [instance])
-#
-#     mock_cursor = mock.MagicMock()
-#     mock_cursor.execute = mock.MagicMock(side_effect=ConfigurationError)  # catch error unrelated to postgres
-#     db = mock.MagicMock(return_value=mock_cursor)
-#
-#     check._collect_stats(db)
-#     # check that `Not all metrics may be available` was logged
