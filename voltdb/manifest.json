@@ -29,7 +29,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "CPU load": "assets/monitors/cpu_load.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
