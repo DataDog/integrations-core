@@ -21,6 +21,8 @@ METRIC_TO_CHECK_WHITELIST = {
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
 
+METRIC_TO_CHECK_REDIRECT = {'snmp_cisco': 'snmp'}
+
 
 def get_manifest_schema():
     return jsonschema.Draft7Validator(
