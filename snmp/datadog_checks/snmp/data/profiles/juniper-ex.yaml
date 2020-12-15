@@ -6,6 +6,7 @@ extends:
   - _generic-if.yaml
   - _generic-ip.yaml
   - _generic-tcp.yaml
+  - _generic-udp.yaml
   - _generic-bgp4.yaml
   - _generic-ospf.yaml
   - _generic-host-resources.yaml
