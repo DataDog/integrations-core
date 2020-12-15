@@ -84,48 +84,56 @@ class MongoDb(AgentCheck):
                 'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
             }
         )
-        self.is_arbiter = is_affirmative(self.instance.get('is_arbiter', False))
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
             self.server = self.instance['server']
+
+            (
+                self.username,
+                self.password,
+                self.db_name,
+                self.nodelist,
+                self.clean_server_name,
+                self.auth_source,
+            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
         else:
             hosts = self.instance.get('hosts', [])
             if not hosts:
                 raise ConfigurationError('No `hosts` specified')
 
-            username = self.instance.get('username')
-            password = self.instance.get('password')
+            self.username = self.instance.get('username')
+            self.password = self.instance.get('password')
 
-            if password and not username:
+            if self.password and not self.username:
                 raise ConfigurationError('`username` must be set when a `password` is specified')
 
+            # Don't pass username and password in the connection string as we authenticate manually.
             self.server = build_connection_string(
                 hosts,
                 scheme=self.instance.get('connection_scheme', 'mongodb'),
-                username=username,
-                password=password,
                 database=self.instance.get('database'),
                 options=self.instance.get('options'),
             )
 
-        (
-            self.username,
-            self.password,
-            self.db_name,
-            self.nodelist,
-            self.clean_server_name,
-            self.auth_source,
-        ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
+            (
+                _,
+                _,
+                self.db_name,
+                self.nodelist,
+                _,
+                self.auth_source,
+            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
 
-        if self.is_arbiter:
-            # For arbiters, removes the username and password from the connection string.
-            self.server = build_connection_string(
-                self.instance.get('hosts'),
+            server_with_auth = build_connection_string(
+                hosts,
+                username=self.username,
+                password=self.password,
                 scheme=self.instance.get('connection_scheme', 'mongodb'),
                 database=self.instance.get('database'),
                 options=self.instance.get('options'),
             )
+            self.clean_server_name = parse_mongo_uri(server_with_auth, sanitize_username=bool(self.ssl_params))[4]
 
         self.additional_metrics = self.instance.get('additional_metrics', [])
 
@@ -157,8 +165,6 @@ class MongoDb(AgentCheck):
         self.use_x509 = self.ssl_params and not self.password
         if not self.username:
             self.log.debug(u"A username is required to authenticate to `%s`", self.server)
-            self.do_auth = False
-        if self.is_arbiter:
             self.do_auth = False
 
         self.replica_check = is_affirmative(self.instance.get('replica_check', True))
@@ -304,7 +310,21 @@ class MongoDb(AgentCheck):
 
         return StandaloneDeployment()
 
-    def setup_connection(self, auth, replicaset=None):
+    def check_if_arbiter(self, server, admindb):
+        try:
+            repl_set_payload = admindb.command("replSetGetStatus")
+        except Exception:
+            self.log.debug(
+                "Unable to determine arbiter status using the localhost exception. If the current "
+                "node '%s' is an arbiter, it won't be monitored. For monitoring it you need to configure an agent"
+                "on the same node as your arbiter.",
+                server
+            )
+            return False
+
+        return repl_set_payload.get("myState") == 7
+
+    def setup_connection(self, replicaset=None):
         server_string = "{}/{}".format(self.server, replicaset) if replicaset else self.server
         self.log.debug("Connecting to '%s'...", server_string)
         cli = pymongo.mongo_client.MongoClient(
@@ -317,7 +337,8 @@ class MongoDb(AgentCheck):
             **self.ssl_params
         )
 
-        if auth:
+        is_arbiter = self.check_if_arbiter(self.server, cli['admin'])
+        if not is_arbiter and self.do_auth:
             self.log.info("Using '%s' as the authentication database", self.auth_source)
             self._authenticate(cli[self.auth_source])
 
@@ -325,7 +346,7 @@ class MongoDb(AgentCheck):
 
     def check(self, _):
         try:
-            cli = self.setup_connection(self.do_auth)
+            cli = self.setup_connection()
         except Exception:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             raise
