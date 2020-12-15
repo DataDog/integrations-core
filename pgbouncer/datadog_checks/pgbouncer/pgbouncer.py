@@ -70,7 +70,7 @@ class PgBouncer(AgentCheck):
                         rows = cursor.fetchall()
 
                     except Exception as e:
-                        self.log.exception("Not all metrics may be available: %s", e)
+                        self.log.exception("Not all metrics may be available: %s", str(e))
 
                     else:
                         for row in rows:
