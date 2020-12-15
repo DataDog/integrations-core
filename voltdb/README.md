@@ -8,7 +8,7 @@ This check monitors [VoltDB][1] through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
-**Note**: This check should only be configured on one Agent per cluster. If monitoring a cluster spread across several hosts, feel free to install an Agent on each host, but do not enable the VoltDB integration on more than one host, as this would result in duplicate metrics.
+**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, you can install an Agent on each host — but do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
 
 ### Installation
 
