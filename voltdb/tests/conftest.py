@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Iterator
 
 import pytest
 
@@ -15,6 +16,7 @@ from .utils import CreateSchema, EnsureExpectedMetricsShowUp
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
+    # type: (Instance) -> Iterator
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
 
     schema_file = os.path.join(common.HERE, 'compose', 'schema.sql')
@@ -31,15 +33,14 @@ def dd_environment(instance):
         'VOLTDB_IMAGE': common.VOLTDB_IMAGE,
         'VOLTDB_DEPLOYMENT': common.VOLTDB_DEPLOYMENT,
         'VOLTDB_CLIENT_PORT': str(common.VOLTDB_CLIENT_PORT),
-        'TLS_OUTPUT_DIR': common.TLS_OUTPUT_DIR,
-        'TLS_CONTAINER_LOCALCERT_PATH': common.TLS_CONTAINER_LOCALCERT_PATH,
     }
 
     if common.TLS_ENABLED:
         # Must refer to a path within the Agent container.
         instance = instance.copy()
-        instance['tls_ca_cert'] = '/tmp/tlsoutput/client.pem'
-        e2e_metadata = {'docker_volumes': ['{}:/tmp/tlsoutput'.format(common.TLS_OUTPUT_DIR)]}
+        instance['tls_cert'] = '/tmp/voltdb-certs/client.pem'
+        instance['tls_ca_cert'] = '/tmp/voltdb-certs/ca.pem'
+        e2e_metadata = {'docker_volumes': ['{}:/tmp/voltdb-certs'.format(common.TLS_CERTS_DIR)]}
     else:
         e2e_metadata = {}
 
@@ -68,6 +69,7 @@ def instance():
     }  # type: Instance
 
     if common.TLS_ENABLED:
-        instance['tls_ca_cert'] = common.TLS_CLIENT_CERT
+        instance['tls_cert'] = common.TLS_CERT
+        instance['tls_ca_cert'] = common.TLS_CA_CERT
 
     return instance

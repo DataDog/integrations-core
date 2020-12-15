@@ -7,14 +7,10 @@ services:
     environment:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
-      - TLS_ENABLED=${TLS_ENABLED}
     volumes:
       - ${VOLTDB_DEPLOYMENT}:/tmp/deployment.xml
+      - ./certs:/tmp/certs
       - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
-      - ./entrypoint.sh:/tmp/entrypoint.sh
-      - ./localcert.properties:${TLS_CONTAINER_LOCALCERT_PATH}
-      - ${TLS_OUTPUT_DIR}:/tmp/tlsoutput
-    entrypoint: ["sh", "/tmp/entrypoint.sh"]
     ports:
       - ${VOLTDB_CLIENT_PORT}:${VOLTDB_CLIENT_PORT}  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
 
@@ -24,12 +20,10 @@ services:
     environment:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
-      - TLS_ENABLED=${TLS_ENABLED}
     volumes:
       - ${VOLTDB_DEPLOYMENT}:/tmp/deployment.xml
+      - ./certs:/tmp/certs
       - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
-      - ./entrypoint.sh:/tmp/entrypoint.sh
-    entrypoint: ["sh", "/tmp/entrypoint.sh"]
 
   voltdb2:
     image: ${VOLTDB_IMAGE}
@@ -37,9 +31,7 @@ services:
     environment:
       - HOST_COUNT=3
       - HOSTS=voltdb0,voltdb1,voltdb2
-      - TLS_ENABLED=${TLS_ENABLED}
     volumes:
       - ${VOLTDB_DEPLOYMENT}:/tmp/deployment.xml
+      - ./certs:/tmp/certs
       - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
-      - ./entrypoint.sh:/tmp/entrypoint.sh
-    entrypoint: ["sh", "/tmp/entrypoint.sh"]

@@ -11,6 +11,7 @@ Instance = TypedDict(
         'password': str,
         'password_hashed': bool,
         'tls_verify': bool,
+        'tls_cert': str,
         'tls_ca_cert': str,
         'tags': List[str],
         'custom_queries': List[dict],

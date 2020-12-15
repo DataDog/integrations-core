@@ -29,7 +29,7 @@
 
     <!-- See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php -->
     <ssl enabled="true" external="true">
-        <keystore path="/etc/ssl/local/voltdb.keystore" password="tlspass"/>
-        <truststore path="/etc/ssl/local/voltdb.truststore" password="tlspass"/>
+        <keystore path="/tmp/certs/voltdb_key.jks" password="tlspass"/>
+        <truststore path="/tmp/certs/voltdb_trust.jks" password="tlspass"/>
     </ssl>
 </deployment>

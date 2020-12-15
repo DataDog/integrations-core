@@ -29,7 +29,7 @@ class CreateSchema(LazyFunction):
 
         if common.TLS_ENABLED:
             # See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php#SecuritySSLCli
-            command += ['--ssl={}'.format(common.TLS_CONTAINER_LOCALCERT_PATH)]
+            command += ['--ssl=/tmp/certs/localcert.properties']
 
         self._command = command
         self._schema = schema

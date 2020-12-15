@@ -178,10 +178,10 @@ METADATA_EXCLUDE_METRICS = [
 ]
 
 TLS_ENABLED = is_affirmative(os.environ.get('TLS_ENABLED'))
-TLS_OUTPUT_DIR = os.path.join(HERE, 'tlsoutput')
-TLS_CLIENT_CERT = os.path.join(TLS_OUTPUT_DIR, 'client.pem')
+TLS_CERTS_DIR = os.path.join(HERE, 'compose', 'certs')
+TLS_CERT = os.path.join(TLS_CERTS_DIR, 'client.pem')
+TLS_CA_CERT = os.path.join(TLS_CERTS_DIR, 'ca.pem')
 TLS_PASSWORD = 'tlspass'
-TLS_CONTAINER_LOCALCERT_PATH = '/tmp/localcert.properties'
 
 VOLTDB_DEPLOYMENT = os.path.join(HERE, 'compose', 'deployment-tls.xml' if TLS_ENABLED else 'deployment.xml')
 VOLTDB_SCHEME = 'https' if TLS_ENABLED else 'http'
