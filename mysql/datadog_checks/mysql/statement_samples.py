@@ -107,6 +107,7 @@ class MySQLStatementSamples(object):
 
                 if self._rate_limiter.rate_limit_s is None or self._rate_limiter.rate_limit_s != \
                         collect_exec_plans_rate_limit:
+                    # TODO: should this be (queries collected/s) or (collection loop runs/s)?
                     self._rate_limiter = ConstantRateLimiter(collect_exec_plans_rate_limit)
 
                 self.collect_statement_samples(events_statements_table)
@@ -119,9 +120,10 @@ class MySQLStatementSamples(object):
         # Select the most recent events with a bias towards events which have higher wait times
         query = """
             SELECT current_schema AS current_schema,
-                   sql_text AS sql_text,
+                   sql_text,
                    IFNULL(digest_text, sql_text) AS digest_text,
-                   timer_start AS timer_start,
+                   timer_start,
+                   timer_end,
                    MAX(timer_wait) / 1000 AS max_timer_wait_ns,
                    lock_time / 1000 AS lock_time_ns,
                    rows_affected,
@@ -220,6 +222,7 @@ class MySQLStatementSamples(object):
             if statement_plan_sig not in self._seen_statements_cache:
                 self._seen_statements_cache[statement_plan_sig] = True
                 events.append({
+                    # TODO: put event timestamp
                     "timestamp": time.time() * 1000,
                     # TODO: handle localhost correctly
                     "host": self._config.host,
@@ -237,7 +240,7 @@ class MySQLStatementSamples(object):
                     "db": {
                         "instance": schema,
                         "plan": {
-                            "definition": plan,
+                            "definition": obfuscated_plan,
                             "cost": plan_cost,
                             "signature": plan_signature
                         },

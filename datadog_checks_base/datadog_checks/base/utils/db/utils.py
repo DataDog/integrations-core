@@ -9,11 +9,6 @@ from itertools import chain
 
 import pytz
 
-try:
-    from functools import lru_cache, wraps
-except ImportError:
-    from backports.functools_lru_cache import lru_cache
-
 # AgentCheck methods to transformer name e.g. set_metadata -> metadata
 SUBMISSION_METHODS = {
     'gauge': 'gauge',

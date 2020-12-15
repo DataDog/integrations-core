@@ -202,6 +202,7 @@ class PostgresStatementSamples(object):
             if statement_plan_sig not in self.seen_statements_plan_sigs_cache:
                 self.seen_statements_plan_sigs_cache[statement_plan_sig] = True
                 event = {
+                    # TODO: put event timestamp
                     "timestamp": time.time() * 1000,
                     # TODO: handle localhost correctly
                     "host": self.config.host,
@@ -227,6 +228,7 @@ class PostgresStatementSamples(object):
                         "resource_hash": apm_resource_hash,
                         # Missing for now
                         "application": row['application_name'],
+                        # TODO: join to get user name
                         "user": row['usesysid'],
                         # "table": "users",
                         # "index": "idx1",
