@@ -3,13 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from subprocess import PIPE, STDOUT, Popen
 
-import requests
-
 from datadog_checks.base.utils.common import ensure_bytes
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.errors import SubprocessError
 from datadog_checks.dev.structures import LazyFunction
-from datadog_checks.voltdb.config import Config
 from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.types import Instance
 

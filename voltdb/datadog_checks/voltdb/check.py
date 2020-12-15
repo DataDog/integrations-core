@@ -11,8 +11,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import Query, QueryManager
 
 from . import queries
-from .config import Config
 from .client import Client
+from .config import Config
 from .types import Instance
 
 BASE_PARSED_VERSION = pkg_resources.get_distribution('datadog-checks-base').parsed_version

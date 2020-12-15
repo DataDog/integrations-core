@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from typing import Callable, Union, List
+from typing import Callable, Union
 
 import requests
 from six.moves.urllib.parse import urljoin
@@ -22,7 +22,7 @@ class Client(object):
         self._http_get = http_get
 
     def request(self, procedure, parameters=None):
-        # type: (str, Union[str, List[str]]) -> requests.Response
+        # type: (str, Union[str, list]) -> requests.Response
         url = self._api_url
         auth = self._auth
         params = {'Procedure': procedure}
