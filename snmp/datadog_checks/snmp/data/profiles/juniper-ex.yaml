@@ -13,6 +13,7 @@ extends:
   - _juniper-virtualchassis.yaml
   - _juniper-dcu.yaml
   - _juniper-cos.yaml
+  - _juniper-firewall.yaml
 
 device:
   vendor: "juniper-networks"
