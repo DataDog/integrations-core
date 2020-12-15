@@ -318,7 +318,7 @@ class MongoDb(AgentCheck):
                 "Unable to determine arbiter status using the localhost exception. If the current "
                 "node '%s' is an arbiter, it won't be monitored. For monitoring it you need to configure an agent"
                 "on the same node as your arbiter.",
-                server
+                server,
             )
             return False
 
