@@ -101,7 +101,7 @@ class VoltDBCheck(AgentCheck):
         try:
             major, rest = raw.split('.', 1)
         except ValueError:
-            # Malformed version string.
+            self.log.debug('Malformed version string: %s', raw)
             return None
         minor, found, patch = rest.partition('.')
         if not found:
