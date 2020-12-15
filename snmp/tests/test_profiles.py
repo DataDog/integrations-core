@@ -2186,6 +2186,73 @@ def test_juniper_ex(aggregator):
         'device_vendor:juniper-networks',
     ]
 
+    _check_juniper_virtual_chassis(aggregator, common_tags)
+    _check_juniper_dcu(aggregator, common_tags)
+    _check_juniper_cos(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_juniper_mx(aggregator):
+    run_profile_check('juniper-mx')
+
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:juniper-mx',
+        'device_vendor:juniper-networks',
+    ]
+
+    _check_juniper_virtual_chassis(aggregator, common_tags)
+    _check_juniper_firewall(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def _check_juniper_dcu(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting DCU
+    """
+    dcu_tags = ['interface_index:654', 'destination_class_name:John Watson']
+    dcu_counts_and_rates = ['jnxDcuStatsPackets', 'jnxDcuStatsBytes']
+    for decu_metric in dcu_counts_and_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(decu_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + dcu_tags, count=1
+        )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(decu_metric), metric_type=aggregator.RATE, tags=common_tags + dcu_tags, count=1
+        )
+
+
+def _check_juniper_firewall(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting firewall metrics
+    """
+    firewall_tags = ['firewall_filter_name:Greg Lestrade', 'counter_name:police', 'counter_type:clever']
+    firewall_counts_and_rates = [
+        'jnxFWCounterPacketCount',
+        'jnxFWCounterByteCount',
+    ]
+    for metric in firewall_counts_and_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric),
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=common_tags + firewall_tags,
+            count=1,
+        )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(metric),
+            metric_type=aggregator.RATE,
+            tags=common_tags + firewall_tags,
+            count=1,
+        )
+
+
+def _check_juniper_virtual_chassis(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting virtual chassis metrics
+    """
     virtual_chassis_tags = ['virtual_chassis_id:987', 'virtual_chassis_port_name:Sherlock Holmes']
     virtual_chassis_counts_and_rates = [
         'jnxVirtualChassisPortInPkts',
@@ -2199,7 +2266,6 @@ def test_juniper_ex(aggregator):
         'jnxVirtualChassisPortUndersizePkts',
         'jnxVirtualChassisPortCollisions',
     ]
-
     for count_and_rate_metric in virtual_chassis_counts_and_rates:
         aggregator.assert_metric(
             'snmp.{}'.format(count_and_rate_metric),
@@ -2213,32 +2279,23 @@ def test_juniper_ex(aggregator):
             tags=common_tags + virtual_chassis_tags,
             count=1,
         )
-
     virtual_chassis_rates = [
         'jnxVirtualChassisPortInPkts1secRate',
         'jnxVirtualChassisPortOutPkts1secRate',
         'jnxVirtualChassisPortOutOctets1secRate',
         'jnxVirtualChassisPortInOctets1secRate',
     ]
-
     for rate_metric in virtual_chassis_rates:
         aggregator.assert_metric(
             'snmp.{}'.format(rate_metric), metric_type=aggregator.RATE, tags=common_tags + virtual_chassis_tags, count=1
         )
 
-    dcu_tags = ['interface_index:654', 'destination_class_name:John Watson']
-    dcu_counts_and_rates = ['jnxDcuStatsPackets', 'jnxDcuStatsBytes']
 
-    for decu_metric in dcu_counts_and_rates:
-        aggregator.assert_metric(
-            'snmp.{}'.format(decu_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + dcu_tags, count=1
-        )
-        aggregator.assert_metric(
-            'snmp.{}.rate'.format(decu_metric), metric_type=aggregator.RATE, tags=common_tags + dcu_tags, count=1
-        )
-
+def _check_juniper_cos(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting COS metrics
+    """
     cos_tags = ['interface_index:1234', 'queue_number:4321']
-
     cos_counts = [
         'jnxCosIfsetQstatQedPkts',
         'jnxCosIfsetQstatQedBytes',
@@ -2266,12 +2323,10 @@ def test_juniper_ex(aggregator):
         'jnxCosIfsetQstatRateLimitDropPkts',
         'jnxCosIfsetQstatRateLimitDropBytes',
     ]
-
     for cos_metric in cos_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(cos_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + cos_tags, count=1
         )
-
     cos_rates = [
         'jnxCosIfsetQstatQedPktRate',
         'jnxCosIfsetQstatQedByteRate',
@@ -2299,11 +2354,7 @@ def test_juniper_ex(aggregator):
         'jnxCosIfsetQstatRateLimitDropPktRate',
         'jnxCosIfsetQstatRateLimitDropByteRate',
     ]
-
     for cos_metric in cos_rates:
         aggregator.assert_metric(
             'snmp.{}'.format(cos_metric), metric_type=aggregator.RATE, tags=common_tags + cos_tags, count=1
         )
-
-    aggregator.assert_metric('snmp.devices_monitored', count=1)
-    aggregator.assert_all_metrics_covered()
