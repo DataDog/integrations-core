@@ -93,8 +93,8 @@ def render_dashboard_progress():
     lines = [
         '## Dashboards',
         '',
-        '!!! note',
-        '    This is not representative of _all_ dashboards, as many exist in legacy locations.',
+        '',
+        '',
         '',
         None,
         '',
