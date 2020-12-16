@@ -162,6 +162,8 @@ def submit_statement_sample_events(events, tags, source, host):
     def to_logs_event(e):
         m = {k: v for k, v in e.items() if k in logs_common_keys}
         m['message'] = {k: v for k, v in e.items() if k not in logs_common_keys}
+        m['hostname'] = m['host']
+        del m['host']
         return m
 
     for http, url in _get_event_endpoints():

@@ -63,9 +63,9 @@ class MySQLStatementSamples(object):
         self._checkpoint = 0
         self._log = get_check_logger()
         self._last_check_run = None
-        self._stop_after_inactivity_seconds = 60
         self._db = None
         self._tags = None
+        self._service = "mysql"
         self._collection_loop_future = None
         self._rate_limiter = ConstantRateLimiter(1)
         self._collection_strategy_cache = TTLCache(maxsize=1000, ttl=600)
@@ -79,6 +79,9 @@ class MySQLStatementSamples(object):
         :return:
         """
         self._tags = tags
+        for t in self._tags:
+            if t.startswith('service:'):
+                self._service = t[len('service:'):]
         self._last_check_run = time.time()
         if self._collection_loop_future is None or not self._collection_loop_future.running():
             # if it was 'not running' it could have crashed
@@ -96,9 +99,13 @@ class MySQLStatementSamples(object):
             self._db = pymysql.connect(**self._connection_args)
             self._log.info("started mysql statement sampler collection loop")
             while True:
-                if self._last_check_run and time.time() - self._last_check_run > self._stop_after_inactivity_seconds:
+                # if the instance check has stopped running for any reason then the collection loop must shut down
+                # this is to ensure that we have only one collection_loop running per check instance
+                if self._last_check_run and time.time() - self._last_check_run > self._config.min_collection_interval \
+                        * 2:
                     self._log.info("stopping mysql statement sampler collection loop due to check inactivity")
                     break
+
                 self._rate_limiter.sleep()
 
                 events_statements_table, collect_exec_plans_rate_limit = self._get_sample_collection_strategy()
@@ -123,7 +130,8 @@ class MySQLStatementSamples(object):
                    sql_text,
                    IFNULL(digest_text, sql_text) AS digest_text,
                    timer_start,
-                   UNIX_TIMESTAMP()-(select VARIABLE_VALUE from information_schema.global_status where VARIABLE_NAME='UPTIME')+timer_end*1e-12 as timer_end_time_s,
+                   UNIX_TIMESTAMP()-(select VARIABLE_VALUE from information_schema.global_status
+                            where VARIABLE_NAME='UPTIME')+timer_end*1e-12 as timer_end_time_s,
                    MAX(timer_wait) / 1000 AS max_timer_wait_ns,
                    lock_time / 1000 AS lock_time_ns,
                    rows_affected,
