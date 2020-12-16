@@ -39,6 +39,11 @@ def instance():
 
 
 @pytest.fixture
+def instance_shard():
+    return copy.deepcopy(common.INSTANCE_BASIC_SHARD)
+
+
+@pytest.fixture
 def instance_user():
     return copy.deepcopy(common.INSTANCE_USER)
 

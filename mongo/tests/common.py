@@ -18,6 +18,7 @@ MONGODB_VERSION = os.environ['MONGO_VERSION']
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
 INSTANCE_BASIC = {'hosts': ['{}:{}'.format(HOST, PORT1)]}
+INSTANCE_BASIC_SHARD = {'hosts': ['{}:{}'.format(HOST, PORT2)]}
 INSTANCE_BASIC_LEGACY_CONFIG = {'server': MONGODB_SERVER}
 
 INSTANCE_AUTHDB = {
