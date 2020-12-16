@@ -128,6 +128,14 @@
         ]
     },
     {
+        "name": "mongodb.extra_info.heap_usage_bytesps",
+        "type": 1,
+        "value": 2562568.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.globallock.activeclients.readers",
         "type": 0,
         "value": 18.0,
