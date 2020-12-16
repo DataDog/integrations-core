@@ -89,7 +89,7 @@ METRIC_MAP = {
     'haproxy_process_current_tasks': 'process.current.tasks',
     'haproxy_process_current_zlib_memory': 'process.current.zlib.memory',
     'haproxy_process_dropped_logs_total': 'process.dropped.logs.total',
-    'haproxy_process_frontent_ssl_reuse': 'process.frontent.ssl.reuse',
+    'haproxy_process_frontend_ssl_reuse': 'process.frontend.ssl.reuse',
     'haproxy_process_hard_max_connections': 'process.hard.max.connections',
     'haproxy_process_http_comp_bytes_in_total': 'process.http.comp.bytes.in.total',
     'haproxy_process_http_comp_bytes_out_total': 'process.http.comp.bytes.out.total',
