@@ -8,7 +8,6 @@ import datetime
 import decimal
 import json
 import logging
-import time
 
 import mmh3
 
@@ -77,9 +76,16 @@ class EventEncoder(json.JSONEncoder):
         return super(EventEncoder, self).default(o)
 
 
+import itertools
+
+
 def chunks(items, n):
-    for i in range(0, len(items), n):
-        yield items[i:i + n]
+    it = iter(items)
+    while True:
+        chunk = tuple(itertools.islice(it, n))
+        if not chunk:
+            return
+        yield chunk
 
 
 # list of requests sessions and their endpoint urls [(http, url), ...]
@@ -154,11 +160,12 @@ logs_common_keys = {
 }
 
 
-def submit_statement_sample_events(events, tags, source, host):
+def submit_statement_sample_events(events):
     """
     Submit the execution plan events to the event intake
     https://docs.datadoghq.com/api/v1/logs/#send-logs
     """
+
     def to_logs_event(e):
         m = {k: v for k, v in e.items() if k in logs_common_keys}
         m['message'] = {k: v for k, v in e.items() if k not in logs_common_keys}
@@ -166,9 +173,9 @@ def submit_statement_sample_events(events, tags, source, host):
         del m['host']
         return m
 
-    for http, url in _get_event_endpoints():
-        is_dbquery = 'dbquery' in url
-        for chunk in chunks(events, 100):
+    for chunk in chunks(events, 100):
+        for http, url in _get_event_endpoints():
+            is_dbquery = 'dbquery' in url
             try:
                 r = http.request('post', url,
                                  data=json.dumps([to_logs_event(e) if not is_dbquery else e for e in chunk],

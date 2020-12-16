@@ -49,6 +49,8 @@ class PostgresStatementSamples(object):
         self._stop_after_inactivity_seconds = 60
         self._future = None
         self._tags = None
+        self._tags_str = None
+        self._service = "postgres"
         # avoid reprocessing the exact same statements & plans
         self.seen_statements_cache = TTLCache(maxsize=1000, ttl=60)
         self.seen_statements_plan_sigs_cache = TTLCache(maxsize=1000, ttl=60)
@@ -60,6 +62,10 @@ class PostgresStatementSamples(object):
         :return:
         """
         self._tags = tags
+        self._tags_str = ','.join(self._tags)
+        for t in self._tags:
+            if t.startswith('service:'):
+                self._service = t[len('service:'):]
         self._last_check_run = time.time()
         if self._future is None or not self._future.running():
             self.log.info("starting postgres statement sampler")
@@ -84,18 +90,18 @@ class PostgresStatementSamples(object):
                 cursor.execute(query, (self.config.dbname,))
             rows = cursor.fetchall()
 
-        rows = [r for r in rows if r['query'] and r['datname'] and self.can_explain_statement(r['query'])]
-        max_query_start = max(r['query_start'] for r in rows)
-        if self._activity_last_query_start is None or max_query_start > self._activity_last_query_start:
-            self._activity_last_query_start = max_query_start
-
-        # TODO: once stable, either remove these development metrics or make them configurable in a debug mode
         statsd.histogram(
             "dd.postgres.get_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=instance_tags
         )
+        # TODO: once stable, either remove these development metrics or make them configurable in a debug mode
         statsd.histogram("dd.postgres.get_new_pg_stat_activity.rows", len(rows), tags=instance_tags)
         statsd.increment("dd.postgres.get_new_pg_stat_activity.total_rows", len(rows), tags=instance_tags)
-        return rows
+
+        for r in rows:
+            if r['query'] and r['datname'] and self.can_explain_statement(r['query']):
+                if self._activity_last_query_start is None or r['query_start'] > self._activity_last_query_start:
+                    self._activity_last_query_start = r['query_start']
+                yield r
 
     def collection_loop(self):
         try:
@@ -110,13 +116,11 @@ class PostgresStatementSamples(object):
 
     def collect_statement_samples(self):
         start_time = time.time()
+
         samples = self._get_new_pg_stat_activity(self.postgres_check.db, instance_tags=self._tags)
-        events = self._explain_new_pg_stat_activity(
-            self.postgres_check.db, samples, self._tags
-        )
-        if events:
-            host = self.config.host if self.config.host else datadog_agent.get_hostname()
-            submit_statement_sample_events(events, self._tags, "postgres", host)
+        events = self._explain_new_pg_stat_activity(self.postgres_check.db, samples, self._tags)
+        submit_statement_sample_events(events)
+
         elapsed_ms = (time.time() - start_time) * 1000
         statsd.histogram(
             "dd.postgres.collect_statement_samples.time", elapsed_ms, tags=self._tags
@@ -128,7 +132,6 @@ class PostgresStatementSamples(object):
             len(self.seen_statements_plan_sigs_cache),
             tags=self._tags,
         )
-        self.log.debug("ran collect_statement_samples. samples: %s, elapsed_ms: %s", len(samples), int(elapsed_ms))
 
     def can_explain_statement(self, statement):
         # TODO: cleaner query cleaning to strip comments, etc.
@@ -169,10 +172,6 @@ class PostgresStatementSamples(object):
         return result[0][0]
 
     def _explain_new_pg_stat_activity(self, db, samples, instance_tags):
-        start_time = time.time()
-        ddtags = ','.join(self._tags)
-        service = next((t for t in self._tags if t.startswith('service:')), 'service:mysql')[len('service:'):]
-        events = []
         for row in samples:
             original_statement = row['query']
             # TODO: should we cache for the obfuscated statement to avoid re-explaining the same normalized query?
@@ -186,24 +185,18 @@ class PostgresStatementSamples(object):
             # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
             # - `resource_hash` - hash computed off the raw sql text to match apm resources
             # - `query_signature` - hash computed from the raw sql text to match query metrics
+            plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
             if plan_dict:
                 plan = json.dumps(plan_dict)
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
                 plan_signature = compute_exec_plan_signature(normalized_plan)
                 plan_cost = (plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0)
-            else:
-                plan = None
-                normalized_plan = None
-                obfuscated_plan = None
-                plan_signature = None
-                plan_cost = None
 
             obfuscated_statement = datadog_agent.obfuscate_sql(original_statement)
             query_signature = compute_sql_signature(obfuscated_statement)
             apm_resource_hash = query_signature
             statement_plan_sig = (query_signature, plan_signature)
-
             if statement_plan_sig not in self.seen_statements_plan_sigs_cache:
                 self.seen_statements_plan_sigs_cache[statement_plan_sig] = True
                 event = {
@@ -211,9 +204,9 @@ class PostgresStatementSamples(object):
                     "timestamp": time.time() * 1000,
                     # TODO: if "localhost" then use agent hostname instead
                     "host": self.config.host,
-                    "service": service,
+                    "service": self._service,
                     "ddsource": "postgres",
-                    "ddtags": ddtags,
+                    "ddtags": self._tags_str,
                     # no duration with postgres because these are in-progress, not complete events
                     # "duration": ?,
                     "network": {
@@ -244,8 +237,4 @@ class PostgresStatementSamples(object):
                         'normalized_plan': normalized_plan,
                         'original_statement': original_statement,
                     }
-                events.append(event)
-        statsd.histogram(
-            "dd.postgres.explain_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=instance_tags
-        )
-        return events
+                yield event

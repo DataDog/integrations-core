@@ -46,6 +46,20 @@ mysql_statement_sample_keys = [
     'no_good_index_used',
 ]
 
+# columns from events_statements_summary tables which correspond to attributes common to all databases and are
+# therefore stored under other standard keys
+events_statements_sample_exclude_keys = {
+    # gets obfuscated
+    'sql_text',
+    # stored as "instance"
+    'current_schema',
+    # used for signature
+    'digest_text',
+    'timer_end_time_s',
+    'max_timer_wait_ns',
+    'timer_start'
+}
+
 
 class MySQLStatementSamples(object):
     executor = ThreadPoolExecutor()
@@ -65,6 +79,7 @@ class MySQLStatementSamples(object):
         self._last_check_run = None
         self._db = None
         self._tags = None
+        self._tags_str = None
         self._service = "mysql"
         self._collection_loop_future = None
         self._rate_limiter = ConstantRateLimiter(1)
@@ -79,6 +94,7 @@ class MySQLStatementSamples(object):
         :return:
         """
         self._tags = tags
+        self._tags_str = ','.join(tags)
         for t in self._tags:
             if t.startswith('service:'):
                 self._service = t[len('service:'):]
@@ -170,50 +186,35 @@ class MySQLStatementSamples(object):
                 return rows
             self._checkpoint = max(r['timer_start'] for r in rows)
             cursor.execute('SET @@SESSION.sql_notes = 0')
-            tags = ["table:%s", events_statements_table] + self._tags
+            tags = ["table:%s".format(events_statements_table)] + self._tags
             statsd.increment("dd.mysql.events_statements_by_digest.rows", len(rows), tags=tags)
             statsd.timing("dd.mysql.events_statements_by_digest.time", (time.time() - start) * 1000, tags=tags)
             return rows
 
     def _collect_plans_for_statements(self, rows):
-        events = []
+        num_sent = 0
         num_truncated = 0
-        ddtags = ','.join(self._tags)
-        service = next((t for t in self._tags if t.startswith('service:')), 'service:mysql')[len('service:'):]
-        # service:apm-dbm-dev-aurora-postgres
-
         for row in rows:
             if not row or not all(row):
                 self._log.debug('Row was unexpectedly truncated or events_statements_history_long table is not enabled')
                 continue
-            schema = row['current_schema']
-            sql_text = row['sql_text']
-            digest_text = row['digest_text']
-            duration_ns = row['max_timer_wait_ns']
 
+            sql_text = row['sql_text']
             if not sql_text:
                 continue
 
+            # TODO: ingest these anyway without plans
             # The SQL_TEXT column will store 1024 chars by default. Plans cannot be captured on truncated
             # queries, so the `performance_schema_max_sql_text_length` variable must be raised.
             if sql_text[-3:] == '...':
                 num_truncated += 1
                 continue
 
-            plan = None
-            with closing(self._db.cursor()) as cursor:
-                # TODO: run these asynchronously / do some benchmarking to optimize
-                try:
-                    start_time = time.time()
-                    plan = self._attempt_explain(cursor, sql_text, schema)
-                    statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=self._tags)
-                except Exception:
-                    self._log.exception("failed to run explain on query %s", sql_text)
-
             # Plans have several important signatures to tag events with:
             # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
             # - `resource_hash` - hash computed off the raw sql text to match apm resources
             # - `query_signature` - hash computed from the digest text to match query metrics
+            plan = self._attempt_explain_safe(sql_text, row['current_schema'])
             if plan:
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
@@ -223,20 +224,20 @@ class MySQLStatementSamples(object):
                 normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None
 
             obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
-            query_signature = compute_sql_signature(datadog_agent.obfuscate_sql(digest_text))
+            query_signature = compute_sql_signature(datadog_agent.obfuscate_sql(row['digest_text']))
             apm_resource_hash = compute_sql_signature(obfuscated_statement)
             statement_plan_sig = (query_signature, plan_signature)
 
             if statement_plan_sig not in self._seen_statements_cache:
                 self._seen_statements_cache[statement_plan_sig] = True
-                events.append({
+                yield {
                     "timestamp": row["timer_end_time_s"] * 1000,
                     # TODO: if "localhost" then use agent hostname instead
                     "host": self._config.host,
-                    "service": service,
+                    "service": self._service,
                     "ddsource": "mysql",
-                    "ddtags": ddtags,
-                    "duration": duration_ns,
+                    "ddtags": self._tags_str,
+                    "duration": row['max_timer_wait_ns'],
                     # Missing for now
                     # "network": {
                     #     "client": {
@@ -245,7 +246,7 @@ class MySQLStatementSamples(object):
                     #     }
                     # },
                     "db": {
-                        "instance": schema,
+                        "instance": row['current_schema'],
                         "plan": {
                             "definition": obfuscated_plan,
                             "cost": plan_cost,
@@ -253,16 +254,11 @@ class MySQLStatementSamples(object):
                         },
                         "query_signature": query_signature,
                         "resource_hash": apm_resource_hash,
-                        # Missing for now
-                        # "application": "mcnulty",
-                        # "user": "dog",
-                        # "table": "users",
-                        # "index": "idx1",
-                        # "operation": "SELECT",
                         "statement": obfuscated_statement
                     },
-                    'mysql': {k: row[k] for k in mysql_statement_sample_keys if k in row},
-                })
+                    'mysql': {k: v for k, v in row.items() if k not in events_statements_sample_exclude_keys},
+                }
+                num_sent += 1
                 # TODO: add debug
 
         if num_truncated > 0:
@@ -270,10 +266,8 @@ class MySQLStatementSamples(object):
                 'Unable to collect %d/%d statement samples due to truncated SQL text. Consider raising '
                 '`performance_schema_max_sql_text_length` to capture these queries.',
                 num_truncated,
-                num_truncated + len(events),
+                num_truncated + num_sent,
             )
-
-        return events
 
     def _get_enabled_performance_schema_consumers(self):
         """
@@ -374,9 +368,7 @@ class MySQLStatementSamples(object):
             events_statements_table, self._config.options.get('events_statements_row_limit', 5000)
         )
         events = self._collect_plans_for_statements(rows)
-        if events:
-            host = self._config.host if self._config.host else datadog_agent.get_hostname()
-            submit_statement_sample_events(events, self._tags, "mysql", host)
+        submit_statement_sample_events(events)
 
         statsd.gauge("dd.mysql.collect_statement_samples.total.time",
                      (time.time() - start_time) * 1000,
@@ -387,6 +379,17 @@ class MySQLStatementSamples(object):
         statsd.gauge("dd.mysql.collect_statement_samples.seen_statement_plan_sigs",
                      len(self._seen_statements_plan_sigs_cache),
                      tags=self._tags)
+
+    def _attempt_explain_safe(self, sql_text, schema):
+        start_time = time.time()
+        with closing(self._db.cursor()) as cursor:
+            # TODO: run these asynchronously / do some benchmarking to optimize
+            try:
+                plan = self._attempt_explain(cursor, sql_text, schema)
+                statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=self._tags)
+                return plan
+            except Exception:
+                self._log.exception("failed to run explain on query %s", sql_text)
 
     def _attempt_explain(self, cursor, statement, schema):
         """
