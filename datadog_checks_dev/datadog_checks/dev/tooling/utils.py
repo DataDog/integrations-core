@@ -579,13 +579,21 @@ def has_agent_8_check_signature(check):
 
 
 def has_saved_views(check):
+    return _has_asset_in_manifest(check, 'saved_views')
+
+
+def has_recommended_monitor(check):
+    return _has_asset_in_manifest(check, 'monitors')
+
+
+def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
     except JSONDecodeError as e:
         raise Exception("Cannot decode {}: {}".format(manifest_file, e))
-    return len(manifest.get('assets', {}).get('saved_views', {})) > 0
+    return len(manifest.get('assets', {}).get(asset, {})) > 0
 
 
 def is_tile_only(check):
