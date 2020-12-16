@@ -1,5 +1,7 @@
 # Profile for Juniper EX Series Ethernet devices
-# See: https://www.juniper.net/documentation/software/topics/concept/mix-smi-ex-junos-overview.html
+# See: 
+#   https://www.juniper.net/documentation/en_US/junos/topics/concept/standard-mib-overview.html
+#   https://www.juniper.net/documentation/en_US/junos/topics/concept/enterprise-specific-mibs-overview.html
 
 extends:
   - _base.yaml

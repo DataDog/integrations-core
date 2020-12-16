@@ -1,7 +1,8 @@
 # Profile for Juniper SRX Series Firewall devices
-# See:
-# * https://www.juniper.net/documentation/software/topics/concept/mix-smi-ex-junos-overview.html
-# * https://apps.juniper.net/mib-explorer/search.jsp#object=jnxFirewalls&product=Junos%20OS&release=20.3R1
+# See: 
+#   https://www.juniper.net/documentation/en_US/junos/topics/concept/standard-mib-overview.html
+#   https://www.juniper.net/documentation/en_US/junos/topics/concept/enterprise-specific-mibs-overview.html
+
 
 extends:
   - _base.yaml
