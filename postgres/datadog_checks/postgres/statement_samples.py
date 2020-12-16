@@ -19,14 +19,19 @@ from datadog_checks.base.utils.db.utils import ConstantRateLimiter
 
 VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
-# keys from pg_stat_activity to include along with each (sample & execution plan)
-pg_stat_activity_sample_keys = [
-    'query_start',
-    'wait_event_type',
-    'wait_event',
-    'state',
-]
-
+# columns from pg_stat_activity which correspond to attributes common to all databases and are therefore stored in
+# under other standard keys
+pg_stat_activity_sample_exclude_keys = {
+    # we process & obfuscate this separately
+    'query',
+    # stored separately
+    'application_name',
+    'datname',
+    'usename',
+    'client_addr',
+    'client_hostname',
+    'client_port',
+}
 
 class PostgresStatementSamples(object):
     # TODO: see what we should set max_workers to
@@ -202,23 +207,24 @@ class PostgresStatementSamples(object):
             if statement_plan_sig not in self.seen_statements_plan_sigs_cache:
                 self.seen_statements_plan_sigs_cache[statement_plan_sig] = True
                 event = {
-                    # TODO: put event timestamp
+                    # the timestamp for activity events is the time at which they were collected
                     "timestamp": time.time() * 1000,
-                    # TODO: handle localhost correctly
+                    # TODO: if "localhost" then use agent hostname instead
                     "host": self.config.host,
                     "service": service,
                     "ddsource": "postgres",
                     "ddtags": ddtags,
-                    # no duration with postgres
+                    # no duration with postgres because these are in-progress, not complete events
                     # "duration": ?,
                     "network": {
                         "client": {
-                            "ip": row['client_addr'],
-                            "port": row['client_port']
+                            "ip": row.get('client_addr', None),
+                            "port": row.get('client_port', None),
+                            "hostname": row.get('client_hostname', None)
                         }
                     },
                     "db": {
-                        "instance": row['datname'],
+                        "instance": row.get('datname', None),
                         "plan": {
                             "definition": obfuscated_plan,
                             "cost": plan_cost,
@@ -226,16 +232,11 @@ class PostgresStatementSamples(object):
                         },
                         "query_signature": query_signature,
                         "resource_hash": apm_resource_hash,
-                        # Missing for now
-                        "application": row['application_name'],
-                        # TODO: join to get user name
-                        "user": row['usesysid'],
-                        # "table": "users",
-                        # "index": "idx1",
-                        # "operation": "SELECT",
+                        "application": row.get('application_name', None),
+                        "user": row['usename'],
                         "statement": obfuscated_statement
                     },
-                    'postgres': {k: row[k] for k in pg_stat_activity_sample_keys if k in row},
+                    'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
                 }
                 if self.config.collect_statement_samples_debug:
                     event['db']['debug'] = {
