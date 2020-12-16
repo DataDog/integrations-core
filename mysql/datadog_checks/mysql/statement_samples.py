@@ -123,7 +123,7 @@ class MySQLStatementSamples(object):
                    sql_text,
                    IFNULL(digest_text, sql_text) AS digest_text,
                    timer_start,
-                   timer_end,
+                   UNIX_TIMESTAMP()-(select VARIABLE_VALUE from information_schema.global_status where VARIABLE_NAME='UPTIME')+timer_end*1e-12 as timer_end_time_s,
                    MAX(timer_wait) / 1000 AS max_timer_wait_ns,
                    lock_time / 1000 AS lock_time_ns,
                    rows_affected,
@@ -222,8 +222,7 @@ class MySQLStatementSamples(object):
             if statement_plan_sig not in self._seen_statements_cache:
                 self._seen_statements_cache[statement_plan_sig] = True
                 events.append({
-                    # TODO: put event timestamp
-                    "timestamp": time.time() * 1000,
+                    "timestamp": row["timer_end_time_s"] * 1000,
                     # TODO: handle localhost correctly
                     "host": self._config.host,
                     "service": service,
