@@ -29,11 +29,11 @@ def patch(lines):
     new_lines = lines[:marker_index]
 
     for renderer in (
-        render_config_spec_progress,
         render_dashboard_progress,
-        render_metadata_progress,
         render_logs_progress,
+        render_config_spec_progress,
         render_e2e_progress,
+        render_metadata_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
         render_saved_views_progress,
@@ -68,6 +68,7 @@ def render_config_spec_progress():
     percent = checks_with_config_spec / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_config_spec}/{total_checks}"'
     return lines
 
 
@@ -112,6 +113,7 @@ def render_dashboard_progress():
     percent = integrations_with_dashboard / total_integrations * 100
     formatted_percent = f'{percent:.2f}'
     lines[5] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[7] = f'??? check "Completed {integrations_with_dashboard}/{total_integrations}"'
     return lines
 
 
@@ -136,6 +138,7 @@ def render_metadata_progress():
     percent = checks_with_metadata / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_metadata}/{total_checks}"'
     return lines
 
 
@@ -166,6 +169,7 @@ def render_logs_progress():
     percent = checks_with_logs / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_logs}/{total_checks}"'
     return lines
 
 
@@ -187,6 +191,7 @@ def render_e2e_progress():
     percent = checks_with_e2e / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_e2e}/{total_checks}"'
     return lines
 
 
@@ -208,6 +213,7 @@ def render_process_signatures_progress():
     percent = checks_with_ps / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_ps}/{total_checks}"'
     return lines
 
 
@@ -229,6 +235,7 @@ def render_check_signatures_progress():
     percent = checks_with_cs / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_cs}/{total_checks}"'
     return lines
 
 
@@ -251,4 +258,5 @@ def render_saved_views_progress():
     percent = checks_with_sv / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_sv}/{total_checks}"'
     return lines
