@@ -231,7 +231,7 @@ class MySQLStatementSamples(object):
                 self._seen_statements_cache[statement_plan_sig] = True
                 events.append({
                     "timestamp": row["timer_end_time_s"] * 1000,
-                    # TODO: handle localhost correctly
+                    # TODO: if "localhost" then use agent hostname instead
                     "host": self._config.host,
                     "service": service,
                     "ddsource": "mysql",
