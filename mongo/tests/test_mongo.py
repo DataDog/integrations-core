@@ -5,6 +5,7 @@ import logging
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
 
 from . import common
@@ -67,6 +68,7 @@ def test_mongo(aggregator, check, instance_authdb):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.parametrize(
@@ -87,6 +89,7 @@ def test_mongo2(aggregator, check, instance_user):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_mongo_old_config(aggregator, check, instance):
@@ -100,6 +103,7 @@ def test_mongo_old_config(aggregator, check, instance):
         if metric_name in METRIC_VAL_CHECKS_OLD:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_mongo_old_config_2(aggregator, check, instance):
@@ -113,6 +117,7 @@ def test_mongo_old_config_2(aggregator, check, instance):
         if metric_name in METRIC_VAL_CHECKS_OLD:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1valid_and_1invalid_custom_queries):
