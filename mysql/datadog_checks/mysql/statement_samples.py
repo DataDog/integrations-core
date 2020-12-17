@@ -214,6 +214,7 @@ class MySQLStatementSamples(object):
             # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
             # - `resource_hash` - hash computed off the raw sql text to match apm resources
             # - `query_signature` - hash computed from the digest text to match query metrics
+            # TODO: add configurable ratelimiting for explains/s
             plan = self._attempt_explain_safe(sql_text, row['current_schema'])
             if plan:
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None

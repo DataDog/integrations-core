@@ -178,6 +178,7 @@ class PostgresStatementSamples(object):
             if original_statement in self.seen_statements_cache:
                 continue
             self.seen_statements_cache[original_statement] = True
+            # TODO: add configurable ratelimiting for explains/s
             plan_dict = self._run_explain(db, original_statement, instance_tags)
 
             # Plans have several important signatures to tag events with. Note that for postgres, the
