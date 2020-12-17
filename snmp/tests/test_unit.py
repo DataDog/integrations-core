@@ -630,7 +630,7 @@ def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors():
     check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCInOctets', index, results, tags)
     check.rate.assert_not_called()
 
-    # assert not called because of missing ifHCInOctets
+    # assert not called because of missing ifHCOutOctets
     check.rate = mock.Mock()
     check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, results, tags)
     check.rate.assert_not_called()
