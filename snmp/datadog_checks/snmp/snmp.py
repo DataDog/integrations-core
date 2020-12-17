@@ -364,6 +364,7 @@ class SnmpCheck(AgentCheck):
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
         start_time = time.time()
+        self.rate('snmp.check_interval', time.time(), tags=self._config.tags)
         config = self._config
         if config.ip_network:
             if self._thread is None:
