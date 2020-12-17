@@ -20,4 +20,25 @@ CONFIG = {
     'password': 'monitor',
     'timeout': 10,
     'tags': ['foo:bar'],
+    'tls_verify': False,
 }
+
+# TLS certs
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
+cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
+private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
+
+TLS_CONFIG = {
+        'db': 'abc',
+        'server': 'localhost',
+        'port': '999',
+        'username': 'dbadmin',
+        'password': 'monitor',
+        'timeout': 10,
+        'tags': ['foo:bar'],
+        'tls_verify': True,
+        'validate_hostname': True,
+        'tls_cert': cert,
+        'tls_private_key': private_key,
+        'tls_ca_cert': CERTIFICATE_DIR,
+    }
