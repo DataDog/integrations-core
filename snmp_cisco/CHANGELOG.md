@@ -1,2 +1,0 @@
-# CHANGELOG - snmp_cisco
-
