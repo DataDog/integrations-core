@@ -33,7 +33,7 @@
     "dashboards": {},
     "monitors": {},
     "saved_views": {},
-    "service_checks": "",
+    "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": ""
   }
