@@ -50,6 +50,10 @@ def get_manifest_schema():
                     "description": "The metric to use to determine the health of this integration",
                     "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
                 },
+                "metric_integration_check_name": {
+                    "description": "The name of an external integration check providing metrics",
+                    "type": "string",
+                },
                 "creates_events": {"description": "Whether or not this integration emits events", "type": "boolean"},
                 "short_description": {
                     "description": "Brief description of this integration",
@@ -466,7 +470,11 @@ def manifest(ctx, fix):
             if metric_to_check:
                 metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
                 for metric in metrics_to_check:
-                    if not is_metric_in_metadata_file(metric, check_name) and metric not in METRIC_TO_CHECK_WHITELIST:
+                    metric_integration_check_name = decoded.get('metric_integration_check_name') or check_name
+                    if (
+                        not is_metric_in_metadata_file(metric, metric_integration_check_name)
+                        and metric not in METRIC_TO_CHECK_WHITELIST
+                    ):
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
 
