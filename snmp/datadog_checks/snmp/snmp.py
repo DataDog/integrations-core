@@ -83,6 +83,8 @@ class SnmpCheck(AgentCheck):
 
         self._last_fetch_number = 0
 
+        self._submitted_metrics = 0
+
     def _get_next_fetch_id(self):
         # type: () -> str
         """
@@ -363,6 +365,7 @@ class SnmpCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
+        self._submitted_metrics = 0
         start_time = time.time()
         self.rate('snmp.check_interval', time.time(), tags=self._config.tags)
         config = self._config
@@ -389,6 +392,7 @@ class SnmpCheck(AgentCheck):
         check_duration = time.time() - start_time
         tags = ['loader:python'] + config.tags
         self.gauge('snmp.check_duration', check_duration, tags=tags)
+        self.gauge('snmp.submitted_metrics', self._submitted_metrics, tags=tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
@@ -708,3 +712,4 @@ class SnmpCheck(AgentCheck):
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
+        self._submitted_metrics += 1
