@@ -581,3 +581,61 @@ def test_batches(items, size, output):
 def test_batches_size_must_be_strictly_positive(size):
     with pytest.raises(ValueError):
         list(batches([1, 2, 3], size=size))
+
+
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric():
+    instance = common.generate_instance_config([])
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+    results = {
+        'ifHighSpeed': {
+            ('1', '2'): 80,
+        },
+        'ifHCInOctets': {
+            ('1', '2'): 5000000,
+        },
+        'ifHCOutOctets': {
+            ('1', '2'): 1000000,
+        },
+    }
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCInOctets', index, results, tags)
+    # ((5000000 * 8) / (80 * 1000000)) * 100 = 50.0
+    check.rate.assert_called_with('snmp.ifBandwidthInUsage.rate', 50.0, ['foo', 'bar'])
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, results, tags)
+    # ((1000000 * 8) / (80 * 1000000)) * 100 = 10.0
+    check.rate.assert_called_with('snmp.ifBandwidthOutUsage.rate', 10.0, ['foo', 'bar'])
+
+
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors():
+    instance = common.generate_instance_config([])
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+    results = {
+        'ifHighSpeed': {
+            ('1', '2'): 80,
+        },
+    }
+
+    # assert not called because of missing ifHCInOctets
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCInOctets', index, results, tags)
+    check.rate.assert_not_called()
+
+    # assert not called because of missing ifHCInOctets
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, results, tags)
+    check.rate.assert_not_called()
+
+    # assert not called because of missing ifHighSpeed
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, {}, tags)
+    check.rate.assert_not_called()
