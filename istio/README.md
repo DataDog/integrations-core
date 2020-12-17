@@ -150,4 +150,4 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
-[18]: https://istio.io/latest/docs/tasks/observability/mixer/metrics/collecting-metrics/#before-you-begin
+[18]: https://istio.io/v1.1/docs/tasks/telemetry/
