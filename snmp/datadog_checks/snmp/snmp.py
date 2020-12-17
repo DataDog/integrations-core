@@ -8,6 +8,7 @@ import ipaddress
 import json
 import re
 import threading
+import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
@@ -362,6 +363,7 @@ class SnmpCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
+        start_time = time.time()
         config = self._config
         if config.ip_network:
             if self._thread is None:
@@ -383,6 +385,9 @@ class SnmpCheck(AgentCheck):
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
             self._check_device(config)
+        check_duration = time.time() - start_time
+        tags = ['loader:python'] + config.tags
+        self.gauge('snmp.check_duration', check_duration, tags=tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
