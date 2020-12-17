@@ -84,6 +84,7 @@ class SnmpCheck(AgentCheck):
         self._last_fetch_number = 0
 
         self._submitted_metrics = 0
+        self.telemetry_tags = []
 
     def _get_next_fetch_id(self):
         # type: () -> str
@@ -365,9 +366,10 @@ class SnmpCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
-        self._submitted_metrics = 0
         start_time = time.time()
-        self.rate('snmp.check_interval', time.time(), tags=self._config.tags)
+        self._submitted_metrics = 0
+        self.telemetry_tags = ['loader:python'] + self._config.tags
+        self.rate('snmp.check_interval', time.time(), tags=telemetry_tags)
         config = self._config
         if config.ip_network:
             if self._thread is None:
@@ -390,9 +392,8 @@ class SnmpCheck(AgentCheck):
         else:
             self._check_device(config)
         check_duration = time.time() - start_time
-        tags = ['loader:python'] + config.tags
-        self.gauge('snmp.check_duration', check_duration, tags=tags)
-        self.gauge('snmp.submitted_metrics', self._submitted_metrics, tags=tags)
+        self.gauge('snmp.check_duration', check_duration, tags=self.telemetry_tags)
+        self.gauge('snmp.submitted_metrics', self._submitted_metrics, tags=self.telemetry_tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
@@ -433,6 +434,7 @@ class SnmpCheck(AgentCheck):
                 config.oid_config.update_scalar_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
+                self.telemetry_tags = tags
                 self.report_metrics(config.parsed_metrics, results, tags)
         except CheckException as e:
             error = str(e)
