@@ -434,7 +434,7 @@ class SnmpCheck(AgentCheck):
                 config.oid_config.update_scalar_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
-                self.telemetry_tags = tags
+                self.telemetry_tags += tags
                 self.report_metrics(config.parsed_metrics, results, tags)
         except CheckException as e:
             error = str(e)
