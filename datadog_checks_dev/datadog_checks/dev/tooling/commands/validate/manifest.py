@@ -50,10 +50,6 @@ def get_manifest_schema():
                     "description": "The metric to use to determine the health of this integration",
                     "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
                 },
-                "metric_integration_check_name": {
-                    "description": "The name of an external integration check providing metrics",
-                    "type": "string",
-                },
                 "creates_events": {"description": "Whether or not this integration emits events", "type": "boolean"},
                 "short_description": {
                     "description": "Brief description of this integration",
