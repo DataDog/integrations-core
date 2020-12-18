@@ -127,6 +127,87 @@ See [Tracing Docker Applications][21] for a complete list of available environme
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][23].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  annotations:
+    ad.datadoghq.com/redis.check_names: '["redisdb"]'
+    ad.datadoghq.com/redis.init_configs: '[{}]'
+    ad.datadoghq.com/redis.instances: |
+      [
+        {
+          "host": "%%host%%",
+          "port":"6379",
+          "password":"%%env_REDIS_PASSWORD%%"
+        }
+      ]
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:latest
+      ports:
+        - containerPort: 6379
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be passed to the Agent. See the [Autodiscovery Template Variable][17] documentation.
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+
+Then, set [Log Integrations][20] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][24].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  annotations:
+    ad.datadoghq.com/redis.logs: '[{"source":"redis","service":"<YOUR_APP_NAME>"}]'
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:latest
+      ports:
+        - containerPort: 6379
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -205,3 +286,6 @@ Additional helpful documentation, links, and articles:
 [19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
 [21]: https://docs.datadoghq.com/agent/docker/apm/?tab=linux
+[22]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
