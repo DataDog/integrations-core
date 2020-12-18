@@ -86,6 +86,8 @@ class InstanceConfig:
 
         self.instance = instance
         self.tags = instance.get('tags', [])
+        self.tags.append('loader:python')
+
         self.metrics = instance.get('metrics', [])
         metric_tags = instance.get('metric_tags', [])
 

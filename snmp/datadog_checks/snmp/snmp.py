@@ -368,8 +368,8 @@ class SnmpCheck(AgentCheck):
         # type: (Dict[str, Any]) -> None
         start_time = time.time()
         self._submitted_metrics = 0
-        self.telemetry_tags = ['loader:python'] + self._config.tags
-        self.rate('snmp.check_interval', time.time(), tags=self.telemetry_tags)
+        self.telemetry_tags = self._config.tags[:]
+        self.monotonic_count('snmp.check_interval', time.time(), tags=self.telemetry_tags)
         config = self._config
         if config.ip_network:
             if self._thread is None:
