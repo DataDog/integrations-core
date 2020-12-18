@@ -129,7 +129,7 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Docker" xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
 
 #### Kubernetes
 
