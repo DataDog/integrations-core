@@ -149,7 +149,7 @@ TAGS = {
         'namespace:kube-system',
     ],
     NAMESPACE + '.pod.count': ['uid:b6fb4273-2dd6-4edb-9a23-7642bb121806', 'created_by_kind:daemonset'],
-    NAMESPACE + '.deployment.count': ['condition:progressing', 'condition:available', 'status:true'],
+    NAMESPACE + '.deployment.count': ['namespace:default','namespace:test'],
     NAMESPACE + '.replicaset.count': ['owner_kind:deployment', 'owner_name:metrics-server-v0.3.6'],
     NAMESPACE + '.namespace.count': ['phase:active', 'phase:terminating'],
     NAMESPACE + '.job.count': ['owner_kind:cronjob', 'owner_name:a-cronjob'],
@@ -373,6 +373,19 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         NAMESPACE + '.persistentvolumes.by_phase',
         tags=['storageclass:local-data', 'phase:released', 'optional:tag1'],
         value=0,
+    )
+
+    # deployment counts
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.count',
+        tags=['namespace:default', 'optional:tag1'],
+        value=1,
+    )
+
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.count',
+        tags=['namespace:test', 'optional:tag1'],
+        value=1,
     )
 
     for metric in METRICS:

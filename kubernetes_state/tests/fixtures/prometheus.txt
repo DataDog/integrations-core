@@ -135,6 +135,12 @@ kube_deployment_status_condition{namespace="default",deployment="redis-master",c
 kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="true"} 1
 kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="false"} 0
 kube_deployment_status_condition{namespace="default",deployment="redis-master",condition="Available",status="unknown"} 0
+kube_deployment_status_condition{namespace="test",deployment="redis-master",condition="Progressing",status="true"} 1
+kube_deployment_status_condition{namespace="test",deployment="redis-master",condition="Progressing",status="false"} 0
+kube_deployment_status_condition{namespace="test",deployment="redis-master",condition="Progressing",status="unknown"} 0
+kube_deployment_status_condition{namespace="test",deployment="redis-master",condition="Available",status="true"} 1
+kube_deployment_status_condition{namespace="test",deployment="redis-master",condition="Available",status="false"} 0
+kube_deployment_status_condition{namespace="test",deployment="redis-master",condition="Available",status="unknown"} 0
 # HELP kube_replicaset_owner Information about the ReplicaSet's owner.
 # TYPE kube_replicaset_owner gauge
 kube_replicaset_owner{namespace="kube-system",replicaset="l7-default-backend-678889f899",owner_kind="Deployment",owner_name="l7-default-backend",owner_is_controller="true"} 1
