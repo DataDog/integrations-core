@@ -81,33 +81,39 @@ Datadog APM integrates with Redis to see the traces across your distributed syst
 
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-#### Containerized
+#### Docker
 
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                                      |
-| -------------------- | -------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `redisdb`                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                              |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"6379", "password":"%%env_REDIS_PASSWORD%%"}` |
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["redisdb"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]'
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be passed to the Agent. See the [Autodiscovery Template Variable][17] documentation.
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][18].
 
-| Parameter      | Value                                               |
-| -------------- | --------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "redis", "service": "<YOUR_APP_NAME>"}` |
+Then, set [Log Integrations][20] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"redis","service":"<YOUR_APP_NAME>"}]'
+```
 
 ##### Trace collection
 
-APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
 
 Required environment variables on the Agent container:
 
@@ -117,7 +123,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
+See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -194,3 +200,8 @@ Additional helpful documentation, links, and articles:
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
 [16]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles
+[17]: https://docs.datadoghq.com/agent/faq/template_variables/
+[18]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[21]: https://docs.datadoghq.com/agent/docker/apm/?tab=linux
