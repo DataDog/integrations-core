@@ -470,7 +470,11 @@ def manifest(ctx, fix):
             if metric_to_check:
                 metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
                 for metric in metrics_to_check:
-                    metric_integration_check_name = decoded.get('metric_integration_check_name') or check_name
+                    metric_integration_check_name = check_name
+                    # snmp vendor specific integrations define metric_to_check
+                    # with metrics from `snmp` integration
+                    if check_name.startswith('snmp_') and not metadata_in_manifest:
+                        metric_integration_check_name = 'snmp'
                     if (
                         not is_metric_in_metadata_file(metric, metric_integration_check_name)
                         and metric not in METRIC_TO_CHECK_WHITELIST
