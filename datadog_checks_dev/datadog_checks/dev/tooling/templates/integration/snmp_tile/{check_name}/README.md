@@ -3,7 +3,7 @@
 ## Overview
 
 This check monitors [{integration_name}][1].
-For details of monitored metrics see the [SNMP integration tile][2]
+For details of monitored metrics see the [Network Device Monitoring][2] documentation.
 
 ## Setup
 
