@@ -895,7 +895,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             namespace = self._label_to_tag("namespace", sample[self.SAMPLE_LABELS], scraper_config)
-            deployment = self._label_to_tag("deployment", sample[self.SAMPLE_LABELS], scraper_config)
+            deployment = sample[self.SAMPLE_LABELS].get("deployment")
             if (deployment, namespace) in seen:
                 continue
             seen.add((deployment, namespace))
