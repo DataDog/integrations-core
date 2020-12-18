@@ -31,7 +31,7 @@ The {integration_name} integration does not include any service checks.
 
 ### Events
 
-{integration_name} does not include any events.
+The {integration_name} integration does not include any events.
 
 ## Troubleshooting
 
