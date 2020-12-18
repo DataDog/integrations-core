@@ -26,7 +26,16 @@ from .mixins import PrometheusScraperMixin
 class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
     DEFAULT_METRIC_LIMIT = 2000
 
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'prometheus_timeout': {'name': 'timeout'},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
+        self._http_handlers = {}
         super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 
     def check(self, instance):

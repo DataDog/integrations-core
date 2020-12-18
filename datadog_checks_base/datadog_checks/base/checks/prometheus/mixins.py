@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import logging
 from collections import defaultdict
 from fnmatch import fnmatchcase
@@ -436,15 +437,34 @@ class PrometheusScraperMixin(object):
                             pass
 
     def get_http_handler(self, endpoint, instance):
-        try:
-            http_handler = self._http_handlers[endpoint] = RequestsWrapper(
-                instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-            )
+        if endpoint in self._http_handlers:
+            return self._http_handlers[endpoint]
 
-            return http_handler
-        except Exception as e:
-            self.log.debug("PrometheusScraperMixin not using RequestsWrapper: %s", e)
-            return requests
+        http_config = copy.deepcopy(instance)
+        # TODO: Deprecate this behavior in Agent 8
+        if http_config.get('ssl_ca_cert') is False:
+            http_config['ssl_verify'] = False
+
+        # TODO: Deprecate this behavior in Agent 8
+        if http_config.get('ssl_verify') is False:
+            http_config.setdefault('tls_ignore_warning', True)
+
+        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+            http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        headers = http_handler.options['headers']
+
+        bearer_token = http_config.get('_bearer_token')
+        if bearer_token is not None:
+            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+
+        headers.setdefault('accept-encoding', 'gzip')
+
+        # Explicitly set the content type we accept
+        headers.setdefault('accept', 'text/plain')
+
+        return http_handler
 
     def process_metric(self, message, **kwargs):
         """
