@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 5.6.1 / 2020-12-18
+
+* [Fixed] [orchestrator] change cardinality of deployment count. See [#8222](https://github.com/DataDog/integrations-core/pull/8222).
+
 ## 5.6.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] add labels from `self.SAMPLE_LABELS` to container status metrics. See [#7602](https://github.com/DataDog/integrations-core/pull/7602). Thanks [jfmyers9](https://github.com/jfmyers9).
