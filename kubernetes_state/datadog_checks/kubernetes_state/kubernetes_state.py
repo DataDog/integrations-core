@@ -896,7 +896,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
             namespace = self._label_to_tag("namespace", sample[self.SAMPLE_LABELS], scraper_config)
             deployment = self._label_to_tag("deployment", sample[self.SAMPLE_LABELS], scraper_config)
-            if (deployment,namespace) in seen:
+            if (deployment, namespace) in seen:
                 continue
             seen.add((deployment, namespace))
             tags.append(namespace)

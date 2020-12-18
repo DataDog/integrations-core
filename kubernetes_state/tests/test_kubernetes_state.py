@@ -149,7 +149,7 @@ TAGS = {
         'namespace:kube-system',
     ],
     NAMESPACE + '.pod.count': ['uid:b6fb4273-2dd6-4edb-9a23-7642bb121806', 'created_by_kind:daemonset'],
-    NAMESPACE + '.deployment.count': ['namespace:default','namespace:test'],
+    NAMESPACE + '.deployment.count': ['namespace:default', 'namespace:test'],
     NAMESPACE + '.replicaset.count': ['owner_kind:deployment', 'owner_name:metrics-server-v0.3.6'],
     NAMESPACE + '.namespace.count': ['phase:active', 'phase:terminating'],
     NAMESPACE + '.job.count': ['owner_kind:cronjob', 'owner_name:a-cronjob'],
