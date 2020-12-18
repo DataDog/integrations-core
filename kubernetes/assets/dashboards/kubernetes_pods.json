@@ -658,7 +658,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                        "q": "sum:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -694,7 +694,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                        "q": "sum:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
