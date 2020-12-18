@@ -108,6 +108,9 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
 
+    if integration_type == 'snmp_tile' and not name.startswith('snmp_'):
+        abort(f'Invalid snmp_tile name ({name}). snmp_tile integrations should start with `snmp_`')
+
     template_fields = {}
     if non_interactive and repo_choice != 'core':
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
