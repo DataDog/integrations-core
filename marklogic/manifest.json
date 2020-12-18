@@ -32,7 +32,9 @@
     "dashboards": {
       "MarkLogic - Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "Marklogic low cache": "assets/recommended_monitors/marklogic_low_cache.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {
