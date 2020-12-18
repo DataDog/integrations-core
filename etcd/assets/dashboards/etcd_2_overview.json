@@ -1,6 +1,6 @@
 {
     "title": "Etcd v2 - Overview",
-    "description": "This dashboard visualizes your etcd v2 cluster's activity and performance so you can ensure your configurations are synced across your hosts and containers. Further reading on etcd monitoring:\n\n- [Monitor etcd performance to ensure consistent Docker configuration](https://www.datadoghq.com/blog/monitor-etcd-performance/)\n\n- [Datadog's etcd integration docs](https://docs.datadoghq.com/integrations/etcd/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "This dashboard helps you visualize your etcd v2 cluster's activity and performance to ensure configurations are synced across your hosts and containers. Further reading on etcd monitoring:\n\n- [Monitor etcd performance to ensure consistent Docker configuration](https://www.datadoghq.com/blog/monitor-etcd-performance/)\n\n- [Datadog's etcd integration docs](https://docs.datadoghq.com/integrations/etcd/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
             "id": 0,
