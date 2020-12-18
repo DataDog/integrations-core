@@ -23,7 +23,7 @@ For details of monitored metrics see the [SNMP integration tile][2]
 
 ### Metrics
 
-{integration_name} does not include any metrics.
+The {integration_name} integration does not include any metrics.
 
 ### Service Checks
 
