@@ -11,6 +11,7 @@ import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from six import PY3, iteritems, itervalues, string_types
 
+from ...utils.http import RequestsWrapper
 from ...utils.prometheus import metrics_pb2
 from .. import AgentCheck
 from ..libs.prometheus import text_fd_to_metric_families
@@ -353,11 +354,11 @@ class PrometheusScraperMixin(object):
                         _l.value = _metric['labels'][lbl]
         return _obj
 
-    def scrape_metrics(self, endpoint):
+    def scrape_metrics(self, endpoint, instance={}):
         """
         Poll the data from prometheus and return the metrics as a generator.
         """
-        response = self.poll(endpoint)
+        response = self.poll(endpoint, instance=instance)
         try:
             # no dry run if no label joins
             if not self.label_joins:
@@ -392,8 +393,10 @@ class PrometheusScraperMixin(object):
         instance = kwargs.get('instance')
         if instance:
             kwargs['custom_tags'] = instance.get('tags', [])
+        else:
+            instance = {}
 
-        for metric in self.scrape_metrics(endpoint):
+        for metric in self.scrape_metrics(endpoint, instance=instance):
             self.process_metric(metric, **kwargs)
 
     def store_labels(self, message):
@@ -431,6 +434,17 @@ class PrometheusScraperMixin(object):
                                 extra_label.name, extra_label.value = label_tuple
                         except KeyError:
                             pass
+
+    def get_http_handler(self, endpoint, instance):
+        try:
+            http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+                instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+            )
+
+            return http_handler
+        except Exception as e:
+            self.log.debug("PrometheusScraperMixin not using RequestsWrapper: %s", e)
+            return requests
 
     def process_metric(self, message, **kwargs):
         """
@@ -489,7 +503,7 @@ class PrometheusScraperMixin(object):
         except AttributeError as err:
             self.log.debug("Unable to handle metric: %s - error: %s", message.name, err)
 
-    def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None):
+    def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None, instance={}):
         """
         Polls the metrics from the prometheus metrics endpoint provided.
         Defaults to the protobuf format, but can use the formats specified by
@@ -532,7 +546,7 @@ class PrometheusScraperMixin(object):
             self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
 
         try:
-            response = requests.get(
+            response = self.get_http_handler(endpoint, instance).get(
                 endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
             )
         except requests.exceptions.SSLError:

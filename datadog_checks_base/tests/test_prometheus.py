@@ -263,7 +263,7 @@ def test_process(bin_data, mocked_prometheus_check, ref_gauge):
     check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
     check.process_metric = mock.MagicMock()
     check.process(endpoint, instance=None)
-    check.poll.assert_called_with(endpoint)
+    check.poll.assert_called_with(endpoint, instance={})
     check.process_metric.assert_called_with(ref_gauge, instance=None)
 
 
@@ -274,7 +274,7 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_
     check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_histograms_buckets=False, instance=None)
-    check.poll.assert_called_with(endpoint)
+    check.poll.assert_called_with(endpoint, instance={})
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_histograms_buckets=False)
 
 
@@ -285,7 +285,7 @@ def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, ref_g
     check.poll = mock.MagicMock(return_value=MockResponse(bin_data, protobuf_content_type))
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_monotonic_counter=False, instance=None)
-    check.poll.assert_called_with(endpoint)
+    check.poll.assert_called_with(endpoint, instance={})
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_monotonic_counter=False)
 
 
@@ -297,7 +297,7 @@ def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge
     check.process_metric = mock.MagicMock()
     instance = {'endpoint': 'IgnoreMe', 'tags': ['tag1:tagValue1', 'tag2:tagValue2']}
     check.process(endpoint, instance=instance)
-    check.poll.assert_called_with(endpoint)
+    check.poll.assert_called_with(endpoint, instance=instance)
     check.process_metric.assert_called_with(
         ref_gauge, custom_tags=['tag1:tagValue1', 'tag2:tagValue2'], instance=instance
     )
