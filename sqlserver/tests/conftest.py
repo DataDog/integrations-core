@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-from collections import namedtuple
 from copy import deepcopy
 
 import pytest

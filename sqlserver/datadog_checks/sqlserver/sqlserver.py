@@ -13,12 +13,21 @@ import six
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryManager
-from .const import DEFAULT_AUTODISCOVERY_INTERVAL, AUTODISCOVERY_QUERY, VALID_METRIC_TYPES, COUNTER_TYPE_QUERY, \
-    PERF_LARGE_RAW_BASE, PERF_RAW_LARGE_FRACTION, PERF_AVERAGE_BULK, PERF_COUNTER_BULK_COUNT, \
-    PERF_COUNTER_LARGE_RAWCOUNT, BASE_NAME_QUERY
 
 from . import metrics
 from .connection import Connection, SQLConnectionError
+from .const import (
+    AUTODISCOVERY_QUERY,
+    BASE_NAME_QUERY,
+    COUNTER_TYPE_QUERY,
+    DEFAULT_AUTODISCOVERY_INTERVAL,
+    PERF_AVERAGE_BULK,
+    PERF_COUNTER_BULK_COUNT,
+    PERF_COUNTER_LARGE_RAWCOUNT,
+    PERF_LARGE_RAW_BASE,
+    PERF_RAW_LARGE_FRACTION,
+    VALID_METRIC_TYPES,
+)
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from .utils import set_default_driver_conf
 
@@ -76,7 +85,8 @@ class SQLServer(AgentCheck):
             )
         if not self.autodiscovery and (self.autodiscovery_include or self.autodiscovery_exclude):
             self.log.warning(
-                "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored")
+                "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
+            )
 
     def initialize_connection(self):
         self.connection = Connection(self.init_config, self.instance, self.handle_service_check, self.log)
