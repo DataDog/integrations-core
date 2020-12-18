@@ -38,4 +38,4 @@ The {integration_name} integration does not include any events.
 Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings#integrations/snmp
+[2]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
