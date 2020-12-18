@@ -27,7 +27,7 @@ The {integration_name} integration does not include any metrics.
 
 ### Service Checks
 
-{integration_name} does not include any service checks.
+The {integration_name} integration does not include any service checks.
 
 ### Events
 
