@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from collections import namedtuple
 from copy import deepcopy
 
 import pytest
@@ -95,7 +96,7 @@ def instance_ao_docker_secondary():
 def instance_autodiscovery():
     instance = deepcopy(INSTANCE_DOCKER)
     instance['database_autodiscovery'] = True
-    return instance
+    return deepcopy(instance)
 
 
 @pytest.fixture(scope='session')
