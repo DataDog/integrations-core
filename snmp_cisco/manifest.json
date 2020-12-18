@@ -8,7 +8,6 @@
     "snmp.cefcFRUPowerAdminStatus",
     "snmp.devClientCount"
   ],
-  "metric_integration_check_name": "snmp",
   "creates_events": false,
   "short_description": "Collect SNMP metrics from your Cisco network devices.",
   "guid": "4109f288-7460-4ed2-b0c3-04e708fbd5bd",
