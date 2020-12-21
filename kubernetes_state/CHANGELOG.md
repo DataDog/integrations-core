@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 5.6.2 / 2020-12-21
+
+* [Fixed] Fix deployment count metric. See [#8229](https://github.com/DataDog/integrations-core/pull/8229).
+
 ## 5.6.1 / 2020-12-18
 
 * [Fixed] [orchestrator] change cardinality of deployment count. See [#8222](https://github.com/DataDog/integrations-core/pull/8222).
