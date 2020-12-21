@@ -101,8 +101,9 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
             },
             'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
-            'kube_deployment_status_condition': {
+            'kube_deployment_status_observed_generation': {
                 'metric_name': 'deployment.count',
+                'allowed_labels': ['namespace'],
             },
         }
 
@@ -130,7 +131,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             # to get overall count is to filter by Available
-            'kube_deployment_status_condition': self.kube_deployment_count,
+            'kube_deployment_status_observed_generation': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -317,7 +318,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     # _generation metrics are more metadata than metrics, no real use case for now
                     'kube_daemonset_metadata_generation',
                     'kube_deployment_metadata_generation',
-                    'kube_deployment_status_observed_generation',
+                    'kube_deployment_status_condition',
                     'kube_replicaset_metadata_generation',
                     'kube_replicaset_status_observed_generation',
                     'kube_replicationcontroller_metadata_generation',
@@ -886,22 +887,6 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
-
-    def kube_deployment_count(self, metric, scraper_config):
-        config = self.object_count_params[metric.name]
-        metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
-        seen = set()
-
-        for sample in metric.samples:
-            tags = []
-            namespace = self._label_to_tag("namespace", sample[self.SAMPLE_LABELS], scraper_config)
-            deployment = sample[self.SAMPLE_LABELS].get("deployment")
-            if (deployment, namespace) in seen:
-                continue
-            seen.add((deployment, namespace))
-            tags.append(namespace)
-            tags += scraper_config['custom_tags']
-            self.gauge(metric_name, 1, tags=list(tags))
 
     def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
         """
