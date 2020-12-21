@@ -1,7 +1,6 @@
 {
-	"id": 0,
 	"name": "[MarkLogic] {{host.name}} cache is not large enough to handle new requests",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "change(avg(last_5m),last_5m):avg:marklogic.forests.query_read_rate{*} / avg:marklogic.forests.list_cache_hit_rate{*} > 0.006",
 	"message": "{{#is_alert}} \nTo fix:\n1. Consider adding memory to the cache.\n{{/is_alert}}\n\n{{#is_recovery}}\nWhew, there's now enough cache to safely handle new requests!\n{{/is_recovery}}",
 	"tags": [
@@ -23,7 +22,6 @@
 			"warning": 0.005
 		}
 	},
-	"priority": null,
 	"recommended_monitor_metadata": {
 		"description": "Notify your team when your host's cache is getting too low to handle new requests."
 	}
