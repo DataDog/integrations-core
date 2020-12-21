@@ -80,7 +80,7 @@ def test_client_logging_disabled(aggregator, instance):
     'agent_log_level, expected_vertica_log_level', [(logging.DEBUG, logging.DEBUG), (TRACE_LEVEL, logging.DEBUG)]
 )
 def test_client_logging_enabled_debug_if_agent_uses_debug_or_trace(
-        aggregator, instance, agent_log_level, expected_vertica_log_level
+    aggregator, instance, agent_log_level, expected_vertica_log_level
 ):
     """
     Improve collection of debug flares by automatically enabling client DEBUG logs when the Agent uses DEBUG logs.
