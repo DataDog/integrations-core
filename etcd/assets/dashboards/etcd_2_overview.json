@@ -1,0 +1,509 @@
+{
+    "title": "Etcd v2 - Overview",
+    "description": "This dashboard helps you visualize your etcd v2 cluster's activity and performance to ensure configurations are synced across your hosts and containers. Further reading on etcd monitoring:\n\n- [Monitor etcd performance to ensure consistent Docker configuration](https://www.datadoghq.com/blog/monitor-etcd-performance/)\n\n- [Datadog's etcd integration docs](https://docs.datadoghq.com/integrations/etcd/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/screenboard/integrations/etcd.png",
+                "sizing": "zoom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.gets.success{$scope} by {host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:etcd.store.gets.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Get success / fail (red)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.sets.success{$scope} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "sum:etcd.store.sets.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Set success / fail (red)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 39,
+                "y": 16,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.update.success{$scope} by {host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:etcd.store.update.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Update success / fail (red)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 32,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.delete.success{$scope} by {host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:etcd.store.delete.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Delete success / fail (red)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 48,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.compareanddelete.success{$scope} by {host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:etcd.store.compareanddelete.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Compare-and-delete success / fail (red)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 39,
+                "y": 48,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.compareandswap.success{$scope} by {host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:etcd.store.compareandswap.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Compare-and-swap success / fail (red)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 39,
+                "y": 32,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.create.success{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "sum:etcd.store.create.fail{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Create store success / fail",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 115,
+                "y": 0,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.leader.latency.avg{$scope} by {follower}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Avg. latency from leader to followers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 39,
+                "y": 0,
+                "width": 38,
+                "height": 15
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.self.recv.bandwidthrate{$scope} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.self.send.bandwidthrate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "grey",
+                            "line_type": "solid"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Bandwidth rate, send (line) / receive (area)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 78,
+                "y": 0,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.self.recv.pkgrate{$scope} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.self.send.pkgrate{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "grey"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Package rate, send (line) / receive (area)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 78,
+                "y": 16,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.leader.counts.success{$scope} by {follower}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "sum:etcd.leader.counts.fail{$scope} by {follower}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "RPC req per follower, success / fail",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 78,
+                "y": 32,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:etcd.self.recv.appendrequest.count{$scope} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "avg:etcd.self.send.appendrequest.count{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "orange",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Append req, send (line) / receive (area)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 78,
+                "y": 48,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.expire.count{$scope} by {host}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Expire count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 115,
+                "y": 16,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:etcd.store.watchers{$scope} by {host}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Watchers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 115,
+                "y": 32,
+                "width": 37,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 75
+}
