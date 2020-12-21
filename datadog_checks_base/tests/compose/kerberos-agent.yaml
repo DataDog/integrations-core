@@ -2,6 +2,33 @@ version: '3.7'
 
 services:
 
+  agent:
+    image: agent
+    build: ./kerberos-agent
+    environment:
+      DD_API_KEY: 7764dc7695819b69cc62a4e6ce98d121
+      KRB5_KEYTAB: ${KRB5_KEYTAB}
+      KRB5_CCNAME: ${KRB5_CCNAME}
+      KRB5_REALM: ${KRB5_REALM}
+      KRB5_SVC: ${KRB5_SVC}
+      KRB5_KDC: kerberos-kdc
+      WEBHOST: ${WEBHOST}
+      DOMAIN: example.com
+      KRB5_USER: datadog/admin
+      KRB5_PASS: 123pass
+    hostname: agent
+    domainname: example.com
+    volumes:
+      - ${SHARED_VOLUME}:${SHARED_VOLUME}
+    networks:
+      kdc-net:
+        aliases:
+          - agent.example.com
+    depends_on:
+      - web
+      - kerberos-kdc
+
+
   kerberos-kdc:
     build: ./kerberos-kdc
     image: kerberos-kdc
@@ -42,7 +69,7 @@ services:
       DOMAIN: example.com
       KRB5_USER: datadog/admin
       KRB5_PASS: 123pass
-      SERVICE_NAME: ${KRB5_SVC}/${HOSTNAME}.${DOMAIN}
+      SERVICE_NAME: ${KRB5_SVC}/compose_web_1.compose_kdc-net
     hostname: web
     domainname: example.com
     volumes: 
