@@ -153,7 +153,7 @@ def config(ctx, check, sync, verbose):
 def validate_default_template(spec_file):
     init_config_default = False
     instances_default = False
-    if 'template: init_config' not in spec_file and 'template: instances' not in spec_file:
+    if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
         # This config spec does not have init_config or instances
         return True
 
