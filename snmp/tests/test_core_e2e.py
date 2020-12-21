@@ -5,6 +5,8 @@ from collections import defaultdict
 
 import pytest
 
+from datadog_checks.base.stubs.common import MetricStub
+
 from . import common
 
 pytestmark = [pytest.mark.e2e, common.python_autodiscovery_only]
@@ -36,10 +38,25 @@ def assert_python_vs_core(dd_agent_check, instance):
     expected_metrics = defaultdict(int)
     for _, metrics in aggregator._metrics.items():
         for metric in metrics:
-            expected_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
+            tags = [t for t in metric.tags if not t.startswith('loader:')]  # Remove `loader` tag
+            expected_metrics[(metric.name, metric.type, tuple(sorted(tags)))] += 1
 
     aggregator.reset()
     aggregator = dd_agent_check(core_instance, rate=True)
+
+    # Remove `loader` tag
+    for metric_name in aggregator._metrics:
+        aggregator._metrics[metric_name] = [
+            MetricStub(
+                stub.name,
+                stub.type,
+                stub.value,
+                [t for t in stub.tags if not t.startswith('loader:')],
+                stub.hostname,
+                stub.device,
+            )
+            for stub in aggregator._metrics[metric_name]
+        ]
 
     actual_metrics = defaultdict(int)
     for _, metrics in aggregator._metrics.items():
