@@ -9,4 +9,4 @@ files:
       - template: instances
         options:
           - template: instances/http
-          - template: init_config/default
+          - template: instances/default
