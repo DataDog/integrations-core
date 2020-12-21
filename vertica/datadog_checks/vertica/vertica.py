@@ -4,11 +4,9 @@
 from __future__ import division
 
 import logging
-import ssl
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from itertools import chain
-from os.path import expanduser, isdir
 
 import vertica_python as vertica
 from six import iteritems
@@ -562,8 +560,6 @@ class VerticaCheck(AgentCheck):
             connection_options['log_path'] = ''
 
         if self._tls_verify:
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-            # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
             tls_context = self.get_tls_context()
             connection_options['ssl'] = tls_context
 
