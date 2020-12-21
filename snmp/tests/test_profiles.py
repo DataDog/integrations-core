@@ -2198,6 +2198,7 @@ def test_juniper_ex(aggregator):
     _check_juniper_firewall(aggregator, common_tags)
     aggregator.assert_metric('snmp.devices_monitored', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
