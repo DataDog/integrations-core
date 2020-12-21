@@ -44,8 +44,18 @@ class PrometheusScraperMixin(object):
     UNWANTED_LABELS = ["le", "quantile"]  # are specifics keys for prometheus itself
     REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
 
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'prometheus_timeout': {'name': 'timeout'},
+    }
+
     def __init__(self, *args, **kwargs):
         super(PrometheusScraperMixin, self).__init__(*args, **kwargs)
+
+        self.init_config = {}
 
         # The scraper needs its own logger
         self.log = logging.getLogger(__name__)

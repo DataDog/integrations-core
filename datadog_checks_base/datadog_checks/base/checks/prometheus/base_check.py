@@ -18,6 +18,7 @@ class PrometheusScraper(PrometheusScraperMixin):
     def __init__(self, check):
         super(PrometheusScraper, self).__init__()
         self.check = check
+        self._http_handlers = {}
 
     def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """
@@ -87,14 +88,6 @@ class GenericPrometheusCheck(AgentCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 2000
-
-    HTTP_CONFIG_REMAPPER = {
-        'ssl_verify': {'name': 'tls_verify'},
-        'ssl_cert': {'name': 'tls_cert'},
-        'ssl_private_key': {'name': 'tls_private_key'},
-        'ssl_ca_cert': {'name': 'tls_ca_cert'},
-        'prometheus_timeout': {'name': 'timeout'},
-    }
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):
         super(GenericPrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
