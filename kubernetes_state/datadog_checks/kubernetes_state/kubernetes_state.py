@@ -101,9 +101,9 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
             },
             'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
-            'kube_deployment_status_condition': {
+            'kube_deployment_status_observed_generation': {
                 'metric_name': 'deployment.count',
-                'allowed_labels': ['namespace', 'condition', 'status'],
+                'allowed_labels': ['namespace'],
             },
         }
 
@@ -131,7 +131,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             # to get overall count is to filter by Available
-            'kube_deployment_status_condition': self.count_objects_by_tags,
+            'kube_deployment_status_observed_generation': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -318,7 +318,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     # _generation metrics are more metadata than metrics, no real use case for now
                     'kube_daemonset_metadata_generation',
                     'kube_deployment_metadata_generation',
-                    'kube_deployment_status_observed_generation',
+                    'kube_deployment_status_condition',
                     'kube_replicaset_metadata_generation',
                     'kube_replicaset_status_observed_generation',
                     'kube_replicationcontroller_metadata_generation',
