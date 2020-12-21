@@ -491,7 +491,7 @@ class TestAuth:
         response = http.get(instance["url"])
         assert response.status_code == 200
 
-    @pytest.mark.skipif(False, reason='Test fixture for Agent QA only')
+    @pytest.mark.skipif(True, reason='Test fixture for Agent QA only')
     def test_kerberos_auth_with_agent(self, kerberos_agent):
         """
         Test setup to verify kerberos authorization from an actual Agent container.
