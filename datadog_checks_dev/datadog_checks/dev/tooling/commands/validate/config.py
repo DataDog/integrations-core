@@ -72,8 +72,17 @@ def config(ctx, check, sync, verbose):
             source = check
             version = get_version_string(check)
 
-        spec = ConfigSpec(read_file(spec_path), source=source, version=version)
+        spec_file = read_file(spec_path)
+        default_temp = validate_default_template(spec_file)
+        spec = ConfigSpec(spec_file, source=source, version=version)
         spec.load()
+
+        if not default_temp:
+            check_display_queue.append(
+                lambda **kwargs: echo_failure(
+                    f"Missing default template in init_config or instances section", **kwargs
+                )
+            )
 
         if spec.errors:
             files_failed[spec_path] = True
@@ -139,6 +148,20 @@ def config(ctx, check, sync, verbose):
 
     if files_failed:
         abort()
+
+
+def validate_default_template(spec_file):
+    init_config_default = False
+    instances_default = False
+    for line in spec_file.split('\n'):
+        if any(template in line for template in ['init_config/default', 'init_config/openmetrics', 'init_config/jmx']):
+            init_config_default = True
+        if any(template in line for template in ['instances/default', 'instances/openmetrics', 'instances/jmx']):
+            instances_default = True
+
+        if instances_default and init_config_default:
+            return True
+    return False
 
 
 def validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter):
