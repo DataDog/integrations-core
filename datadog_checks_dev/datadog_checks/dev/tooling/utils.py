@@ -34,7 +34,7 @@ DOGWEB_JSON_DASHBOARDS = (
     'gunicorn',
     'hdfs_datanode',
     'hdfs_namenode',
-    'immunio', # Is this a core integration??
+    'immunio',  # Is this a core integration??
     'kafka',
     'kong',
     'kyoto_tycoon',
