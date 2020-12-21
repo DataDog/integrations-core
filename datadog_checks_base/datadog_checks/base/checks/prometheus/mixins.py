@@ -10,8 +10,9 @@ from math import isinf, isnan
 
 import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
-from six import PY3, iteritems, itervalues, string_types
+from six import PY3, iteritems, itervalues
 
+from ...config import is_affirmative
 from ...utils.http import RequestsWrapper
 from ...utils.prometheus import metrics_pb2
 from .. import AgentCheck
@@ -355,7 +356,7 @@ class PrometheusScraperMixin(object):
                         _l.value = _metric['labels'][lbl]
         return _obj
 
-    def scrape_metrics(self, endpoint, instance={}):
+    def scrape_metrics(self, endpoint, instance=None):
         """
         Poll the data from prometheus and return the metrics as a generator.
         """
@@ -440,14 +441,26 @@ class PrometheusScraperMixin(object):
         if endpoint in self._http_handlers:
             return self._http_handlers[endpoint]
 
-        http_config = copy.deepcopy(instance)
-        # TODO: Deprecate this behavior in Agent 8
-        if http_config.get('ssl_ca_cert') is False:
-            http_config['ssl_verify'] = False
+        if instance is None:
+            instance = {}
+        headers = copy.deepcopy(self.extra_headers)
 
-        # TODO: Deprecate this behavior in Agent 8
-        if http_config.get('ssl_verify') is False:
-            http_config.setdefault('tls_ignore_warning', True)
+        http_config = copy.deepcopy(instance)
+
+        if http_config.get('headers') is None:
+            http_config['headers'] = {}
+        http_config['headers'].update(headers)
+        http_config.setdefault('timeout', self.prometheus_timeout)
+
+        http_config.setdefault('tls_cert', self.ssl_cert)
+        http_config.setdefault('tls_private_key', self.ssl_private_key)
+        http_config.setdefault('tls_verify', True)
+        http_config.setdefault('tls_ignore_warning', False)
+
+        http_config.setdefault('tls_ca_cert', self.ssl_ca_cert)
+        if http_config['tls_ca_cert'] is False:
+            http_config['tls_ignore_warning'] = True
+            http_config['tls_verify'] = False
 
         http_handler = self._http_handlers[endpoint] = RequestsWrapper(
             http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
@@ -523,7 +536,7 @@ class PrometheusScraperMixin(object):
         except AttributeError as err:
             self.log.debug("Unable to handle metric: %s - error: %s", message.name, err)
 
-    def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None, instance={}):
+    def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None, instance=None):
         """
         Polls the metrics from the prometheus metrics endpoint provided.
         Defaults to the protobuf format, but can use the formats specified by
@@ -548,27 +561,16 @@ class PrometheusScraperMixin(object):
             headers['accept'] = (
                 'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
             )
-        headers.update(self.extra_headers)
-        cert = None
-        if isinstance(self.ssl_cert, string_types):
-            cert = self.ssl_cert
-            if isinstance(self.ssl_private_key, string_types):
-                cert = (self.ssl_cert, self.ssl_private_key)
-        verify = True
-        disable_insecure_warnings = False
-        if isinstance(self.ssl_ca_cert, string_types):
-            verify = self.ssl_ca_cert
-        elif self.ssl_ca_cert is False:
-            disable_insecure_warnings = True
-            verify = False
-
-        if endpoint.startswith('https') and not disable_insecure_warnings and not verify:
+        handler = self.get_http_handler(endpoint, instance)
+        if (
+            endpoint.startswith('https')
+            and not handler.ignore_tls_warning
+            and not is_affirmative(handler.options.get('tls_verify', True))
+        ):
             self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
 
         try:
-            response = self.get_http_handler(endpoint, instance).get(
-                endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
-            )
+            response = handler.get(endpoint, extra_headers=headers, stream=False)
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
