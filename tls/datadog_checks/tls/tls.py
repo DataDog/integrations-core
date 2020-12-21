@@ -59,29 +59,9 @@ class TLSCheck(AgentCheck):
             self._sock_type = socket.SOCK_STREAM
             self._port = int(self.instance.get('port', parsed_uri.port or 443))
 
-        self._validate_cert = is_affirmative(self.instance.get('validate_cert', True))
-
         # https://en.wikipedia.org/wiki/Server_Name_Indication
         self._server_hostname = self.instance.get('server_hostname', self._server)
-        self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
-
-        self._cert = self.instance.get('cert')
-        if self._cert:
-            self._cert = expanduser(self._cert)
-
-        self._private_key = self.instance.get('private_key')
-        if self._private_key:
-            self._private_key = expanduser(self._private_key)
-
-        self._cafile = None
-        self._capath = None
-        ca_cert = self.instance.get('ca_cert')
-        if ca_cert:
-            ca_cert = expanduser(ca_cert)
-            if isdir(ca_cert):
-                self._capath = ca_cert
-            else:
-                self._cafile = ca_cert
+        self._tls_validate_hostname = is_affirmative(self.instance.get('tls_validate_hostname', True))
 
         # Thresholds expressed in seconds take precedence over those expressed in days
         self._seconds_warning = (
@@ -109,7 +89,7 @@ class TLSCheck(AgentCheck):
         if self._local_cert_path:
             self.check = self.check_local
             self.log.debug('Selecting local connection for method of collection')
-            if self._validate_hostname and self._server_hostname:
+            if self._tls_validate_hostname and self._server_hostname:
                 self._tags.append('server_hostname:{}'.format(self._server_hostname))
         else:
             self.check = self.check_remote
@@ -122,7 +102,7 @@ class TLSCheck(AgentCheck):
         self._validation_data = None
         self._tls_context = None
 
-    def check_remote(self, instance):
+    def check_remote(self, _):
         if not self._server:
             raise ConfigurationError('You must specify `server` in your configuration file.')
 
@@ -181,10 +161,10 @@ class TLSCheck(AgentCheck):
         self.validate_certificate(cert)
         self.check_age(cert)
 
-    def check_local(self, instance):
-        if self._validate_hostname and not self._server_hostname:
+    def check_local(self, _):
+        if self._tls_validate_hostname and not self._server_hostname:
             raise ConfigurationError(
-                'You must specify `server_hostname` in your configuration file, or disable `validate_hostname`.'
+                'You must specify `server_hostname` in your configuration file, or disable `tls_validate_hostname`.'
             )
 
         try:
@@ -233,7 +213,7 @@ class TLSCheck(AgentCheck):
 
     def validate_certificate(self, cert):
         self.log.debug('Validating certificate')
-        if self._validate_hostname:
+        if self._tls_validate_hostname:
             validator, host_type = self.validation_data
 
             try:
@@ -338,34 +318,5 @@ class TLSCheck(AgentCheck):
     @property
     def tls_context(self):
         if self._tls_context is None:
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-            # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
-            self._tls_context = ssl.SSLContext(protocol=PROTOCOL_TLS_CLIENT)
-
-            # Run our own validation later on if need be
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            #
-            # IMPORTANT: This must be set before verify_mode in Python 3.7+, see:
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            self._tls_context.check_hostname = False
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-            self._tls_context.verify_mode = ssl.CERT_REQUIRED if self._validate_cert else ssl.CERT_NONE
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-            if self._cafile or self._capath:  # no cov
-                self._tls_context.load_verify_locations(self._cafile, self._capath, None)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-            else:
-                self._tls_context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-            if self._cert:  # no cov
-                self._tls_context.load_cert_chain(self._cert, keyfile=self._private_key)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.create_default_context
-            if 'SSLv3' in self._allowed_versions:  # no cov
-                self._tls_context.options &= ~ssl.OP_NO_SSLv3
-
+            self._tls_context = self.get_tls_context()
         return self._tls_context

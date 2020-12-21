@@ -36,7 +36,7 @@ files:
       value:
         type: string
         example: TCP
-    - name: local_cert_path
+    - name: local_cert_path # is this the same as cert?
       description: |
         The path to a local certificate in lieu of a server/port. In this mode, the
         service checks `tls.can_connect` and `tls.version` are unavailable. The
@@ -51,25 +51,6 @@ files:
         See: https://en.wikipedia.org/wiki/Server_Name_Indication
       value:
         type: string
-    - name: validate_hostname
-      description: |
-        Whether or not to verify the certificate was issued for `server_hostname`. If enabled,
-        this is an additional requirement for the service check `tls.cert_validation`.
-      value:
-        type: boolean
-        example: true
-    - name: validate_cert
-      description: |
-        Whether or not to validate the certificate. If disabled, the service check
-        `tls.cert_validation` always reports as OK except for:
-
-        1. parsing errors
-        2. hostname mismatch, if `validate_hostname` is true
-
-        Disabling this is useful when only the monitoring of certificate expiration is desired.
-      value:
-        type: boolean
-        example: true
     - name: allowed_versions
       description: |
         The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
@@ -117,33 +98,6 @@ files:
         `tls.cert_expiration` begins emitting CRITICAL. Overrides `days_critical`.
       value:
         type: integer
-    - name: cert
-      description: |
-        The path to a single file in PEM format containing a certificate as well as any
-        number of CA certificates needed to establish the certificate’s authenticity for
-        use when connecting to `server`. It may also contain an unencrypted private key to use.
-      value:
-        type: string
-        default: null
-        example: <CERT_PATH>
-    - name: private_key
-      description: |
-        The unencrypted private key to use for `cert` when connecting to `server`. This is
-        required if `cert` is set and it does not already contain a private key.
-      value:
-        type: string
-        default: null
-        example: <PRIVATE_KEY_PATH>
-    - name: ca_cert
-      description: |
-        The path to a file of concatenated CA certificates in PEM format or a directory
-        containing several CA certificates in PEM format. If a directory, the directory
-        must have been processed using the c_rehash utility supplied with OpenSSL. See:
-        https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
-      value:
-        type: string
-        default: null
-        example: <CA_CERT_PATH>
     - name: timeout
       description: The timeout for connecting to `server`.
       value:
@@ -154,3 +108,4 @@ files:
       value:
         type: string
     - template: instances/default
+    - template: instances/tls

@@ -66,17 +66,17 @@ def instance_local_no_server_hostname():
 
 @pytest.fixture
 def instance_local_not_found():
-    return {'local_cert_path': 'not_found.pem', 'validate_hostname': False}
+    return {'local_cert_path': 'not_found.pem', 'tls_validate_hostname': False}
 
 
 @pytest.fixture(scope='session')
 def instance_local_ok(certs):
-    yield {'local_cert_path': certs['valid.pem'], 'validate_hostname': False}
+    yield {'local_cert_path': certs['valid.pem'], 'tls_validate_hostname': False}
 
 
 @pytest.fixture(scope='session')
 def instance_local_ok_der(certs):
-    yield {'local_cert_path': certs['valid.crt'], 'validate_hostname': False}
+    yield {'local_cert_path': certs['valid.crt'], 'tls_validate_hostname': False}
 
 
 @pytest.fixture(scope='session')
@@ -93,24 +93,24 @@ def instance_local_hostname_mismatch(certs):
 @pytest.fixture(scope='session')
 def instance_local_cert_bad():
     with temp_binary(b'junk') as f:
-        yield {'local_cert_path': f, 'validate_hostname': False}
+        yield {'local_cert_path': f, 'tls_validate_hostname': False}
 
 
 @pytest.fixture(scope='session')
 def instance_local_cert_expired(certs):
-    yield {'local_cert_path': certs['expired.pem'], 'validate_hostname': False}
+    yield {'local_cert_path': certs['expired.pem'], 'tls_validate_hostname': False}
 
 
 @pytest.fixture(scope='session')
 def instance_local_cert_critical_days(certs):
-    yield {'local_cert_path': certs['valid.pem'], 'validate_hostname': False, 'days_critical': 200}
+    yield {'local_cert_path': certs['valid.pem'], 'tls_validate_hostname': False, 'days_critical': 200}
 
 
 @pytest.fixture(scope='session')
 def instance_local_cert_critical_seconds(certs):
     yield {
         'local_cert_path': certs['valid.pem'],
-        'validate_hostname': False,
+        'tls_validate_hostname': False,
         'days_critical': -1,
         'seconds_critical': days_to_seconds(200),
     }
@@ -118,14 +118,14 @@ def instance_local_cert_critical_seconds(certs):
 
 @pytest.fixture(scope='session')
 def instance_local_cert_warning_days(certs):
-    yield {'local_cert_path': certs['valid.pem'], 'validate_hostname': False, 'days_warning': 200}
+    yield {'local_cert_path': certs['valid.pem'], 'tls_validate_hostname': False, 'days_warning': 200}
 
 
 @pytest.fixture(scope='session')
 def instance_local_cert_warning_seconds(certs):
     yield {
         'local_cert_path': certs['valid.pem'],
-        'validate_hostname': False,
+        'tls_validate_hostname': False,
         'days_warning': -1,
         'seconds_warning': days_to_seconds(200),
     }
@@ -138,22 +138,22 @@ def instance_remote_no_server():
 
 @pytest.fixture
 def instance_remote_ok():
-    return {'server': 'https://valid.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://valid.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture(scope='session')
 def instance_e2e():
-    return {'server': 'https://localhost', 'port': 4443, 'server_hostname': 'valid.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://localhost', 'port': 4443, 'server_hostname': 'valid.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_ok_ip():
-    return {'server': '1.1.1.1'}
+    return {'server': '1.1.1.1', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_ok_udp():
-    return {'server': '1.1.1.1', 'transport': 'udp'}
+    return {'server': '1.1.1.1', 'transport': 'udp', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
@@ -173,37 +173,37 @@ def instance_remote_no_connect_port_in_host():
 
 @pytest.fixture
 def instance_remote_version_default_1_1():
-    return {'server': 'https://tls-v1-1.valid.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://tls-v1-1.valid.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_version_default_1_2():
-    return {'server': 'https://tls-v1-2.valid.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://tls-v1-2.valid.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_version_default_1_3():
-    return {'server': 'https://tls-v1-3.valid.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://tls-v1-3.valid.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_hostname_mismatch():
-    return {'server': 'https://wronghost.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://wronghost.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_self_signed_ok():
-    return {'server': 'https://selfsigned.mock', 'validate_cert': False}
+    return {'server': 'https://selfsigned.mock', 'tls_verify': False}
 
 
 @pytest.fixture
 def instance_remote_cert_expired():
-    return {'server': 'https://expired.mock', 'ca_cert': CA_CERT}
+    return {'server': 'https://expired.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
 def instance_remote_cert_critical_days():
-    return {'server': 'https://valid.mock', 'days_critical': 200, 'ca_cert': CA_CERT}
+    return {'server': 'https://valid.mock', 'days_critical': 200, 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
@@ -212,13 +212,13 @@ def instance_remote_cert_critical_seconds():
         'server': 'https://valid.mock',
         'days_critical': -1,
         'seconds_critical': days_to_seconds(200),
-        'ca_cert': CA_CERT,
+        'tls_ca_cert': CA_CERT,
     }
 
 
 @pytest.fixture
 def instance_remote_cert_warning_days():
-    return {'server': 'https://valid.mock', 'days_warning': 200, 'ca_cert': CA_CERT}
+    return {'server': 'https://valid.mock', 'days_warning': 200, 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
@@ -227,5 +227,5 @@ def instance_remote_cert_warning_seconds():
         'server': 'https://valid.mock',
         'days_warning': -1,
         'seconds_warning': days_to_seconds(200),
-        'ca_cert': CA_CERT,
+        'tls_ca_cert': CA_CERT,
     }

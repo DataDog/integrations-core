@@ -26,7 +26,7 @@ def test_tags_local_hostname_no_validation():
         'name': 'foo',
         'local_cert_path': 'cert.pem',
         'server_hostname': 'www.google.com',
-        'validate_hostname': False,
+        'tls_validate_hostname': False,
     }
     c = TLSCheck('tls', {}, [instance])
 
@@ -38,36 +38,6 @@ def test_tags_remote():
     c = TLSCheck('tls', {}, [instance])
 
     assert c._tags == ['name:foo', 'server_hostname:www.google.com', 'server:www.google.com', 'port:443']
-
-
-def test_cert():
-    instance = {'cert': 'cert'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._cert == os.path.expanduser(instance['cert'])
-
-
-def test_private_key():
-    instance = {'private_key': 'private_key'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._private_key == os.path.expanduser(instance['private_key'])
-
-
-def test_ca_cert_file():
-    instance = {'ca_cert': 'ca_cert'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._cafile == os.path.expanduser(instance['ca_cert'])
-    assert c._capath is None
-
-
-def test_ca_cert_dir():
-    instance = {'ca_cert': '~'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._cafile is None
-    assert c._capath == os.path.expanduser(instance['ca_cert'])
 
 
 def test_validation_data():
