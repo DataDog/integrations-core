@@ -1,4 +1,5 @@
 # Statistics for traffic that satisfies the rules in each configured Destination Class
+# See https://www.juniper.net/documentation/en_US/junos/topics/concept/cos-security-understanding.html
 metrics:
   - MIB: JUNIPER-COS-MIB
     table:
