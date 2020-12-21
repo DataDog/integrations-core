@@ -2333,12 +2333,6 @@ def _check_juniper_virtual_chassis(aggregator, common_tags):
                 tags=common_tags + tags,
                 count=1,
             )
-            aggregator.assert_metric(
-                'snmp.{}.rate'.format(count_and_rate_metric),
-                metric_type=aggregator.RATE,
-                tags=common_tags + tags,
-                count=1,
-            )
     for rate_metric in VIRTUAL_CHASSIS_RATES:
         for tags in virtual_chassis_tags:
             aggregator.assert_metric(

@@ -7,10 +7,10 @@ metrics:
       name: jnxScuStatsTable
     forced_type: monotonic_count_and_rate
     symbols:
-    # he number of packets sent out of jnxScuStatsDstIfIndex that match the source class (jnxScuStatsClassName) and match the address type (jnxScuStatsAddrFamily) defined for this table entry. 
+    # The number of packets sent out of jnxScuStatsDstIfIndex that match the source class (jnxScuStatsClassName) and match the address type (jnxScuStatsAddrFamily) defined for this table entry. 
     - OID: 1.3.6.1.4.1.2636.3.16.1.1.1.4
       name:  jnxScuStatsPackets
-    # he number of packets sent out of jnxScuStatsDstIfIndex that match the source class (jnxScuStatsClassName) and match the address type (jnxScuStatsAddrFamily) defined for this table entry. 
+    # The number of packets sent out of jnxScuStatsDstIfIndex that match the source class (jnxScuStatsClassName) and match the address type (jnxScuStatsAddrFamily) defined for this table entry. 
     - OID: 1.3.6.1.4.1.2636.3.16.1.1.1.5
       name: jnxScuStatsBytes
     metric_tags:

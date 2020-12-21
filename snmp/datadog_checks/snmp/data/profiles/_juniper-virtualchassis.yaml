@@ -7,7 +7,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2
       name: jnxVirtualChassisPortTable
-    forced_type: monotonic_count_and_rate
+    forced_type: monotonic_count
     symbols:
     # Indicates the total number of packets received on the virtual-chassis port.
     - OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.5
@@ -61,7 +61,7 @@ metrics:
     # Indicates the total number of packets sent per second from the virtual-chassis port. 
     - OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.12
       name: jnxVirtualChassisPortOutPkts1secRate
-    # Indicates the total number of octets received per secondon the virtual-chassis port.
+    # Indicates the total number of octets received per second on the virtual-chassis port.
     - OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.13
       name: jnxVirtualChassisPortInOctets1secRate
     # Indicates the total number of octets sent per second on the virtual-chassis port. 
