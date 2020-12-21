@@ -516,11 +516,11 @@
         {
             "definition": {
                 "check": "iis.site_up",
-                "group": "$scope",
+                "group": "$site",
                 "group_by": [],
                 "grouping": "cluster",
                 "tags": [
-                    "$scope"
+                    "$site"
                 ],
                 "title": "Sites up",
                 "title_align": "center",
