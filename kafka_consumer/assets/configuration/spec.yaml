@@ -29,6 +29,7 @@ files:
         type: integer
         example: 5
       default: 5
+    - template: init_config/default
   - template: instances
     options:
       - name: kafka_connect_str

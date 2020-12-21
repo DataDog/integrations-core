@@ -12,6 +12,7 @@ files:
                   query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
+          - template: init_config/default
       - template: instances
         options:
           - name: db
@@ -131,7 +132,7 @@ files:
             value:
               type: string
               example: <CA_CERT_PATH>
-          - template: instances/tags
+          - template: instances/default
           - template: instances/db
             overrides:
               custom_queries.value.example:
