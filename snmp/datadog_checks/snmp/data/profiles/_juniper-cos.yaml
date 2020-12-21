@@ -95,6 +95,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.2636.3.15.10
       name: jnxCosIfsetQstatTable
+    forced_type: gauge
     symbols:
     # The rate (expressed in packets per second) at which packets were queued at the output queue.
     - OID: 1.3.6.1.4.1.2636.3.15.10.1.4

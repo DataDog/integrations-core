@@ -54,6 +54,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2
       name: jnxVirtualChassisPortTable
+    forced_type: gauge
     symbols:
     # Indicates the total number of packets received per second on the virtual-chassis port.
     - OID: 1.3.6.1.4.1.2636.3.40.1.4.1.2.1.11
