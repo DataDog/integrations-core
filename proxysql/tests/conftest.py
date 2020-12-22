@@ -10,7 +10,6 @@ import pytest
 
 from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
-
 from datadog_checks.proxysql import ProxysqlCheck
 
 from .common import ALL_METRICS
@@ -113,7 +112,7 @@ def dd_environment():
             cert_dest = "/etc/ssl/certs/proxysql-ca.pem"
             if PROXYSQL_VERSION.startswith('2'):
                 # SSL is only available with version 2.x of ProxySQL
-                instance['tls_verify'] = True
+                instance['use_tls'] = True
                 instance['tls_ca_cert'] = cert_dest
                 instance['validate_hostname'] = False
             yield instance, {'docker_volumes': ['{}:{}'.format(cert_src, cert_dest)]}
@@ -150,4 +149,3 @@ def _assert_metadata(datadog_agent, check_id=''):
         'version.raw': mock.ANY,
     }
     datadog_agent.assert_metadata(check_id, version_metadata)
-
