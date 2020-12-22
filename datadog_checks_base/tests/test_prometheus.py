@@ -5,6 +5,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
+from collections import OrderedDict
 
 import mock
 import pytest
@@ -1984,3 +1985,55 @@ def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check
     expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
     for _, _, message in caplog.record_tuples:
         assert message != expected_message
+
+
+def test_requests_wrapper_config():
+    instance_http = {
+        'prometheus_endpoint': 'http://localhost:8080',
+        'extra_headers': {'foo': 'bar'},
+        'auth_type': 'digest',
+        'username': 'data',
+        'password': 'dog',
+        'tls_cert': '/path/to/cert',
+    }
+    init_config_http = {'timeout': 42}
+    check = PrometheusCheck('prometheus_check', init_config_http, {}, [instance_http])
+
+    expected_headers = OrderedDict(
+        [
+            ('User-Agent', 'Datadog Agent/0.0.0'),
+            ('Accept', '*/*'),
+            ('Accept-Encoding', 'gzip'),
+            ('foo', 'bar'),
+            ('accept-encoding', 'gzip'),
+            (
+                'accept',
+                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited',
+            ),
+        ]
+    )
+
+    with mock.patch("requests.get") as get:
+        check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
+        get.assert_called_with(
+            instance_http['prometheus_endpoint'],
+            stream=False,
+            headers=expected_headers,
+            auth=requests.auth.HTTPDigestAuth('data', 'dog'),
+            cert='/path/to/cert',
+            timeout=(42.0, 42.0),
+            proxies=None,
+            verify=True,
+        )
+
+        check.poll(instance_http['prometheus_endpoint'])
+        get.assert_called_with(
+            instance_http['prometheus_endpoint'],
+            stream=False,
+            headers=expected_headers,
+            auth=requests.auth.HTTPDigestAuth('data', 'dog'),
+            cert='/path/to/cert',
+            timeout=(42.0, 42.0),
+            proxies=None,
+            verify=True,
+        )

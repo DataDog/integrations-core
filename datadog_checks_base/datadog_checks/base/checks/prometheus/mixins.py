@@ -49,13 +49,13 @@ class PrometheusScraperMixin(object):
         'ssl_cert': {'name': 'tls_cert'},
         'ssl_private_key': {'name': 'tls_private_key'},
         'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'ssl_ignore_warning': {'name': 'tls_ignore_warning'},
         'prometheus_timeout': {'name': 'timeout'},
     }
 
     def __init__(self, *args, **kwargs):
-        super(PrometheusScraperMixin, self).__init__(*args, **kwargs)
-
         self.init_config = {}
+        super(PrometheusScraperMixin, self).__init__(*args, **kwargs)
 
         # The scraper needs its own logger
         self.log = logging.getLogger(__name__)
@@ -166,9 +166,6 @@ class PrometheusScraperMixin(object):
 
         # Extra http headers to be sent when polling endpoint
         self.extra_headers = {}
-
-        # Timeout used during the network request
-        self.prometheus_timeout = 10
 
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
@@ -460,17 +457,16 @@ class PrometheusScraperMixin(object):
         if http_config.get('headers') is None:
             http_config['headers'] = {}
         http_config['headers'].update(headers)
-        http_config.setdefault('timeout', self.prometheus_timeout)
 
-        http_config.setdefault('tls_cert', self.ssl_cert)
-        http_config.setdefault('tls_private_key', self.ssl_private_key)
-        http_config.setdefault('tls_verify', True)
-        http_config.setdefault('tls_ignore_warning', False)
+        http_config.setdefault('ssl_cert', self.ssl_cert)
+        http_config.setdefault('ssl_private_key', self.ssl_private_key)
+        http_config.setdefault('ssl_verify', True)
+        http_config.setdefault('ssl_ignore_warning', False)
 
-        http_config.setdefault('tls_ca_cert', self.ssl_ca_cert)
-        if http_config['tls_ca_cert'] is False:
-            http_config['tls_ignore_warning'] = True
-            http_config['tls_verify'] = False
+        http_config.setdefault('ssl_ca_cert', self.ssl_ca_cert)
+        if http_config['ssl_ca_cert'] is False:
+            http_config['ssl_ignore_warning'] = True
+            http_config['ssl_verify'] = False
 
         http_handler = self._http_handlers[endpoint] = RequestsWrapper(
             http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
@@ -565,8 +561,8 @@ class PrometheusScraperMixin(object):
         """
         if headers is None:
             headers = {}
-        if 'accept-encoding' not in headers:
-            headers['accept-encoding'] = 'gzip'
+        if 'Accept-Encoding' not in headers:
+            headers['Accept-Encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
             headers['accept'] = (
                 'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
@@ -575,7 +571,7 @@ class PrometheusScraperMixin(object):
         if (
             endpoint.startswith('https')
             and not handler.ignore_tls_warning
-            and not is_affirmative(handler.options.get('tls_verify', True))
+            and not is_affirmative(handler.options.get('ssl_verify', True))
         ):
             self.log.warning(u'An unverified HTTPS request is being made to %s', endpoint)
 
