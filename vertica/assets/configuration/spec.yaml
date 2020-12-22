@@ -94,44 +94,12 @@ files:
             value:
               type: integer
               example: 10
-          - name: tls_verify
-            description: Whether or not to connect securely using TLS. The server must also support this.
-            value:
-              type: boolean
-              example: false
+          - template: instances/tls
           - name: validate_hostname
             description: Whether or not to verify the TLS certificate was issued for `server` if `tls_verify` is true.
             value:
               type: boolean
               example: true
-          - name: cert
-            description: |
-              The path to a single file in PEM format containing a certificate as well as any
-              number of CA certificates needed to establish the certificate’s authenticity for
-              use when connecting to `server`. It may also contain an unencrypted private key to use.
-
-              Setting this implicitly sets `tls_verify` to true.
-            value:
-              type: string
-              example: <CERT_PATH>
-          - name: private_key
-            description: |
-              The unencrypted private key to use for `cert` when connecting to `server`. This is
-              required if `cert` is set and it does not already contain a private key.
-            value:
-              type: string
-              example: <PRIVATE_KEY_PATH>
-          - name: ca_cert
-            description: |
-              The path to a file of concatenated CA certificates in PEM format or a directory
-              containing several CA certificates in PEM format. If a directory, the directory
-              must have been processed using the c_rehash utility supplied with OpenSSL. See:
-              https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
-
-              Setting this implicitly sets `tls_verify` to true.
-            value:
-              type: string
-              example: <CA_CERT_PATH>
           - template: instances/default
           - template: instances/db
             overrides:
