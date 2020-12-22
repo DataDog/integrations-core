@@ -5,7 +5,6 @@
   "name": "{check_name}",
   "metric_prefix": "snmp.",
   "metric_to_check": "",
-  "metric_integration_check_name": "snmp",
   "creates_events": false,
   "short_description": "Collect SNMP metrics from your {integration_name} network devices.",
   "guid": "{guid}",
