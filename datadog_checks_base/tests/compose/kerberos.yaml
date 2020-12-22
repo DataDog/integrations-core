@@ -42,7 +42,7 @@ services:
       DOMAIN: example.com
       KRB5_USER: datadog/admin
       KRB5_PASS: 123pass
-      SERVICE_NAME: ${KRB5_SVC}/${HOSTNAME}.${DOMAIN}
+      SERVICE_NAME: ${KRB5_SVC}/${WEBHOST}
     hostname: web
     domainname: example.com
     volumes: 
