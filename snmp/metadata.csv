@@ -612,7 +612,7 @@ snmp.jnxCosIfsetQstatMHpRedDropBytes,count,,byte,,[Juniper EX] The total number 
 snmp.jnxCosIfsetQstatHpRedDropBytes,count,,byte,,[Juniper EX] The total number of high PLP TCP bytes RED-dropped at the output queue on the given interface.,0,snmp,
 snmp.jnxCosIfsetQstatRateLimitDropPkts,count,,packet,,[Juniper EX] The total number of rate-limit dropped packets at the output on the given interface.,0,snmp,
 snmp.jnxCosIfsetQstatRateLimitDropBytes,count,,byte,,[Juniper EX] The total number of rate-limit dropped bytes at the output on the given interface.,0,snmp,
-snmp.jnxCosIfsetQstatQedPktRate,gauge,,byte,second,[Juniper EX] The rate (expressed in packets per second) at which packets were queued at the output queue.,0,snmp,
+snmp.jnxCosIfsetQstatQedPktRate,gauge,,packet,second,[Juniper EX] The rate (expressed in packets per second) at which packets were queued at the output queue.,0,snmp,
 snmp.jnxCosIfsetQstatQedByteRate,gauge,,byte,second,[Juniper EX] The rate (expressed in bytes per second) at which bytes were queued at the output queue. ,0,snmp,
 snmp.jnxCosIfsetQstatTxedPktRate,gauge,,packet,second,"[Juniper EX] The output queue's packet transmit rate, expressed in packets per second.",0,snmp,
 snmp.jnxCosIfsetQstatTxedByteRate,gauge,,byte,second,[Juniper EX] The queue's current transmit rate in bytes per second.,0,snmp,
