@@ -12,6 +12,7 @@ files:
                   query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
+          - template: init_config/default
       - template: instances
         options:
           - name: db
@@ -99,7 +100,7 @@ files:
             value:
               type: boolean
               example: true
-          - template: instances/tags
+          - template: instances/default
           - template: instances/db
             overrides:
               custom_queries.value.example:
