@@ -13,14 +13,6 @@ files:
       required: true
       value:
         type: string
-    - name: api_version
-      description: |
-        The version of Harbor's REST API to use. The default is no version (the format before version 2).
-
-        NOTE: In a future release, the default value will become `v2.0`. If you use an older version of Harbor,
-              set the version to `null` or an empty string.
-      value:
-        type: string
     - template: instances/http
       overrides:
         username.description: |
