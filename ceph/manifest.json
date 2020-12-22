@@ -33,7 +33,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "ceph": "assets/dashboards/-_overview.json"
+      "ceph": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
