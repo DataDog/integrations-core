@@ -4,7 +4,7 @@
 
 * [Added] Add metric_to_check validation redirection for snmp_<vendor> integrations. See [#8215](https://github.com/DataDog/integrations-core/pull/8215).
 * [Added] Add exec command option to ddev env shell. See [#8235](https://github.com/DataDog/integrations-core/pull/8235).
-* [Added] fail validation if metadata file is empty. See [#8194](https://github.com/DataDog/integrations-core/pull/8194).
+* [Added] Fail validation if metadata file is empty. See [#8194](https://github.com/DataDog/integrations-core/pull/8194).
 * [Fixed] Fix release. See [#8237](https://github.com/DataDog/integrations-core/pull/8237).
 * [Fixed] Update dogweb dashboard list. See [#8191](https://github.com/DataDog/integrations-core/pull/8191).
 
