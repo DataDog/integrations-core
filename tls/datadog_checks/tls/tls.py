@@ -4,7 +4,6 @@
 import socket
 import ssl
 from datetime import datetime
-from os.path import expanduser, isdir
 
 import service_identity
 from cryptography.hazmat.backends import default_backend
@@ -117,6 +116,7 @@ class TLSCheck(AgentCheck):
             self.log.debug('TLS check able to connect')
             self.service_check(self.SERVICE_CHECK_CAN_CONNECT, self.OK, tags=self._tags)
 
+        protocol_version = None
         # Get the cert & TLS version from the connection
         with closing(sock):
             self.log.debug('Getting cert and TLS protocol version')

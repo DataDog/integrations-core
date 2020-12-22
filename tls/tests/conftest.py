@@ -87,7 +87,7 @@ def instance_local_hostname(certs):
 
 @pytest.fixture(scope='session')
 def instance_local_hostname_mismatch(certs):
-    yield {'local_cert_path': certs['valid.pem'], 'server_hostname': 'wrong.host'}
+    yield {'server_hostname': 'wrong.host', 'local_cert_path': certs['valid.pem']}
 
 
 @pytest.fixture(scope='session')
@@ -148,12 +148,12 @@ def instance_e2e():
 
 @pytest.fixture
 def instance_remote_ok_ip():
-    return {'server': '1.1.1.1', 'tls_ca_cert': CA_CERT}
+    return {'server': '1.1.1.1', 'tls_validate_hostname': False}
 
 
 @pytest.fixture
 def instance_remote_ok_udp():
-    return {'server': '1.1.1.1', 'transport': 'udp', 'tls_ca_cert': CA_CERT}
+    return {'server': '1.1.1.1', 'transport': 'udp', 'tls_validate_hostname': False}
 
 
 @pytest.fixture
@@ -188,7 +188,7 @@ def instance_remote_version_default_1_3():
 
 @pytest.fixture
 def instance_remote_hostname_mismatch():
-    return {'server': 'https://wronghost.mock', 'tls_ca_cert': CA_CERT}
+    return {'server': 'https://wronghost.mock', 'tls_verify': False}
 
 
 @pytest.fixture
