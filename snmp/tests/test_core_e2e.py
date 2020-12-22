@@ -29,6 +29,15 @@ def test_e2e_profile(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
+METRIC_TO_SKIP = [
+    'snmp.ifBandwidthInUsage.rate',
+    'snmp.ifBandwidthOutUsage.rate',
+    'snmp.check_duration',
+    'snmp.check_interval',
+    'snmp.submitted_metrics',
+]
+
+
 def assert_python_vs_core(dd_agent_check, instance):
     python_instance = instance.copy()
     python_instance['loader'] = 'python'
@@ -37,26 +46,22 @@ def assert_python_vs_core(dd_agent_check, instance):
     aggregator = dd_agent_check(python_instance, rate=True)
     expected_metrics = defaultdict(int)
     for _, metrics in aggregator._metrics.items():
-        for metric in metrics:
-            tags = [t for t in metric.tags if not t.startswith('loader:')]  # Remove `loader` tag
-            expected_metrics[(metric.name, metric.type, tuple(sorted(tags)))] += 1
+        for stub in metrics:
+            if stub.name in METRIC_TO_SKIP:
+                continue
+            stub = normalize_stub_metric(stub)
+            expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))] += 1
 
     aggregator.reset()
     aggregator = dd_agent_check(core_instance, rate=True)
 
-    # Remove `loader` tag
-    for metric_name in aggregator._metrics:
-        aggregator._metrics[metric_name] = [
-            MetricStub(
-                stub.name,
-                stub.type,
-                stub.value,
-                [t for t in stub.tags if not t.startswith('loader:')],
-                stub.hostname,
-                stub.device,
-            )
-            for stub in aggregator._metrics[metric_name]
-        ]
+    aggregator_metrics = aggregator._metrics
+    aggregator._metrics = defaultdict(list)
+    for metric_name in aggregator_metrics:
+        for stub in aggregator_metrics[metric_name]:
+            if stub.name in METRIC_TO_SKIP:
+                continue
+            aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
 
     actual_metrics = defaultdict(int)
     for _, metrics in aggregator._metrics.items():
@@ -87,6 +92,18 @@ def assert_python_vs_core(dd_agent_check, instance):
         aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
+
+
+def normalize_stub_metric(stub):
+    tags = [t for t in stub.tags if not t.startswith('loader:')]  # Remove `loader` tag
+    return MetricStub(
+        stub.name,
+        stub.type,
+        stub.value,
+        tags,
+        stub.hostname,
+        stub.device,
+    )
 
 
 def has_index_mapping_tag(tags):
