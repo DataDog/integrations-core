@@ -44,9 +44,11 @@ class ProxysqlCheck(AgentCheck):
         if not all((self.host, self.port, self.user, self.password)):
             raise ConfigurationError("ProxySQL host, port, username and password are needed")
 
+        # can get rid of this
         self.tls_verify = self.instance.get("tls_verify", False)
         self.validate_hostname = self.instance.get("validate_hostname", True)
         self.tls_ca_cert = self.instance.get("tls_ca_cert")
+
         self.connect_timeout = self.instance.get("connect_timeout", 10)
         self.read_timeout = self.instance.get("read_timeout")
 
@@ -96,7 +98,7 @@ class ProxysqlCheck(AgentCheck):
                 ca_cert=self.tls_ca_cert, check_hostname=self.validate_hostname
             )
         else:
-            ssl_context = make_insecure_ssl_client_context()
+            ssl_context = make_insecure_ssl_client_context() # can keep this
 
         db = None
         try:

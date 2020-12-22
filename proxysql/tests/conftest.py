@@ -4,11 +4,16 @@
 import os
 from copy import deepcopy
 
+import mock
 import pymysql
 import pytest
 
 from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+
+from datadog_checks.proxysql import ProxysqlCheck
+
+from .common import ALL_METRICS
 
 DOCKER_HOST = get_docker_hostname()
 MYSQL_PORT = 6612
@@ -120,3 +125,29 @@ def init_mysql():
 
 def init_proxy():
     pymysql.connect(host=DOCKER_HOST, port=PROXY_PORT, user=MYSQL_USER, passwd=MYSQL_PASS)
+
+
+def get_check(instance):
+    """Simple helper method to get a check instance from a config instance."""
+    return ProxysqlCheck('proxysql', {}, [instance])
+
+
+def _assert_all_metrics(aggregator):
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def _assert_metadata(datadog_agent, check_id=''):
+    raw_version = PROXYSQL_VERSION
+    major, minor = raw_version.split('.')[:2]
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
+    datadog_agent.assert_metadata(check_id, version_metadata)
+

@@ -1,15 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.proxysql import ProxysqlCheck
 
 from .common import (
-    ALL_METRICS,
     COMMANDS_COUNTERS_METRICS,
     CONNECTION_POOL_METRICS,
     GLOBAL_METRICS,
@@ -17,49 +13,7 @@ from .common import (
     QUERY_RULES_TAGS_METRICS,
     USER_TAGS_METRICS,
 )
-from .conftest import PROXYSQL_VERSION
-
-
-def get_check(instance):
-    """Simple helper method to get a check instance from a config instance."""
-    return ProxysqlCheck('proxysql', {}, [instance])
-
-
-@pytest.mark.unit
-def test_wrong_config(dd_run_check, instance_basic):
-    # Empty instance
-    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
-        dd_run_check(get_check({}))
-
-    # Only host
-    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
-        dd_run_check(get_check({'host': 'localhost'}))
-
-    # Missing password
-    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
-        dd_run_check(get_check({'host': 'localhost', 'port': 6032, 'username': 'admin'}))
-
-    # Wrong additional metrics group
-    with pytest.raises(
-        ConfigurationError,
-        match="There is no additional metric group called 'foo' for the ProxySQL integration, it should be one of ",
-    ):
-        instance_basic['additional_metrics'].append('foo')
-        dd_run_check(get_check(instance_basic))
-
-
-@pytest.mark.unit
-def test_config_ok(dd_run_check):
-    check = get_check({'host': 'localhost', 'port': 6032, 'username': 'admin', 'password': 'admin'})
-    connect_mock, query_executor_mock = mock.MagicMock(), mock.MagicMock()
-
-    check.connect = connect_mock
-    check._query_manager.executor = query_executor_mock
-
-    dd_run_check(check)
-
-    connect_mock.assert_called_once()
-    assert query_executor_mock.call_count == 2
+from .conftest import get_check, _assert_all_metrics, _assert_metadata
 
 
 @pytest.mark.integration
@@ -145,26 +99,6 @@ def test_metadata(datadog_agent, dd_run_check, instance_basic):
     _assert_metadata(datadog_agent)
 
 
-def _assert_all_metrics(aggregator):
-    for metric in ALL_METRICS:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-
-
-def _assert_metadata(datadog_agent, check_id=''):
-    raw_version = PROXYSQL_VERSION
-    major, minor = raw_version.split('.')[:2]
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': mock.ANY,
-        'version.raw': mock.ANY,
-    }
-    datadog_agent.assert_metadata(check_id, version_metadata)
-
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_all_metrics(aggregator, instance_all_metrics, dd_run_check):
@@ -178,11 +112,4 @@ def test_all_metrics(aggregator, instance_all_metrics, dd_run_check):
 def test_all_metrics_stats_user(aggregator, instance_stats_user, dd_run_check):
     check = get_check(instance_stats_user)
     dd_run_check(check)
-    _assert_all_metrics(aggregator)
-
-
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, datadog_agent):
-    aggregator = dd_agent_check(rate=True)
-    _assert_metadata(datadog_agent, check_id='proxysql')
     _assert_all_metrics(aggregator)
