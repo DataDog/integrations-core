@@ -7,35 +7,28 @@ For details of monitored metrics see the [Network Device Monitoring][2] document
 
 ## Setup
 
-### Installation
-
-{install_info}
-
-### Configuration
-
-1. <List of steps to setup this Integration>
-
-### Validation
-
-<Steps to validate integration is functioning as expected>
+To install and configure the SNMP integration, see the [Network Device Monitoring][2] documentation.
 
 ## Data Collected
 
 ### Metrics
 
-The {integration_name} integration does not include any metrics.
+For details of monitored metrics see the [SNMP integration tile][2]
 
 ### Service Checks
 
-The {integration_name} integration does not include any service checks.
+Snmp Cisco does not include any service checks.
 
 ### Events
 
-The {integration_name} integration does not include any events.
+Snmp Cisco does not include any events.
 
-## Troubleshooting
+## Further Reading
 
-Need help? Contact [Datadog support][1].
+Additional helpful documentation, links, and articles:
 
-[1]: https://docs.datadoghq.com/help/
-[2]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
+* [Monitor SNMP with Datadog][4]
+
+[1]: https://app.datadoghq.com/account/settings#integrations/snmp
+[2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
+[3]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
