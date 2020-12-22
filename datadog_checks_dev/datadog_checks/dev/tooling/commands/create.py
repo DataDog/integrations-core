@@ -104,12 +104,19 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
 
-    integration_dir = os.path.join(root, normalize_package_name(name))
+    if integration_type == 'snmp_tile' and name.startswith('snmp_'):
+        name_without_snmp_prefix = name[len('snmp_'):]
+        echo_warning(f'Creating snmp_tile for vendor ({name}) in directory (snmp_{name})')
+        value = click.prompt(f'Did you mean vendor ({name_without_snmp_prefix})? (y/n)', default='y')
+        if value.lower() == 'y':
+            name = name_without_snmp_prefix
+
+    integration_dir_name = name
+    if integration_type == 'snmp_tile':
+        integration_dir_name = 'snmp_' + name
+    integration_dir = os.path.join(root, normalize_package_name(integration_dir_name))
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
-
-    if integration_type == 'snmp_tile' and not name.startswith('snmp_'):
-        abort(f'Invalid snmp_tile name ({name}). snmp_tile integrations should start with `snmp_`')
 
     template_fields = {}
     if non_interactive and repo_choice != 'core':
