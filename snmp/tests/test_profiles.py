@@ -2345,9 +2345,9 @@ def _check_juniper_cos(aggregator, common_tags):
     Shared testing function for Juniper profiles supporting COS metrics
     """
     cos_tags = [
-        ['interface_name:acted oxen oxen forward quaintly kept zombies but oxen', 'queue_number:25'],
-        ['interface_name:acted kept quaintly acted oxen kept', 'queue_number:50'],
-        ['interface_name:their', 'queue_number:15'],
+        ['interface:acted oxen oxen forward quaintly kept zombies but oxen', 'queue_number:25'],
+        ['interface:acted kept quaintly acted oxen kept', 'queue_number:50'],
+        ['interface:their', 'queue_number:15'],
     ]
     for cos_metric in COS_COUNTS:
         for tags in cos_tags:
