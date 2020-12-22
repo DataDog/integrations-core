@@ -14,6 +14,9 @@ The ProxySQL integration is included in the [Datadog Agent][3] package, so you d
 
 ### Configuration
 
+#### Enabling SSL
+Text here
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
