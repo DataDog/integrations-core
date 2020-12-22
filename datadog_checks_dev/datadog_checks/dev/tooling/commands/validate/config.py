@@ -79,9 +79,7 @@ def config(ctx, check, sync, verbose):
 
         if not default_temp:
             check_display_queue.append(
-                lambda **kwargs: echo_failure(
-                    f"Missing default template in init_config or instances section", **kwargs
-                )
+                lambda **kwargs: echo_failure("Missing default template in init_config or instances section")
             )
 
         if spec.errors:
