@@ -80,18 +80,18 @@ def kerberos_agent():
         }
 
         with docker_run(
-                compose_file=compose_file,
-                env_vars={
-                    'SHARED_VOLUME': shared_volume,
-                    'KRB5_CONFIG': krb5_conf,
-                    'KRB5_KEYTAB': common_config['keytab'],
-                    'KRB5_CCNAME': common_config['cache'],
-                    'KRB5_REALM': common_config['realm'],
-                    'KRB5_SVC': common_config['svc'],
-                    'WEBHOST': common_config['hostname'],
-                    'WEBPORT': webserver_port,
-                },
-                conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
+            compose_file=compose_file,
+            env_vars={
+                'SHARED_VOLUME': shared_volume,
+                'KRB5_CONFIG': krb5_conf,
+                'KRB5_KEYTAB': common_config['keytab'],
+                'KRB5_CCNAME': common_config['cache'],
+                'KRB5_REALM': common_config['realm'],
+                'KRB5_SVC': common_config['svc'],
+                'WEBHOST': common_config['hostname'],
+                'WEBPORT': webserver_port,
+            },
+            conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
         ):
             yield common_config
 

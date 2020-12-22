@@ -520,6 +520,7 @@ class TestAuth:
         response = http.get(instance["url"])
 
         import time
+
         time.sleep(3600)
 
         assert response.status_code == 200
