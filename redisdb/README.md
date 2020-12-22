@@ -125,7 +125,7 @@ Required environment variables on the Agent container:
 
 See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
 
 <!-- xxz tab xxx -->
@@ -206,7 +206,7 @@ Required environment variables on the Agent container:
 
 See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
