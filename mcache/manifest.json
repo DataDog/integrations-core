@@ -35,7 +35,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "memcached": "assets/dashboards/memcached_dashboard.json"
+      "memcached": "assets/dashboards/memcached_dashboard.json",
+      "memcached_screenboard": "assets/dashboards/memcached_screenboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
