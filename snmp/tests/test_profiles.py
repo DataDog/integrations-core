@@ -2320,9 +2320,9 @@ def _check_juniper_virtual_chassis(aggregator, common_tags):
     Shared testing function for Juniper profiles supporting virtual chassis metrics
     """
     virtual_chassis_tags = [
-        ['virtual_chassis_id:24', 'virtual_chassis_port_name:but driving but'],
-        ['virtual_chassis_id:11', 'virtual_chassis_port_name:Jaded forward but oxen quaintly their their'],
-        ['virtual_chassis_id:22', 'virtual_chassis_port_name:forward forward driving driving Jaded Jaded'],
+        ['port_name:but driving but'],
+        ['port_name:Jaded forward but oxen quaintly their their'],
+        ['port_name:forward forward driving driving Jaded Jaded'],
     ]
 
     for count_and_rate_metric in VIRTUAL_CHASSIS_COUNTS:
