@@ -214,7 +214,11 @@ def generate_container_profile_instance_config(profile):
 
     # TODO: Remove when default profile loading is implemented in corecheck snmp
     conf['profiles'] = {profile: {'definition_file': '{}.yaml'.format(profile)}}
-    return generate_instance_config([], template=conf)
+
+    instance = generate_instance_config([], template=conf)
+    instance['community_string'] = profile
+    instance['enforce_mib_constraints'] = False
+    return instance
 
 
 def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_key=None, priv=None, priv_key=None):
