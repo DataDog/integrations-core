@@ -18,7 +18,7 @@ metrics:
         OID: 1.3.6.1.2.1.31.1.1.1.1
         name: ifName
       table: ifXTable
-      tag: interface_name
+      tag: interface
       index_transform:
         - start: 0
           end: 0

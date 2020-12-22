@@ -2235,9 +2235,9 @@ def _check_juniper_scu(aggregator, common_tags):
     Shared testing function for Juniper profiles supporting scu
     """
     scu_tags = [
-        ['address_family:1', 'interface_name:kept but'],
-        ['address_family:1', 'interface_name:quaintly driving oxen their zombies oxen acted acted'],
-        ['address_family:1', 'interface_name:but forward kept but their driving oxen quaintly acted'],
+        ['address_family:1', 'interface:kept but'],
+        ['address_family:1', 'interface:quaintly driving oxen their zombies oxen acted acted'],
+        ['address_family:1', 'interface:but forward kept but their driving oxen quaintly acted'],
     ]
     for metric in SCU_COUNTS:
         for tags in scu_tags:
@@ -2269,17 +2269,17 @@ def _check_juniper_dcu(aggregator, common_tags):
         [
             'address_family:1',
             'destination_class_name:their',
-            'interface_name:quaintly driving oxen their zombies oxen acted acted',
+            'interface:quaintly driving oxen their zombies oxen acted acted',
         ],
         [
             'address_family:1',
             'destination_class_name:acted but forward acted zombies forward',
-            'interface_name:but forward kept but their driving oxen quaintly acted',
+            'interface:but forward kept but their driving oxen quaintly acted',
         ],
         [
             'address_family:2',
             'destination_class_name:oxen Jaded oxen Jaded forward kept quaintly',
-            'interface_name:kept but',
+            'interface:kept but',
         ],
     ]
     for decu_metric in DCU_COUNTS:
