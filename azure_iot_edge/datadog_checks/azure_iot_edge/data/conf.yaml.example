@@ -56,7 +56,7 @@ instances:
     edge_agent_prometheus_url: http://edgeAgent:9600/metrics
 
     ## @param prometheus_metrics_prefix - string - optional
-    ## <PREFIX> for exposed Prometheus metrics.
+    ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
     # prometheus_metrics_prefix: <PREFIX>_
 
