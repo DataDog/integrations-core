@@ -30,8 +30,20 @@ def test_e2e_profile(dd_agent_check):
 
 
 METRIC_TO_SKIP = [
+    # forced_type: percent
+    'snmp.sysMultiHostCpuUser',
+    'snmp.sysMultiHostCpuNice',
+    'snmp.sysMultiHostCpuSystem',
+    'snmp.sysMultiHostCpuIdle',
+    'snmp.sysMultiHostCpuIrq',
+    'snmp.sysMultiHostCpuSoftirq',
+    'snmp.sysMultiHostCpuIowait',
+
+    # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
+
+    # telemetry
     'snmp.check_duration',
     'snmp.check_interval',
     'snmp.submitted_metrics',
