@@ -15,9 +15,17 @@ metrics:
       name: jnxDcuStatsBytes
     metric_tags:
     - column:
-        OID: 1.3.6.1.4.1.2636.3.6.2.1.1
-        name: jnxDcuStatsSrcIfIndex
-      tag: interface_index
+        OID: 1.3.6.1.2.1.31.1.1.1.1
+        name: ifName
+      table: ifXTable
+      tag: interface_name
+      index_transform:
+        - start: 0
+          end: 0
+    - column:
+        OID: 1.3.6.1.4.1.2636.3.6.2.1.2
+        name: jnxDcuStatsAddrFamily
+      tag: address_family
     - column:
         OID: 1.3.6.1.4.1.2636.3.6.2.1.3
         name: jnxDcuStatsClassName

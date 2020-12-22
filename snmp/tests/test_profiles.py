@@ -2235,9 +2235,9 @@ def _check_juniper_scu(aggregator, common_tags):
     Shared testing function for Juniper profiles supporting scu
     """
     scu_tags = [
-        ['addr_family:1', 'interface_index:403'],
-        ['addr_family:1', 'interface_index:796'],
-        ['addr_family:1', 'interface_index:116'],
+        ['address_family:1', 'interface_name:kept but'],
+        ['address_family:1', 'interface_name:quaintly driving oxen their zombies oxen acted acted'],
+        ['address_family:1', 'interface_name:but forward kept but their driving oxen quaintly acted'],
     ]
     for metric in SCU_COUNTS:
         for tags in scu_tags:
@@ -2266,9 +2266,21 @@ def _check_juniper_dcu(aggregator, common_tags):
     Shared testing function for Juniper profiles supporting DCU
     """
     dcu_tags = [
-        ['destination_class_name:their', 'interface_index:83'],
-        ['destination_class_name:acted but forward acted zombies forward', 'interface_index:780'],
-        ['destination_class_name:oxen Jaded oxen Jaded forward kept quaintly', 'interface_index:907'],
+        [
+            'address_family:1',
+            'destination_class_name:their',
+            'interface_name:quaintly driving oxen their zombies oxen acted acted',
+        ],
+        [
+            'address_family:1',
+            'destination_class_name:acted but forward acted zombies forward',
+            'interface_name:but forward kept but their driving oxen quaintly acted',
+        ],
+        [
+            'address_family:2',
+            'destination_class_name:oxen Jaded oxen Jaded forward kept quaintly',
+            'interface_name:kept but',
+        ],
     ]
     for decu_metric in DCU_COUNTS:
         for tags in dcu_tags:
@@ -2333,9 +2345,9 @@ def _check_juniper_cos(aggregator, common_tags):
     Shared testing function for Juniper profiles supporting COS metrics
     """
     cos_tags = [
-        ['interface_index:170', 'queue_number:25'],
-        ['interface_index:243', 'queue_number:50'],
-        ['interface_index:463', 'queue_number:15'],
+        ['interface_name:acted oxen oxen forward quaintly kept zombies but oxen', 'queue_number:25'],
+        ['interface_name:acted kept quaintly acted oxen kept', 'queue_number:50'],
+        ['interface_name:their', 'queue_number:15'],
     ]
     for cos_metric in COS_COUNTS:
         for tags in cos_tags:
