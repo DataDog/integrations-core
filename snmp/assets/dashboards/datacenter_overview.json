@@ -41,7 +41,7 @@
         "has_search_bar": "auto",
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -101,7 +101,7 @@
         "markers": [],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -122,7 +122,7 @@
         ],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -157,7 +157,7 @@
         ],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -178,7 +178,7 @@
         ],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -213,7 +213,7 @@
         ],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -293,7 +293,7 @@
         "markers": [],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -356,7 +356,7 @@
         ],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -394,7 +394,7 @@
         "markers": [],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -415,7 +415,7 @@
         ],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -472,7 +472,7 @@
         "markers": [],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
             "label": "Interface Performance"
           }
         ]
@@ -538,7 +538,7 @@
         "markers": [],
         "custom_links": [
           {
-            "link": "/screen/integration/Device%20Dashboard?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}}&tpl_var_interface={{interface.value}}",
+            "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}}&tpl_var_interface={{interface.value}}",
             "label": "Interface Performance"
           }
         ]
