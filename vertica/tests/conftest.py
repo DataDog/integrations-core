@@ -51,3 +51,8 @@ def instance():
 @pytest.fixture
 def tls_instance():
     return deepcopy(common.TLS_CONFIG)
+
+
+@pytest.fixture
+def tls_instance_legacy():
+    return deepcopy(common.TLS_CONFIG_LEGACY)
