@@ -13,6 +13,10 @@
     "linux"
   ],
   "public_title": "Red Hat Gluster Storage",
+  "process_signatures": [
+    "glusterd",
+    "gluster"
+  ],
   "categories": [
     "data store"
   ],
@@ -25,7 +29,7 @@
     },
     "dashboards": {},
     "monitors": {
-      "brick status": "/assets/monitors/brick_status.json"
+      "brick status": "assets/monitors/brick_status.json"
     },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
