@@ -74,7 +74,7 @@ files:
             value:
               example: <RRD_WHITELIST_FILE_PATH>
               type: string
-          - template: instances/default
+          - template: instances/tags
       - template: logs
         example:
           - type: file
