@@ -24,7 +24,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
-    "monitors": {},
+    "monitors": {
+      "brick status": "/assets/monitors/brick_status.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
