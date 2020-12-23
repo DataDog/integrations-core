@@ -441,7 +441,7 @@
                     }
                 ],
                 "time": {},
-                "title": "Participating storage deamon over $cluster",
+                "title": "Participating storage daemon over $cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -465,7 +465,7 @@
                     }
                 ],
                 "time": {},
-                "title": "Online storage deamon over $cluster",
+                "title": "Online storage daemon over $cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
