@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
+try:
+    from json import JSONDecodeError
+except ImportError:
+    from simplejson import JSONDecodeError
 import os
 import sys
 from typing import Any
@@ -57,11 +60,14 @@ class GlusterfsCheck(AgentCheck):
         # Ensures units are universally the same by specifying the --units flag
         gluster_args += ['-a', '-o', 'json', '-u', 'g']
         self.log.debug("gstatus command: %s", gluster_args)
-        output, _, _ = get_subprocess_output(gluster_args, self.log)
         try:
+            output, _, _ = get_subprocess_output(gluster_args, self.log)
             gstatus = json.loads(output)
-        except json.JSONDecoderError as e:
+        except JSONDecodeError as e:
             self.log.debug("Unable to decode gstatus output: %s", str(e))
+            raise
+        except Exception as e:
+            self.log.debug("Encountered error trying to collect gluster status: %s", str(e))
             raise
 
         if 'data' in gstatus:

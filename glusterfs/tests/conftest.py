@@ -27,7 +27,7 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
     with docker_run(compose_file=compose_file):
         create_volume()
-        yield {}, E2E_METADATA
+        yield {'init_config': {'gstatus_path': '/opt/datadog-agent/embedded/sbin/gstatus'}}, E2E_METADATA
 
 
 @pytest.fixture
