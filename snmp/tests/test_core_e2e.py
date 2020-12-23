@@ -50,15 +50,16 @@ METRIC_TO_SKIP = [
 
 def assert_python_vs_core(dd_agent_check, config, total_count=None):
     python_config = config.copy()
-    python_config['loader'] = 'python'
+    python_config['init_config']['loader'] = 'python'
     core_config = config.copy()
-    core_config['loader'] = 'core'
+    core_config['init_config']['loader'] = 'core'
     aggregator = dd_agent_check(python_config, rate=True)
     expected_metrics = defaultdict(int)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
             if stub.name in METRIC_TO_SKIP:
                 continue
+            assert "loader:python" in stub.tags
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))] += 1
     expected_count = sum(count for count in expected_metrics.values())
@@ -70,6 +71,7 @@ def assert_python_vs_core(dd_agent_check, config, total_count=None):
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
+            assert "loader:core" in stub.tags
             if stub.name in METRIC_TO_SKIP:
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
