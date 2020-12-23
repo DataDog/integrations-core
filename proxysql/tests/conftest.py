@@ -8,92 +8,26 @@ import mock
 import pymysql
 import pytest
 
-from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.proxysql import ProxysqlCheck
 
-from .common import ALL_METRICS
-
-DOCKER_HOST = get_docker_hostname()
-MYSQL_PORT = 6612
-PROXY_PORT = 6033
-PROXY_ADMIN_PORT = 6032
-MYSQL_USER = 'proxysql'
-MYSQL_PASS = 'pass'
-PROXY_ADMIN_USER = 'proxy'
-PROXY_ADMIN_PASS = 'proxy'
-PROXY_STATS_USER = 'proxystats'
-PROXY_STATS_PASS = 'proxystats'
-MYSQL_DATABASE = 'test'
-PROXY_MAIN_DATABASE = 'main'
-PROXYSQL_VERSION = os.environ['PROXYSQL_VERSION']
-
-BASIC_INSTANCE = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [],
-}
-
-
-BASIC_INSTANCE_TLS = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [],
-    'use_tls': True,
-    'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
-    'tls_validate_hostname': True
-}
-
-
-BASIC_INSTANCE_TLS_LEGACY = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [],
-    'tls_verify': True,  # legacy version of tls_verify
-    'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
-    'validate_hostname': True  # legacy version of tls_validate_hostname
-}
-
-
-INSTANCE_ALL_METRICS = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [
-        'command_counters_metrics',
-        'connection_pool_metrics',
-        'users_metrics',
-        'memory_metrics',
-        'query_rules_metrics',
-    ],
-}
-
-INSTANCE_ALL_METRICS_STATS = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_STATS_USER,
-    'password': PROXY_STATS_PASS,
-    'database_name': PROXY_MAIN_DATABASE,
-    'tags': ["application:test"],
-    'additional_metrics': [
-        'command_counters_metrics',
-        'connection_pool_metrics',
-        'users_metrics',
-        'memory_metrics',
-        'query_rules_metrics',
-    ],
-}
+from .common import (
+    ALL_METRICS,
+    BASIC_INSTANCE,
+    BASIC_INSTANCE_TLS,
+    BASIC_INSTANCE_TLS_LEGACY,
+    DOCKER_HOST,
+    INSTANCE_ALL_METRICS,
+    INSTANCE_ALL_METRICS_STATS,
+    MYSQL_DATABASE,
+    MYSQL_PASS,
+    MYSQL_PORT,
+    MYSQL_USER,
+    PROXY_ADMIN_PORT,
+    PROXY_PORT,
+    PROXYSQL_VERSION,
+)
 
 
 @pytest.fixture

@@ -31,8 +31,8 @@ def test_missing_password(dd_run_check):
 @pytest.mark.unit
 def test_wrong_additional_metrics_group(dd_run_check, instance_basic):
     with pytest.raises(
-            ConfigurationError,
-            match="There is no additional metric group called 'foo' for the ProxySQL integration, it should be one of ",
+        ConfigurationError,
+        match="There is no additional metric group called 'foo' for the ProxySQL integration, it should be one of ",
     ):
         instance_basic['additional_metrics'].append('foo')
         dd_run_check(get_check(instance_basic))
