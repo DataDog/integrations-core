@@ -38,11 +38,9 @@ METRIC_TO_SKIP = [
     'snmp.sysMultiHostCpuIrq',
     'snmp.sysMultiHostCpuSoftirq',
     'snmp.sysMultiHostCpuIowait',
-
     # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
-
     # telemetry
     'snmp.check_duration',
     'snmp.check_interval',
