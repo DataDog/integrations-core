@@ -107,7 +107,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     integration_dir_name = normalize_package_name(name)
     if integration_type == 'snmp_tile':
         integration_dir_name = 'snmp_' + integration_dir_name
-    integration_dir = os.path.join(root, normalize_package_name(integration_dir_name))
+    integration_dir = os.path.join(root, integration_dir_name)
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
 
