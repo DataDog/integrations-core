@@ -23,6 +23,7 @@ To connect to ProxySQL using SSL/TLS, enable the `use_tls` option in `conf.yaml`
     tls_ca_cert: ca_cert.pem
     tls_private_key: private_key.pem
     tls_private_key_password: Password123
+
 ```
 
 <!-- xxx tabs xxx -->
