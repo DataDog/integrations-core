@@ -46,3 +46,8 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return deepcopy(common.CONFIG)
+
+
+@pytest.fixture
+def tls_instance():
+    return deepcopy(common.TLS_CONFIG)

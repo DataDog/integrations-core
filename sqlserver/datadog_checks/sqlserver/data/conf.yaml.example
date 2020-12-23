@@ -23,6 +23,13 @@ init_config:
     #     columns: <COLUMNS>
     #     tags: <TAGS>
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
 ## Every instance is scheduled independent of the others.
 ##
 ## Note: All '%' characters must be escaped as '%%'.
@@ -45,9 +52,46 @@ instances:
     # password: <PASSWORD>
 
     ## @param database - string - optional - default: master
-    ## Database name to query
+    ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
     # database: master
+
+    ## @param database_autodiscovery - boolean - optional - default: false
+    ## Auto-discover and monitor databases.  If `true`, overrides `database` option.
+    ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
+    #
+    # database_autodiscovery: false
+
+    ## @param autodiscovery_include - list of strings - optional
+    ## Regular expression for database names to include as part of `database_autodiscovery`.
+    ## Will report metrics for databases that are found in this instance, ignores databases listed but not found.
+    ##
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so 
+    ## to match anywhere, prepend `.*`. For exact matches append `$`. 
+    ##
+    ## Defaults to `.*` to include everything.
+    #
+    # autodiscovery_include:
+    #   - master$
+    #   - AdventureWorks.*
+
+    ## @param autodiscovery_exclude - list of strings - optional
+    ## Regular expression for database names to exclude as part of `database_autodiscovery`.
+    ##
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so
+    ## to match anywhere, prepend `.*`. For exact matches append `$`.
+    ##
+    ## In case of conflicts, database exclusion via `autodiscovery_exclude` takes precedence over
+    ## those found via `autodiscovery_include`.
+    #
+    # autodiscovery_exclude:
+    #   - model
+    #   - msdb
+
+    ## @param database_autodiscovery_interval - integer - optional - default: 3600
+    ## Frequency in seconds of scans for new databases.  Defaults to `3600`.
+    #
+    # database_autodiscovery_interval: 3600
 
     ## @param include_ao_metrics - boolean - optional - default: false
     ## Include AlwaysOn availability group metrics.
@@ -211,6 +255,26 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
 
 ## Log Section
 ##

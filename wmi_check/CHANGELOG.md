@@ -1,6 +1,6 @@
 # CHANGELOG - wmi_check
 
-## 1.9.2 / 2020-10-06
+## 1.9.2 / 2020-10-06 / Agent 7.24.0
 
 * [Fixed] Fix missing tags from tag_by. See [#7706](https://github.com/DataDog/integrations-core/pull/7706).
 

@@ -99,6 +99,60 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
         check.initialize_connection()
 
 
+def test_autodiscovery_patterns(instance_autodiscovery, dd_run_check):
+    Row = namedtuple('Row', 'name')
+    fetchall_results = [
+        Row('master'),
+        Row('tempdb'),
+        Row('model'),
+        Row('msdb'),
+        Row('AdventureWorks2017'),
+        Row('CaseSensitive2018'),
+        Row('Fancy2020db'),
+    ]
+    all_dbs = set([r.name for r in fetchall_results])
+
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+
+    instance = copy.deepcopy(instance_autodiscovery)
+
+    # check base case of default filters
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == all_dbs
+
+    # check missing additions, but no exclusions
+    mock_cursor.fetchall.return_value = iter(fetchall_results)  # reset the mock results
+    instance['autodiscovery_include'] = ['missingdb', 'fakedb']
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set()
+
+    # check included found and missing additions
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    instance['autodiscovery_include'] = ['master', 'fancy2020db', 'missingdb', 'fakedb']
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set(['master', 'Fancy2020db'])
+
+    # check excluded dbs
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    instance['autodiscovery_include'] = ['.*']  # replace default `.*`
+    instance['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set(['tempdb', 'AdventureWorks2017', 'CaseSensitive2018'])
+
+    # check excluded overrides included
+    mock_cursor.fetchall.return_value = iter(fetchall_results)
+    instance['autodiscovery_include'] = ['t.*', 'master']  # remove default `.*`
+    instance['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set(['tempdb'])
+
+
 def test_set_default_driver_conf():
     # Docker Agent with ODBCSYSINI env var
     # The only case where we set ODBCSYSINI to the the default odbcinst.ini folder

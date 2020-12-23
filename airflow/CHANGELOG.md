@@ -1,6 +1,10 @@
 # CHANGELOG - Airflow
 
-## 1.7.0 / 2020-10-31
+## 1.7.1 / 2020-12-11
+
+* [Fixed] Update check signature. See [#8175](https://github.com/DataDog/integrations-core/pull/8175).
+
+## 1.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

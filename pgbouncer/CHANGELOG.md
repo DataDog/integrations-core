@@ -1,6 +1,10 @@
 # CHANGELOG - pgbouncer
 
-## 1.12.0 / 2020-10-31
+## 1.12.1 / 2020-12-11
+
+* [Fixed] Make pgbouncer more reslient. See [#8124](https://github.com/DataDog/integrations-core/pull/8124).
+
+## 1.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 

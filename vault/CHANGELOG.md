@@ -1,6 +1,10 @@
 # CHANGELOG - Vault
 
-## 2.9.1 / 2020-11-04
+## 2.10.0 / 2020-12-11
+
+* [Added] Add new Vault 1.5+ metrics. See [#8031](https://github.com/DataDog/integrations-core/pull/8031).
+
+## 2.9.1 / 2020-11-04 / Agent 7.24.0
 
 * [Fixed] Fix secondary mode detection logic. See [#7926](https://github.com/DataDog/integrations-core/pull/7926).
 

@@ -21,72 +21,73 @@ from .git import get_latest_tag
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DOGWEB_JSON_DASHBOARDS = (
-    'btrfs',
-    'cassandra',
-    'couchbase',
-    'elastic',
-    'fluentd',
-    'gearmand',
-    'iis',
-    'ibm_was',
-    'immunio',
-    'kong',
-    'kyoto_tycoon',
-    'marathon',
-    'mcached',
-    'mysql',
-    'nginx',
-    'pgbouncer',
-    'php_fpm',
-    'postfix',
-    'postgres',
-    'sqlserver',
-    'rabbitmq',
-    'riak',
-    'riakcs',
-    'solr',
-    'sqlserver',
-    'tokumx',
-    'tomcat',
-    'varnish',
-)
-DOGWEB_CODE_GENERATED_DASHBOARDS = (
     'activemq',
-    'apache',
+    'btrfs',
     'ceph',
     'cisco_aci',
     'consul',
+    'couchbase',
     'couchdb',
-    'cri',
-    'crio',
     'etcd',
+    'fluentd',
+    'gearmand',
     'gunicorn',
-    'haproxy',
     'hdfs_datanode',
     'hdfs_namenode',
-    'hyperv',
-    'ibm_mq',
+    'immunio',  # Is this a core integration??
     'kafka',
-    'kube_controller_manager',
-    'kube_scheduler',
+    'kong',
+    'kyoto_tycoon',
     'kubernetes',
     'lighttpd',
     'mapreduce',
     'marathon',
     'mesos',
-    'mongo',
     'nginx',
-    'nginx_ingress_controller',
     'openstack',
+    'pgbouncer',
+    'php_fpm',
+    'postfix',
     'powerdns_recursor',
     'rabbitmq',
-    'redisdb',
-    'sigsci',
+    'riak',
+    'riakcs',
+    'solr',
     'spark',
-    'twistlock',
+    'sqlserver',
+    'tokumx',
+    'varnish',
+    'vsphere',
     'wmi_check',
     'yarn',
     'zk',
+)
+
+# List of integrations where is not possible or it does not make sense to have its own log integration
+INTEGRATION_LOGS_NOT_POSSIBLE = (
+    'btrfs',  # it emits to the system log
+    'datadog_checks_base',
+    'datadog_checks_dev',
+    'datadog_checks_downloader',
+    'directory',  # OS
+    'external_dns',  # remote connection
+    'http_check',  # Its not a service
+    'linux_proc_extras',
+    'ntp',  # the integration is for a remote ntp server
+    'openmetrics',  # base class
+    'pdh_check',  # base class
+    'process',  # system
+    'prometheus',  # base class
+    'sap_hana',  # see open questions in the architecture rfc
+    'snmp',  # remote connection to the devices
+    'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
+    'ssh_check',  # remote connection
+    'system_core',  # system
+    'system_swap',  # system
+    'tcp_check',  # remote connection
+    'tls',  # remote connection
+    'windows_service',  # OS
+    'wmi_check',  # base class
 )
 
 
@@ -409,6 +410,14 @@ def get_metric_sources():
     return {path for path in os.listdir(get_root()) if file_exists(get_metadata_file(path))}
 
 
+def get_available_logs_integrations():
+    # Also excluding all the kube_ integrations
+    checks = sorted(
+        x for x in set(get_valid_checks()).difference(INTEGRATION_LOGS_NOT_POSSIBLE) if not x.startswith('kube')
+    )
+    return checks
+
+
 def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
 
@@ -550,6 +559,16 @@ def has_agent_8_check_signature(check):
     return True
 
 
+def has_saved_views(check):
+    manifest_file = get_manifest_file(check)
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+    return len(manifest.get('assets', {}).get('saved_views', {})) > 0
+
+
 def is_tile_only(check):
     config_file = get_config_file(check)
     return not os.path.exists(config_file)
@@ -569,10 +588,24 @@ def is_jmx_integration(check_name):
 
 
 def has_dashboard(check):
-    if check in DOGWEB_JSON_DASHBOARDS or check in DOGWEB_CODE_GENERATED_DASHBOARDS:
+    if check in DOGWEB_JSON_DASHBOARDS:
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
+
+
+def has_logs(check):
+    config_file = get_config_file(check)
+    if os.path.exists(config_file):
+        with open(config_file, 'r', encoding='utf-8') as f:
+            if '# logs:' in f.read():
+                return True
+
+    readme_file = get_readme_file(check)
+    if os.path.exists(readme_file):
+        with open(readme_file, 'r', encoding='utf-8') as f:
+            if '# Log collection' in f.read():
+                return True
 
 
 def find_legacy_signature(check):

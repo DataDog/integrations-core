@@ -82,3 +82,14 @@ def _varbind_value_to_float(value):
             value = value[:found]
         value = value.strip()
     return float(value)
+
+
+def try_varbind_value_to_float(value, default_value=None):
+    # type: (Any, Any) -> Any
+    """
+    Try parsing snmp varbind_value to float, returning `default_value` on ValueError exception
+    """
+    try:
+        return _varbind_value_to_float(value)
+    except ValueError:
+        return default_value

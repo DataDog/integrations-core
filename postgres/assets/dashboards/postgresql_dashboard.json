@@ -1,0 +1,131 @@
+{
+    "title": "Postgres - Metrics",
+    "description": "This dashboard provides real-time insights into your PostgreSQL databases, so you can monitor throughput and resource utilization metrics from all your servers and troubleshoot performance issues. Further reading on PostgreSQL monitoring:\n\n- [Datadog's guide to key PostgreSQL metrics](https://www.datadoghq.com/blog/postgresql-monitoring/)\n\n- [Collecting metrics with PostgreSQL monitoring tools](https://www.datadoghq.com/blog/postgresql-monitoring-tools/)\n\n- [How to monitor PostgreSQL with Datadog](https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/)\n\n- [Datadog's PostgreSQL integration docs](https://docs.datadoghq.com/integrations/postgres/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:postgresql.rows_fetched{$scope}"
+                    },
+                    {
+                        "q": "avg:postgresql.rows_returned{$scope}"
+                    },
+                    {
+                        "q": "avg:postgresql.rows_inserted{$scope}"
+                    },
+                    {
+                        "q": "avg:postgresql.rows_updated{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Rows fetched / returned / inserted / updated (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:postgresql.connections{$scope} by {db}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "postgresql.rows_inserted{$scope},postgresql.rows_deleted{$scope},postgresql.rows_updated{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Inserts / updates / deletes (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.util{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk utilization (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "I/O wait (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        }
+    ]
+}

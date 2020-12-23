@@ -5,6 +5,7 @@ import logging
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
 
 from . import common
@@ -67,6 +68,7 @@ def test_mongo(aggregator, check, instance_authdb):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.parametrize(
@@ -87,6 +89,7 @@ def test_mongo2(aggregator, check, instance_user):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_mongo_old_config(aggregator, check, instance):
@@ -100,6 +103,7 @@ def test_mongo_old_config(aggregator, check, instance):
         if metric_name in METRIC_VAL_CHECKS_OLD:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_mongo_old_config_2(aggregator, check, instance):
@@ -113,6 +117,7 @@ def test_mongo_old_config_2(aggregator, check, instance):
         if metric_name in METRIC_VAL_CHECKS_OLD:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1valid_and_1invalid_custom_queries):
@@ -183,6 +188,33 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     assert 'Exception: Custom query returned an empty result set.' in caplog.text
 
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
+
+
+def test_mongo_replset(instance_shard, aggregator, check):
+    mongo_check = check(instance_shard)
+    mongo_check.check(None)
+
+    replset_metrics = [
+        'mongodb.replset.health',
+        'mongodb.replset.replicationlag',
+        'mongodb.replset.state',
+        'mongodb.replset.votefraction',
+        'mongodb.replset.votes',
+    ]
+    replset_common_tags = [
+        "replset_name:shard01",
+        "server:mongodb://localhost:27018/",
+        "sharding_cluster_role:shardsvr",
+    ]
+    for metric in replset_metrics:
+        aggregator.assert_metric(metric, tags=replset_common_tags + ['replset_state:primary'])
+    aggregator.assert_metric(
+        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:primary', 'member:shard01a:27018']
+    )
+    aggregator.assert_metric(
+        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27018']
+    )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_metadata(check, instance, datadog_agent):

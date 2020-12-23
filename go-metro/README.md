@@ -58,7 +58,7 @@ instances:
       - app.datadoghq.com
 ```
 
-*NOTE*: for go metro to run unprivileged, you will have to set CAP_NET_RAW capabilities on the binary:
+*NOTE*: for go-metro to run unprivileged, you will have to set CAP_NET_RAW capabilities on the binary:
 ```
 # Install required libraries
 $ sudo apt-get install libcap  # debian
@@ -67,7 +67,7 @@ $ sudo yum install libcap  # redhat
 $ sudo yum install compat-libcap1  # redhat alternative
 
 # Set capabilities
-$ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro`
+$ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 ```
 
 Because of different package names for different distros, if the instructions above
@@ -75,11 +75,11 @@ don't work for you, please issue an `apt-cache search libcap` or `yum search lib
 should get a shortlist of packages that might provide the binary. Feel free to reach out
 should you require assistance.
 
-Also, please note that go-metro logs to its own file - found in /var/log/datadog/go-metro.log.
-Additionally, go-mtro runs standalone so it will *NOT* currently appear on the agent's info page.
+Also, please note that go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`.
+Additionally, go-metro runs standalone so it will *NOT* currently appear on the Agent's info page.
 
 Finally, because the go-metro binary is only bundled with the 64-bit RPM and DEB distributions of the
-datadog-agent, it is only available in those packaged versions (ie. go-metro is currently
+Datadog Agent, it is only available in those packaged versions (i.e. go-metro is currently
 unavailable with the source install or the 32-bit packages).
 
 ### Validation

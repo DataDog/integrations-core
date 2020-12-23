@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.11.0 / 2020-12-11
+
+* [Added] Amazon fargate config specs. See [#8003](https://github.com/DataDog/integrations-core/pull/8003).
+
 ## 2.10.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Support include/exclude containers in ECS Fargate. See [#7165](https://github.com/DataDog/integrations-core/pull/7165).

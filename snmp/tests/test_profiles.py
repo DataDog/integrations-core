@@ -25,6 +25,7 @@ from .metrics import (
     DISK_GAUGES,
     DRS_GAUGES,
     FRU_METRICS,
+    IF_BANDWIDTH_USAGE,
     IF_COUNTS,
     IF_GAUGES,
     IF_RATES,
@@ -296,6 +297,11 @@ def test_f5(aggregator):
         ('/Common/http-tunnel', 'desc3'),
         ('/Common/socks-tunnel', 'desc4'),
     ]
+    interfaces_with_bandwidth_usage = {
+        '1.0',
+        'mgmt',
+        '/Common/internal',
+    }
     tags = [
         'snmp_profile:' + profile,
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
@@ -322,14 +328,20 @@ def test_f5(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
             )
-    for metric in IF_GAUGES:
-        for interface, desc in interfaces:
+        if interface in interfaces_with_bandwidth_usage:
+            for metric in IF_BANDWIDTH_USAGE:
+                aggregator.assert_metric(
+                    'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
+                )
+
+        for metric in IF_GAUGES:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric),
                 metric_type=aggregator.GAUGE,
-                tags=['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags,
+                tags=interface_tags,
                 count=1,
             )
+
     for version in ['ipv4', 'ipv6']:
         ip_tags = ['ipversion:{}'.format(version)] + tags
         for metric in IP_COUNTS:
@@ -418,6 +430,8 @@ def test_router(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -462,6 +476,11 @@ def test_f5_router(aggregator):
         ('/Common/http-tunnel', 'desc3'),
         ('/Common/socks-tunnel', 'desc4'),
     ]
+    interfaces_with_bandwidth_usage = {
+        '1.0',
+        'mgmt',
+        '/Common/internal',
+    }
     common_tags = [
         'snmp_profile:router',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
@@ -480,6 +499,9 @@ def test_f5_router(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        if interface in interfaces_with_bandwidth_usage:
+            for metric in IF_BANDWIDTH_USAGE:
+                aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
     for version in ['ipv4', 'ipv6']:
         tags = ['ipversion:{}'.format(version)] + common_tags
         for metric in IP_COUNTS:
@@ -528,6 +550,9 @@ def test_cisco_3850(aggregator):
             )
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
@@ -655,6 +680,9 @@ def test_meraki_cloud_controller(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     for metric in IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
+    for metric in IF_BANDWIDTH_USAGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
@@ -793,6 +821,8 @@ def test_cisco_nexus(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
@@ -1195,6 +1225,8 @@ def test_proliant(aggregator):
 
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     mem_boards = ['11', '12']
     for board in mem_boards:
@@ -1361,6 +1393,9 @@ def assert_cisco_asa(aggregator, profile):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     for metric in IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
+    for metric in IF_BANDWIDTH_USAGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
@@ -1772,7 +1807,7 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2000,7 +2035,7 @@ def test_fortinet_fortigate(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")

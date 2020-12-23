@@ -8,6 +8,7 @@ import io
 import logging
 import math
 import os
+import re
 
 import mock
 import pytest
@@ -2251,7 +2252,11 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
-        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}
+        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
+        'kube_persistentvolumeclaim_info': {
+            'labels_to_match': ['persistentvolumeclaim', 'namespace'],
+            'labels_to_get': ['storageclass'],
+        },
     }
     mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_status_ready': 'pod.ready'}
     # dry run to build mapping
@@ -2287,6 +2292,9 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
     text_data = mock_get.replace('dd-agent-62bgh', 'dd-agent-1337')
+    pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
+    text_data = pvc_replace.sub('', text_data)
+
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )

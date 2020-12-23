@@ -48,6 +48,27 @@ def get_tag(transformers, column_name, **modifiers):
     return tag
 
 
+def get_tag_list(transformers, column_name, **modifiers):
+    """
+    Convert a column to a list of tags that will be used in every submission.
+
+    Tag name is determined by `column_name`. The column value represents a list of values. It is expected to be either
+    a list of strings, or a comma-separated string.
+
+    For example, if the column is named `server_tag` and the column returned the value `'us,primary'`, then all
+    submissions for that row will be tagged by `server_tag:us` and `server_tag:primary`.
+    """
+    template = '%s:{}' % column_name
+
+    def tag_list(_, value, **kwargs):
+        if isinstance(value, str):
+            value = [v.strip() for v in value.split(',')]
+
+        return [template.format(v) for v in value]
+
+    return tag_list
+
+
 def get_monotonic_gauge(transformers, column_name, **modifiers):
     """
     Send the result as both a `gauge` suffixed by `.total` and a `monotonic_count` suffixed by `.count`.
@@ -410,6 +431,7 @@ COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
+    'tag_list': get_tag_list,
     'match': get_match,
     'service_check': get_service_check,
     'time_elapsed': get_time_elapsed,

@@ -1,19 +1,18 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import importlib
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, Sequence, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, cast
 
 import rethinkdb
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db import QueryManager
 
-from . import operations, queries
+from . import queries
 from .config import Config
-from .document_db import DocumentQuery
-from .document_db.types import Metric
 from .types import Instance
-from .version import parse_version
 
 
 class RethinkDBCheck(AgentCheck):
@@ -21,7 +20,8 @@ class RethinkDBCheck(AgentCheck):
     Collect metrics from a RethinkDB cluster.
     """
 
-    SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
+    __NAMESPACE__ = 'rethinkdb'
+    SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -32,21 +32,51 @@ class RethinkDBCheck(AgentCheck):
         if self.config.password:
             self.register_secret(self.config.password)
 
-        self.queries = (
-            queries.config_summary,
-            queries.cluster_statistics,
-            queries.server_statistics,
-            queries.table_statistics,
-            queries.replica_statistics,
-            queries.table_statuses,
-            queries.server_statuses,
-            queries.jobs_summary,
-            queries.current_issues_summary,
-        )  # type: Sequence[DocumentQuery]
+        self._conn = None  # type: Optional[rethinkdb.net.Connection]
+
+        manager_queries = [
+            queries.ClusterMetrics,
+            queries.ServerMetrics,
+            queries.DatabaseConfigMetrics,
+            queries.DatabaseTableMetrics,
+            queries.TableConfigMetrics,
+            queries.ReplicaMetrics,
+            queries.ShardMetrics,
+            queries.JobMetrics,
+            queries.CurrentIssuesMetrics,
+        ]  # type: list
+
+        if self.is_metadata_collection_enabled:
+            manager_queries.append(queries.VersionMetadata)
+
+        self._query_manager = QueryManager(
+            self,
+            executor=self._execute_raw_query,
+            queries=manager_queries,
+            tags=self.config.tags,
+        )
+        self._query_funcs = {}  # type: Dict[str, Callable]
+
+        self.check_initializations.append(self._query_manager.compile_queries)
+
+    def _execute_raw_query(self, query):
+        # type: (str) -> List[tuple]
+        query_func = self._query_funcs.get(query)
+
+        if query_func is None:
+            # QueryManager only supports `str` queries.
+            # So here's the workaround: we make `query` refer to the import paths of query functions, then import here.
+            # Cache the results so imports only happen on the first check run.
+            module_name, _, func_name = query.partition(':')
+            module = importlib.import_module(module_name, package='datadog_checks.rethinkdb')
+            query_func = getattr(module, func_name)
+            self._query_funcs[query] = query_func
+
+        return query_func(self._conn)
 
     @contextmanager
     def connect_submitting_service_checks(self):
-        # type: () -> Iterator[rethinkdb.net.Connection]
+        # type: () -> Iterator[None]
         config = self.config
         tags = config.service_check_tags
 
@@ -58,7 +88,8 @@ class RethinkDBCheck(AgentCheck):
                 password=config.password,
                 ssl={'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else {},
             ) as conn:
-                yield conn
+                self._conn = conn
+                yield
         except rethinkdb.errors.ReqlDriverError as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
@@ -71,45 +102,14 @@ class RethinkDBCheck(AgentCheck):
             raise
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=tags)
+        finally:
+            self._conn = None
 
-    def collect_metrics(self, conn):
-        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-        """
-        Collect metrics from the RethinkDB cluster we are connected to.
-        """
-        for query in self.queries:
-            for metric in query.run(logger=self.log, conn=conn, config=self.config):
-                yield metric
-
-    def submit_metric(self, metric):
-        # type: (Metric) -> None
-        submit = getattr(self, metric['type'])  # type: Callable
-        submit(metric['name'], metric['value'], tags=self.config.tags + metric['tags'])
-
-    def submit_version_metadata(self, conn):
-        # type: (rethinkdb.net.Connection) -> None
-        try:
-            raw_version = operations.get_connected_server_raw_version(conn)
-        except Exception as exc:
-            self.log.error('Error collecting version metadata: %s', exc)
-            return
-
-        if raw_version is None:
-            return
-
-        try:
-            version = parse_version(raw_version)
-        except ValueError as exc:
-            self.log.error('Failed to parse version: %s', exc)
-            return
-
-        self.set_metadata('version', version)
+    def collect_metrics(self):  # Exposed for mocking purposes.
+        # type: () -> None
+        self._query_manager.execute()
 
     def check(self, instance):
         # type: (Any) -> None
-        with self.connect_submitting_service_checks() as conn:
-            for metric in self.collect_metrics(conn):
-                self.submit_metric(metric)
-
-            if self.is_metadata_collection_enabled():
-                self.submit_version_metadata(conn)
+        with self.connect_submitting_service_checks():
+            self.collect_metrics()
