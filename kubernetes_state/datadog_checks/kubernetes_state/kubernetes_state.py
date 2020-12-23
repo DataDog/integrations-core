@@ -126,7 +126,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_limitrange': self.kube_limitrange,
             'kube_persistentvolume_status_phase': self.count_values_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
-            'kube_namespace_status_phase': self.count_objects_by_tags,
+            'kube_namespace_status_phase': self.count_values_by_tags,
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             'kube_deployment_status_observed_generation': self.count_objects_by_tags,
