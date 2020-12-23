@@ -537,6 +537,7 @@ flags:
     carryforward: true
     paths:
     - active_directory/datadog_checks/active_directory
+    - active_directory/datadog_checks/
   activemq_xml:
     carryforward: true
     paths:
