@@ -30,6 +30,14 @@ class TLSCheck(AgentCheck):
     DEFAULT_EXPIRE_SECONDS_WARNING = days_to_seconds(DEFAULT_EXPIRE_DAYS_WARNING)
     DEFAULT_EXPIRE_SECONDS_CRITICAL = days_to_seconds(DEFAULT_EXPIRE_DAYS_CRITICAL)
 
+    # This remapper is used to support legacy TLS integration config values
+    TLS_CONFIG_REMAPPER = {
+        'cert': {'name': 'tls_cert'},
+        'private_key': {'name': 'tls_private_key'},
+        'ca_cert': {'name': 'tls_ca_cert'},
+        'validate_hostname': {'name': 'tls_validate_hostname'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(TLSCheck, self).__init__(name, init_config, instances)
 
