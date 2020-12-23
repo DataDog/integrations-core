@@ -94,7 +94,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'allowed_labels': ['storageclass', 'phase'],
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
-            # is a count by namespace and phase <Active|Terminating>
             'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
             'kube_replicaset_owner': {
                 'metric_name': 'replicaset.count',
@@ -125,12 +124,11 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_node_spec_unschedulable': self.kube_node_spec_unschedulable,
             'kube_resourcequota': self.kube_resourcequota,
             'kube_limitrange': self.kube_limitrange,
-            'kube_persistentvolume_status_phase': self.count_objects_by_tags,
+            'kube_persistentvolume_status_phase': self.count_values_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
             'kube_namespace_status_phase': self.count_objects_by_tags,
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
-            # to get overall count is to filter by Available
             'kube_deployment_status_observed_generation': self.count_objects_by_tags,
         }
 
@@ -869,7 +867,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
-    def count_objects_by_tags(self, metric, scraper_config):
+    def count_values_by_tags(self, metric, scraper_config):
         """ Count objects by allowed tags and submit counts as gauges. """
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
@@ -884,6 +882,25 @@ class KubernetesState(OpenMetricsBaseCheck):
                 tags.append(tag)
             tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
+
+        for tags, count in iteritems(object_counter):
+            self.gauge(metric_name, count, tags=list(tags))
+
+    def count_objects_by_tags(self, metric, scraper_config):
+        """ Count objects by allowed tags and submit counts as gauges. """
+        config = self.object_count_params[metric.name]
+        metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
+        object_counter = Counter()
+
+        for sample in metric.samples:
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+            tags += scraper_config['custom_tags']
+            object_counter[tuple(sorted(tags))] += 1
 
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
