@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 1.8.1 / 2020-12-23
+
+* [Fixed] Bump lxml to 4.6.2. See [#8249](https://github.com/DataDog/integrations-core/pull/8249).
+
 ## 1.8.0 / 2020-12-11
 
 * [Added] Refactor to only parse configuration once. See [#8025](https://github.com/DataDog/integrations-core/pull/8025).

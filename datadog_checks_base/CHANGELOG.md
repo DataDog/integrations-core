@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 15.7.2 / 2020-12-23
+
+* [Fixed] Bump lxml to 4.6.2. See [#8249](https://github.com/DataDog/integrations-core/pull/8249).
+
 ## 15.7.1 / 2020-12-15
 
 * [Fixed] openmetrics: fix error in label_joins when metrics in label_mapping are not present anymore in active_label_mapping. See [#8167](https://github.com/DataDog/integrations-core/pull/8167).
