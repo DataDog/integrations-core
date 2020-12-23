@@ -100,9 +100,9 @@ kube_deployment_spec_strategy_rollingupdate_max_unavailable{deployment="tiller-d
 # HELP kube_deployment_status_observed_generation The generation observed by the deployment controller.
 # TYPE kube_deployment_status_observed_generation gauge
 kube_deployment_status_observed_generation{deployment="failingtest",namespace="default"} 1
-kube_deployment_status_observed_generation{deployment="jaundiced-numbat-kube-state-metrics",namespace="default"} 1
+kube_deployment_status_observed_generation{deployment="jaundiced-numbat-kube-state-metrics",namespace="default"} 4
 kube_deployment_status_observed_generation{deployment="kube-dns",namespace="kube-system"} 1
-kube_deployment_status_observed_generation{deployment="tiller-deploy",namespace="kube-system"} 1
+kube_deployment_status_observed_generation{deployment="tiller-deploy",namespace="kube-system"} 5
 # HELP kube_deployment_status_replicas The number of replicas per deployment.
 # TYPE kube_deployment_status_replicas gauge
 kube_deployment_status_replicas{deployment="failingtest",namespace="default"} 1
