@@ -17,17 +17,17 @@ For details of monitored metrics see the [SNMP integration tile][2]
 
 ### Service Checks
 
-Snmp Cisco does not include any service checks.
+Snmp {integration_name} does not include any service checks.
 
 ### Events
 
-Snmp Cisco does not include any events.
+Snmp {integration_name} does not include any events.
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [Monitor SNMP with Datadog][4]
+* [Monitor SNMP with Datadog][3]
 
 [1]: https://app.datadoghq.com/account/settings#integrations/snmp
 [2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
