@@ -104,13 +104,6 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
 
-    if integration_type == 'snmp_tile' and name.startswith('snmp_'):
-        name_without_snmp_prefix = name[len('snmp_') :]
-        echo_warning(f'Creating snmp_tile for vendor ({name}) in directory (snmp_{normalize_package_name(name)})')
-        value = click.prompt(f'Did you mean vendor ({name_without_snmp_prefix})? (y/n)', default='y')
-        if value.lower() == 'y':
-            name = name_without_snmp_prefix
-
     integration_dir_name = normalize_package_name(name)
     if integration_type == 'snmp_tile':
         integration_dir_name = 'snmp_' + integration_dir_name
