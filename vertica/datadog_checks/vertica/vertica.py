@@ -18,6 +18,9 @@ from datadog_checks.base.utils.containers import iter_unique
 from . import views
 from .utils import kilobytes_to_bytes, node_state_to_service_check
 
+# Python 3 only
+PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
+
 
 class VerticaCheck(AgentCheck):
     __NAMESPACE__ = 'vertica'
