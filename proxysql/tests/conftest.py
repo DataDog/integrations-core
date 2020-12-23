@@ -37,6 +37,33 @@ BASIC_INSTANCE = {
     'additional_metrics': [],
 }
 
+
+BASIC_INSTANCE_TLS = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_ADMIN_USER,
+    'password': PROXY_ADMIN_PASS,
+    'tags': ["application:test"],
+    'additional_metrics': [],
+    'use_tls': True,
+    'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
+    'tls_validate_hostname': True
+}
+
+
+BASIC_INSTANCE_TLS_LEGACY = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_ADMIN_USER,
+    'password': PROXY_ADMIN_PASS,
+    'tags': ["application:test"],
+    'additional_metrics': [],
+    'tls_verify': True,  # legacy version of tls_verify
+    'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
+    'validate_hostname': True  # legacy version of tls_validate_hostname
+}
+
+
 INSTANCE_ALL_METRICS = {
     'host': DOCKER_HOST,
     'port': PROXY_ADMIN_PORT,
@@ -72,6 +99,16 @@ INSTANCE_ALL_METRICS_STATS = {
 @pytest.fixture
 def instance_basic():
     return deepcopy(BASIC_INSTANCE)
+
+
+@pytest.fixture
+def instance_basic_tls():
+    return deepcopy(BASIC_INSTANCE_TLS)
+
+
+@pytest.fixture
+def instance_basic_tls_legacy():
+    return deepcopy(BASIC_INSTANCE_TLS_LEGACY)
 
 
 @pytest.fixture()

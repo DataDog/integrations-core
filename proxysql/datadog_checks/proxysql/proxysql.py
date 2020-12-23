@@ -6,7 +6,7 @@ from contextlib import closing, contextmanager
 import pymysql
 import pymysql.cursors
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from .queries import (
@@ -34,6 +34,11 @@ class ProxysqlCheck(AgentCheck):
     SERVICE_CHECK_NAME = "can_connect"
     __NAMESPACE__ = "proxysql"
 
+    # This remapper is used to support legacy Proxysql integration config values
+    TLS_CONFIG_REMAPPER = {
+        'validate_hostname': {'name': 'tls_validate_hostname'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(ProxysqlCheck, self).__init__(name, init_config, instances)
         self.host = self.instance.get("host", "")
@@ -44,7 +49,13 @@ class ProxysqlCheck(AgentCheck):
         if not all((self.host, self.port, self.user, self.password)):
             raise ConfigurationError("ProxySQL host, port, username and password are needed")
 
-        self.use_tls = self.instance.get("use_tls", False)
+        # If `tls_verify` is explicitly set to true, set `use_tls` to true (for legacy support)
+        # `tls_verify` used to do what `use_tls` does now
+        self.tls_verify = is_affirmative(self.instance.get('tls_verify'))
+        self.use_tls = is_affirmative(self.instance.get('use_tls', False))
+
+        if self.tls_verify and not self.use_tls:
+            self.use_tls = True
 
         self.connect_timeout = self.instance.get("connect_timeout", 10)
         self.read_timeout = self.instance.get("read_timeout")
