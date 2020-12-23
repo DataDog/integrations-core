@@ -125,7 +125,7 @@ marklogic.forests.storage.host.forest_size,gauge,,mebibyte,,"The total ordinary 
 marklogic.forests.storage.host.large_data_size,gauge,,mebibyte,,"The amount of space large objects take up on disk.",0,marklogic,forest stor host large data size
 marklogic.forests.storage.host.remaining_space,gauge,,mebibyte,,"The total free storage for forests.",0,marklogic,forest stor host remaining space
 marklogic.forests.total_forests,gauge,,unit,,"The total number of forests.",0,marklogic,forest tot
-marklogic.forests.total_load,gauge,,mebibyte,second,"The sum of the processing load factors.",0,marklogic,forest tot load
+marklogic.forests.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,forest tot load
 marklogic.forests.total_rate,gauge,,mebibyte,second,"The sum of the processing rate factors.",0,marklogic,forest tot rate
 marklogic.forests.triple_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest t cache hit rate
 marklogic.forests.triple_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest t cache miss rate
