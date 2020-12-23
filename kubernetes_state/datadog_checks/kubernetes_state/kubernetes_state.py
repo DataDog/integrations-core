@@ -124,9 +124,9 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_node_spec_unschedulable': self.kube_node_spec_unschedulable,
             'kube_resourcequota': self.kube_resourcequota,
             'kube_limitrange': self.kube_limitrange,
-            'kube_persistentvolume_status_phase': self.count_values_by_tags,
+            'kube_persistentvolume_status_phase': self.sum_values_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
-            'kube_namespace_status_phase': self.count_values_by_tags,
+            'kube_namespace_status_phase': self.sum_values_by_tags,
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             'kube_deployment_status_observed_generation': self.count_objects_by_tags,
@@ -867,8 +867,8 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
-    def count_values_by_tags(self, metric, scraper_config):
-        """ Count objects by allowed tags and submit counts as gauges. """
+    def sum_values_by_tags(self, metric, scraper_config):
+        """ Sum values by allowed tags and submit counts as gauges. """
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
