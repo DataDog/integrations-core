@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from collections import defaultdict
+from copy import deepcopy
 
 import pytest
 
@@ -49,9 +50,9 @@ METRIC_TO_SKIP = [
 
 
 def assert_python_vs_core(dd_agent_check, config, total_count=None):
-    python_config = config.copy()
+    python_config = deepcopy(config)
     python_config['init_config']['loader'] = 'python'
-    core_config = config.copy()
+    core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
     aggregator = dd_agent_check(python_config, rate=True)
     expected_metrics = defaultdict(int)
@@ -59,7 +60,7 @@ def assert_python_vs_core(dd_agent_check, config, total_count=None):
         for stub in metrics:
             if stub.name in METRIC_TO_SKIP:
                 continue
-            assert "loader:python" in stub.tags
+            assert "loader:core" not in stub.tags
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))] += 1
     expected_count = sum(count for count in expected_metrics.values())

@@ -204,7 +204,10 @@ def generate_instance_config(metrics, template=None):
 def generate_container_instance_config(metrics):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
-    return generate_instance_config(metrics, template=conf)
+    return {
+        'init_config': {},
+        'instances': [generate_instance_config(metrics, template=conf)],
+    }
 
 
 def generate_container_profile_config(profile):
