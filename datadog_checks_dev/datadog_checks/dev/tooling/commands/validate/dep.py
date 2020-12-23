@@ -4,7 +4,7 @@
 import click
 
 from ....utils import get_next
-from ...dependencies import read_agent_dependencies, read_check_dependencies, read_check_base_dependencies
+from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
