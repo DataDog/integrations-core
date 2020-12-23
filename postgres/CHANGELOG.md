@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 5.3.1 / 2020-12-11
+
+* [Fixed] Removed duplicated metrics. See [#8116](https://github.com/DataDog/integrations-core/pull/8116).
+
 ## 5.3.0 / 2020-11-26
 
 * [Added] Add new metrics for WAL based logical replication. See [#8026](https://github.com/DataDog/integrations-core/pull/8026).

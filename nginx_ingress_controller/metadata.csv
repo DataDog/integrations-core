@@ -13,11 +13,11 @@ nginx_ingress.controller.last.reload.success,gauge,,,,Whether the last configura
 nginx_ingress.controller.upstream.latency.count,gauge,,,,Count of upstream service latency per Ingress,0,nginx-ingress-controller,upstream latency count
 nginx_ingress.controller.upstream.latency.sum,gauge,,second,,Sum of upstream service latency per Ingress,0,nginx-ingress-controller,upstream latency sum
 nginx_ingress.controller.upstream.latency.quantile,gauge,,second,,Quantiles of upstream service latency per Ingress,0,nginx-ingress-controller,upstream latency quant
-nginx_ingress.controller.response.duration.count,count,,,,Count of response duration per Ingress,0,nginx-ingress-controller,response duration count
+nginx_ingress.controller.response.duration.count,gauge,,,,Count of response duration per Ingress,0,nginx-ingress-controller,response duration count
 nginx_ingress.controller.response.duration.sum,gauge,,second,,Sum of response duration per Ingress,0,nginx-ingress-controller,response duration sum
 nginx_ingress.controller.requests,count,,request,,The total number of client requests,0,nginx-ingress-controller,nb reqs
 nginx_ingress.controller.cpu.time,count,,second,,Cpu usage in seconds,0,nginx-ingress-controller,cpu
 nginx_ingress.controller.mem.resident,gauge,,byte,,Resident memory size in bytes,0,nginx-ingress-controller,mem rss
 nginx_ingress.controller.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,nginx-ingress-controller,mem virt
-nginx_ingress.controller.request.duration.count,count,,,,The count of request processing time,0,nginx-ingress-controller,request duration count
+nginx_ingress.controller.request.duration.count,gauge,,,,The count of request processing time,0,nginx-ingress-controller,request duration count
 nginx_ingress.controller.request.duration.sum,gauge,,millisecond,,The sum of request processing time,0,nginx-ingress-controller,request duration sum

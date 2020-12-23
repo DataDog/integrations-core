@@ -1,5 +1,9 @@
 # CHANGELOG - Vertica
 
+## 1.9.0 / 2020-12-11
+
+* [Added] Add option to limit metric collection. See [#7997](https://github.com/DataDog/integrations-core/pull/7997).
+
 ## 1.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

@@ -1,5 +1,9 @@
 # CHANGELOG - system_core
 
+## 1.9.0 / 2020-12-11
+
+* [Added] Add config specs. See [#7977](https://github.com/DataDog/integrations-core/pull/7977).
+
 ## 1.8.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).

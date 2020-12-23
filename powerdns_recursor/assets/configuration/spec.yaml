@@ -43,3 +43,7 @@ files:
         example: 3
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+      - type: journald
+        source: powerdns

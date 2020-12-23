@@ -133,7 +133,7 @@ def test_check(aggregator, check, instance):
     _test_service_checks(aggregator, count=0)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @requires_socket_support

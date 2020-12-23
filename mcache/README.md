@@ -16,7 +16,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 #### Metric Collection
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -44,7 +44,7 @@ Datadog APM integrates with Memcache to see the traces across your distributed s
 1. [Enable trace collection in Datadog][6].
 2. [Instrument your application that makes requests to Memchache][7].
 
-#<!-- xxz tab xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized

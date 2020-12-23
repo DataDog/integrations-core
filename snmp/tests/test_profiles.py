@@ -1113,7 +1113,36 @@ def test_hp_ilo4(aggregator):
         for metric in phys_adapter_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
+    drive_counts = [
+        "cpqDaPhyDrvUsedReallocs",
+        "cpqDaPhyDrvRefHours",
+        "cpqDaPhyDrvHardReadErrs",
+        "cpqDaPhyDrvRecvReadErrs",
+        "cpqDaPhyDrvHardWriteErrs",
+        "cpqDaPhyDrvRecvWriteErrs",
+        "cpqDaPhyDrvHSeekErrs",
+        "cpqDaPhyDrvSeekErrs",
+    ]
+    drive_gauges = [
+        "cpqDaPhyDrvStatus",
+        "cpqDaPhyDrvFactReallocs",
+        "cpqDaPhyDrvSpinupTime",
+        "cpqDaPhyDrvSize",
+        "cpqDaPhyDrvSmartStatus",
+        "cpqDaPhyDrvCurrentTemperature",
+    ]
+    drive_idx = [(0, 2), (0, 28), (8, 31), (9, 24), (9, 28), (10, 17), (11, 4), (12, 20), (18, 22), (23, 2)]
+    for drive_cntrl_idx, drive_index in drive_idx:
+        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + common_tags
+        for metric in drive_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in drive_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1267,6 +1296,7 @@ def test_proliant(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1815,7 +1845,7 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2043,7 +2073,7 @@ def test_fortinet_fortigate(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")

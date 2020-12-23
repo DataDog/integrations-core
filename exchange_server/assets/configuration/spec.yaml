@@ -3,6 +3,8 @@ files:
 - name: exchange_server.yaml
   options:
   - template: init_config
+    options:
+      - template: init_config/default
   - template: instances
     options:
     - name: host
@@ -35,6 +37,7 @@ files:
         compact_example: true
         items:
           type: string
+    - template: instances/default
 
   - template: logs
     example:

@@ -1,5 +1,11 @@
 # CHANGELOG - Snowflake
 
+## 3.0.0 / 2020-12-11
+
+* [Added] Support proxy settings. See [#8019](https://github.com/DataDog/integrations-core/pull/8019).
+* [Fixed] Document Snowflake connector proxy configuration and support proxy connection options. See [#8181](https://github.com/DataDog/integrations-core/pull/8181).
+* [Changed] Make role configuration step more explicit. See [#8092](https://github.com/DataDog/integrations-core/pull/8092).
+
 ## 2.1.2 / 2020-11-06 / Agent 7.24.0
 
 * [Fixed] Add workaround for issue in platform.platform() on python 3.8 or later. See [#7932](https://github.com/DataDog/integrations-core/pull/7932). Thanks [kurochan](https://github.com/kurochan).
