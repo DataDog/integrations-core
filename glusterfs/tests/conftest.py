@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 
 import mock
 import pytest
-import time
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import docker_run, run_command
@@ -53,5 +53,3 @@ def create_volume():
     ):
         run_command("docker exec gluster-node-1 {}".format(command), capture=True, check=True)
         time.sleep(10)
-
-

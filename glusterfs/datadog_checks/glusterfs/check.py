@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 try:
     from json import JSONDecodeError
 except ImportError:
     from simplejson import JSONDecodeError
+
 import os
-import sys
 from typing import Any
 
 from six import iteritems
