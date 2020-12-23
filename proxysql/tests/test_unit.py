@@ -11,20 +11,25 @@ from .conftest import get_check
 
 
 @pytest.mark.unit
-def test_wrong_config(dd_run_check, instance_basic):
-    # Empty instance
+def test_empty_instance(dd_run_check):
     with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
         dd_run_check(get_check({}))
 
-    # Only host
+
+@pytest.mark.unit
+def test_only_host(dd_run_check):
     with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
         dd_run_check(get_check({'host': 'localhost'}))
 
-    # Missing password
+
+@pytest.mark.unit
+def test_missing_password(dd_run_check):
     with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
         dd_run_check(get_check({'host': 'localhost', 'port': 6032, 'username': 'admin'}))
 
-    # Wrong additional metrics group
+
+@pytest.mark.unit
+def test_wrong_additional_metrics_group(dd_run_check, instance_basic):
     with pytest.raises(
         ConfigurationError,
         match="There is no additional metric group called 'foo' for the ProxySQL integration, it should be one of ",
