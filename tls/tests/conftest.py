@@ -75,6 +75,11 @@ def instance_local_ok(certs):
 
 
 @pytest.fixture(scope='session')
+def instance_local_ok_legacy(certs):
+    yield {'local_cert_path': certs['valid.pem'], 'validate_hostname': False}
+
+
+@pytest.fixture(scope='session')
 def instance_local_ok_der(certs):
     yield {'local_cert_path': certs['valid.crt'], 'tls_validate_hostname': False}
 
@@ -139,6 +144,11 @@ def instance_remote_no_server():
 @pytest.fixture
 def instance_remote_ok():
     return {'server': 'https://valid.mock', 'tls_ca_cert': CA_CERT}
+
+
+@pytest.fixture
+def instance_remote_ok_legacy():
+    return {'server': 'https://valid.mock', 'ca_cert': CA_CERT}
 
 
 @pytest.fixture(scope='session')

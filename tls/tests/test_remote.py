@@ -30,6 +30,20 @@ def test_ok(aggregator, instance_remote_ok):
     aggregator.assert_all_metrics_covered()
 
 
+def test_ok_legacy(aggregator, instance_remote_ok_legacy):
+    c = TLSCheck('tls', {}, [instance_remote_ok_legacy])
+    c.check(None)
+
+    aggregator.assert_service_check(c.SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_ok_ip(aggregator, instance_remote_ok_ip):
     c = TLSCheck('tls', {}, [instance_remote_ok_ip])
     c.check(None)

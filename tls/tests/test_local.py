@@ -40,6 +40,20 @@ def test_ok(aggregator, instance_local_ok):
     aggregator.assert_all_metrics_covered()
 
 
+def test_ok_legacy(aggregator, instance_local_ok_legacy):
+    c = TLSCheck('tls', {}, [instance_local_ok_legacy])
+    c.check(None)
+
+    aggregator.assert_service_check(c.SERVICE_CHECK_CAN_CONNECT, count=0)
+    aggregator.assert_service_check(c.SERVICE_CHECK_VERSION, count=0)
+    aggregator.assert_service_check(c.SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_ok_der(aggregator, instance_local_ok_der):
     c = TLSCheck('tls', {}, [instance_local_ok_der])
     c.check(None)

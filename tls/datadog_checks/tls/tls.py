@@ -68,18 +68,25 @@ class TLSCheck(AgentCheck):
 
         # https://en.wikipedia.org/wiki/Server_Name_Indication
         self._server_hostname = self.instance.get('server_hostname', self._server)
+
+        # `validate_hostname` is still supported for legacy implementations of TLS
         self._tls_validate_hostname = is_affirmative(self.instance.get('tls_validate_hostname', True))
+        self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
+
+        # If either `tls_validate_hostname` or `validate_hostname` is false, then set to false
+        if not self._tls_validate_hostname or not self._validate_hostname:
+            self._tls_validate_hostname = False
 
         # Thresholds expressed in seconds take precedence over those expressed in days
         self._seconds_warning = (
-            int(self.instance.get('seconds_warning', 0))
-            or days_to_seconds(float(self.instance.get('days_warning', 0)))
-            or self.DEFAULT_EXPIRE_SECONDS_WARNING
+                int(self.instance.get('seconds_warning', 0))
+                or days_to_seconds(float(self.instance.get('days_warning', 0)))
+                or self.DEFAULT_EXPIRE_SECONDS_WARNING
         )
         self._seconds_critical = (
-            int(self.instance.get('seconds_critical', 0))
-            or days_to_seconds(float(self.instance.get('days_critical', 0)))
-            or self.DEFAULT_EXPIRE_SECONDS_CRITICAL
+                int(self.instance.get('seconds_critical', 0))
+                or days_to_seconds(float(self.instance.get('days_critical', 0)))
+                or self.DEFAULT_EXPIRE_SECONDS_CRITICAL
         )
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLSocket.version
