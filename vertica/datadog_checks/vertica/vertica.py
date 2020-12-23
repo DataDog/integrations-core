@@ -4,6 +4,7 @@
 from __future__ import division
 
 import logging
+import ssl
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from itertools import chain
