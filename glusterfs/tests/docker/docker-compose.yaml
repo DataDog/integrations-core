@@ -1,0 +1,15 @@
+version: '2'
+services:
+    gs1:
+        container_name: gluster-node-1
+        image: metal3d/glusterfs
+        privileged: true
+        volumes:
+        - ./volumes/server1:/data
+
+    gs2:
+        image: metal3d/glusterfs
+        container_name: gluster-node-2
+        privileged: true
+        volumes:
+        - ./volumes/server2:/data
