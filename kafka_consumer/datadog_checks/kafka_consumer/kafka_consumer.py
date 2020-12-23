@@ -106,7 +106,7 @@ class KafkaCheck(AgentCheck):
             if len(self._consumer_offsets) < self._context_limit:
                 self._get_highwater_offsets()
             else:
-                self.log.debug("Context limit reached. Skipping highwater offset collection.")
+                self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
