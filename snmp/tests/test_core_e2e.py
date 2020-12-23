@@ -25,8 +25,8 @@ def test_e2e_metric_types(dd_agent_check):
 
 
 def test_e2e_profile(dd_agent_check):
-    instance = common.generate_container_profile_instance_config('f5-big-ip')
-    assert_python_vs_core(dd_agent_check, instance)
+    config = common.generate_container_profile_config('f5-big-ip')
+    assert_python_vs_core(dd_agent_check, config, total_count=469)
 
 
 METRIC_TO_SKIP = [
@@ -48,12 +48,12 @@ METRIC_TO_SKIP = [
 ]
 
 
-def assert_python_vs_core(dd_agent_check, instance):
-    python_instance = instance.copy()
-    python_instance['loader'] = 'python'
-    core_instance = instance.copy()
-    core_instance['loader'] = 'core'
-    aggregator = dd_agent_check(python_instance, rate=True)
+def assert_python_vs_core(dd_agent_check, config, total_count=None):
+    python_config = config.copy()
+    python_config['loader'] = 'python'
+    core_config = config.copy()
+    core_config['loader'] = 'core'
+    aggregator = dd_agent_check(python_config, rate=True)
     expected_metrics = defaultdict(int)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
@@ -61,9 +61,10 @@ def assert_python_vs_core(dd_agent_check, instance):
                 continue
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))] += 1
+    expected_count = sum(count for count in expected_metrics.values())
 
     aggregator.reset()
-    aggregator = dd_agent_check(core_instance, rate=True)
+    aggregator = dd_agent_check(core_config, rate=True)
 
     aggregator_metrics = aggregator._metrics
     aggregator._metrics = defaultdict(list)
@@ -102,6 +103,12 @@ def assert_python_vs_core(dd_agent_check, instance):
         aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
+
+    # assert count
+    actual_count = sum(len(metrics) for metrics in aggregator._metrics.values())
+    assert expected_count == actual_count
+    if total_count is not None:
+        assert total_count == actual_count == expected_count
 
 
 def normalize_stub_metric(stub):

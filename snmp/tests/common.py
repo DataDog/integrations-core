@@ -207,18 +207,21 @@ def generate_container_instance_config(metrics):
     return generate_instance_config(metrics, template=conf)
 
 
-def generate_container_profile_instance_config(profile):
+def generate_container_profile_config(profile):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
     conf['profile'] = profile
 
     # TODO: Remove when default profile loading is implemented in corecheck snmp
-    conf['profiles'] = {profile: {'definition_file': '{}.yaml'.format(profile)}}
+    init_config = {'profiles': {profile: {'definition_file': '{}.yaml'.format(profile)}}}
 
     instance = generate_instance_config([], template=conf)
     instance['community_string'] = profile
     instance['enforce_mib_constraints'] = False
-    return instance
+    return {
+        'init_config': init_config,
+        'instances': [instance],
+    }
 
 
 def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_key=None, priv=None, priv_key=None):
