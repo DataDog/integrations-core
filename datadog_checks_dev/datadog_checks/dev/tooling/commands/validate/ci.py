@@ -279,18 +279,18 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
 
         expected_coverage_paths = get_coverage_sources(flag)
 
-        configured_coverage_paths = data.get('paths', [])
-        if configured_coverage_paths != expected_coverage_paths:
-            message = f'Flag `{flag}` has incorrect coverage source paths'
+        # configured_coverage_paths = data.get('paths', [])
+        # if configured_coverage_paths != expected_coverage_paths:
+        #     message = f'Flag `{flag}` has incorrect coverage source paths'
 
-            if fix:
-                fixed = True
-                echo_warning(message)
-                data['paths'] = expected_coverage_paths
-                echo_success(f'Configured coverage paths for flag `{flag}`')
-            else:
-                success = False
-                echo_failure(message)
+        #     if fix:
+        #         fixed = True
+        #         echo_warning(message)
+        #         data['paths'] = expected_coverage_paths
+        #         echo_success(f'Configured coverage paths for flag `{flag}`')
+        #     else:
+        #         success = False
+        #         echo_failure(message)
 
         if not data.get('carryforward'):
             message = f'Flag `{flag}` must have carryforward set to true'
