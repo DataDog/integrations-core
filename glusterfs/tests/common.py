@@ -1,3 +1,11 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+GLUSTER_VERSION = os.getenv('GLUSTER_VERSION')
+
+CHECK = 'glusterfs'
 CONFIG = {'init_config': {'gstatus_path': 'docker exec gluster-node-1 gstatus'}, 'instances': [{}]}
 
 EXPECTED_METRICS = [
