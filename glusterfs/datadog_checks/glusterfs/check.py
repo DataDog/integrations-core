@@ -107,8 +107,8 @@ class GlusterfsCheck(AgentCheck):
             self.log.debug("Could not retrieve GlusterFS version: %s", str(e))
 
         if raw_version:
-            version_parts = self.parse_version(raw_version)
-
+            major, minor = self.parse_version(raw_version)
+            version_parts = {'major': str(int(major)), 'minor': str(int(minor))}
             self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
             self.log.debug('Found GlusterFS version: %s', raw_version)
         else:
@@ -123,7 +123,7 @@ class GlusterfsCheck(AgentCheck):
         except ValueError as e:
             self.log.debug("Unable to parse GlusterFS version: %s", str(e))
         else:
-            return {'major': str(int(major)), 'minor': str(int(minor))}
+            return major, minor
 
     def parse_volume_summary(self, output):
         for volume in output:
