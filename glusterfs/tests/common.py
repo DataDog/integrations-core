@@ -1,3 +1,5 @@
+CONFIG = {'init_config': {'gstatus_path': 'docker exec gluster-node-1 gstatus'}, 'instances': [{}]}
+
 EXPECTED_METRICS = [
     "glusterfs.brick.block_size",
     "glusterfs.brick.inodes.free",

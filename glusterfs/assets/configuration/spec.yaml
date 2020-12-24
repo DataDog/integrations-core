@@ -1,4 +1,4 @@
-name: Red Hat Gluster Storage
+name: GlusterFS
 files:
 - name: glusterfs.yaml
   options:

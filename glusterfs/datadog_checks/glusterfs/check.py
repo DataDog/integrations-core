@@ -9,6 +9,7 @@ except ImportError:
     from simplejson import JSONDecodeError
 
 import os
+import shlex
 from typing import Any
 
 from six import iteritems
@@ -55,12 +56,13 @@ class GlusterfsCheck(AgentCheck):
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
                 raise Exception('The dd-agent user does not have sudo access')
-            gluster_args = ['sudo', self.gstatus_cmd]
+            gluster_args = 'sudo {}'.format(self.gstatus_cmd)
         else:
-            gluster_args = [self.gstatus_cmd]
+            gluster_args = self.gstatus_cmd
 
         # Ensures units are universally the same by specifying the --units flag
-        gluster_args += ['-a', '-o', 'json', '-u', 'g']
+        gluster_args += ' -a -o json -u g'
+        gluster_args = shlex.split(gluster_args)
         self.log.debug("gstatus command: %s", gluster_args)
         try:
             output, _, _ = get_subprocess_output(gluster_args, self.log)
@@ -130,13 +132,14 @@ class GlusterfsCheck(AgentCheck):
             self.submit_metrics(volume, 'volume', VOLUME_STATS, volume_tags)
 
             if 'subvols' in volume:
-                self.parse_subvols_stats(volume['subvols'], volume)
+                self.parse_subvols_stats(volume['subvols'], volume_tags)
 
             self.submit_service_check(self.VOLUME_SC, volume['health'], volume_tags)
 
     def parse_subvols_stats(self, subvols, volume_tags):
         for subvol in subvols:
             self.submit_metrics(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
+            self.submit_service_check(self.BRICK_SC, subvol['health'], volume_tags)
 
             for brick in subvol.get('bricks', []):
                 brick_name = brick['name'].split(":")
@@ -154,8 +157,6 @@ class GlusterfsCheck(AgentCheck):
                 ]
                 tags.extend(self._tags)
                 self.submit_metrics(brick, 'brick', BRICK_STATS, tags)
-
-            self.submit_service_check(self.BRICK_SC, subvol['health'], volume_tags)
 
     def submit_metrics(self, payload, prefix, metric_mapping, tags):
         """
@@ -184,6 +185,7 @@ class GlusterfsCheck(AgentCheck):
             self.service_check(sc_name, AgentCheck.OK, tags=tags)
         elif status == 'partial':
             self.service_check(sc_name, AgentCheck.WARNING, tags=tags, message=msg)
-        else:
-            # Degraded or Down
+        elif status == 'degraded' or status == 'down':
             self.service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
+        else:
+            self.service_check(sc_name, AgentCheck.UNKNOWN, tags=tags, message=msg)

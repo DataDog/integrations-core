@@ -2,10 +2,10 @@ version: '2'
 services:
     gs1:
         container_name: gluster-node-1
-        image: metal3d/glusterfs
+        image: gluster/gluster-centos:latest
         privileged: true
 
     gs2:
-        image: metal3d/glusterfs
+        image: gluster/gluster-centos:latest
         container_name: gluster-node-2
         privileged: true

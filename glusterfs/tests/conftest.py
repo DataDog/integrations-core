@@ -8,7 +8,9 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.dev import docker_run, run_command
+from datadog_checks.dev import WaitFor, docker_run, run_command
+
+from .common import CONFIG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -25,9 +27,8 @@ E2E_METADATA = {
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-    with docker_run(compose_file=compose_file):
-        create_volume()
-        yield {'init_config': {'gstatus_path': '/opt/datadog-agent/embedded/sbin/gstatus'}}, E2E_METADATA
+    with docker_run(compose_file=compose_file, conditions=[WaitFor(create_volume)]):
+        yield CONFIG, E2E_METADATA
 
 
 @pytest.fixture
@@ -45,11 +46,18 @@ def mock_gstatus_data():
 
 
 def create_volume():
+    run_command("docker exec gluster-node-2 mkdir /test-export", capture=True, check=True)
+
     for command in (
         'gluster peer probe gluster-node-2',
-        'mkdir /export',
-        'gluster volume create gv0 gluster-node-1:/export force',
+        'mkdir /test-export',
+        'gluster volume create gv0 replica 2 gluster-node-1:/test-export gluster-node-2:/test-export force',
         'gluster volume start gv0',
+        'yum update -y',
+        'yum install -y python3',
+        'curl -LO https://github.com/gluster/gstatus/releases/download/v1.0.4/gstatus',
+        'chmod +x ./gstatus',
+        'mv ./gstatus /usr/local/bin/gstatus',
     ):
         run_command("docker exec gluster-node-1 {}".format(command), capture=True, check=True)
         time.sleep(10)
