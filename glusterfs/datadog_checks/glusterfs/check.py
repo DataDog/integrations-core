@@ -127,19 +127,20 @@ class GlusterfsCheck(AgentCheck):
 
     def parse_volume_summary(self, output):
         for volume in output:
-            volume_tags = ["vol_name:{}".format(volume['name']), "vol_type:{}".format(volume['type'])]
+            volume_tags = ["vol_name:{}".format(volume.get('name')), "vol_type:{}".format(volume.get('type'))]
             volume_tags.extend(self._tags)
             self.submit_metrics(volume, 'volume', VOLUME_STATS, volume_tags)
 
             if 'subvols' in volume:
-                self.parse_subvols_stats(volume['subvols'], volume_tags)
+                self.parse_subvols_stats(volume.get('subvols', []), volume_tags)
 
-            self.submit_service_check(self.VOLUME_SC, volume['health'], volume_tags)
+            self.submit_service_check(self.VOLUME_SC, volume.get('health'), volume_tags)
 
     def parse_subvols_stats(self, subvols, volume_tags):
         for subvol in subvols:
-            self.submit_metrics(subvol, 'subvol', VOL_SUBVOL_STATS, volume_tags)
-            self.submit_service_check(self.BRICK_SC, subvol['health'], volume_tags)
+            subvol_tags = volume_tags + ['subvol_name:{}'.format(subvol.get('name'))]
+            self.submit_metrics(subvol, 'subvol', VOL_SUBVOL_STATS, subvol_tags)
+            self.submit_service_check(self.BRICK_SC, subvol['health'], subvol_tags)
 
             for brick in subvol.get('bricks', []):
                 brick_name = brick['name'].split(":")
