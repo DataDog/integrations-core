@@ -277,7 +277,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
             echo_failure(f'Defined check `{flag}` has no tox.ini file')
             continue
 
-        expected_coverage_paths = get_coverage_sources(flag)
+        # expected_coverage_paths = get_coverage_sources(flag)
 
         # configured_coverage_paths = data.get('paths', [])
         # if configured_coverage_paths != expected_coverage_paths:
