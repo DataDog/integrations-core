@@ -33,11 +33,14 @@ def test_version_metadata(aggregator, datadog_agent):
     c.check_id = 'test:123'
     c.check({})
 
+    major, minor = c.parse_version(GLUSTER_VERSION)
+
     version_metadata = {
         'version.raw': GLUSTER_VERSION,
         'version.scheme': 'glusterfs',
+        'version.major': major,
+        'version.minor': minor,
     }
-    version_metadata.update(c.parse_version(GLUSTER_VERSION))
 
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(4)
