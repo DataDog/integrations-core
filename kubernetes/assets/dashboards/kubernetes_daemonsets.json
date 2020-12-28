@@ -461,7 +461,7 @@
         "height": 24
       },
       "definition": {
-        "title": "CPU requests, limits and usage",
+        "title": "CPU requests, limits, and usage",
         "title_size": "16",
         "title_align": "left",
         "show_legend": true,
