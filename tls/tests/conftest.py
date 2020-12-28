@@ -15,6 +15,8 @@ from .utils import download_cert, temp_binary
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 CA_CERT = os.path.join(HERE, 'compose', 'ca.crt')
+PRIVATE_KEY = os.path.join(HERE, 'compose', 'ca.key')
+
 
 HOSTNAME_TO_PORT_MAPPING = {
     "tls-v1-1.valid.mock": ('127.0.0.1', 4444),
