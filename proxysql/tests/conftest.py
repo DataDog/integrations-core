@@ -16,7 +16,6 @@ from .common import (
     ALL_METRICS,
     BASIC_INSTANCE,
     BASIC_INSTANCE_TLS,
-    BASIC_INSTANCE_TLS_LEGACY,
     DOCKER_HOST,
     INSTANCE_ALL_METRICS,
     INSTANCE_ALL_METRICS_STATS,
@@ -38,11 +37,6 @@ def instance_basic():
 @pytest.fixture
 def instance_basic_tls():
     return deepcopy(BASIC_INSTANCE_TLS)
-
-
-@pytest.fixture
-def instance_basic_tls_legacy():
-    return deepcopy(BASIC_INSTANCE_TLS_LEGACY)
 
 
 @pytest.fixture()
@@ -83,7 +77,7 @@ def dd_environment():
             cert_dest = "/etc/ssl/certs/proxysql-ca.pem"
             if PROXYSQL_VERSION.startswith('2'):
                 # SSL is only available with version 2.x of ProxySQL
-                instance['use_tls'] = True
+                instance['tls_verify'] = True
                 instance['tls_ca_cert'] = cert_dest
                 instance['validate_hostname'] = False
             yield instance, {'docker_volumes': ['{}:{}'.format(cert_src, cert_dest)]}

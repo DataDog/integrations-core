@@ -135,22 +135,9 @@ BASIC_INSTANCE_TLS = {
     'password': PROXY_ADMIN_PASS,
     'tags': ["application:test"],
     'additional_metrics': [],
-    'use_tls': True,
+    'tls_verify': True,
     'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
     'tls_validate_hostname': True,
-}
-
-
-BASIC_INSTANCE_TLS_LEGACY = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [],
-    'tls_verify': True,  # legacy version of tls_verify
-    'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
-    'validate_hostname': True,  # legacy version of tls_validate_hostname
 }
 
 

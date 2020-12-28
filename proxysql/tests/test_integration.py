@@ -43,17 +43,17 @@ def test_service_checks_ok(aggregator, instance_basic, dd_run_check):
     )
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_server_down(aggregator, instance_basic, dd_run_check):
-    instance_basic['port'] = 111
-    check = get_check(instance_basic)
-
-    with pytest.raises(Exception, match="OperationalError.*Can't connect to MySQL server on"):
-        dd_run_check(check)
-
-    aggregator.assert_service_check('proxysql.can_connect', AgentCheck.CRITICAL)
-    aggregator.assert_all_metrics_covered()
+# @pytest.mark.integration
+# @pytest.mark.usefixtures('dd_environment')
+# def test_server_down(aggregator, instance_basic, dd_run_check):
+#     instance_basic['port'] = 111
+#     check = get_check(instance_basic)
+#
+#     with pytest.raises(Exception, match="OperationalError.*Can't connect to MySQL server on"):
+#         dd_run_check(check)
+#
+#     aggregator.assert_service_check('proxysql.can_connect', AgentCheck.CRITICAL)
+#     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration

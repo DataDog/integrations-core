@@ -33,15 +33,10 @@ instances:
     #
     password: <PROXYSQL_ADMIN_PASSWORD>
 
-    ## @param use_tls - boolean - optional - default: false
-    ## Instructs the check to use SSL when connecting to ProxySQL
-    #
-    # use_tls: false
-
-    ## @param tls_verify - boolean - optional - default: true
+    ## @param tls_verify - boolean - optional - default: false
     ## Instructs the check to validate the TLS certificate(s) of the service(s).
     #
-    # tls_verify: true
+    # tls_verify: false
 
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory

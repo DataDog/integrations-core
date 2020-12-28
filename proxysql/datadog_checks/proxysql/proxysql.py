@@ -49,13 +49,7 @@ class ProxysqlCheck(AgentCheck):
         if not all((self.host, self.port, self.user, self.password)):
             raise ConfigurationError("ProxySQL host, port, username and password are needed")
 
-        # If `tls_verify` is explicitly set to true, set `use_tls` to true (for legacy support)
-        # `tls_verify` used to do what `use_tls` does now
-        self.tls_verify = is_affirmative(self.instance.get('tls_verify'))
-        self.use_tls = is_affirmative(self.instance.get('use_tls', False))
-
-        if self.tls_verify and not self.use_tls:
-            self.use_tls = True
+        self.tls_verify = is_affirmative(self.instance.get('tls_verify', False))
 
         self.connect_timeout = self.instance.get("connect_timeout", 10)
         self.read_timeout = self.instance.get("read_timeout")
@@ -100,7 +94,7 @@ class ProxysqlCheck(AgentCheck):
 
     @contextmanager
     def connect(self):
-        if self.use_tls:
+        if self.tls_verify:
             self.log.debug("Connecting to ProxySQL via SSL/TLS")
             # If ca_cert is None, will load the default certificates
             ssl_context = self.get_tls_context()

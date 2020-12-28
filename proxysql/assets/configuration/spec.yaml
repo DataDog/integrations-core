@@ -34,15 +34,10 @@ files:
       value:
         type: string
         example: <PROXYSQL_ADMIN_PASSWORD>
-    - name: use_tls
-      required: false
-      description: |
-        Instructs the check to use SSL when connecting to ProxySQL
-      value:
-        type: boolean
-        example: false
-        default: false
     - template: instances/tls
+      overrides:
+        tls_verify.default: false
+        tls_verify.value.example: false
     - name: connect_timeout
       required: false
       description: |

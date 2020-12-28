@@ -73,32 +73,6 @@ def test_tls_config_ok(dd_run_check, instance_basic_tls):
 
             dd_run_check(check)
 
-            assert check.use_tls is True
-            assert tls_context.check_hostname is True
-            assert check._connection is not None
-
-
-@pytest.mark.unit
-def test_tls_legacy_config_ok(dd_run_check, instance_basic_tls_legacy):
-    with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
-        with mock.patch('datadog_checks.proxysql.proxysql.pymysql') as pymysql:
-            check = get_check(instance_basic_tls_legacy)
-
-            # mock TLS context
-            tls_context = mock.MagicMock()
-            ssl.SSLContext.return_value = tls_context
-
-            # mock query executor
-            query_executor_mock = mock.MagicMock()
-            check._query_manager.executor = query_executor_mock
-
-            # mock behavior of db
-            mock_db = mock.MagicMock()
-            mock_db.close.return_value = True
-            pymysql.connect.return_value = mock_db
-
-            dd_run_check(check)
-
-            assert check.use_tls is True
+            assert check.tls_verify is True
             assert tls_context.check_hostname is True
             assert check._connection is not None
