@@ -100,7 +100,7 @@ class ProxysqlCheck(AgentCheck):
             ssl_context = self.get_tls_context()
         else:
             self.log.debug("Connecting to ProxySQL without SSL/TLS")
-            ssl_context = make_insecure_ssl_client_context()  # can keep this
+            ssl_context = make_insecure_ssl_client_context()
 
         db = None
         try:
