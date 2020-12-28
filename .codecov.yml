@@ -1,7 +1,4 @@
-comment:
-  layout: diff, flags
-  behavior: default
-  branches: null
+comment: false
 coverage:
   range: 50..100
   round: down
