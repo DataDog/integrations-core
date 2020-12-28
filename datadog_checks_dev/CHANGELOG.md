@@ -1,5 +1,34 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 6.1.0 / 2020-12-22
+
+* [Added] Add metric_to_check validation redirection for snmp_<vendor> integrations. See [#8215](https://github.com/DataDog/integrations-core/pull/8215).
+* [Added] Add exec command option to ddev env shell. See [#8235](https://github.com/DataDog/integrations-core/pull/8235).
+* [Added] Fail validation if metadata file is empty. See [#8194](https://github.com/DataDog/integrations-core/pull/8194).
+* [Fixed] Fix release. See [#8237](https://github.com/DataDog/integrations-core/pull/8237).
+* [Fixed] Update dogweb dashboard list. See [#8191](https://github.com/DataDog/integrations-core/pull/8191).
+
+## 6.0.0 / 2020-12-11
+
+* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+* [Added] Add support for tabular check output. See [#8129](https://github.com/DataDog/integrations-core/pull/8129).
+* [Added] Add test filter to env test. See [#8101](https://github.com/DataDog/integrations-core/pull/8101).
+* [Added] [SNMP] Generate profiles from MIBs. See [#7925](https://github.com/DataDog/integrations-core/pull/7925).
+* [Added] Validate partner integration readmes contain an h2 support section. See [#8055](https://github.com/DataDog/integrations-core/pull/8055).
+* [Added] Add 'since' flag to manually specify tag to look from. See [#7950](https://github.com/DataDog/integrations-core/pull/7950).
+* [Added] Support inline comment to skip http validation. See [#8020](https://github.com/DataDog/integrations-core/pull/8020).
+* [Added] Add config template for TLS helper. See [#8014](https://github.com/DataDog/integrations-core/pull/8014).
+* [Fixed] Refactor `has_logs` utility. See [#8123](https://github.com/DataDog/integrations-core/pull/8123).
+* [Fixed] Build developer docs in strict mode. See [#8152](https://github.com/DataDog/integrations-core/pull/8152).
+* [Fixed] Skip auto-setting Python version suffix if using an RC build. See [#7653](https://github.com/DataDog/integrations-core/pull/7653).
+* [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
+* [Fixed] Fix pdh configuration spec. See [#8106](https://github.com/DataDog/integrations-core/pull/8106).
+* [Fixed] Update small typo in tls-specific options documentation. See [#8103](https://github.com/DataDog/integrations-core/pull/8103).
+* [Fixed] [Config specs] Allow longer line in compact_example lists. See [#8015](https://github.com/DataDog/integrations-core/pull/8015).
+* [Fixed] Include openmetrics integrations in http validation. See [#7999](https://github.com/DataDog/integrations-core/pull/7999).
+* [Changed] Use snmp mibs copy while mibs.snmplabs.com is down. See [#7835](https://github.com/DataDog/integrations-core/pull/7835).
+* [Changed] Add sub-watt metric metadata units. See [#7994](https://github.com/DataDog/integrations-core/pull/7994).
+
 ## 5.1.0 / 2020-11-10
 
 * [Added] Allow mechanism for handling duplicate option names for config specs. See [#7968](https://github.com/DataDog/integrations-core/pull/7968).

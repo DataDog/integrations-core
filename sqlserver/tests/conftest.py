@@ -62,33 +62,40 @@ def instance_e2e():
 
 @pytest.fixture
 def instance_ao_docker_primary():
-    instance = INSTANCE_DOCKER
+    instance = deepcopy(INSTANCE_DOCKER)
     instance['include_ao_metrics'] = True
     instance['driver'] = 'FreeTDS'
-    return deepcopy(instance)
+    return instance
 
 
 @pytest.fixture
 def instance_ao_docker_primary_local_only():
-    instance = INSTANCE_DOCKER
+    instance = deepcopy(INSTANCE_DOCKER)
     instance['include_ao_metrics'] = True
     instance['driver'] = 'FreeTDS'
     instance['only_emit_local'] = True
-    return deepcopy(instance)
+    return instance
 
 
 @pytest.fixture
 def instance_ao_docker_primary_non_existing_ag():
-    instance = INSTANCE_DOCKER
+    instance = deepcopy(INSTANCE_DOCKER)
     instance['include_ao_metrics'] = True
     instance['driver'] = 'FreeTDS'
     instance['availability_group'] = 'AG2'
-    return deepcopy(instance)
+    return instance
 
 
 @pytest.fixture
 def instance_ao_docker_secondary():
     return deepcopy(INSTANCE_AO_DOCKER_SECONDARY)
+
+
+@pytest.fixture
+def instance_autodiscovery():
+    instance = deepcopy(INSTANCE_DOCKER)
+    instance['database_autodiscovery'] = True
+    return instance
 
 
 @pytest.fixture(scope='session')

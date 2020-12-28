@@ -25,7 +25,7 @@
     items:
       type: string
 - name: prometheus_metrics_prefix
-  description: <PREFIX> for exposed Prometheus metrics.
+  description: Removes a given <PREFIX> from exposed Prometheus metrics.
   value:
     type: string
     example: <PREFIX>_

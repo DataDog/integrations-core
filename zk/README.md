@@ -18,18 +18,6 @@ The ZooKeeper check is included in the [Datadog Agent][3] package, so you don't 
 
 As of version 3.5, ZooKeeper has a `4lw.commands.whitelist` parameter (see [ZooKeeper documentation][7]) that whitelists [four letter word commands][8]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host:
-
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your ZooKeeper [metrics](#metric-collection) and [logs](#log-collection).
-   See the [sample zk.d/conf.yaml][5] for all available configuration options.
-
-2. [Restart the Agent][6].
-
 #### Enabling SSL
 
 ZooKeeper 3.5 introduced the ability to use SSL authentication. For information about setting up SSL with ZooKeeper, see the [ZooKeeper SSL User Guide][13]. 
@@ -62,6 +50,18 @@ To convert the JKS files to PEM files:
    ```
    openssl pkcs12 -in cert.p12 -out cert.pem
    ``` 
+   
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+To configure this check for an Agent running on a host:
+
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your ZooKeeper [metrics](#metric-collection) and [logs](#log-collection).
+   See the [sample zk.d/conf.yaml][5] for all available configuration options.
+
+2. [Restart the Agent][6].
 
 #### Log collection
 

@@ -47,7 +47,8 @@ instances:
 
   -
     ## @param use_prometheus - boolean - optional - default: false
-    ## Whether or not to preview the new version of the check supporting only HAProxy versions >=2.
+    ## Enable to preview the new version of the check which supports HAProxy version 2+ 
+    ## or environments using the HAProxy exporter.
     ##
     ## Prometheus-related options take effect only when this is set to `true`.
     #
@@ -197,7 +198,7 @@ instances:
     prometheus_url: <PROMETHEUS_URL>
 
     ## @param prometheus_metrics_prefix - string - optional
-    ## <PREFIX> for exposed Prometheus metrics.
+    ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
     # prometheus_metrics_prefix: <PREFIX>_
 

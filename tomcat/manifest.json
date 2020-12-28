@@ -31,7 +31,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "tomcat--overview": "assets/dashboards/overview.json",
+      "tomcat": "assets/dashboards/metrics.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "tomcat"

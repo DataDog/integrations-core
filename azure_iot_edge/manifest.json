@@ -20,7 +20,7 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "azure-iot-edge",
   "assets": {
     "configuration": {

@@ -1,6 +1,6 @@
 # CHANGELOG - lighttpd
 
-## 1.13.1 / 2020-11-03
+## 1.13.1 / 2020-11-03 / Agent 7.24.0
 
 * [Fixed] Remove default `encoding` example in logs config. See [#7916](https://github.com/DataDog/integrations-core/pull/7916).
 

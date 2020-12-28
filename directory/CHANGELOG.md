@@ -1,6 +1,6 @@
 # CHANGELOG - directory
 
-## 1.9.1 / 2020-11-04
+## 1.9.1 / 2020-11-04 / Agent 7.24.0
 
 * [Fixed] Add tags to the new `system.disk.directory.exists` service check. See [#7929](https://github.com/DataDog/integrations-core/pull/7929).
 

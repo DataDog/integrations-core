@@ -452,6 +452,8 @@ class ProcessCheck(AgentCheck):
 
         if len(pids) == 0:
             self.warning("No matching process '%s' was found", name)
+            # reset the PID cache now, something changed
+            self.last_pid_cache_ts[name] = 0
 
         for attr, mname in iteritems(ATTR_TO_METRIC):
             vals = [x for x in proc_state[attr] if x is not None]

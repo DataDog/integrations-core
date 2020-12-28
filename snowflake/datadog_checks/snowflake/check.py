@@ -1,11 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import threading
 from contextlib import closing
 
 import snowflake.connector as sf
-from snowflake.connector.network import SnowflakeRestful
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
@@ -36,18 +34,27 @@ class SnowflakeCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT = 'snowflake.can_connect'
 
-    MONKEY_PATCH_LOCK = threading.Lock()
-
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
         self.config = Config(self.instance)
         self._conn = None
+
+        self.proxy_host = self.init_config.get('proxy_host', None)
+        self.proxy_port = self.init_config.get('proxy_port', None)
+        self.proxy_user = self.init_config.get('proxy_user', None)
+        self.proxy_password = self.init_config.get('proxy_password', None)
 
         # Add default tags like account to all metrics
         self._tags = self.config.tags + ['account:{}'.format(self.config.account)]
 
         if self.config.password:
             self.register_secret(self.config.password)
+
+        if self.config.role == 'ACCOUNTADMIN':
+            self.log.info(
+                'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
+                'refer to docs about custom roles.'
+            )
 
         self.metric_queries = []
         self.errors = []
@@ -62,7 +69,6 @@ class SnowflakeCheck(AgentCheck):
         if not self.metric_queries:
             raise ConfigurationError('No valid metric_groups configured, please list at least one.')
 
-        self._proxies = self.http.options['proxies']  # SKIP_HTTP_VALIDATION
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
@@ -93,7 +99,7 @@ class SnowflakeCheck(AgentCheck):
     def connect(self):
         self.log.debug(
             "Establishing a new connection to Snowflake: account=%s, user=%s, database=%s, schema=%s, warehouse=%s, "
-            "role=%s, login_timeout=%s, authenticator=%s, ocsp_response_cache_filename=%s",
+            "role=%s, timeout=%s, authenticator=%s, ocsp_response_cache_filename=%s, proxy_host=%s, proxy_port=%s",
             self.config.account,
             self.config.user,
             self.config.database,
@@ -103,31 +109,32 @@ class SnowflakeCheck(AgentCheck):
             self.config.login_timeout,
             self.config.authenticator,
             self.config.ocsp_response_cache_filename,
+            self.proxy_host,
+            self.proxy_port,
         )
 
         try:
-            with self.MONKEY_PATCH_LOCK:
-                # Monkey patch proxies to request_exec
-                SnowflakeRestful._request_exec = self._make_snowflake_request_func(
-                    self._proxies, SnowflakeRestful._request_exec
-                )
-                conn = sf.connect(
-                    user=self.config.user,
-                    password=self.config.password,
-                    account=self.config.account,
-                    database=self.config.database,
-                    schema=self.config.schema,
-                    warehouse=self.config.warehouse,
-                    role=self.config.role,
-                    passcode_in_password=self.config.passcode_in_password,
-                    passcode=self.config.passcode,
-                    client_prefetch_threads=self.config.client_prefetch_threads,
-                    login_timeout=self.config.login_timeout,
-                    ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
-                    authenticator=self.config.authenticator,
-                    token=self.config.token,
-                    client_session_keep_alive=self.config.client_keep_alive,
-                )
+            conn = sf.connect(
+                user=self.config.user,
+                password=self.config.password,
+                account=self.config.account,
+                database=self.config.database,
+                schema=self.config.schema,
+                warehouse=self.config.warehouse,
+                role=self.config.role,
+                passcode_in_password=self.config.passcode_in_password,
+                passcode=self.config.passcode,
+                client_prefetch_threads=self.config.client_prefetch_threads,
+                login_timeout=self.config.login_timeout,
+                ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
+                authenticator=self.config.authenticator,
+                token=self.config.token,
+                client_session_keep_alive=self.config.client_keep_alive,
+                proxy_host=self.proxy_host,
+                proxy_port=self.proxy_port,
+                proxy_user=self.proxy_user,
+                proxy_password=self.proxy_password,
+            )
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
@@ -135,27 +142,6 @@ class SnowflakeCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
-
-    def _make_snowflake_request_func(self, proxies, method):
-        """
-        This is a workaround to include proxy config in the Snowflake connection.
-        The current Snowflake logic applies global proxy configs via env vars.
-
-        TODO: Remove when https://github.com/snowflakedb/snowflake-connector-python/pull/352 gets merged
-        """
-
-        def _request_exec(*args, **kwargs):
-            session = kwargs.get('session') or args[1]
-            session.proxies = proxies
-            try:
-                return method(*args, **kwargs)
-            except Exception as e:
-                self.log.error(
-                    "Encountered error while attempting to connect to Snowflake via proxy settings: %s", str(e)
-                )
-                return
-
-        return _request_exec
 
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):

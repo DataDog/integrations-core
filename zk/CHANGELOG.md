@@ -1,10 +1,19 @@
 # CHANGELOG - zk
 
+## 2.9.2 / 2020-12-15
+
+* [Fixed] Ensure connection failure message is shown on Python 2. See [#8197](https://github.com/DataDog/integrations-core/pull/8197).
+
+## 2.9.1 / 2020-12-11
+
+* [Fixed] Bump allowed base check package versions. See [#8160](https://github.com/DataDog/integrations-core/pull/8160).
+* [Fixed] Update small typo in tls-specific options documentation. See [#8103](https://github.com/DataDog/integrations-core/pull/8103).
+
 ## 2.9.0 / 2020-11-18
 
 * [Added] Add SSL Support for Zookeeper. See [#7884](https://github.com/DataDog/integrations-core/pull/7884).
 
-## 2.8.0 / 2020-10-31
+## 2.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 

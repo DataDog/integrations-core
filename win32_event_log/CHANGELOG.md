@@ -1,6 +1,6 @@
 # CHANGELOG - win32_event_log
 
-## 2.7.0 / 2020-10-31
+## 2.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config specs. See [#7856](https://github.com/DataDog/integrations-core/pull/7856).
 

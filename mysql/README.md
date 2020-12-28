@@ -192,6 +192,13 @@ _Available for Agent versions >6.0_
            pattern: "# Time:"
            # If mysqld was started with `--log-short-format`, use:
            # pattern: "# Query_time:"
+           # If using mysql version <5.7, use the following rules instead:
+           # - type: multi_line
+           #   name: new_slow_query_log_entry
+           #   pattern: "# Time|# User@Host"
+           # - type: exclude_at_match
+           #   name: exclude_timestamp_only_line
+           #   pattern: "# Time:"
 
      - type: file
        path: "<GENERAL_LOG_FILE_PATH>"

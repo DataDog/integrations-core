@@ -1,6 +1,10 @@
 # CHANGELOG - consul
 
-## 1.17.0 / 2020-10-31
+## 1.17.1 / 2020-12-11
+
+* [Fixed] Add consul 1.9.0 metrics. See [#8095](https://github.com/DataDog/integrations-core/pull/8095).
+
+## 1.17.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

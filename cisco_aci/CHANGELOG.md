@@ -1,6 +1,6 @@
 # CHANGELOG - cisco_aci
 
-## 1.12.0 / 2020-10-31
+## 1.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
 * [Security] Upgrade `cryptography` dependency. See [#7869](https://github.com/DataDog/integrations-core/pull/7869).

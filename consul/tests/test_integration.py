@@ -7,6 +7,7 @@ import pytest
 from requests import HTTPError
 
 from datadog_checks.consul import ConsulCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -49,6 +50,8 @@ def test_check(aggregator, instance, dd_environment):
     aggregator.assert_service_check('consul.check')
     aggregator.assert_service_check('consul.up', tags=['consul_datacenter:dc1', 'consul_url:{}'.format(common.URL)])
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
 
 @pytest.mark.integration
 def test_single_node_install(aggregator, instance_single_node_install, dd_environment):
@@ -62,6 +65,8 @@ def test_single_node_install(aggregator, instance_single_node_install, dd_enviro
 
     aggregator.assert_service_check('consul.check')
     aggregator.assert_service_check('consul.up', tags=['consul_datacenter:dc1', 'consul_url:{}'.format(common.URL)])
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
@@ -98,8 +103,23 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
             aggregator.assert_metric(metric, tags=common_tags, count=1)
 
         aggregator.assert_metric('consul.peers', value=3, count=1)
+        aggregator.assert_metric_has_tag_prefix('consul.raft.replication.appendEntries.logs', 'peer_id', count=2)
+
+        for hist_suffix in ['count', 'sum', 'quantile']:
+            aggregator.assert_metric_has_tag('consul.http.request.{}'.format(hist_suffix), 'method:GET', at_least=0)
+            for metric in common.PROMETHEUS_HIST_METRICS:
+                for tag in common_tags:
+                    aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
 
         aggregator.assert_all_metrics_covered()
+
+        # Some of the metrics documented in the metadata.csv were sent through DogStatsD as `timer` as well.
+        # We end up with some of the prometheus metrics having a different in-app type.
+        # Example with `consul.raft.commitTime.count`:
+        #  * It is a rate when submitting metrics with DogStatsD
+        #  * It is a rate when submitting metrics with OpenMetricsBaseCheck
+        # TODO: solve conflict
+        # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     else:
         caplog.at_level(logging.WARNING)

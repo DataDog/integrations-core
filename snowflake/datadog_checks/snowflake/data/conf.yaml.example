@@ -13,32 +13,25 @@ init_config:
     #     columns: <COLUMNS>
     #     tags: <TAGS>
 
-    ## @param proxy - mapping - optional
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
-    ## to specify hosts that must bypass proxies.
-    ##
-    ## The SOCKS protocol is also supported like so:
-    ##
-    ##   socks5://user:pass@host:port
-    ##
-    ## Using the scheme `socks5` causes the DNS resolution to happen on the
-    ## client, rather than on the proxy server. This is in line with `curl`,
-    ## which uses the scheme to decide whether to do the DNS resolution on
-    ## the client or proxy. If you want to resolve the domains on the proxy
-    ## server, use `socks5h` as the scheme.
+    ## @param proxy_host - string - optional
+    ## The host of your proxy server.
     #
-    # proxy:
-    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
-    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
-    #   no_proxy:
-    #   - <HOSTNAME_1>
-    #   - <HOSTNAME_2>
+    # proxy_host: <PROXY_HOST>
 
-    ## @param skip_proxy - boolean - optional - default: false
-    ## If set to `true`, this makes the check bypass any proxy
-    ## settings enabled and attempt to reach services directly.
+    ## @param proxy_port - integer - optional
+    ## The port of your proxy server.
     #
-    # skip_proxy: false
+    # proxy_port: <PROXY_PORT>
+
+    ## @param proxy_user - string - optional
+    ## The username to authenticate your proxy server.
+    #
+    # proxy_user: <PROXY_USER>
+
+    ## @param proxy_password - string - optional
+    ## The password to authenticate your proxy server.
+    #
+    # proxy_password: <PROXY_PASSWORD>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -68,6 +61,15 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param role - string - required
+    ## Name of the role to use.
+    ##
+    ## By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. Snowflake recommends
+    ## configuring a role specific for monitoring:
+    ## https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+    #
+    role: <ROLE>
+
     ## @param database - string - optional - default: SNOWFLAKE
     ## Name of the default database to use.
     #
@@ -77,11 +79,6 @@ instances:
     ## Name of the default schema to use for the database.
     #
     # schema: ACCOUNT_USAGE
-
-    ## @param role - string - optional - default: ACCOUNTADMIN
-    ## Name of the default role to use.
-    #
-    # role: ACCOUNTADMIN
 
     ## @param warehouse - string - optional
     ## Name of the default warehouse to use.
@@ -187,37 +184,6 @@ instances:
     #       type: gauge
     #     tags:
     #     - test:snowflake
-
-    ## @param proxy - mapping - optional
-    ## This overrides the `proxy` setting in `init_config`.
-    ##
-    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
-    ## to specify hosts that must bypass proxies.
-    ##
-    ## The SOCKS protocol is also supported, for example:
-    ##
-    ##   socks5://user:pass@host:port
-    ##
-    ## Using the scheme `socks5` causes the DNS resolution to happen on the
-    ## client, rather than on the proxy server. This is in line with `curl`,
-    ## which uses the scheme to decide whether to do the DNS resolution on
-    ## the client or proxy. If you want to resolve the domains on the proxy
-    ## server, use `socks5h` as the scheme.
-    #
-    # proxy:
-    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
-    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
-    #   no_proxy:
-    #   - <HOSTNAME_1>
-    #   - <HOSTNAME_2>
-
-    ## @param skip_proxy - boolean - optional - default: false
-    ## This overrides the `skip_proxy` setting in `init_config`.
-    ##
-    ## If set to `true`, this makes the check bypass any proxy
-    ## settings enabled and attempt to reach services directly.
-    #
-    # skip_proxy: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

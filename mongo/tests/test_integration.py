@@ -46,7 +46,7 @@ def test_integration_mongos(instance_integration, aggregator, check):
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -85,7 +85,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -158,7 +158,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -197,7 +197,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check):
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -270,7 +270,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -308,7 +308,7 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check)
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -383,7 +383,7 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -416,6 +416,6 @@ def test_standalone(instance_integration, aggregator, check):
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_metric_type=False,
+        check_submission_type=True,
     )
     assert len(aggregator._events) == 0

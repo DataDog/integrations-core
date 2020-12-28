@@ -101,8 +101,10 @@ class CustomQueriesCollector(MongoCollector):
         cursor = pymongo.command_cursor.CommandCursor(
             pymongo.collection.Collection(db, collection_name), result['cursor'], None
         )
+        empty_result_set = True
 
         for row in cursor:
+            empty_result_set = False
             metric_info = []
             query_tags = list(tags)
 
@@ -127,6 +129,9 @@ class CustomQueriesCollector(MongoCollector):
 
             for metric_name, metric_value, submit_method in metric_info:
                 submit_method(metric_name, metric_value, tags=query_tags)
+
+        if empty_result_set:
+            raise Exception('Custom query returned an empty result set.')
 
     def collect(self, client):
         for raw_query in self.custom_queries:

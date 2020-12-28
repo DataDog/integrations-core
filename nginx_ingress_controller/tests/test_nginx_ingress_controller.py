@@ -73,6 +73,7 @@ def test_nginx_ingress_controller(aggregator, mock_data):
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.sum', count=0)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_with_histograms(aggregator, mock_data):
@@ -91,4 +92,4 @@ def test_with_histograms(aggregator, mock_data):
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.sum')
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

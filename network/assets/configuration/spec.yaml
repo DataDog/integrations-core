@@ -9,6 +9,8 @@ files:
           To make modifications to the check configuration, please copy this file
           to `network.yaml` and make your changes on that file.
         required: true
+        options:
+          - template: init_config/default
       - template: instances
         description: Network check only supports one configured instance
         options:
@@ -124,4 +126,4 @@ files:
               type: array
               items: 
                 type: string
-          - template: instances/tags
+          - template: instances/default

@@ -138,6 +138,8 @@ class QueryManager(object):
                         continue
                     elif column_type == 'tag':
                         tags.append(transformer(None, value))
+                    elif column_type == 'tag_list':
+                        tags.extend(transformer(None, value))
                     else:
                         submission_queue.append((transformer, value))
 

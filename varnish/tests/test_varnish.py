@@ -11,15 +11,6 @@ from . import common
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
 
-GAUGE_IN_5_RATE_IN_6 = [
-    "varnish.n_expired",
-    "varnish.n_lru_moved",
-    "varnish.n_lru_nuked",
-    "varnish.n_obj_purged",
-    "varnish.n_purges",
-]
-
-
 def test_check(aggregator, check, instance):
     check.check(instance)
 
@@ -27,12 +18,13 @@ def test_check(aggregator, check, instance):
         metrics_to_check = common.COMMON_METRICS + common.METRICS_5
     else:
         metrics_to_check = common.COMMON_METRICS + common.METRICS_6
+
     for mname in metrics_to_check:
         aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
+    aggregator.assert_all_metrics_covered()
     metadata_metrics = get_metadata_metrics()
-    exclude = [m for m in aggregator.metric_names if m not in metadata_metrics]
-    aggregator.assert_metrics_using_metadata(metadata_metrics, exclude=exclude, check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
 
 
 def test_inclusion_filter(aggregator, check, instance):

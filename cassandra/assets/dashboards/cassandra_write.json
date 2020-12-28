@@ -1,0 +1,934 @@
+{
+    "title": "Cassandra - Write Path",
+    "description": "You can use this dashboard to rapidly troubleshoot any write-related issues that you identified from the [Cassandra overview](https://app.datadoghq.com/dash/integration/23/cassandra---overview) dashboard. Aggregated metric graphs enable you to isolate issues to a particular table, host, or combination thereof. Further reading on Cassandra monitoring:\n\n- [Datadog's blog post describing our suite of Cassandra dashboards](https://www.datadoghq.com/blog/tlp-cassandra-dashboards/)\n\n- [Our guide to key metrics for Cassandra monitoring](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)\n\n- [How to collect Cassandra metrics using built-in Cassandra and JDK tools](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)\n\n- [How to monitor Cassandra using Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)\n\n- [Datadog's integration docs for Cassandra](https://docs.datadoghq.com/integrations/cassandra/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": "environment",
+            "name": "environment"
+        },
+        {
+            "default": "*",
+            "prefix": "datacenter",
+            "name": "datacenter"
+        },
+        {
+            "default": "*",
+            "prefix": "host",
+            "name": "host"
+        },
+        {
+            "default": "*",
+            "prefix": "keyspace",
+            "name": "keyspace"
+        },
+        {
+            "default": "*",
+            "prefix": "table",
+            "name": "table"
+        },
+        {
+            "default": "*",
+            "prefix": "columnfamily",
+            "name": "columnfamily"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:secondaryindexmanagement} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:countermutationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:memtableflushwriter} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:viewmutationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:memtablepostflush} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:hintsdispatcher} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:migrationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:mutationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:miscstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.pending_tasks{$environment,$datacenter,$host,type:commitlog} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending threads per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:secondaryindexmanagement} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:countermutationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:memtableflushwriter} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:viewmutationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:memtablepostflush} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:hintsdispatcher} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:migrationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:mutationstage} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.currently_blocked_tasks.count{$environment,$datacenter,$host,threadpools:miscstage} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Currently blocked threads per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:counter_mutation} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:batch_remove} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:batch_store} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:_trace} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:mutation} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:hint} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Dropped messages per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:jmx.gc.minor_collection_time{$environment,$datacenter,$host} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Minor GC time (New Gen) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:jmx.gc.major_collection_time{$environment,$datacenter,$host} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Major GC time (Old Gen) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:jmx.gc.minor_collection_time{$environment,$datacenter,$host} by {datacenter,host} + avg:jmx.gc.major_collection_count{$environment,$datacenter,$host} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 150",
+                        "label": "15% of the time spent in Garbage Collection (STW GC)"
+                    }
+                ],
+                "title": "Stop the world GC average per datacenter (Minor + Major GC)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.write_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write count per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.write_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write count per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.write_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write count per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.write_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write Latency (p75 & p95) per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.write_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write Latency (p75 & p95) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.write_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write Latency (p75 & p95) per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.write_latency.99th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write Latency (p95 & p99) per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.write_latency.99th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write Latency (p95 & p99) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.write_latency.99th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.write_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write Latency (p95 & p99) per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.cas_commit_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.cas_prepare_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.cas_propose_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CAS operations counts per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.cas_commit_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.cas_prepare_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.cas_propose_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CAS operations counts per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.cas_commit_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.cas_prepare_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.cas_propose_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CAS operations counts per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.cas_commit_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_prepare_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_propose_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_commit_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_prepare_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_propose_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CAS operations latencies (p75 & p95) per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.cas_commit_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_prepare_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_propose_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_commit_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_prepare_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_propose_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CAS operations latencies (p75 & p95) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.cas_commit_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_prepare_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_propose_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_commit_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_prepare_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.cas_propose_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,table,columnfamily,datacenter,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CAS operations latencies (p75 & p95) per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.view_lock_acquire_time.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.view_read_time.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Materialized view count per table and DC (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.view_lock_acquire_time.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.view_read_time.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Materialized view count per host (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.view_lock_acquire_time.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:cassandra.view_read_time.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Materialized view count per host and table (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.view_lock_acquire_time.75th_percentile{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_read_time.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_lock_acquire_time.95th_percentile{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_read_time.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Materialized view latencies (p75 & p95) per table and DC (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.view_lock_acquire_time.75th_percentile{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_read_time.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_lock_acquire_time.95th_percentile{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_read_time.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Materialized view latencies (p75 & p95) per host (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.view_lock_acquire_time.75th_percentile{$environment,$datacenter,$host,$keyspace,$table} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_read_time.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_lock_acquire_time.95th_percentile{$environment,$datacenter,$host,$keyspace,$table} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.view_read_time.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Materialized view latencies (p75 & p95) per host and table (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_flushes.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending flushes per table and DC (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_flushes.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending flushes per host (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_flushes.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending flushes per host and table (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.waiting_on_free_memtable_space.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.waiting_on_free_memtable_space.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Waiting to free memtable space (p75 & p95) per table and DC (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.waiting_on_free_memtable_space.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.waiting_on_free_memtable_space.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Waiting to free memtable space (p75 & p95) per host (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.waiting_on_free_memtable_space.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.waiting_on_free_memtable_space.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Waiting to free memtable space (p75 & p95) per host and table (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.min{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Min delta on column update per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.min{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Min delta on column update per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.min{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.col_update_time_delta_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Min delta on column update per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:ntp.offset{$environment,$datacenter,$host} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 0.01",
+                        "label": "y = 0.01"
+                    },
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = -0.01",
+                        "label": "y = -0.01"
+                    }
+                ],
+                "title": "Clock drift"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.cpu.idle{$environment,$datacenter,$host}, avg:system.cpu.user{$environment,$datacenter,$host}, avg:system.cpu.guest{$environment,$datacenter,$host}, avg:system.cpu.iowait{$environment,$datacenter,$host}, avg:system.cpu.stolen{$environment,$datacenter,$host}, avg:system.cpu.system{$environment,$datacenter,$host}"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 75",
+                        "label": "75 %"
+                    }
+                ],
+                "title": "CPU usage"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.load.1{$environment,$datacenter,$host} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Unix CPU load per node (1 minute)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.mem.total{$environment,$datacenter,$host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "avg:system.mem.total{$environment,$datacenter,$host} - avg:system.mem.usable{$environment,$datacenter,$host}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.net.bytes_rcvd{$environment,$datacenter,$host} by {datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:system.net.bytes_sent{$environment,$datacenter,$host} by {datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network"
+            }
+        }
+    ]
+}

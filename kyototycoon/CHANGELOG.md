@@ -1,6 +1,6 @@
 # CHANGELOG - kyototycoon
 
-## 1.12.0 / 2020-10-31
+## 1.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add logs support. See [#7791](https://github.com/DataDog/integrations-core/pull/7791).
 * [Added] Add config spec. See [#7790](https://github.com/DataDog/integrations-core/pull/7790).

@@ -4,11 +4,9 @@
 from __future__ import division
 
 import logging
-import ssl
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from itertools import chain
-from os.path import expanduser, isdir
 
 import vertica_python as vertica
 from six import iteritems
@@ -21,7 +19,6 @@ from . import views
 from .utils import kilobytes_to_bytes, node_state_to_service_check
 
 # Python 3 only
-PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
 class VerticaCheck(AgentCheck):
@@ -47,29 +44,8 @@ class VerticaCheck(AgentCheck):
 
         self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
 
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
+        self._tls_verify = is_affirmative(self.instance.get('tls_verify', True))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
-
-        self._cert = self.instance.get('cert', '')
-        if self._cert:  # no cov
-            self._cert = expanduser(self._cert)
-            self._tls_verify = True
-
-        self._private_key = self.instance.get('private_key', '')
-        if self._private_key:  # no cov
-            self._private_key = expanduser(self._private_key)
-
-        self._cafile = None
-        self._capath = None
-        ca_cert = self.instance.get('ca_cert', '')
-        if ca_cert:  # no cov
-            ca_cert = expanduser(ca_cert)
-            if isdir(ca_cert):
-                self._capath = ca_cert
-            else:
-                self._cafile = ca_cert
-
-            self._tls_verify = True
 
         custom_queries = self.instance.get('custom_queries', [])
         use_global_custom_queries = self.instance.get('use_global_custom_queries', True)
@@ -103,7 +79,7 @@ class VerticaCheck(AgentCheck):
         # Default to no library logs, since they're too verbose even at the INFO level.
         return None
 
-    def check(self, instance):
+    def check(self, _):
         if self._connection is None:
             connection = self.get_connection()
             if connection is None:
@@ -582,29 +558,8 @@ class VerticaCheck(AgentCheck):
             # but we still get logs via parent root logger
             connection_options['log_path'] = ''
 
-        if self._tls_verify:  # no cov
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-            # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
-            tls_context = ssl.SSLContext(protocol=PROTOCOL_TLS_CLIENT)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-            tls_context.verify_mode = ssl.CERT_REQUIRED
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            tls_context.check_hostname = self._validate_hostname
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-            if self._cafile or self._capath:
-                tls_context.load_verify_locations(self._cafile, self._capath, None)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-            else:
-                tls_context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-            if self._cert:
-                tls_context.load_cert_chain(self._cert, keyfile=self._private_key)
-
+        if self._tls_verify:
+            tls_context = self.get_tls_context()
             connection_options['ssl'] = tls_context
 
         try:

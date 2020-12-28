@@ -106,7 +106,7 @@ class KafkaCheck(AgentCheck):
             if len(self._consumer_offsets) < self._context_limit:
                 self._get_highwater_offsets()
             else:
-                self.log.debug("Context limit reached. Skipping highwater offset collection.")
+                self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
@@ -335,7 +335,7 @@ class KafkaCheck(AgentCheck):
                 1. Issue a ListGroupsRequest to every broker
                 2. Attach a callback to each ListGroupsRequest that issues OffsetFetchRequests for every group.
                    Note: Because a broker only returns groups for which it is the coordinator, as an optimization we
-                  skip the FindCoordinatorRequest
+                   skip the FindCoordinatorRequest
             B: When fetching only listed groups:
                 1. Issue a FindCoordintorRequest for each group
                 2. Attach a callback to each FindCoordinatorResponse that issues OffsetFetchRequests for that group

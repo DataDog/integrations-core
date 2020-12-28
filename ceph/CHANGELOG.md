@@ -1,6 +1,10 @@
 # CHANGELOG - ceph
 
-## 2.2.0 / 2020-10-31
+## 2.3.0 / 2020-11-25
+
+* [Added] Support octopus version. See [#8077](https://github.com/DataDog/integrations-core/pull/8077).
+
+## 2.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 
