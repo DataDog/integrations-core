@@ -925,7 +925,7 @@
         "height": 14
       },
       "definition": {
-        "title": "Replicas MisScheduled",
+        "title": "Replicas Misscheduled",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
