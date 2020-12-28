@@ -25,8 +25,13 @@ def test_e2e_metric_types(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
-def test_e2e_profile(dd_agent_check):
+def test_e2e_profile_f5(dd_agent_check):
     config = common.generate_container_profile_config('f5-big-ip')
+    assert_python_vs_core(dd_agent_check, config, total_count=469)
+
+
+def test_e2e_profile_cisco_nexus(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-nexus')
     assert_python_vs_core(dd_agent_check, config, total_count=469)
 
 
