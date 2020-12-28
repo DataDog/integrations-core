@@ -79,14 +79,14 @@ class TLSCheck(AgentCheck):
 
         # Thresholds expressed in seconds take precedence over those expressed in days
         self._seconds_warning = (
-                int(self.instance.get('seconds_warning', 0))
-                or days_to_seconds(float(self.instance.get('days_warning', 0)))
-                or self.DEFAULT_EXPIRE_SECONDS_WARNING
+            int(self.instance.get('seconds_warning', 0))
+            or days_to_seconds(float(self.instance.get('days_warning', 0)))
+            or self.DEFAULT_EXPIRE_SECONDS_WARNING
         )
         self._seconds_critical = (
-                int(self.instance.get('seconds_critical', 0))
-                or days_to_seconds(float(self.instance.get('days_critical', 0)))
-                or self.DEFAULT_EXPIRE_SECONDS_CRITICAL
+            int(self.instance.get('seconds_critical', 0))
+            or days_to_seconds(float(self.instance.get('days_critical', 0)))
+            or self.DEFAULT_EXPIRE_SECONDS_CRITICAL
         )
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLSocket.version
@@ -135,7 +135,9 @@ class TLSCheck(AgentCheck):
         with closing(sock):
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                with closing(self.tls_context.wrap_socket(sock, server_hostname=self._server_hostname)) as secure_sock:
+                with closing(
+                    self.get_tls_context().wrap_socket(sock, server_hostname=self._server_hostname)
+                ) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     protocol_version = secure_sock.version()
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
@@ -328,9 +330,3 @@ class TLSCheck(AgentCheck):
         if b'-----BEGIN CERTIFICATE-----' in cert:
             return load_pem_x509_certificate(cert, backend)
         return load_der_x509_certificate(cert, backend)
-
-    @property
-    def tls_context(self):
-        if self._tls_context is None:
-            self._tls_context = self.get_tls_context()
-        return self._tls_context

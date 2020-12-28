@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import ssl
-
 from datadog_checks.tls import TLSCheck
 
 
@@ -72,11 +70,3 @@ def test_validation_data():
     assert c._validation_data is None
     assert c.validation_data == c._validation_data
     assert isinstance(c.validation_data, tuple)
-
-
-def test_tls_context():
-    c = TLSCheck('tls', {}, [{}])
-
-    assert c._tls_context is None
-    assert c.tls_context == c._tls_context
-    assert isinstance(c.tls_context, ssl.SSLContext)
