@@ -1286,12 +1286,24 @@ def test_generic_host_resources(aggregator):
     for metric in sys_metrics:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
-    aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=2)
-    aggregator.assert_metric('snmp.hrStorageSize', count=2)
-    aggregator.assert_metric('snmp.hrStorageUsed', count=2)
-    aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=2)
+    storages = [
+        ('1.3.6.1.2.1.25.2.1.3', 'oxen their driving forward quaintly'),
+        ('1.3.6.1.2.1.25.2.1.4', 'quaintly driving Jaded forward their quaintly zombies'),
+    ]
+    for storage_type, storage_desc in storages:
+        tags = common_tags + ['storagetype:{}'.format(storage_type), 'storagedesc:{}'.format(storage_desc)]
+        aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageSize', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageUsed', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=1, tags=tags)
 
-    aggregator.assert_metric('snmp.hrProcessorLoad', count=2)
+    processors = [
+        '1.3.6.1.3.81.16',
+        '1.3.6.1.3.95.73.140.186.121.144.199',
+    ]
+    for proc in processors:
+        tags = common_tags + ['processorid:{}'.format(proc)]
+        aggregator.assert_metric('snmp.hrProcessorLoad', count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
