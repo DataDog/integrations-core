@@ -17,6 +17,9 @@ from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyErr
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
 if platform.system() == 'Windows':
+    import win32wnet
+
+if platform.system() == 'Windows':
     # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
     IGNORE_CASE = re.I
 
@@ -64,6 +67,39 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        self.log.info("entering DISK check")
+    
+        if platform.system() == 'Windows':
+            self._manual_mounts = instance.get('create_mounts', [])
+            if not self._manual_mounts:
+                self.log.info("No manual mounts")
+            else:
+                self.log.info("Manual mounts: {}".format(len(self._manual_mounts)))
+                for manual_mount in self._manual_mounts:
+                    self.log.info("mm: {}".format(manual_mount))
+                    nr = win32wnet.NETRESOURCE()
+                    remote_machine = manual_mount.get('host')
+                    
+                    share = manual_mount.get('share')
+                    uname = manual_mount.get('user')
+                    pword = manual_mount.get('password')
+                    mtype = manual_mount.get('type')
+                
+                    if mtype and mtype.lower() == "nfs":
+                        self.log.info("Attempting NFS mount")
+                        nr.lpRemoteName = r"{}:{}".format(remote_machine, share)
+                    else:
+                        self.log.info("Attempting SMB mount")
+                        nr.lpRemoteName = r"\\{}\{}".format(remote_machine, share).rstrip('\\')
+                    nr.dwType = 0
+                    nr.lpLocalName = manual_mount.get('mountpoint')
+                    self.log.info("NR: {}".format(nr.lpRemoteName))
+                    try:
+                        win32wnet.WNetAddConnection2(nr, pword, uname, 0)
+                    except Exception as e:
+                        self.log.warning("Failed to mount {}".format(e))
+
 
         deprecations_init_conf = {
             'file_system_global_blacklist': 'file_system_global_exclude',
