@@ -35,6 +35,11 @@ def test_e2e_profile_arista(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, total_count=14)
 
 
+def test_e2e_profile_aruba(dd_agent_check):
+    config = common.generate_container_profile_config('aruba')
+    assert_python_vs_core(dd_agent_check, config, total_count=14)
+
+
 def test_e2e_profile_f5(dd_agent_check):
     config = common.generate_container_profile_config('f5-big-ip')
     assert_python_vs_core(dd_agent_check, config, total_count=469)
