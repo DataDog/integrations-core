@@ -158,7 +158,7 @@ def test_metadata(datadog_agent):
     check.log = mock.MagicMock()
 
     with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
-        check._collect_metadata(instance['stats_url'])
+        check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(
             'Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)
@@ -166,7 +166,7 @@ def test_metadata(datadog_agent):
 
     datadog_agent.reset()
     with mock.patch('requests.get', side_effect=IndexError()):
-        check._collect_metadata(instance['stats_url'])
+        check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(
             'Error collecting Envoy version with url=`%s`. Error: %s', 'http://localhost:8001/server_info', ''
@@ -174,7 +174,7 @@ def test_metadata(datadog_agent):
 
     datadog_agent.reset()
     with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
-        check._collect_metadata(instance['stats_url'])
+        check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(
             'Error collecting Envoy version with url=`%s`. Error: %s',
@@ -184,7 +184,7 @@ def test_metadata(datadog_agent):
 
     datadog_agent.reset()
     with mock.patch('requests.get', return_value=response('server_info')):
-        check._collect_metadata(instance['stats_url'])
+        check._collect_metadata()
 
         major, minor, patch = ENVOY_VERSION.split('.')
         version_metadata = {
@@ -200,7 +200,7 @@ def test_metadata(datadog_agent):
 
     datadog_agent.reset()
     with mock.patch('requests.get', return_value=response('server_info_before_1_9')):
-        check._collect_metadata(instance['stats_url'])
+        check._collect_metadata()
 
         expected_version = '1.8.0'
         major, minor, patch = expected_version.split('.')
@@ -217,7 +217,7 @@ def test_metadata(datadog_agent):
 
     datadog_agent.reset()
     with mock.patch('requests.get', return_value=response('server_info_invalid')):
-        check._collect_metadata(instance['stats_url'])
+        check._collect_metadata()
 
         datadog_agent.assert_metadata('test:123', {})
         datadog_agent.assert_metadata_count(0)
