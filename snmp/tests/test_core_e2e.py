@@ -47,107 +47,107 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
 
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
     config = common.generate_container_profile_config('checkpoint-firewall')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=301)
 
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=4290)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
     config = common.generate_container_profile_config('cisco-asa')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_asa_5525(dd_agent_check):
     config = common.generate_container_profile_config('cisco-asa-5525')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_catalyst(dd_agent_check):
     config = common.generate_container_profile_config('cisco-catalyst')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_csr1000v(dd_agent_check):
     config = common.generate_container_profile_config('cisco-csr1000v')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_nexus(dd_agent_check):
     config = common.generate_container_profile_config('cisco-nexus')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=445)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_icm(dd_agent_check):
     config = common.generate_container_profile_config('cisco_icm')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_isr_4431(dd_agent_check):
     config = common.generate_container_profile_config('cisco_isr_4431')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_cisco_uc_virtual_machine(dd_agent_check):
     config = common.generate_container_profile_config('cisco_uc_virtual_machine')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_dell_poweredge(dd_agent_check):
     config = common.generate_container_profile_config('dell-poweredge')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_f5_big_ip(dd_agent_check):
     config = common.generate_container_profile_config('f5-big-ip')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=469)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_fortinet_fortigate(dd_agent_check):
     config = common.generate_container_profile_config('fortinet-fortigate')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_generic_router(dd_agent_check):
     config = common.generate_container_profile_config('generic-router')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_hp_ilo4(dd_agent_check):
     config = common.generate_container_profile_config('hp-ilo4')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_hpe_proliant(dd_agent_check):
     config = common.generate_container_profile_config('hpe-proliant')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_idrac(dd_agent_check):
     config = common.generate_container_profile_config('idrac')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_isilon(dd_agent_check):
     config = common.generate_container_profile_config('isilon')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     config = common.generate_container_profile_config('meraki-cloud-controller')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_netapp(dd_agent_check):
     config = common.generate_container_profile_config('netapp')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_palo_alto(dd_agent_check):
     config = common.generate_container_profile_config('palo-alto')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=0)
+    assert_python_vs_core(dd_agent_check, config)
 
 
 METRIC_TO_SKIP = [
@@ -253,8 +253,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
         for metric in metrics:
             actual_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
 
-    if expected_metrics:
-        print("Python metrics not found in Corecheck metrics:")
+    print("Python metrics not found in Corecheck metrics:")
     for key in sorted(expected_metrics):
         (name, mtype, tags) = key
         if has_index_mapping_tag(tags):
@@ -262,8 +261,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
         if key not in actual_metrics:
             print("\t{}".format(key))
 
-    if actual_metrics:
-        print("Corecheck metrics not found in Python metrics:")
+    print("Corecheck metrics not found in Python metrics:")
     for key in sorted(actual_metrics):
         (name, mtype, tags) = key
         if has_index_mapping_tag(tags):
