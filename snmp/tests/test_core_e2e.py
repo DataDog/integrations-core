@@ -59,11 +59,11 @@ METRIC_TO_SKIP = [
     # wrong mac_addr value
     # python: ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:0xffffffffffff',
     #          'snmp_device:172.24.0.2', 'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
-    # core:   ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:������', 'snmp_device:172.24.0.2',
+    # core:   ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:....', 'snmp_device:172.24.0.2',
     #          'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
     #         ('snmp.cpiPduChainRole', 0, ('device_vendor:chatsworth', 'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
     #          'legacy_pdu_model:P10-1234-ABC', 'legacy_pdu_name:legacy-name1', 'legacy_pdu_version:1.2.3',
-    #          'pdu_cabinetid:cab1', 'pdu_macaddress:\x00$�5\x03�', 'pdu_model:model1', 'pdu_name:name1',
+    #          'pdu_cabinetid:cab1', 'pdu_macaddress:\\x0...., 'pdu_model:model1', 'pdu_name:name1',
     #          'pdu_version:v1.1', 'snmp_device:172.24.0.2', 'snmp_profile:chatsworth_pdu'))
     'snmp.cswSwitchState',
     'snmp.cpiPduChainRole',
