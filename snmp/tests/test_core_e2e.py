@@ -40,6 +40,11 @@ def test_e2e_profile_aruba(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, total_count=14)
 
 
+def test_e2e_profile_chatsworth_pdu(dd_agent_check):
+    config = common.generate_container_profile_config('chatsworth_pdu')
+    assert_python_vs_core(dd_agent_check, config, total_count=184)
+
+
 def test_e2e_profile_f5(dd_agent_check):
     config = common.generate_container_profile_config('f5-big-ip')
     assert_python_vs_core(dd_agent_check, config, total_count=469)
@@ -56,7 +61,26 @@ METRIC_TO_SKIP = [
     #          'snmp_device:172.24.0.2', 'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
     # core:   ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:������', 'snmp_device:172.24.0.2',
     #          'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
+    #         ('snmp.cpiPduChainRole', 0, ('device_vendor:chatsworth', 'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
+    #          'legacy_pdu_model:P10-1234-ABC', 'legacy_pdu_name:legacy-name1', 'legacy_pdu_version:1.2.3',
+    #          'pdu_cabinetid:cab1', 'pdu_macaddress:\x00$�5\x03�', 'pdu_model:model1', 'pdu_name:name1',
+    #          'pdu_version:v1.1', 'snmp_device:172.24.0.2', 'snmp_profile:chatsworth_pdu'))
     'snmp.cswSwitchState',
+    'snmp.cpiPduChainRole',
+    'snmp.cpiPduNumberBranches',
+    'snmp.cpiPduNumberOutlets',
+    'snmp.cpiPduOutOfService',
+    'snmp.cpiPduTotalPower',
+    'snmp.cpiPduUpgrade',
+
+    # index_transform
+    'snmp.cpiPduBranchCurrent',
+    'snmp.cpiPduBranchEnergy',
+    'snmp.cpiPduBranchMaxCurrent',
+    'snmp.cpiPduBranchPower',
+    'snmp.cpiPduBranchPowerFactor',
+    'snmp.cpiPduBranchStatus',
+    'snmp.cpiPduBranchVoltage',
 
     # forced_type: flag_stream
     'snmp.upsBasicStateOutputState.AVRTrimActive',
