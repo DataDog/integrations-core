@@ -72,6 +72,9 @@ services:
         target: /etc/core/key
     networks:
       harbor:
+      harbor-chartmuseum:
+        aliases:
+        - harbor-core
     dns_search: .
     depends_on:
       - registry
@@ -125,6 +128,9 @@ services:
       - SETUID
     networks:
       harbor:
+      harbor-chartmuseum:
+        aliases:
+          - redis
     dns_search: .
   proxy:
     image: goharbor/nginx-photon:v2.0.5
@@ -150,6 +156,24 @@ services:
       - registry
       - core
       - portal
+  chartmuseum:
+    container_name: chartmuseum
+    image: goharbor/chartmuseum-photon:v2.0.5
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    networks:
+      - harbor-chartmuseum
+    dns_search: .
+    env_file:
+      ./config/chartserver/env
 networks:
   harbor:
+    external: false
+  harbor-chartmuseum:
     external: false
