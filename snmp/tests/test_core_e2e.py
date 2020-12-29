@@ -25,6 +25,11 @@ def test_e2e_metric_types(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
+def test_e2e_profile_apc_ups(dd_agent_check):
+    config = common.generate_container_profile_config('apc_ups')
+    assert_python_vs_core(dd_agent_check, config, total_count=28)
+
+
 def test_e2e_profile_f5(dd_agent_check):
     config = common.generate_container_profile_config('f5-big-ip')
     assert_python_vs_core(dd_agent_check, config, total_count=469)
@@ -42,6 +47,16 @@ METRIC_TO_SKIP = [
     # core:   ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:������', 'snmp_device:172.24.0.2',
     #          'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
     'snmp.cswSwitchState',
+
+    # forced_type: flag_stream
+    'snmp.upsBasicStateOutputState.AVRTrimActive',
+    'snmp.upsBasicStateOutputState.BatteriesDischarged',
+    'snmp.upsBasicStateOutputState.LowBatteryOnBattery',
+    'snmp.upsBasicStateOutputState.NoBatteriesAttached',
+    'snmp.upsBasicStateOutputState.On',
+    'snmp.upsBasicStateOutputState.OnLine',
+    'snmp.upsBasicStateOutputState.ReplaceBattery',
+
     # forced_type: percent
     'snmp.sysMultiHostCpuUser',
     'snmp.sysMultiHostCpuNice',
@@ -50,9 +65,11 @@ METRIC_TO_SKIP = [
     'snmp.sysMultiHostCpuIrq',
     'snmp.sysMultiHostCpuSoftirq',
     'snmp.sysMultiHostCpuIowait',
+
     # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
+
     # telemetry
     'snmp.check_duration',
     'snmp.check_interval',
