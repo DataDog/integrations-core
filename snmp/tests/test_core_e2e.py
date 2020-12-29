@@ -89,16 +89,6 @@ def test_e2e_profile_cisco_icm(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-def test_e2e_profile_cisco_isr_4431(dd_agent_check):
-    config = common.generate_container_profile_config('cisco_isr_4431')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_cisco_uc_virtual_machine(dd_agent_check):
-    config = common.generate_container_profile_config('cisco_uc_virtual_machine')
-    assert_python_vs_core(dd_agent_check, config)
-
-
 def test_e2e_profile_dell_poweredge(dd_agent_check):
     config = common.generate_container_profile_config('dell-poweredge')
     assert_python_vs_core(dd_agent_check, config)
