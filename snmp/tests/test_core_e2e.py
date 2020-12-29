@@ -169,6 +169,9 @@ METRIC_TO_SKIP = [
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
 
+    # handle gosnmp.IPAddress and gosnmp.ObjectIdentifier:
+    # https://github.com/DataDog/datadog-agent/blob/c2dac4ee5d83cf4a2d2616c5fed409e1c075c2fa/pkg/collector/corechecks/snmp/gosnmp_value.go#L9-L30
+
     # handle old symbol syntax. Example:
     'snmp.cfInterconnectStatus',
     'snmp.extcache64Hits',
