@@ -304,7 +304,7 @@ class Couchbase(AgentCheck):
                 break
 
         except requests.exceptions.HTTPError:
-            self.log.error("Error accessing the endpoint %s", url)
+            self.log.error("Error accessing the endpoint %s", tasks_url)
 
         return couchbase
 
