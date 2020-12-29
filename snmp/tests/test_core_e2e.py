@@ -24,6 +24,10 @@ def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
     assert_python_vs_core(dd_agent_check, instance)
 
+# Profile tests
+# expected_total_count: Test with some expected_total_count to be sure that both python and corecheck impl
+# are collecting some metrics.
+
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
