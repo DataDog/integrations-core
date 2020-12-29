@@ -91,7 +91,7 @@ The Agent submits this service check for each Windows service configured in `ser
 | Paused           | WARNING               |
 | Unknown          | UNKNOWN               |
 
-If the service cannot be accessed by the Agent either due to permission restriction or the name is incorrect, the service check will report `UNKNOWN`.
+If the service cannot be accessed by the Agent due to a permission restriction or an incorrect name, the service check reports `UNKNOWN`.
 
 ## Troubleshooting
 
