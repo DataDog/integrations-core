@@ -29,64 +29,64 @@ def test_e2e_metric_types(dd_agent_check):
 # are collecting some metrics.
 
 
-# def test_e2e_profile_apc_ups(dd_agent_check):
-#     config = common.generate_container_profile_config('apc_ups')
-#     assert_python_vs_core(dd_agent_check, config, expected_total_count=28)
-#
-#
-# def test_e2e_profile_arista(dd_agent_check):
-#     config = common.generate_container_profile_config('arista')
-#     assert_python_vs_core(dd_agent_check, config, expected_total_count=14)
-#
-#
-# def test_e2e_profile_aruba(dd_agent_check):
-#     config = common.generate_container_profile_config('aruba')
-#     assert_python_vs_core(dd_agent_check, config, expected_total_count=28)
-#
-#
-# def test_e2e_profile_chatsworth_pdu(dd_agent_check):
-#     config = common.generate_container_profile_config('chatsworth_pdu')
-#     assert_python_vs_core(dd_agent_check, config, expected_total_count=184)
-#
-#
-# def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-#     config = common.generate_container_profile_config('checkpoint-firewall')
-#     assert_python_vs_core(dd_agent_check, config, expected_total_count=301)
-#
-#
-# def test_e2e_profile_cisco_3850(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco-3850')
-#     assert_python_vs_core(dd_agent_check, config, expected_total_count=4290)
-#
-#
-# def test_e2e_profile_cisco_asa(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco-asa')
-#     assert_python_vs_core(dd_agent_check, config)
-#
-#
-# def test_e2e_profile_cisco_asa_5525(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco-asa-5525')
-#     assert_python_vs_core(dd_agent_check, config)
-#
-#
-# def test_e2e_profile_cisco_catalyst(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco-catalyst')
-#     assert_python_vs_core(dd_agent_check, config)
-#
-#
-# def test_e2e_profile_cisco_csr1000v(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco-csr1000v')
-#     assert_python_vs_core(dd_agent_check, config)
-#
-#
-# def test_e2e_profile_cisco_nexus(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco-nexus')
-#     assert_python_vs_core(dd_agent_check, config)
-#
-#
-# def test_e2e_profile_cisco_icm(dd_agent_check):
-#     config = common.generate_container_profile_config('cisco_icm')
-#     assert_python_vs_core(dd_agent_check, config)
+def test_e2e_profile_apc_ups(dd_agent_check):
+    config = common.generate_container_profile_config('apc_ups')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=28)
+
+
+def test_e2e_profile_arista(dd_agent_check):
+    config = common.generate_container_profile_config('arista')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=14)
+
+
+def test_e2e_profile_aruba(dd_agent_check):
+    config = common.generate_container_profile_config('aruba')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=28)
+
+
+def test_e2e_profile_chatsworth_pdu(dd_agent_check):
+    config = common.generate_container_profile_config('chatsworth_pdu')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=184)
+
+
+def test_e2e_profile_checkpoint_firewall(dd_agent_check):
+    config = common.generate_container_profile_config('checkpoint-firewall')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=301)
+
+
+def test_e2e_profile_cisco_3850(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-3850')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=4290)
+
+
+def test_e2e_profile_cisco_asa(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-asa')
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_profile_cisco_asa_5525(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-asa-5525')
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_profile_cisco_catalyst(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-catalyst')
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_profile_cisco_csr1000v(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-csr1000v')
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_profile_cisco_nexus(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-nexus')
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_profile_cisco_icm(dd_agent_check):
+    config = common.generate_container_profile_config('cisco_icm')
+    assert_python_vs_core(dd_agent_check, config)
 
 
 def test_e2e_profile_dell_poweredge(dd_agent_check):
@@ -168,6 +168,12 @@ METRIC_TO_SKIP = [
     # from dell-poweredge.yaml and _dell-rac.yaml
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
+
+    # handle old symbol syntax. Example:
+    'snmp.cfInterconnectStatus',
+    'snmp.extcache64Hits',
+    'snmp.miscCacheAge',
+    'snmp.ncHttpActiveCliConns',
 
     # snmpsim type 64x
     'snmp.ospfIfLsaCount',
