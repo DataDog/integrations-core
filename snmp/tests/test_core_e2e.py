@@ -45,7 +45,6 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, total_count=184)
 
 
-
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
     assert_python_vs_core(dd_agent_check, config, total_count=184)
@@ -58,7 +57,7 @@ def test_e2e_profile_arista(dd_agent_check):
 
 def test_e2e_profile_aruba(dd_agent_check):
     config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, total_count=184)
+    assert_python_vs_core(dd_agent_check, config, total_count=28)
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
@@ -188,6 +187,20 @@ METRIC_TO_SKIP = [
     'snmp.cpiPduOutOfService',
     'snmp.cpiPduTotalPower',
     'snmp.cpiPduUpgrade',
+
+    # snmpsim type 64x
+    'snmp.ospfIfLsaCount',
+    'snmp.ospfIfRetransInterval',
+    'snmp.ospfIfState',
+    'snmp.ospfNbrEvents',
+    'snmp.ospfNbrLsRetransQLen',
+    'snmp.ospfNbrState',
+    'snmp.ospfVirtIfLsaCount',
+    'snmp.ospfVirtIfRetransInterval',
+    'snmp.ospfVirtIfState',
+    'snmp.ospfVirtNbrEvents',
+    'snmp.ospfVirtNbrLsRetransQLen',
+    'snmp.ospfVirtNbrState',
 
     # index_transform
     'snmp.cpiPduBranchCurrent',
