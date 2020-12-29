@@ -36,6 +36,12 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
 
 
 METRIC_TO_SKIP = [
+    # wrong mac_addr value
+    # python: ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:0xffffffffffff',
+    #          'snmp_device:172.24.0.2', 'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
+    # core:   ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:������', 'snmp_device:172.24.0.2',
+    #          'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
+    'snmp.cswSwitchState',
     # forced_type: percent
     'snmp.sysMultiHostCpuUser',
     'snmp.sysMultiHostCpuNice',
