@@ -171,6 +171,22 @@ METRIC_TO_SKIP = [
 
     # handle gosnmp.IPAddress and gosnmp.ObjectIdentifier:
     # https://github.com/DataDog/datadog-agent/blob/c2dac4ee5d83cf4a2d2616c5fed409e1c075c2fa/pkg/collector/corechecks/snmp/gosnmp_value.go#L9-L30
+    'snmp.bgpPeerAdminStatus',
+    'snmp.bgpPeerConnectRetryInterval',
+    'snmp.bgpPeerFsmEstablishedTime',
+    'snmp.bgpPeerFsmEstablishedTransitions',
+    'snmp.bgpPeerHoldTime',
+    'snmp.bgpPeerHoldTimeConfigured',
+    'snmp.bgpPeerInTotalMessages',
+    'snmp.bgpPeerInUpdates',
+    'snmp.bgpPeerKeepAlive',
+    'snmp.bgpPeerKeepAliveConfigured',
+    'snmp.bgpPeerMinASOriginationInterval',
+    'snmp.bgpPeerNegotiatedVersion',
+    'snmp.bgpPeerOutTotalMessages',
+    'snmp.bgpPeerOutUpdates',
+    'snmp.bgpPeerRemoteAs',
+    'snmp.bgpPeerState',
 
     # handle old symbol syntax. Example:
     'snmp.cfInterconnectStatus',
