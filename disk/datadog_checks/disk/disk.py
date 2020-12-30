@@ -75,9 +75,9 @@ class Disk(AgentCheck):
             if not self._manual_mounts:
                 self.log.info("No manual mounts")
             else:
-                self.log.info("Manual mounts: {}".format(len(self._manual_mounts)))
+                self.log.info("Manual mounts: %d", len(self._manual_mounts))
                 for manual_mount in self._manual_mounts:
-                    self.log.info("mm: {}".format(manual_mount))
+                    self.log.info("mm: %s", manual_mount)
                     nr = win32wnet.NETRESOURCE()
                     remote_machine = manual_mount.get('host')
                     
@@ -94,11 +94,11 @@ class Disk(AgentCheck):
                         nr.lpRemoteName = r"\\{}\{}".format(remote_machine, share).rstrip('\\')
                     nr.dwType = 0
                     nr.lpLocalName = manual_mount.get('mountpoint')
-                    self.log.info("NR: {}".format(nr.lpRemoteName))
+                    self.log.info("NR: %s", nr.lpRemoteName)
                     try:
                         win32wnet.WNetAddConnection2(nr, pword, uname, 0)
                     except Exception as e:
-                        self.log.warning("Failed to mount {}".format(e))
+                        self.log.warning("Failed to mount: %s", e)
 
 
         deprecations_init_conf = {
