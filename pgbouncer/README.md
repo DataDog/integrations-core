@@ -47,6 +47,8 @@ To configure this check for an Agent running on a host:
      - database_url: "postgresql://datadog:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require"
    ```
 
+  **Note**: If your instance of PgBouncer does not have SSL support, replace `sslmode=require` with `sslmode=allow` to avoid server errors. For more information on SSL support, see the [Postgres documentation][10].
+
 2. [Restart the Agent][4].
 
 ##### Log collection
@@ -135,3 +137,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.postgresql.org/docs/9.1/libpq-ssl.html
