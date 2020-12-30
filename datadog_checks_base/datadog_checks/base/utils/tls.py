@@ -35,8 +35,8 @@ STANDARD_FIELDS = {
 class TlsContextWrapper(object):
     __slots__ = ('logger', 'config', 'tls_context')
 
-    def __init__(self, instance, remapper=None):
-        # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]]) -> None
+    def __init__(self, instance, remapper=None, overrides=None):
+        # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]], Dict[AnyStr, Any]) -> None
         default_fields = dict(STANDARD_FIELDS)
 
         # Populate with the default values
@@ -90,6 +90,11 @@ class TlsContextWrapper(object):
             if unique_name in config:
                 config[field] = config[unique_name]
                 del config[unique_name]
+
+        # Override existing config options if there exists any overrides
+        for overridden_field, data in iteritems(overrides):
+            if config[overridden_field]:
+                config[overridden_field] = data
 
         self.config = config
         self.tls_context = self._create_tls_context()

@@ -309,7 +309,7 @@ class AgentCheck(object):
 
         return self._http
 
-    def get_tls_context(self, refresh=False):
+    def get_tls_context(self, refresh=False, overrides=None):
         # type: (bool) -> ssl.SSLContext
         """
         Creates and cache an SSLContext instance based on user configuration.
@@ -317,7 +317,7 @@ class AgentCheck(object):
         Since: Agent 7.24
         """
         if not hasattr(self, '_tls_context_wrapper'):
-            self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER)
+            self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER, overrides)
 
         if refresh:
             self._tls_context_wrapper.refresh_tls_context()
