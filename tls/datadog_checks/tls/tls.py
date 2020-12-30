@@ -340,18 +340,14 @@ class TLSCheck(AgentCheck):
         if self._tls_context is None:
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
             # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
-
-            overrides = {
-                "tls_validate_hostname": False
-            }
-            self._tls_context = self.get_tls_context(overrides=overrides)
+            self._tls_context = ssl.SSLContext(protocol=PROTOCOL_TLS_CLIENT)
 
             # Run our own validation later on if need be
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
             #
             # IMPORTANT: This must be set before verify_mode in Python 3.7+, see:
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            # self._tls_context.check_hostname = False
+            self._tls_context.check_hostname = False
 
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
             self._tls_context.verify_mode = ssl.CERT_REQUIRED if self._validate_cert else ssl.CERT_NONE
