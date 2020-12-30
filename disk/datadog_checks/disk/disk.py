@@ -69,7 +69,7 @@ class Disk(AgentCheck):
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
 
         self.log.info("entering DISK check")
-    
+
         if platform.system() == 'Windows':
             self._manual_mounts = instance.get('create_mounts', [])
             if not self._manual_mounts:
@@ -80,12 +80,12 @@ class Disk(AgentCheck):
                     self.log.info("mm: %s", manual_mount)
                     nr = win32wnet.NETRESOURCE()
                     remote_machine = manual_mount.get('host')
-                    
+
                     share = manual_mount.get('share')
                     uname = manual_mount.get('user')
                     pword = manual_mount.get('password')
                     mtype = manual_mount.get('type')
-                
+
                     if mtype and mtype.lower() == "nfs":
                         self.log.info("Attempting NFS mount")
                         nr.lpRemoteName = r"{}:{}".format(remote_machine, share)
@@ -99,7 +99,6 @@ class Disk(AgentCheck):
                         win32wnet.WNetAddConnection2(nr, pword, uname, 0)
                     except Exception as e:
                         self.log.warning("Failed to mount: %s", e)
-
 
         deprecations_init_conf = {
             'file_system_global_blacklist': 'file_system_global_exclude',
