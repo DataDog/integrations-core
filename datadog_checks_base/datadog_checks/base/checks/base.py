@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
 from six import binary_type, iteritems, text_type
@@ -310,9 +310,11 @@ class AgentCheck(object):
         return self._http
 
     def get_tls_context(self, refresh=False, overrides=None):
-        # type: (bool) -> ssl.SSLContext
+        # type: (bool, Dict[AnyStr, Any]) -> ssl.SSLContext
         """
         Creates and cache an SSLContext instance based on user configuration.
+        Note that user configuration can be overridden by using `overrides`.
+        This should only be applied to older integration that manually set config values.
 
         Since: Agent 7.24
         """
