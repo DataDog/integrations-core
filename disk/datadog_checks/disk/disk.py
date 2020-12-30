@@ -470,7 +470,7 @@ class Disk(AgentCheck):
         if not self._manual_mounts:
             self.log.debug("No manual mounts")
         else:
-            self.log.debug("Attempting to create {} mounts: ".format(len(self._manual_mounts)))
+            self.log.debug("Attempting to create %d mounts: ", len(self._manual_mounts))
             for manual_mount in self._manual_mounts:
                 remote_machine = manual_mount.get('host')
                 share = manual_mount.get('share')
@@ -486,18 +486,18 @@ class Disk(AgentCheck):
 
                 if mtype and mtype.lower() == "nfs":
                     nr.lpRemoteName = r"{}:{}".format(remote_machine, share)
-                    self.log.debug("Attempting NFS mount: {}".format(nr.lpRemoteName))
+                    self.log.debug("Attempting NFS mount: %s", nr.lpRemoteName)
                 else:
                     nr.lpRemoteName = r"\\{}\{}".format(remote_machine, share).rstrip('\\')
-                    self.log.debug("Attempting SMB mount: {}".format(nr.lpRemoteName))
+                    self.log.debug("Attempting SMB mount: %s", nr.lpRemoteName)
 
                 nr.dwType = 0
                 nr.lpLocalName = mountpoint
                 try:
                     win32wnet.WNetAddConnection2(nr, pword, uname, 0)
-                    self.log.debug("Successfully mounted {} as {}".format(mountpoint, nr.lpRemoteName))
+                    self.log.debug("Successfully mounted %s as %s", mountpoint, nr.lpRemoteName)
                 except Exception as e:
-                    self.log.warning("Failed to mount {} {}".format(nr.lpRemoteName, e))
+                    self.log.warning("Failed to mount %s %s", nr.lpRemoteName, str(e))
                     pass
 
     @staticmethod
