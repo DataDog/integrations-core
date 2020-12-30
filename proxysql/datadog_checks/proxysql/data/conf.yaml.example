@@ -48,30 +48,6 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
-    ## @param tls_cert - string - optional
-    ## The path to a single file in PEM format containing a certificate as well as any
-    ## number of CA certificates needed to establish the certificate's authenticity for
-    ## use when connecting to services. It may also contain an unencrypted private key to use.
-    ##
-    ## Setting this implicitly sets `tls_verify` to true.
-    #
-    # tls_cert: <CERT_PATH>
-
-    ## @param tls_private_key - string - optional
-    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
-    ## required if `tls_cert` is set and it does not already contain a private key.
-    ##
-    ## Setting this implicitly sets `tls_verify` to true.
-    #
-    # tls_private_key: <PRIVATE_KEY_PATH>
-
-    ## @param tls_private_key_password - string - optional
-    ## Optional password to decrypt tls_private_key.
-    ##
-    ## Setting this implicitly sets `tls_verify` to true.
-    #
-    # tls_private_key_password: <PRIVATE_KEY_PASSWORD>
-
     ## @param tls_validate_hostname - boolean - optional - default: true
     ## Verifies that the server's cert hostname matches the one requested.
     #

@@ -38,6 +38,9 @@ files:
       overrides:
         tls_verify.default: false
         tls_verify.value.example: false
+        tls_cert.hidden: true
+        tls_private_key.hidden: true
+        tls_private_key_password.hidden: true
     - name: connect_timeout
       required: false
       description: |
