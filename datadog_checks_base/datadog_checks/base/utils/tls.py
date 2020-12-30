@@ -92,9 +92,10 @@ class TlsContextWrapper(object):
                 del config[unique_name]
 
         # Override existing config options if there exists any overrides
-        for overridden_field, data in iteritems(overrides):
-            if config[overridden_field]:
-                config[overridden_field] = data
+        if overrides:
+            for overridden_field, data in iteritems(overrides):
+                if config[overridden_field]:
+                    config[overridden_field] = data
 
         self.config = config
         self.tls_context = self._create_tls_context()
