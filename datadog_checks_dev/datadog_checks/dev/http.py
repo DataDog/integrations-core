@@ -21,4 +21,5 @@ class MockResponse(Response):
 
             self.raw = BytesIO(content.encode('utf-8'))
 
+        # Add new keyword arguments to set as needed
         self.status_code = status_code

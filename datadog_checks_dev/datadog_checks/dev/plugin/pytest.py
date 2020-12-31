@@ -234,6 +234,7 @@ def dd_save_state():
 
 @pytest.fixture
 def mock_http_response(mocker):
+    # Lazily import `requests` as it may be costly under certain conditions
     global MockResponse
     if MockResponse is None:
         from ..http import MockResponse
