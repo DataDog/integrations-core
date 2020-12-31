@@ -23,7 +23,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.cpu.time{$host} by {host,cpu})",
+                                    "q": "avg:otel.system.cpu.time{$host} by {host,cpu}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -232,7 +232,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.network.io{$host,direction:transmit} by {host})",
+                                    "q": "avg:otel.system.network.io{$host,direction:transmit} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -241,7 +241,7 @@
                                 }
                             ],
                             "show_legend": false,
-                            "title": "Number of bytes transmitted by host",
+                            "title": Bytes per second transmitted by host",
                             "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
@@ -259,7 +259,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.network.io{$host,direction:receive} by {host})",
+                                    "q": "avg:otel.system.network.io{$host,direction:receive} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -268,7 +268,7 @@
                                 }
                             ],
                             "show_legend": false,
-                            "title": "Number of bytes received by host",
+                            "title": "Bytes per second received by host",
                             "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
@@ -286,7 +286,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.network.packets{$host} by {host})",
+                                    "q": "avg:otel.system.network.packets{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -313,7 +313,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.network.dropped_packets{$host} by {host})",
+                                    "q": "avg:otel.system.network.dropped_packets{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -377,7 +377,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.process.cpu.time{$host} by {host})",
+                                    "q": "avg:otel.process.cpu.time{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -431,7 +431,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.process.disk.io{$host,direction:read} by {host}), -derivative(avg:otel.process.disk.io{$host,direction:write} by {host})",
+                                    "q": "avg:otel.process.disk.io{$host,direction:read} by {host}, -avg:otel.process.disk.io{$host,direction:write} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -469,7 +469,7 @@
                                 {
                                     "display_type": "line",
                                     "on_right_yaxis": false,
-                                    "q": "derivative(sum:otel.system.disk.io{$host,direction:read} by {host,device})",
+                                    "q": "sum:otel.system.disk.io{$host,direction:read} by {host,device}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -478,7 +478,7 @@
                                 },
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(sum:otel.system.disk.io{$host,direction:write} by {host}), -derivative(sum:otel.system.disk.io{$host,direction:write} by {host})",
+                                    "q": "sum:otel.system.disk.io{$host,direction:write} by {host}, -sum:otel.system.disk.io{$host,direction:write} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -506,7 +506,7 @@
                                 {
                                     "display_type": "line",
                                     "on_right_yaxis": false,
-                                    "q": "derivative(avg:otel.system.disk.ops{$host} by {host})",
+                                    "q": "avg:otel.system.disk.ops{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -533,7 +533,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.disk.io_time{$host} by {host})",
+                                    "q": "avg:otel.system.disk.io_time{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -560,7 +560,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.disk.operation_time{$host} by {host})",
+                                    "q": "avg:otel.system.disk.operation_time{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -651,7 +651,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.swap.paging_ops{$host,direction:page_out} by {host})",
+                                    "q": "avg:otel.system.swap.paging_ops{$host,direction:page_out} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -678,7 +678,7 @@
                             "requests": [
                                 {
                                     "display_type": "line",
-                                    "q": "derivative(avg:otel.system.swap.page_faults{$host} by {host})",
+                                    "q": "avg:otel.system.swap.page_faults{$host} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
