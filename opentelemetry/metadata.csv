@@ -4,19 +4,19 @@ otel.system.cpu.load_average.1m,gauge,,unit,,Average CPU Load over 1 minute,0,op
 otel.system.cpu.load_average.5m,gauge,,unit,,Average CPU Load over 5 minutes,0,opentelemetry,load norm 5
 otel.system.cpu.load_average.15m,gauge,,unit,,Average CPU Load over 15 minutes,0,opentelemetry,load norm 15
 otel.system.memory.usage,gauge,,byte,,Bytes of memory in use,0,opentelemetry,mem usage
-otel.system.disk.io,gauge,,byte,,Disk bytes transferred.,0,opentelemetry,disk io
-otel.system.disk.operations,gauge,,unit,,Disk operations count,0,opentelemetry,disk ops
-otel.system.disk.io_time,gauge,,second,,Time disk spent activated,0,opentelemetry,disk io time
+otel.system.disk.io,gauge,,byte,second,Disk bytes transferred per second,0,opentelemetry,disk io
+otel.system.disk.operations,gauge,,unit,second,Disk operations per second,0,opentelemetry,disk ops
+otel.system.disk.io_time,gauge,,unit,,Time disk spent activated each second,0,opentelemetry,disk io time
 otel.system.disk.operation_time,gauge,,second,,Time spent in disk operations,0,opentelemetry,disk ops time
 otel.system.disk.merged,gauge,,request,,The number of disk reads merged into single physical disk access operations.,0,opentelemetry,disk merged
 otel.system.disk.pending_operations,gauge,,unit,,The queue size of pending I/O operations.,0,opentelemetry,disk pending ops
 otel.system.filesystem.usage,gauge,,byte,,Filesystem bytes used.,0,opentelemetry,fs in use
 otel.system.filesystem.inodes.usage,gauge,,inode,,Filesystem inodes used,0,opentelemetry,inodes in use
-otel.system.network.dropped,gauge,,packet,,Count of packets that are dropped or discarded even though there was no error,-1,opentelemetry,packets dropped
-otel.system.network.dropped_packets,gauge,,packet,,The number of packets dropped,-1,opentelemetry,packets dropped
-otel.system.network.packets,gauge,,packet,,The number of packets transferred,0,opentelemetry,packets
+otel.system.network.dropped,gauge,,packet,second,Packets that are dropped or discarded per second even though there was no error,-1,opentelemetry,packets dropped
+otel.system.network.dropped_packets,gauge,,packet,second,The number of packets dropped per second,-1,opentelemetry,packets dropped
+otel.system.network.packets,gauge,,packet,second,The number of packets transferred per second,0,opentelemetry,packets
 otel.system.network.errors,gauge,,error,,The number of errors encountered,-1,opentelemetry,packets err
-otel.system.network.io,gauge,,byte,,The number of bytes transmitted and received,0,opentelemetry,bytes sent
+otel.system.network.io,gauge,,byte,second,The number of bytes transmitted and received per second,0,opentelemetry,bytes sent
 otel.system.network.connections,gauge,,connection,,The number of connections,0,opentelemetry,conns
 otel.system.network.tcp_connections,gauge,,connection,,The number of TCP connections,0,opentelemetry,tcp conns
 otel.system.process.count,gauge,,process,,Total number of processes in each state,0,opentelemetry,processes count
@@ -25,10 +25,10 @@ otel.system.processes.blocked,gauge,,process,,Total number of blocked processes,
 otel.process.cpu.time,gauge,,second,,Total CPU seconds broken down by different states.,0,opentelemetry,processes cpu time
 otel.process.memory.physical_usage,gauge,,byte,,The amount of physical memory in use,0,opentelemetry,processes mem Rhys
 otel.process.memory.virtual_usage,gauge,,byte,,Virtual memory size,0,opentelemetry,processes mem virtual
-otel.process.disk.io,gauge,,byte,,Disk bytes transferred,0,opentelemetry,processes disk io
+otel.process.disk.io,gauge,,byte,second,Disk bytes transferred per second,0,opentelemetry,processes disk io
 otel.system.swap.usage,gauge,,byte,,Swap (unix) or pagefile (windows) usage,0,opentelemetry,swap in use
-otel.system.swap.paging_ops,gauge,,occurrence,,The number of paging operations,0,opentelemetry,swap paging ops
-otel.system.swap.page_faults,gauge,,occurrence,,The number of paging faults,-1,opentelemetry,swap page faults
+otel.system.swap.paging_ops,gauge,,occurrence,second,The number of paging operations per second,0,opentelemetry,swap paging ops
+otel.system.swap.page_faults,gauge,,occurrence,second,The number of paging faults per second,-1,opentelemetry,swap page faults
 otel.system.paging.usage,gauge,,byte,,Unix swap or windows pagefile usage,0,opentelemetry,paging in use
 otel.system.paging.faults,gauge,,occurrence,,The number of paging faults,0,opentelemetry,paging faults
 otel.system.paging.operations,gauge,,unit,,The number of paging operations,0,opentelemetry,paging ops
