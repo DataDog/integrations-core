@@ -241,7 +241,7 @@
                                 }
                             ],
                             "show_legend": false,
-                            "title": Bytes per second transmitted by host",
+                            "title": "Bytes per second transmitted by host",
                             "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
