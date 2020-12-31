@@ -28,6 +28,7 @@ from .._env import (
 
 __aggregator = None
 __datadog_agent = None
+MockResponse = None
 
 
 @pytest.fixture
@@ -229,6 +230,17 @@ def dd_get_state():
 @pytest.fixture
 def dd_save_state():
     return save_state
+
+
+@pytest.fixture
+def mock_http_response(mocker):
+    global MockResponse
+    if MockResponse is None:
+        from ..http import MockResponse
+
+    yield lambda *args, **kwargs: mocker.patch(
+        kwargs.pop('method', 'requests.get'), return_value=MockResponse(*args, **kwargs)
+    )
 
 
 def pytest_configure(config):
