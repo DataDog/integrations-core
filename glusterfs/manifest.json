@@ -27,7 +27,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Red Hat Gluster Storage": "assets/dashboards/red_hat_gluster_storage.json"
+    },
     "monitors": {
       "brick status": "assets/monitors/brick_status.json"
     },

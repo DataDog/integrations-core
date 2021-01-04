@@ -1,0 +1,604 @@
+{
+    "author_name": "Datadog",
+    "description": "",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "volume_name",
+            "prefix": "vol_name"
+        },
+        {
+            "default": "*",
+            "name": "brick_server",
+            "prefix": "brick_server"
+        }
+    ],
+    "title": "Red Hat Gluster Storage",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/red_hat_gluster_storage@2x.png"
+            },
+            "id": 4299518788960180,
+            "layout": {
+                "height": 12,
+                "width": 24,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Cluster Health",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7151459780793010,
+            "layout": {
+                "height": 5,
+                "width": 83,
+                "x": 26,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "With this dashboard, you can get a high-level view of your GlusterFS clusters and troubleshoot performance issues, including:\n\n- Cluster health\n- When a volume, node or brick goes offline\n- Brick and volume usage\n\nTo learn more about our GlusterFS integration, see:\n\nOur official integration documentation\nOur blog post\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 889074538483226,
+            "layout": {
+                "height": 34,
+                "width": 24,
+                "x": 1,
+                "y": 14
+            }
+        },
+        {
+            "definition": {
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:glusterfs.cluster.nodes.active{*}"
+                    }
+                ],
+                "time": {},
+                "title": "Active nodes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1543090856833202,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 26,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:glusterfs.cluster.nodes.count{*}-avg:glusterfs.cluster.nodes.active{*}"
+                    }
+                ],
+                "time": {},
+                "title": "Inactive nodes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 958929336749130,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 47,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:glusterfs.cluster.volumes.started{*}"
+                    }
+                ],
+                "time": {},
+                "title": "Volumes started",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8758671643461740,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 68,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:glusterfs.cluster.volumes.count{*}"
+                    }
+                ],
+                "time": {},
+                "title": "Total volumes",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 3556950173097090,
+            "layout": {
+                "height": 15,
+                "width": 20,
+                "x": 89,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Volume",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5750309842209690,
+            "layout": {
+                "height": 5,
+                "width": 83,
+                "x": 26,
+                "y": 23
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Health",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1053320209895192,
+            "layout": {
+                "height": 5,
+                "width": 41,
+                "x": 26,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Storage",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 8932723478122072,
+            "layout": {
+                "height": 5,
+                "width": 41,
+                "x": 68,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.volume.bricks.count{$volume_name} by {vol_name}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Number of bricks per volume",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2154440898066924,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 26,
+                "y": 35
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.volume.online{$volume_name} by {vol_name}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Volumes online",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1747705371654184,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 26,
+                "y": 51
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.volume.size.free{$volume_name} by {vol_name}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Space available",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3732405901291996,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 68,
+                "y": 51
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.volume.used.percent{$volume_name} by {vol_name}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Percentage size used",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7103148646631076,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 68,
+                "y": 35
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The loss of a single brick in the volume will not cause the volume itself to be unavailable, instead this would manifest as inaccessible files in the file system.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3691908531588406,
+            "layout": {
+                "height": 15,
+                "width": 21,
+                "x": 3,
+                "y": 79
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Bricks",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7293255988058668,
+            "layout": {
+                "height": 5,
+                "width": 83,
+                "x": 26,
+                "y": 67
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Health",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 942769373806882,
+            "layout": {
+                "height": 5,
+                "width": 41,
+                "x": 26,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Storage",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2642526862940572,
+            "layout": {
+                "height": 5,
+                "width": 41,
+                "x": 68,
+                "y": 73
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.brick.online{$brick_server} by {brick_server,brick_export}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Bricks online",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2177012672425692,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 26,
+                "y": 79
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.brick.block_size{$brick_server} by {brick_server,brick_export}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Brick block size",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3295484822592124,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 26,
+                "y": 95
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.brick.size.used{$brick_server} by {brick_server,brick_export}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Bricks size used",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 857353741630330,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 68,
+                "y": 79
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:glusterfs.brick.inodes.used{$brick_server} by {brick_server,brick_export}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Bricks inodes used",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3682107306640612,
+            "layout": {
+                "height": 15,
+                "width": 41,
+                "x": 68,
+                "y": 95
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Consider expanding your volume when the volume utilization has become high. \n\nFor distributed volumes, you can increase distribution and capacity by adding a brick. Similarly, you might want to add a group of bricks to a distributed replicated volume.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2253038093267678,
+            "layout": {
+                "height": 21,
+                "width": 22,
+                "x": 111,
+                "y": 31
+            }
+        }
+    ]
+}
