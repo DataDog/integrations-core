@@ -31,34 +31,45 @@ def format_check_usage(checks, default=None):
         return f'{checks[0]}, {checks[1]}, and {remaining} other{plurality}'
 
 
-def verify_base_dependency(source, name, base_versions, force_pinned=True):
+def verify_base_dependency(source, name, base_versions, force_pinned=True, min_base_version=None):
     """Minimal dependency verification for `datadog-checks-base` dependencies.
 
     Ensures that the version isn't specifically pinned since that will limit check installations.
     Optionally ensures that dependencies which have no pins are reported as errors.
+    Optionally validate a specific version satisfies the base requirement spec.
     """
+    failed = False
+
     for specifier_set, dependency_definitions in base_versions.items():
         checks = sorted(dep.check_name for dep in dependency_definitions)
 
         if not specifier_set and force_pinned:
             echo_failure(f'Unspecified version found for dependency `{name}`: {format_check_usage(checks, source)}')
-            return False
+            failed = True
         elif len(specifier_set) > 1:
             echo_failure(
                 f'Multiple unstable version pins `{specifier_set}` found for dependency `{name}`: '
                 f'{format_check_usage(checks, source)}'
             )
-            return False
+            failed = True
         elif specifier_set:
             specifier = get_next(specifier_set)
+
             if specifier.operator != '>=':
                 echo_failure(
                     f'Forced version pin `{specifier}` found for dependency `{name}` '
                     f'(use >= explicitly for base dependency): {format_check_usage(checks, source)}'
                 )
-                return False
+                failed = True
 
-    return True
+            if min_base_version is not None and min_base_version not in specifier:
+                echo_failure(
+                    f'Minimum datadog_checks_base version `{min_base_version}` not satisfied by dependency specifier '
+                    f'`{specifier}`: {format_check_usage(checks, source)}'
+                )
+                failed = True
+
+    return not failed
 
 
 def verify_dependency(source, name, versions):
@@ -109,7 +120,10 @@ def verify_dependency(source, name, versions):
 @click.option(
     '--require-base-check-version', is_flag=True, help='Require specific version for datadog-checks-base requirement'
 )
-def dep(require_base_check_version):
+@click.option(
+    '--min-base-check-version', help='Specify minimum version for datadog-checks-base requirement, e.g. `11.0.0`'
+)
+def dep(require_base_check_version, min_base_check_version):
     """
     This command will:
 
@@ -119,6 +133,7 @@ def dep(require_base_check_version):
       listed in every integration are compatible.
     * Verify each check specifies a `CHECKS_BASE_REQ` variable for `datadog-checks-base` requirement
     * Optionally verify that the `datadog-checks-base` requirement is lower-bounded
+    * Optionally verify that the `datadog-checks-base` requirement satisfies specific version
     """
     failed = False
     check_dependencies, check_errors = read_check_dependencies()
@@ -154,7 +169,9 @@ def dep(require_base_check_version):
             echo_failure(f'Dependency needs to be synced: {name}')
 
     for name, versions in sorted(check_base_dependencies.items()):
-        if not verify_base_dependency('Base Checks', name, versions, force_pinned=require_base_check_version):
+        if not verify_base_dependency(
+            'Base Checks', name, versions, require_base_check_version, min_base_check_version
+        ):
             failed = True
 
     for name, versions in sorted(agent_dependencies.items()):
