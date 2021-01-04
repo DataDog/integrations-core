@@ -24,6 +24,7 @@ def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
     assert_python_vs_core(dd_agent_check, instance)
 
+
 # Profile tests
 # expected_total_count: Test with some expected_total_count to be sure that both python and corecheck impl
 # are collecting some metrics.
@@ -161,14 +162,12 @@ METRIC_TO_SKIP = [
     'snmp.cpiPduOutOfService',
     'snmp.cpiPduTotalPower',
     'snmp.cpiPduUpgrade',
-
     # handle metrics present multiple times. Example:
     # - snmp.memoryDeviceStatus
     # - snmp.networkDeviceStatus
     # from dell-poweredge.yaml and _dell-rac.yaml
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
-
     # handle gosnmp.IPAddress and gosnmp.ObjectIdentifier:
     # https://github.com/DataDog/datadog-agent/blob/c2dac4ee5d83cf4a2d2616c5fed409e1c075c2fa/pkg/collector/corechecks/snmp/gosnmp_value.go#L9-L30
     'snmp.bgpPeerAdminStatus',
@@ -187,13 +186,11 @@ METRIC_TO_SKIP = [
     'snmp.bgpPeerOutUpdates',
     'snmp.bgpPeerRemoteAs',
     'snmp.bgpPeerState',
-
     # handle old symbol syntax. Example:
     'snmp.cfInterconnectStatus',
     'snmp.extcache64Hits',
     'snmp.miscCacheAge',
     'snmp.ncHttpActiveCliConns',
-
     # snmpsim type 64x
     'snmp.ospfIfLsaCount',
     'snmp.ospfIfRetransInterval',
@@ -207,7 +204,6 @@ METRIC_TO_SKIP = [
     'snmp.ospfVirtNbrEvents',
     'snmp.ospfVirtNbrLsRetransQLen',
     'snmp.ospfVirtNbrState',
-
     # index_transform
     'snmp.cpiPduBranchCurrent',
     'snmp.cpiPduBranchEnergy',
@@ -216,7 +212,6 @@ METRIC_TO_SKIP = [
     'snmp.cpiPduBranchPowerFactor',
     'snmp.cpiPduBranchStatus',
     'snmp.cpiPduBranchVoltage',
-
     # forced_type: flag_stream
     'snmp.upsBasicStateOutputState.AVRTrimActive',
     'snmp.upsBasicStateOutputState.BatteriesDischarged',
@@ -225,7 +220,6 @@ METRIC_TO_SKIP = [
     'snmp.upsBasicStateOutputState.On',
     'snmp.upsBasicStateOutputState.OnLine',
     'snmp.upsBasicStateOutputState.ReplaceBattery',
-
     # forced_type: percent
     'snmp.sysMultiHostCpuUser',
     'snmp.sysMultiHostCpuNice',
@@ -234,11 +228,9 @@ METRIC_TO_SKIP = [
     'snmp.sysMultiHostCpuIrq',
     'snmp.sysMultiHostCpuSoftirq',
     'snmp.sysMultiHostCpuIowait',
-
     # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
-
     # telemetry
     'snmp.check_duration',
     'snmp.check_interval',
