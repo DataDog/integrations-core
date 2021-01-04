@@ -36,9 +36,25 @@ TLS_CONFIG = {
     'password': 'monitor',
     'timeout': 10,
     'tags': ['foo:bar'],
-    'tls_verify': True,
-    'validate_hostname': True,
+    'use_tls': True,
+    'tls_validate_hostname': True,
     'tls_cert': cert,
     'tls_private_key': private_key,
     'tls_ca_cert': CERTIFICATE_DIR,
+}
+
+# Legacy TLS using old config values
+TLS_CONFIG_LEGACY = {
+    'db': 'abc',
+    'server': 'localhost',
+    'port': '999',
+    'username': 'dbadmin',
+    'password': 'monitor',
+    'timeout': 10,
+    'tags': ['foo:bar'],
+    'tls_verify': True,  # old `tls_verify` is now `use_tls`
+    'validate_hostname': True,
+    'cert': cert,
+    'private_key': private_key,
+    'ca_cert': CERTIFICATE_DIR,
 }

@@ -93,6 +93,11 @@ instances:
     #
     # timeout: 10
 
+    ## @param use_tls - boolean - optional - default: false
+    ## This instructs the Vertica check to connect using TLS.
+    #
+    # use_tls: false
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate(s) of the service(s).
     #
@@ -136,11 +141,6 @@ instances:
     ## Verifies that the server's cert hostname matches the one requested.
     #
     # tls_validate_hostname: true
-
-    ## @param validate_hostname - boolean - optional - default: true
-    ## Whether or not to verify the TLS certificate was issued for `server` if `tls_verify` is true.
-    #
-    # validate_hostname: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

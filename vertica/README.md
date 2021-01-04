@@ -14,6 +14,12 @@ The Vertica check is included in the [Datadog Agent][2] package. No additional i
 
 Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vertica performance data. See the example [vertica.d/conf.yaml][6] for all available configuration options.
 
+#### Enabling SSL
+
+The Vertica integration supports connecting to Vertica via SSL. To enable this, set `use_tls` in `conf.yaml` to `true`. 
+
+Note: For Vertica integration versions <=1.9.0, set `tls_verify` to `true` instead. For legacy support, if `tls_verify` is explicitly set to `true`, `use_tls` will be set to `true`.
+
 #### Prepare Vertica
 
 Create a database user for the Datadog Agent. From [vsql][11], connect to the database as a superuser. Then run the `CREATE USER` statement.
