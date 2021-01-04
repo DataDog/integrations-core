@@ -877,7 +877,12 @@ def test_cisco_nexus(aggregator):
         tags = ['fan_status_index:{}'.format(index)] + common_tags
         aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
-    aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.cswStackPortOperStatus',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['interface:GigabitEthernet1/0/1'],
+    )
+
     aggregator.assert_metric(
         'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
