@@ -677,6 +677,7 @@ def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors(results, m
     check.rate = mock.Mock()
     with caplog.at_level(logging.DEBUG):
         check.try_submit_bandwidth_usage_metric_if_bandwidth_metric(metric_name, index, results, tags)
+
     check.rate.assert_not_called()
     for msg in error_messages:
         assert msg in caplog.text
