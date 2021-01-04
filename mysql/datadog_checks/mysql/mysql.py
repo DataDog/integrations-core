@@ -482,10 +482,10 @@ class MySql(AgentCheck):
 
                     if replication_role in {'writer', 'reader'}:
                         runtime_tags.append('replication_role:' + replication_role)
-                except pymysql.err.ProgrammingError as e:
+                except pymysql.err.InternalError as e:
                     # Non-AWS Aurora databases will not have the tables required for
                     # the query so this is an expected error.
-                    if e.args[0] != pymysql.constants.ER.NO_SUCH_TABLE:
+                    if e.args[0] != pymysql.constants.ER.UNKNOWN_TABLE:
                         raise
         except Exception:
             self.log.warning("Error occurred while fetching runtime tags: %s", traceback.format_exc())
