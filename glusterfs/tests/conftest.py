@@ -46,11 +46,11 @@ def mock_gstatus_data():
 
 
 def create_volume():
-    run_command("docker exec gluster-node-2 mkdir /export-test", capture=True, check=True)
+    run_command("docker exec gluster-node-2 mkdir -p /export-test", capture=True, check=True)
 
     for command in (
         'gluster peer probe gluster-node-2',
-        'mkdir /export-test',
+        'mkdir -p /export-test',
         'gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force',
         'gluster volume start gv0',
         'yum update -y',
