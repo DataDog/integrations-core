@@ -46,16 +46,16 @@ def mock_gstatus_data():
 
 
 def create_volume():
-    run_command("docker exec gluster-node-2 mkdir /test-export", capture=True, check=True)
+    run_command("docker exec gluster-node-2 mkdir /export-test", capture=True, check=True)
 
     for command in (
         'gluster peer probe gluster-node-2',
-        'mkdir /test-export',
-        'gluster volume create gv0 replica 2 gluster-node-1:/test-export gluster-node-2:/test-export force',
+        'mkdir /export-test',
+        'gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force',
         'gluster volume start gv0',
         'yum update -y',
         'yum install -y python3',
-        'curl -LO https://github.com/gluster/gstatus/releases/download/v1.0.4/gstatus',
+        'curl -LO https://github.com/gluster/gstatus/releases/download/v1.0.5/gstatus',
         'chmod +x ./gstatus',
         'mv ./gstatus /usr/local/bin/gstatus',
     ):
