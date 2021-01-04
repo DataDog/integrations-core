@@ -6,6 +6,7 @@ import mock
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.proxysql import ProxysqlCheck
 
 from .conftest import get_check
 
@@ -76,3 +77,20 @@ def test_tls_config_ok(dd_run_check, instance_basic_tls):
             assert check.tls_verify is True
             assert tls_context.check_hostname is True
             assert check._connection is not None
+
+
+@pytest.mark.parametrize(
+    'extra_config, expected_http_kwargs',
+    [
+        pytest.param(
+            {'validate_hostname': False}, {'tls_validate_hostname': False}, id='legacy validate_hostname param'
+        ),
+    ],
+)
+def test_tls_config_legacy(extra_config, expected_http_kwargs, instance_all_metrics):
+    instance = instance_all_metrics
+    instance.update(extra_config)
+    c = ProxysqlCheck('proxysql', {}, [instance])
+    c.get_tls_context()  # need to call this for config values to be saved by _tls_context_wrapper
+    actual_options = {k: v for k, v in c._tls_context_wrapper.config.items() if k in expected_http_kwargs}
+    assert expected_http_kwargs == actual_options
