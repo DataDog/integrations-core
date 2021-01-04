@@ -42,6 +42,7 @@ from .queries import (
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
+    SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
@@ -107,6 +108,9 @@ class MySql(AgentCheck):
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
+
+                # Supplement tags with runtime data
+                self.config.tags += self._get_runtime_tags(db)
 
                 # Metric collection
                 self._collect_metrics(db)
@@ -462,6 +466,31 @@ class MySql(AgentCheck):
         except Exception:
             self.warning("Error while running %s\n%s", query, traceback.format_exc())
             self.log.exception("Error while running %s", query)
+
+    def _get_runtime_tags(self, db):
+        """
+        Collects the tags which are determined at runtime by queries (separate from the tags
+        defined by config).
+        """
+        runtime_tags = []
+
+        try:
+            with closing(db.cursor()) as cursor:
+                try:
+                    cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
+                    replication_role = cursor.fetchone()[0]
+
+                    if replication_role in {'writer', 'reader'}:
+                        runtime_tags.append('replication_role:' + replication_role)
+                except pymysql.err.ProgrammingError as e:
+                    # Non-AWS Aurora databases will not have the tables required for
+                    # the query so this is an expected error.
+                    if e.args[0] != pymysql.constants.ER.NO_SUCH_TABLE:
+                        raise
+        except Exception:
+            self.log.warning("Error occurred while fetching runtime tags: %s", traceback.format_exc())
+
+        return runtime_tags
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
