@@ -674,7 +674,6 @@ def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors(results, m
     index = ('1', '2')
     tags = ['foo', 'bar']
 
-    # assert not called because of missing ifHCInOctets
     check.rate = mock.Mock()
     with caplog.at_level(logging.DEBUG):
         check.try_submit_bandwidth_usage_metric_if_bandwidth_metric(metric_name, index, results, tags)
