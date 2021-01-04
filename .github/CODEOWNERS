@@ -72,6 +72,8 @@ assets/               @DataDog/agent-integrations
 # Infrastructure integrations
 /snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations               
 /snmp/*.md                                @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation    
+/snmp_*/                                  @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/snmp_*/*.md                              @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/                                 @DataDog/infrastructure-integrations @DataDog/agent-integrations               
 /vsphere/*.md                             @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation  
 /openstack/                               @DataDog/infrastructure-integrations @DataDog/agent-integrations               
