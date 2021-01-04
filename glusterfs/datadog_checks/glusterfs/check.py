@@ -71,7 +71,7 @@ class GlusterfsCheck(AgentCheck):
             self.log.debug("Unable to decode gstatus output: %s", str(e))
             raise
         except Exception as e:
-            self.log.debug("Encountered error trying to collect gluster status: %s", str(e))
+            self.log.warning("Encountered error trying to collect gluster status: %s", str(e))
             raise
 
         if 'data' in gstatus:
