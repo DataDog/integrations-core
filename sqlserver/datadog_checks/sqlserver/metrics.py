@@ -66,6 +66,7 @@ class BaseSqlServerMetric(object):
 
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
+        logger.debug("%s: received %d rows and %d columns", cls.__name__, len(rows), len(columns))
         return rows, columns
 
     @classmethod

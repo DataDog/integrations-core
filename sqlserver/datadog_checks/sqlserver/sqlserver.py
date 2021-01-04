@@ -381,6 +381,14 @@ class SQLServer(AgentCheck):
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
             db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+
+            if not db_fragmentation_object_names:
+                self.log.debug(
+                    "No fragmentation object names specified, will return fragmentation metrics for all "
+                    "object_ids of current database(s): %s",
+                    db_names,
+                )
+
             for db_name in db_names:
                 for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
                     cfg = {
