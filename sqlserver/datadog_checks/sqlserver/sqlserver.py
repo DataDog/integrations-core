@@ -17,16 +17,25 @@ from datadog_checks.base.utils.db import QueryManager
 from . import metrics
 from .connection import Connection, SQLConnectionError
 from .const import (
+    AO_METRICS,
+    AO_METRICS_PRIMARY,
+    AO_METRICS_SECONDARY,
     AUTODISCOVERY_QUERY,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
+    FCI_METRICS,
+    INSTANCE_METRICS,
+    INSTANCE_METRICS_TOTAL,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
     PERF_LARGE_RAW_BASE,
     PERF_RAW_LARGE_FRACTION,
-    VALID_METRIC_TYPES,
+    TASK_SCHEDULER_METRICS,
+    VALID_METRIC_TYPES, SERVICE_CHECK_NAME,
 )
 from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from .utils import set_default_driver_conf
@@ -131,7 +140,7 @@ class SQLServer(AgentCheck):
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
-        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+        self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
@@ -200,16 +209,16 @@ class SQLServer(AgentCheck):
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
             self._add_performance_counters(
-                chain(self.INSTANCE_METRICS, self.INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
+                chain(INSTANCE_METRICS, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
             )
 
         # populated through autodiscovery
         if self.databases:
             for db in self.databases:
-                self._add_performance_counters(self.INSTANCE_METRICS_TOTAL, metrics_to_collect, tags, db=db)
+                self._add_performance_counters(INSTANCE_METRICS_TOTAL, metrics_to_collect, tags, db=db)
 
         # Load database statistics
-        for name, table, column in self.DATABASE_METRICS:
+        for name, table, column in DATABASE_METRICS:
             # include database as a filter option
             db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
             for db_name in db_names:
@@ -218,7 +227,7 @@ class SQLServer(AgentCheck):
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            for name, table, column in self.AO_METRICS + self.AO_METRICS_PRIMARY + self.AO_METRICS_SECONDARY:
+            for name, table, column in AO_METRICS + AO_METRICS_PRIMARY + AO_METRICS_SECONDARY:
                 db_name = 'master'
                 cfg = {
                     'name': name,
@@ -234,7 +243,7 @@ class SQLServer(AgentCheck):
 
         # Load FCI metrics
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            for name, table, column in self.FCI_METRICS:
+            for name, table, column in FCI_METRICS:
                 cfg = {
                     'name': name,
                     'table': table,
@@ -245,7 +254,7 @@ class SQLServer(AgentCheck):
 
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
-            for name, table, column in self.TASK_SCHEDULER_METRICS:
+            for name, table, column in TASK_SCHEDULER_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -254,7 +263,7 @@ class SQLServer(AgentCheck):
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
             db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
             for db_name in db_names:
-                for name, table, column in self.DATABASE_FRAGMENTATION_METRICS:
+                for name, table, column in DATABASE_FRAGMENTATION_METRICS:
                     cfg = {
                         'name': name,
                         'table': table,
