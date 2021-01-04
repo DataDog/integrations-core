@@ -131,7 +131,12 @@ Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Res
 
 ### Spark on AWS EMR
 
-To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install the [Datadog Agent][10] and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
+To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install the [Datadog Agent] [10]:
+
+For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
+
+For Agent v6/7, create the '/etc/datadog-agent/conf.d/spark.d/conf.yaml' configuration file with the [proper values on each EMR node] [11]. 
+
 
 ## Further Reading
 

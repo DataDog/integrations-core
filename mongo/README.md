@@ -126,6 +126,7 @@ Then create the same user from a mongos proxy, this also has the side effect of 
 
 Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
 <!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 ### Configuration
