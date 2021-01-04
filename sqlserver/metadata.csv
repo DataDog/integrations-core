@@ -48,5 +48,5 @@ sqlserver.task.context_switches_count,gauge,,unit,,Number of scheduler context s
 sqlserver.task.pending_io_count,gauge,,unit,,Number of physical I/Os that are performed by this task.,0,sql_server,task io pending
 sqlserver.task.pending_io_byte_count,gauge,,byte,,Total byte count of I/Os that are performed by this task.,0,sql_server,task io byte
 sqlserver.task.pending_io_byte_average,gauge,,byte,,Average byte count of I/Os that are performed by this task.,0,sql_server,task avg io byte
-sqlserver.fci.status,gauge,,byte,,Status of the node in a SQL Server failover custer instance,0,sql_server,fci status
-sqlserver.fci.is_current_owner,gauge,,byte,,Whether or not this node is the current owner of the SQL Server FCI ,0,sql_server,fci current owner
+sqlserver.fci.status,gauge,,,,Status of the node in a SQL Server failover custer instance,0,sql_server,fci status
+sqlserver.fci.is_current_owner,gauge,,,,Whether or not this node is the current owner of the SQL Server FCI ,0,sql_server,fci current owner
