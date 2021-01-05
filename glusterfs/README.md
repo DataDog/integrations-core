@@ -32,9 +32,9 @@ No additional installation is needed on your server.
     instances:
       -
         ## @param use_sudo - boolean - optional - default: false
-        ## GlusterFS requires sudo.Please be sure to add the following line to your sudoers file:
+        ## GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
         ##
-        ## dd-agent ALL=(ALL) NOPASSWD:/usr/bin/gstatus
+        ## dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
         ##
         ## Enable the option for the check to run with sudo.
         #

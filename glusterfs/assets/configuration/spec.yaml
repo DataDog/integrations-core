@@ -20,7 +20,7 @@ files:
       description: |
         GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
 
-        dd-agent ALL=(ALL) NOPASSWD:/usr/bin/gstatus
+        dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
 
         Enable the option for the check to run with sudo.
       value:
