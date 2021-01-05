@@ -4,7 +4,7 @@
 import click
 
 from ....utils import get_next
-from ...dependencies import read_agent_dependencies, read_check_dependencies
+from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
@@ -29,6 +29,47 @@ def format_check_usage(checks, default=None):
         remaining = num_checks - 2
         plurality = 's' if remaining > 1 else ''
         return f'{checks[0]}, {checks[1]}, and {remaining} other{plurality}'
+
+
+def verify_base_dependency(source, name, base_versions, force_pinned=True, min_base_version=None):
+    """Minimal dependency verification for `datadog-checks-base` dependencies.
+
+    Ensures that the version isn't specifically pinned since that will limit check installations.
+    Optionally ensures that dependencies which have no pins are reported as errors.
+    Optionally validate a specific version satisfies the base requirement spec.
+    """
+    failed = False
+
+    for specifier_set, dependency_definitions in base_versions.items():
+        checks = sorted(dep.check_name for dep in dependency_definitions)
+
+        if not specifier_set and force_pinned:
+            echo_failure(f'Unspecified version found for dependency `{name}`: {format_check_usage(checks, source)}')
+            failed = True
+        elif len(specifier_set) > 1:
+            echo_failure(
+                f'Multiple unstable version pins `{specifier_set}` found for dependency `{name}`: '
+                f'{format_check_usage(checks, source)}'
+            )
+            failed = True
+        elif specifier_set:
+            specifier = get_next(specifier_set)
+
+            if specifier.operator != '>=':
+                echo_failure(
+                    f'Forced version pin `{specifier}` found for dependency `{name}` '
+                    f'(use >= explicitly for base dependency): {format_check_usage(checks, source)}'
+                )
+                failed = True
+
+            if min_base_version is not None and min_base_version not in specifier:
+                echo_failure(
+                    f'Minimum datadog_checks_base version `{min_base_version}` not satisfied by dependency specifier '
+                    f'`{specifier}`: {format_check_usage(checks, source)}'
+                )
+                failed = True
+
+    return not failed
 
 
 def verify_dependency(source, name, versions):
@@ -76,7 +117,13 @@ def verify_dependency(source, name, versions):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Verify dependencies across all checks')
-def dep():
+@click.option(
+    '--require-base-check-version', is_flag=True, help='Require specific version for datadog-checks-base requirement'
+)
+@click.option(
+    '--min-base-check-version', help='Specify minimum version for datadog-checks-base requirement, e.g. `11.0.0`'
+)
+def dep(require_base_check_version, min_base_check_version):
     """
     This command will:
 
@@ -84,12 +131,23 @@ def dep():
     * Verify all the dependencies are pinned.
     * Verify the embedded Python environment defined in the base check and requirements
       listed in every integration are compatible.
+    * Verify each check specifies a `CHECKS_BASE_REQ` variable for `datadog-checks-base` requirement
+    * Optionally verify that the `datadog-checks-base` requirement is lower-bounded
+    * Optionally verify that the `datadog-checks-base` requirement satisfies specific version
     """
     failed = False
     check_dependencies, check_errors = read_check_dependencies()
 
     if check_errors:
         for check_error in check_errors:
+            echo_failure(check_error)
+
+        abort()
+
+    check_base_dependencies, check_base_errors = read_check_base_dependencies()
+
+    if check_base_errors:
+        for check_error in check_base_errors:
             echo_failure(check_error)
 
         abort()
@@ -109,6 +167,12 @@ def dep():
         if name not in agent_dependencies:
             failed = True
             echo_failure(f'Dependency needs to be synced: {name}')
+
+    for name, versions in sorted(check_base_dependencies.items()):
+        if not verify_base_dependency(
+            'Base Checks', name, versions, require_base_check_version, min_base_check_version
+        ):
+            failed = True
 
     for name, versions in sorted(agent_dependencies.items()):
         if not verify_dependency('Agent', name, versions):

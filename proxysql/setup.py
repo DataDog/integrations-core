@@ -27,7 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = ['datadog-checks-base>=15.2.0']
+CHECKS_BASE_REQ = 'datadog-checks-base>=15.2.0'
 
 
 setup(
@@ -57,7 +57,7 @@ setup(
     # The package we're going to ship
     packages=['datadog_checks.proxysql'],
     # Run-time dependencies
-    install_requires=CHECKS_BASE_REQ,
+    install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,

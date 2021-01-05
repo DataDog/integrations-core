@@ -27,6 +27,9 @@ def get_dependencies():
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog-checks-base'
+
+
 setup(
     name='datadog-activemq',
     version=ABOUT['__version__'],
@@ -54,7 +57,7 @@ setup(
     # The package we're going to ship
     packages=['datadog_checks.activemq'],
     # Run-time dependencies
-    install_requires=['datadog-checks-base'],
+    install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
