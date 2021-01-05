@@ -208,7 +208,6 @@ class AggregatorStub(object):
     def assert_histogram_bucket(
         self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
     ):
-        self._asserted.add(name)
         expected_tags = normalize_tags(tags, sort=True)
 
         candidates = []
