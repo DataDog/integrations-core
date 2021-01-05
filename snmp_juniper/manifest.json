@@ -1,5 +1,5 @@
 {
-  "display_name": "Juniper",
+  "display_name": "Juniper Networks",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "snmp_juniper",
