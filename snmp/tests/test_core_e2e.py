@@ -32,7 +32,7 @@ def test_e2e_metric_types(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=28)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=42)
 
 
 def test_e2e_profile_arista(dd_agent_check):
@@ -212,22 +212,6 @@ METRIC_TO_SKIP = [
     'snmp.cpiPduBranchPowerFactor',
     'snmp.cpiPduBranchStatus',
     'snmp.cpiPduBranchVoltage',
-    # forced_type: flag_stream
-    'snmp.upsBasicStateOutputState.AVRTrimActive',
-    'snmp.upsBasicStateOutputState.BatteriesDischarged',
-    'snmp.upsBasicStateOutputState.LowBatteryOnBattery',
-    'snmp.upsBasicStateOutputState.NoBatteriesAttached',
-    'snmp.upsBasicStateOutputState.On',
-    'snmp.upsBasicStateOutputState.OnLine',
-    'snmp.upsBasicStateOutputState.ReplaceBattery',
-    # forced_type: percent
-    'snmp.sysMultiHostCpuUser',
-    'snmp.sysMultiHostCpuNice',
-    'snmp.sysMultiHostCpuSystem',
-    'snmp.sysMultiHostCpuIdle',
-    'snmp.sysMultiHostCpuIrq',
-    'snmp.sysMultiHostCpuSoftirq',
-    'snmp.sysMultiHostCpuIowait',
     # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
