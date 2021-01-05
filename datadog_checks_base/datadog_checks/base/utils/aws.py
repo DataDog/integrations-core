@@ -11,13 +11,14 @@ def rds_parse_tags_from_endpoint(endpoint):
     * `dbinstanceidentifier` - The instance's unique identifier for RDS and Aurora clusters
     * `dbclusteridentifier` - The cluster identifier in the case of Aurora cluster endpoints and serverless
     * `hostname` - The full endpoint if the endpoint points to a specific instance
+    * `host` - The full endpoint if the endpoint points to a specific instance
     * `region` - The AWS region of the endpoint
 
     Examples:
 
     >>> rds_parse_tags_from_endpoint('customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com')
     ['dbinstanceidentifier:customers-04', 'hostname:customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com',
-     'region:us-west-2']
+     'host:customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com', 'region:us-west-2']
 
     >>> rds_parse_tags_from_endpoint('dd-metrics.cluster-ro-cfxdfe8cpixl.ap-east-1.rds.amazonaws.com')
     ['dbclusteridentifier:dd-metrics', 'region:ap-east-1']
