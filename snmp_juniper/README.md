@@ -2,8 +2,13 @@
 
 ## Overview
 
-This check monitors [juniper][1].
-For details of monitored metrics see the [Network Device Monitoring][2] documentation.
+Collect SNMP metrics from Juniper appliances, including:
+
+- Juniper EX Ethernet Switches
+- Juniper MX Routers
+- Juniper SRX Firewalls
+
+For details of monitored metrics see the [SNMP integration tile][2]
 
 ## Setup
 
@@ -17,11 +22,11 @@ For details of monitored metrics see the [SNMP integration tile][2]
 
 ### Service Checks
 
-Snmp juniper does not include any service checks.
+Snmp Juniper does not include any service checks.
 
 ### Events
 
-Snmp juniper does not include any events.
+Snmp Juniper does not include any events.
 
 ## Further Reading
 
