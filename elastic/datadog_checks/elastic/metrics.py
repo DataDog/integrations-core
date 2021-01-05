@@ -505,6 +505,12 @@ NODE_SYSTEM_METRICS_POST_5 = {
     'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
     'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
     'system.load.15': ('gauge', 'os.cpu.load_average.15m'),
+
+    'elasticsearch.cgroup.cpu.stat.number_of_elapsed_periods':
+        ('gauge', 'os.cgroup.cpu.stat.number_of_elapsed_periods'),
+    'elasticsearch.cgroup.cpu.stat.number_of_times_throttled':
+        ('gauge', 'os.cgroup.cpu.stat.number_of_times_throttled'),
+    'elasticsearch.process.cpu.percent': ('gauge', 'process.cpu.percent')
 }
 
 
