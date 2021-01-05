@@ -111,9 +111,9 @@ def test_health_stats_for_version(version, expected_metric_count):
         pytest.param([1, 6, 0], 9, id='v1.6.0'),
         pytest.param([2, 0, 0], 9, id='v2.0.0'),
         pytest.param([2, 1, 0], 9, id='v2.1.0'),
-        pytest.param([5, 0, 0], 13, id='v5'),
-        pytest.param([6, 3, 0], 13, id='v6.3.0'),
-        pytest.param([7, 2, 0], 13, id='v7.2.0'),
+        pytest.param([5, 0, 0], 16, id='v5'),
+        pytest.param([6, 3, 0], 16, id='v6.3.0'),
+        pytest.param([7, 2, 0], 16, id='v7.2.0'),
     ],
 )
 def test_node_system_stats_for_version(version, expected_metric_count):
