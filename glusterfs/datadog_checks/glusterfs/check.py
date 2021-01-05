@@ -49,10 +49,11 @@ class GlusterfsCheck(AgentCheck):
                     'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
                 )
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
+        self.use_sudo = is_affirmative(self.instance.get('use_sudo', False))
+
 
     def check(self, _):
-        use_sudo = is_affirmative(self.instance.get('use_sudo', False))
-        if use_sudo:
+        if self.use_sudo:
             test_sudo, err, rcode = get_subprocess_output(['sudo', '-ln', self.gstatus_cmd], self.log)
             if rcode != 0:
                 raise Exception('The dd-agent user does not have sudo access: %s', err or test_sudo)
@@ -156,7 +157,7 @@ class GlusterfsCheck(AgentCheck):
                     'device:{}'.format(brick_device),
                     'fs_name:{}'.format(fs_name),
                 ]
-                tags.extend(self._tags)
+                tags.extend(subvol_tags)
                 self.submit_metrics(brick, 'brick', BRICK_STATS, tags)
 
     def submit_metrics(self, payload, prefix, metric_mapping, tags):
