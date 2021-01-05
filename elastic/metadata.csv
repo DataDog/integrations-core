@@ -256,3 +256,6 @@ elasticsearch.index.primary_shards,gauge,,shard,,The number of primary shards in
 elasticsearch.index.replica_shards,gauge,,shard,,The number of replica shards in the index,0,elasticsearch,index replica shards count
 elasticsearch.index.primary_store_size,gauge,,byte,,The store size of primary shards in the index,0,elasticsearch,index primary store size
 elasticsearch.index.store_size,gauge,,byte,,The store size of primary and replica shards in the index,0,elasticsearch,index pri and rep store size
+elasticsearch.cgroup.cpu.stat.number_of_elapsed_periods,gauge,integer, The number of reporting periods that have elapsed
+elasticsearch.cgroup.cpu.stat.number_of_times_throttled,gauge,integer, The number of times all tasks in the same cgroup as the Elasticsearch process have been throttled
+elasticsearch.process.cpu.percent,gauge,integer, CPU usage in percent, or -1 if not known at the time the stats are computed
