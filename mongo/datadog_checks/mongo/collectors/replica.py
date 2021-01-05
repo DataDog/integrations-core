@@ -2,6 +2,7 @@ import time
 
 from six.moves.urllib.parse import urlsplit
 
+from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import SOURCE_TYPE_NAME, ReplicaSetDeployment, get_long_state_name, get_state_name
 
@@ -92,6 +93,24 @@ class ReplicaCollector(MongoCollector):
                 event_payload['host'] = self.hostname
             self.check.event(event_payload)
 
+    def get_replset_config(self, api):
+        """On most nodes, simply runs `replSetGetConfig`.
+        Unfortunately when the agent is connected to an arbiter, running the `replSetGetConfig`
+        raises authentication errors. And because authenticating on an arbiter is not allowed, the workaround
+        in that case is to run the command directly on the primary."""
+        if api.deployment_type.is_arbiter:
+            try:
+                api_primary = MongoApi(self.check.config, self.log, replicaset=api.deployment_type.replset_name)
+            except Exception:
+                self.log.warning(
+                    "Current node is an arbiter, the extra connection to the primary was unsuccessful."
+                    " Votes metrics won't be reported."
+                )
+                return None
+            return api_primary['admin'].command('replSetGetConfig')
+
+        return api['admin'].command('replSetGetConfig')
+
     def collect(self, api):
         db = api["admin"]
         status = db.command('replSetGetStatus')
@@ -118,7 +137,7 @@ class ReplicaCollector(MongoCollector):
             result['health'] = current['health']
 
         # Collect the number of votes
-        config = db.command('replSetGetConfig')
+        config = self.get_replset_config(api)
         votes = 0
         total = 0.0
         for member in config['config']['members']:
