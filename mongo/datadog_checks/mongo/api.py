@@ -13,32 +13,41 @@ class MongoApi(MongoClient):
     def __init__(self, config, log, replicaset=None):
         self._config = config
         self._log = log
-        self._replicaset = replicaset
-        self._latest_is_master_payload = None
-        self._is_arbiter = False
         self.deployment_type = None
-        merged_options_dict = {}
-        merged_options_dict.update(self._config.additional_options)
-        merged_options_dict.update(self._config.ssl_params)
-        super(MongoApi, self).__init__(
-            host=self._config.hosts,
-            socketTimeoutMS=self._config.timeout,
-            connectTimeoutMS=self._config.timeout,
-            serverSelectionTimeoutMS=self._config.timeout,
-            read_preference=ReadPreference.PRIMARY_PREFERRED,
-            replicaSet=self._replicaset,
-            appname=DD_APP_NAME,
-            **merged_options_dict
-        )
+        if self._config.server:
+            # Deprecated option
+            super(MongoApi, self).__init__(
+                self._config.server,
+                socketTimeoutMS=self._config.timeout,
+                connectTimeoutMS=self._config.timeout,
+                serverSelectionTimeoutMS=self._config.timeout,
+                read_preference=ReadPreference.PRIMARY_PREFERRED,
+                replicaSet=replicaset,
+                **self._config.ssl_params
+            )
+        else:
+            merged_options_dict = {}
+            merged_options_dict.update(self._config.additional_options)
+            merged_options_dict.update(self._config.ssl_params)
+            super(MongoApi, self).__init__(
+                host=self._config.hosts,
+                socketTimeoutMS=self._config.timeout,
+                connectTimeoutMS=self._config.timeout,
+                serverSelectionTimeoutMS=self._config.timeout,
+                read_preference=ReadPreference.PRIMARY_PREFERRED,
+                replicaSet=replicaset,
+                appname=DD_APP_NAME,
+                **merged_options_dict
+            )
         self._initialize()
 
     def _initialize(self):
         self._log.debug("Connecting to '%s'", self._config.hosts)
 
-        self._latest_is_master_payload = self['admin'].command('isMaster')
-        self._is_arbiter = self._latest_is_master_payload.get('arbiterOnly', False)
+        is_master_payload = self['admin'].command('isMaster')
+        is_arbiter = is_master_payload.get('arbiterOnly', False)
 
-        if not self._is_arbiter and self._config.do_auth:
+        if not is_arbiter and self._config.do_auth:
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             self._authenticate()
 
