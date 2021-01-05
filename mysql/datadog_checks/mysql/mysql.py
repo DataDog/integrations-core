@@ -43,6 +43,7 @@ from .queries import (
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
     SQL_REPLICATION_ROLE_AWS_AURORA,
+    SQL_SERVER_ID_AWS_AURORA,
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
@@ -81,6 +82,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self.check_initializations.append(self.init_with_connection)
         self._statement_metrics = MySQLStatementMetrics(self._config)
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
@@ -99,6 +101,18 @@ class MySql(AgentCheck):
     def get_library_versions(cls):
         return {'pymysql': pymysql.__version__}
 
+    def init_with_connection(self):
+        """
+        Run one-time check initialization tasks which require a connection to the DB.
+        """
+        tags = []
+
+        with self._connect() as db:
+            if self._get_is_aurora(db):
+                tags.extend(self._get_runtime_aurora_tags(db))
+
+        self.config.tags = list(set(self.config.tags) | set(tags))
+
     def check(self, _):
         self._set_qcache_stats()
         with self._connect() as db:
@@ -108,9 +122,6 @@ class MySql(AgentCheck):
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
-
-                # Supplement tags with runtime data
-                self.config.tags += self._get_runtime_tags(db)
 
                 # Metric collection
                 self._collect_metrics(db)
@@ -467,28 +478,18 @@ class MySql(AgentCheck):
             self.warning("Error while running %s\n%s", query, traceback.format_exc())
             self.log.exception("Error while running %s", query)
 
-    def _get_runtime_tags(self, db):
-        """
-        Collects the tags which are determined at runtime by queries (separate from the tags
-        defined by config).
-        """
+    def _get_runtime_aurora_tags(self, db):
         runtime_tags = []
 
         try:
             with closing(db.cursor()) as cursor:
-                try:
-                    cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
-                    replication_role = cursor.fetchone()[0]
+                cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
+                replication_role = cursor.fetchone()[0]
 
-                    if replication_role in {'writer', 'reader'}:
-                        runtime_tags.append('replication_role:' + replication_role)
-                except pymysql.err.InternalError as e:
-                    # Non-AWS Aurora databases will not have the tables required for
-                    # the query so this is an expected error.
-                    if e.args[0] != pymysql.constants.ER.UNKNOWN_TABLE:
-                        raise
+                if replication_role in {'writer', 'reader'}:
+                    runtime_tags.append('replication_role:' + replication_role)
         except Exception:
-            self.log.warning("Error occurred while fetching runtime tags: %s", traceback.format_exc())
+            self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
 
         return runtime_tags
 
@@ -558,6 +559,24 @@ class MySql(AgentCheck):
                     self.log.exception("Error while fetching mysql pid from psutil")
 
         return pid
+
+    def _get_is_aurora(self, db):
+        """
+        Tests if the instance is an AWS Aurora database.
+        """
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_SERVER_ID_AWS_AURORA)
+                if len(cursor.fetchall()) > 0:
+                    return True
+        except Exception:
+            self.warning(
+                "Unable to determine if server is Aurora. If this is an Aurora database, some "
+                "information may be unavailable: %s",
+                traceback.format_exc(),
+            )
+
+        return False
 
     @classmethod
     def _get_stats_from_status(cls, db):

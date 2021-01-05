@@ -769,7 +769,7 @@ def test_replication_check_status(
     assert len(aggregator.service_checks('mysql.replication.slave_running')) == expected_service_check_len
 
 
-def test__get_runtime_tags():
+def test__get_runtime_aurora_tags():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
     class MockCursor:
@@ -805,25 +805,25 @@ def test__get_runtime_tags():
     reader_row = ('reader',)
     writer_row = ('writer',)
 
-    tags = mysql_check._get_runtime_tags(MockDatabase(MockCursor(reader_row)))
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(reader_row)))
     assert tags == ['replication_role:reader']
 
-    tags = mysql_check._get_runtime_tags(MockDatabase(MockCursor(writer_row)))
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(writer_row)))
     assert tags == ['replication_role:writer']
 
-    tags = mysql_check._get_runtime_tags(MockDatabase(MockCursor((1, 'reader'))))
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor((1, 'reader'))))
     assert tags == []
 
     # Error cases for non-aurora databases; any error should be caught and not fail the check
 
-    tags = mysql_check._get_runtime_tags(
+    tags = mysql_check._get_runtime_aurora_tags(
         MockDatabase(
             MockCursorWithError(pymysql.err.InternalError(pymysql.constants.ER.UNKNOWN_TABLE, 'Unknown Table'))
         )
     )
     assert tags == []
 
-    tags = mysql_check._get_runtime_tags(
+    tags = mysql_check._get_runtime_aurora_tags(
         MockDatabase(
             MockCursorWithError(
                 pymysql.err.ProgrammingError(pymysql.constants.ER.DBACCESS_DENIED_ERROR, 'Access Denied')
