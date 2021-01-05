@@ -1,9 +1,17 @@
-trigger:
+# Nightly run on the master branch.
+# This pipeline tests using the latest released version of `datadog_checks_base` rather than the dev version.
+
+schedules:
+- cron: "0 5 * * *"
+  displayName: Nightly (5am UTC)
+  always: true
   branches:
     include:
     - master
 
 pr: none
+
+trigger: none
 
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
@@ -12,10 +20,10 @@ variables:
 jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
-    run_py2_tests: false  # Don't run python2 tests on master
+    run_py2_tests: false  # Handled via separate nightly
+    force_base_package: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
-      ispr: false
