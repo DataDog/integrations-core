@@ -22,11 +22,11 @@ For details of monitored metrics see the [SNMP Data Collected][3] section.
 
 ### Service Checks
 
-Snmp Juniper does not include any service checks.
+Juniper does not include any service checks.
 
 ### Events
 
-Snmp Juniper does not include any events.
+Juniper does not include any events.
 
 ## Further Reading
 
