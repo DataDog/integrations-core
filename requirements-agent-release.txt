@@ -33,7 +33,7 @@ datadog-dotnetclr==1.7.0; sys_platform == 'win32'
 datadog-druid==1.6.0
 datadog-ecs-fargate==2.11.0
 datadog-eks-fargate==1.2.0
-datadog-elastic==1.22.1
+datadog-elastic==1.22.2
 datadog-envoy==1.20.0
 datadog-etcd==2.6.0
 datadog-exchange-server==1.8.1; sys_platform == 'win32'
