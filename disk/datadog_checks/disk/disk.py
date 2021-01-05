@@ -462,7 +462,6 @@ class Disk(AgentCheck):
 
     def _create_manual_mounts(self):
         """
-        _create_manual_mounts
         on Windows, in order to collect statistics on remote (SMB/NFS) drives, the drive must be mounted
         as the agent user in the agent context, otherwise the agent can't 'see' the drive.  If so configured,
         attempt to mount desired drives
