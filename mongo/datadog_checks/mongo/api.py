@@ -73,13 +73,6 @@ class MongoApi(MongoClient):
         except PyMongoError as e:
             self._log.error(u"Authentication failed due to invalid credentials or configuration issues. %s", e)
 
-        # TODO: catch error at the check level and sends the service check
-        # if not authenticated:
-        #     message = "Mongo: cannot connect with config %s" % self.config.clean_server_name
-        #     self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags,
-        #           message=message)
-        #     raise Exception(message)
-
         return authenticated
 
     def _get_deployment_type(self):
@@ -101,4 +94,3 @@ class MongoApi(MongoClient):
             return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
 
         return StandaloneDeployment()
-

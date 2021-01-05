@@ -9,32 +9,12 @@ from contextlib import contextmanager
 import mock
 import pymongo
 import pytest
-from datadog_test_libs.utils.mock_dns import mock_local
 from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
 
 from . import common
-
-HOSTNAME_TO_PORT_MAPPING = {
-    "mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local": (
-        '127.0.0.1',
-        27017,
-    ),
-    "mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local": (
-        '127.0.0.1',
-        27018,
-    ),
-    "mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local": (
-        '127.0.0.1',
-        27019,
-    ),
-    "mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local": (
-        '127.0.0.1',
-        27020,
-    ),
-}
 
 
 @pytest.fixture(scope='session')
@@ -126,18 +106,12 @@ def instance_integration(instance_custom_queries):
     return instance
 
 
-@pytest.fixture(scope='session', autouse=True)
-def mock_local_tls_dns():
-    with mock_local(HOSTNAME_TO_PORT_MAPPING):
-        yield
-
-
 @contextmanager
 def mock_pymongo(deployment):
     mongo_api = lambda *args, **kwargs: MockedPyMongoClient(*args, deployment=deployment, **kwargs)  # noqa
     with mock.patch('datadog_checks.mongo.mongo.MongoApi', mongo_api), mock.patch(
-        'datadog_checks.mongo.collectors.replica.MongoApi', mongo_api
-    ), mock.patch('pymongo.collection.Collection'), mock.patch('pymongo.command_cursor') as cur:
+        'pymongo.collection.Collection'
+    ), mock.patch('pymongo.command_cursor') as cur:
         cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
         yield
 

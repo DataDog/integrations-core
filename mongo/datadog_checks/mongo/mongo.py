@@ -76,13 +76,12 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect = self._build_metric_list_to_collect()
         self.collectors = []
         self.last_states_by_server = {}
-        self.api = None
 
     @classmethod
     def get_library_versions(cls):
         return {'pymongo': pymongo.version}
 
-    def refresh_collectors(self, mongo_version, all_dbs, tags):
+    def refresh_collectors(self, deployment_type, mongo_version, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self.config.additional_metrics
         potential_collectors = [
             ConnPoolStatsCollector(self, tags),
@@ -113,11 +112,10 @@ class MongoDb(AgentCheck):
         for db_name in all_dbs:
             potential_collectors.append(DbStatCollector(self, db_name, tags))
 
-        deployment = self.api.deployment_type
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
         # stated in the configuration of the query.
-        is_secondary = isinstance(deployment, ReplicaSetDeployment) and deployment.is_secondary
+        is_secondary = isinstance(deployment_type, ReplicaSetDeployment) and deployment_type.is_secondary
         queries = self.config.custom_queries
         if is_secondary:
             # On a secondary node, only collect the custom queries that define the 'run_on_secondary' parameter.
@@ -133,7 +131,7 @@ class MongoDb(AgentCheck):
 
         potential_collectors.append(CustomQueriesCollector(self, self.config.db_name, tags, queries))
 
-        self.collectors = [coll for coll in potential_collectors if coll.compatible_with(deployment)]
+        self.collectors = [coll for coll in potential_collectors if coll.compatible_with(deployment_type)]
 
     def _build_metric_list_to_collect(self):
         """
@@ -165,14 +163,14 @@ class MongoDb(AgentCheck):
 
     def check(self, _):
         try:
-            self.api = MongoApi(self.config, self.log)
+            api = MongoApi(self.config, self.log)
             self.log.debug("Connected!")
         except Exception:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags)
             raise
 
         try:
-            mongo_version = self.api.server_info().get('version', '0.0')
+            mongo_version = api.server_info().get('version', '0.0')
             self.set_metadata('version', mongo_version)
         except Exception:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags)
@@ -182,7 +180,7 @@ class MongoDb(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.service_check_tags)
 
         tags = deepcopy(self.config.metric_tags)
-        deployment = self.api.deployment_type
+        deployment = api.deployment_type
         if isinstance(deployment, ReplicaSetDeployment):
             tags.extend(
                 [
@@ -195,16 +193,13 @@ class MongoDb(AgentCheck):
         elif isinstance(deployment, MongosDeployment):
             tags.append('sharding_cluster_role:mongos')
 
-        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-            dbnames = []
-        else:
-            dbnames = self.api.list_database_names()
-            self.gauge('mongodb.dbs', len(dbnames), tags=tags)
+        dbnames = api.list_database_names()
+        self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
-        self.refresh_collectors(mongo_version, dbnames, tags)
+        self.refresh_collectors(api.deployment_type, mongo_version, dbnames, tags)
         for collector in self.collectors:
             try:
-                collector.collect(self.api)
+                collector.collect(api)
             except Exception:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
