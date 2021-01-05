@@ -208,12 +208,15 @@ class AggregatorStub(object):
     def assert_histogram_bucket(
         self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
     ):
+        self._asserted.add(name)
+        expected_tags = normalize_tags(tags, sort=True)
+
         candidates = []
         for bucket in self.histogram_bucket(name):
             if value is not None and value != bucket.value:
                 continue
 
-            if tags and tags != sorted(bucket.tags):
+            if expected_tags and expected_tags != sorted(bucket.tags):
                 continue
 
             if hostname and hostname != bucket.hostname:
