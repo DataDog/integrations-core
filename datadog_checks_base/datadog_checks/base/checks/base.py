@@ -332,7 +332,9 @@ class AgentCheck(object):
         Since: Agent 7.24
         """
         if not hasattr(self, '_tls_context_wrapper'):
-            self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER, overrides)
+            self._tls_context_wrapper = TlsContextWrapper(
+                self.instance or {}, self.TLS_CONFIG_REMAPPER, overrides=overrides
+            )
 
         if refresh:
             self._tls_context_wrapper.refresh_tls_context()

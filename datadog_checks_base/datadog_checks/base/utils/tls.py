@@ -39,6 +39,11 @@ class TlsContextWrapper(object):
         # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]], Dict[AnyStr, Any]) -> None
         default_fields = dict(STANDARD_FIELDS)
 
+        # Override existing config options if there exists any overrides
+        if overrides:
+            for overridden_field, data in iteritems(overrides):
+                instance[overridden_field] = data
+
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
         for field in STANDARD_FIELDS:
@@ -90,12 +95,6 @@ class TlsContextWrapper(object):
             if unique_name in config:
                 config[field] = config[unique_name]
                 del config[unique_name]
-
-        # Override existing config options if there exists any overrides
-        if overrides:
-            for overridden_field, data in iteritems(overrides):
-                if config[overridden_field]:
-                    config[overridden_field] = data
 
         self.config = config
         self.tls_context = self._create_tls_context()

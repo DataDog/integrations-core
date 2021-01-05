@@ -201,3 +201,35 @@ class TestTLSContext:
         with patch('ssl.SSLContext'), patch('os.path.expanduser') as mock_expand:
             check.get_tls_context()
             mock_expand.assert_called_with('~/foo')
+
+
+class TestTLSContextOverrides:
+    def test_override_context(self):
+        instance = {'tls_cert': 'foo', 'tls_private_key': 'bar'}
+        check = AgentCheck('test', {}, [instance])
+
+        overrides = {'tls_cert': 'not_foo'}
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context(overrides=overrides)  # type: MagicMock
+            context.load_cert_chain.assert_called_with('not_foo', keyfile='bar', password=None)
+
+    def test_override_context_empty(self):
+        instance = {'tls_cert': 'foo', 'tls_private_key': 'bar'}
+        check = AgentCheck('test', {}, [instance])
+
+        overrides = {}
+        with patch('ssl.SSLContext'):
+            context = check.get_tls_context(overrides=overrides)  # type: MagicMock
+            context.load_cert_chain.assert_called_with('foo', keyfile='bar', password=None)
+
+    def test_override_context_wrapper_config(self):
+        instance = {'tls_verify': True}
+        overrides = {'tls_verify': False}
+        tls = TlsContextWrapper(instance, overrides=overrides)
+        assert tls.config['tls_verify'] is False
+
+    def test_override_context_wrapper_config_empty(self):
+        instance = {'tls_verify': True}
+        overrides = {}
+        tls = TlsContextWrapper(instance, overrides=overrides)
+        assert tls.config['tls_verify'] is True
