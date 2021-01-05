@@ -33,7 +33,7 @@ FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
 
 SQL_SERVER_ID_AWS_AURORA = """\
-SHOW VARIABLES LIKE 'aurora_server_id' LIMIT 1"""
+SHOW VARIABLES LIKE 'aurora_server_id'"""
 
 SQL_REPLICATION_ROLE_AWS_AURORA = """\
 SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
