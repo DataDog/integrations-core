@@ -1,9 +1,8 @@
 from pymongo import MongoClient, ReadPreference
+from pymongo.errors import PyMongoError
 
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
-from pymongo.errors import PyMongoError
-
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
 DD_APP_NAME = 'datadog-agent'
