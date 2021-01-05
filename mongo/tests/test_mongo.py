@@ -246,7 +246,7 @@ def test_mongo_replset(instance_shard, aggregator, check):
         'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:primary', 'member:shard01a:27018']
     )
     aggregator.assert_metric(
-        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27018']
+        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27019']
     )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
