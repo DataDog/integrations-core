@@ -19,9 +19,9 @@ class ReplicationOpLogCollector(MongoCollector):
 
         return True
 
-    def collect(self, client):
+    def collect(self, api):
         # Fetch information analogous to Mongo's db.getReplicationInfo()
-        localdb = client["local"]
+        localdb = api["local"]
 
         oplog_data = {}
         try:

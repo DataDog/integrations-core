@@ -11,8 +11,8 @@ class SessionStatsCollector(MongoCollector):
         # Can only be run on mongos nodes.
         return isinstance(deployment, MongosDeployment)
 
-    def collect(self, client):
-        config_db = client["config"]
+    def collect(self, api):
+        config_db = api["config"]
         try:
             # 3.6+ only
             sessions_count = next(

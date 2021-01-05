@@ -24,8 +24,8 @@ class DbStatCollector(MongoCollector):
         else:
             return deployment.is_principal()
 
-    def collect(self, client):
-        db = client[self.db_name]
+    def collect(self, api):
+        db = api[self.db_name]
         # Submit the metric
         additional_tags = [
             u"cluster:db:{0}".format(self.db_name),  # FIXME: 8.x, was kept for backward compatibility

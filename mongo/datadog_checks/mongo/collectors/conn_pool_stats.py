@@ -18,7 +18,7 @@ class ConnPoolStatsCollector(MongoCollector):
             return False
         return deployment.use_shards
 
-    def collect(self, client):
-        db = client["admin"]
+    def collect(self, api):
+        db = api["admin"]
         stats = {'connection_pool': db.command('connPoolStats')}
         self._submit_payload(stats)

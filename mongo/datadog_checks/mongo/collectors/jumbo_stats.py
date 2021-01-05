@@ -13,8 +13,8 @@ class JumboStatsCollector(MongoCollector):
         # Can only be run on mongos nodes.
         return isinstance(deployment, MongosDeployment)
 
-    def collect(self, client):
-        chunks = client['config']['chunks']
+    def collect(self, api):
+        chunks = api['config']['chunks']
         total_chunks_count = chunks.count_documents({})
         jumbo_chunks_count = chunks.count_documents({'jumbo': True})
 

@@ -22,9 +22,9 @@ class CollStatsCollector(MongoCollector):
         # Can only be run once per cluster.
         return deployment.is_principal()
 
-    def collect(self, client):
+    def collect(self, api):
         # Ensure that you're on the right db
-        db = client[self.db_name]
+        db = api[self.db_name]
         # Loop through the collections
         for coll_name in self.coll_names:
             # Grab the stats from the collection

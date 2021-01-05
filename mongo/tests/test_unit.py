@@ -134,14 +134,13 @@ def test_parse_server_config(check):
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
-    check = check(instance)
-    assert check.server == 'mongodb://localhost,localhost:27018/test?replicaSet=bar%21baz'
-    assert check.username == 'john doe'
-    assert check.password == 'p@ss\\word'
-    assert check.db_name == 'test'
-    assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
-    assert check.clean_server_name == ('mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz')
-    assert check.auth_source == 'test'
+    config = check(instance).config
+    assert config.username == 'john doe'
+    assert config.password == 'p@ss\\word'
+    assert config.db_name == 'test'
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz'
+    assert config.auth_source == 'test'
 
 
 def test_username_no_password(check):
@@ -153,13 +152,12 @@ def test_username_no_password(check):
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
-    check = check(instance)
-    assert check.server == 'mongodb://localhost,localhost:27018/test?replicaSet=bar%21baz'
-    assert check.username == 'john doe'
-    assert check.db_name == 'test'
-    assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
-    assert check.clean_server_name == ('mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz')
-    assert check.auth_source == 'test'
+    config = check(instance).config
+    assert config.username == 'john doe'
+    assert config.db_name == 'test'
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == ('mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz')
+    assert config.auth_source == 'test'
 
 
 @pytest.mark.parametrize(

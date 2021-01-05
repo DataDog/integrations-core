@@ -2,6 +2,7 @@ import time
 
 from six.moves.urllib.parse import urlsplit
 
+from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import SOURCE_TYPE_NAME, ReplicaSetDeployment, get_long_state_name, get_state_name
 
@@ -19,7 +20,7 @@ class ReplicaCollector(MongoCollector):
     def __init__(self, check, tags):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
-        self.hostname = self.extract_hostname_for_event(self.check.clean_server_name)
+        self.hostname = self.extract_hostname_for_event(self.check.config.clean_server_name)
 
     def compatible_with(self, deployment):
         # Can only be run on mongod that are part of a replica set.
@@ -66,7 +67,7 @@ class ReplicaCollector(MongoCollector):
                 "for {replset_name}; it was {old_state} before.".format(
                     node=node_hostname,
                     id=member_id,
-                    uri=self.check.clean_server_name,
+                    uri=self.check.config.clean_server_name,
                     status=long_state_str,
                     status_short=short_state_str,
                     replset_name=replset_name,
@@ -92,27 +93,26 @@ class ReplicaCollector(MongoCollector):
                 event_payload['host'] = self.hostname
             self.check.event(event_payload)
 
-    def get_replset_config(self, client):
+    def get_replset_config(self, api):
         """On most nodes, simply runs `replSetGetConfig`.
         Unfortunately when the agent is connected to an arbiter, running the `replSetGetConfig`
         raises authentication errors. And because authenticating on an arbiter is not allowed, the workaround
         in that case is to run the command directly on the primary."""
-
-        if self.check.deployment.is_arbiter:
+        if api.deployment_type.is_arbiter:
             try:
-                cli_primary = self.check.setup_connection(replicaset=self.check.deployment.replset_name)
+                api_primary = MongoApi(self.check.config, self.log, replicaset=api.deployment_type.replset_name)
             except Exception:
                 self.log.warning(
                     "Current node is an arbiter, the extra connection to the primary was unsuccessful."
                     " Votes metrics won't be reported."
                 )
                 return None
-            return cli_primary['admin'].command('replSetGetConfig')
+            return api_primary['admin'].command('replSetGetConfig')
 
-        return client['admin'].command('replSetGetConfig')
+        return api['admin'].command('replSetGetConfig')
 
-    def collect(self, client):
-        db = client["admin"]
+    def collect(self, api):
+        db = api["admin"]
         status = db.command('replSetGetStatus')
         result = {}
 
@@ -137,7 +137,7 @@ class ReplicaCollector(MongoCollector):
             result['health'] = current['health']
 
         # Collect the number of votes
-        config = self.get_replset_config(client)
+        config = self.get_replset_config(api)
         votes = 0
         total = 0.0
         for member in config['config']['members']:
@@ -148,7 +148,6 @@ class ReplicaCollector(MongoCollector):
         result['voteFraction'] = votes / total
         result['state'] = status['myState']
         self._submit_payload({'replSet': result})
-
         if is_primary:
             # Submit events
             replset_name = status['set']

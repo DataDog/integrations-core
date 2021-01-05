@@ -18,8 +18,8 @@ class TopCollector(MongoCollector):
             return False
         return True
 
-    def collect(self, client):
-        dbtop = client["admin"].command('top')
+    def collect(self, api):
+        dbtop = api["admin"].command('top')
         for ns, ns_metrics in iteritems(dbtop['totals']):
             if "." not in ns:
                 continue

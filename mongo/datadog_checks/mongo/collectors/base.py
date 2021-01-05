@@ -25,7 +25,7 @@ class MongoCollector(object):
         self.base_tags = tags
         self.metrics_to_collect = self.check.metrics_to_collect
 
-    def collect(self, client):
+    def collect(self, api):
         """The main method exposed by the collector classes, needs to be implemented by every subclass.
         Performs the actual collection and submission of the metrics."""
         raise NotImplementedError()

@@ -13,8 +13,8 @@ class IndexStatsCollector(MongoCollector):
         # Can only be run once per cluster.
         return deployment.is_principal()
 
-    def collect(self, client):
-        db = client[self.db_name]
+    def collect(self, api):
+        db = api[self.db_name]
         for coll_name in self.coll_names:
             try:
                 for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):

@@ -5,6 +5,8 @@ import os
 from bson import Timestamp, json_util
 from mock import MagicMock
 
+from datadog_checks.mongo.api import MongoApi
+
 from .common import HERE
 
 
@@ -60,8 +62,12 @@ class MockedDB(object):
             return json.load(f, object_hook=json_util.object_hook)
 
 
-class MockedPyMongoClient(object):
-    def __init__(self, deployment):
+class MockedPyMongoClient(MongoApi):
+    def __init__(self, config, log, deployment, replicaset=None):
+        self._config = config
+        self._log = log
+        self._replicaset = replicaset
+        self.deployment_type = None
         self.deployment = deployment
         with open(os.path.join(HERE, "fixtures", "server_info"), 'r') as f:
             self.server_info = MagicMock(return_value=json.load(f))
@@ -69,9 +75,16 @@ class MockedPyMongoClient(object):
             self.list_database_names = MagicMock(return_value=json.load(f))
 
         self.db_cache = {}
+        MongoApi._initialize(self)
 
     def __getitem__(self, db_name):
         if db_name not in self.db_cache:
             self.db_cache[db_name] = MockedDB(db_name, self.deployment)
 
         return self.db_cache[db_name]
+
+    def _authenticate(self):
+        return MongoApi._authenticate(self)
+
+    def _get_deployment_type(self):
+        return MongoApi._get_deployment_type(self)

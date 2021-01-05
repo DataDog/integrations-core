@@ -13,8 +13,8 @@ class ServerStatusCollector(MongoCollector):
         # Can be run on any node.
         return True
 
-    def collect(self, client):
-        db = client[self.db_name]
+    def collect(self, api):
+        db = api[self.db_name]
         # No need to check for `result['ok']`, already handled by pymongo
         payload = db.command('serverStatus', tcmalloc=self.collect_tcmalloc_metrics)
 

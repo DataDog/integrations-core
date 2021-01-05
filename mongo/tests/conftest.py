@@ -10,7 +10,6 @@ import mock
 import pymongo
 import pytest
 from datadog_test_libs.utils.mock_dns import mock_local
-from mock import MagicMock
 from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
@@ -135,11 +134,10 @@ def mock_local_tls_dns():
 
 @contextmanager
 def mock_pymongo(deployment):
-    mocked_client = MockedPyMongoClient(deployment=deployment)
-
-    with mock.patch('pymongo.mongo_client.MongoClient', MagicMock(return_value=mocked_client),), mock.patch(
-        'pymongo.collection.Collection'
-    ), mock.patch('pymongo.command_cursor') as cur:
+    mongo_api = lambda *args, **kwargs: MockedPyMongoClient(*args, deployment=deployment, **kwargs)  # noqa
+    with mock.patch('datadog_checks.mongo.mongo.MongoApi', mongo_api), mock.patch(
+        'datadog_checks.mongo.collectors.replica.MongoApi', mongo_api
+    ), mock.patch('pymongo.collection.Collection'), mock.patch('pymongo.command_cursor') as cur:
         cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
         yield
 
