@@ -42,7 +42,8 @@ class TlsContextWrapper(object):
         # Override existing config options if there exists any overrides
         if overrides:
             for overridden_field, data in iteritems(overrides):
-                instance[overridden_field] = data
+                if instance.get(overridden_field):
+                    instance[overridden_field] = data
 
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
