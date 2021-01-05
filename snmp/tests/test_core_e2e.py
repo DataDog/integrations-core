@@ -146,7 +146,7 @@ def test_e2e_profile_palo_alto(dd_agent_check):
 
 
 METRIC_TO_SKIP = [
-    # wrong mac_addr value
+    # OctetString hexify / wrong mac_addr value
     # python and core check have different behaviour, see:
     # https://github.com/DataDog/datadog-agent/pull/6749/commits/d2ceb28730188d3b0eb96a397510073c59d6c1e2
     #
