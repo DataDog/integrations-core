@@ -40,5 +40,8 @@ def rds_parse_tags_from_endpoint(endpoint):
     else:
         tags.append('dbinstanceidentifier:' + identifier)
         tags.append('hostname:' + endpoint)
+        # Add the `host` tag as the instance endpoint. This is a more useful tag for metrics
+        # because the agent's hostname is not the actual host being monitored.
+        tags.append('host:' + endpoint)
     tags.append('region:' + region)
     return tags
