@@ -1,0 +1,39 @@
+{
+  "display_name": "Dell",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "snmp_dell",
+  "metric_prefix": "snmp.",
+  "metric_to_check": [
+    "snmp.fanSpeed",
+    "snmp.systemStateChassisStatus",
+    "snmp.cacheDeviceStatus"
+  ],
+  "creates_events": false,
+  "short_description": "Collect SNMP metrics from your Dell network devices.",
+  "guid": "67aa0ef7-7c1d-4c03-8723-6beb4f531f6b",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Dell",
+  "categories": [ 
+    "monitoring", 
+    "notification", 
+    "network", 
+    "autodiscovery",
+    "snmp"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "snmp-dell",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
