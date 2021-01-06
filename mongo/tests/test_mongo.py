@@ -4,10 +4,9 @@
 import logging
 
 import pytest
-
-from datadog_checks.dev.utils import get_metadata_metrics
 from six import iteritems
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
 
 from . import common
@@ -114,13 +113,13 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter):
         'mongodb.replset.health': 1.0,
         'mongodb.replset.votefraction': None,
         'mongodb.replset.votes': 1,
-        'mongodb.replset.state': 7
+        'mongodb.replset.state': 7,
     }
     expected_tags = [
         'server:mongodb://testUser:*****@localhost:27020/',
         'replset_name:shard01',
         'replset_state:arbiter',
-        'sharding_cluster_role:shardsvr'
+        'sharding_cluster_role:shardsvr',
     ]
     for metric, value in iteritems(expected_metrics):
         aggregator.assert_metric(metric, value, expected_tags, count=1)
