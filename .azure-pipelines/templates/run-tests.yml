@@ -7,8 +7,24 @@ parameters:
   latest_metrics: false
   repo: ''
   coverage: true
+  force_base_package: false
 
 steps:
+- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true')) }}:
+  - script: ddev test --cov --junit ${{ parameters.check }}
+    displayName: 'Run Unit/Integration tests'
+    env:
+      CODECOV_TOKEN: $(CODECOV_TOKEN)
+
+- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
+    - script: ddev test --junit ${{ parameters.check }}
+      displayName: 'Run Unit/Integration tests (no coverage)'
+
+# Nightly base package check
+- ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
+    - script: ddev test --force-base-package --force-env-rebuild --junit ${{ parameters.check }}
+      displayName: 'Run Unit/Integration tests (no coverage, forced datadog_checks_base package)'
+
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |
       ENV_TEST_OPTS=''
@@ -20,16 +36,6 @@ steps:
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
-
-- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true')) }}:
-  - script: ddev test --cov --junit ${{ parameters.check }}
-    displayName: 'Run Unit/Integration tests'
-    env:
-      CODECOV_TOKEN: $(CODECOV_TOKEN)
-
-- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
-    - script: ddev test --junit ${{ parameters.check }}
-      displayName: 'Run Unit/Integration tests (no coverage)'
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
   - script: ddev test --bench --junit ${{ parameters.check }}

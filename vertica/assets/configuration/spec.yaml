@@ -94,12 +94,13 @@ files:
             value:
               type: integer
               example: 10
-          - template: instances/tls
-          - name: validate_hostname
-            description: Whether or not to verify the TLS certificate was issued for `server` if `tls_verify` is true.
+          - name: use_tls
+            description: |
+              This instructs the Vertica check to connect using TLS.
             value:
               type: boolean
-              example: true
+              example: false
+          - template: instances/tls
           - template: instances/default
           - template: instances/db
             overrides:

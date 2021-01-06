@@ -1,12 +1,12 @@
 {
-  "title": "Twistlock - Overview",
+  "title": "Prisma Cloud Compute Edition - Overview",
   "description": "",
   "widgets": [
     {
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "/static/images/screenboard/integrations/twistlock.svg",
+        "url": "https://static.datadoghq.com/static/images/saas_logos/bot/twistlock@2x.png",
         "sizing": "fit"
       },
       "layout": {

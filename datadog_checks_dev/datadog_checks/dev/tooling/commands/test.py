@@ -11,7 +11,7 @@ from ...subprocess import run_command
 from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
-from ..utils import complete_testable_checks
+from ..utils import complete_testable_checks, get_version_string
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -43,6 +43,8 @@ def display_envs(check_envs):
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--skip-env', is_flag=True, help='Skip environment creation and assume it is already running')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
+@click.option('--force-base-package', is_flag=True, help='Force using latest released version of datadog-checks-base')
+@click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
 @click.pass_context
 def test(
     ctx,
@@ -66,6 +68,8 @@ def test(
     cov_keep,
     skip_env,
     pytest_args,
+    force_base_package,
+    force_env_rebuild,
 ):
     """Run tests for Agent-based checks.
 
@@ -186,15 +190,33 @@ def test(
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
-            result = run_command(
-                'tox '
+            command = [
+                'tox',
                 # so users won't get failures for our possibly strict CI requirements
-                '--skip-missing-interpreters '
+                '--skip-missing-interpreters',
                 # so coverage tracks the real locations instead of .tox virtual envs
-                '--develop '
+                '--develop',
                 # comma-separated list of environments
-                '-e {}'.format(','.join(envs))
-            )
+                '-e {}'.format(','.join(envs)),
+            ]
+
+            env = os.environ.copy()
+
+            if force_base_package:
+                version = get_version_string('datadog_checks_base', '')
+                env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
+
+            if force_env_rebuild:
+                command.append('--recreate')
+
+            if verbose:
+                command.append('-' + 'v' * verbose)
+
+            command = ' '.join(command)
+
+            echo_debug(f'TOX COMMAND: {command}')
+            result = run_command(command, env=env)
+
             if result.code:
                 abort('\nFailed!', code=result.code)
 

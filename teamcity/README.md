@@ -42,6 +42,50 @@ Add an item like the above to `instances` for each build configuration you want 
 
 [Restart the Agent][6] to start collecting and sending Teamcity events to Datadog.
 
+##### Log collection
+
+1. Configure Teamcity [logs settings][11].
+
+2. By default, Datadog's integration pipeline supports the following kind of log format:
+
+   ```text
+   [2020-09-10 21:21:37,486]   INFO -  jetbrains.buildServer.STARTUP - Current stage: System is ready
+   ```
+
+   Clone and edit the [integration pipeline][12] if you defined different conversion [patterns][13].
+
+3. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+4. Uncomment the following configuration block in your `teamcity.d/conf.yaml` file. Change the `path` parameter value based on your environment. See the [sample teamcity.d/conf.yaml][5] for all available configuration options.
+
+   ```yaml
+   logs:
+     - type: file
+       path: /opt/teamcity/logs/teamcity-server.log
+       source: teamcity
+     - type: file
+       path: /opt/teamcity/logs/teamcity-activities.log
+       source: teamcity
+     - type: file
+       path: /opt/teamcity/logs/teamcity-vcs.log
+       source: teamcity
+     - type: file
+       path: /opt/teamcity/logs/teamcity-cleanup.log
+       source: teamcity
+     - type: file
+       path: /opt/teamcity/logs/teamcity-notifications.log
+       source: teamcity
+     - type: file
+       path: /opt/teamcity/logs/teamcity-ws.log
+       source: teamcity
+   ```
+
+5. [Restart the Agent][6].
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -54,6 +98,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `teamcity`                                                                                        |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
 | `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"%%host%%", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][10].
+
+| Parameter      | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "teamcity"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -93,3 +145,7 @@ Need help? Contact [Datadog support][8].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://www.jetbrains.com/help/teamcity/teamcity-server-logs.html
+[12]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[13]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns

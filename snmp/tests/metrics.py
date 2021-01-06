@@ -321,3 +321,92 @@ CCCA_ROUTER_GAUGES = [
     "cccaRouterCallsInProgress",
     "cccaRouterCallsInQueue",
 ]
+
+# Juniper enterprise metrics
+
+VIRTUAL_CHASSIS_COUNTS = [
+    'jnxVirtualChassisPortInPkts',
+    'jnxVirtualChassisPortOutPkts',
+    'jnxVirtualChassisPortInOctets',
+    'jnxVirtualChassisPortOutOctets',
+    'jnxVirtualChassisPortInMcasts',
+    'jnxVirtualChassisPortOutMcasts',
+    'jnxVirtualChassisPortCarrierTrans',
+    'jnxVirtualChassisPortInCRCAlignErrors',
+    'jnxVirtualChassisPortUndersizePkts',
+    'jnxVirtualChassisPortCollisions',
+]
+
+VIRTUAL_CHASSIS_RATES = [
+    'jnxVirtualChassisPortInPkts1secRate',
+    'jnxVirtualChassisPortOutPkts1secRate',
+    'jnxVirtualChassisPortOutOctets1secRate',
+    'jnxVirtualChassisPortInOctets1secRate',
+]
+
+COS_COUNTS = [
+    'jnxCosIfsetQstatQedPkts',
+    'jnxCosIfsetQstatQedBytes',
+    'jnxCosIfsetQstatTxedPkts',
+    'jnxCosIfsetQstatTxedBytes',
+    'jnxCosIfsetQstatTailDropPkts',
+    'jnxCosIfsetQstatTotalRedDropPkts',
+    'jnxCosIfsetQstatLpNonTcpRedDropPkts',
+    'jnxCosIfsetQstatLpTcpRedDropPkts',
+    'jnxCosIfsetQstatHpNonTcpRedDropPkts',
+    'jnxCosIfsetQstatHpTcpRedDropPkts',
+    'jnxCosIfsetQstatTotalRedDropBytes',
+    'jnxCosIfsetQstatLpNonTcpRedDropBytes',
+    'jnxCosIfsetQstatLpTcpRedDropBytes',
+    'jnxCosIfsetQstatHpNonTcpRedDropBytes',
+    'jnxCosIfsetQstatHpTcpRedDropBytes',
+    'jnxCosIfsetQstatLpRedDropPkts',
+    'jnxCosIfsetQstatMLpRedDropPkts',
+    'jnxCosIfsetQstatMHpRedDropPkts',
+    'jnxCosIfsetQstatHpRedDropPkts',
+    'jnxCosIfsetQstatLpRedDropBytes',
+    'jnxCosIfsetQstatMLpRedDropBytes',
+    'jnxCosIfsetQstatMHpRedDropBytes',
+    'jnxCosIfsetQstatHpRedDropBytes',
+    'jnxCosIfsetQstatRateLimitDropPkts',
+    'jnxCosIfsetQstatRateLimitDropBytes',
+]
+
+COS_RATES = [
+    'jnxCosIfsetQstatQedPktRate',
+    'jnxCosIfsetQstatQedByteRate',
+    'jnxCosIfsetQstatTxedPktRate',
+    'jnxCosIfsetQstatTxedByteRate',
+    'jnxCosIfsetQstatTailDropPktRate',
+    'jnxCosIfsetQstatTotalRedDropPktRate',
+    'jnxCosIfsetQstatLpNonTcpRDropPktRate',
+    'jnxCosIfsetQstatLpTcpRedDropPktRate',
+    'jnxCosIfsetQstatHpNonTcpRDropPktRate',
+    'jnxCosIfsetQstatHpTcpRedDropPktRate',
+    'jnxCosIfsetQstatTotalRedDropByteRate',
+    'jnxCosIfsetQstatLpNonTcpRDropByteRate',
+    'jnxCosIfsetQstatLpTcpRedDropByteRate',
+    'jnxCosIfsetQstatHpNonTcpRDropByteRate',
+    'jnxCosIfsetQstatHpTcpRedDropByteRate',
+    'jnxCosIfsetQstatLpRedDropPktRate',
+    'jnxCosIfsetQstatMLpRedDropPktRate',
+    'jnxCosIfsetQstatMHpRedDropPktRate',
+    'jnxCosIfsetQstatHpRedDropPktRate',
+    'jnxCosIfsetQstatLpRedDropByteRate',
+    'jnxCosIfsetQstatMLpRedDropByteRate',
+    'jnxCosIfsetQstatMHpRedDropByteRate',
+    'jnxCosIfsetQstatHpRedDropByteRate',
+    'jnxCosIfsetQstatRateLimitDropPktRate',
+    'jnxCosIfsetQstatRateLimitDropByteRate',
+]
+
+FIREWALL_COUNTS = [
+    'jnxFWCounterPacketCount',
+    'jnxFWCounterByteCount',
+]
+
+USER_FIREWALL = ['jnxUserFwLDAPTotalQuery', 'jnxUserFwLDAPFailedQuery']
+
+DCU_COUNTS = ['jnxDcuStatsPackets', 'jnxDcuStatsBytes']
+
+SCU_COUNTS = ['jnxScuStatsPackets', 'jnxScuStatsBytes']

@@ -51,7 +51,7 @@ instances:
   - prometheus_url: http://localhost:9990/admin/metrics/prometheus
 
     ## @param prometheus_metrics_prefix - string - optional
-    ## <PREFIX> for exposed Prometheus metrics.
+    ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
     # prometheus_metrics_prefix: <PREFIX>_
 

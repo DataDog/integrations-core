@@ -59,7 +59,7 @@ instances:
     # collect_nginx_histograms: false
 
     ## @param prometheus_metrics_prefix - string - optional
-    ## <PREFIX> for exposed Prometheus metrics.
+    ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
     # prometheus_metrics_prefix: <PREFIX>_
 

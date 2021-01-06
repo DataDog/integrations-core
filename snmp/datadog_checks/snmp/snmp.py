@@ -564,6 +564,10 @@ class SnmpCheck(AgentCheck):
             self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping metric %s', name)
             return
 
+        if name not in results:
+            self.log.debug('[SNMP Bandwidth usage] missing `%s` metric, skipping this row. index=%s', name, index)
+            return
+
         octets_value = results[name][index]
         try:
             if_high_speed_val = results['ifHighSpeed'][index]

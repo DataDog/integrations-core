@@ -70,7 +70,7 @@ instances:
       - coredns_template_rr_failures_total: template_resource_record_failures_count
 
     ## @param prometheus_metrics_prefix - string - optional
-    ## <PREFIX> for exposed Prometheus metrics.
+    ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
     # prometheus_metrics_prefix: <PREFIX>_
 

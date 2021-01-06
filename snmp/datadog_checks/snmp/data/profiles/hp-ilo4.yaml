@@ -6,6 +6,7 @@
 extends:
   - _base.yaml
   - _hp-compaq-health.yaml
+  - _hp-driver-stats.yaml
 
 device:
   vendor: "hp"
