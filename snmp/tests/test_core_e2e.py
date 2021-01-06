@@ -154,11 +154,6 @@ METRIC_TO_SKIP = [
     # See II-153
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
-    # handle old symbol syntax. Example:
-    'snmp.cfInterconnectStatus',
-    'snmp.extcache64Hits',
-    'snmp.miscCacheAge',
-    'snmp.ncHttpActiveCliConns',
     # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
