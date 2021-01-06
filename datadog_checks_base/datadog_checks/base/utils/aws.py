@@ -10,8 +10,10 @@ def rds_parse_tags_from_endpoint(endpoint):
 
     * `dbinstanceidentifier` - The instance's unique identifier for RDS and Aurora clusters
     * `dbclusteridentifier` - The cluster identifier in the case of Aurora cluster endpoints and serverless
-    * `hostname` - The full endpoint if the endpoint points to a specific instance
-    * `host` - The full endpoint if the endpoint points to a specific instance
+    * `hostname` - The full endpoint if the endpoint points to a specific instance. This tag should match
+        the RDS integration tag of the same name.
+    * `host` - Same value as the hostname tag, but intended to supplement the agent `host` tag since RDS
+        instance checks are always run on different hosts from where the actual managed DB is run.
     * `region` - The AWS region of the endpoint
 
     Examples:
@@ -41,8 +43,6 @@ def rds_parse_tags_from_endpoint(endpoint):
     else:
         tags.append('dbinstanceidentifier:' + identifier)
         tags.append('hostname:' + endpoint)
-        # Add the `host` tag as the instance endpoint. This is a more useful tag for metrics
-        # because the agent's hostname is not the actual host being monitored.
         tags.append('host:' + endpoint)
     tags.append('region:' + region)
     return tags
