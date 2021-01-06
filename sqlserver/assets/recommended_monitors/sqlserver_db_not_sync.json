@@ -3,7 +3,9 @@
 	"type": "metric alert",
 	"query": "avg(last_5m):avg:sqlserver.database.is_sync_with_backup{*} < 1",
 	"message": "SQLServer database is not marked for replication sync. It may not be synced with its backup.",
-	"tags": [],
+	"tags": [
+      "integration:sql-server"
+    ],
 	"options": {
 		"notify_audit": false,
 		"locked": false,

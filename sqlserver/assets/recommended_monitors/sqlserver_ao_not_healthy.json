@@ -4,7 +4,7 @@
 	"query": "avg(last_5m):avg:sqlserver.ao.ag_sync_health{*} < 1",
 	"message": "Availability group has not been healthy for the last 5 minutes",
 	"tags": [
-      "integration:sqlserver"
+      "integration:sql-server"
     ],
 	"options": {
 		"notify_audit": false,

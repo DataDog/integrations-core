@@ -4,7 +4,7 @@
 	"query": "avg(last_5m):avg:sqlserver.database.state{*} > 0",
 	"message": "SQLServer database is not online for the last 5 minutes",
 	"tags": [
-      "integration:sqlserver"
+      "integration:sql-server"
     ],
 	"options": {
 		"notify_audit": false,
