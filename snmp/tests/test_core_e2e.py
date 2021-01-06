@@ -42,12 +42,12 @@ def test_e2e_profile_arista(dd_agent_check):
 
 def test_e2e_profile_aruba(dd_agent_check):
     config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=28)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=67)
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     config = common.generate_container_profile_config('chatsworth_pdu')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=184)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=225)
 
 
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
@@ -57,7 +57,7 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4290)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=4303)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
