@@ -5,6 +5,7 @@ import click
 
 from ....utils import get_next
 from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
+from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
@@ -117,17 +118,18 @@ def verify_dependency(source, name, versions):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Verify dependencies across all checks')
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option(
     '--require-base-check-version', is_flag=True, help='Require specific version for datadog-checks-base requirement'
 )
 @click.option(
     '--min-base-check-version', help='Specify minimum version for datadog-checks-base requirement, e.g. `11.0.0`'
 )
-def dep(require_base_check_version, min_base_check_version):
+def dep(check, require_base_check_version, min_base_check_version):
     """
     This command will:
 
-    * Verify the uniqueness of dependency versions across all checks.
+    * Verify the uniqueness of dependency versions across all checks, or optionally a single check
     * Verify all the dependencies are pinned.
     * Verify the embedded Python environment defined in the base check and requirements
       listed in every integration are compatible.
@@ -136,7 +138,7 @@ def dep(require_base_check_version, min_base_check_version):
     * Optionally verify that the `datadog-checks-base` requirement satisfies specific version
     """
     failed = False
-    check_dependencies, check_errors = read_check_dependencies()
+    check_dependencies, check_errors = read_check_dependencies(check)
 
     if check_errors:
         for check_error in check_errors:
@@ -144,7 +146,7 @@ def dep(require_base_check_version, min_base_check_version):
 
         abort()
 
-    check_base_dependencies, check_base_errors = read_check_base_dependencies()
+    check_base_dependencies, check_base_errors = read_check_base_dependencies(check)
 
     if check_base_errors:
         for check_error in check_base_errors:

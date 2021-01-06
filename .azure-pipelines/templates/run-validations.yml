@@ -1,4 +1,5 @@
 parameters:
+  check: null
   repo: 'core'
   ispr: false
 
@@ -26,7 +27,7 @@ steps:
   displayName: 'Validate dashboard definition files'
 
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'true')) }}:
-  - script: ddev validate dep --require-base-check-version
+  - script: ddev validate dep --require-base-check-version ${{ parameters.check }}
     displayName: 'Validate dependencies'
 
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'false')) }}:
