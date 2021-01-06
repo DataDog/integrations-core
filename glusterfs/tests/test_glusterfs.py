@@ -9,15 +9,13 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.glusterfs import GlusterfsCheck
 
-from .common import CHECK, CONFIG, EXPECTED_METRICS, GLUSTER_VERSION
-
-INIT_CONFIG = {'gstatus_path': '/usr/local/bin/gstatus'}
+from .common import CHECK, E2E_INIT_CONFIG, EXPECTED_METRICS, GLUSTER_VERSION
 
 
 @pytest.mark.unit
 def test_check(aggregator, instance, mock_gstatus_data):
     # type: (AggregatorStub, Dict[str, Any]) -> None
-    check = GlusterfsCheck(CHECK, INIT_CONFIG, [instance])
+    check = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
     check.check(instance)
 
     for metric in EXPECTED_METRICS:
@@ -28,10 +26,10 @@ def test_check(aggregator, instance, mock_gstatus_data):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(aggregator, datadog_agent):
-    c = GlusterfsCheck(CHECK, CONFIG['init_config'], [{}])
+def test_version_metadata(aggregator, datadog_agent, instance):
+    c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, instance)
     c.check_id = 'test:123'
-    c.check({})
+    c.check(instance)
 
     major, minor = c.parse_version(GLUSTER_VERSION)
 

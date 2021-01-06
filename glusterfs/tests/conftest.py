@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import WaitFor, docker_run, run_command
 
-from .common import CONFIG
+from .common import CONFIG, INSTANCE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -33,7 +33,7 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return INSTANCE
 
 
 @pytest.fixture()
