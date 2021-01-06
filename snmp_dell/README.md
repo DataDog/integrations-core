@@ -18,7 +18,7 @@ To install and configure the SNMP integration, see the [Network Device Monitorin
 
 ### Metrics
 
-For details of monitored metrics see the [Network Device Monitoring documentation][1]
+For details of monitored metrics see the [Network Device Monitoring documentation][1].
 
 ### Service Checks
 
