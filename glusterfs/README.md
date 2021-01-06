@@ -21,33 +21,34 @@ No additional installation is needed on your server.
    ```yaml
    init_config:
 
-    ## @param gstatus_path - string - optional - default: /path/to/gstatus
+    ## @param gstatus_path - string - optional - default: /opt/datadog-agent/embedded/sbin/gstatus
     ## Path to the gstatus command.
     ##
     ## A version of the gstatus is shipped with the Agent binary.
     ## If you are using a source install, specify the location of gstatus.
     #
-    # gstatus_path: /path/to/gstatus
+    # gstatus_path: /opt/datadog-agent/embedded/sbin/gstatus
 
     instances:
       -
-        ## @param use_sudo - boolean - optional - default: false
-        ## GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
+        ## @param min_collection_interval - number - optional - default: 60
+        ## The GlusterFS integration collects cluster-wide metrics which can put additional workload on the server.
+        ## Increase the collection interval to reduce the frequency.
         ##
-        ## dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
-        ##
-        ## Enable the option for the check to run with sudo.
+        ## This changes the collection interval of the check. For more information, see:
+        ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
         #
-        use_sudo: true
+        min_collection_interval: 60
    ```
-   
-   If you enable `use_sudo`, add a line like the following to your `sudoers` file:
+    
+   **NOTE**: By default, [`gstatus`][8] internally calls the `gluster` command which requires running as superuser. Add a line like the following to your `sudoers` file:
+ 
    ```text
     dd-agent ALL=(ALL) NOPASSWD:/path/to/your/gstatus
    ```
-   
-   [`gstatus`][8] internally calls the `gluster` command which requires running as superuser.
-    
+
+   If your GlusterFS environment does not require root, set `use_sudo` configuration option to `false`.
+
 2. [Restart the Agent][4].
 
 ### Validation

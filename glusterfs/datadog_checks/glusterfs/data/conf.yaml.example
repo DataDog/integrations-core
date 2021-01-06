@@ -47,11 +47,14 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 15
+    ## @param min_collection_interval - number - optional - default: 60
+    ## The GlusterFS integration collects cluster-wide metrics which can put additional workload on the server.
+    ## Increase the collection interval to reduce the frequency.
+    ##
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
-    # min_collection_interval: 15
+    min_collection_interval: 60
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

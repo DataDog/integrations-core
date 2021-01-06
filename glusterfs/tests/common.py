@@ -6,7 +6,7 @@ import os
 GLUSTER_VERSION = os.getenv('GLUSTER_VERSION')
 
 CHECK = 'glusterfs'
-CONFIG = {'init_config': {'gstatus_path': 'docker exec gluster-node-1 gstatus'}, 'instances': [{}]}
+CONFIG = {'init_config': {'gstatus_path': 'docker exec gluster-node-1 gstatus'}, 'instances': [{'use_sudo': False}]}
 
 EXPECTED_METRICS = [
     "glusterfs.brick.block_size",
