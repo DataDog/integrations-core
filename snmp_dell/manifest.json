@@ -1,5 +1,5 @@
 {
-  "display_name": "Dell Inc.",
+  "display_name": "Dell",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "snmp_dell",
@@ -18,7 +18,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Dell Inc.",
+  "public_title": "Datadog-Dell Inc.",
   "categories": [ 
     "monitoring", 
     "notification", 
