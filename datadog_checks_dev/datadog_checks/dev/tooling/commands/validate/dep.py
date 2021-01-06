@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...utils import complete_valid_checks
 from ....utils import get_next
 from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
+from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
