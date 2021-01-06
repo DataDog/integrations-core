@@ -10,7 +10,7 @@
     "snmp.jnxScuStatsPackets"
   ],
   "creates_events": false,
-  "short_description": "Collect SNMP metrics from your Juniper network devices.",
+  "short_description": "Collect metrics from your Juniper network devices.",
   "guid": "62f074dc-8b6b-466d-bca2-175194221546",
   "support": "core",
   "supported_os": [
