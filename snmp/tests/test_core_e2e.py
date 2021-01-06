@@ -202,25 +202,15 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
 
     print("Python metrics not found in Corecheck metrics:")
     for key in sorted(expected_metrics):
-        (name, mtype, tags) = key
-        if has_index_mapping_tag(tags):
-            continue
         if key not in actual_metrics:
             print("\t{}".format(key))
 
     print("Corecheck metrics not found in Python metrics:")
     for key in sorted(actual_metrics):
-        (name, mtype, tags) = key
-        if has_index_mapping_tag(tags):
-            continue
         if key not in expected_metrics:
             print("\t{}".format(key))
 
     for (name, mtype, tags), count in expected_metrics.items():
-        # TODO: to delete when index mapping support is added to corecheck snmp
-        if has_index_mapping_tag(tags):
-            aggregator.assert_metric(name, metric_type=mtype)
-            continue
         aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
@@ -242,10 +232,3 @@ def normalize_stub_metric(stub):
         stub.hostname,
         stub.device,
     )
-
-
-def has_index_mapping_tag(tags):
-    for tag in tags:
-        if tag.startswith('ipversion:'):
-            return True
-    return False
