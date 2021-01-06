@@ -1,4 +1,4 @@
-# Agent Check: snmp_Dell
+# Agent Check: snmp_dell
 
 ## Overview
 
