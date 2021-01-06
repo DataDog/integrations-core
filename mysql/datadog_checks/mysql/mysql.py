@@ -73,7 +73,8 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.version = None
-        self._config = MySQLConfig(self.instance)
+        self._is_aurora = None
+        self.config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
         self._conn = None
@@ -101,34 +102,27 @@ class MySql(AgentCheck):
     def get_library_versions(cls):
         return {'pymysql': pymysql.__version__}
 
-    def init_with_connection(self):
-        """
-        Run one-time check initialization tasks which require a connection to the DB.
-        """
-        tags = []
-
-        with self._connect() as db:
-            if self._get_is_aurora(db):
-                tags.extend(self._get_runtime_aurora_tags(db))
-
-        self.config.tags = list(set(self.config.tags) | set(tags))
-
     def check(self, _):
+        tags = list(self.config.tags)
         self._set_qcache_stats()
         with self._connect() as db:
             try:
                 self._conn = db
+
+                if self._get_is_aurora(db):
+                    tags.extend(self._get_runtime_aurora_tags(db))
+                    tags = list(set(tags))
 
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
 
                 # Metric collection
-                self._collect_metrics(db)
-                self._collect_system_metrics(self._config.host, db, self._config.tags)
+                self._collect_metrics(db, tags)
+                self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.deep_database_monitoring:
-                    self._collect_statement_metrics(db, self._config.tags)
-                    self._statement_samples.run_sampler(self.service_check_tags)
+                    self._collect_statement_metrics(db, tags)
+                    self._statement_samples.run_sampler(tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -562,13 +556,19 @@ class MySql(AgentCheck):
 
     def _get_is_aurora(self, db):
         """
-        Tests if the instance is an AWS Aurora database.
+        Tests if the instance is an AWS Aurora database and caches the result.
         """
+        if self._is_aurora is not None:
+            return self._is_aurora
+
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_SERVER_ID_AWS_AURORA)
                 if len(cursor.fetchall()) > 0:
-                    return True
+                    self._is_aurora = True
+                else:
+                    self._is_aurora = False
+
         except Exception:
             self.warning(
                 "Unable to determine if server is Aurora. If this is an Aurora database, some "
@@ -576,7 +576,7 @@ class MySql(AgentCheck):
                 traceback.format_exc(),
             )
 
-        return False
+        return self._is_aurora
 
     @classmethod
     def _get_stats_from_status(cls, db):
