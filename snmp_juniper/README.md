@@ -2,7 +2,7 @@
 
 ## Overview
 
-Juniper Networks develops and markets networking products, including routers, switches, network management software and network security products. Configure the Juniper integration and collect SNMP metrics from devices including:
+Juniper Networks develops and markets networking products, including routers, switches, network management software, and network security products. Configure the Juniper integration and collect SNMP metrics from devices, including:
 
 - Juniper EX Ethernet Switches
 - Juniper MX Routers
