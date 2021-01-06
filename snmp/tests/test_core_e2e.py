@@ -151,6 +151,7 @@ METRIC_TO_SKIP = [
     # in dell-poweredge.yaml and _dell-rac.yaml
     # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
     # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
+    # See II-153
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
     # handle old symbol syntax. Example:
