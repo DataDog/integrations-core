@@ -43,6 +43,7 @@ jobs:
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
       parameters:
+        check: ${{ parameters.check }}
         repo: ${{ parameters.repo }}
         ispr: ${{ parameters.ispr }}
 

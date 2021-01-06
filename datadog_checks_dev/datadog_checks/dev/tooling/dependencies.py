@@ -63,24 +63,28 @@ def load_base_check(req_file, dependencies, errors, check_name=None):
     errors.append(f'File `{req_file}` missing base check dependency `CHECKS_BASE_REQ`')
 
 
-def read_check_dependencies():
+def read_check_dependencies(check=None):
     root = get_root()
     dependencies = create_dependency_data()
     errors = []
 
-    for check_name in sorted(get_valid_checks()):
+    checks = sorted(get_valid_checks()) if check is None else [check]
+
+    for check_name in checks:
         req_file = os.path.join(root, check_name, 'requirements.in')
         load_dependency_data(req_file, dependencies, errors, check_name)
 
     return dependencies, errors
 
 
-def read_check_base_dependencies():
+def read_check_base_dependencies(check=None):
     root = get_root()
     dependencies = create_dependency_data()
     errors = []
 
-    for check_name in sorted(get_valid_checks()):
+    checks = sorted(get_valid_checks()) if check is None else [check]
+
+    for check_name in checks:
         if check_name.startswith('datadog_checks_'):
             continue
         req_file = os.path.join(root, check_name, 'setup.py')
