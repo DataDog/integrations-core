@@ -11,6 +11,7 @@ parameters:
 
 steps:
 
+# Run e2e first
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |
       ENV_TEST_OPTS=''
