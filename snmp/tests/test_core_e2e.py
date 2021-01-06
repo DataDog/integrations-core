@@ -146,75 +146,17 @@ def test_e2e_profile_palo_alto(dd_agent_check):
 
 
 METRIC_TO_SKIP = [
-    # OctetString hexify / wrong mac_addr value
-    # python and core check have different behaviour, see:
-    # https://github.com/DataDog/datadog-agent/pull/6749/commits/d2ceb28730188d3b0eb96a397510073c59d6c1e2
-    #
-    # python: ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:0xffffffffffff',
-    #          'snmp_device:172.24.0.2', 'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
-    # core:   ('snmp.cswSwitchState', 0, ('device_vendor:cisco', 'mac_addr:....', 'snmp_device:172.24.0.2',
-    #          'snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus'))
-    #         ('snmp.cpiPduChainRole', 0, ('device_vendor:chatsworth', 'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
-    #          'legacy_pdu_model:P10-1234-ABC', 'legacy_pdu_name:legacy-name1', 'legacy_pdu_version:1.2.3',
-    #          'pdu_cabinetid:cab1', 'pdu_macaddress:\\x0...., 'pdu_model:model1', 'pdu_name:name1',
-    #          'pdu_version:v1.1', 'snmp_device:172.24.0.2', 'snmp_profile:chatsworth_pdu'))
-    'snmp.cswSwitchState',
-    'snmp.cpiPduChainRole',
-    'snmp.cpiPduNumberBranches',
-    'snmp.cpiPduNumberOutlets',
-    'snmp.cpiPduOutOfService',
-    'snmp.cpiPduTotalPower',
-    'snmp.cpiPduUpgrade',
     # handle metrics present multiple times. Example:
     # - snmp.memoryDeviceStatus
     # - snmp.networkDeviceStatus
     # from dell-poweredge.yaml and _dell-rac.yaml
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
-    # handle gosnmp.IPAddress and gosnmp.ObjectIdentifier:
-    # https://github.com/DataDog/datadog-agent/blob/c2dac4ee5d83cf4a2d2616c5fed409e1c075c2fa/pkg/collector/corechecks/snmp/gosnmp_value.go#L9-L30
-    'snmp.bgpPeerAdminStatus',
-    'snmp.bgpPeerConnectRetryInterval',
-    'snmp.bgpPeerFsmEstablishedTime',
-    'snmp.bgpPeerFsmEstablishedTransitions',
-    'snmp.bgpPeerHoldTime',
-    'snmp.bgpPeerHoldTimeConfigured',
-    'snmp.bgpPeerInTotalMessages',
-    'snmp.bgpPeerInUpdates',
-    'snmp.bgpPeerKeepAlive',
-    'snmp.bgpPeerKeepAliveConfigured',
-    'snmp.bgpPeerMinASOriginationInterval',
-    'snmp.bgpPeerNegotiatedVersion',
-    'snmp.bgpPeerOutTotalMessages',
-    'snmp.bgpPeerOutUpdates',
-    'snmp.bgpPeerRemoteAs',
-    'snmp.bgpPeerState',
     # handle old symbol syntax. Example:
     'snmp.cfInterconnectStatus',
     'snmp.extcache64Hits',
     'snmp.miscCacheAge',
     'snmp.ncHttpActiveCliConns',
-    # snmpsim type 64x
-    'snmp.ospfIfLsaCount',
-    'snmp.ospfIfRetransInterval',
-    'snmp.ospfIfState',
-    'snmp.ospfNbrEvents',
-    'snmp.ospfNbrLsRetransQLen',
-    'snmp.ospfNbrState',
-    'snmp.ospfVirtIfLsaCount',
-    'snmp.ospfVirtIfRetransInterval',
-    'snmp.ospfVirtIfState',
-    'snmp.ospfVirtNbrEvents',
-    'snmp.ospfVirtNbrLsRetransQLen',
-    'snmp.ospfVirtNbrState',
-    # index_transform
-    'snmp.cpiPduBranchCurrent',
-    'snmp.cpiPduBranchEnergy',
-    'snmp.cpiPduBranchMaxCurrent',
-    'snmp.cpiPduBranchPower',
-    'snmp.cpiPduBranchPowerFactor',
-    'snmp.cpiPduBranchStatus',
-    'snmp.cpiPduBranchVoltage',
     # bandwidth
     'snmp.ifBandwidthInUsage.rate',
     'snmp.ifBandwidthOutUsage.rate',
