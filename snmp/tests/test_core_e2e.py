@@ -146,10 +146,11 @@ def test_e2e_profile_palo_alto(dd_agent_check):
 
 
 METRIC_TO_SKIP = [
-    # handle metrics present multiple times. Example:
-    # - snmp.memoryDeviceStatus
-    # - snmp.networkDeviceStatus
-    # from dell-poweredge.yaml and _dell-rac.yaml
+    # Following metrics are declared multiple times in profiles.
+    # Example: snmp.networkDeviceStatus and snmp.memoryDeviceStatus are declared twice
+    # in dell-poweredge.yaml and _dell-rac.yaml
+    # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
+    # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
     # handle old symbol syntax. Example:
