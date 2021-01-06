@@ -49,8 +49,7 @@ class GlusterfsCheck(AgentCheck):
                     'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
                 )
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
-        self.use_sudo = is_affirmative(self.instance.get('use_sudo', False))
-
+        self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def check(self, _):
         if self.use_sudo:

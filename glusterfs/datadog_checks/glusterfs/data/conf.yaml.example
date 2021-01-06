@@ -22,14 +22,14 @@ init_config:
 instances:
 
   -
-    ## @param use_sudo - boolean - optional - default: false
+    ## @param use_sudo - boolean - optional - default: true
     ## GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
     ##
     ## dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
     ##
     ## Enable the option for the check to run with sudo.
     #
-    # use_sudo: false
+    # use_sudo: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

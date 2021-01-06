@@ -25,6 +25,6 @@ files:
         Enable the option for the check to run with sudo.
       value:
         type: boolean
-        example: false
+        example: true
 
     - template: instances/default
