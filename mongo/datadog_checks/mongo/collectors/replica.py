@@ -3,7 +3,7 @@ import time
 from six.moves.urllib.parse import urlsplit
 
 from datadog_checks.mongo.collectors.base import MongoCollector
-from datadog_checks.mongo.common import SOURCE_TYPE_NAME, get_long_state_name, get_state_name
+from datadog_checks.mongo.common import SOURCE_TYPE_NAME, ReplicaSetDeployment, get_long_state_name, get_state_name
 
 try:
     import datadog_agent
@@ -19,7 +19,11 @@ class ReplicaCollector(MongoCollector):
     def __init__(self, check, tags):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
-        self.hostname = self.extract_hostname_for_event(self.check.clean_server_name)
+        self.hostname = self.extract_hostname_for_event(self.check.config.clean_server_name)
+
+    def compatible_with(self, deployment):
+        # Can only be run on mongod that are part of a replica set.
+        return isinstance(deployment, ReplicaSetDeployment)
 
     @staticmethod
     def extract_hostname_for_event(server_uri):
@@ -62,7 +66,7 @@ class ReplicaCollector(MongoCollector):
                 "for {replset_name}; it was {old_state} before.".format(
                     node=node_hostname,
                     id=member_id,
-                    uri=self.check.clean_server_name,
+                    uri=self.check.config.clean_server_name,
                     status=long_state_str,
                     status_short=short_state_str,
                     replset_name=replset_name,
@@ -88,8 +92,8 @@ class ReplicaCollector(MongoCollector):
                 event_payload['host'] = self.hostname
             self.check.event(event_payload)
 
-    def collect(self, client):
-        db = client["admin"]
+    def collect(self, api):
+        db = api["admin"]
         status = db.command('replSetGetStatus')
         result = {}
 
@@ -125,7 +129,6 @@ class ReplicaCollector(MongoCollector):
         result['voteFraction'] = votes / total
         result['state'] = status['myState']
         self._submit_payload({'replSet': result})
-
         if is_primary:
             # Submit events
             replset_name = status['set']

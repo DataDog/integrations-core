@@ -33,7 +33,17 @@ def test_integration_mongos(instance_integration, aggregator, check):
 
     _assert_metrics(
         aggregator,
-        ['default', 'custom-queries', 'dbstats', 'indexes-stats', 'collection', 'connection-pool', 'jumbo', 'sessions'],
+        [
+            'count-dbs',
+            'serverStatus',
+            'custom-queries',
+            'dbstats',
+            'indexes-stats',
+            'collection',
+            'connection-pool',
+            'jumbo',
+            'sessions',
+        ],
         ['sharding_cluster_role:mongos'],
     )
 
@@ -64,7 +74,8 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'custom-queries',
         'oplog',
         'replset-primary',
@@ -139,7 +150,8 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'oplog',
         'replset-secondary',
         'top',
@@ -176,7 +188,8 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check):
         'sharding_cluster_role:configsvr',
     ]
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'custom-queries',
         'oplog',
         'replset-primary',
@@ -251,7 +264,8 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         'sharding_cluster_role:configsvr',
     ]
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'oplog',
         'replset-secondary',
         'top',
@@ -284,7 +298,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check)
 
     replica_tags = ['replset_name:replset', 'replset_state:primary']
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'custom-queries',
         'oplog',
         'replset-primary',
@@ -362,7 +377,8 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
 
     replica_tags = ['replset_name:replset', 'replset_state:secondary']
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'oplog',
         'replset-secondary',
         'top',
@@ -396,7 +412,8 @@ def test_standalone(instance_integration, aggregator, check):
         mongo_check.check(None)
 
     metrics_categories = [
-        'default',
+        'count-dbs',
+        'serverStatus',
         'custom-queries',
         'top',
         'dbstats-local',

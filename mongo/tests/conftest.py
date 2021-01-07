@@ -9,7 +9,6 @@ from contextlib import contextmanager
 import mock
 import pymongo
 import pytest
-from mock import MagicMock
 from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
@@ -110,8 +109,7 @@ def instance_integration(instance_custom_queries):
 @contextmanager
 def mock_pymongo(deployment):
     mocked_client = MockedPyMongoClient(deployment=deployment)
-
-    with mock.patch('pymongo.mongo_client.MongoClient', MagicMock(return_value=mocked_client),), mock.patch(
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
         'pymongo.collection.Collection'
     ), mock.patch('pymongo.command_cursor') as cur:
         cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
