@@ -300,8 +300,11 @@ class HTTPCheck(AgentCheck):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(float(timeout))
             sock.connect((host, port))
-            context = self.get_tls_context()
-            context.load_verify_locations(instance_ca_certs)
+
+            overrides = {
+                "tls_ca_certs": instance_ca_certs
+            }
+            context = self.get_tls_context(overrides=overrides)
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
