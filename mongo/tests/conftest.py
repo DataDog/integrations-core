@@ -108,8 +108,8 @@ def instance_integration(instance_custom_queries):
 
 @contextmanager
 def mock_pymongo(deployment):
-    mongo_api = lambda *args, **kwargs: MockedPyMongoClient(*args, deployment=deployment, **kwargs)  # noqa
-    with mock.patch('datadog_checks.mongo.mongo.MongoApi', mongo_api), mock.patch(
+    mocked_client = MockedPyMongoClient(deployment=deployment)
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
         'pymongo.collection.Collection'
     ), mock.patch('pymongo.command_cursor') as cur:
         cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']

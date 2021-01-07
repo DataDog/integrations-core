@@ -8,14 +8,14 @@ from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, 
 DD_APP_NAME = 'datadog-agent'
 
 
-class MongoApi(MongoClient):
+class MongoApi(object):
     def __init__(self, config, log, replicaset=None):
         self._config = config
         self._log = log
         self.deployment_type = None
         if self._config.server:
             # Deprecated option
-            super(MongoApi, self).__init__(
+            self._cli = MongoClient(
                 self._config.server,
                 socketTimeoutMS=self._config.timeout,
                 connectTimeoutMS=self._config.timeout,
@@ -28,7 +28,7 @@ class MongoApi(MongoClient):
             merged_options_dict = {}
             merged_options_dict.update(self._config.additional_options)
             merged_options_dict.update(self._config.ssl_params)
-            super(MongoApi, self).__init__(
+            self._cli = MongoClient(
                 host=self._config.hosts,
                 socketTimeoutMS=self._config.timeout,
                 connectTimeoutMS=self._config.timeout,
@@ -39,6 +39,15 @@ class MongoApi(MongoClient):
                 **merged_options_dict
             )
         self._initialize()
+
+    def __getitem__(self, item):
+        return self._cli[item]
+
+    def server_info(self, session=None):
+        return self._cli.server_info(session)
+
+    def list_database_names(self, session=None):
+        return self._cli.list_database_names(session)
 
     def _initialize(self):
         self._log.debug("Connecting to '%s'", self._config.hosts)
