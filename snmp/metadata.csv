@@ -758,6 +758,6 @@ snmp.powerSupplyMaximumInputVoltage,gauge,,volt,,[Dell Poweredge] The maximum in
 snmp.powerSupplyOutputWatts,gauge,,deciwatt,,[Dell Poweredge] The maximum sustained output wattage of the power supply in tenths of watts.,0,snmp,
 snmp.powerSupplyStatus,gauge,,,,[Dell Poweredge] The status of the power supply.,0,snmp,
 snmp.processorDeviceStatus,gauge,,,,[Dell Poweredge] The status of the processor device.,0,snmp,
-snmp.processorDeviceThreadCount,gauge,,,,[Dell Poweredge] The number of processor threads detected for the processor device.,0,snmp,
+snmp.processorDeviceThreadCount,gauge,,thread,,[Dell Poweredge] The number of processor threads detected for the processor device.,0,snmp,
 snmp.temperatureProbeReading,gauge,,decidegree celsius,,[Dell Poweredge] The value of the Dell temperature probe in tenths of degrees Centigrade.,0,snmp,
 snmp.temperatureProbeStatus,gauge,,,,[Dell Poweredge] The status of the Dell temperature probe.,0,snmp,
