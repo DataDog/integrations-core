@@ -13,28 +13,18 @@ otel.system.disk.pending_operations,gauge,,unit,,The queue size of pending I/O o
 otel.system.filesystem.usage,gauge,,byte,,Filesystem bytes used.,0,opentelemetry,fs in use
 otel.system.filesystem.inodes.usage,gauge,,inode,,Filesystem inodes used,0,opentelemetry,inodes in use
 otel.system.network.dropped,gauge,,packet,second,Packets that are dropped or discarded per second even though there was no error,-1,opentelemetry,packets dropped
-otel.system.network.dropped_packets,gauge,,packet,second,The number of packets dropped per second,-1,opentelemetry,packets dropped
 otel.system.network.packets,gauge,,packet,second,The number of packets transferred per second,0,opentelemetry,packets
 otel.system.network.errors,gauge,,error,,The number of errors encountered,-1,opentelemetry,packets err
 otel.system.network.io,gauge,,byte,second,The number of bytes transmitted and received per second,0,opentelemetry,bytes sent
 otel.system.network.connections,gauge,,connection,,The number of connections,0,opentelemetry,conns
-otel.system.network.tcp_connections,gauge,,connection,,The number of TCP connections,0,opentelemetry,tcp conns
-otel.system.process.count,gauge,,process,,Total number of processes in each state,0,opentelemetry,processes count
-otel.system.processes.running,gauge,,process,,Total number of running processes,0,opentelemetry,processes running count
-otel.system.processes.blocked,gauge,,process,,Total number of blocked processes,0,opentelemetry,processes running blocked
+otel.system.processes.count,gauge,,process,,Total number of processes in each state,0,opentelemetry,processes count
+otel.system.processes.created,gauge,,process,,Total number of created processes,0,opentelemetry,processes created count
 otel.process.cpu.time,gauge,,second,,Total CPU seconds broken down by different states.,0,opentelemetry,processes cpu time
 otel.process.memory.physical_usage,gauge,,byte,,The amount of physical memory in use,0,opentelemetry,processes mem Rhys
 otel.process.memory.virtual_usage,gauge,,byte,,Virtual memory size,0,opentelemetry,processes mem virtual
 otel.process.disk.io,gauge,,byte,second,Disk bytes transferred per second,0,opentelemetry,processes disk io
-otel.system.swap.usage,gauge,,byte,,Swap (unix) or pagefile (windows) usage,0,opentelemetry,swap in use
-otel.system.swap.paging_ops,gauge,,occurrence,second,The number of paging operations per second,0,opentelemetry,swap paging ops
-otel.system.swap.page_faults,gauge,,occurrence,second,The number of paging faults per second,-1,opentelemetry,swap page faults
 otel.system.paging.usage,gauge,,byte,,Unix swap or windows pagefile usage,0,opentelemetry,paging in use
 otel.system.paging.faults,gauge,,occurrence,,The number of paging faults,0,opentelemetry,paging faults
 otel.system.paging.operations,gauge,,unit,,The number of paging operations,0,opentelemetry,paging ops
-otel.system.filesystem.utilization,gauge,,unit,,Filesystem utilisation,0,opentelemetry,fs utilization
-otel.system.cpu.utilization,gauge,,unit,,CPU utilization,0,opentelemetry,cpu utilization
-otel.system.memory.utilization,gauge,,unit,,Memory utilization,0,opentelemetry,mem utilization
-otel.system.paging.utilization,gauge,,unit,,Paging utilization,0,opentelemetry,paging utilization
 otel.datadog_exporter.metrics.running,gauge,,unit,,Reports that the Datadog metrics exporter is successfully sending metrics,0,opentelemetry,metrics running
 otel.datadog_exporter.traces.running,gauge,,unit,,Reports that the Datadog traces exporter is successfully sending traces,0,opentelemetry,traces running
