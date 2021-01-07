@@ -127,7 +127,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label'):
         # _get_devices_label is only called on linux, so devices_label is manually filled
         # to make the test run on everything
-        c.devices_label = {DEFAULT_DEVICE_NAME: 'label:mylab'}
+        c.devices_label = {DEFAULT_DEVICE_NAME: ['label:mylab', 'device_label:mylab']}
         c.check(instance)
 
     # Assert metrics
@@ -138,6 +138,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
         'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
         'optional:tags1',
         'label:mylab',
+        'device_label:mylab',
     ]
 
     for name, value in iteritems(gauge_metrics):
@@ -152,6 +153,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
                 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
                 'optional:tags1',
                 'label:mylab',
+                'device_label:mylab',
             ],
         )
 
@@ -167,7 +169,7 @@ def test_get_devices_label():
         __name__='get_subprocess_output',
     ):
         labels = c._get_devices_label()
-        assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
+        assert labels.get("/dev/mapper/vagrant--vg-root") == ["label:DATA", "device_label:DATA"]
 
 
 @pytest.mark.usefixtures('psutil_mocks')
@@ -199,7 +201,9 @@ def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gau
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
     for metric in chain(gauge_metrics, rate_metrics):
-        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL'])
+        aggregator.assert_metric(
+            metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL', 'device_label:MYLABEL']
+        )
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')

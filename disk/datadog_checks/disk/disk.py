@@ -152,7 +152,7 @@ class Disk(AgentCheck):
                     tags.extend(device_tags)
 
             if self.devices_label.get(device_name):
-                tags.append(self.devices_label.get(device_name))
+                tags.extend(self.devices_label.get(device_name))
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -316,7 +316,7 @@ class Disk(AgentCheck):
                 metric_tags.append('device:{}'.format(disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
-                    metric_tags.append(self.devices_label.get(disk_name))
+                    metric_tags.extend(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
@@ -422,7 +422,7 @@ class Disk(AgentCheck):
                 # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
                 labels = self._blkid_label_re.findall(d[1])
                 if labels:
-                    devices_label[d[0]] = 'label:{}'.format(labels[0])
+                    devices_label[d[0]] = ['label:{}'.format(labels[0]), 'device_label:{}'.format(labels[0])]
 
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use blkid to have device labels")
@@ -446,7 +446,7 @@ class Disk(AgentCheck):
                 device = root.text
                 label = root.attrib.get('LABEL')
                 if label and device:
-                    devices_label[device] = 'label:{}'.format(label)
+                    devices_label[device] = ['label:{}'.format(label), 'device_label:{}'.format(label)]
             except ET.ParseError as e:
                 self.log.warning(
                     'Failed to parse line %s because of %s - skipping the line (some labels might be missing)', line, e
