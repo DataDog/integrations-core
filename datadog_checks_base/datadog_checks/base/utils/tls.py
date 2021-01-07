@@ -4,6 +4,7 @@
 import logging
 import os
 import ssl
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict
 
 from six import iteritems
@@ -40,7 +41,7 @@ class TlsContextWrapper(object):
         default_fields = dict(STANDARD_FIELDS)
 
         # Override existing config options if there exists any overrides
-        overridden_instance = {field: data for field, data in iteritems(instance)}
+        overridden_instance = deepcopy(instance)
 
         if overrides:
             for overridden_field, data in iteritems(overrides):
