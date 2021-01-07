@@ -995,6 +995,27 @@ class TestSubmission:
         aggregator.assert_metric('test.foo', 7, metric_type=aggregator.COUNT, tags=['test:foo', 'tag:tag2'])
         aggregator.assert_all_metrics_covered()
 
+    def test_runtime_tags(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'count'}, {'name': 'tag', 'type': 'tag'}],
+            },
+            executor=mock_executor([[3, 'tag1'], [7, 'tag2'], [5, 'tag1']]),
+            tags=['test:init'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute(['test:runtime', 'test:init'])
+
+        aggregator.assert_metric(
+            'test.foo', 8, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag1']
+        )
+        aggregator.assert_metric(
+            'test.foo', 7, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag2']
+        )
+        aggregator.assert_all_metrics_covered()
+
     def test_kwarg_passing(self, aggregator):
         class MyCheck(AgentCheck):
             __NAMESPACE__ = 'test_check'
