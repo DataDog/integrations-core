@@ -42,7 +42,6 @@ class VoltDBCheck(AgentCheck):
             queries.CommandLogMetrics,
             queries.ProcedureMetrics,
             queries.LatencyMetrics,
-            # queries.StatementMetrics,  # TODO: reconsider later, this is causing unsustainably too many data points
             queries.GCMetrics,
             queries.IOStatsMetrics,
             queries.TableMetrics,

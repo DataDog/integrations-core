@@ -43,20 +43,6 @@ voltdb.latency.p999,gauge,,microsecond,,99.9th percentile latency.,0,voltdb,late
 voltdb.latency.p9999,gauge,,microsecond,,99.99th percentile latency.,0,voltdb,latency_p9999
 voltdb.latency.p99999,gauge,,microsecond,,99.999th percentile latency.,0,voltdb,latency_p99999
 voltdb.latency.transactions_per_sec,gauge,,transaction,second,Number of transactions per second during the interval,0,voltdb,latency_txns_per_sec
-voltdb.statement.invocations,count,,,,Total number of invocations of the statement at this site.,0,voltdb,statement_invoc
-voltdb.statement.timed_invocations,count,,,,"Total number of invocations used to measure the minimum, maximum and average execution time.",0,voltdb,statement_timed_invoc
-voltdb.statement.min_execution_time,gauge,,nanosecond,,Minimum amount of time it took to execute the statement.,0,voltdb,statement_time_min
-voltdb.statement.max_execution_time,gauge,,nanosecond,,Maximum amount of time it took to execute the statement.,0,voltdb,statement_time_max
-voltdb.statement.avg_execution_time,gauge,,nanosecond,,Average amount of time it took to execute the statement.,0,voltdb,statement_time_avg
-voltdb.statement.min_result_size,gauge,,byte,,Minimum size of the results returned by the statement.,0,voltdb,statement_size_min
-voltdb.statement.max_result_size,gauge,,byte,,Maximum size of the results returned by the statement.,0,voltdb,statement_size_max
-voltdb.statement.avg_result_size,gauge,,byte,,Average size of the results returned by the statement.,0,voltdb,statement_size_avg
-voltdb.statement.min_parameter_set_size,gauge,,byte,,Minimum size of the parameters passed as input to the statement.,0,voltdb,statement_paramsize_min
-voltdb.statement.max_parameter_set_size,gauge,,byte,,Maximum size of the parameters passed as input to the statement.,0,voltdb,statement_paramsize_max
-voltdb.statement.avg_parameter_set_size,gauge,,byte,,Average size of the parameters passed as input to the statement.,0,voltdb,statement_paramsize_avg
-voltdb.statement.aborts,count,,,,Total number of times the procedure was aborted. Only non-zero for the `<ALL>` row of each procedure.,0,voltdb,statement_aborts
-voltdb.statement.failures,count,,,,Total number of times the statement failed unexpectedly.,0,voltdb,statement_failures
-voltdb.statement.successes,count,,,,Total number of times the statement succeeded.,0,voltdb,statement_successes
 voltdb.gc.newgen_avg_gc_time,gauge,,millisecond,,Average time taken by young generation collections.,0,voltdb,newgen_gc_time_agv
 voltdb.gc.newgen_gc_count,count,,,,Total number of times young generation garbage collection was performed.,0,voltdb,newgen_gc_count
 voltdb.gc.oldgen_avg_gc_time,gauge,,millisecond,,Average time taken by young generation collections.,0,voltdb,oldgen_gc_time_avg

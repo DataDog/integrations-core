@@ -91,27 +91,6 @@ METRICS = [
         ],
         {'host_id', 'voltdb_hostname'},
     ),
-    # TODO: reconsider later, this is causing unsustainably too many data points
-    # (
-    #     # PROCEDUREDETAIL
-    #     [
-    #         'voltdb.statement.invocations',
-    #         'voltdb.statement.timed_invocations',
-    #         'voltdb.statement.min_execution_time',
-    #         'voltdb.statement.max_execution_time',
-    #         'voltdb.statement.avg_execution_time',
-    #         'voltdb.statement.min_result_size',
-    #         'voltdb.statement.max_result_size',
-    #         'voltdb.statement.avg_result_size',
-    #         'voltdb.statement.min_parameter_set_size',
-    #         'voltdb.statement.max_parameter_set_size',
-    #         'voltdb.statement.avg_parameter_set_size',
-    #         'voltdb.statement.aborts',
-    #         'voltdb.statement.failures',
-    #         'voltdb.statement.successes',
-    #     ],
-    #     {'host_id', 'voltdb_hostname', 'site_id', 'partition_id', 'procedure', 'statement'},
-    # ),
     (
         # GC
         [

@@ -138,42 +138,6 @@ LatencyMetrics = {
     ],
 }
 
-# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatproceduredetail
-# One row per statement for each (non-system) procedure that has been executed on the cluster, by execution site.
-StatementMetrics = {
-    'name': 'statement',
-    'query': '@Statistics:[PROCEDUREDETAIL]',
-    'columns': [
-        None,  # TIMESTAMP
-        {'name': 'host_id', 'type': 'tag'},
-        {'name': 'voltdb_hostname', 'type': 'tag'},
-        {'name': 'site_id', 'type': 'tag'},
-        {'name': 'partition_id', 'type': 'tag'},
-        {'name': 'procedure', 'type': 'tag'},
-        {'name': 'statement', 'type': 'tag'},
-        {'name': 'statement.invocations', 'type': 'monotonic_count'},
-        {'name': 'statement.timed_invocations', 'type': 'monotonic_count'},
-        {'name': 'statement.min_execution_time', 'type': 'gauge'},
-        {'name': 'statement.max_execution_time', 'type': 'gauge'},
-        {'name': 'statement.avg_execution_time', 'type': 'gauge'},
-        {'name': 'statement.min_result_size', 'type': 'gauge'},
-        {'name': 'statement.max_result_size', 'type': 'gauge'},
-        {'name': 'statement.avg_result_size', 'type': 'gauge'},
-        {'name': 'statement.min_parameter_set_size', 'type': 'gauge'},
-        {'name': 'statement.max_parameter_set_size', 'type': 'gauge'},
-        {'name': 'statement.avg_parameter_set_size', 'type': 'gauge'},
-        {'name': 'statement.aborts', 'type': 'monotonic_count'},
-        {'name': 'statement.failures', 'type': 'monotonic_count'},
-    ],
-    'extras': [
-        {
-            'name': 'statement.successes',
-            'expression': 'statement.invocations - statement.aborts - statement.failures',
-            'submit_type': 'monotonic_count',
-        },
-    ],
-}
-
 # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatgc
 # One row per server.
 GCMetrics = {
