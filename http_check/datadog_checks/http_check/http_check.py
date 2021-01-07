@@ -310,7 +310,7 @@ class HTTPCheck(AgentCheck):
             context.check_hostname = check_hostname
             context.load_verify_locations(instance_ca_certs)
 
-            if client_cert and client_key:
+            if client_cert:
                 context.load_cert_chain(client_cert, keyfile=client_key)
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)

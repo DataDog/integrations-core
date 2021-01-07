@@ -199,6 +199,29 @@ def test_mock_case(aggregator, http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.parametrize(
+    ["config", "cert", "password"],
+    [
+        ({'tls_cert': 'foo'}, 'foo', None),
+        ({'tls_cert': 'foo', 'tls_private_key': 'bar'}, 'foo', 'bar'),
+        ({'client_cert': 'foo'}, 'foo', None),
+        ({'client_cert': 'foo', 'client_key': 'bar'}, 'foo', 'bar'),
+    ],
+)
+def test_client_certs_are_passed(aggregator, http_check, config, cert, password):
+    instance = {'url': 'https://valid.mock', 'name': 'baz'}
+    instance.update(config)
+    with mock.patch('ssl.SSLContext.load_cert_chain') as load_cert_chain:
+        # Run the check for the one instance
+        http_check.check(instance)
+        load_cert_chain.assert_called_with(cert, keyfile=password)
+
+    expired_cert_tags = ['url:https://valid.mock', 'instance:baz']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_service_check_instance_name_normalization(aggregator, http_check):
     """
     Service check `instance` tag value is normalized.
