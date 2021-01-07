@@ -318,15 +318,15 @@ class HTTPCheck(AgentCheck):
 
         except Exception as e:
             msg = str(e)
-            if 'expiration' in msg:
+            if any(word in msg for word in ['expired', 'expiration']):
                 self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
+                return AgentCheck.UNKNOWN, None, None, msg
             else:
                 self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
+                return AgentCheck.UNKNOWN, None, None, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
