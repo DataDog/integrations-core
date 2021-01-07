@@ -40,6 +40,7 @@ files:
               type: array
               items:
                 type: string
+          - template: init_config/default
       - template: instances
         options:
           - name: use_mount
@@ -57,7 +58,7 @@ files:
             value:
               example: false
               type: boolean
-          - template: instances/tags
+          - template: instances/default
           - name: file_system_include
             description: |
               Instruct the check to only collect from matching file systems.

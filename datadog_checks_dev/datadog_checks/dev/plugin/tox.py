@@ -70,6 +70,17 @@ def tox_configure(config):
             if E2E_READY_CONDITION in cfg.description:
                 cfg.description = description
 
+    # Workaround for tox's `--force-dep` having limited functionality when package already installed.
+    # Primarily meant for pinning datadog-checks-base to a specific version, but could be
+    # applied to other packages in the future. Since we typically install checks base via
+    # editable mode, we need to force the reinstall to ensure that the PyPI package installs.
+    force_install = os.getenv('TOX_FORCE_INSTALL', [])
+    if force_install:
+        command = f'pip install --force-reinstall {force_install}'.split()
+
+        for env in config.envlist:
+            config.envconfigs[env].commands.insert(0, command)
+
 
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style

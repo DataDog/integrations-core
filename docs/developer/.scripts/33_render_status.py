@@ -3,16 +3,16 @@ import os
 from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
-    get_config_file,
     get_default_config_spec,
-    get_readme_file,
     get_valid_checks,
     get_valid_integrations,
+    has_logs,
     has_agent_8_check_signature,
     has_dashboard,
     has_e2e,
     has_process_signature,
     has_saved_views,
+    has_recommended_monitor,
     is_tile_only,
 )
 
@@ -28,11 +28,12 @@ def patch(lines):
     new_lines = lines[:marker_index]
 
     for renderer in (
-        render_config_spec_progress,
         render_dashboard_progress,
-        render_metadata_progress,
         render_logs_progress,
+        render_recommended_monitors_progress,
+        render_config_spec_progress,
         render_e2e_progress,
+        render_metadata_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
         render_saved_views_progress,
@@ -67,6 +68,7 @@ def render_config_spec_progress():
     percent = checks_with_config_spec / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_config_spec}/{total_checks}"'
     return lines
 
 
@@ -91,8 +93,8 @@ def render_dashboard_progress():
     lines = [
         '## Dashboards',
         '',
-        '!!! note',
-        '    This is not representative of _all_ dashboards, as many exist in legacy locations.',
+        '',
+        '',
         '',
         None,
         '',
@@ -111,6 +113,7 @@ def render_dashboard_progress():
     percent = integrations_with_dashboard / total_integrations * 100
     formatted_percent = f'{percent:.2f}'
     lines[5] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[7] = f'??? check "Completed {integrations_with_dashboard}/{total_integrations}"'
     return lines
 
 
@@ -135,6 +138,7 @@ def render_metadata_progress():
     percent = checks_with_metadata / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_metadata}/{total_checks}"'
     return lines
 
 
@@ -147,28 +151,17 @@ def render_logs_progress():
 
     for check in valid_checks:
         status = None
-        has_logs = False
         tile_only = is_tile_only(check)
+        check_has_logs = has_logs(check)
 
         if not tile_only:
             status = ' '
-            config_file = get_config_file(check)
+        if check_has_logs:
+            status = 'X'
+            checks_with_logs += 1
 
-            with open(config_file, 'r', encoding='utf-8') as f:
-                if '# logs:' in f.read():
-                    status = 'X'
-                    checks_with_logs += 1
-                    has_logs = True
-
-        if not has_logs:
-            readme_file = get_readme_file(check)
-            if os.path.exists(readme_file):
-                with open(readme_file, 'r', encoding='utf-8') as f:
-                    if '# Log collection' in f.read():
-                        status = 'X'
-                        checks_with_logs += 1
-            if status != 'X' and tile_only:
-                total_checks -= 1  # we cannot really add log collection to tile only integrations
+        if status != 'X' and tile_only:
+            total_checks -= 1  # we cannot really add log collection to tile only integrations
 
         if status is not None:
             lines.append(f'    - [{status}] {check}')
@@ -176,6 +169,7 @@ def render_logs_progress():
     percent = checks_with_logs / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_logs}/{total_checks}"'
     return lines
 
 
@@ -197,6 +191,7 @@ def render_e2e_progress():
     percent = checks_with_e2e / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_e2e}/{total_checks}"'
     return lines
 
 
@@ -218,6 +213,7 @@ def render_process_signatures_progress():
     percent = checks_with_ps / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_ps}/{total_checks}"'
     return lines
 
 
@@ -239,11 +235,12 @@ def render_check_signatures_progress():
     percent = checks_with_cs / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_cs}/{total_checks}"'
     return lines
 
 
 def render_saved_views_progress():
-    valid_checks = get_available_logs_integrations()
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
     total_checks = len(valid_checks)
     checks_with_sv = 0
 
@@ -261,4 +258,28 @@ def render_saved_views_progress():
     percent = checks_with_sv / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_sv}/{total_checks}"'
+    return lines
+
+
+def render_recommended_monitors_progress():
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
+    total_checks = len(valid_checks)
+    checks_with_rm = 0
+
+    lines = ['## Recommended monitors', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if has_recommended_monitor(check):
+            checks_with_rm += 1
+            status = 'X'
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_rm / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_rm}/{total_checks}"'
     return lines

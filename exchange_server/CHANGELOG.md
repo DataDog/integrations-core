@@ -1,5 +1,9 @@
 # CHANGELOG - exchange_server
 
+## 1.8.1 / 2020-12-11
+
+* [Fixed] Fix line wrap in conf.yaml. See [#8016](https://github.com/DataDog/integrations-core/pull/8016).
+
 ## 1.8.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

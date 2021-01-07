@@ -44,8 +44,6 @@ EXPECTED_E2E_METRICS = [
     'spark.stage.memory_bytes_spilled',
     'spark.streaming.statistics.batch_duration',
     'spark.stage.shuffle_write_records',
-    'spark.streaming.statistics.avg_input_rate',
-    'spark.streaming.statistics.avg_scheduling_delay',
     'spark.job.num_completed_stages',
     'spark.job.count',
     'spark.job.num_tasks',
@@ -56,18 +54,52 @@ EXPECTED_E2E_METRICS = [
     'spark.job.num_completed_tasks',
     'spark.job.num_skipped_stages',
     'spark.job.num_failed_tasks',
+    'spark.executor.active_tasks',
+    'spark.executor.completed_tasks',
+    'spark.executor.disk_used',
+    'spark.executor.failed_tasks',
+    'spark.executor.max_memory',
+    'spark.executor.memory_used',
+    'spark.executor.rdd_blocks',
+    'spark.executor.total_duration',
+    'spark.executor.total_input_bytes',
+    'spark.executor.total_shuffle_read',
+    'spark.executor.total_shuffle_write',
+    'spark.executor.total_tasks',
+    'spark.structured_streaming.latency',
+    'spark.structured_streaming.processing_rate',
+    'spark.structured_streaming.rows_count',
+    'spark.structured_streaming.used_bytes',
+]
+
+FLAKY_E2E_METRICS = [
+    'spark.structured_streaming.input_rate',
+    'spark.streaming.statistics.avg_input_rate',
+    'spark.streaming.statistics.avg_scheduling_delay',
 ]
 
 
 INSTANCE_STANDALONE = {
-    'spark_url': 'http://{}:8080'.format(HOST),
+    'spark_url': 'http://spark-master:8080',
     'cluster_name': 'SparkCluster',
     'spark_cluster_mode': 'spark_standalone_mode',
 }
 
 
-INSTANCE_DRIVER = {
-    'spark_url': 'http://{}:4040'.format(HOST),
+INSTANCE_DRIVER_1 = {
+    'spark_url': 'http://spark-app-1:4040',
     'cluster_name': 'SparkDriver',
     'spark_cluster_mode': 'spark_driver_mode',
+}
+
+INSTANCE_DRIVER_2 = {
+    'spark_url': 'http://spark-app-2:4050',
+    'cluster_name': 'SparkDriver',
+    'spark_cluster_mode': 'spark_driver_mode',
+}
+
+HOSTNAME_TO_PORT_MAPPING = {
+    "spark-app-1": ('127.0.0.1', 4040),
+    "spark-app-2": ('127.0.0.1', 4050),
+    "spark-master": ('127.0.0.1', 8080),
 }

@@ -3,7 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict
 
+import pytest
+
 from datadog_checks.marklogic.api import MarkLogicApi
+
+pytestmark = pytest.mark.unit
 
 
 class MockResponseWrapper:
@@ -30,6 +34,18 @@ class MockRequestsWrapper:
         self.url = url
         self.params = params
         return self.ret
+
+
+def test_url_is_correct_without_trailing_slash():
+    # type: () -> None
+    api = MarkLogicApi(MockRequestsWrapper({'foo': 'bar'}), 'http://localhost:8002')
+    assert api._base_url == 'http://localhost:8002/manage/v2'
+
+
+def test_url_is_correct_with_trailing_slash():
+    # type: () -> None
+    api = MarkLogicApi(MockRequestsWrapper({'foo': 'bar'}), 'http://localhost:8002/')
+    assert api._base_url == 'http://localhost:8002/manage/v2'
 
 
 def test_get_status_data():

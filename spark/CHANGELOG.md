@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.19.0 / 2020-12-29
+
+* [Added] Add metrics for structured streams. See [#8078](https://github.com/DataDog/integrations-core/pull/8078).
+
 ## 1.18.0 / 2020-11-23
 
 * [Added] Add more granular executor metrics. See [#8028](https://github.com/DataDog/integrations-core/pull/8028).

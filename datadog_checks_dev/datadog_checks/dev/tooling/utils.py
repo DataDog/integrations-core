@@ -21,62 +21,43 @@ from .git import get_latest_tag
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DOGWEB_JSON_DASHBOARDS = (
-    'btrfs',
-    'cassandra',
-    'couchbase',
-    'fluentd',
-    'gearmand',
-    'ibm_was',
-    'immunio',
-    'kong',
-    'kyoto_tycoon',
-    'marathon',
-    'mcached',
-    'mysql',
-    'nginx',
-    'pgbouncer',
-    'php_fpm',
-    'postfix',
-    'postgres',
-    'sqlserver',
-    'rabbitmq',
-    'riak',
-    'riakcs',
-    'solr',
-    'sqlserver',
-    'tokumx',
-    'varnish',
-)
-DOGWEB_CODE_GENERATED_DASHBOARDS = (
     'activemq',
+    'btrfs',
     'ceph',
     'cisco_aci',
     'consul',
+    'couchbase',
     'couchdb',
-    'cri',
-    'crio',
+    'etcd',
+    'fluentd',
+    'gearmand',
     'gunicorn',
     'hdfs_datanode',
     'hdfs_namenode',
-    'hyperv',
-    'ibm_mq',
+    'immunio',  # Is this a core integration??
     'kafka',
-    'kube_controller_manager',
-    'kube_scheduler',
+    'kong',
+    'kyoto_tycoon',
     'kubernetes',
     'lighttpd',
     'mapreduce',
     'marathon',
     'mesos',
     'nginx',
-    'nginx_ingress_controller',
     'openstack',
+    'pgbouncer',
+    'php_fpm',
+    'postfix',
     'powerdns_recursor',
     'rabbitmq',
-    'redisdb',
-    'sigsci',
+    'riak',
+    'riakcs',
+    'solr',
     'spark',
-    'twistlock',
+    'sqlserver',
+    'tokumx',
+    'varnish',
+    'vsphere',
     'wmi_check',
     'yarn',
     'zk',
@@ -579,13 +560,21 @@ def has_agent_8_check_signature(check):
 
 
 def has_saved_views(check):
+    return _has_asset_in_manifest(check, 'saved_views')
+
+
+def has_recommended_monitor(check):
+    return _has_asset_in_manifest(check, 'monitors')
+
+
+def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
     except JSONDecodeError as e:
         raise Exception("Cannot decode {}: {}".format(manifest_file, e))
-    return len(manifest.get('assets', {}).get('saved_views', {})) > 0
+    return len(manifest.get('assets', {}).get(asset, {})) > 0
 
 
 def is_tile_only(check):
@@ -607,10 +596,24 @@ def is_jmx_integration(check_name):
 
 
 def has_dashboard(check):
-    if check in DOGWEB_JSON_DASHBOARDS or check in DOGWEB_CODE_GENERATED_DASHBOARDS:
+    if check in DOGWEB_JSON_DASHBOARDS:
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
+
+
+def has_logs(check):
+    config_file = get_config_file(check)
+    if os.path.exists(config_file):
+        with open(config_file, 'r', encoding='utf-8') as f:
+            if '# logs:' in f.read():
+                return True
+
+    readme_file = get_readme_file(check)
+    if os.path.exists(readme_file):
+        with open(readme_file, 'r', encoding='utf-8') as f:
+            if '# Log collection' in f.read():
+                return True
 
 
 def find_legacy_signature(check):

@@ -1,5 +1,10 @@
 # CHANGELOG - pdh_check
 
+## 1.12.2 / 2020-12-11
+
+* [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
+* [Fixed] Fix pdh configuration spec. See [#8106](https://github.com/DataDog/integrations-core/pull/8106).
+
 ## 1.12.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).

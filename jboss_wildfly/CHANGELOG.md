@@ -1,5 +1,9 @@
 # CHANGELOG - JBoss/WildFly
 
+## 1.5.0 / 2020-12-11
+
+* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+
 ## 1.4.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add missing custom_jar_paths option to config. See [#7809](https://github.com/DataDog/integrations-core/pull/7809).

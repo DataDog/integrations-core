@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.8.0 / 2021-01-04
+
+* [Added] Support v2. See [#8269](https://github.com/DataDog/integrations-core/pull/8269).
+
 ## 1.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7845](https://github.com/DataDog/integrations-core/pull/7845).

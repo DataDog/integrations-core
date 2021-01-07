@@ -24,8 +24,7 @@ To collect Kubernetes State metrics, please refer to the [kubernetes_state integ
 
 ### Configuration
 
-Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml][4] for all available configuration options.
-
+Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor.
 
 ### Validation
 

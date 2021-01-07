@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
+from datadog_checks.sap_hana.connection import HanaConnection
 
 pytestmark = pytest.mark.unit
 
@@ -131,3 +132,30 @@ def test_custom_query_configuration(instance):
     cursor.fetchmany = rows_generator()
 
     gauge.assert_not_called()
+
+
+def test_tls_overwrite():
+    """Tests that the connection class correctly overrides the `_open_socket_and_init_protocoll` method.
+    The fact that there is a typo in the private method name makes it possible that this could change in the future.
+    """
+    tls_context = mock.MagicMock()
+    socket = mock.MagicMock()
+    conn = HanaConnection("localhost", 8000, 'foo', 'bar', tls_context=tls_context)
+    with mock.patch('socket.create_connection', mock.MagicMock(return_value=socket)):
+        socket.recv.return_value = b'12345678'
+        tls_context.wrap_socket.return_value = socket
+        with pytest.raises(Exception, match='Invalid message header received'):
+            conn.connect()
+        tls_context.wrap_socket.assert_called()
+
+
+def test_no_tls_overwrite_by_default():
+    tls_context = mock.MagicMock(__nonzero__=lambda *args: False, __bool__=lambda *args: False)
+    socket = mock.MagicMock()
+    conn = HanaConnection("localhost", 8000, 'foo', 'bar', tls_context=tls_context)
+    with mock.patch('socket.create_connection', mock.MagicMock(return_value=socket)):
+        socket.recv.return_value = b'12345678'
+        tls_context.wrap_socket.return_value = socket
+        with pytest.raises(Exception, match='Invalid message header received'):
+            conn.connect()
+        tls_context.wrap_socket.assert_not_called()
