@@ -25,9 +25,9 @@ def test_check(aggregator, instance, mock_gstatus_data):
 
 
 @pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 def test_version_metadata(aggregator, datadog_agent, instance):
-    c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, instance)
+    c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
     c.check_id = 'test:123'
     c.check(instance)
 

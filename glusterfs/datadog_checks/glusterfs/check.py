@@ -59,7 +59,6 @@ class GlusterfsCheck(AgentCheck):
             gluster_args = 'sudo {}'.format(self.gstatus_cmd)
         else:
             gluster_args = self.gstatus_cmd
-
         # Ensures units are universally the same by specifying the --units flag
         gluster_args += ' -a -o json -u g'
         gluster_args = shlex.split(gluster_args)
