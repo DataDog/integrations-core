@@ -2,7 +2,7 @@
   "display_name": "OpenTelemetry",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "opentelemetry",
+  "name": "OTel",
   "metric_prefix": "otel.",
   "metric_to_check": [
     "otel.datadog_exporter.metrics.running",
@@ -23,7 +23,7 @@
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "opentelemetry",
+  "integration_id": "otel",
   "assets": {
     "dashboards": {
       "OpenTelemetry Dashboard": "assets/dashboards/dashboard.json"
