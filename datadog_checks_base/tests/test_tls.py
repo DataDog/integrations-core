@@ -227,6 +227,7 @@ class TestTLSContextOverrides:
         overrides = {'tls_verify': False}
         tls = TlsContextWrapper(instance, overrides=overrides)
         assert tls.config['tls_verify'] is False
+        assert instance['tls_verify'] is True  # Overrides should not affect the original instance
 
     def test_override_context_wrapper_config_empty(self):
         instance = {'tls_verify': True}
@@ -234,14 +235,9 @@ class TestTLSContextOverrides:
         tls = TlsContextWrapper(instance, overrides=overrides)
         assert tls.config['tls_verify'] is True
 
-    def test_override_instance_config(self):
-        instance = {'tls_verify': True}
-        overrides = {'tls_verify': False}
-        tls = TlsContextWrapper(instance, overrides=overrides)
-        assert instance['tls_verify'] is False
-
     def test_override_non_exist_instance_config(self):
         instance = {'tls_verify': True}
         overrides = {'fake_config': 'foo'}
         tls = TlsContextWrapper(instance, overrides=overrides)
         assert instance.get('fake_config') is None
+        assert tls.config['tls_verify'] is True
