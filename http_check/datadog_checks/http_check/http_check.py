@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import copy
 import re
 import socket
-import ssl
 import time
 from datetime import datetime
 
@@ -237,9 +236,7 @@ class HTTPCheck(AgentCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, seconds_left, msg = self.check_cert_expiration(
-                instance, timeout, instance_ca_certs, check_hostname, client_cert, client_key
-            )
+            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             tags_list.append("instance:{}".format(instance_name))
@@ -280,9 +277,7 @@ class HTTPCheck(AgentCheck):
 
         self.service_check(sc_name, status, tags=tags, message=msg)
 
-    def check_cert_expiration(
-        self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None
-    ):
+    def check_cert_expiration(self, instance, timeout, instance_ca_certs):
         # thresholds expressed in seconds take precedence over those expressed in days
         seconds_warning = (
             int(instance.get('seconds_warning', 0))
@@ -305,13 +300,8 @@ class HTTPCheck(AgentCheck):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(float(timeout))
             sock.connect((host, port))
-            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-            context.verify_mode = ssl.CERT_REQUIRED
-            context.check_hostname = check_hostname
+            context = self.get_tls_context()
             context.load_verify_locations(instance_ca_certs)
-
-            if client_cert:
-                context.load_cert_chain(client_cert, keyfile=client_key)
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
