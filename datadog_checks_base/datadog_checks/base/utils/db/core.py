@@ -80,10 +80,10 @@ class QueryManager(object):
         for query in self.queries:
             query.compile(column_transformers, EXTRA_TRANSFORMERS.copy())
 
-    def execute(self, tags=None):
+    def execute(self, extra_tags=None):
         """This method is what you call every check run."""
         logger = self.check.log
-        global_tags = list(set(self.tags + (tags or [])))
+        global_tags = list(set(self.tags + (extra_tags or [])))
 
         for query in self.queries:
             query_name = query.name
