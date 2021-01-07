@@ -301,9 +301,7 @@ class HTTPCheck(AgentCheck):
             sock.settimeout(float(timeout))
             sock.connect((host, port))
 
-            overrides = {
-                "tls_ca_certs": instance_ca_certs
-            }
+            overrides = {"tls_ca_certs": instance_ca_certs}
             context = self.get_tls_context(overrides=overrides)
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
