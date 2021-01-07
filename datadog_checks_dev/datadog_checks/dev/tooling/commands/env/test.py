@@ -7,7 +7,7 @@ from .... import EnvVars
 from ...e2e import create_interface, get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import complete_active_checks, get_tox_envs
-from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
+from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start
 from .stop import stop
@@ -44,10 +44,8 @@ from .stop import stop
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
-@click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
-@click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, test_filter, debug, verbose):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, test_filter):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -100,12 +98,11 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                     ctx.invoke(
                         test_command,
                         checks=[f'{check}:{env}'],
+                        debug=DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,
                         test_filter=test_filter,
-                        debug=debug,
-                        verbose=verbose,
                     )
             finally:
                 if new_env:
