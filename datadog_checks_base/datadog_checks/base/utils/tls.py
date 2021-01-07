@@ -41,19 +41,19 @@ class TlsContextWrapper(object):
         default_fields = dict(STANDARD_FIELDS)
 
         # Override existing config options if there exists any overrides
-        overridden_instance = deepcopy(instance)
+        instance = deepcopy(instance)
 
         if overrides:
             for overridden_field, data in iteritems(overrides):
-                if overridden_instance.get(overridden_field):
-                    overridden_instance[overridden_field] = data
+                if instance.get(overridden_field):
+                    instance[overridden_field] = data
 
         # Populate with the default values
-        config = {field: overridden_instance.get(field, value) for field, value in iteritems(default_fields)}
+        config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
         for field in STANDARD_FIELDS:
             unique_name = UNIQUE_FIELD_PREFIX + field
-            if unique_name in overridden_instance:
-                config[unique_name] = overridden_instance[unique_name]
+            if unique_name in instance:
+                config[unique_name] = instance[unique_name]
 
         if remapper is None:
             remapper = {}
@@ -80,7 +80,7 @@ class TlsContextWrapper(object):
                 default = not default
 
             # Get value, with a possible default
-            value = overridden_instance.get(remapped_field, data.get('default', default))
+            value = instance.get(remapped_field, data.get('default', default))
 
             # Invert booleans if need be
             if data.get('invert'):
