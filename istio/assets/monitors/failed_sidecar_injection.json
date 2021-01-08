@@ -27,4 +27,3 @@
 		"description": "Notify your team when there is more than 1 failed sidecar injection requesst in your Istio integration."
 	}
 }
-}
