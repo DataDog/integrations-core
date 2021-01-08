@@ -1,6 +1,6 @@
 {
 	"name": "[Istio] Increased number of failed sidecar injection requests",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "sum(last_5m):avg:istio.sidecar_injection.requests_total{*}.as_count() - avg:istio.sidecar_injection.success_total{*}.as_count() > 3",
 	"message": "Monitor Istio for failed sidecar injection requests. Increased failed requests may signify other issues in your Istio mesh and requires attention.",
 	"tags": [
