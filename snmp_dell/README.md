@@ -22,7 +22,7 @@ For details of monitored metrics see the [Network Device Monitoring documentatio
 
 ### Service Checks
 
-Snmp Dell does not include any service checks.
+The Dell integration does not include any service checks.
 
 ### Events
 
