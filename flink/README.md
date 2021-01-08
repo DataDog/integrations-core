@@ -22,7 +22,7 @@ No additional installation is needed on your server.
 
     ```yaml
     metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
-    metrics.reporter.dghttp.apikey: <YOUR_DATADOG_API_KEY>
+    metrics.reporter.dghttp.apikey: <DATADOG_API_KEY>
     metrics.reporter.dghttp.dataCenter: {{< region-param key="dd_datacenter" >}}
     ```
 
