@@ -6,13 +6,13 @@ import sys
 
 import click
 
-from ..dependencies import read_check_base_dependencies
 from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci, get_next
+from ...utils import chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
 from ..constants import get_root
+from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
-from ..utils import complete_testable_checks, get_version_string
+from ..utils import complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
