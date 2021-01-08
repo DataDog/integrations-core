@@ -437,6 +437,9 @@ jobs:
     - checkName: vertica
       displayName: Vertica
       os: linux
+    - checkName: voltdb
+      displayName: VoltDB
+      os: linux
     - checkName: vsphere
       displayName: vSphere
       os: linux
