@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dell Inc. is a technology company that develops computers and network hardware for high performance networking in both small large businesses. Collect metrics for monitoring and alerting from Dell hardware including:
+Dell Inc. is a technology company that develops computers and network hardware for high performance networking in both small and large businesses. Collect metrics for monitoring and alerting from Dell hardware including:
 
 * Dell PowerEdge
 * Dell iDRAC
