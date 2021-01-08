@@ -9,7 +9,7 @@ from os import mkdir
 import mock
 import pytest
 
-from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.dev.utils import create_file
 from datadog_checks.dev.utils import temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
@@ -276,14 +276,16 @@ def test_file_metrics_many(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_non_existent_directory():
+def test_non_existent_directory(aggregator):
     """
     Missing or inaccessible directory coverage.
     """
-    config = {'directory': '/non-existent/directory'}
-    with pytest.raises(ConfigurationError):
+    config = {'directory': '/non-existent/directory', 'tags': ['foo:bar']}
+    with pytest.raises(CheckException):
         dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
+    expected_tags = ['dir_name:/non-existent/directory', 'foo:bar']
+    aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
 
 
 def test_missing_directory_config():
@@ -291,12 +293,15 @@ def test_missing_directory_config():
         DirectoryCheck('directory', {}, [{}])
 
 
-def test_non_existent_directory_ignore_missing():
-    config = {'directory': '/non-existent/directory', 'ignore_missing': True}
+def test_non_existent_directory_ignore_missing(aggregator):
+    config = {'directory': '/non-existent/directory', 'ignore_missing': True, 'tags': ['foo:bar']}
     check = DirectoryCheck('directory', {}, [config])
     check._get_stats = mock.MagicMock()
     check.check(config)
-    check._get_stats.assert_called_once()
+    check._get_stats.assert_not_called()
+
+    expected_tags = ['dir_name:/non-existent/directory', 'foo:bar']
+    aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
 
 
 def test_no_recursive_symlink_loop(aggregator):

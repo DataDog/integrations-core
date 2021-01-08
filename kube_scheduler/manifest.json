@@ -24,11 +24,17 @@
   "is_public": true,
   "integration_id": "kube-scheduler",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "kube_scheduler": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "kube_scheduler"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

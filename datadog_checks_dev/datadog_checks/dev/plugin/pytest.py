@@ -28,6 +28,7 @@ from .._env import (
 
 __aggregator = None
 __datadog_agent = None
+MockResponse = None
 
 
 @pytest.fixture
@@ -136,7 +137,7 @@ def dd_environment_runner(request):
 
 
 @pytest.fixture
-def dd_agent_check(request, aggregator):
+def dd_agent_check(request, aggregator, datadog_agent):
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
 
@@ -193,8 +194,7 @@ def dd_agent_check(request, aggregator):
                 collector = json.loads(raw_json)
             except Exception as e:
                 raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
-
-            replay_check_run(collector, aggregator)
+            replay_check_run(collector, aggregator, datadog_agent)
 
         return aggregator
 
@@ -230,6 +230,18 @@ def dd_get_state():
 @pytest.fixture
 def dd_save_state():
     return save_state
+
+
+@pytest.fixture
+def mock_http_response(mocker):
+    # Lazily import `requests` as it may be costly under certain conditions
+    global MockResponse
+    if MockResponse is None:
+        from ..http import MockResponse
+
+    yield lambda *args, **kwargs: mocker.patch(
+        kwargs.pop('method', 'requests.get'), return_value=MockResponse(*args, **kwargs)
+    )
 
 
 def pytest_configure(config):

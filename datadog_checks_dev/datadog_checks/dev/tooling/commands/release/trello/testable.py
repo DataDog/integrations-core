@@ -9,17 +9,22 @@ import click
 
 from .....subprocess import SubprocessError, run_command
 from .....utils import basepath, chdir, get_next
+from ....config import APP_DIR
 from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ....trello import TrelloClient
 from ....utils import format_commit_id
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from .fixed_cards_mover import FixedCardsMover
 from .rc_build_cards_updater import RCBuildCardsUpdater
+from .tester_selector.tester_selector import TesterSelector, TrelloUser, create_tester_selector
 
 
 def create_trello_card(
     client: TrelloClient,
+    testerSelector: TesterSelector,
     teams: List[str],
+    pr_num: int,
     pr_title: str,
     pr_url: str,
     pr_labels: List[str],
@@ -37,10 +42,15 @@ Labels: {labels}
 {pr_body}'''
     for team in teams:
         member = pick_card_member(config, pr_author, team)
-        if member:
-            echo_info(f'Randomly assigned issue to {member}')
+        tester_name = member
+        if member is None:
+            tester = _select_trello_tester(client, testerSelector, team, pr_author, pr_num, pr_url)
+            if tester:
+                member = tester.id
+                tester_name = tester.full_name
+
         if dry_run:
-            echo_success(f'Will create a card for team {team}: ', nl=False)
+            echo_success(f'Will create a card for {tester_name}: ', nl=False)
             echo_info(pr_title)
             continue
         creation_attempts = 3
@@ -68,6 +78,29 @@ Labels: {labels}
                 echo_success(f'Created card for team {team}: ', nl=False)
                 echo_info(response.json().get('url'))
                 break
+
+
+def _select_trello_tester(
+    trello: TrelloClient, testerSelector: TesterSelector, team: str, pr_author: str, pr_num: int, pr_url: str
+) -> Optional[TrelloUser]:
+    team_label = None
+    for label, t in trello.label_team_map.items():
+        if t == team:
+            team_label = label
+            break
+
+    trello_user = None
+    if team_label in trello.label_github_team_map:
+        github_team = trello.label_github_team_map[team_label]
+        if pr_author:
+            trello_user = testerSelector.get_next_tester(pr_author, github_team, pr_num)
+    else:
+        echo_warning(f'Invalid team {team} for {pr_url}')
+
+    if not trello_user:
+        echo_warning(f'Cannot assign tester for {pr_author} {pr_url}')
+        return None
+    return trello_user
 
 
 def _all_synced_with_remote(refs: Sequence[str]) -> bool:
@@ -146,11 +179,23 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.option(
-    '--update-rc-builds-cards', is_flag=True, help='Update cards in RC builds column with `target_ref` version',
+    '--update-rc-builds-cards', is_flag=True, help='Update cards in RC builds column with `target_ref` version'
+)
+@click.option(
+    '--move-cards',
+    is_flag=True,
+    help='Do not create a card for a change, but move the existing card from '
+    + '`HAVE BUGS - FIXME` or `FIXED - Ready to Rebuild` to INBOX team',
 )
 @click.pass_context
 def testable(
-    ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, update_rc_builds_cards: bool
+    ctx: click.Context,
+    base_ref: str,
+    target_ref: str,
+    milestone: str,
+    dry_run: bool,
+    update_rc_builds_cards: bool,
+    move_cards: bool,
 ) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
@@ -195,8 +240,7 @@ def testable(
     See trello subcommand for details on how to setup access:
 
     `ddev release trello -h`.
-
-"""
+    """
     root = get_root()
     repo = basepath(root)
     if repo not in ('integrations-core', 'datadog-agent'):
@@ -212,10 +256,11 @@ def testable(
     if repo == 'integrations-core':
         options = {
             '1': 'Integrations',
-            '2': 'Containers',
-            '3': 'Core',
-            '4': 'Platform',
-            '5': 'Tools and Libraries',
+            '2': 'Infra Integrations',
+            '3': 'Containers',
+            '4': 'Core',
+            '5': 'Platform',
+            '6': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -229,7 +274,8 @@ def testable(
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
-            '9': 'Tools and Libraries',
+            '9': 'Infra Integrations',
+            '10': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -240,10 +286,17 @@ def testable(
     commit_ids: Set[str] = set()
     user_config = ctx.obj
     trello = TrelloClient(user_config)
+
+    fixed_cards_mover = None
+    if move_cards:
+        fixed_cards_mover = FixedCardsMover(trello, dry_run)
+
     rc_build_cards_updater = None
     if update_rc_builds_cards:
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
+    github_teams = trello.label_github_team_map.values()
+    testerSelector = create_tester_selector(trello, repo, github_teams, user_config, APP_DIR)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:
@@ -319,14 +372,30 @@ def testable(
         pr_title = pr_data.get('title', commit_subject)
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
+        pr_num = pr_data.get('number', 0)
 
         trello_config = user_config['trello']
         if not (trello_config['key'] and trello_config['token']):
             abort('Error: You are not authenticated for Trello. Please set your trello ddev config')
 
+        if fixed_cards_mover:
+            fixed_cards_mover.on_new_pr(pr_url)
+            continue
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
-            create_trello_card(trello, teams, pr_title, pr_url, pr_labels, pr_body, dry_run, pr_author, user_config)
+            create_trello_card(
+                trello,
+                testerSelector,
+                teams,
+                pr_num,
+                pr_title,
+                pr_url,
+                pr_labels,
+                pr_body,
+                dry_run,
+                pr_author,
+                user_config,
+            )
             continue
 
         finished = False
@@ -386,9 +455,37 @@ def testable(
                 return
             else:
                 create_trello_card(
-                    trello, [value], pr_title, pr_url, pr_labels, pr_body, dry_run, pr_author, user_config
+                    trello,
+                    testerSelector,
+                    [value],
+                    pr_num,
+                    pr_title,
+                    pr_url,
+                    pr_labels,
+                    pr_body,
+                    dry_run,
+                    pr_author,
+                    user_config,
                 )
 
             finished = True
     if rc_build_cards_updater and not dry_run:
         rc_build_cards_updater.update_cards()
+
+    if fixed_cards_mover:
+        message = fixed_cards_mover.get_message()
+        echo_info('\n')
+        echo_info(message)
+    elif dry_run:
+        show_card_assigments(testerSelector)
+
+
+def show_card_assigments(testerSelector: TesterSelector):
+    echo_info('Cards assignments')
+    stat = testerSelector.get_stats()
+
+    for team, v in stat.items():
+        echo_info(team)
+        for user, prs in v.items():
+            prs_str = ", ".join([str(pr) for pr in prs])
+            echo_info(f"\t- {user}: {prs_str}")

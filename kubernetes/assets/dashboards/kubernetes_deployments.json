@@ -1,1311 +1,1356 @@
 {
-    "author_info": {
-        "author_name": "Datadog"
-    },
-    "board_title": "Kubernetes Deployments Overview",
-    "created": "2020-07-14T17:23:45.442889+00:00",
-    "created_by": {
-        "access_role": "st",
-        "disabled": false,
-        "email": "support@datadoghq.com",
-        "handle": "support@datadoghq.com",
-        "is_admin": false,
-        "name": "Datadog",
-        "role": null,
-        "title": null,
-        "verified": true
-    },
+    "title": "Kubernetes Deployments Overview",
     "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
-    "id": 1227732,
-    "modified": "2020-07-19T17:46:45.196308+00:00",
-    "new_id": "yn5-ms6-w87",
-    "read_only": false,
-    "template_variables": [
-        {
-            "default": "*",
-            "name": "scope",
-            "prefix": null
-        },
-        {
-            "default": "*",
-            "name": "kube_cluster_name",
-            "prefix": "kube_cluster_name"
-        },
-        {
-            "default": "*",
-            "name": "kube_namespace",
-            "prefix": "kube_namespace"
-        },
-        {
-            "default": "*",
-            "name": "kube_deployment",
-            "prefix": "kube_deployment"
-        }
-    ],
     "widgets": [
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
+            "id": 0,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "palette": "green_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "green_on_white"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Available",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Available",
-            "type": "query_value",
-            "width": 14,
-            "x": 45,
-            "y": 6
+            "layout": {
+                "x": 45,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "green",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Replicas Available",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Available",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 57
+            "layout": {
+                "x": 0,
+                "y": 57,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "precision": 0,
+            "id": 2,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "custom_fg_color": "#6a53a1",
+                                "value": 0,
                                 "palette": "green_on_white",
-                                "value": "0"
+                                "custom_fg_color": "#6a53a1"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Replicas",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas",
-            "type": "query_value",
-            "width": 14,
-            "x": 15,
-            "y": 6
+            "layout": {
+                "x": 15,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Replicas",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 42
+            "layout": {
+                "x": 0,
+                "y": 42,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
+            "id": 4,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "palette": "red_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "red_on_white"
                             },
                             {
                                 "comparator": "<=",
-                                "palette": "green_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "green_on_white"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Unavailable",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Unavailable",
-            "type": "query_value",
-            "width": 14,
-            "x": 75,
-            "y": 6
+            "layout": {
+                "x": 75,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_cluster_name,kube_namespace,kube_deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "orange",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Replicas Unavailable",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Unavailable",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 72
+            "layout": {
+                "x": 0,
+                "y": 72,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "precision": 0,
+            "id": 6,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "palette": "green_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "green_on_white"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Desired",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Desired",
-            "type": "query_value",
-            "width": 14,
-            "x": 30,
-            "y": 6
+            "layout": {
+                "x": 30,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "cool",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Replicas Desired",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Desired",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 42
+            "layout": {
+                "x": 60,
+                "y": 42,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
+            "id": 8,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "palette": "green_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "green_on_white"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Updated",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Updated",
-            "type": "query_value",
-            "width": 14,
-            "x": 60,
-            "y": 6
+            "layout": {
+                "x": 60,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Replicas Updated",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Updated",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 57
+            "layout": {
+                "x": 60,
+                "y": 57,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.rollingupdate.max_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "warm",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Max Unavailable Replicas in Rolling Update (spec strategy)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Max Unavailable Replicas in Rolling Update (spec strategy)",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 87
+            "layout": {
+                "x": 60,
+                "y": 87,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment,kube_cluster_name,kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment,kube_cluster_name,kube_namespace}",
+                        "display_type": "area",
                         "style": {
                             "palette": "warm",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Replicas Desired but Not Available",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Desired but Not Available",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 87
+            "layout": {
+                "x": 0,
+                "y": 87,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "markers": [
-                    {
-                        "label": "y = 0",
-                        "type": "ok dashed",
-                        "value": "y = 0"
-                    }
-                ],
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "orange",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "markers": [
+                    {
+                        "value": "y = 0",
+                        "display_type": "ok dashed",
+                        "label": "y = 0"
+                    }
+                ],
+                "title": "Replicas Outdated",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Outdated",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 72
+            "layout": {
+                "x": 60,
+                "y": 72,
+                "width": 59,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
+            "id": 13,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">=",
-                                "palette": "yellow_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "yellow_on_white"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Outdated",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Outdated",
-            "type": "query_value",
-            "width": 14,
-            "x": 105,
-            "y": 6
+            "layout": {
+                "x": 105,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
+            "id": 14,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "palette": "red_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "red_on_white"
                             },
                             {
                                 "comparator": "<=",
-                                "palette": "green_on_white",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "green_on_white"
                             }
-                        ],
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace}"
+                        ]
                     }
                 ],
-                "viz": "query_value"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Desired Not Available",
-            "type": "query_value",
-            "width": 14,
-            "x": 90,
-            "y": 6
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Overview",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 119,
-            "x": 0,
-            "y": 0
-        },
-        {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
                 "custom_links": [],
+                "title": "Desired Not Available",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 90,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "note",
+                "content": "Overview",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 119,
+                "height": 5
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment})",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Deployments",
-            "type": "timeseries",
-            "width": 29,
-            "x": 0,
-            "y": 21
+            "layout": {
+                "x": 0,
+                "y": 21,
+                "width": 29,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 17,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Replicas per Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas per Deployments",
-            "type": "timeseries",
-            "width": 29,
-            "x": 30,
-            "y": 21
+            "layout": {
+                "x": 30,
+                "y": 21,
+                "width": 29,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "custom_links": [],
+            "id": 18,
+            "definition": {
+                "type": "change",
                 "requests": [
                     {
+                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
                         "change_type": "absolute",
                         "compare_to": "week_before",
                         "increase_good": true,
                         "order_by": "change",
-                        "order_dir": "desc",
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}"
+                        "order_dir": "desc"
                     }
                 ],
-                "viz": "change"
+                "custom_links": [],
+                "title": "Replicas per Deployments",
+                "title_size": "16",
+                "title_align": "left"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas per Deployments",
-            "type": "change",
-            "width": 29,
-            "x": 60,
-            "y": 21
+            "layout": {
+                "x": 60,
+                "y": 21,
+                "width": 29,
+                "height": 14
+            }
         },
         {
-            "height": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 19,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas Desired but Not Available",
-            "type": "timeseries",
-            "width": 29,
-            "x": 90,
-            "y": 21
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Replicas by Deployment",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 119,
-            "x": 0,
-            "y": 36
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Resources",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 119,
-            "x": 0,
-            "y": 102
-        },
-        {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
                 "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Replicas Desired but Not Available",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 90,
+                "y": 21,
+                "width": 29,
+                "height": 14
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "note",
+                "content": "Replicas by Deployment",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 119,
+                "height": 5
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "note",
+                "content": "Resources",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 102,
+                "width": 119,
+                "height": 5
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
+                        "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment})",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "CPU Usage by Deployment",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "CPU Usage by Deployment",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 114
+            "layout": {
+                "x": 0,
+                "y": 114,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 23,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                        "q": "exclude_null(avg:kubernetes.memory.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name})",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Memory Usage by Deployment",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Memory Usage by Deployment",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 114
+            "layout": {
+                "x": 60,
+                "y": 114,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "tile_def": {
-                "custom_links": [],
+            "id": 24,
+            "definition": {
+                "type": "toplist",
                 "requests": [
                     {
                         "q": "top(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
                     }
                 ],
-                "viz": "toplist"
+                "custom_links": [],
+                "title": "Most memory-intensive Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
             },
-            "time": {
-                "live_span": "4h"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Most memory-intensive Deployments",
-            "type": "toplist",
-            "width": 59,
-            "x": 60,
-            "y": 139
+            "layout": {
+                "x": 60,
+                "y": 139,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "tile_def": {
-                "custom_links": [],
+            "id": 25,
+            "definition": {
+                "type": "toplist",
                 "requests": [
                     {
                         "q": "top(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
                     }
                 ],
-                "viz": "toplist"
+                "custom_links": [],
+                "title": "Most CPU-intensive Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
             },
-            "time": {
-                "live_span": "4h"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Most CPU-intensive Deployments",
-            "type": "toplist",
-            "width": 59,
-            "x": 0,
-            "y": 139
+            "layout": {
+                "x": 0,
+                "y": 139,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 26,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
-                        "metadata": {
-                            "sum:kubernetes.cpu.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}": {
-                                "alias": "Limits"
-                            },
-                            "sum:kubernetes.cpu.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}": {
-                                "alias": "Requests"
-                            },
-                            "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}": {
-                                "alias": "Usage"
-                            }
-                        },
                         "q": "sum:kubernetes.cpu.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.cpu.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                        "metadata": [
+                            {
+                                "expression": "sum:kubernetes.cpu.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                                "alias_name": "Requests"
+                            },
+                            {
+                                "expression": "sum:kubernetes.cpu.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                                "alias_name": "Limits"
+                            },
+                            {
+                                "expression": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                                "alias_name": "Usage"
+                            }
+                        ],
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "CPU requests, limits and usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "CPU requests, limits and usage",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 164
+            "layout": {
+                "x": 0,
+                "y": 164,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 27,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
-                        "metadata": {
-                            "sum:kubernetes.memory.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}": {
-                                "alias": "Limits"
-                            },
-                            "sum:kubernetes.memory.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}": {
-                                "alias": "Requests"
-                            },
-                            "sum:kubernetes.memory.rss{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}": {
-                                "alias": "Usage"
-                            }
-                        },
                         "q": "sum:kubernetes.memory.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.memory.rss{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}, sum:kubernetes.memory.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                        "metadata": [
+                            {
+                                "expression": "sum:kubernetes.memory.limits{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                                "alias_name": "Limits"
+                            },
+                            {
+                                "expression": "sum:kubernetes.memory.requests{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                                "alias_name": "Requests"
+                            },
+                            {
+                                "expression": "sum:kubernetes.memory.rss{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name}",
+                                "alias_name": "Usage"
+                            }
+                        ],
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Memory requests, limits and usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Memory requests, limits and usage",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 164
+            "layout": {
+                "x": 60,
+                "y": 164,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "CPU",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 59,
-            "x": 0,
-            "y": 108
+            "id": 28,
+            "definition": {
+                "type": "note",
+                "content": "CPU",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 108,
+                "width": 59,
+                "height": 5
+            }
         },
         {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Memory",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 59,
-            "x": 60,
-            "y": 108
+            "id": 29,
+            "definition": {
+                "type": "note",
+                "content": "Memory",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 60,
+                "y": 108,
+                "width": 59,
+                "height": 5
+            }
         },
         {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Disk",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 59,
-            "x": 0,
-            "y": 189
+            "id": 30,
+            "definition": {
+                "type": "note",
+                "content": "Disk",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 189,
+                "width": 59,
+                "height": 5
+            }
         },
         {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Network",
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 59,
-            "x": 60,
-            "y": 189
+            "id": 31,
+            "definition": {
+                "type": "note",
+                "content": "Network",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 60,
+                "y": 189,
+                "width": 59,
+                "height": 5
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
+            "id": 32,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Network Usage (Rx / Tx rate)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Network Usage (Rx / Tx rate)",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 195
+            "layout": {
+                "x": 60,
+                "y": 195,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
-                "markers": [
-                    {
-                        "label": "y = 0",
-                        "type": "ok dashed",
-                        "value": "y = 0"
-                    }
-                ],
+            "id": 33,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes.network.rx_errors{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, sum:kubernetes.network.tx_errors{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "value": "y = 0",
+                        "display_type": "ok dashed",
+                        "label": "y = 0"
+                    }
+                ],
+                "title": "Network Errors",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Network Errors",
-            "type": "timeseries",
-            "width": 59,
-            "x": 60,
-            "y": 220
+            "layout": {
+                "x": 60,
+                "y": 220,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
+            "id": 34,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes.filesystem.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "title": "Disk Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk Usage",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 195
+            "layout": {
+                "x": 0,
+                "y": 195,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "custom_links": [],
-                "markers": [
-                    {
-                        "label": "\u00a0100%\u00a0",
-                        "type": "error dashed",
-                        "value": "y = 100"
-                    }
-                ],
+            "id": 35,
+            "definition": {
+                "type": "timeseries",
                 "requests": [
                     {
                         "q": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}*100",
+                        "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
                     }
                 ],
-                "right_yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                },
-                "viz": "timeseries",
+                "custom_links": [],
                 "yaxis": {
-                    "includeZero": true,
                     "label": "",
-                    "max": "auto",
+                    "scale": "linear",
                     "min": "auto",
-                    "scale": "linear"
-                }
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "right_yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "value": "y = 100",
+                        "display_type": "error dashed",
+                        "label": " 100% "
+                    }
+                ],
+                "title": "Disk Usage %",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk Usage %",
-            "type": "timeseries",
-            "width": 59,
-            "x": 0,
-            "y": 220
+            "layout": {
+                "x": 0,
+                "y": 220,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "tile_def": {
-                "custom_links": [],
+            "id": 36,
+            "definition": {
+                "type": "toplist",
                 "requests": [
                     {
                         "q": "top(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
                     }
                 ],
-                "viz": "toplist"
+                "custom_links": [],
+                "title": "Most Disk-intensive Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
             },
-            "time": {
-                "live_span": "4h"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Most Disk-intensive Deployments",
-            "type": "toplist",
-            "width": 59,
-            "x": -1,
-            "y": 245
+            "layout": {
+                "x": -1,
+                "y": 245,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 22,
-            "tile_def": {
-                "custom_links": [],
+            "id": 37,
+            "definition": {
+                "type": "toplist",
                 "requests": [
                     {
                         "q": "top(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_deployment,!pod_name:no_pod,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}, 10, 'mean', 'desc')"
                     }
                 ],
-                "viz": "toplist"
+                "custom_links": [],
+                "title": "Most Network-intensive Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
             },
-            "time": {
-                "live_span": "4h"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Most Network-intensive Deployments",
-            "type": "toplist",
-            "width": 59,
-            "x": 60,
-            "y": 245
+            "layout": {
+                "x": 60,
+                "y": 245,
+                "width": 59,
+                "height": 24
+            }
         },
         {
-            "height": 12,
-            "tile_def": {
-                "precision": 0,
+            "id": 38,
+            "definition": {
+                "type": "query_value",
                 "requests": [
                     {
+                        "q": "count_nonzero(sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment})",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "palette": "white_on_green",
-                                "value": "0"
+                                "value": 0,
+                                "palette": "white_on_green"
                             }
-                        ],
-                        "q": "count_nonzero(sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment})"
+                        ]
                     }
                 ],
-                "viz": "query_value"
+                "custom_links": [],
+                "title": "Deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "precision": 0
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Deployments",
-            "type": "query_value",
-            "width": 14,
-            "x": 0,
-            "y": 6
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            }
         }
-    ]
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        },
+        {
+            "name": "kube_cluster_name",
+            "default": "*",
+            "prefix": "kube_cluster_name"
+        },
+        {
+            "name": "kube_namespace",
+            "default": "*",
+            "prefix": "kube_namespace"
+        },
+        {
+            "name": "kube_deployment",
+            "default": "*",
+            "prefix": "kube_deployment"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 30341
 }

@@ -1,0 +1,81 @@
+name: Gitlab Runner
+files:
+- name: gitlab_runner.yaml
+  options:
+  - template: init_config
+    options:
+    - name: allowed_metrics
+      description: List of metrics to extract from Prometheus.
+      required: true
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - ci_docker_machines_provider_machine_creation_duration_seconds
+        - ci_docker_machines_provider_machine_states
+        - ci_runner_builds
+        - ci_runner_errors
+        - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
+        - ci_ssh_docker_machines_provider_machine_states
+        - gitlab_runner_autoscaling_machine_creation_duration_seconds
+        - gitlab_runner_autoscaling_machine_states
+        - gitlab_runner_errors_total
+        - gitlab_runner_jobs
+        - gitlab_runner_version_info
+        - go_gc_duration_seconds
+        - go_goroutines
+        - go_memstats_alloc_bytes
+        - go_memstats_alloc_bytes_total
+        - go_memstats_buck_hash_sys_bytes
+        - go_memstats_frees_total
+        - go_memstats_gc_sys_bytes
+        - go_memstats_heap_alloc_bytes
+        - go_memstats_heap_idle_bytes
+        - go_memstats_heap_inuse_bytes
+        - go_memstats_heap_objects
+        - go_memstats_heap_released_bytes_total
+        - go_memstats_heap_sys_bytes
+        - go_memstats_last_gc_time_seconds
+        - go_memstats_lookups_total
+        - go_memstats_mallocs_total
+        - go_memstats_mcache_inuse_bytes
+        - go_memstats_mcache_sys_bytes
+        - go_memstats_mspan_inuse_bytes
+        - go_memstats_mspan_sys_bytes
+        - go_memstats_next_gc_bytes
+        - go_memstats_other_sys_bytes
+        - go_memstats_stack_inuse_bytes
+        - go_memstats_stack_sys_bytes
+        - go_memstats_sys_bytes
+        - process_cpu_seconds_total
+        - process_max_fds
+        - process_open_fds
+        - process_resident_memory_bytes
+        - process_start_time_seconds
+        - process_virtual_memory_bytes
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+      - name: gitlab_url
+        required: true
+        description: |
+          Master URL to probe for service health status
+          If you are using gitlab CE and not EE, use this url with
+          the authorization token: http://localhost/?token=<TOKEN>
+        value:
+          type: string
+      - name: prometheus_endpoint
+        required: true
+        description: URL of the metrics endpoint of prometheus
+        value:
+          type: string
+          example: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
+      - template: instances/openmetrics
+        overrides:
+          prometheus_url.hidden: true
+  - template: logs
+    example:
+      - type: journald
+        source: gitlab-runner

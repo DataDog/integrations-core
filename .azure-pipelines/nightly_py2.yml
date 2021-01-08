@@ -1,6 +1,6 @@
 # Nightly run on the master branch.
 # This pipeline is the only one running py2 tests on all integrations since
-# the all_master.yml is now python3 only (August 2020).
+# the all_master.yml is now python3 only (August 2020)
 
 schedules:
 - cron: "0 4 * * *"

@@ -309,8 +309,8 @@ def test_check_real_process_regex(aggregator):
 
 
 def test_relocated_procfs(aggregator):
-    import tempfile
     import shutil
+    import tempfile
     import uuid
 
     unique_process_name = str(uuid.uuid4())

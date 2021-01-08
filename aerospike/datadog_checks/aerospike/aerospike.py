@@ -101,7 +101,7 @@ class AerospikeCheck(AgentCheck):
         # We'll connect on the first check run
         self._client = None
 
-    def check(self, instance):
+    def check(self, _):
         if self._client is None:
             client = self.get_client()
             if client is None:

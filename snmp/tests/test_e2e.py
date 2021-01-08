@@ -4,6 +4,7 @@
 
 import pytest
 from tests.metrics import (
+    IF_BANDWIDTH_USAGE,
     IF_COUNTS,
     IF_GAUGES,
     IF_RATES,
@@ -70,12 +71,17 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
-
-    for interface in ['eth0', 'eth1']:
-        tags = ['interface:{}'.format(interface)] + common_tags
+    interfaces = [
+        ('eth0', 'kept'),
+        ('eth1', 'their forward oxen'),
+    ]
+    for interface, if_desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IF_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
@@ -103,6 +109,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
+        'device_vendor:apc',
     ]
     metrics = [
         'upsAdvBatteryNumOfBadBattPacks',
@@ -135,13 +142,12 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'snmp.upsBasicStateOutputState.BatteriesDischarged',
         'snmp.upsBasicStateOutputState.LowBatteryOnBattery',
         'snmp.upsBasicStateOutputState.NoBatteriesAttached',
+        'snmp.upsBasicStateOutputState.On',
         'snmp.upsBasicStateOutputState.OnLine',
         'snmp.upsBasicStateOutputState.ReplaceBattery',
     ]
     for metric in ups_basic_state_output_state_metrics:
-        aggregator.assert_metric(
-            metric, metric_type=aggregator.GAUGE, count=2, tags=common_tags,
-        )
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=2, tags=common_tags)
 
     # ==== test snmp v3 ===
     common_tags = [

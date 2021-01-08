@@ -167,13 +167,13 @@ class TUFDownloader:
         return target_abspaths
 
     def __download_in_toto_layout_pubkeys(self, target, target_relpath):
-        '''
+        """
         NOTE: We assume that all the public keys needed to verify any in-toto
         root layout, or sublayout, metadata file has been directly signed by
         the top-level TUF targets role using *OFFLINE* keys. This is a
         reasonable assumption, as TUF does not offer meaningful security
         guarantees if _ALL_ targets were signed using _online_ keys.
-        '''
+        """
 
         pubkey_abspaths = self.__download_custom(target, '.pub')
         if not len(pubkey_abspaths):
@@ -265,11 +265,11 @@ class TUFDownloader:
             return target_abspath
 
     def download(self, target_relpath):
-        '''
+        """
         Returns:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
-        '''
+        """
         return self.__download_with_tuf_in_toto(target_relpath)
 
     def __get_versions(self, standard_distribution_name):
@@ -304,11 +304,11 @@ class TUFDownloader:
         return wheels
 
     def get_wheel_relpath(self, standard_distribution_name, version=None):
-        '''
+        """
         Returns:
             If download over TUF is successful, this function will return the
             latest known version of the Datadog integration.
-        '''
+        """
         wheels = self.__get_versions(standard_distribution_name)
 
         if not wheels:

@@ -166,7 +166,7 @@ class VSphereRestClient(object):
         Doc:
         https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/session.create-operation.html
         """
-        session_token = self._request_json("session", method="post", extra_headers=self.JSON_REQUEST_HEADERS,)
+        session_token = self._request_json("session", method="post", extra_headers=self.JSON_REQUEST_HEADERS)
         return session_token
 
     def tagging_category_get(self, category_id):

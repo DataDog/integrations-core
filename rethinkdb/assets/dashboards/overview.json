@@ -1,534 +1,549 @@
 {
-    "author_info": {
-        "author_name": "Datadog"
-    },
-    "board_title": "RethinkDB Overview",
-    "created": "2020-05-21T15:43:15.489305+00:00",
-    "created_by": {
-        "access_role": "st",
-        "disabled": false,
-        "email": "support@datadoghq.com",
-        "handle": "support@datadoghq.com",
-        "is_admin": false,
-        "name": "Datadog",
-        "role": null,
-        "title": null,
-        "verified": true
-    },
+    "title": "RethinkDB Overview",
     "description": "## RethinkDB Overview\n\nThis dashboard provides an overview of RethinkDB availability, client activity, and read/write throughput so you can monitor the health and performance of your deployments. \n\n- [Monitor RethinkDB with Datadog](datadoghq.com/blog/monitor-rethinkdb-with-datadog)\n- [RethinkDB integration documentation](https://docs.datadoghq.com/integrations/rethinkdb/)",
-    "id": 1127697,
-    "modified": "2020-06-03T21:53:28.312481+00:00",
-    "new_id": "bky-fc7-h88",
-    "read_only": false,
-    "template_variables": [
-        {
-            "default": "*",
-            "name": "database",
-            "prefix": "database"
-        },
-        {
-            "default": "*",
-            "name": "table",
-            "prefix": "table"
-        },
-        {
-            "default": "*",
-            "name": "server",
-            "prefix": "server"
-        }
-    ],
     "widgets": [
-        {
-            "height": 13,
-            "id": 0,
-            "legend": false,
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:rethinkdb.stats.server.query_engine.clients_active{$database,$table,$server} by {server}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Active clients by server",
-            "type": "timeseries",
-            "width": 47,
-            "x": 0,
-            "y": 23
+      {
+        "id": 0,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "sum:rethinkdb.stats.server.query_engine.clients_active{$database,$table,$server} by {server}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "Active clients by server",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false
         },
-        {
-            "height": 13,
-            "id": 1,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:rethinkdb.stats.server.query_engine.client_connections{$database,$table,$server} by {server}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Client connections by server",
-            "type": "timeseries",
-            "width": 47,
-            "x": 0,
-            "y": 39
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Client connections",
-            "id": 2,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 47,
-            "x": 0,
-            "y": 17
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Documents read per second",
-            "id": 3,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 47,
-            "x": 49,
-            "y": 17
-        },
-        {
-            "height": 13,
-            "id": 4,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.table.query_engine.read_docs_per_sec{$database,$table,$server} by {table}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "By table",
-            "type": "timeseries",
-            "width": 47,
-            "x": 49,
-            "y": 23
-        },
-        {
-            "height": 13,
-            "id": 5,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.server.query_engine.read_docs_per_sec{$database,$table,$server} by {server}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "By server",
-            "type": "timeseries",
-            "width": 47,
-            "x": 49,
-            "y": 39
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 5,
-            "html": "Documents written per second",
-            "id": 6,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 47,
-            "x": 98,
-            "y": 17
-        },
-        {
-            "height": 13,
-            "id": 7,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.table.query_engine.written_docs_per_sec{$database,$table,$server} by {table}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "By table",
-            "type": "timeseries",
-            "width": 47,
-            "x": 98,
-            "y": 23
-        },
-        {
-            "height": 13,
-            "id": 8,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.server.query_engine.written_docs_per_sec{$database,$table,$server} by {server}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "By server",
-            "type": "timeseries",
-            "width": 47,
-            "x": 98,
-            "y": 39
-        },
-        {
-            "height": 13,
-            "id": 9,
-            "legend": false,
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.server.query_engine.queries_per_sec{$database,$table,$server} by {server}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Queries per second by server",
-            "type": "timeseries",
-            "width": 47,
-            "x": 0,
-            "y": 55
-        },
-        {
-            "height": 13,
-            "id": 11,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.table_server.query_engine.read_docs_per_sec{$database,$table,$server} by {state}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "By replica state",
-            "type": "timeseries",
-            "width": 47,
-            "x": 49,
-            "y": 55
-        },
-        {
-            "height": 13,
-            "id": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:rethinkdb.stats.table_server.query_engine.written_docs_per_sec{$database,$table,$server} by {state}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "By replica state",
-            "type": "timeseries",
-            "width": 47,
-            "x": 98,
-            "y": 55
-        },
-        {
-            "height": 13,
-            "id": 13,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:rethinkdb.table_status.shards.replicas{$database,$table,$server} by {table}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Replicas per table",
-            "type": "timeseries",
-            "width": 47,
-            "x": 51,
-            "y": 0
-        },
-        {
-            "height": 13,
-            "id": 14,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:rethinkdb.table_status.shards{$database,$table,$server} by {table}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Shards per table",
-            "type": "timeseries",
-            "width": 47,
-            "x": 99,
-            "y": 0
-        },
-        {
-            "height": 13,
-            "id": 15,
-            "tile_def": {
-                "custom_unit": " ",
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_green",
-                                "value": "0"
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_red",
-                                "value": "1"
-                            }
-                        ],
-                        "q": "sum:rethinkdb.config.servers{$database,$table,$server}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Servers up",
-            "type": "query_value",
-            "width": 17,
-            "x": 33,
-            "y": 0
-        },
-        {
-            "check": "rethinkdb.table_status.status.all_replicas_ready",
-            "group_by": [],
-            "grouping": "cluster",
-            "height": 15,
-            "id": 16,
-            "tags": [
-                "$table"
-            ],
-            "title": true,
-            "title_align": "center",
-            "title_size": 16,
-            "title_text": "Fully replicated tables",
-            "type": "check_status",
-            "width": 17,
-            "x": 15,
-            "y": 0
-        },
-        {
-            "height": 15,
-            "id": 17,
-            "sizing": "center",
-            "type": "image",
-            "url": "https://static.datadoghq.com/static/images/avatars/bot/rethinkdb.png",
-            "width": 13,
-            "x": 0,
-            "y": 0
+        "layout": {
+          "x": 0,
+          "y": 23,
+          "width": 47,
+          "height": 15
         }
-    ]
-}
+      },
+      {
+        "id": 1,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "sum:rethinkdb.stats.server.query_engine.client_connections{$database,$table,$server} by {server}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "Client connections by server",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 0,
+          "y": 39,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 2,
+        "definition": {
+          "type": "note",
+          "content": "Client connections",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 0,
+          "y": 17,
+          "width": 47,
+          "height": 5
+        }
+      },
+      {
+        "id": 3,
+        "definition": {
+          "type": "note",
+          "content": "Documents read per second",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 49,
+          "y": 17,
+          "width": 47,
+          "height": 5
+        }
+      },
+      {
+        "id": 4,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.table.query_engine.read_docs_per_sec{$database,$table,$server} by {table}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "By table",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 49,
+          "y": 23,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 5,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.server.query_engine.read_docs_per_sec{$database,$table,$server} by {server}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "By server",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 49,
+          "y": 39,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 6,
+        "definition": {
+          "type": "note",
+          "content": "Documents written per second",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 98,
+          "y": 17,
+          "width": 47,
+          "height": 5
+        }
+      },
+      {
+        "id": 7,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.table.query_engine.written_docs_per_sec{$database,$table,$server} by {table}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "By table",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 98,
+          "y": 23,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 8,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.server.query_engine.written_docs_per_sec{$database,$table,$server} by {server}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "By server",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 98,
+          "y": 39,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 9,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.server.query_engine.queries_per_sec{$database,$table,$server} by {server}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "Queries per second by server",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false
+        },
+        "layout": {
+          "x": 0,
+          "y": 55,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 10,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.table_server.query_engine.read_docs_per_sec{$database,$table,$server} by {state}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "By replica state",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 49,
+          "y": 55,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 11,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:rethinkdb.stats.table_server.query_engine.written_docs_per_sec{$database,$table,$server} by {state}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "By replica state",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 98,
+          "y": 55,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 12,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "sum:rethinkdb.table_status.shards.replicas{$database,$table,$server} by {table}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "Replicas per table",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 51,
+          "y": 0,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 13,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "sum:rethinkdb.table_status.shards{$database,$table,$server} by {table}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "yaxis": {
+            "label": "",
+            "scale": "linear",
+            "min": "auto",
+            "max": "auto",
+            "include_zero": true
+          },
+          "title": "Shards per table",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 99,
+          "y": 0,
+          "width": 47,
+          "height": 15
+        }
+      },
+      {
+        "id": 14,
+        "definition": {
+          "type": "query_value",
+          "requests": [
+            {
+              "q": "sum:rethinkdb.config.servers{$database,$table,$server}",
+              "aggregator": "last",
+              "conditional_formats": [
+                {
+                  "comparator": ">",
+                  "value": 0,
+                  "palette": "white_on_green"
+                },
+                {
+                  "comparator": "<",
+                  "value": 1,
+                  "palette": "white_on_red"
+                }
+              ]
+            }
+          ],
+          "custom_links": [],
+          "title": "Servers up",
+          "title_size": "16",
+          "title_align": "left",
+          "custom_unit": " ",
+          "precision": 0
+        },
+        "layout": {
+          "x": 33,
+          "y": 0,
+          "width": 17,
+          "height": 15
+        }
+      },
+      {
+        "id": 15,
+        "definition": {
+          "type": "check_status",
+          "title": "Fully replicated tables",
+          "title_size": "16",
+          "title_align": "center",
+          "check": "rethinkdb.table_status.status.all_replicas_ready",
+          "grouping": "cluster",
+          "group_by": [],
+          "tags": [
+            "$table"
+          ]
+        },
+        "layout": {
+          "x": 15,
+          "y": 0,
+          "width": 17,
+          "height": 15
+        }
+      },
+      {
+        "id": 16,
+        "definition": {
+          "type": "image",
+          "url": "https://static.datadoghq.com/static/images/avatars/bot/rethinkdb.png",
+          "sizing": "center"
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 13,
+          "height": 15
+        }
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "database",
+        "default": "*",
+        "prefix": "database"
+      },
+      {
+        "name": "table",
+        "default": "*",
+        "prefix": "table"
+      },
+      {
+        "name": "server",
+        "default": "*",
+        "prefix": "server"
+      }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 30328
+  }

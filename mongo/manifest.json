@@ -36,7 +36,9 @@
     "monitors": {
       "[MongoDB] High incoming connections": "assets/monitors/high_connections.json"
     },
-    "dashboards": {},
+    "dashboards": {
+      "mongodb": "assets/dashboards/overview.json"
+    },
     "saved_views": {
       "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",
       "queries": "assets/saved_views/queries.json",
@@ -46,6 +48,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mongodb"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

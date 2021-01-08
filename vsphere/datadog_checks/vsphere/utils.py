@@ -37,7 +37,7 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 def format_metric_name(counter):
     # type: (vim.PerformanceManager.PerfCounterInfo) -> MetricName
     return "{}.{}.{}".format(
-        to_string(counter.groupInfo.key), to_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)],
+        to_string(counter.groupInfo.key), to_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)]
     )
 
 
@@ -85,8 +85,8 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
-def get_parent_tags_recursively(mor, infrastructure_data):
-    # type: (vim.ManagedEntity, InfrastructureData) -> List[str]
+def get_parent_tags_recursively(mor, infrastructure_data, config):
+    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -108,7 +108,13 @@ def get_parent_tags_recursively(mor, infrastructure_data):
         if isinstance(parent, vim.HostSystem):
             tags.append('vsphere_host:{}'.format(parent_name))
         elif isinstance(parent, vim.Folder):
-            tags.append('vsphere_folder:{}'.format(parent_name))
+            if isinstance(parent, vim.StoragePod):
+                tags.append('vsphere_datastore_cluster:{}'.format(parent_name))
+                # Legacy mode: keep it as "folder"
+                if config.include_datastore_cluster_folder_tag:
+                    tags.append('vsphere_folder:{}'.format(parent_name))
+            else:
+                tags.append('vsphere_folder:{}'.format(parent_name))
         elif isinstance(parent, vim.ComputeResource):
             if isinstance(parent, vim.ClusterComputeResource):
                 tags.append('vsphere_cluster:{}'.format(parent_name))
@@ -118,7 +124,7 @@ def get_parent_tags_recursively(mor, infrastructure_data):
         elif isinstance(parent, vim.Datastore):
             tags.append('vsphere_datastore:{}'.format(parent_name))
 
-        parent_tags = get_parent_tags_recursively(parent, infrastructure_data)
+        parent_tags = get_parent_tags_recursively(parent, infrastructure_data, config)
         parent_tags.extend(tags)
         return parent_tags
     return []

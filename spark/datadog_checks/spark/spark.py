@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems
+from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -38,6 +40,9 @@ SPARK_VERSION_PATH = 'api/v1/version'
 SPARK_MASTER_STATE_PATH = '/json/'
 SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
+
+# Extract the application name and the dd metric name from the structured streams metrics.
+STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
 
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
@@ -89,34 +94,31 @@ SPARK_STAGE_METRICS = {
     'diskBytesSpilled': ('spark.stage.disk_bytes_spilled', COUNT),
 }
 
+SPARK_EXECUTOR_TEMPLATE_METRICS = {
+    'rddBlocks': ('spark.{}.rdd_blocks', COUNT),
+    'memoryUsed': ('spark.{}.memory_used', COUNT),
+    'diskUsed': ('spark.{}.disk_used', COUNT),
+    'activeTasks': ('spark.{}.active_tasks', COUNT),
+    'failedTasks': ('spark.{}.failed_tasks', COUNT),
+    'completedTasks': ('spark.{}.completed_tasks', COUNT),
+    'totalTasks': ('spark.{}.total_tasks', COUNT),
+    'totalDuration': ('spark.{}.total_duration', COUNT),
+    'totalInputBytes': ('spark.{}.total_input_bytes', COUNT),
+    'totalShuffleRead': ('spark.{}.total_shuffle_read', COUNT),
+    'totalShuffleWrite': ('spark.{}.total_shuffle_write', COUNT),
+    'maxMemory': ('spark.{}.max_memory', COUNT),
+}
+
 SPARK_DRIVER_METRICS = {
-    'rddBlocks': ('spark.driver.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.driver.memory_used', COUNT),
-    'diskUsed': ('spark.driver.disk_used', COUNT),
-    'activeTasks': ('spark.driver.active_tasks', COUNT),
-    'failedTasks': ('spark.driver.failed_tasks', COUNT),
-    'completedTasks': ('spark.driver.completed_tasks', COUNT),
-    'totalTasks': ('spark.driver.total_tasks', COUNT),
-    'totalDuration': ('spark.driver.total_duration', COUNT),
-    'totalInputBytes': ('spark.driver.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.driver.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.driver.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.driver.max_memory', COUNT),
+    key: (value[0].format('driver'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
 }
 
 SPARK_EXECUTOR_METRICS = {
-    'rddBlocks': ('spark.executor.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.executor.memory_used', COUNT),
-    'diskUsed': ('spark.executor.disk_used', COUNT),
-    'activeTasks': ('spark.executor.active_tasks', COUNT),
-    'failedTasks': ('spark.executor.failed_tasks', COUNT),
-    'completedTasks': ('spark.executor.completed_tasks', COUNT),
-    'totalTasks': ('spark.executor.total_tasks', COUNT),
-    'totalDuration': ('spark.executor.total_duration', COUNT),
-    'totalInputBytes': ('spark.executor.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.executor.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.executor.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.executor.max_memory', COUNT),
+    key: (value[0].format('executor'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
+}
+
+SPARK_EXECUTOR_LEVEL_METRICS = {
+    key: (value[0].format('executor.id'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
 }
 
 SPARK_RDD_METRICS = {
@@ -142,6 +144,14 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
 
+SPARK_STRUCTURED_STREAMING_METRICS = {
+    'inputRate-total': ('spark.structured_streaming.input_rate', GAUGE),
+    'latency': ('spark.structured_streaming.latency', GAUGE),
+    'processingRate-total': ('spark.structured_streaming.processing_rate', GAUGE),
+    'states-rowsTotal': ('spark.structured_streaming.rows_count', GAUGE),
+    'states-usedBytes': ('spark.structured_streaming.used_bytes', GAUGE),
+}
+
 
 class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
@@ -157,6 +167,8 @@ class SparkCheck(AgentCheck):
         # `proxyapproved=true` GET param.
         # The page also sets a cookie that needs to be stored (no need to set persist_connections in the config)
         self.proxy_redirect_cookies = None
+
+        self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
     def check(self, instance):
         # Get additional tags from the conf file
@@ -188,6 +200,7 @@ class SparkCheck(AgentCheck):
         # Get the streaming statistics metrics
         if is_affirmative(instance.get('streaming_metrics', True)):
             self._spark_streaming_statistics_metrics(instance, spark_apps, tags)
+            self._spark_structured_streams_metrics(instance, spark_apps, tags)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
@@ -503,6 +516,13 @@ class SparkCheck(AgentCheck):
                 tags.extend(addl_tags)
                 tags.append('status:%s' % str(status).lower())
 
+                job_id = job.get('jobId')
+                if job_id is not None:
+                    tags.append('job_id:{}'.format(job_id))
+
+                for stage_id in job.get('stageIds', []):
+                    tags.append('stage_id:{}'.format(stage_id))
+
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)
 
@@ -524,6 +544,10 @@ class SparkCheck(AgentCheck):
                 tags = ['app_name:%s' % str(app_name)]
                 tags.extend(addl_tags)
                 tags.append('status:%s' % str(status).lower())
+
+                stage_id = stage.get('stageId')
+                if stage_id is not None:
+                    tags.append('stage_id:{}'.format(stage_id))
 
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', COUNT, 1, tags)
@@ -547,6 +571,13 @@ class SparkCheck(AgentCheck):
                     self._set_metrics_from_json(tags, executor, SPARK_DRIVER_METRICS)
                 else:
                     self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
+
+                    if is_affirmative(self.instance.get('executor_level_metrics', False)):
+                        self._set_metrics_from_json(
+                            tags + ['executor_id:{}'.format(executor.get('id', 'unknown'))],
+                            executor,
+                            SPARK_EXECUTOR_LEVEL_METRICS,
+                        )
 
             if len(response):
                 self._set_metric('spark.executor.count', COUNT, len(response), tags)
@@ -592,6 +623,44 @@ class SparkCheck(AgentCheck):
                 # then it means that the application is not a streaming application, we should skip metric submission
                 if e.response.status_code != 404:
                     raise
+
+    def _spark_structured_streams_metrics(self, instance, running_apps, addl_tags):
+        """
+        Get metrics for each application structured stream.
+        Requires:
+        - The Metric Servlet to be enabled to path <APP_URL>/metrics/json (enabled by default)
+        - `SET spark.sql.streaming.metricsEnabled=true` in the app
+        """
+
+        for app_name, tracking_url in itervalues(running_apps):
+            try:
+                base_url = self._get_request_url(instance, tracking_url)
+                response = self._rest_request_to_json(
+                    base_url, self.metricsservlet_path, SPARK_SERVICE_CHECK, addl_tags
+                )
+                self.log.debug('Structured streaming metrics: %s', response)
+                response = {
+                    metric_name: v['value']
+                    for metric_name, v in iteritems(response.get('gauges'))
+                    if 'streaming' in metric_name and 'value' in v
+                }
+                for gauge_name, value in iteritems(response):
+                    match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
+                    if not match:
+                        continue
+                    groups = match.groupdict()
+                    metric_name = groups['metric_name']
+                    if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        continue
+                    metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
+                    tags = ['app_name:%s' % str(app_name)]
+                    tags.extend(addl_tags)
+                    self._set_metric(metric_name, submission_type, value, tags=tags)
+            except HTTPError as e:
+                self.log.debug(
+                    "No structured streaming metrics to collect from" " app %s. %s", app_name, e, exc_info=True
+                )
+                pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         """

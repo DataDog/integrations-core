@@ -37,7 +37,7 @@ class InnoDBMetrics(object):
                 cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.log.warning(
-                "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e,
+                "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e
             )
             return {}
         except (UnicodeDecodeError, UnicodeEncodeError) as e:

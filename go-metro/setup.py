@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
+
+from setuptools import setup
 
 HERE = path.dirname(path.abspath(__file__))
 
@@ -25,6 +26,8 @@ def get_dependencies():
     with open(dep_file, encoding='utf-8') as f:
         return f.readlines()
 
+
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
 
 setup(
     name='datadog-go-metro',
@@ -59,7 +62,7 @@ setup(
     packages=['datadog_checks.go-metro'],
 
     # Run-time dependencies
-    install_requires=['datadog_checks_base'],
+    install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': get_dependencies()},
 
     # Extra files to ship with the wheel package

@@ -6,6 +6,7 @@
 Collects network metrics.
 """
 
+import distutils.spawn
 import os
 import re
 import socket
@@ -18,6 +19,11 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 if PY3:
     long = int
@@ -55,6 +61,7 @@ class Network(AgentCheck):
             )
 
         self._collect_cx_state = instance.get('collect_connection_state', False)
+        self._collect_cx_queues = instance.get('collect_connection_queues', False)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
 
@@ -270,8 +277,16 @@ class Network(AgentCheck):
             return False
 
         if proc_location != "/proc":
-            self.warning("Cannot collect connection state: currently with a custom /proc path: %s", proc_location)
-            return False
+            # If we have `ss`, we're fine with a non-standard `/proc` location
+            if distutils.spawn.find_executable("ss") is None:
+                self.warning(
+                    "Cannot collect connection state: `ss` cannot be found and "
+                    "currently with a custom /proc path: %s",
+                    proc_location,
+                )
+                return False
+            else:
+                return True
 
         return True
 
@@ -281,7 +296,10 @@ class Network(AgentCheck):
         For that procfs_path can be set to something like "/host/proc"
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
-        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+        proc_location = datadog_agent.get_config('procfs_path')
+        if not proc_location:
+            proc_location = '/proc'
+        proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
@@ -290,6 +308,17 @@ class Network(AgentCheck):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
+                ss_env = {"PROC_ROOT": net_proc_base_location}
+
+                # By providing the environment variables in ss_env, the PATH will be overriden. In CentOS,
+                # datadog-agent PATH is "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", while sh PATH
+                # will be '/usr/local/bin:/usr/bin'. In CentOS, ss is located in /sbin and /usr/sbin, not
+                # in the sh PATH, which will result in network metric collection failure.
+                #
+                # The line below will set sh PATH explicitly as the datadog-agent PATH to fix that issue.
+                if "PATH" in os.environ:
+                    ss_env["PATH"] = os.environ["PATH"]
+
                 metrics = self._get_metrics()
                 for ip_version in ['4', '6']:
                     # Call `ss` for each IP version because there's no built-in way of distinguishing
@@ -298,7 +327,7 @@ class Network(AgentCheck):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -310,15 +339,22 @@ class Network(AgentCheck):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
+
+                    if self._collect_cx_queues:
+                        cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
+                        output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                        for (state, recvq, sendq) in self._parse_queues("ss", output):
+                            self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                            self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
-            except OSError:
-                self.log.info("`ss` not found: using `netstat` as a fallback")
+            except OSError as e:
+                self.log.info("`ss` invocation failed: %s. Using `netstat` as a fallback", str(e))
                 output, _, _ = get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
                 lines = output.splitlines()
                 # Active Internet connections (w/o servers)
@@ -334,8 +370,14 @@ class Network(AgentCheck):
                 metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
+
+                if self._collect_cx_queues:
+                    for (state, recvq, sendq) in self._parse_queues("netstat", output):
+                        self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                        self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
+
             except SubprocessOutputEmptyError:
-                self.log.exception("Error collecting connection stats.")
+                self.log.exception("Error collecting connection states.")
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
         try:
@@ -633,6 +675,32 @@ class Network(AgentCheck):
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
+        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+
+        net_proc_base_location = self._get_net_proc_base_location(proc_location)
+
+        if self._is_collect_cx_state_runnable(net_proc_base_location):
+            try:
+                self.log.debug("Using `netstat` to collect connection state")
+                output_TCP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)
+                output_UDP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"], self.log)
+                lines = output_TCP.splitlines() + output_UDP.splitlines()
+                # Active Internet connections (w/o servers)
+                # Proto Recv-Q Send-Q Local Address           Foreign Address         State
+                # tcp        0      0 46.105.75.4:80          79.220.227.193:2032     SYN_RECV
+                # tcp        0      0 46.105.75.4:143         90.56.111.177:56867     ESTABLISHED
+                # tcp        0      0 46.105.75.4:50468       107.20.207.175:443      TIME_WAIT
+                # tcp6       0      0 46.105.75.4:80          93.15.237.188:58038     FIN_WAIT2
+                # tcp6       0      0 46.105.75.4:80          79.220.227.193:2029     ESTABLISHED
+                # udp        0      0 0.0.0.0:123             0.0.0.0:*
+                # udp6       0      0 :::41458                :::*
+
+                metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
+                for metric, value in iteritems(metrics):
+                    self.gauge(metric, value, tags=custom_tags)
+            except SubprocessOutputEmptyError:
+                self.log.exception("Error collecting connection states.")
+
     def _check_solaris(self, instance):
         # Can't get bytes sent and received via netstat
         # Default to kstat -p link:0:
@@ -809,3 +877,25 @@ class Network(AgentCheck):
         protocol = self.PSUTIL_TYPE_MAPPING.get(conn.type, '')
         family = self.PSUTIL_FAMILY_MAPPING.get(conn.family, '')
         return '{}{}'.format(protocol, family)
+
+    def _parse_queues(self, tool, ss_output):
+        """
+        for each line of `ss_output`, returns a triplet with:
+        * a connection state (`established`, `listening`)
+        * the receive queue size
+        * the send queue size
+        """
+        for line in ss_output.splitlines():
+            fields = line.split()
+
+            if len(fields) < (6 if tool == "netstat" else 3):
+                continue
+
+            state_column = 0 if tool == "ss" else 5
+
+            try:
+                state = self.tcp_states[tool][fields[state_column]]
+            except KeyError:
+                continue
+
+            yield (state, fields[1], fields[2])

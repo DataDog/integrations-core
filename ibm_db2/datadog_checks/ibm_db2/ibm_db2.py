@@ -27,7 +27,7 @@ class IbmDb2Check(AgentCheck):
         self._username = self.instance.get('username', '')
         self._password = self.instance.get('password', '')
         self._host = self.instance.get('host', '')
-        self._port = self.instance.get('port', 5000)
+        self._port = self.instance.get('port', 50000)
         self._tags = self.instance.get('tags', [])
         self._tls_cert = self.instance.get('tls_cert')
 

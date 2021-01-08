@@ -4,22 +4,13 @@ files:
     options:
       - template: init_config
         options:
-          - name: global_custom_queries
-            description: |
-              Global custom queries can be applied to all instances using the
-              `use_global_custom_queries` setting at the instance level.
-
-              See `custom_queries` defined below for syntax and documentation about each option.
-            value:
-              type: array
-              items:
-                type: object
-              example:
+          - template: init_config/db
+            overrides:
+              global_custom_queries.value.example:
                 - metric_prefix: mysql
                   query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
-
           - template: init_config/default
 
       - template: instances
@@ -33,7 +24,7 @@ files:
             value:
               type: string
               example: localhost
-              default: None
+              default: null
 
           - name: user
             description: |
@@ -42,7 +33,7 @@ files:
             value:
               type: string
               example: datadog
-              default: None
+              default: null
 
           - name: pass
             description: |
@@ -58,7 +49,6 @@ files:
             value:
               type: number
               example: 3306
-              default: None
 
           - name: sock
             description: |
@@ -108,50 +98,9 @@ files:
                 key: <KEY_FILE_PATH>
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
-
-          - name: use_global_custom_queries
-            description: |
-              How `global_custom_queries` should be used for this instance. There are 3 options:
-
-              * 'true' - `global_custom_queries` override `custom_queries`.
-              * 'false' - `custom_queries` override `global_custom_queries`.
-              * 'extend' - `global_custom_queries` are used in addition to any `custom_queries`.
-            value:
-              type: string
-              example: 'true'
-
-          - name: custom_queries
-            description: |
-              A list of custom queries used to retrieve custom metrics.
-
-              The following fields are expected:
-
-              query:
-                The SQL query to execute. It can be a simple statement, or a multi-line script.
-              columns:
-                A list representing each column, ordered sequentially from left to right.
-                The number of columns must be equal to the number of columns returned in the `query`.
-
-                Each column is an object with the following fields:
-
-                name:
-                  The suffix to append to `mysql.` to form the full metric name.
-                  If `type` is `tag`, this column is considered a tag and applied to every metric
-                  collected by this query.
-                type:
-                  The submission method (gauge, monotonic_count, etc.).
-                  Use the 'tag' type to tag each metric in the row with the name and value
-                  of the item in this column.
-                  Use the 'count' type to perform aggregation for queries that return multiple
-                  rows with the same or no tags.
-              tags: (optional)
-                A list of tags to apply to each metric.
-
-            value:
-              type: array
-              items:
-                type: object
-              example:
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
                 - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
                   columns:
                     - name: foo
@@ -224,21 +173,21 @@ files:
 
               - name: extra_status_metrics
                 description: |
-                  Set to `false` to disable extra status metrics.
+                  Set to `true` to enable extra status metrics.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
-                  example: true
+                  example: false
 
               - name: extra_innodb_metrics
                 description: |
-                  Set to `false` to disable extra InnoDB metrics.
+                  Set to `true` to enable extra InnoDB metrics.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
-                  example: true
+                  example: false
 
               - name: disable_innodb_metrics
                 description: |
@@ -275,7 +224,7 @@ files:
                   high number of tables and schemas, this may have a negative impact on your database performance.
 
                   Metrics provided by the options:
-                    - mysql.info.schema.size (per schame)
+                    - mysql.info.schema.size (per schema)
                     - mysql.performance.query_run_time.avg (per schema)
                     - mysql.performance.digest_95th_percentile.avg_us
 
@@ -284,7 +233,19 @@ files:
                   MySQL integration tile in the Datadog Web UI for further instructions.
                 value:
                   type: boolean
-                  example: true
+                  example: false
+
+          - name: deep_database_monitoring
+            description: |
+              Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+
+              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+              success manager or Datadog support.
+            enabled: false
+            value:
+              type: boolean
+              example: true
+              default: false
 
           - template: instances/default
 
@@ -297,6 +258,10 @@ files:
               - type: multi_line
                 name: new_log_start_with_date
                 pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+              # Useful when timestamp is only logged every second (not every log) and format is yymmdd. (This comment won't be present in the output.)
+              - type: multi_line
+                name: new_logs_do_not_always_start_with_timestamp
+                pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
 
           - type: file
             path: "<ERROR_LOG_FILE_PATH>"

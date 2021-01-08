@@ -43,7 +43,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `reverse_content_match`          | When `true`, reverses the behavior of the `content_match` option, i.e. the HTTP check reports as DOWN if the string or expression in `content_match` IS found. (default is `false`)                                                              |
 | `username` & `password`          | If your service uses basic authentication, you can provide the username and password here.                                                                                                                                                       |
 | `http_response_status_code`      | A string or Python regular expression for an HTTP status code. This check reports DOWN for any status code that does not match. This defaults to 1xx, 2xx and 3xx HTTP status codes. For example: `401` or `4\d\d`.                              |
-| `include_content`                | When set to `true`, the check includes the first 200 characters of the HTTP response body in notifications. The default value is `false`.                                                                                                        |
+| `include_content`                | When set to `true`, the check includes the first 500 characters of the HTTP response body in notifications. The default value is `false`.                                                                                                        |
 | `collect_response_time`          | By default, the check collects the response time (in seconds) as the metric `network.http.response_time`. To disable, set this value to `false`.                                                                                                 |
 | `tls_verify`                     | Instructs the check to validate the TLS certificate of services when reaching to `url`.                                                                                                                                                          |
 | `tls_ignore_warning`             | If `tls_verify` is set to `true`, it disables any security warnings from the SSL connection.                                                                                                                                                     |
@@ -76,8 +76,7 @@ The HTTP check does not include any events.
 
 To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][10] page, not 'Integration'.
 
-**`http.can_connect`**:
-
+**http.can_connect**:<br>
 Returns `DOWN` when any of the following occur:
 
 - the request to `uri` times out
@@ -88,8 +87,7 @@ Returns `DOWN` when any of the following occur:
 
 Otherwise, returns `UP`.
 
-**`http.ssl_cert`**:
-
+**http.ssl_cert**:<br>
 The check returns:
 
 - `DOWN` if the `uri`'s certificate has already expired

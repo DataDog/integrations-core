@@ -14,13 +14,11 @@ from datetime import datetime, timedelta
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
-from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 
 from .cadvisor import CadvisorScraper
 from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin
@@ -294,7 +292,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
-            raise CheckException("Unable to detect the kubelet URL automatically.")
+            raise CheckException("Unable to detect the kubelet URL automatically: " + kubelet_conn_info.get('err', ''))
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -366,16 +364,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
-        with disable_warnings_ctx(InsecureRequestWarning, disable=not self.kubelet_credentials.verify()):
-            return requests.get(
-                url,
-                timeout=timeout,
-                verify=self.kubelet_credentials.verify(),
-                cert=self.kubelet_credentials.cert_pair(),
-                headers=self.kubelet_credentials.headers(url),
-                params={'verbose': verbose},
-                stream=stream,
-            )
+        return requests.get(
+            url,
+            timeout=timeout,
+            verify=self.kubelet_credentials.verify(),
+            cert=self.kubelet_credentials.cert_pair(),
+            headers=self.kubelet_credentials.headers(url),
+            params={'verbose': verbose},
+            stream=stream,
+        )
 
     def retrieve_pod_list(self):
         try:

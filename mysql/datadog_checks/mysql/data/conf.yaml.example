@@ -3,10 +3,10 @@
 init_config:
 
     ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ##
     ## Global custom queries can be applied to all instances using the
     ## `use_global_custom_queries` setting at the instance level.
-    ##
-    ## See `custom_queries` defined below for syntax and documentation about each option.
     #
     # global_custom_queries:
     #   - metric_prefix: mysql
@@ -25,14 +25,14 @@ init_config:
 #
 instances:
 
-    ## @param host - string - optional - default: None
+    ## @param host - string - optional
     ## MySQL host to connect to.
     ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
     ## provide a value for the sock key (below).
     #
   - host: localhost
 
-    ## @param user - string - optional - default: None
+    ## @param user - string - optional
     ## Username used to connect to MySQL.
     #
     user: datadog
@@ -42,7 +42,7 @@ instances:
     #
     pass: <PASS>
 
-    ## @param port - number - optional - default: None
+    ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.
     #
     port: 3306
@@ -53,7 +53,7 @@ instances:
     #
     # sock: <SOCK>
 
-    ## @param charset - string - optional - default: None
+    ## @param charset - string - optional
     ## Charset you want to use.
     #
     # charset: utf8
@@ -86,37 +86,32 @@ instances:
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
-    ## * 'true' - `global_custom_queries` override `custom_queries`.
-    ## * 'false' - `custom_queries` override `global_custom_queries`.
-    ## * 'extend' - `global_custom_queries` are used in addition to any `custom_queries`.
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
     #
     # use_global_custom_queries: 'true'
 
     ## @param custom_queries - list of mappings - optional
-    ## A list of custom queries used to retrieve custom metrics.
+    ## Each query must have 2 fields, and can have a third optional field:
     ##
-    ## The following fields are expected:
-    ##
-    ## query:
-    ##   The SQL query to execute. It can be a simple statement, or a multi-line script.
-    ## columns:
-    ##   A list representing each column, ordered sequentially from left to right.
-    ##   The number of columns must be equal to the number of columns returned in the `query`.
-    ##
-    ##   Each column is an object with the following fields:
-    ##
-    ##   name:
-    ##     The suffix to append to `mysql.` to form the full metric name.
-    ##     If `type` is `tag`, this column is considered a tag and applied to every metric
-    ##     collected by this query.
-    ##   type:
-    ##     The submission method (gauge, monotonic_count, etc.).
-    ##     Use the 'tag' type to tag each metric in the row with the name and value
-    ##     of the item in this column.
-    ##     Use the 'count' type to perform aggregation for queries that return multiple
-    ##     rows with the same or no tags.
-    ## tags: (optional)
-    ##   A list of tags to apply to each metric.
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column. You can
+    ##                          use the `count` type to perform aggregation for queries that
+    ##                          return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
     #
     # custom_queries:
     #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
@@ -175,19 +170,19 @@ instances:
         #
         # galera_cluster: false
 
-        ## @param extra_status_metrics - boolean - optional - default: true
-        ## Set to `false` to disable extra status metrics.
+        ## @param extra_status_metrics - boolean - optional - default: false
+        ## Set to `true` to enable extra status metrics.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
-        # extra_status_metrics: true
+        # extra_status_metrics: false
 
-        ## @param extra_innodb_metrics - boolean - optional - default: true
-        ## Set to `false` to disable extra InnoDB metrics.
+        ## @param extra_innodb_metrics - boolean - optional - default: false
+        ## Set to `true` to enable extra InnoDB metrics.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
-        # extra_innodb_metrics: true
+        # extra_innodb_metrics: false
 
         ## @param disable_innodb_metrics - boolean - optional - default: false
         ## Set to `true` only if experiencing issues with older (unsupported) versions of MySQL
@@ -210,7 +205,7 @@ instances:
         #
         # schema_size_metrics: false
 
-        ## @param extra_performance_metrics - boolean - optional - default: true
+        ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance
         ## and if the version for that instance is >= 5.6.0.
         ##
@@ -219,7 +214,7 @@ instances:
         ## high number of tables and schemas, this may have a negative impact on your database performance.
         ##
         ## Metrics provided by the options:
-        ##   - mysql.info.schema.size (per schame)
+        ##   - mysql.info.schema.size (per schema)
         ##   - mysql.performance.query_run_time.avg (per schema)
         ##   - mysql.performance.digest_95th_percentile.avg_us
         ##
@@ -227,7 +222,15 @@ instances:
         ## to have PROCESS and SELECT privileges. Take a look at the
         ## MySQL integration tile in the Datadog Web UI for further instructions.
         #
-        # extra_performance_metrics: true
+        # extra_performance_metrics: false
+
+    ## @param deep_database_monitoring - boolean - optional - default: false
+    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+    ##
+    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+    ## success manager or Datadog support.
+    #
+    # deep_database_monitoring: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -265,6 +268,8 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
@@ -279,6 +284,9 @@ instances:
 #     - type: multi_line
 #       name: new_log_start_with_date
 #       pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#     - type: multi_line
+#       name: new_logs_do_not_always_start_with_timestamp
+#       pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
 #   - type: file
 #     path: <ERROR_LOG_FILE_PATH>
 #     source: mysql

@@ -125,7 +125,6 @@ class PostfixCheck(AgentCheck):
             self.log.debug('authorized_mailq_users : %s', authorized_mailq_users)
 
         output, _, _ = get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'], self.log, False)
-
         active_count = 0
         hold_count = 0
         deferred_count = 0
@@ -144,15 +143,13 @@ class PostfixCheck(AgentCheck):
 
         -- 1 Kbytes in 2 Requests.
         '''
-
         for line in output.splitlines():
             if '*' in line:
                 active_count += 1
-                continue
-            if '!' in line:
+            elif '!' in line:
                 hold_count += 1
-                continue
-            if line[0:1].isdigit():
+            # Check the line starts with an ID
+            elif line[0:1].isalnum():
                 deferred_count += 1
 
         self.gauge(

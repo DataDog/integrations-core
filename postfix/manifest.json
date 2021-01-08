@@ -26,11 +26,15 @@
   "type": "check",
   "integration_id": "postfix",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "postfix"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

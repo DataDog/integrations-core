@@ -48,6 +48,12 @@ CONFIG = {
             'tags': list(CUSTOM_TAGS),
         }
     ],
+    'logs': [
+        {
+            "type": "docker",
+            "source": "gitlab-runner",
+        }
+    ],
 }
 
 BAD_CONFIG = {

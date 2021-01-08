@@ -1,60 +1,89 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param nodetool - string - required
-  ## command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
-  ## can be overwritten on an instance
-  ## Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
-  ## access to the nodetool installation directory for the check to work.  
-  ## The nodetool installation also sets some environment variables (e.g. `CASSANDRA_HOME` and `DSCINSTALLDIR`),
-  ## but sets them as variables only for the user doing the nodetool installation. Those environment variables should
-  ## be set as system-wide variables.
-  #
-  # nodetool: /usr/bin/nodetool
+    ## @param nodetool - string - required
+    ## The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
+    ## can be overwritten on an instance.
+    ## Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
+    ## access to the nodetool installation directory for the check to work.
+    ## The nodetool installation also sets some environment variables (for example, `CASSANDRA_HOME`
+    ## and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
+    ## You should set those environment variables as system-wide variables.
+    #
+    nodetool: nodetool
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
-    ## @param keyspaces - list of string - required
+    ## @param keyspaces - list of strings - required
     ## The list of keyspaces to monitor.
     ## An empty list results in no metrics being sent.
     #
-  - keyspaces:
-      - <KEYSPACE_1>
-      - <KEYSPACE_2>
+  - keyspaces: []
 
-    ## @param host - string - optional
+    ## @param host - string - optional - default: localhost
     ## Host that the Datadog Cassandra Nodetool check connects to.
     #
     # host: localhost
 
-    ## @param port - integer - optional
-    ## The port JMX is listening to for connections.
+    ## @param port - integer - optional - default: 7199
+    ## The port JMX listens to for connections.
     #
     # port: 7199
 
     ## @param username - string - optional
     ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
-    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra nodetool
+    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
     ## check can execute the `status` command
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
+    ## Password from the credentials needed to connect to the host. These are the credentials for the JMX server.
     ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
     ## check can execute the `status` command
     #
     # password: <PASSWORD>
 
     ## @param ssl - boolean - optional - default: false
-    ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to the JMX server.
+    ## Whether to use the --ssl parameter with nodetool to initiate a connection over SSL to the JMX server.
     #
     # ssl: false
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

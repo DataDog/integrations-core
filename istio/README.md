@@ -30,11 +30,12 @@ Add one of the configuration blocks below to your `istio.d/conf.yaml` file to st
     init_config:
     
     instances:
-      - istiod_endpoint: http://istiod.istio-system:8080/metrics
+      - istiod_endpoint: http://istiod.istio-system:15014/metrics
     ```
     
    To monitor Istio mesh metrics, continue to use `istio_mesh_endpoint`. Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].
    
+   **NOTE**: Be sure to enable [V1 Telemetry][18] for Istio `v1.6` or higher to collect mesh metrics.
    
 2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
     ```yaml
@@ -107,15 +108,19 @@ The Istio check does not include any events.
 
 For Istio versions `1.5` or higher:
 
-`istio.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+**istio.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 For all other versions of Istio:
 
-`istio.pilot.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+**istio.pilot.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
-`istio.galley.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+**istio.galley.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
-`istio.citadel.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+**istio.citadel.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ## Troubleshooting
 
@@ -145,3 +150,4 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
+[18]: https://istio.io/v1.1/docs/tasks/telemetry/

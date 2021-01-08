@@ -1,5 +1,7 @@
 parameters:
+  check: null
   repo: 'core'
+  ispr: false
 
 steps:
 - ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
@@ -14,17 +16,25 @@ steps:
   - script: ddev validate codeowners
     displayName: 'Validate codeowners'
 
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate http
+    displayName: 'Validate use of http wrapper'
+
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
 - script: ddev validate dashboards
   displayName: 'Validate dashboard definition files'
 
-- ${{ if eq(parameters.repo, 'core') }}:
-  - script: ddev validate dep
+- ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'true')) }}:
+  - script: ddev validate dep --require-base-check-version ${{ parameters.check }}
     displayName: 'Validate dependencies'
 
-- script: ddev validate manifest -i
+- ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'false')) }}:
+    - script: ddev validate dep
+      displayName: 'Validate dependencies'
+
+- script: ddev validate manifest
   displayName: 'Validate manifest files'
 
 - script: ddev validate metadata
@@ -44,3 +54,13 @@ steps:
 
 - script: ddev validate imports
   displayName: 'Validate imports'
+
+- script: ddev validate package
+  displayName: 'Validate package'
+
+- script: ddev validate jmx-metrics
+  displayName: 'Validate JMX integrations metrics.yaml'
+
+- ${{ if eq(parameters.repo, 'marketplace') }}:
+  - script: ddev validate eula
+    displayName: 'Validate EULA files'

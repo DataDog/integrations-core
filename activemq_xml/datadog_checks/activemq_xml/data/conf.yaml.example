@@ -82,7 +82,7 @@ instances:
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
     ## The SOCKS protocol is also supported, for example:
@@ -116,6 +116,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -135,10 +136,15 @@ instances:
     ##     |__ aws_host
     ##     |__ aws_service
     ##
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. 
-    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials  
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
@@ -210,6 +216,34 @@ instances:
     ## Set the path to your Kerberos key tab file.
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
 
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 signing, set the region.

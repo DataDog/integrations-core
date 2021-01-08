@@ -94,6 +94,16 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'allowed_labels': ['storageclass', 'phase'],
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
+            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
+            'kube_replicaset_owner': {
+                'metric_name': 'replicaset.count',
+                'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
+            },
+            'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
+            'kube_deployment_status_observed_generation': {
+                'metric_name': 'deployment.count',
+                'allowed_labels': ['namespace'],
+            },
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -114,8 +124,12 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_node_spec_unschedulable': self.kube_node_spec_unschedulable,
             'kube_resourcequota': self.kube_resourcequota,
             'kube_limitrange': self.kube_limitrange,
-            'kube_persistentvolume_status_phase': self.count_objects_by_tags,
+            'kube_persistentvolume_status_phase': self.sum_values_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
+            'kube_namespace_status_phase': self.sum_values_by_tags,
+            'kube_replicaset_owner': self.count_objects_by_tags,
+            'kube_job_owner': self.count_objects_by_tags,
+            'kube_deployment_status_observed_generation': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -206,6 +220,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_hpa_status_current_replicas': 'hpa.current_replicas',
                         'kube_hpa_status_condition': 'hpa.condition',
                         'kube_node_info': 'node.count',
+                        'kube_pod_info': 'pod.count',
                         'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
                         'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
                         'kube_node_status_allocatable_pods': 'node.pods_allocatable',
@@ -280,7 +295,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_node_labels',
                     'kube_pod_created',
                     'kube_pod_container_info',
-                    'kube_pod_info',
                     'kube_pod_owner',
                     'kube_pod_start_time',
                     'kube_pod_labels',
@@ -288,7 +302,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicaset_created',
                     'kube_replicationcontroller_created',
                     'kube_resourcequota_created',
-                    'kube_replicaset_owner',
                     'kube_service_created',
                     'kube_service_info',
                     'kube_service_labels',
@@ -303,7 +316,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     # _generation metrics are more metadata than metrics, no real use case for now
                     'kube_daemonset_metadata_generation',
                     'kube_deployment_metadata_generation',
-                    'kube_deployment_status_observed_generation',
+                    'kube_deployment_status_condition',
                     'kube_replicaset_metadata_generation',
                     'kube_replicaset_status_observed_generation',
                     'kube_replicationcontroller_metadata_generation',
@@ -311,8 +324,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_statefulset_metadata_generation',
                     'kube_statefulset_status_observed_generation',
                     'kube_hpa_metadata_generation',
-                    # kube_node_status_phase and kube_namespace_status_phase have no use case as a service check
-                    'kube_namespace_status_phase',
+                    # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
                     # These CronJob and Job metrics need use cases to determine how do implement
                     'kube_cronjob_status_active',
@@ -585,21 +597,23 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
 
             reason = sample[self.SAMPLE_LABELS].get('reason')
-            if reason:
+            if reason and reason.lower() in allowed_status_reasons:
                 # Filtering according to the reason here is paramount to limit cardinality
-                if reason.lower() in allowed_status_reasons:
-                    tags += self._build_tags('reason', reason, scraper_config)
-                else:
+                tags += self._build_tags('reason', reason, scraper_config)
+            else:
+                continue
+
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                if label_name == "reason":
                     continue
 
-            if 'container' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('kube_container_name', sample[self.SAMPLE_LABELS]['container'], scraper_config)
+                elif label_name == 'container':
+                    tags += self._build_tags(
+                        'kube_container_name', sample[self.SAMPLE_LABELS]['container'], scraper_config
+                    )
 
-            if 'namespace' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('namespace', sample[self.SAMPLE_LABELS]['namespace'], scraper_config)
-
-            if 'pod' in sample[self.SAMPLE_LABELS]:
-                tags += self._build_tags('pod', sample[self.SAMPLE_LABELS]['pod'], scraper_config)
+                else:
+                    tags += self._build_tags(label_name, label_value, scraper_config)
 
             self.gauge(
                 metric_name,
@@ -853,8 +867,8 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
-    def count_objects_by_tags(self, metric, scraper_config):
-        """ Count objects by allowed tags and submit counts as gauges. """
+    def sum_values_by_tags(self, metric, scraper_config):
+        """ Sum values by allowed tags and submit counts as gauges. """
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
@@ -872,9 +886,28 @@ class KubernetesState(OpenMetricsBaseCheck):
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
+    def count_objects_by_tags(self, metric, scraper_config):
+        """ Count objects by allowed tags and submit counts as gauges. """
+        config = self.object_count_params[metric.name]
+        metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
+        object_counter = Counter()
+
+        for sample in metric.samples:
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+            tags += scraper_config['custom_tags']
+            object_counter[tuple(sorted(tags))] += 1
+
+        for tags, count in iteritems(object_counter):
+            self.gauge(metric_name, count, tags=list(tags))
+
     def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
         """
-        Build a list of formated tags from `label_name` parameter. It also depend of the
+        Build a list of formatted tags from `label_name` parameter. It also depend of the
         check configuration ('keep_ksm_labels' parameter)
         """
         tags = []

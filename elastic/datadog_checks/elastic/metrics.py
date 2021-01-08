@@ -258,6 +258,22 @@ JVM_METRICS_POST_0_90_10 = {
     ),
 }
 
+JVM_METRICS_RATE = {
+    # Submit metrics as rate
+    'jvm.gc.collectors.young.rate': ('rate', 'jvm.gc.collectors.young.collection_count'),
+    'jvm.gc.collectors.young.collection_time.rate': (
+        'rate',
+        'jvm.gc.collectors.young.collection_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+    'jvm.gc.collectors.old.rate': ('rate', 'jvm.gc.collectors.old.collection_count'),
+    'jvm.gc.collectors.old.collection_time.rate': (
+        'rate',
+        'jvm.gc.collectors.old.collection_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+}
+
 JVM_METRICS_PRE_0_90_10 = {
     'jvm.gc.concurrent_mark_sweep.count': ('gauge', 'jvm.gc.collectors.ConcurrentMarkSweep.collection_count'),
     'jvm.gc.concurrent_mark_sweep.collection_time': (
@@ -492,7 +508,7 @@ NODE_SYSTEM_METRICS_POST_5 = {
 }
 
 
-def stats_for_version(version):
+def stats_for_version(version, jvm_rate=False):
     """
     Get the proper set of stats metrics for the specified ES version
     """
@@ -501,6 +517,8 @@ def stats_for_version(version):
     # JVM additional metrics
     if version >= [0, 90, 10]:
         metrics.update(JVM_METRICS_POST_0_90_10)
+        if jvm_rate:
+            metrics.update(JVM_METRICS_RATE)
     else:
         metrics.update(JVM_METRICS_PRE_0_90_10)
 

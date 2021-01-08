@@ -39,6 +39,7 @@ def test_flatten_json_timestamp(check):
 def test_plus_api(check, instance, aggregator):
     instance = deepcopy(instance)
     instance['use_plus_api'] = True
+    instance['use_plus_api_stream'] = True
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
@@ -47,6 +48,20 @@ def test_plus_api(check, instance, aggregator):
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
     assert total == 1180
+
+
+def test_plus_api_no_stream(check, instance, aggregator):
+    instance = deepcopy(instance)
+    instance['use_plus_api'] = True
+    instance['use_plus_api_stream'] = False
+    check = check(instance)
+    check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
+    check.check(instance)
+
+    total = 0
+    for m in aggregator.metric_names:
+        total += len(aggregator.metrics(m))
+    assert total == 883
 
 
 def test_nest_payload(check):

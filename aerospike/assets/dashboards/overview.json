@@ -1,1283 +1,707 @@
 {
-    "author_info": {
-        "author_name": "Datadog"
-    },
-    "board_title": "Aerospike Overview",
-    "created": "2019-12-24T20:03:21.354815+00:00",
-    "created_by": {
-        "access_role": "adm",
-        "disabled": false,
-        "email": "support@datadoghq.com",
-        "handle": "support@datadoghq.com",
-        "is_admin": true,
-        "name": "Datadog",
-        "role": null,
-        "verified": true
-    },
-    "description": "## Aerospike Dashboard\n\nThis is an example Aerospike dashboard demonstrating the metrics that the integration collects.",
-    "disableCog": false,
-    "disableEditing": false,
-    "id": 932434,
-    "isIntegration": false,
-    "isShared": false,
-    "modified": "2020-01-07T18:52:16.071628+00:00",
-    "new_id": "4iq-sen-4xc",
-    "originalHeight": 80,
-    "originalWidth": "calc(100% - 32px)",
-    "read_only": false,
+    "author_name": "Datadog",
+    "description": "## Aerospike Dashboard\n\nDatadog's integration for Aerospike gives you the visibility you need to identify performance issues and monitor failovers and events.\n\nThis dashboard shows an overview of your Aerospike infrastructure, and provides more information about records or queries.\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "free",
     "template_variables": [
         {
             "default": "*",
-            "name": "scope",
-            "prefix": null
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "default": "*",
+            "name": "namespace",
+            "prefix": "namespace"
         }
     ],
+    "title": "Aerospike Overview",
     "widgets": [
         {
-            "add_timeframe": true,
-            "board_id": "4iq-sen-4xc",
-            "height": 18,
-            "isShared": false,
-            "margin": "",
-            "scaleFactor": 1,
-            "sizing": "zoom",
-            "title": false,
-            "type": "image",
-            "url": "/static/images/saas_logos/bot/aerospike.png",
-            "width": 39,
-            "x": 0,
-            "y": 0
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/aerospike.png"
+            },
+            "id": 7753884020916534,
+            "layout": {
+                "height": 8,
+                "width": 23,
+                "x": 0,
+                "y": 0
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": null,
-            "legend_size": null,
-            "query": "avg:system.load.1{*} by {host}",
-            "scaleFactor": 1,
-            "tile_def": {
-                "group": null,
-                "noGroupHosts": true,
-                "noMetricHosts": true,
-                "notes": null,
-                "requests": [
-                    {
-                        "q": "avg:aerospike.namespace.hwm_breached{$scope} by {host}",
-                        "type": "fill"
-                    }
+            "definition": {
+                "background_color": "vivid_purple",
+                "content": "Overview",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 633318193893096,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 25,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "content": "Logs",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1687736885768436,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 157,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "core_host",
+                    "core_service"
                 ],
-                "scope": [
-                    "$scope"
-                ],
-                "style": {
-                    "fillMax": 1,
-                    "fillMin": 0,
-                    "palette": "green_to_orange",
-                    "paletteFlip": false
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:aerospike",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
                 },
-                "viz": "hostmap"
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
             },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "HWM Breached Status",
-            "type": "hostmap",
-            "width": 39,
-            "x": 0,
-            "y": 60
+            "id": 3413760249370810,
+            "layout": {
+                "height": 75,
+                "width": 42,
+                "x": 157,
+                "y": 6
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
+            "definition": {
+                "check": "aerospike.cluster_up",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "title": "Cluster up",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
             },
-            "tile_def": {
-                "autoscale": true,
+            "id": 2723979951146168,
+            "layout": {
+                "height": 8,
+                "width": 16,
+                "x": 28,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "check": "aerospike.can_connect",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "title": "Can connect",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 1626887414722286,
+            "layout": {
+                "height": 8,
+                "width": 16,
+                "x": 48,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "purple",
+                "content": "Performances",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5780037871530346,
+            "layout": {
+                "height": 5,
+                "width": 85,
+                "x": 69,
+                "y": 61
+            }
+        },
+        {
+            "definition": {
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "top(avg:aerospike.client_connections{$scope} by {host}, 10, 'mean', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                        "q": "top(sum:aerospike.namespace.objects{$host,$namespace} by {namespace}, 10, 'max', 'desc')"
                     }
                 ],
-                "viz": "timeseries"
+                "time": {},
+                "title": "Number of records by namespace (top 10) over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Client Connections Per Node",
-            "type": "timeseries",
-            "width": 39,
-            "x": 0,
-            "y": 40
+            "id": 3490162981096378,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 69,
+                "y": 15
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
+            "definition": {
+                "background_color": "vivid_purple",
+                "content": "Records",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
             },
-            "tile_def": {
-                "requests": [
-                    {
-                        "change_type": "absolute",
-                        "compare_to": "day_before",
-                        "extra_col": "",
-                        "increase_good": true,
-                        "order_by": "change",
-                        "order_dir": "desc",
-                        "q": "sum:aerospike.namespace.master_objects{$scope} by {namespace}"
-                    }
-                ],
-                "viz": "change"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Master Record 24hr Change",
-            "type": "change",
-            "width": 39,
-            "x": 122,
-            "y": 10
+            "id": 516561346724720,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 69,
+                "y": 0
+            }
         },
         {
-            "add_timeframe": true,
-            "autoscale": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "palette": "green_on_white",
-                                "value": 8
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "yellow_on_white",
-                                "value": 6
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_red",
-                                "value": 6
-                            }
-                        ],
-                        "q": "min:aerospike.cluster_size{$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Cluster Size",
-            "type": "query_value",
-            "width": 39,
-            "x": -1,
-            "y": 20
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "top(sum:aerospike.namespace.master_objects{$scope} by {namespace}, 10, 'max', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Master Records",
-            "type": "toplist",
-            "width": 39,
-            "x": 41,
-            "y": 10
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "top(sum:aerospike.namespace.tps.read{$scope} by {namespace}, 25, 'mean', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Read TPS",
-            "type": "timeseries",
-            "width": 38,
-            "x": 82,
-            "y": 59
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:aerospike.namespace.tps.write{$scope} by {namespace}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Write TPS",
-            "type": "timeseries",
-            "width": 39,
-            "x": 41,
-            "y": 59
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "top(sum:aerospike.set.objects{$scope} by {set,namespace}, 100, 'max', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Set Object Count with Replication",
-            "type": "toplist",
-            "width": 39,
-            "x": 0,
-            "y": 80
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:aerospike.namespace.master_objects{$scope} by {namespace}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Record Growth Over Time",
-            "type": "timeseries",
-            "width": 38,
-            "x": 82,
-            "y": 10
-        },
-        {
-            "add_timeframe": true,
-            "autoscale": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "precision": "2",
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:aerospike.namespace.master_objects{$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total Master Records",
-            "type": "query_value",
-            "width": 39,
-            "x": 41,
-            "y": 29
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_green",
-                                "value": 50
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow",
-                                "value": 40
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_red",
-                                "value": 40
-                            }
-                        ],
-                        "q": "top(max:aerospike.namespace.memory_free_pct{$scope} by {namespace}, 10, 'max', 'asc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Memory Free %",
-            "type": "toplist",
-            "width": 59,
-            "x": 102,
-            "y": 139
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_green",
-                                "value": 60
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow",
-                                "value": 50
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_red",
-                                "value": 50
-                            }
-                        ],
-                        "q": "top(avg:aerospike.namespace.device_free_pct{$scope} by {namespace}, 10, 'max', 'asc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk Free %",
-            "type": "toplist",
-            "width": 59,
-            "x": 102,
-            "y": 89
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_green",
-                                "value": 50
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow",
-                                "value": 20
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_red",
-                                "value": 20
-                            }
-                        ],
-                        "q": "top(avg:aerospike.namespace.device_available_pct{$scope} by {namespace}, 10, 'max', 'asc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk Space Available % (with fragmentation)",
-            "type": "toplist",
-            "width": 59,
-            "x": 41,
-            "y": 109
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "top(max:aerospike.namespace.device_used_bytes{$scope} by {host}, 50, 'max', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk/Device Used Bytes",
-            "type": "toplist",
-            "width": 59,
-            "x": 41,
-            "y": 89
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "top(sum:aerospike.namespace.device_used_bytes{$scope} by {namespace}, 10, 'mean', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk Space Growth Over Time",
-            "type": "timeseries",
-            "width": 59,
-            "x": 102,
-            "y": 109
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:aerospike.namespace.cache_read_pct{$scope} by {namespace}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Cache Reads",
-            "type": "timeseries",
-            "width": 39,
-            "x": 122,
-            "y": 59
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:aerospike.namespace.fail_record_too_big{$scope} by {namespace}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Record Too Big failures since restart",
-            "type": "timeseries",
-            "width": 39,
-            "x": 122,
-            "y": 29
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "change_type": "absolute",
-                        "compare_to": "hour_before",
-                        "extra_col": "",
-                        "increase_good": false,
-                        "order_by": "change",
-                        "order_dir": "desc",
-                        "q": "avg:aerospike.namespace.fail_key_busy{$scope} by {namespace}"
-                    }
-                ],
-                "viz": "change"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Fail Key Busy last hour",
-            "type": "change",
-            "width": 39,
-            "x": 0,
-            "y": 180
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "top(avg:aerospike.namespace.memory_used_bytes{$scope} by {namespace}, 25, 'mean', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Memory used per namespace",
-            "type": "toplist",
-            "width": 59,
-            "x": 41,
-            "y": 139
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "top(avg:aerospike.namespace.objects{$scope} by {host,namespace}, 50, 'max', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Records (Master and Replicas)",
-            "type": "toplist",
-            "width": 38,
-            "x": 82,
-            "y": 29
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "per_minute(top(avg:aerospike.namespace.expired_objects{$scope} by {namespace}, 10, 'mean', 'desc'))",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Expired objects",
-            "type": "toplist",
-            "width": 39,
-            "x": 0,
-            "y": 140
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
+            "definition": {
                 "markers": [
                     {
-                        "dim": "y",
+                        "display_type": "error dashed",
                         "label": "y = 0.01",
-                        "type": "error dashed",
-                        "val": 0.01,
                         "value": "y = 0.01"
                     },
                     {
-                        "dim": "y",
+                        "display_type": "error dashed",
                         "label": "y = -0.01",
-                        "type": "error dashed",
-                        "val": -0.01,
                         "value": "y = -0.01"
                     }
                 ],
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:aerospike.cluster_clock_skew_ms{$scope}",
+                        "display_type": "line",
+                        "q": "avg:aerospike.cluster_clock_skew_ms{$host}",
                         "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
-                "viz": "timeseries"
+                "show_legend": false,
+                "time": {},
+                "title": "Clock drift over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Clock drift",
-            "type": "timeseries",
-            "width": 39,
-            "x": 0,
-            "y": 100
+            "id": 4070848715260756,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 69,
+                "y": 67
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
+            "definition": {
+                "background_color": "vivid_purple",
+                "content": "Disk and Memory",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
             },
-            "tile_def": {
+            "id": 210385078999180,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 25,
+                "y": 31
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:aerospike.namespace.device_used_bytes{$host} by {host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Disk usage over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7114786597210948,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 25,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 50
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_yellow",
+                                "value": 20
+                            }
+                        ],
+                        "q": "top(avg:aerospike.namespace.device_available_pct{$host,$namespace} by {namespace}, 10, 'mean', 'asc')"
+                    }
+                ],
+                "time": {},
+                "title": "Disk space % left by namespace (bottom 10) over $host,$namespace ",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
+            },
+            "id": 2433867121661902,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 25,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
                 "autoscale": true,
+                "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:aerospike.xdr_timelag{$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                        "q": "sum:aerospike.namespace.master_objects{$host,$namespace}"
                     }
                 ],
-                "viz": "timeseries"
+                "time": {},
+                "title": "Master records over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "XDR Timelag (Time from Write to Ship)",
-            "type": "timeseries",
-            "width": 59,
-            "x": 41,
-            "y": 189
+            "id": 7791031123765026,
+            "layout": {
+                "height": 8,
+                "width": 15,
+                "x": 69,
+                "y": 6
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
+            "definition": {
+                "markers": [],
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:aerospike.xdr_ship_outstanding_objects{$scope}",
+                        "display_type": "line",
+                        "q": "sum:aerospike.objects{$host}",
                         "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
-                "viz": "timeseries"
+                "show_legend": false,
+                "time": {},
+                "title": "Total number of objects over $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "XDR Avg Outstanding Objects",
-            "type": "timeseries",
-            "width": 59,
-            "x": 102,
-            "y": 189
+            "id": 3326198085934762,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 69,
+                "y": 30
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
+            "definition": {
+                "markers": [],
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:aerospike.xdr_throughput{$scope}",
+                        "display_type": "line",
+                        "q": "avg:aerospike.client_connections{$host} by {host}",
                         "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
-                "viz": "timeseries"
+                "show_legend": false,
+                "time": {},
+                "title": "Client connection by $host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "XDR Throughput per second",
-            "type": "timeseries",
-            "width": 59,
-            "x": 41,
-            "y": 169
+            "id": 3729188942455594,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 25,
+                "y": 15
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
+            "definition": {
+                "markers": [],
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:aerospike.xdr_ship_latency_avg{$scope}",
+                        "display_type": "line",
+                        "q": "sum:aerospike.namespace.memory_used_bytes{$host,$namespace} by {namespace}",
                         "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
-                "viz": "timeseries"
+                "show_legend": false,
+                "time": {},
+                "title": "Memory usage over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "XDR Ship Latency in ms",
-            "type": "timeseries",
-            "width": 59,
-            "x": 102,
-            "y": 169
+            "id": 7260533328190918,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 25,
+                "y": 67
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
+            "definition": {
+                "markers": [],
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:aerospike.dlog_free_pct{$scope}",
+                        "display_type": "line",
+                        "q": "avg:aerospike.namespace.tps.read{$host,$namespace}, avg:aerospike.namespace.tps.write{$host,$namespace}",
                         "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
-                "viz": "timeseries"
+                "show_legend": false,
+                "time": {},
+                "title": "I/O throughput performance over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "dlog free percent",
-            "type": "timeseries",
-            "width": 39,
-            "x": 0,
-            "y": 120
+            "id": 1043364801462354,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 112,
+                "y": 67
+            }
         },
         {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
+            "definition": {
+                "background_color": "white",
+                "content": "Datadog's integration for Aerospike gives you the visibility you need to identify performance issues and monitor failovers and events.\n\nThis dashboard shows an overview of your Aerospike infrastructure, and provides more information about records or queries.\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
             },
-            "tile_def": {
-                "autoscale": true,
+            "id": 8592195853847688,
+            "layout": {
+                "height": 28,
+                "width": 21,
+                "x": 1,
+                "y": 10
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Check memory and disk usage per node and per namespace to keep an eye on their growth.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6244582391414486,
+            "layout": {
+                "height": 11,
+                "width": 17,
+                "x": 6,
+                "y": 61
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "top(avg:aerospike.namespace.client_proxy_complete{$scope} by {namespace}, 10, 'mean', 'desc')",
+                        "display_type": "line",
+                        "q": "sum:aerospike.namespace.fail_record_too_big{$host,$namespace}",
                         "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
                     }
                 ],
-                "viz": "timeseries"
+                "show_legend": false,
+                "time": {},
+                "title": "Transactions failed due to oversized record over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Client Proxies",
-            "type": "timeseries",
-            "width": 39,
-            "x": 0,
-            "y": 160
+            "id": 1536884807324678,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 69,
+                "y": 45
+            }
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": "4iq-sen-4xc",
-            "font_size": "18",
-            "height": 8,
-            "html": "Records",
-            "isShared": false,
-            "refresh_every": 30000,
-            "scaleFactor": 1,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": false,
-            "type": "note",
-            "width": 120,
-            "x": 41,
-            "y": 0
+            "definition": {
+                "background_color": "gray",
+                "content": "In Aerospike, a record represents the data stored in the database, inside different namespaces.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2447777031307794,
+            "layout": {
+                "height": 8,
+                "width": 26,
+                "x": 85,
+                "y": 6
+            }
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": "4iq-sen-4xc",
-            "font_size": "18",
-            "height": 8,
-            "html": "IO",
-            "isShared": false,
-            "refresh_every": 30000,
-            "scaleFactor": 1,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": false,
-            "type": "note",
-            "width": 120,
-            "x": 41,
-            "y": 49
+            "definition": {
+                "background_color": "vivid_purple",
+                "content": "Queries",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3541792879628510,
+            "layout": {
+                "height": 5,
+                "width": 42,
+                "x": 113,
+                "y": 0
+            }
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": "4iq-sen-4xc",
-            "font_size": "18",
-            "height": 8,
-            "html": "Disk",
-            "isShared": false,
-            "refresh_every": 30000,
-            "scaleFactor": 1,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": false,
-            "type": "note",
-            "width": 120,
-            "x": 41,
-            "y": 79
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:aerospike.namespace.query_reqs{$host,$namespace}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Number of query requests over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4722534793496978,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 113,
+                "y": 6
+            }
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": "4iq-sen-4xc",
-            "font_size": "18",
-            "height": 8,
-            "html": "Memory",
-            "isShared": false,
-            "refresh_every": 30000,
-            "scaleFactor": 1,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": false,
-            "type": "note",
-            "width": 120,
-            "x": 41,
-            "y": 129
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:aerospike.namespace.query_fail{$host,$namespace}, sum:aerospike.namespace.query_lookup_error{$host,$namespace}, sum:aerospike.namespace.query_agg_error{$host,$namespace}, sum:aerospike.namespace.query_udf_bg_failure{$host,$namespace}, sum:aerospike.namespace.query_fail{$host,$namespace}+sum:aerospike.namespace.query_lookup_error{$host,$namespace}+sum:aerospike.namespace.query_agg_error{$host,$namespace}+sum:aerospike.namespace.query_udf_bg_failure{$host,$namespace}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Failed queries over $host,$namespace",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4609315798922092,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 113,
+                "y": 36
+            }
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": "4iq-sen-4xc",
-            "font_size": "18",
-            "height": 8,
-            "html": "XDR",
-            "isShared": false,
-            "refresh_every": 30000,
-            "scaleFactor": 1,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": false,
-            "type": "note",
-            "width": 120,
-            "x": 41,
-            "y": 159
+            "definition": {
+                "background_color": "gray",
+                "content": "If a type of failing query is increasing, it means a specific part of Aerospike is having issues. Types listed:\n\n* `query_fail` related to internal errors,\n\n* `query_lookup_error` for secondary index query lookup,\n\n* `query_agg_error` for query aggregation,\n\n* `query_udf_bg_failure` for udf background queries.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3930085723228016,
+            "layout": {
+                "height": 14,
+                "width": 42,
+                "x": 113,
+                "y": 21
+            }
         }
     ]
 }

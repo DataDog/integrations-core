@@ -19,14 +19,17 @@ You can also create your own metrics using custom `find`, `count` and `aggregate
 
 The MongoDB check is included in the [Datadog Agent][2] package. No additional installation is necessary.
 
-### Configuration
+### Architecture
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+Most low-level metrics (uptime, storage size etc.) needs to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
 
-#### Host
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Standalone" xxx -->
+#### Standalone
+
+To configure this integration for a single node MongoDB deployment:
 
 ##### Prepare MongoDB
-
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
 ```shell
@@ -49,6 +52,94 @@ db.createUser({
 })
 ```
 
+##### Configure the agents
+You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
+<!-- xxz tab xxx -->
+<!-- xxx tab "ReplicaSet" xxx -->
+#### ReplicaSet
+
+To configure this integration for a MongoDB replica set:
+
+##### Prepare MongoDB
+In a Mongo shell, authenticate to the primary and create a read-only user for the Datadog Agent in the `admin` database:
+
+```shell
+# Authenticate as the admin user.
+use admin
+db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
+
+# On MongoDB 2.x, use the addUser command.
+db.addUser("datadog", "<UNIQUEPASSWORD>", true)
+
+# On MongoDB 3.x or higher, use the createUser command.
+db.createUser({
+  "user": "datadog",
+  "pwd": "<UNIQUEPASSWORD>",
+  "roles": [
+    { role: "read", db: "admin" },
+    { role: "clusterMonitor", db: "admin" },
+    { role: "read", db: "local" }
+  ]
+})
+```
+
+##### Configure the agents
+You need to configure one agent for each member. See below for configuration options.
+Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Sharding" xxx -->
+#### Sharding
+
+To configure this integration for a MongoDB sharded cluster:
+
+##### Prepare MongoDB
+For each shard in your cluster, connect to the primary of the replica set and create a local read-only user for the Datadog Agent in the `admin` database:
+
+```shell
+# Authenticate as the admin user.
+use admin
+db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
+
+# On MongoDB 2.x, use the addUser command.
+db.addUser("datadog", "<UNIQUEPASSWORD>", true)
+
+# On MongoDB 3.x or higher, use the createUser command.
+db.createUser({
+  "user": "datadog",
+  "pwd": "<UNIQUEPASSWORD>",
+  "roles": [
+    { role: "read", db: "admin" },
+    { role: "clusterMonitor", db: "admin" },
+    { role: "read", db: "local" }
+  ]
+})
+```
+
+Then create the same user from a mongos proxy, this also has the side effect of creating the local user in the config servers and allows direct connection.
+
+
+##### Configure the agents
+1. Configure one Agent for each member of each shard.
+2. Configure one Agent for each member of the config servers.
+3. Configure one extra Agent to connect to the cluster through a mongos proxy. This mongos can be a new one dedicated to monitoring purposes or an existing one.
+
+Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+
+### Configuration
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+To configure this check for an Agent running on a host:
+
 ##### Metric collection
 
 1. Edit the `mongo.d/conf.yaml` file in the `conf.d` folder at the root of your [Agent's configuration directory][3]. See the [sample mongo.d/conf.yaml][4] for all available configuration options.
@@ -61,6 +152,7 @@ db.createUser({
        ## Hosts to collect metrics from, as is appropriate for your deployment topology.
        ## E.g. for a standalone deployment, specify the hostname and port of the mongod instance.
        ## For replica sets or sharded clusters, see instructions in the sample conf.yaml.
+       ## Only specify multiple hosts when connecting through mongos
        #
      - hosts:
          - <HOST>:<PORT>
@@ -86,12 +178,6 @@ db.createUser({
        #
        options:
          authSource: admin
-
-       ## @param replica_check - boolean - optional - default: true
-       ## Whether or not to read from available replicas.
-       ## Disable this if any replicas are inaccessible to the Agent.
-       #
-       replica_check: true
    ```
 
 2. [Restart the Agent][5].
@@ -127,6 +213,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
@@ -137,7 +226,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `mongo`                                                                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"hosts": ["%%hosts%%:%%port%%], "username": "datadog", "password : "<UNIQUEPASSWORD>", "database": "<DATABASE>", "replica_check": true}` |
+| `<INSTANCE_CONFIG>`  | `{"hosts": ["%%host%%:%%port%%], "username": "datadog", "password : "<UNIQUEPASSWORD>", "database": "<DATABASE>"}` |
 
 ##### Trace collection
 
@@ -165,6 +254,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                       |
 | -------------- | ------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "mongodb", "service": "mongo"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -234,3 +326,4 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [15]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
 [16]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [17]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[18]: https://docs.mongodb.com/manual/core/replica-set-arbiter/#authentication

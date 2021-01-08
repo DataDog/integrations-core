@@ -7,8 +7,6 @@ services:
         volumes:
             - ./dags:/usr/local/airflow/dags
             - ./airflow.cfg:/usr/local/airflow/airflow.cfg
-        ports:
-            - "8080:8080"
         command: webserver
         healthcheck:
             test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]

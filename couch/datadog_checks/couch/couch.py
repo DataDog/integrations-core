@@ -76,12 +76,14 @@ class CouchDb(AgentCheck):
             except Exception as e:
                 raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
-            if version.startswith('1.'):
+            major_version = int(version.split('.')[0])
+            if major_version == 0:
+                raise errors.BadVersionError("Unknown version {}".format(version))
+            elif major_version <= 1:
                 self.checker = CouchDB1(self)
-            elif version.startswith('2.'):
-                self.checker = CouchDB2(self)
             else:
-                raise errors.BadVersionError("Unkown version {0}".format(version))
+                # v2 of the CouchDB check supports versions 2 and higher of Couch
+                self.checker = CouchDB2(self)
 
         self.checker.check(instance)
 
@@ -188,6 +190,7 @@ class CouchDB1:
 
 
 class CouchDB2:
+    """v2 of the CouchDB check. Supports all versions of Couch > 2.X, including Couch v3"""
 
     MAX_NODES_PER_CHECK = 20
 

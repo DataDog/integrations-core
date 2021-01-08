@@ -20,7 +20,9 @@ IndexTableMetricTag = TypedDict(
 )
 
 ColumnTableMetricTag = TypedDict(
-    'ColumnTableMetricTag', {'MIB': str, 'column': Symbol, 'table': str, 'tag': str}, total=False
+    'ColumnTableMetricTag',
+    {'MIB': str, 'column': Symbol, 'table': str, 'tag': str, 'index_transform': str},
+    total=False,
 )
 
 TableMetricTag = Union[IndexTableMetricTag, ColumnTableMetricTag]
@@ -29,7 +31,9 @@ TableMetricTag = Union[IndexTableMetricTag, ColumnTableMetricTag]
 # Metrics.
 
 OIDMetric = TypedDict(
-    'OIDMetric', {'name': str, 'OID': str, 'metric_tags': List[str], 'forced_type': str, 'options': dict}, total=False,
+    'OIDMetric',
+    {'name': str, 'OID': str, 'metric_tags': List[str], 'forced_type': str, 'options': dict},
+    total=False,
 )
 
 SymbolMetric = TypedDict(

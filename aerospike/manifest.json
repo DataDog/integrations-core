@@ -10,13 +10,13 @@
   "guid": "582de9e7-0c99-4037-9cc5-bc34612ce039",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os"
+    "linux"
   ],
   "public_title": "Datadog-Aerospike Integration",
   "categories": [
     "data store",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
@@ -30,6 +30,9 @@
       "Aerospike Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "aerospike"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

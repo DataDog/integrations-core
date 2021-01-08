@@ -2,13 +2,6 @@
 #
 init_config:
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
@@ -40,6 +33,13 @@ init_config:
     ## The timeout for connecting to services.
     #
     # timeout: 10
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
 #
@@ -105,43 +105,37 @@ instances:
     # spark_proxy_enabled: false
 
     ## @param streaming_metrics - boolean - optional - default: true
-    ## Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
+    ## Enable collection of streaming statistics.
+    ## Both Spark Streaming (DStream) and Structured Streaming (DataFrame) can be monitored but the latter requires
+    ## additional configuration. To collect Structured Streaming metrics you need to:
+    ##   1. The default MetricsServlet sink has not been disabled.
+    ##   2. Set 'spark.sql.streaming.metricsEnabled=true' in the configuration.
+    ## For more details refer to Spark official documentation:
+    ##   1. https://spark.apache.org/docs/latest/monitoring.html#metrics
+    ##   2. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#reporting-metrics-using-dropwizard 
+    ## Note that if the MetricsServlet is not serving the JSON metrics payload on the default path (/metrics/json)
+    ## you also need to set the `metricsservlet_path` option below.
     #
     # streaming_metrics: true
 
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    ## @param metricsservlet_path - string - optional - default: /metrics/json
+    ## Some Spark metrics are only available via a DropWizard sink, notably the Structured Streaming ones. The
+    ## integration fetches a JSON metrics payload from each application by leveraging the default MetricsServlet
+    ## sink which exposes metrics on the /metrics/json path by default for all applications. If you configured
+    ## the MetricsServlet to use a non-default path, you also need to update the following field to tell
+    ## the integration about it.
     #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
+    # metricsservlet_path: /metrics/json
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
+    ## @param executor_level_metrics - boolean - optional - default: false
+    ## Enable collection of more granular executor metrics.
     #
-    # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
+    # executor_level_metrics: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
     ## The SOCKS protocol is also supported, for example:
@@ -175,6 +169,7 @@ instances:
     ##   - basic
     ##     |__ username
     ##     |__ password
+    ##     |__ use_legacy_auth_encoding
     ##   - digest
     ##     |__ username
     ##     |__ password
@@ -194,10 +189,15 @@ instances:
     ##     |__ aws_host
     ##     |__ aws_service
     ##
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. 
-    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials  
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
@@ -269,6 +269,40 @@ instances:
     ## Set the path to your Kerberos key tab file.
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##
+    ##   - type: dcos_auth
+    ##     login_url (required): DC/OS login endpoint
+    ##     service_account (required): The DC/OS service account to authenticate.
+    ##     private_key_path (required): The absolute path for the DC/OS service account.
+    ##     expiration: Token expiration in seconds, defaults to 300 (5 min).
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
 
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 signing, set the region.
@@ -382,6 +416,35 @@ instances:
     #
     # persist_connections: false
 
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
@@ -389,6 +452,8 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.

@@ -4,9 +4,12 @@
 import copy
 import os
 import time
+from contextlib import contextmanager
 
+import mock
 import pymongo
 import pytest
+from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
@@ -19,7 +22,12 @@ def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(
-        compose_file, conditions=[WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5), InitializeDB()]
+        compose_file,
+        conditions=[
+            WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),
+            InitializeDB(),
+            WaitFor(create_shard_user, attempts=60, wait=5),
+        ],
     ):
         yield common.INSTANCE_BASIC
 
@@ -27,6 +35,11 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return copy.deepcopy(common.INSTANCE_BASIC)
+
+
+@pytest.fixture
+def instance_shard():
+    return copy.deepcopy(common.INSTANCE_BASIC_SHARD)
 
 
 @pytest.fixture
@@ -56,6 +69,7 @@ def instance_custom_queries():
         },
         {
             'query': {'count': 'foo', 'query': {'1': {'$type': 16}}},
+            'database': 'test',
             'metric_prefix': 'dd.custom.mongo.count',
             'tags': ['tag1:val1', 'tag2:val2'],
             'count_type': 'gauge',
@@ -70,6 +84,7 @@ def instance_custom_queries():
                 ],
                 'cursor': {},
             },
+            'database': 'test2',
             'fields': [
                 {'field_name': 'total', 'name': 'total', 'type': 'count'},
                 {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
@@ -80,6 +95,25 @@ def instance_custom_queries():
     ]
 
     return instance
+
+
+@pytest.fixture
+def instance_integration(instance_custom_queries):
+    instance = copy.deepcopy(instance_custom_queries)
+    instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top", "jumbo_chunks"]
+    instance["collections"] = ["foo", "bar"]
+    instance["collections_indexes_stats"] = True
+    return instance
+
+
+@contextmanager
+def mock_pymongo(deployment):
+    mocked_client = MockedPyMongoClient(deployment=deployment)
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
+        'pymongo.collection.Collection'
+    ), mock.patch('pymongo.command_cursor') as cur:
+        cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
+        yield
 
 
 @pytest.fixture
@@ -118,7 +152,7 @@ def setup_sharding(compose_file):
     for i, (service, command) in enumerate(service_commands, 1):
         # Wait before router init
         if i == len(service_commands):
-            time.sleep(20)
+            time.sleep(10)
 
         run_command(['docker-compose', '-f', compose_file, 'exec', '-T', service, 'sh', '-c', command], check=True)
 
@@ -149,13 +183,20 @@ class InitializeDB(LazyFunction):
             {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
         ]
 
-        db = cli['test']
-        db.foo.insert_many(foos)
-        db.bar.insert_many(bars)
-        db.orders.insert_many(orders)
+        for db_name in ['test', 'test2']:
+            db = cli[db_name]
+            db.foo.insert_many(foos)
+            db.bar.insert_many(bars)
+            db.orders.insert_many(orders)
+            db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': db_name}])
 
         auth_db = cli['authDB']
         auth_db.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
 
-        db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': 'test'}])
+
+def create_shard_user():
+    cli_shard = pymongo.mongo_client.MongoClient(
+        common.SHARD_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+    )
+    cli_shard['admin'].command("createUser", "testUser", pwd="testPass", roles=["root"])

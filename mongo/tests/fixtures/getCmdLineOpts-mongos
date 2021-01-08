@@ -1,0 +1,61 @@
+{
+    "argv": [
+        "/opt/bitnami/mongodb/bin/mongos",
+        "--config=/opt/bitnami/mongodb/conf/mongos.conf"
+    ],
+    "parsed": {
+        "config": "/opt/bitnami/mongodb/conf/mongos.conf",
+        "net": {
+            "bindIp": "*",
+            "ipv6": false,
+            "port": 27017,
+            "unixDomainSocket": {
+                "enabled": true,
+                "pathPrefix": "/opt/bitnami/mongodb/tmp"
+            }
+        },
+        "processManagement": {
+            "fork": false,
+            "pidFilePath": "/opt/bitnami/mongodb/tmp/mongodb.pid"
+        },
+        "security": {
+            "keyFile": "/opt/bitnami/mongodb/conf/keyfile"
+        },
+        "setParameter": {
+            "enableLocalhostAuthBypass": "false"
+        },
+        "sharding": {
+            "configDB": "mongo-mongodb-sharded-configsvr/mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017"
+        },
+        "systemLog": {
+            "destination": "file",
+            "logAppend": true,
+            "logRotate": "reopen",
+            "path": "/opt/bitnami/mongodb/logs/mongodb.log",
+            "quiet": false,
+            "verbosity": 0
+        }
+    },
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1601453692,
+            "i": 1
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1601453692,
+                "i": 1
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "NG0W5cd5airyDy80jIuF6IYWbB0=",
+                "$type": "00"
+            },
+            "keyId": 6857852638906548233
+        }
+    }
+}

@@ -1,0 +1,27 @@
+name: ASP.NET
+files:
+- name: aspdotnet.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      description: |
+        ASP .NET host to connect to.
+        Using "." means the current host. Using any other value, the Agent attempts to connect to a remote host.
+        Note: Remote access requires additional permissions
+      required: true
+      value:
+        type: string
+        example: .
+        default: None
+    - name: port
+      description: ASP .NET port to connect to.
+      required: true
+      value:
+        type: integer
+        example: 26379
+        default: None
+    - template: instances/default

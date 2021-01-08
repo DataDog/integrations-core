@@ -103,6 +103,7 @@
             "vsphere_datacenter:Dätacenter",
             "vsphere_datastore:Datastore 1",
             "vsphere_folder:Datacenters",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_folder:datastore",
             "vsphere_type:datastore"
@@ -116,6 +117,7 @@
             "vsphere_datacenter:Dätacenter",
             "vsphere_datastore:Datastore 2",
             "vsphere_folder:Datacenters",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_folder:datastore",
             "vsphere_type:datastore"
@@ -177,6 +179,7 @@
             "vsphere_datacenter:Dätacenter",
             "vsphere_datastore:Datastore 1",
             "vsphere_folder:Datacenters",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_folder:datastore",
             "vsphere_type:datastore"
@@ -190,6 +193,7 @@
             "vsphere_datacenter:Dätacenter",
             "vsphere_datastore:Datastore 2",
             "vsphere_folder:Datacenters",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_folder:datastore",
             "vsphere_type:datastore"
@@ -251,6 +255,7 @@
             "vsphere_datacenter:Dätacenter",
             "vsphere_datastore:Datastore 1",
             "vsphere_folder:Datacenters",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_folder:datastore",
             "vsphere_type:datastore"
@@ -264,6 +269,7 @@
             "vsphere_datacenter:Dätacenter",
             "vsphere_datastore:Datastore 2",
             "vsphere_folder:Datacenters",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_folder:datastore",
             "vsphere_type:datastore"
@@ -1598,6 +1604,7 @@
             "vsphere_folder:Datacenters",
             "vsphere_datacenter:Dätacenter",
             "vsphere_folder:datastore",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_type:datastore"
         ]
@@ -1611,6 +1618,7 @@
             "vsphere_folder:Datacenters",
             "vsphere_datacenter:Dätacenter",
             "vsphere_folder:datastore",
+            "vsphere_datastore_cluster:Datastores",
             "vsphere_folder:Datastores",
             "vsphere_type:datastore"
         ]

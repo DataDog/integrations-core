@@ -1,0 +1,399 @@
+{
+  "title": "Prisma Cloud Compute Edition - Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "image",
+        "url": "https://static.datadoghq.com/static/images/saas_logos/bot/twistlock@2x.png",
+        "sizing": "fit"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 32,
+        "height": 29
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "note",
+        "content": "Hosts",
+        "background_color": "gray",
+        "font_size": "24",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 33,
+        "y": 0,
+        "width": 43,
+        "height": 7
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:twistlock.hosts.cve.count{severity:high}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 1,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<=",
+                "value": 1,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "High CVE Hostcount",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 33,
+        "y": 9,
+        "width": 21,
+        "height": 20
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:twistlock.hosts.cve.count{severity:critical}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 1,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Critical CVE hostcount",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 55,
+        "y": 9,
+        "width": 21,
+        "height": 20
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(sum:twistlock.hosts.cve.details{*} by {cve,severity}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Top 10 CVEs reported by hosts",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 0,
+        "y": 30,
+        "width": 32,
+        "height": 49
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "note",
+        "content": "Images",
+        "background_color": "gray",
+        "font_size": "24",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 78,
+        "y": 0,
+        "width": 43,
+        "height": 7
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:twistlock.images.cve.count{severity:high}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 1,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "High CVE Image count",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 78,
+        "y": 9,
+        "width": 21,
+        "height": 20
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:twistlock.images.cve.count{severity:critical}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 1,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Critical CVE Images",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 100,
+        "y": 9,
+        "width": 21,
+        "height": 20
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "query_table",
+        "requests": [
+          {
+            "q": "sum:twistlock.hosts.cve.count{*} by {scanned_host}",
+            "aggregator": "avg",
+            "limit": 25,
+            "order": "desc",
+            "alias": "CVE Count"
+          }
+        ],
+        "custom_links": [],
+        "title": "CVE count by host",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 33,
+        "y": 46,
+        "width": 43,
+        "height": 33
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:twistlock.hosts.cve.count{severity:critical}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "sum:twistlock.hosts.cve.count{severity:high}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "sum:twistlock.hosts.cve.count{severity:medium}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "sum:twistlock.hosts.cve.count{severity:low}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "events": [
+          {
+            "q": "twistlock ",
+            "tags_execution": "and"
+          }
+        ],
+        "title": "Count of hosts by CVE severity",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 33,
+        "y": 30,
+        "width": 43,
+        "height": 15
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:twistlock.images.cve.count{severity:critical}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "sum:twistlock.images.cve.count{severity:high}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "sum:twistlock.images.cve.count{severity:medium}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "sum:twistlock.images.cve.count{severity:low}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "events": [
+          {
+            "q": "twistlock ",
+            "tags_execution": "and"
+          }
+        ],
+        "title": "Count of images by CVE severity",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 77,
+        "y": 30,
+        "width": 44,
+        "height": 15
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:twistlock.images.cve.details{*} by {scanned_image,severity}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "CVE counts by Image/Severity",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 77,
+        "y": 46,
+        "width": 44,
+        "height": 33
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 265
+}

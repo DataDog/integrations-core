@@ -114,9 +114,12 @@ def write_option(option, writer, indent='', start_list=False):
         if not required:
             if 'default' in value:
                 default = value['default']
-                if default is not None:
-                    if type(default) is str:
+                default_type = type(default)
+                if default is not None and str(default).lower() != 'none':
+                    if default_type is str:
                         writer.write(' - default: ', default)
+                    elif default_type is bool:
+                        writer.write(' - default: ', 'true' if default else 'false')
                     else:
                         writer.write(' - default: ', repr(default))
             else:
@@ -145,7 +148,8 @@ def write_option(option, writer, indent='', start_list=False):
                     if isinstance(item, str):
                         compacted_item = construct_yaml(item, default_flow_style=True, default_style='"')
                     else:
-                        compacted_item = construct_yaml(item, default_flow_style=True)
+                        # Compact examples should stay on one line to prevent weird line wraps.
+                        compacted_item = construct_yaml(item, default_flow_style=True, width=float('inf'))
 
                     option_yaml_lines.append(f'- {compacted_item.strip()}')
 

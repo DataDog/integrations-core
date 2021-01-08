@@ -7,10 +7,10 @@ import uuid
 
 import click
 import jsonschema
-import requests
 
 from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
+from ...git import content_changed
 from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
@@ -95,6 +95,10 @@ def get_manifest_schema():
                             "type": "string",
                             "description": "Relative path to the json file containing service check metadata",
                         },
+                        "metrics_metadata": {
+                            "type": "string",
+                            "description": "Relative path to the metrics metadata.csv file.",
+                        },
                         "logs": {
                             "type": "object",
                             "properties": {
@@ -144,6 +148,7 @@ def get_manifest_schema():
                             "pricing": {
                                 "description": "Available pricing options",
                                 "type": "array",
+                                "minItems": 1,
                                 "items": {
                                     "description": "Attributes of pricing plans available for this integration",
                                     "type": "object",
@@ -250,49 +255,27 @@ def is_metric_in_metadata_file(metric, check):
     Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
     """
     metadata_file = get_metadata_file(check)
+    if not os.path.isfile(metadata_file):
+        return False
     for _, row in read_metadata_rows(metadata_file):
         if row['metric_name'] == metric:
             return True
     return False
 
 
-def get_original_manifest_field(check_name, field_to_check, repo_url, manifests_from_master):
-    repo_url = f'{repo_url}/{check_name}/manifest.json'
-    if manifests_from_master.get(check_name):
-        data = manifests_from_master.get(check_name)
-    else:
-        data = requests.get(repo_url.format(check_name))
-        manifests_from_master[check_name] = data
-
-    if data.status_code == 404:
-        # This integration isn't on the provided repo yet, so it's field can change
-        return None
-
-    data.raise_for_status()
-    decoded_master = data.json()
-    return decoded_master.get(field_to_check)
-
-
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
-@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields, and extra validations')
-@click.option(
-    '--repo_url', '-r', help='The raw github URL to the base of the repository to compare manifest fields against'
-)
 @click.pass_context
-def manifest(ctx, fix, include_extras, repo_url):
+def manifest(ctx, fix):
     """Validate `manifest.json` files."""
     all_guids = {}
-    raw_gh_url = 'https://raw.githubusercontent.com/DataDog/{}/master/'
 
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
     is_marketplace = ctx.obj['repo_choice'] == 'marketplace'
-    formatted_repo_url = repo_url or raw_gh_url.format(os.path.basename(root))
     ok_checks = 0
     failed_checks = 0
     fixed_checks = 0
-    manifests_from_master = {}
 
     echo_info("Validating all manifest.json files...")
     for check_name in sorted(os.listdir(root)):
@@ -317,7 +300,7 @@ def manifest(ctx, fix, include_extras, repo_url):
             if errors:
                 file_failures += 1
                 for error in errors:
-                    display_queue.append((echo_failure, f'  {error.message}'))
+                    display_queue.append((echo_failure, f'  {"->".join(error.absolute_path)}:{error.message}'))
 
             # guid
             guid = decoded.get('guid')
@@ -464,12 +447,34 @@ def manifest(ctx, fix, include_extras, repo_url):
                 else:
                     display_queue.append((echo_failure, output))
 
+            # metrics_metadata
+            metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
+            metadata_file_exists = os.path.isfile(get_metadata_file(check_name))
+            if not metadata_in_manifest and metadata_file_exists:
+                # There is a metadata.csv file but no entry in the manifest.json
+                file_failures += 1
+                display_queue.append((echo_failure, '  metadata.csv exists but not defined in the manifest.json'))
+            elif metadata_in_manifest and not metadata_file_exists:
+                # There is an entry in the manifest.json file but the referenced csv file does not exist.
+                file_failures += 1
+                display_queue.append(
+                    (echo_failure, '  metrics_metadata in manifest.json references a non-existing file.')
+                )
+
             # metric_to_check
             metric_to_check = decoded.get('metric_to_check')
             if metric_to_check:
                 metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
                 for metric in metrics_to_check:
-                    if not is_metric_in_metadata_file(metric, check_name) and metric not in METRIC_TO_CHECK_WHITELIST:
+                    metric_integration_check_name = check_name
+                    # snmp vendor specific integrations define metric_to_check
+                    # with metrics from `snmp` integration
+                    if check_name.startswith('snmp_') and not metadata_in_manifest:
+                        metric_integration_check_name = 'snmp'
+                    if (
+                        not is_metric_in_metadata_file(metric, metric_integration_check_name)
+                        and metric not in METRIC_TO_CHECK_WHITELIST
+                    ):
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
 
@@ -497,45 +502,37 @@ def manifest(ctx, fix, include_extras, repo_url):
                 else:
                     display_queue.append((echo_failure, output))
 
-            if include_extras:
-                # Ensure attributes haven't changed
+            # is_public
+            correct_is_public = True
+            is_public = decoded.get('is_public')
+            if not isinstance(is_public, bool):
+                file_failures += 1
+                output = '  required boolean: is_public'
+
+                if fix:
+                    decoded['is_public'] = correct_is_public
+
+                    display_queue.append((echo_warning, output))
+                    display_queue.append((echo_success, f'  new `is_public`: {correct_is_public}'))
+
+                    file_failures -= 1
+                    file_fixed = True
+                else:
+                    display_queue.append((echo_failure, output))
+
+            # Ensure attributes haven't changed
+            # Skip if the manifest is a new file (i.e. new integration)
+            manifest_fields_changed = content_changed(file_glob=f"{check_name}/manifest.json")
+            if 'new file' not in manifest_fields_changed:
                 for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
-                    original_value = get_original_manifest_field(
-                        check_name, field, formatted_repo_url, manifests_from_master
-                    )
-                    output = f'Attribute `{field}` is not allowed to be modified.'
-                    if original_value and original_value != decoded.get(field):
+                    if field in manifest_fields_changed:
+                        output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
                         file_failures += 1
-                        if fix:
-                            decoded[field] = original_value
-                            file_failures -= 1
-                            file_fixed = True
-                            display_queue.append((echo_warning, output))
-                            display_queue.append((echo_success, f'  original {field}: {original_value}'))
-                        else:
-                            output += f" Please use the existing value: {original_value}"
-                            display_queue.append((echo_failure, output))
-                    elif not original_value:
-                        output = f"  No existing field on default branch: {field}"
-                        display_queue.append((echo_warning, output))
-
-                # is_public
-                correct_is_public = True
-                is_public = decoded.get('is_public')
-                if not isinstance(is_public, bool):
-                    file_failures += 1
-                    output = '  required boolean: is_public'
-
-                    if fix:
-                        decoded['is_public'] = correct_is_public
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, f'  new `is_public`: {correct_is_public}'))
-
-                        file_failures -= 1
-                        file_fixed = True
-                    else:
                         display_queue.append((echo_failure, output))
+            else:
+                display_queue.append(
+                    (echo_info, "  skipping check for changed fields: integration not on default branch")
+                )
 
             if file_failures > 0:
                 failed_checks += 1

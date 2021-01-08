@@ -1,11 +1,25 @@
 # CHANGELOG - pgbouncer
 
-## 1.10.0 / 2020-05-17
+## 1.12.1 / 2020-12-11
+
+* [Fixed] Make pgbouncer more reslient. See [#8124](https://github.com/DataDog/integrations-core/pull/8124).
+
+## 1.12.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 1.11.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add config spec. See [#7589](https://github.com/DataDog/integrations-core/pull/7589).
+* [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
+## 1.10.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Support more recent version in metadata. See [#6634](https://github.com/DataDog/integrations-core/pull/6634).
 
-## 1.9.0 / 2020-04-01
+## 1.9.0 / 2020-04-01 / Agent 7.19.0
 
 * [Added] Adding maxwait_us, total_wait_time, and avg_wait_time metrics. See [#6180](https://github.com/DataDog/integrations-core/pull/6180). Thanks [blaines](https://github.com/blaines).
 * [Added] Add pgbouncer version metadata. See [#5761](https://github.com/DataDog/integrations-core/pull/5761).
@@ -13,34 +27,34 @@
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.8.0 / 2019-12-02
+## 1.8.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
 
-## 1.7.0 / 2019-07-04
+## 1.7.0 / 2019-07-04 / Agent 6.13.0
 
 * [Added] Add logs section. See [#3961](https://github.com/DataDog/integrations-core/pull/3961).
 
-## 1.6.0 / 2019-05-14
+## 1.6.0 / 2019-05-14 / Agent 6.12.0
 
 * [Fixed] Use name instead of db to identify databases from SHOW DATABASES. See [#3459](https://github.com/DataDog/integrations-core/pull/3459). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).
 * [Added] Upgrade psycopg2-binary to 2.8.2. See [#3649](https://github.com/DataDog/integrations-core/pull/3649).
 * [Added] Adhere to code style. See [#3554](https://github.com/DataDog/integrations-core/pull/3554).
 
-## 1.5.0 / 2019-02-18
+## 1.5.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add support for database metrics. See [#2777](https://github.com/DataDog/integrations-core/pull/2777). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).
 * [Added] Support Python 3. See [#3039](https://github.com/DataDog/integrations-core/pull/3039).
 
-## 1.4.0 / 2019-01-04
+## 1.4.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Bump psycopg2-binary version to 2.7.5. See [#2799][1].
 
-## 1.3.1 / 2018-11-30
+## 1.3.1 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Failure to reconnect to PGBouncer when using database URL. See [#2587][2]. Thanks [VSpike][3].
 
-## 1.3.0 / 2018-08-07
+## 1.3.0 / 2018-08-07 / Agent 6.5.0
 
 * [Added] Add the ability to specify 'use_cached' connections in config. See [#2000][4]. Thanks [kellydunn][5].
 * [Changed] Rename dependency psycopg2 to pyscopg2-binary. See [#1842][6].

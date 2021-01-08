@@ -22,7 +22,18 @@ jobs:
     - id: files
       run: |
         git fetch origin master
-        FILES=$(git --no-pager diff --name-only HEAD...FETCH_HEAD 2>/dev/null | tr "\n" " ")
+        FILES=$(git --no-pager diff --name-only origin/master -- .in-toto | xargs echo)
         echo "::set-output name=all::$FILES"
+
+    - id: merge
+      name: Merge branch into latest master
+      env:
+        HEAD_BRANCH: ${{ github.head_ref }}
+      run: |
+        git fetch origin $HEAD_BRANCH
+        git checkout origin/master
+        git config user.name "release-hash-check"
+        git config user.email "<>"
+        git merge --no-commit --no-edit origin/$HEAD_BRANCH
 
     - run: python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}

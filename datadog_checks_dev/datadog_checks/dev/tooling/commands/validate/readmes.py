@@ -6,7 +6,7 @@ from os import path
 
 import click
 
-from ...utils import complete_valid_checks, get_root, get_valid_integrations, read_readme_file
+from ...utils import complete_valid_checks, get_root, get_valid_integrations, load_manifest, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
@@ -34,8 +34,13 @@ def readmes(ctx, integration):
     for integration in integrations:
         has_overview = False
         has_setup = False
+        has_support = False
         errors = False
         display_queue = []
+
+        # get any manifest info needed for validation
+        manifest = load_manifest(integration)
+        support_type = manifest['support']
 
         lines = read_readme_file(integration)
         for line_no, line in lines:
@@ -45,6 +50,9 @@ def readmes(ctx, integration):
 
             if "## Setup" == line.strip():
                 has_setup = True
+
+            if "## Support" == line.strip():
+                has_support = True
 
             for ext in IMAGE_EXTENSIONS:
                 if ext in line:
@@ -78,6 +86,10 @@ def readmes(ctx, integration):
         if not (has_overview and has_setup):
             errors = True
             display_queue.append((echo_failure, "     readme does not contain both an Overview and Setup H2 section"))
+
+        if not has_support and support_type == 'partner':
+            errors = True
+            display_queue.append((echo_failure, "     readme does not contain a Support H2 section"))
 
         if errors:
             failed_checks += 1

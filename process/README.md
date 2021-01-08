@@ -49,21 +49,25 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
 
 [Run the Agent's `status` subcommand][8] and look for `process` under the Checks section.
 
-## Data Collected
-
-### Metrics
+### Metrics notes
 
 **Note**: Some metrics are not available on Linux or OSX:
 
 - Process I/O metrics are **not** available on Linux or OSX since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][9]
 - `system.cpu.iowait` is not available on Windows.
 
-See [metadata.csv][10] for a list of metrics provided by this check.
-
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
 
 The `system.processes.cpu.pct` metric sent by this check is only accurate for processes that live for more 
 than 30 seconds. Do not expect its value to be accurate for shorter-lived processes.
+
+For the full list of metrics, see the [Metrics section](#metrics).
+
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Events
 
@@ -71,8 +75,7 @@ The Process Check does not include any events.
 
 ### Service Checks
 
-**process.up**:
-
+**process.up**:<br>
 The Agent submits this service check for each instance in `process.yaml`, tagging each with `process:<name>`.
 
 For an instance with no `thresholds` specified, the service check has a status of either CRITICAL (zero processes running) or OK (at least one process running).
@@ -90,9 +93,9 @@ instances:
 
 The Agent submits a `process.up` tagged `process:my_worker_process` whose status is:
 
-- CRITICAL when there are less than 1 or more than 7 worker processes
-- WARNING when there are 1, 2, 6, or 7 worker processes
-- OK when there are 3, 4, or 5 worker processes
+- `CRITICAL` when there are less than 1 or more than 7 worker processes
+- `WARNING` when there are 1, 2, 6, or 7 worker processes
+- `OK` when there are 3, 4, or 5 worker processes
 
 ## Troubleshooting
 

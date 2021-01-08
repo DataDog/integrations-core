@@ -19,6 +19,10 @@ Ensure that you have configured the following:
 - [Trello](../../ddev/configuration.md#trello) credentials
 - [Trello team mappings](../../ddev/configuration.md#card-assignment)
 
+## Before Freeze
+
+1. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
+
 ## Freeze
 
 At midnight (EDT/EST) on the Friday before QA week we freeze, at which point the release manager will release
@@ -89,14 +93,8 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle.
-
-```
-#agent-integrations status:
-1. Status of the testing: [cards left | finished]
-2. Bugs found pending to fix: [description of bugs]
-3. Fixes done pending a new RC build: [link PRs of fixes]
-```
+The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle. 
+Reply in the thread with any pending PRs meant for the next RC and update the spreadsheet `PRs included in Agent RCs`.
 
 ### Logs
 
@@ -109,3 +107,5 @@ Each release candidate is deployed in a staging environment. We observe the `WAR
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
 the same process outlined above.
+
+Notify the Agent Release Manager when code freeze ends.

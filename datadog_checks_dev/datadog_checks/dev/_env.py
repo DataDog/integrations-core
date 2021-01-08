@@ -92,14 +92,19 @@ def format_config(config):
     return config
 
 
-def replay_check_run(agent_collector, stub_aggregator):
+def replay_check_run(agent_collector, stub_aggregator, stub_agent):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
+        inventories = collector.get('inventories')
         runner = collector.get('runner', {})
         check_id = runner.get('CheckID', '')
         check_name = runner.get('CheckName', '')
 
+        if inventories:
+            for metadata in inventories.values():
+                for meta_key, meta_val in metadata.items():
+                    stub_agent.set_check_metadata(check_name, meta_key, meta_val)
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
                 raw_metric_type = data['type']
@@ -124,7 +129,16 @@ def replay_check_run(agent_collector, stub_aggregator):
             )
 
         if runner.get('LastError'):
-            errors.extend(json.loads(runner['LastError']))
+            try:
+                new_errors = json.loads(runner['LastError'])
+            except json.decoder.JSONDecodeError:
+                new_errors = [
+                    {
+                        'message': str(runner['LastError']),
+                        'traceback': '',
+                    }
+                ]
+            errors.extend(new_errors)
     if errors:
         raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))
 

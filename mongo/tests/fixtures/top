@@ -1,0 +1,815 @@
+{
+    "totals": {
+        "note": "all times in microseconds",
+        "admin.$cmd.aggregate": {
+            "total": {
+                "time": 139460,
+                "count": 328
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 0,
+                "count": 0
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 139460,
+                "count": 328
+            }
+        },
+        "admin.system.roles": {
+            "total": {
+                "time": 298,
+                "count": 1
+            },
+            "readLock": {
+                "time": 298,
+                "count": 1
+            },
+            "writeLock": {
+                "time": 0,
+                "count": 0
+            },
+            "queries": {
+                "time": 298,
+                "count": 1
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 0,
+                "count": 0
+            }
+        },
+        "admin.system.version": {
+            "total": {
+                "time": 26602,
+                "count": 9
+            },
+            "readLock": {
+                "time": 976,
+                "count": 5
+            },
+            "writeLock": {
+                "time": 25626,
+                "count": 4
+            },
+            "queries": {
+                "time": 389,
+                "count": 2
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 24898,
+                "count": 3
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 913,
+                "count": 3
+            }
+        },
+        "config.cache.chunks.config.system.sessions": {
+            "total": {
+                "time": 1036785,
+                "count": 131
+            },
+            "readLock": {
+                "time": 836731,
+                "count": 128
+            },
+            "writeLock": {
+                "time": 200054,
+                "count": 3
+            },
+            "queries": {
+                "time": 836731,
+                "count": 128
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 13497,
+                "count": 1
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 220,
+                "count": 1
+            },
+            "commands": {
+                "time": 186337,
+                "count": 1
+            }
+        },
+        "config.cache.collections": {
+            "total": {
+                "time": 2038407,
+                "count": 229
+            },
+            "readLock": {
+                "time": 2007504,
+                "count": 227
+            },
+            "writeLock": {
+                "time": 30903,
+                "count": 2
+            },
+            "queries": {
+                "time": 2007504,
+                "count": 227
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 30903,
+                "count": 2
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 0,
+                "count": 0
+            }
+        },
+        "config.cache.databases": {
+            "total": {
+                "time": 25371,
+                "count": 2
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 25371,
+                "count": 2
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 25269,
+                "count": 1
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 0,
+                "count": 0
+            }
+        },
+        "config.system.sessions": {
+            "total": {
+                "time": 5706320,
+                "count": 3577
+            },
+            "readLock": {
+                "time": 725,
+                "count": 5
+            },
+            "writeLock": {
+                "time": 5705595,
+                "count": 3572
+            },
+            "queries": {
+                "time": 613,
+                "count": 4
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 3049235,
+                "count": 1316
+            },
+            "remove": {
+                "time": 405,
+                "count": 5
+            },
+            "commands": {
+                "time": 75594,
+                "count": 3
+            }
+        },
+        "config.transaction_coordinators": {
+            "total": {
+                "time": 93,
+                "count": 1
+            },
+            "readLock": {
+                "time": 93,
+                "count": 1
+            },
+            "writeLock": {
+                "time": 0,
+                "count": 0
+            },
+            "queries": {
+                "time": 93,
+                "count": 1
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 0,
+                "count": 0
+            }
+        },
+        "config.transactions": {
+            "total": {
+                "time": 73275,
+                "count": 30
+            },
+            "readLock": {
+                "time": 45550,
+                "count": 27
+            },
+            "writeLock": {
+                "time": 80,
+                "count": 1
+            },
+            "queries": {
+                "time": 45550,
+                "count": 27
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 27725,
+                "count": 3
+            }
+        },
+        "local.oplog": {
+            "total": {
+                "time": 278,
+                "count": 1
+            },
+            "readLock": {
+                "time": 278,
+                "count": 1
+            },
+            "writeLock": {
+                "time": 0,
+                "count": 0
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 278,
+                "count": 1
+            }
+        },
+        "local.oplog.rs": {
+            "total": {
+                "time": 2635115240.0,
+                "count": 23303
+            },
+            "readLock": {
+                "time": 2635075906.0,
+                "count": 23298
+            },
+            "writeLock": {
+                "time": 39116,
+                "count": 2
+            },
+            "queries": {
+                "time": 591496,
+                "count": 20
+            },
+            "getmore": {
+                "time": 7691619,
+                "count": 1910
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 45509,
+                "count": 7
+            }
+        },
+        "local.replset.election": {
+            "total": {
+                "time": 126383,
+                "count": 18
+            },
+            "readLock": {
+                "time": 111522,
+                "count": 9
+            },
+            "writeLock": {
+                "time": 14861,
+                "count": 9
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 4741,
+                "count": 13
+            }
+        },
+        "local.replset.minvalid": {
+            "total": {
+                "time": 32,
+                "count": 1
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 32,
+                "count": 1
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 32,
+                "count": 1
+            }
+        },
+        "local.replset.oplogTruncateAfterPoint": {
+            "total": {
+                "time": 310,
+                "count": 1
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 310,
+                "count": 1
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 310,
+                "count": 1
+            }
+        },
+        "local.startup_log": {
+            "total": {
+                "time": 24,
+                "count": 1
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 24,
+                "count": 1
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 24,
+                "count": 1
+            }
+        },
+        "local.system.replset": {
+            "total": {
+                "time": 152697,
+                "count": 4
+            },
+            "readLock": {
+                "time": 136157,
+                "count": 2
+            },
+            "writeLock": {
+                "time": 16540,
+                "count": 2
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 16540,
+                "count": 2
+            }
+        },
+        "local.system.rollback.id": {
+            "total": {
+                "time": 32,
+                "count": 1
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 32,
+                "count": 1
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 0,
+                "count": 0
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 32,
+                "count": 1
+            }
+        },
+        "test.bar": {
+            "total": {
+                "time": 70838,
+                "count": 3
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 2878,
+                "count": 2
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 2878,
+                "count": 2
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 67960,
+                "count": 1
+            }
+        },
+        "test.foo": {
+            "total": {
+                "time": 21215,
+                "count": 3
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 3943,
+                "count": 2
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 3943,
+                "count": 2
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 17272,
+                "count": 1
+            }
+        },
+        "test.orders": {
+            "total": {
+                "time": 17424,
+                "count": 3
+            },
+            "readLock": {
+                "time": 0,
+                "count": 0
+            },
+            "writeLock": {
+                "time": 738,
+                "count": 2
+            },
+            "queries": {
+                "time": 0,
+                "count": 0
+            },
+            "getmore": {
+                "time": 0,
+                "count": 0
+            },
+            "insert": {
+                "time": 738,
+                "count": 2
+            },
+            "update": {
+                "time": 0,
+                "count": 0
+            },
+            "remove": {
+                "time": 0,
+                "count": 0
+            },
+            "commands": {
+                "time": 16686,
+                "count": 1
+            }
+        }
+    },
+    "ok": 1.0,
+    "$gleStats": {
+        "lastOpTime": {
+            "$timestamp": {
+                "t": 0,
+                "i": 0
+            }
+        },
+        "electionId": {
+            "$oid": "7fffffff0000000000000005"
+        }
+    },
+    "lastCommittedOpTime": {
+        "$timestamp": {
+            "t": 1600329302,
+            "i": 82
+        }
+    },
+    "$configServerState": {
+        "opTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600329302,
+                    "i": 22
+                }
+            },
+            "t": 14
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600329302,
+                "i": 82
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600329302,
+            "i": 82
+        }
+    }
+}

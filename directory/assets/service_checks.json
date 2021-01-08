@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "agent_version": "7.24.0",
+    "integration": "Directory",
+    "check": "system.disk.directory.exists",
+    "statuses": ["ok", "warning"],
+    "groups": ["host", "dir_name"],
+    "name": "Exists",
+    "description": "Returns `WARNING` if the Agent is unable to find or access the directory to monitor, `OK` otherwise."
+  }
+]

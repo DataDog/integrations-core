@@ -48,6 +48,18 @@ def backend_list_mock_v5(*args, **kwargs):
             return ensure_unicode(f.read()), u"", 0
 
 
+# Varnish >= 6.5 varnishadm output
+def backend_list_mock_v6_5(*args, **kwargs):
+    if common.VARNISHADM_PATH in args[0]:
+        fpath = os.path.join(common.FIXTURE_DIR, "backend_list_output")
+        with open(fpath) as f:
+            return ensure_unicode(f.read()), u"", 0
+    else:
+        fpath = os.path.join(common.FIXTURE_DIR, "stats_output_json_6.5")
+        with open(fpath) as f:
+            return ensure_unicode(f.read()), u"", 0
+
+
 # Varnish >= 4.x && <= 5.x Varnishadm manually set backend to sick
 def backend_manual_unhealthy_mock(*args, **kwargs):
     if common.VARNISHADM_PATH in args[0]:
@@ -163,6 +175,51 @@ def test_command_line_post_varnish5(mock_subprocess, mock_version, mock_geteuid,
     )
 
     mock_version.return_value = LooseVersion('5.0.0'), 'json'
+    mock_geteuid.return_value = 1
+
+    check.check(instance)
+    args, _ = mock_subprocess.call_args
+    assert args[0] == [
+        'sudo',
+        common.VARNISHADM_PATH,
+        '-T',
+        common.DAEMON_ADDRESS,
+        '-S',
+        common.SECRETFILE_PATH,
+        'backend.list',
+        '-p',
+    ]
+
+
+@mock.patch('datadog_checks.varnish.varnish.geteuid')
+@mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
+@mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=backend_list_mock_v6_5)
+def test_command_line_post_varnish6_5(mock_subprocess, mock_version, mock_geteuid, aggregator, check, instance):
+    """
+    Test the Varnishadm output for version >= 6.5
+    """
+    mock_version.return_value = LooseVersion('6.5.0'), 'json'
+    mock_geteuid.return_value = 0
+
+    instance['varnishadm'] = common.VARNISHADM_PATH
+    instance['secretfile'] = common.SECRETFILE_PATH
+
+    check.check(instance)
+    args, _ = mock_subprocess.call_args
+    assert args[0] == [
+        common.VARNISHADM_PATH,
+        '-T',
+        common.DAEMON_ADDRESS,
+        '-S',
+        common.SECRETFILE_PATH,
+        'backend.list',
+        '-p',
+    ]
+    aggregator.assert_service_check(
+        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'cluster:webs'], count=1
+    )
+
+    mock_version.return_value = LooseVersion('6.5.0'), 'json'
     mock_geteuid.return_value = 1
 
     check.check(instance)

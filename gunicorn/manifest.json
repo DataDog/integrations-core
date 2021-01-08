@@ -25,7 +25,7 @@
   "type": "check",
   "integration_id": "gunicorn",
   "assets": {
-     "configuration": {
+    "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
@@ -39,6 +39,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "gunicorn"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

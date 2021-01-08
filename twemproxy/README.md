@@ -12,9 +12,12 @@ The Agent's Twemproxy check is included in the [Datadog Agent][2] package, so yo
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `twemproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample twemproxy.d/conf.yaml][4] for all available configuration options:
 
@@ -28,6 +31,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5] to begin sending Twemproxy metrics to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -37,6 +43,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `twemproxy`                            |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22222"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -54,9 +63,8 @@ The Twemproxy check does not include any events.
 
 ### Service Checks
 
-`twemproxy.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to the Twemproxy stats endpoint to collect metrics, otherwise OK.
+**twemproxy.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the Twemproxy stats endpoint to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 

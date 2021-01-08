@@ -1,0 +1,390 @@
+cluster-id: '6379934502374617998'
+host-id: '11056738472355946623'
+timestamp: '2020-07-30T13:02:23.796646Z'
+cluster-health-report:
+- state: at-risk
+  resource-type: cluster
+  resource-id: '6379934502374617998'
+  resource-name: 1989ae23274a-cluster
+  code: HEALTH-CLUSTER
+  message: " Review the following critical resources: forest:Documents,database:Documents"
+  relation:
+  - type: forest
+    id: '5680420541357674164'
+    name: Documents
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+- state: critical
+  resource-type: forest
+  resource-id: '5680420541357674164'
+  resource-name: Documents
+  code: HEALTH-FOREST-UNMOUNTED
+  message: Forest unmounted.
+  relation:
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+  - type: host
+    id: '11056738472355946623'
+    name: 1989ae23274a
+- state: offline
+  resource-type: forest
+  resource-id: '5680420541357674164'
+  resource-name: Documents
+  code: HEALTH-FOREST-OFFLINE
+  message: Forest is offline.
+  relation:
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+  - type: host
+    id: '11056738472355946623'
+    name: 1989ae23274a
+- state: maintenance
+  resource-type: forest
+  resource-id: '5680420541357674164'
+  resource-name: Documents
+  code: HEALTH-FOREST-DISABLED
+  message: Forest is intentionally disabled.
+  relation:
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+  - type: host
+    id: '11056738472355946623'
+    name: 1989ae23274a
+- state: at-risk
+  resource-type: database
+  resource-id: '15840795568493088143'
+  resource-name: Documents
+  code: HEALTH-DATABASE
+  message: " Review forest:Documents"
+  relation:
+  - type: database
+    id: '6176656934243489227'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: database
+    id: '13323466423335319974'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '5680420541357674164'
+    name: Documents
+  - type: server
+    id: '16411676540799357743'
+    name: App-Services
+- state: critical
+  resource-type: database
+  resource-id: '15840795568493088143'
+  resource-name: Documents
+  code: HEALTH-DATABASE-NOT-AVAILABLE
+  message: Database is not available.
+  relation:
+  - type: database
+    id: '6176656934243489227'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: database
+    id: '13323466423335319974'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '5680420541357674164'
+    name: Documents
+  - type: server
+    id: '16411676540799357743'
+    name: App-Services
+- state: offline
+  resource-type: database
+  resource-id: '15840795568493088143'
+  resource-name: Documents
+  code: HEALTH-DATABASE-OFFLINE
+  message: Database is offline.
+  relation:
+  - type: database
+    id: '6176656934243489227'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: database
+    id: '13323466423335319974'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '5680420541357674164'
+    name: Documents
+  - type: server
+    id: '16411676540799357743'
+    name: App-Services
+- state: info
+  resource-type: database
+  resource-id: '15840795568493088143'
+  resource-name: Documents
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '6176656934243489227'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: database
+    id: '13323466423335319974'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '5680420541357674164'
+    name: Documents
+  - type: server
+    id: '16411676540799357743'
+    name: App-Services
+- state: info
+  resource-type: database
+  resource-id: '13833149331377421047'
+  resource-name: Security
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '17627953730178945761'
+    name: Security
+  - type: server
+    id: '6365804286653405395'
+    name: Admin
+- state: info
+  resource-type: database
+  resource-id: '9633692373968836175'
+  resource-name: App-Services
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '4787230593892877989'
+    name: App-Services
+  - type: server
+    id: '7827232067045712497'
+    name: HealthCheck
+  - type: server
+    id: '138220334309358682'
+    name: Manage
+- state: info
+  resource-type: database
+  resource-id: '6176656934243489227'
+  resource-name: Schemas
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '13055580246135548913'
+    name: Schemas
+- state: info
+  resource-type: database
+  resource-id: '15133931599507789262'
+  resource-name: Fab
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '6176656934243489227'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: database
+    id: '13323466423335319974'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '17617461023876764499'
+    name: Fab
+- state: info
+  resource-type: database
+  resource-id: '6827042107260979099'
+  resource-name: Modules
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '8055763697080481290'
+    name: Modules
+  - type: server
+    id: '16411676540799357743'
+    name: App-Services
+- state: info
+  resource-type: database
+  resource-id: '12769805738820513376'
+  resource-name: Last-Login
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '17012551736211247154'
+    name: Last-Login
+- state: info
+  resource-type: database
+  resource-id: '13323466423335319974'
+  resource-name: Triggers
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '13555736545897989179'
+    name: Triggers
+- state: info
+  resource-type: database
+  resource-id: '9301497564105342536'
+  resource-name: Extensions
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '9893794073889784201'
+    name: Extensions
+- state: info
+  resource-type: database
+  resource-id: '8158136237620547167'
+  resource-name: Meters
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '13833149331377421047'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '1296753946219113509'
+    name: Meters
+- state: at-risk
+  resource-type: server
+  resource-id: '16411676540799357743'
+  resource-name: App-Services
+  code: HEALTH-SERVER
+  message: " Review database:Documents"
+  relation:
+  - type: group
+    id: '5473203305447372597'
+    name: Default
+  - type: host
+    id: '11056738472355946623'
+    name: 1989ae23274a
+  - type: host
+    id: '3760332270192013838'
+    name: b4672afb4c00
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+- state: at-risk
+  resource-type: host
+  resource-id: '11056738472355946623'
+  resource-name: 1989ae23274a
+  code: HEALTH-HOST
+  message: " Review forest:Documents"
+  relation:
+  - type: forest
+    id: '4787230593892877989'
+    name: App-Services
+  - type: forest
+    id: '5680420541357674164'
+    name: Documents
+  - type: forest
+    id: '9893794073889784201'
+    name: Extensions
+  - type: forest
+    id: '17617461023876764499'
+    name: Fab
+  - type: forest
+    id: '17012551736211247154'
+    name: Last-Login
+  - type: forest
+    id: '1296753946219113509'
+    name: Meters
+  - type: forest
+    id: '8055763697080481290'
+    name: Modules
+  - type: forest
+    id: '13055580246135548913'
+    name: Schemas
+  - type: forest
+    id: '17627953730178945761'
+    name: Security
+  - type: forest
+    id: '13555736545897989179'
+    name: Triggers
+  - type: group
+    id: '5473203305447372597'
+    name: Default
+- state: at-risk
+  resource-type: forest
+  resource-id: '5680420541357674164'
+  resource-name: Documents
+  code: HEALTH-FOREST
+  message: " Review database:Documents"
+  relation:
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+  - type: host
+    id: '11056738472355946623'
+    name: 1989ae23274a
+- state: at-risk
+  resource-type: forest
+  resource-id: '5680420541357674164'
+  resource-name: Documents
+  code: HEALTH-FOREST
+  message: " Review database:Documents"
+  relation:
+  - type: group
+    id: '5473203305447372597'
+    name: Default
+  - type: database
+    id: '15840795568493088143'
+    name: Documents
+  - type: host
+    id: '11056738472355946623'
+    name: 1989ae23274a

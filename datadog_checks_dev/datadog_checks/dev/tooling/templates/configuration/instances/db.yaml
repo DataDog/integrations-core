@@ -1,0 +1,55 @@
+- name: use_global_custom_queries
+  description: |
+    How `global_custom_queries` should be used for this instance. There are 3 options:
+
+    1. true - `global_custom_queries` override `custom_queries`.
+    2. false - `custom_queries` override `global_custom_queries`.
+    3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+  value:
+    type: string
+    example: "true"
+- name: custom_queries
+  description: |
+    Each query must have 2 fields, and can have a third optional field:
+
+    1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+               Use the pipe `|` if you require a multi-line script.
+    2. columns - The list representing each column, ordered sequentially from left to right.
+                 The number of columns must equal the number of columns returned in the query.
+                 There are 2 required pieces of data:
+                   a. name - The suffix to append to `<INTEGRATION>.` to form
+                             the full metric name. If `type` is `tag`, this column is
+                             considered a tag and applied to every
+                             metric collected by this particular query.
+                   b. type - The submission method (gauge, monotonic_count, etc.).
+                             This can also be set to `tag` to tag each metric in the row
+                             with the name and value of the item in this column. You can
+                             use the `count` type to perform aggregation for queries that
+                             return multiple rows with the same or no tags.
+                 Columns without a name are ignored. To skip a column, enter:
+                   - {}
+    3. tags (optional) - A list of tags to apply to each metric.
+  value:
+    type: array
+    items:
+      type: object
+      properties:
+        - name: query
+          type: string
+        - name: columns
+          type: array
+          items:
+            type: object
+        - name: tags
+          type: array
+          items:
+            type: string
+    example:
+      - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+        columns:
+          - name: foo
+            type: tag
+          - name: event.total
+            type: gauge
+        tags:
+          - test:<INTEGRATION>

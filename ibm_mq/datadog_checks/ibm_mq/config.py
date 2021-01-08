@@ -22,22 +22,6 @@ try:
 except ImportError as e:
     pymqiException = e
     pymqi = None
-else:
-    # Since pymqi is not be available/installed on win/macOS when running e2e,
-    # we load the following constants only pymqi import succeed
-
-    DEFAULT_CHANNEL_STATUS_MAPPING = {
-        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
-        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
-    }
 
 
 log = logging.getLogger(__file__)
@@ -125,6 +109,8 @@ class IBMMQConfig:
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
 
+        self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
+
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
         self._queue_tag_re = instance.get('queue_tag_re', {})  # type: Dict[str, str]
@@ -177,4 +163,16 @@ class IBMMQConfig:
                     raise ConfigurationError("Invalid mapping: {}".format(e))
             return custom_mapping
         else:
-            return DEFAULT_CHANNEL_STATUS_MAPPING
+            # Use a default mapping. (Can't be defined at top-level because pymqi may not be installed.)
+            return {
+                pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
+                pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
+            }

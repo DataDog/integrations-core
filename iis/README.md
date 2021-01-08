@@ -10,52 +10,14 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 ### Installation
 
-The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
+The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, [install the Agent][2] on your IIS servers.
 
-1. [Install the Agent][2] on your IIS servers.
-
-2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. You can check for this using the following command:
-
-    ```text
-    Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
-    ```
-
-    This class should be installed as part of the web-http-common Windows Feature:
-
-    ```text
-    PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
-
-    Display Name                       Name               Install State
-    ------------                       ----               -------------
-    [X] Web Server (IIS)               Web-Server             Installed
-    [X] Web Server                     Web-WebServer          Installed
-    [X] Common HTTP Features           Web-Common-Http        Installed
-    [X] Default Document               Web-Default-Doc        Installed
-    [X] Directory Browsing             Web-Dir-Browsing       Installed
-    [X] HTTP Errors                    Web-Http-Errors        Installed
-    [X] Static Content                 Web-Static-Content     Installed
-    ```
-
-You can add the missing features with `install-windowsfeature web-common-http`. This requires a restart of the system to work properly.
-
-### Configuration
-
-On your IIS servers, first resync the WMI counters. On Windows <= 2003 (or equivalent), run the following in cmd.exe:
-
-```text
-C:/> winmgmt /clearadap
-C:/> winmgmt /resyncperf
-```
-
-On Windows >= 2008 (or equivalent), instead run:
-
-```text
-C:/> winmgmt /resyncperf
-```
+<!-- xxx tabs xxx -->	
+<!-- xxx tab "Host" xxx -->	
 
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -64,8 +26,6 @@ Follow the instructions below to configure this check for an Agent running on a 
 2. [Restart the Agent][6] to begin sending IIS metrics to Datadog.
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -87,6 +47,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
@@ -101,13 +64,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                            |
 | -------------- | ------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "iis", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -126,7 +90,7 @@ The IIS check does not include any events.
 ### Service Checks
 
 **iis.site_up**:<br>
-The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise returns `OK`.
+The Agent submits this service check for each configured site in `iis.yaml`. It returns `CRITICAL` if the site's uptime is zero, otherwise returns `OK`.
 
 ## Troubleshooting
 

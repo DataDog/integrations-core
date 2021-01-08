@@ -226,5 +226,19 @@ def test_stats_metrics(aggregator, instance):
     for metric, metric_type in common.QUEUE_STATS_METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags)
 
+    queue_tags_persistent = queue_tags + ['persistent:true']
+
+    for metric, metric_type in common.QUEUE_STATS_LIST_METRICS:
+        aggregator.assert_metric(
+            metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags_persistent
+        )
+
+    queue_tags_nonpersistent = queue_tags + ['persistent:false']
+
+    for metric, metric_type in common.QUEUE_STATS_LIST_METRICS:
+        aggregator.assert_metric(
+            metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags_nonpersistent
+        )
+
     assert_all_metrics(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

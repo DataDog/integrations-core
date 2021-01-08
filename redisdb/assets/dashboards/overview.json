@@ -1,0 +1,809 @@
+{
+  "title": "Redis - Overview",
+  "description": "This dashboard shows latency information and slow query counts that summarize your Redis master's performance, as well as memory metrics to help you manage your Redis instance. For more information, see:\n\n- [Datadog's Redis documentation](https://docs.datadoghq.com/integrations/redisdb/)\n\n- [How to monitor Redis performance metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/)\n\n- [Collecting Redis metrics](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n\n- [Monitoring Redis with Datadog](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:redis.info.latency_ms{$scope}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Latency",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 28,
+        "y": 71,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:redis.mem.used{$scope}",
+            "display_type": "area",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Used memory",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 76,
+        "y": 71,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:redis.mem.fragmentation_ratio{$scope}",
+            "display_type": "line"
+          }
+        ],
+        "custom_links": [],
+        "markers": [
+          {
+            "value": "y = 1.5",
+            "display_type": "error dashed",
+            "label": "Restart Redis"
+          }
+        ],
+        "title": "Fragmentation ratio",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 76,
+        "y": 39,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "per_minute(sum:redis.keys.evicted{$scope})",
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Evictions",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 76,
+        "y": 23,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:redis.clients.blocked{$scope}",
+            "aggregator": "max",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 1,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Blocked clients",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "5m"
+        },
+        "autoscale": true,
+        "precision": 0,
+        "text_align": "center"
+      },
+      "layout": {
+        "x": 45,
+        "y": 6,
+        "width": 17,
+        "height": 10
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:redis.net.clients{$scope}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Connected clients",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 124,
+        "y": 71,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:redis.keys{$scope}",
+            "aggregator": "max",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Redis keyspace",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "5m"
+        },
+        "autoscale": true,
+        "precision": 2,
+        "text_align": "left"
+      },
+      "layout": {
+        "x": 63,
+        "y": 6,
+        "width": 20,
+        "height": 10
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:redis.keys{$scope}",
+            "display_type": "area",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Keys",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 124,
+        "y": 87,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:redis.rdb.changes_since_last{$scope}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 1073741824,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<",
+                "value": 1073741824,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Unsaved changes",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "5m"
+        },
+        "autoscale": true,
+        "precision": 2,
+        "text_align": "left"
+      },
+      "layout": {
+        "x": 84,
+        "y": 6,
+        "width": 19,
+        "height": 10
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "diff(sum:redis.net.rejected{$scope})",
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Rejected connections",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 124,
+        "y": 39,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:redis.replication.master_link_down_since_seconds{$scope}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 60,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<",
+                "value": 60,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Master link down",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "5m"
+        },
+        "autoscale": false,
+        "custom_unit": "secs",
+        "precision": 0,
+        "text_align": "center"
+      },
+      "layout": {
+        "x": 104,
+        "y": 6,
+        "width": 19,
+        "height": 10
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:redis.net.commands{$scope}",
+            "display_type": "line",
+            "style": {
+              "palette": "grey"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Commands per second",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 28,
+        "y": 23,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "top( sum:redis.slowlog.micros.95percentile{$scope} by {name,command} / 1000 , 10 , 'mean' , 'desc' )",
+            "display_type": "area"
+          }
+        ],
+        "custom_links": [],
+        "title": "Slowlog",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 28,
+        "y": 55,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/saas_logos/bot/redis.png",
+        "sizing": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 27,
+        "height": 10
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "( avg:redis.stats.keyspace_hits{$scope} / ( avg:redis.stats.keyspace_hits{$scope} + avg:redis.stats.keyspace_misses{$scope} ) ) * 100",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 75,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<=",
+                "value": 89,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">=",
+                "value": 90,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Hit rate",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "5m"
+        },
+        "autoscale": false,
+        "custom_unit": "%",
+        "precision": 0,
+        "text_align": "center"
+      },
+      "layout": {
+        "x": 28,
+        "y": 6,
+        "width": 16,
+        "height": 10
+      }
+    },
+    {
+      "id": 15,
+      "definition": {
+        "type": "note",
+        "content": "[Performance metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/#toc-performance-metrics3)",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 28,
+        "y": 17,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 16,
+      "definition": {
+        "type": "note",
+        "content": "[Memory metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/#toc-memory-metrics4)",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 76,
+        "y": 17,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 17,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:redis.clients.blocked{$scope}",
+            "display_type": "line"
+          }
+        ],
+        "custom_links": [],
+        "title": "Blocked clients",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 76,
+        "y": 55,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 18,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "( avg:redis.stats.keyspace_hits{$scope} / ( avg:redis.stats.keyspace_hits{$scope} + avg:redis.stats.keyspace_misses{$scope} ) ) * 100",
+            "display_type": "line"
+          }
+        ],
+        "custom_links": [],
+        "markers": [
+          {
+            "value": "y = 100",
+            "display_type": "ok dashed",
+            "label": "Ideal hit rate"
+          },
+          {
+            "value": "y = 75",
+            "display_type": "error dashed",
+            "label": "Investigate"
+          }
+        ],
+        "title": "Cache hit rate",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 28,
+        "y": 39,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 19,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:redis.net.slaves{$scope}",
+            "display_type": "line"
+          }
+        ],
+        "custom_links": [],
+        "title": "Connected slaves",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "4h"
+        },
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 124,
+        "y": 23,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 20,
+      "definition": {
+        "type": "note",
+        "content": "[Basic activity metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/#toc-basic-activity-metrics5)",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 124,
+        "y": 17,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "id": 21,
+      "definition": {
+        "type": "note",
+        "content": "This dashboard shows latency information and slow query counts that summarize your Redis master's performance, as well as memory metrics to help you manage your Redis instance. For more information, see:\n\n- Our [official Redis documentation](https://docs.datadoghq.com/integrations/redisdb/)\n\nOr our 3-part series blog post:\n\n- Part 1: [How to monitor Redis performance metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) \n- Part 2: [Collecting Redis metrics](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/) blog post\n- Part 3: [Monitoring Redis with Datadog](https://www.datadoghq.com/blog/monitor-redis-using-datadog/) blog post\n\nClone this template dashboard to make changes and add your own graph widgets.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 27,
+        "height": 36
+      }
+    },
+    {
+      "id": 2029859795963094,
+      "definition": {
+        "type": "note",
+        "content": "Summary",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 28,
+        "y": 0,
+        "width": 95,
+        "height": 5
+      }
+    },
+    {
+      "id": 7254533646120618,
+      "definition": {
+        "type": "note",
+        "content": "Latency is the measurement of the time between a client request and the actual server response. Tracking latency is the most direct way to detect changes in Redis performance. \n\nDue to the single-threaded nature of Redis, outliers in your latency distribution could cause serious bottlenecks. A long response time for one request increases the latency for all subsequent requests.",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 0,
+        "y": 69,
+        "width": 27,
+        "height": 21
+      }
+    },
+    {
+      "id": 3234558686225570,
+      "definition": {
+        "type": "note",
+        "content": "Memory usage is a critical component of Redis performance. If used_memory exceeds the total available system memory, the operating system will begin swapping old/unused sections of memory. \n\nEvery swapped section is written to disk, severely affecting performance. Writing or reading from disk is up to 5 orders of magnitude (100,000x!) slower than writing or reading from memory (0.1 µs for memory vs. 10 ms for disk).",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "top"
+      },
+      "layout": {
+        "x": 76,
+        "y": 87,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 7164258887875332,
+      "definition": {
+        "type": "note",
+        "content": "Redis is capable of handling many active connections, with a default of 10,000 client connections available. \n\nYou can set the maximum number of connections to a different value, by altering the `maxclient` directive in redis.conf. Any new connection attempts will be disconnected if your Redis instance is currently at its maximum number of connections.",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 124,
+        "y": 55,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 8591017402331204,
+      "definition": {
+        "type": "note",
+        "content": "Redis Logs",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 172,
+        "y": 0,
+        "width": 48,
+        "height": 5
+      }
+    },
+    {
+      "id": 2256452427559188,
+      "definition": {
+        "type": "log_stream",
+        "indexes": [],
+        "query": "source:redis",
+        "sort": {
+          "column": "time",
+          "order": "desc"
+        },
+        "columns": [],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-md"
+      },
+      "layout": {
+        "x": 172,
+        "y": 6,
+        "width": 48,
+        "height": 96
+      }
+    },
+    {
+      "id": 8578713551939390,
+      "definition": {
+        "type": "note",
+        "content": "Amount of time that the master link has been down. Only available when the connection between a master and its slave has been lost. Ideally, this value should never exceed zero–the master and slave should be in constant communication to ensure the slave is not serving up stale data.\n\n",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 124,
+        "y": 6,
+        "width": 47,
+        "height": 10
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "scope",
+      "default": "*",
+      "prefix": null
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": "u5x-z5k-wnq"
+}

@@ -1,4 +1,5 @@
-{license_header}from typing import Any, Dict
+{license_header}
+from typing import Any, Dict
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics

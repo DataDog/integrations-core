@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  dd-test-sshd:
+    image: hermsi/alpine-sshd:${SSH_SERVER_IMAGE}
+    container_name: dd-test-sshd
+    ports:
+      - "8022:22"
+    environment:
+      - ROOT_PASSWORD=${ROOT_PASSWORD}
+      - ROOT_KEYPAIR_LOGIN_ENABLED=true
+    volumes:
+      - ./config/authorized_keys:/root/.ssh/authorized_keys

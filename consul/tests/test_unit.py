@@ -304,7 +304,7 @@ def test_cull_services_list():
     # Num. services < MAX_SERVICES should be no-op in absence of whitelist
     num_services = MAX_SERVICES - 1
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    assert len(consul_check._cull_services_list(services,)) == num_services
+    assert len(consul_check._cull_services_list(services)) == num_services
 
     # Num. services < MAX_SERVICES should spit out only the whitelist when one is defined
     consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
@@ -419,6 +419,7 @@ def test_network_latency_checks(aggregator):
         (
             "new config",
             {
+                'url': '',
                 'tls_cert': 'certfile',
                 'tls_private_key': 'keyfile',
                 'tls_ca_cert': 'file/path',
@@ -431,10 +432,19 @@ def test_network_latency_checks(aggregator):
                 'headers': {'X-Consul-Token': 'token', 'X-foo': 'bar'},
             },
         ),
-        ("default config", {}, {'cert': None, 'verify': True, 'headers': {'User-Agent': 'Datadog Agent/0.0.0'}}),
+        (
+            "default config",
+            {'url': ''},
+            {
+                'cert': None,
+                'verify': True,
+                'headers': {'User-Agent': 'Datadog Agent/0.0.0', 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate'},
+            },
+        ),
         (
             "legacy config",
             {
+                'url': '',
                 'client_cert_file': 'certfile',
                 'private_key_file': 'keyfile',
                 'ca_bundle_file': 'file/path',
@@ -443,7 +453,12 @@ def test_network_latency_checks(aggregator):
             {
                 'cert': ('certfile', 'keyfile'),
                 'verify': 'file/path',
-                'headers': {'X-Consul-Token': 'token', 'User-Agent': 'Datadog Agent/0.0.0'},
+                'headers': {
+                    'X-Consul-Token': 'token',
+                    'User-Agent': 'Datadog Agent/0.0.0',
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate',
+                },
             },
         ),
     ],

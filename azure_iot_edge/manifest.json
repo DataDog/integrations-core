@@ -1,0 +1,43 @@
+{
+  "display_name": "Azure IoT Edge",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "azure_iot_edge",
+  "metric_prefix": "azure.iot_edge.",
+  "metric_to_check": "azure.iot_edge.edge_agent.iotedged_uptime_seconds",
+  "creates_events": false,
+  "short_description": "Monitor the health and performance of an Azure IoT Edge device and modules.",
+  "guid": "9eafeab9-daf4-4f54-befc-fcc623ec9c1b",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Azure IoT Edge Integration",
+  "categories": [
+    "azure",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "azure-iot-edge",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {
+      "Disk usage": "assets/monitors/disk_usage.json",
+      "Memory usage": "assets/monitors/memory_usage.json",
+      "IoT Hub syncs": "assets/monitors/iothub_syncs.json",
+      "Edge Hub retries": "assets/monitors/edgehub_retries.json"
+    },
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "azure.iot_edge"
+    },
+    "metrics_metadata": "metadata.csv"
+  }
+}

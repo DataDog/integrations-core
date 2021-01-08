@@ -4,8 +4,8 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/default
       - template: init_config/http
+      - template: init_config/default
   - template: instances
     options:
       - name: spark_url
@@ -75,16 +75,64 @@ files:
           type: boolean
           example: false
       - name: streaming_metrics
-        description: Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
+        description: |
+          Enable collection of streaming statistics.
+          Both Spark Streaming (DStream) and Structured Streaming (DataFrame) can be monitored but the latter requires
+          additional configuration. To collect Structured Streaming metrics you need to:
+            1. The default MetricsServlet sink has not been disabled.
+            2. Set 'spark.sql.streaming.metricsEnabled=true' in the configuration.
+          For more details refer to Spark official documentation:
+            1. https://spark.apache.org/docs/latest/monitoring.html#metrics
+            2. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#reporting-metrics-using-dropwizard  /noqa
+          Note that if the MetricsServlet is not serving the JSON metrics payload on the default path (/metrics/json)
+          you also need to set the `metricsservlet_path` option below.
         value:
           type: boolean
           example: true
-      - template: instances/default
+      - name: metricsservlet_path
+        description: |
+          Some Spark metrics are only available via a DropWizard sink, notably the Structured Streaming ones. The
+          integration fetches a JSON metrics payload from each application by leveraging the default MetricsServlet
+          sink which exposes metrics on the /metrics/json path by default for all applications. If you configured
+          the MetricsServlet to use a non-default path, you also need to update the following field to tell
+          the integration about it.
+        value:
+          type: string
+          example: /metrics/json
+      - name: executor_level_metrics
+        description: Enable collection of more granular executor metrics.
+        value:
+          type: boolean
+          example: false
       - template: instances/http
+        overrides:
+          auth_token.description: |
+            This allows for the use of authentication information from dynamic sources.
+            Both a reader and writer must be configured.
+
+            The available readers are:
+
+              - type: file
+                path (required): The absolute path for the file to read from.
+                pattern: A regular expression pattern with a single capture group used to find the
+                         token rather than using the entire file, for example: Your secret is (.+)
+
+              - type: dcos_auth
+                login_url (required): DC/OS login endpoint
+                service_account (required): The DC/OS service account to authenticate.
+                private_key_path (required): The absolute path for the DC/OS service account.
+                expiration: Token expiration in seconds, defaults to 300 (5 min).
+
+            The available writers are:
+
+              - type: header
+                name (required): The name of the field, for example: Authorization
+                value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+                placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+      - template: instances/default
   - template: logs
     example:
     - type: file
       path: /var/log/spark/*.log
       source: spark
       service: <SERVICE_NAME>
-

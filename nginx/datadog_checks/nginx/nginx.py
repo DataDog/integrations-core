@@ -78,7 +78,7 @@ class Nginx(AgentCheck):
 
         tags = instance.get('tags', [])
 
-        url, use_plus_api, plus_api_version = self._get_instance_params(instance)
+        url, use_plus_api, use_plus_api_stream, plus_api_version = self._get_instance_params(instance)
 
         if not use_plus_api:
             response, content_type, version = self._get_data(instance, url)
@@ -98,8 +98,24 @@ class Nginx(AgentCheck):
 
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
-            for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
+            if use_plus_api_stream:
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS))
+            else:
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
+
+            for endpoint, nest in plus_api_chain_list:
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
+
+                if endpoint == 'nginx':
+                    try:
+                        if isinstance(response, dict):
+                            version_plus = response.get('version')
+                        else:
+                            version_plus = json.loads(response).get('version')
+                        self._set_version_metadata(version_plus)
+                    except Exception as e:
+                        self.log.debug("Couldn't submit nginx version: %s", e)
+
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
 
@@ -136,10 +152,6 @@ class Nginx(AgentCheck):
                 func = funcs[metric_type]
                 func(name, value, tags)
 
-                # for vts and plus versions
-                if name == 'nginx.version':
-                    self._set_version_metadata(value)
-
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
@@ -148,9 +160,10 @@ class Nginx(AgentCheck):
         url = instance.get('nginx_status_url')
 
         use_plus_api = instance.get("use_plus_api", False)
+        use_plus_api_stream = instance.get("use_plus_api_stream", True)
         plus_api_version = str(instance.get("plus_api_version", 2))
 
-        return url, use_plus_api, plus_api_version
+        return url, use_plus_api, use_plus_api_stream, plus_api_version
 
     def _get_data(self, instance, url):
         r = self._perform_service_check(instance, url)

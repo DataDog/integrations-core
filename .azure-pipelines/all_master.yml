@@ -18,3 +18,4 @@ jobs:
       restoreKeys: |
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
+      ispr: false

@@ -69,9 +69,9 @@ class IIS(PDHBaseCheck):
                 continue
 
             try:
-                if counter._class_name == 'Web Service':
+                if counter.english_class_name == 'Web Service':
                     self.collect_sites(dd_name, metric_func, counter, counter_values)
-                elif counter._class_name == 'APP_POOL_WAS':
+                elif counter.english_class_name == 'APP_POOL_WAS':
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
 
             except Exception as e:
@@ -93,6 +93,13 @@ class IIS(PDHBaseCheck):
                 # Collect all if not selected
                 and self._sites
             ):
+                self.log.debug(
+                    "Skipping site metric %s: single instance: %s, site name: %s, counter: %s",
+                    dd_name,
+                    str(is_single_instance),
+                    site_name,
+                    str(counter),
+                )
                 continue
 
             tags = self._get_tags(namespace, site_name, is_single_instance)
@@ -122,6 +129,13 @@ class IIS(PDHBaseCheck):
                 # Collect all if not selected
                 and self._app_pools
             ):
+                self.log.debug(
+                    "Skipping app pool metric %s: single instance: %s, site name: %s, counter: %s",
+                    dd_name,
+                    str(is_single_instance),
+                    app_pool_name,
+                    str(counter),
+                )
                 continue
 
             tags = self._get_tags(namespace, app_pool_name, is_single_instance)

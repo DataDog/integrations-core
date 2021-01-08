@@ -1404,7 +1404,7 @@ class OpenStackCheck(AgentCheck):
     # For attaching tags to hosts that are not the host running the agent
 
     def get_external_host_tags(self):
-        """ Returns a list of tags for every guest server that is detected by the OpenStack
+        """Returns a list of tags for every guest server that is detected by the OpenStack
         integration.
         List of pairs (hostname, list_of_tags)
         """
