@@ -8,7 +8,7 @@ Dell Inc. is a technology company that develops computers and network hardware f
 * Dell iDRAC
 * Dell EMC Isilon
 
-For a complete list of all the metrics collected from Dell devices, see the [Network Device Monitoring documentation][1]
+For a complete list of all the metrics collected from Dell devices, see the [Network Device Monitoring documentation][1].
 
 ## Setup
 
