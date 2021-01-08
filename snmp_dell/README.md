@@ -26,7 +26,7 @@ Snmp Dell does not include any service checks.
 
 ### Events
 
-Snmp Dell does not include any events.
+The Dell integration does not include any events.
 
 ## Further Reading
 
