@@ -31,7 +31,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 2. Make sure your SQL Server instance is listening on a specific fixed port. By default, named instances and SQL Server Express are configured for dynamic ports. See [Microsoft's documentation][15] for more details.
 
-3. (Required for AlwaysOn metrics)  An additional permission needs to be granted in order to gather AlwaysOn metrics:
+3. (Required for AlwaysOn metrics)  An additional permission needs to be granted to gather AlwaysOn metrics:
 
     ```text
         GRANT VIEW ANY DEFINITION to datadog;
