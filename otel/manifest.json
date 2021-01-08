@@ -1,5 +1,5 @@
 {
-  "display_name": "OpenTelemetry",
+  "display_name": "OTel",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "OTel",
