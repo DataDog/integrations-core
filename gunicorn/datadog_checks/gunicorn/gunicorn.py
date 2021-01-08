@@ -130,12 +130,14 @@ class GUnicornCheck(AgentCheck):
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
         if len(master_procs) == 0:
             # process not found, it's dead.
+            msg = "No gunicorn process with name %s found" % name
             self.service_check(
                 self.SVC_NAME,
                 AgentCheck.CRITICAL,
                 tags=['app:' + name] + tags,
-                message="No gunicorn process with name %s found" % name,
+                message=msg,
             )
+            self.warning(msg)
         self.log.debug("There exist %s master process(es) with the name %s", len(master_procs), name)
         return master_procs
 
