@@ -175,6 +175,39 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     assert len(aggregator._events) == 0
 
 
+def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregator, check):
+    for query in instance_integration['custom_queries']:
+        query['run_on_secondary'] = True
+    instance_integration['is_arbiter'] = True
+    mongo_check = check(instance_integration)
+    mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
+
+    with mock_pymongo("replica-arbiter-in-shard"):
+        mongo_check.check(None)
+
+    replica_tags = [
+        'replset_name:mongo-mongodb-sharded-shard-0',
+        'replset_state:arbiter',
+        'sharding_cluster_role:shardsvr',
+    ]
+    metrics_categories = ['serverStatus', 'replset-arbiter']
+
+    _assert_metrics(aggregator, metrics_categories, replica_tags)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )
+    assert len(aggregator._events) == 0
+
+
 def test_integration_configsvr_primary(instance_integration, aggregator, check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
@@ -387,6 +420,35 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
     ]
     if collect_custom_queries:
         metrics_categories.append('custom-queries')
+
+    _assert_metrics(aggregator, metrics_categories, replica_tags)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )
+    assert len(aggregator._events) == 0
+
+
+def test_integration_replicaset_arbiter(instance_integration, aggregator, check):
+    for query in instance_integration['custom_queries']:
+        query['run_on_secondary'] = True
+    instance_integration['is_arbiter'] = True
+    mongo_check = check(instance_integration)
+    mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
+
+    with mock_pymongo("replica-arbiter"):
+        mongo_check.check(None)
+
+    replica_tags = ['replset_name:replset', 'replset_state:arbiter']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     _assert_metrics(aggregator, metrics_categories, replica_tags)
 

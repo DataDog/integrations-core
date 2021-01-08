@@ -193,8 +193,11 @@ class MongoDb(AgentCheck):
         elif isinstance(deployment, MongosDeployment):
             tags.append('sharding_cluster_role:mongos')
 
-        dbnames = api.list_database_names()
-        self.gauge('mongodb.dbs', len(dbnames), tags=tags)
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            dbnames = []
+        else:
+            dbnames = api.list_database_names()
+            self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
         self.refresh_collectors(api.deployment_type, mongo_version, dbnames, tags)
         for collector in self.collectors:

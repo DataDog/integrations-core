@@ -21,6 +21,9 @@ files:
           - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
 
         If the port number is not specified, the default port 27017 is used.
+
+        Even if the host is an arbiter node, you still need to provide authentication credentials
+        as the check will create an additional connection to the primary in this specific case.
       value:
         example:
         - <HOST_1>

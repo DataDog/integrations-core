@@ -9,12 +9,28 @@ from contextlib import contextmanager
 import mock
 import pymongo
 import pytest
+from datadog_test_libs.utils.mock_dns import mock_local
 from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
 
 from . import common
+
+HOSTNAME_TO_PORT_MAPPING = {
+    "shard01a": (
+        '127.0.0.1',
+        27018,
+    ),
+    "shard01b": (
+        '127.0.0.1',
+        27019,
+    ),
+    "shard01c": (
+        '127.0.0.1',
+        27020,
+    ),
+}
 
 
 @pytest.fixture(scope='session')
@@ -29,7 +45,12 @@ def dd_environment():
             WaitFor(create_shard_user, attempts=60, wait=5),
         ],
     ):
-        yield common.INSTANCE_BASIC
+        yield common.INSTANCE_BASIC, {'custom_hosts': get_custom_hosts()}
+
+
+def get_custom_hosts():
+    custom_hosts = [(host, '127.0.0.1') for host in HOSTNAME_TO_PORT_MAPPING]
+    return custom_hosts
 
 
 @pytest.fixture
@@ -106,6 +127,12 @@ def instance_integration(instance_custom_queries):
     return instance
 
 
+@pytest.fixture(scope='session', autouse=True)
+def mock_local_tls_dns():
+    with mock_local(HOSTNAME_TO_PORT_MAPPING):
+        yield
+
+
 @contextmanager
 def mock_pymongo(deployment):
     mocked_client = MockedPyMongoClient(deployment=deployment)
@@ -133,6 +160,11 @@ def instance_1valid_and_1invalid_custom_queries():
     ]
 
     return instance
+
+
+@pytest.fixture
+def instance_arbiter():
+    return common.INSTANCE_ARBITER.copy()
 
 
 @pytest.fixture

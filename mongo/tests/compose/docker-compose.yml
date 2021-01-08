@@ -30,16 +30,16 @@ services:
       - ./scripts:/scripts
   shard01b:
     image: mongo:$MONGO_VERSION
-    command: mongod --port 27018 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --oplogSize 16
+    command: mongod --port 27019 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --oplogSize 16
     ports:
-    - "27019:27018"
+    - "27019:27019"
     volumes:
       - ./scripts:/scripts
   shard01c:
     image: mongo:$MONGO_VERSION
-    command: mongod --port 27018 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --oplogSize 16
+    command: mongod --port 27020 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --oplogSize 16
     ports:
-    - "27020:27018"
+    - "27020:27020"
     volumes:
     - ./scripts:/scripts
   shard02a:
