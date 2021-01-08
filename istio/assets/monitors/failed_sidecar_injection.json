@@ -1,0 +1,30 @@
+{
+	"name": "[Istio] Increased number of failed sidecar injection requests",
+	"type": "metric alert",
+	"query": "sum(last_5m):avg:istio.sidecar_injection.requests_total{*}.as_count() - avg:istio.sidecar_injection.success_total{*}.as_count() > 3",
+	"message": "Monitor Istio for failed sidecar injection requests. Increased failed requests may signify other issues in your Istio mesh and requires attention.",
+	"tags": [
+      "integration:istio"
+    ],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 3,
+			"warning": 1
+		}
+	},
+	"priority": null,
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when there is more than 1 failed sidecar injection requesst in your Istio integration."
+	}
+}
+}
