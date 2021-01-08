@@ -1,0 +1,18 @@
+----Queue ID----- --Size-- ---Arrival Time---- --Sender/Recipient------
+3xWyLP6Nmfz23fk        367 Tue Aug 15 16:17:33 root@postfix.devnull.home
+                                                    (deferred transport)
+                                                    alice@crypto.io
+
+3xWyD86NwZz23ff!       358 Tue Aug 15 16:12:08 root@postfix.devnull.home
+                                                    (deferred transport)
+                                                    bob@crypto.io
+
+TxWyD86NwZz23ff*       358 Tue Aug 15 16:11:08 root@postfix.devnull.home
+                                                    (deferred transport)
+                                                    bob@crypto.io
+
+TxWyD86NwZz23ff        358 Tue Aug 15 16:01:08 root@postfix.devnull.home
+                                                    (deferred transport)
+                                                    bob@crypto.io
+
+-- 1 Kbytes in 4 Requests.

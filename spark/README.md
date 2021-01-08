@@ -135,7 +135,7 @@ To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install t
 
 For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
 
-For Agent v6/7, create the '/etc/datadog-agent/conf.d/spark.d/conf.yaml' configuration file with the [proper values on each EMR node] [11]. 
+For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configuration file with the [proper values on each EMR node] [11]. 
 
 
 ## Further Reading

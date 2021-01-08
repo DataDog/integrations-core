@@ -9,6 +9,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 PORT1 = 27017
 PORT2 = 27018
+PORT_ARBITER = 27020
 MAX_WAIT = 150
 
 MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
@@ -47,3 +48,5 @@ INSTANCE_USER = {
     'password': 'testPass2',
 }
 INSTANCE_USER_LEGACY_CONFIG = {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
+
+INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)], 'username': 'testUser', 'password': 'testPass'}
