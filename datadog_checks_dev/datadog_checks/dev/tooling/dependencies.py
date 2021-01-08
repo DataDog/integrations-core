@@ -50,7 +50,7 @@ def load_base_check(req_file, dependencies, errors, check_name=None):
             try:
                 dep = line.split(' = ')[1]
                 req = Requirement(dep.strip("'"))
-            except InvalidRequirement as e:
+            except (IndexError, InvalidRequirement) as e:
                 errors.append(f'File `{req_file}` has an invalid base check dependency: `{line}`\n{e}')
                 return
 
