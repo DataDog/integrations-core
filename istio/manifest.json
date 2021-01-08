@@ -32,7 +32,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {
-      "Failed sidecar injections": "assets/monitors/monitor_deployments_replicas.json"
+      "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
     },
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json",
