@@ -128,7 +128,7 @@ class MySql(AgentCheck):
                 self._put_qcache_stats()
 
                 # Custom queries
-                self._query_manager.execute()
+                self._query_manager.execute(extra_tags=tags)
 
             except Exception as e:
                 self.log.exception("error!")
