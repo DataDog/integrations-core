@@ -31,24 +31,24 @@ def _build_device_ip(container_ip, last_digit='1'):
     return snmp_device
 
 
-@common.python_autodiscovery_only
-def test_e2e_python(dd_agent_check):
-    metrics = common.SUPPORTED_METRIC_TYPES
-    config = common.generate_container_instance_config(metrics)
-    aggregator = dd_agent_check(config, rate=True)
-    tags = ['snmp_device:{}'.format(config['instances'][0]['ip_address']), 'loader:python']
-
-    # Test metrics
-    for metric in common.SUPPORTED_METRIC_TYPES:
-        metric_name = "snmp." + metric['name']
-        aggregator.assert_metric(metric_name, tags=tags)
-    aggregator.assert_metric('snmp.sysUpTimeInstance')
-
-    # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
-
-    common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+# @common.python_autodiscovery_only
+# def test_e2e_python(dd_agent_check):
+#     metrics = common.SUPPORTED_METRIC_TYPES
+#     config = common.generate_container_instance_config(metrics)
+#     aggregator = dd_agent_check(config, rate=True)
+#     tags = ['snmp_device:{}'.format(config['instances'][0]['ip_address']), 'loader:python']
+#
+#     # Test metrics
+#     for metric in common.SUPPORTED_METRIC_TYPES:
+#         metric_name = "snmp." + metric['name']
+#         aggregator.assert_metric(metric_name, tags=tags)
+#     aggregator.assert_metric('snmp.sysUpTimeInstance')
+#
+#     # Test service check
+#     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+#
+#     common.assert_common_metrics(aggregator)
+#     aggregator.all_metrics_asserted()
 
 
 @common.agent_autodiscovery_only
