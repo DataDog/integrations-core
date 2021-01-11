@@ -1,5 +1,10 @@
 # CHANGELOG - haproxy
 
+## 2.14.2 / 2021-01-11
+
+* [Fixed] Fix typo for ssl reuse metric. See [#8203](https://github.com/DataDog/integrations-core/pull/8203). Thanks [wdauchy](https://github.com/wdauchy).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 2.14.1 / 2020-11-24
 
 * [Fixed] Increase robustness of parsing of Unix socket responses in legacy implementation. See [#8080](https://github.com/DataDog/integrations-core/pull/8080).
