@@ -178,7 +178,10 @@ def dd_agent_check(request, aggregator, datadog_agent):
                 if value is not True:
                     check_command.append(str(value))
 
+        print("check_command:", " ".join(check_command))
         result = run_command(check_command, capture=True)
+        print("result.stdout:", result.stdout)
+        print("result.stdout:", result.stdout)
 
         matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
