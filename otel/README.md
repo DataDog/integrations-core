@@ -5,6 +5,8 @@
 The OpenTelemetry Collector is a vendor-agnostic agent process that, via the Datadog exporter, exports telemetry data directly to Datadog servers. 
 It reports metrics and traces from instrumented applications and general system metrics.
 
+Host metrics will be shown in the default dashboard, but you can send arbitrary metrics to Datadog using the OpenTelemetry Collector. All metrics reported by the Collector will be namespaced under `otel.` to prevent collisions with metrics from other Datadog integrations.
+
 ## Setup
 
 ### Installation
@@ -31,7 +33,7 @@ receivers:
       filesystem:
       memory:
       network:
-      swap:
+      paging:
       process:
 
 processors:
@@ -70,7 +72,7 @@ Everything is ready. Begin running and processing data.
 
 ### Metrics
 
-The following metrics are provided by this check, if you're using the `hostmetrics` receiver as in the sample configuration above.
+The following metrics are provided by this check, if you're using the `hostmetrics` receiver as in the sample configuration above. You can send arbitrary metrics with other OpenTelemetry Collector components.
 
 Different groups of metrics can be enabled and customized by following the [hostmetrics receiver instructions][7].
 CPU and disk metrics are not available on macOS.
