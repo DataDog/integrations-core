@@ -187,7 +187,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
-            assert "loader:core" in stub.tags
+            assert "loader:core" in stub.tags, "All metrics: %s" % aggregator_metrics
             if stub.name in METRIC_TO_SKIP:
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
