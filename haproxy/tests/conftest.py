@@ -11,17 +11,17 @@ from copy import deepcopy
 import mock
 import pytest
 import requests
+from packaging import version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
-from .common import ENDPOINT_PROMETHEUS, HERE, INSTANCE
+from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, HAPROXY_VERSION, HAPROXY_VERSION_RAW, HERE, INSTANCE
 from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
     CONFIG_TCPSOCKET,
-    HAPROXY_VERSION,
     PASSWORD,
     STATS_URL,
     STATS_URL_OPEN,
@@ -34,7 +34,7 @@ log = logging.getLogger('test_haproxy')
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    if os.environ['HAPROXY_LEGACY'] == 'true':
+    if HAPROXY_LEGACY == 'true':
         with legacy_environment() as e:
             yield e
     else:
@@ -75,7 +75,7 @@ def legacy_environment():
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
                 env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
-                if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '6']:
+                if HAPROXY_VERSION >= version.parse('1.6'):
                     env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
                 env['HAPROXY_SOCKET_DIR'] = temp_dir
 
@@ -157,23 +157,22 @@ def haproxy_mock_enterprise_version_info():
 @pytest.fixture(scope="session")
 def version_metadata():
     # some version has release info
-    parts = HAPROXY_VERSION.split('-')
-    major, minor, patch = parts[0].split('.')
+    parts = HAPROXY_VERSION_RAW.split('-')
     if len(parts) > 1:
         release = parts[1]
         return {
             'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': patch,
+            'version.major': str(HAPROXY_VERSION.major),
+            'version.minor': str(HAPROXY_VERSION.minor),
+            'version.patch': str(HAPROXY_VERSION.micro),
             'version.raw': mock.ANY,
             'version.release': release,
         }
     else:
         return {
             'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': patch,
+            'version.major': str(HAPROXY_VERSION.major),
+            'version.minor': str(HAPROXY_VERSION.minor),
+            'version.patch': str(HAPROXY_VERSION.micro),
             'version.raw': mock.ANY,
         }
