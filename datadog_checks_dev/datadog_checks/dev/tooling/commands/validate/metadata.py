@@ -204,6 +204,7 @@ VALID_UNIT_NAMES = {
     'millivolt',
     'deciwatt',
     'decidegree celsius',
+    'span',
 }
 
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
