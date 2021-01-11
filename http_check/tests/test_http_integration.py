@@ -39,25 +39,31 @@ def test_check_cert_expiration(http_check):
     # bad hostname
     instance = {'url': 'https://wronghost.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
-    assert status == AgentCheck.CRITICAL
-    assert days_left == 0
-    assert seconds_left == 0
+    assert status == AgentCheck.UNKNOWN
+    assert days_left is None
+    assert seconds_left is None
     assert 'Hostname mismatch' in msg or "doesn't match" in msg
 
     # site is down
     instance = {'url': 'https://this.does.not.exist.foo'}
-
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
-    assert status == AgentCheck.CRITICAL
-    assert days_left == 0
-    assert seconds_left == 0
+    assert status == AgentCheck.UNKNOWN
+    assert days_left is None
+    assert seconds_left is None
 
     # cert expired
     instance = {'url': 'https://expired.mock/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
-    assert status == AgentCheck.CRITICAL
-    assert days_left == 0
-    assert seconds_left == 0
+    if sys.version_info[0] < 3:
+        # Python 2 returns ambiguous "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
+        # Same as site is down
+        assert status == AgentCheck.UNKNOWN
+        assert days_left is None
+        assert seconds_left is None
+    else:
+        assert status == AgentCheck.CRITICAL
+        assert days_left == 0
+        assert seconds_left == 0
 
     # critical in days
     days_critical = 200
