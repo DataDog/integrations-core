@@ -98,7 +98,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                     ctx.invoke(
                         test_command,
                         checks=[f'{check}:{env}'],
-                        debug=True,
+                        debug=DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,
