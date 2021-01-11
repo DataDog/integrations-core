@@ -175,7 +175,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
         for stub in metrics:
             if stub.name in METRIC_TO_SKIP:
                 continue
-            assert "loader:python" in stub.tags, "All snmp python check metrics: %s" % metrics
+            assert "loader:python" in stub.tags, "Stub: %s\nAll snmp python check metrics: %s" % (stub, metrics)
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))] += 1
     total_count_python = sum(count for count in expected_metrics.values())
@@ -187,7 +187,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
-            assert "loader:core" in stub.tags, "All snmp core check metrics: %s" % aggregator_metrics
+            assert "loader:core" in stub.tags, "Stub: %s\nAll snmp core check metrics: %s" % (stub, aggregator_metrics)
             if stub.name in METRIC_TO_SKIP:
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
