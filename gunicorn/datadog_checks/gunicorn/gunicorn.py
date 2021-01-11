@@ -69,6 +69,8 @@ class GUnicornCheck(AgentCheck):
             self.log.debug("instance %s procs - working:%s idle:%s", proc_name, working, idle)
             self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
             self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
+        else:
+            self.log.debug("No master process(es), skipping worker metrics")
 
         self._collect_metadata()
 
