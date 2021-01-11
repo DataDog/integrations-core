@@ -168,6 +168,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
             with open(config_file, 'wb') as f:
                 output = json.dumps(config).encode('utf-8')
+                print("config: ", output)
                 f.write(output)
             check_command.extend(['--config', config_file])
 
