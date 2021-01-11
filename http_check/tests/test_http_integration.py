@@ -225,10 +225,8 @@ def test_mock_case(aggregator, http_check):
 def test_client_certs_are_passed(aggregator, http_check, config, cert, password):
     instance = {'url': 'https://valid.mock', 'name': 'baz'}
     instance.update(config)
-    with mock.patch('ssl.SSLContext.load_cert_chain') as load_cert_chain:
-        # Run the check for the one instance
-        http_check.check(instance)
-        load_cert_chain.assert_called_with(cert, keyfile=password)
+    # Run the check for the one instance
+    http_check.check(instance)
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:baz']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
