@@ -323,6 +323,7 @@ class Disk(AgentCheck):
                 self._last_read_time_by_disk[disk_name] = disk.read_time
                 self._last_write_time_by_disk[disk_name] = disk.write_time
                 # FIXME: 8.x, metrics kept for backwards compatibility but are incorrect: the value is not a percentage
+                # See: https://github.com/DataDog/integrations-core/pull/7323#issuecomment-756427024
                 self.rate(self.METRIC_DISK.format('read_time_pct'), disk.read_time * 100 / 1000, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'), disk.write_time * 100 / 1000, tags=metric_tags)
             except AttributeError as e:
