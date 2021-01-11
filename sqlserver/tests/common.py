@@ -8,6 +8,17 @@ from itertools import chain
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import (
+    AO_METRICS,
+    AO_METRICS_PRIMARY,
+    AO_METRICS_SECONDARY,
+    DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_METRICS,
+    FCI_METRICS,
+    INSTANCE_METRICS,
+    INSTANCE_METRICS_TOTAL,
+    TASK_SCHEDULER_METRICS,
+)
 
 
 def get_local_driver():
@@ -35,18 +46,18 @@ CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries'
 EXPECTED_METRICS = [
     m[0]
     for m in chain(
-        SQLServer.INSTANCE_METRICS,
-        SQLServer.INSTANCE_METRICS_TOTAL,
-        SQLServer.TASK_SCHEDULER_METRICS,
-        SQLServer.DATABASE_METRICS,
-        SQLServer.DATABASE_FRAGMENTATION_METRICS,
-        SQLServer.FCI_METRICS,
+        INSTANCE_METRICS,
+        INSTANCE_METRICS_TOTAL,
+        TASK_SCHEDULER_METRICS,
+        DATABASE_METRICS,
+        DATABASE_FRAGMENTATION_METRICS,
+        FCI_METRICS,
     )
 ] + CUSTOM_METRICS
 
-EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS_PRIMARY]
-EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS_SECONDARY]
-EXPECTED_AO_METRICS_COMMON = [m[0] for m in SQLServer.AO_METRICS]
+EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
+EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
