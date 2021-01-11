@@ -18,8 +18,8 @@ steps:
       if [ "${{ parameters.repo }}" == "core" ]; then
           ENV_TEST_OPTS='--base'
       fi
-      docker run datadog/agent-dev:alex-snmp-corecheck-py3 cat /opt/datadog-agent/version-manifest.txt
-      ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck
+      docker run datadog/agent-dev:alex-snmp-corecheck-jan7-py3 cat /opt/datadog-agent/version-manifest.txt
+      ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck-jan7
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
