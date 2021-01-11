@@ -36,7 +36,7 @@ def test_e2e_python(dd_agent_check):
     metrics = common.SUPPORTED_METRIC_TYPES
     config = common.generate_container_instance_config(metrics)
     aggregator = dd_agent_check(config, rate=True)
-    tags = ['snmp_device:{}'.format(config['instances'][0]['ip_address'])]
+    tags = ['snmp_device:{}'.format(config['instances'][0]['ip_address']), 'loader:python']
 
     # Test metrics
     for metric in common.SUPPORTED_METRIC_TYPES:
