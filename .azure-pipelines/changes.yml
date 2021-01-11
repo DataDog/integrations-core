@@ -16,7 +16,7 @@ variables:
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 1
+    job_name: Changed_1
     display: Linux
     validate: true
     pip_cache_config:
@@ -27,7 +27,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 2
+    job_name: Changed_2
     display: Linux
     validate: true
     pip_cache_config:
@@ -38,7 +38,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 3
+    job_name: Changed_3
     display: Linux
     validate: true
     pip_cache_config:
@@ -49,7 +49,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 4
+    job_name: Changed_4
     display: Linux
     validate: true
     pip_cache_config:
@@ -60,7 +60,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 5
+    job_name: Changed_5
     display: Linux
     validate: true
     pip_cache_config:
@@ -71,7 +71,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 6
+    job_name: Changed_6
     display: Linux
     validate: true
     pip_cache_config:
@@ -82,7 +82,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 7
+    job_name: Changed_7
     display: Linux
     validate: true
     pip_cache_config:
@@ -93,7 +93,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 8
+    job_name: Changed_8
     display: Linux
     validate: true
     pip_cache_config:
@@ -104,7 +104,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 9
+    job_name: Changed_9
     display: Linux
     validate: true
     pip_cache_config:
@@ -115,7 +115,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 10
+    job_name: Changed_10
     display: Linux
     validate: true
     pip_cache_config:
@@ -126,7 +126,7 @@ jobs:
 
 #- template: './templates/test-single-windows.yml'
 #  parameters:
-#    job_name: Changed 11
+#    job_name: Changed_11
 #    check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet azure_iot_edge disk dns_check dotnetclr exchange_server iis pdh_check sqlserver tcp_check win32_event_log windows_service wmi_check'
 #    display: Windows
 #    pip_cache_config:
