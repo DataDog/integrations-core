@@ -1,30 +1,30 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-otel.system.cpu.time,gauge,,second,,Total CPU seconds broken down by different states,0,otel,cpu time
+otel.system.cpu.time,count,,second,,Total CPU seconds broken down by different states,0,otel,cpu time
 otel.system.cpu.load_average.1m,gauge,,unit,,Average CPU Load over 1 minute,0,otel,load norm 1
 otel.system.cpu.load_average.5m,gauge,,unit,,Average CPU Load over 5 minutes,0,otel,load norm 5
 otel.system.cpu.load_average.15m,gauge,,unit,,Average CPU Load over 15 minutes,0,otel,load norm 15
-otel.system.memory.usage,gauge,,byte,,Bytes of memory in use,0,otel,mem usage
-otel.system.disk.io,gauge,,byte,second,Disk bytes transferred per second,0,otel,disk io
-otel.system.disk.operations,gauge,,unit,second,Disk operations per second,0,otel,disk ops
-otel.system.disk.io_time,gauge,,unit,,Time disk spent activated each second,0,otel,disk io time
-otel.system.disk.operation_time,gauge,,second,,Time spent in disk operations,0,otel,disk ops time
-otel.system.disk.merged,gauge,,request,,The number of disk reads merged into single physical disk access operations.,0,otel,disk merged
+otel.system.memory.usage,count,,byte,,Bytes of memory in use,0,otel,mem usage
+otel.system.disk.io,count,,byte,,Disk bytes transferred,0,otel,disk io
+otel.system.disk.operations,count,,unit,,Disk operations count,0,otel,disk ops
+otel.system.disk.io_time,count,,unit,,Time disk spent activated,0,otel,disk io time
+otel.system.disk.operation_time,count,,second,,Time spent in disk operations,0,otel,disk ops time
+otel.system.disk.merged,count,,request,,The number of disk reads merged into single physical disk access operations.,0,otel,disk merged
 otel.system.disk.pending_operations,gauge,,unit,,The queue size of pending I/O operations.,0,otel,disk pending ops
 otel.system.filesystem.usage,gauge,,byte,,Filesystem bytes used.,0,otel,fs in use
 otel.system.filesystem.inodes.usage,gauge,,inode,,Filesystem inodes used,0,otel,inodes in use
-otel.system.network.dropped,gauge,,packet,second,Packets that are dropped or discarded per second even though there was no error,-1,otel,packets dropped
-otel.system.network.packets,gauge,,packet,second,The number of packets transferred per second,0,otel,packets
+otel.system.network.dropped,count,,packet,,Packets that are dropped or discarded even though there was no error,-1,otel,packets dropped
+otel.system.network.packets,count,,packet,,The number of packets transferred,0,otel,packets
 otel.system.network.errors,gauge,,error,,The number of errors encountered,-1,otel,packets err
-otel.system.network.io,gauge,,byte,second,The number of bytes transmitted and received per second,0,otel,bytes sent
+otel.system.network.io,count,,byte,,The number of bytes transmitted and received,0,otel,bytes sent
 otel.system.network.connections,gauge,,connection,,The number of connections,0,otel,conns
 otel.system.processes.count,gauge,,process,,Total number of processes in each state,0,otel,processes count
-otel.system.processes.created,gauge,,process,,Total number of created processes,0,otel,processes created count
-otel.process.cpu.time,gauge,,second,,Total CPU seconds broken down by different states.,0,otel,processes cpu time
-otel.process.memory.physical_usage,gauge,,byte,,The amount of physical memory in use,0,otel,processes mem Rhys
+otel.system.processes.created,count,,process,,Total number of created processes,0,otel,processes created count
+otel.process.cpu.time,count,,second,,Total CPU seconds broken down by different states.,0,otel,processes cpu time
+otel.process.memory.physical_usage,count,,byte,,The amount of physical memory in use,0,otel,processes mem Rhys
 otel.process.memory.virtual_usage,gauge,,byte,,Virtual memory size,0,otel,processes mem virtual
-otel.process.disk.io,gauge,,byte,second,Disk bytes transferred per second,0,otel,processes disk io
+otel.process.disk.io,count,,byte,,Disk bytes transferred per second,0,otel,processes disk io
 otel.system.paging.usage,gauge,,byte,,Unix swap or windows pagefile usage,0,otel,paging in use
-otel.system.paging.faults,gauge,,occurrence,,The number of paging faults,0,otel,paging faults
-otel.system.paging.operations,gauge,,unit,,The number of paging operations,0,otel,paging ops
+otel.system.paging.faults,count,,occurrence,,The number of paging faults,0,otel,paging faults
+otel.system.paging.operations,count,,unit,,The number of paging operations,0,otel,paging ops
 otel.datadog_exporter.metrics.running,gauge,,unit,,Reports that the Datadog metrics exporter is successfully sending metrics,0,otel,metrics running
 otel.datadog_exporter.traces.running,gauge,,unit,,Reports that the Datadog traces exporter is successfully sending traces,0,otel,traces running
