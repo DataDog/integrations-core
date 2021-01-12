@@ -77,6 +77,7 @@ def kerberos_agent():
             "hostname": webserver_hostname,
             "principal": "user/inkeytab@{}".format(realm),
             "tmp_dir": tmp_dir,
+            "dd_api_key": os.getenv('DD_API_KEY'),
         }
 
         with docker_run(
@@ -90,6 +91,7 @@ def kerberos_agent():
                 'KRB5_SVC': common_config['svc'],
                 'WEBHOST': common_config['hostname'],
                 'WEBPORT': webserver_port,
+                'DD_API_KEY': common_config['dd_api_key'],
             },
             conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
         ):
