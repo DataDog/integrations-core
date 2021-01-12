@@ -974,13 +974,15 @@ class Network(AgentCheck):
             sset_len = 0
 
         strings = array.array('B', struct.pack('III', ETHTOOL_GSTRINGS, ETH_SS_STATS, sset_len))
-        strings.extend(b'\x00' * sset_len * ETH_GSTRING_LEN)
+        strings.extend([0] * sset_len * ETH_GSTRING_LEN)
         self._send_ethtool_ioctl(iface, sckt, strings)
 
         all_names = []
         for i in range(sset_len):
             offset = 12 + ETH_GSTRING_LEN * i
-            s = strings[offset : offset + ETH_GSTRING_LEN].tobytes().partition(b'\x00')[0].decode('utf-8')
+            s = strings[offset : offset + ETH_GSTRING_LEN]
+            s = s.tobytes() if PY3 else s.tostring()
+            s = s.partition(b'\x00')[0].decode('utf-8')
             all_names.append(s)
         return all_names
 
@@ -992,7 +994,8 @@ class Network(AgentCheck):
         stats_count = len(stats_names)
 
         stats = array.array('B', struct.pack('II', ETHTOOL_GSTATS, stats_count))
-        stats.extend(struct.pack('Q', 0) * stats_count)
+        # we need `stats_count * (length of uint64)` for the result
+        stats.extend([0] * len(struct.pack('Q', 0)) * stats_count)
         self._send_ethtool_ioctl(iface, sckt, stats)
 
         metrics = {}
