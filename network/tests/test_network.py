@@ -379,7 +379,7 @@ def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggrega
 
 def send_ethtool_ioctl_mock(iface, sckt, data):
     for input, result in common.ETHTOOL_IOCTL_INPUTS_OUTPUTS.items():
-        if input == (iface, data.tobytes()):
+        if input == (iface, data.tobytes() if PY3 else data.tostring()):
             data[:] = array.array('B', [])
             data.frombytes(result)
             return
