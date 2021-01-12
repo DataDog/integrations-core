@@ -12,7 +12,31 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 
 ### Configuration
 
-Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origin and Enterprise clusters. Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
+
+If deploying the Datadog agent using any of the methods linked in the installation instructions above, you must include an SCC (Security Context Constraints) in order for the agent to be able collect data. Please follow the instructions below as they relate to your deployment. 
+
+{{ < tabs > }}
+{{% tab "Helm" %}}
+
+The SCC can be applied directly within your Datadog agent's `values.yaml`. Simply add the following block underneath the `agents:` section in the file. 
+
+```yaml
+...
+agents:
+...
+  podSecurity:
+    securityContextConstraints:
+      create: true
+...
+```
+
+You can either apply this when you initially deploy the agent, or alternatively you can execute a `helm upgrade` after making this change to apply the SCC. 
+
+{{% /tab %}}
+{{% tab "Daemonset" %}}
+
+
+Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
 
 - [Restricted SCC operations](#restricted-scc-operations)
 - [Host network SCC operations](#host)
@@ -34,7 +58,8 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 <div class="alert alert-warning">
 <bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
 </div>
-
+{{% /tab % }}
+{{< /tabs >}}
 #### Log collection
 
 Refer to the [Kubernetes Log Collection][12] documentation for further information.
