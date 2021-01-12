@@ -97,7 +97,6 @@
                         "q": "avg:jboss.jdbc_connections.count{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Open connections",
                 "title_align": "left",
                 "title_size": "16",
@@ -128,7 +127,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Statement cache hit",
                 "title_align": "left",
                 "title_size": "16",
@@ -184,7 +182,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Heap memory usage",
                 "title_align": "left",
                 "title_size": "16",
@@ -217,7 +214,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "GC count per minute",
                 "title_align": "left",
                 "title_size": "16",
@@ -259,6 +255,13 @@
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:jboss.jdbc_connections.active{$host}"
                     }
                 ],
@@ -283,6 +286,13 @@
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_yellow",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:jboss.jdbc_connections.idle{$host}"
                     }
                 ],
@@ -307,6 +317,13 @@
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:jboss.jdbc_connections.request_wait{$host}"
                     }
                 ],
@@ -334,7 +351,6 @@
                         "q": "avg:jboss.transactions.count{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Transactions created",
                 "title_align": "left",
                 "title_size": "16",
@@ -358,7 +374,6 @@
                         "q": "avg:jboss.transactions.committed{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Transactions committed",
                 "title_align": "left",
                 "title_size": "16",
@@ -382,7 +397,6 @@
                         "q": "avg:jboss.transactions.inflight{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Transactions inflight",
                 "title_align": "left",
                 "title_size": "16",
@@ -406,7 +420,6 @@
                         "q": "avg:jboss.transactions.timed_out{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Transactions timed out",
                 "title_align": "left",
                 "title_size": "16",
@@ -456,7 +469,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Statement cache miss",
                 "title_align": "left",
                 "title_size": "16",
@@ -487,7 +499,6 @@
                         "q": "avg:jboss.undertow_session.created{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Sessions created",
                 "title_align": "left",
                 "title_size": "16",
@@ -508,6 +519,13 @@
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:jboss.undertow_session.active{$host}"
                     }
                 ],
@@ -532,6 +550,13 @@
                 "requests": [
                     {
                         "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:jboss.undertow_session.rejected{$host}"
                     }
                 ],
@@ -559,7 +584,6 @@
                         "q": "avg:jboss.undertow_session.expired{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Sessions expired",
                 "title_align": "left",
                 "title_size": "16",
@@ -590,7 +614,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Bytes sent",
                 "title_align": "left",
                 "title_size": "16",
@@ -628,7 +651,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Bytes received",
                 "title_align": "left",
                 "title_size": "16",
@@ -679,7 +701,6 @@
                         "q": "avg:jboss.undertow_listener.processing_time{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Processing time",
                 "title_align": "left",
                 "title_size": "16",
@@ -710,7 +731,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Requests served",
                 "title_align": "left",
                 "title_size": "16",
