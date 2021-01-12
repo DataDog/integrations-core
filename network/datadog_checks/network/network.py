@@ -247,7 +247,7 @@ class Network(AgentCheck):
         if self._collect_count_metrics:
             self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
-    def _submit_devicemetrics(self, iface, vals_by_metric, tags, expected_metrics=None):
+    def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
             return False
@@ -256,7 +256,7 @@ class Network(AgentCheck):
         metric_tags = [] if tags is None else tags[:]
         metric_tags.append('device:{}'.format(iface))
 
-        expected_metrics = expected_metrics or [
+        expected_metrics = [
             'bytes_rcvd',
             'bytes_sent',
             'packets_in.count',
@@ -273,6 +273,24 @@ class Network(AgentCheck):
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
+
+    def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return False
+
+        metric_tags = [] if tags is None else tags[:]
+        metric_tags.append('device:{}'.format(iface))
+
+        allowed = [ENA_METRIC_PREFIX + m for m in ENA_METRIC_NAMES]
+        for m in vals_by_metric:
+            assert m in allowed
+
+        count = 0
+        for metric, val in iteritems(vals_by_metric):
+            self.gauge('system.net.%s' % metric, val, tags=metric_tags)
+            count += 1
+        self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
 
     def _parse_value(self, v):
         try:
@@ -436,9 +454,7 @@ class Network(AgentCheck):
                 if self._collect_ena_metrics:
                     ena_metrics = self._collect_ena(iface)
                     if ena_metrics:
-                        self._submit_devicemetrics(
-                            iface, ena_metrics, custom_tags, [ENA_METRIC_PREFIX + m for m in ENA_METRIC_NAMES]
-                        )
+                        self._submit_ena_metrics(iface, ena_metrics, custom_tags)
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
