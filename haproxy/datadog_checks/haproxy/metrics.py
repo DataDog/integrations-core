@@ -162,7 +162,9 @@ METRIC_MAP = {
     'haproxy_server_retry_warnings_total': 'server.retry.warnings.total',
     'haproxy_server_server_aborts_total': 'server.server.aborts.total',
     'haproxy_server_server_idle_connections_current': 'server.server.idle.connections.current',
+    'haproxy_server_idle_connections_current': 'server.idle.connections.current',  # rename since >= v2.3
     'haproxy_server_server_idle_connections_limit': 'server.server.idle.connections.limit',
+    'haproxy_server_idle_connections_limit': 'server.idle.connections.limit',  # rename since >= 2.3
     'haproxy_server_sessions_total': 'server.sessions.total',
     'haproxy_server_status': 'server.status',
     'haproxy_server_total_time_average_seconds': 'server.total.time.average.seconds',
