@@ -18,7 +18,7 @@ If you are deploying the Datadog Agent using any of the methods linked in the in
 {{ < tabs > }}
 {{% tab "Helm" %}}
 
-The SCC can be applied directly within your Datadog agent's `values.yaml`. Simply add the following block underneath the `agents:` section in the file. 
+The SCC can be applied directly within your Datadog agent's `values.yaml`. Add the following block underneath the `agents:` section in the file. 
 
 ```yaml
 ...
