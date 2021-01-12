@@ -14,8 +14,8 @@ steps:
 # Run e2e first
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |
-      docker run datadog/agent-dev:alex-snmp-corecheck-jan7-py3 cat /opt/datadog-agent/version-manifest.txt
-      ddev env test --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck-jan7 --prod -e DD_LOG_LEVEL=debug
+      docker run datadog/agent-dev:alex-snmp-corecheck-no-sort-py3 cat /opt/datadog-agent/version-manifest.txt
+      ddev env test --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck-no-sort --prod -e DD_LOG_LEVEL=debug
 
     displayName: 'Run E2E tests'
     env:
