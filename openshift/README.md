@@ -13,7 +13,7 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 ### Configuration
 
 
-If deploying the Datadog agent using any of the methods linked in the installation instructions above, you must include an SCC (Security Context Constraints) in order for the agent to be able collect data. Please follow the instructions below as they relate to your deployment. 
+If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include SCC (Security Context Constraints) for the Agent to collect data. Follow the instructions below as they relate to your deployment. 
 
 {{ < tabs > }}
 {{% tab "Helm" %}}
