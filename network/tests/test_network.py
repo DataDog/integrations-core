@@ -381,7 +381,7 @@ def send_ethtool_ioctl_mock(iface, sckt, data):
     for input, result in common.ETHTOOL_IOCTL_INPUTS_OUTPUTS.items():
         if input == (iface, data.tobytes() if PY3 else data.tostring()):
             data[:] = array.array('B', [])
-            data.frombytes(result)
+            data.frombytes(result) if PY3 else data.fromstring(result)
             return
     raise ValueError("Couldn't match any iface/data combination in the test data")
 
