@@ -265,7 +265,6 @@
                         "q": "avg:jboss.jdbc_connections.active{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Active connections",
                 "title_align": "left",
                 "title_size": "16",
@@ -296,7 +295,6 @@
                         "q": "avg:jboss.jdbc_connections.idle{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Idle connections",
                 "title_align": "left",
                 "title_size": "16",
@@ -327,7 +325,6 @@
                         "q": "avg:jboss.jdbc_connections.request_wait{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Requests waiting",
                 "title_align": "left",
                 "title_size": "16",
@@ -529,7 +526,6 @@
                         "q": "avg:jboss.undertow_session.active{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Active sessions",
                 "title_align": "left",
                 "title_size": "16",
@@ -560,7 +556,6 @@
                         "q": "avg:jboss.undertow_session.rejected{$host}"
                     }
                 ],
-                "time": {},
                 "title": "Sessions rejected",
                 "title_align": "left",
                 "title_size": "16",
@@ -792,25 +787,6 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "Undertow is sponsored by JBoss and is the default web server in the Wildfly Application Server.\n\nUndertow is a flexible performant web server written in java, providing both blocking and non-blocking API\u2019s based on NIO.",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 864885259151096,
-            "layout": {
-                "height": 13,
-                "width": 32,
-                "x": 177,
-                "y": 30
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
                 "content": "Listeners are responsible for translating requests to responses to clients. \n\nThis section can be used to monitor the performance of your listeners and understand the throughput and processing times for the server.",
                 "font_size": "14",
                 "show_tick": true,
@@ -825,6 +801,53 @@
                 "width": 32,
                 "x": 177,
                 "y": 52
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:jboss_wildfly",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 4331835511855062,
+            "layout": {
+                "height": 36,
+                "width": 47,
+                "x": 177,
+                "y": 13
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Logs",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6209271648640872,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 177,
+                "y": 7
             }
         }
     ]
