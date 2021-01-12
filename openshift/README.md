@@ -30,7 +30,7 @@ agents:
 ...
 ```
 
-You can either apply this when you initially deploy the agent, or alternatively you can execute a `helm upgrade` after making this change to apply the SCC. 
+You can apply this when you initially deploy the Agent. Or, you can execute a `helm upgrade` after making this change to apply the SCC. 
 
 {{% /tab %}}
 {{% tab "Daemonset" %}}
