@@ -140,13 +140,13 @@ class QueueMetricCollector(object):
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
+        pcf = pymqi.PCFExecute(queue_manager)
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
                 pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
-            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
             self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)
@@ -165,6 +165,11 @@ class QueueMetricCollector(object):
                         msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
                         msg = msg.format(mname, queue_name)
                         self.log.debug(msg)
+        finally:
+            # Close internal reply queue to prevent filling up a dead-letter queue.
+            # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
+            # https://dsuch.github.io/pymqi/examples.html#how-to-specify-dynamic-reply-to-queues
+            pcf.disconnect()
 
     def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
         try:
