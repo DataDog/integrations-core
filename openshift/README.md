@@ -15,7 +15,7 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 
 If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include SCC (Security Context Constraints) for the Agent to collect data. Follow the instructions below as they relate to your deployment. 
 
-{{ < tabs > }}
+{{< tabs >}}
 {{% tab "Helm" %}}
 
 The SCC can be applied directly within your Datadog agent's `values.yaml`. Add the following block underneath the `agents:` section in the file. 
@@ -58,7 +58,7 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 <div class="alert alert-warning">
 <bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
 </div>
-{{% /tab % }}
+{{% /tab %}}
 {{< /tabs >}}
 #### Log collection
 
