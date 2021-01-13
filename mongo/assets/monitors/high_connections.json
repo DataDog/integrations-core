@@ -1,7 +1,7 @@
 {
 	"name": "[MongoDB] High incoming connections",
 	"type": "query alert",
-	"query": "avg(last_5m):( 100 * sum:mongodb.connections.current{*} by {replset_name} ) / ( sum:mongodb.connections.current{*} by {replset_name} + sum:mongodb.connections.available{*} by {replset_name} ) > 90",
+	"query": "avg(last_5m):100 * sum:mongodb.connections.current{*} by {replset_name} / ( sum:mongodb.connections.current{*} by {replset_name} + sum:mongodb.connections.available{*} by {replset_name} ) > 90",
 	"message": "The number of incoming connections is reaching the maximum. {{value}} % of the available connections have been used on {{replset_name.name}}",
 	"tags": [
 		"integration:mongodb"
