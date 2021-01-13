@@ -3,22 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from tests.metrics import (
-    IF_BANDWIDTH_USAGE,
-    IF_COUNTS,
-    IF_GAUGES,
-    IF_RATES,
-    IP_COUNTS,
-    IP_IF_COUNTS,
-    IPX_COUNTS,
-    TCP_COUNTS,
-    TCP_GAUGES,
-    UDP_COUNTS,
-)
-
-from datadog_checks.snmp import SnmpCheck
-
-from . import common
 
 pytestmark = pytest.mark.e2e
 

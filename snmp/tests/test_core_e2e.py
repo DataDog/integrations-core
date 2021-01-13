@@ -25,6 +25,47 @@ def test_e2e_metric_types(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
+def test_e2e_table_regex_match(dd_agent_check):
+    metrics = [
+        {
+            'MIB': "IF-MIB",
+            'table': {
+                "name": "ifTable",
+                "OID": "1.3.6.1.2.1.2.2",
+            },
+            'symbols': [
+                {
+                    "name": "ifInOctets",
+                    "OID": "1.3.6.1.2.1.2.2.1.10",
+                },
+                {
+                    "name": "ifOutOctets",
+                    "OID": "1.3.6.1.2.1.2.2.1.16",
+                },
+            ],
+            'metric_tags': [
+                {
+                    'tag': "interface",
+                    'column': {
+                        "name": "ifDescr",
+                        "OID": "1.3.6.1.2.1.2.2.1.2",
+                    },
+                },
+                {
+                    'column': {
+                        "name": "ifDescr",
+                        "OID": "1.3.6.1.2.1.2.2.1.2",
+                    },
+                    'match': '(\\w)(\\w+)',
+                    'tags': {'prefix': '\\1', 'suffix': '\\2'},
+                },
+            ],
+        }
+    ]
+    instance = common.generate_container_instance_config(metrics)
+    assert_python_vs_core(dd_agent_check, instance)
+
+
 # Profile tests
 # expected_total_count: Test with some expected_total_count to be sure that both python and corecheck impl
 # are collecting some metrics.
