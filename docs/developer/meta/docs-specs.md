@@ -1,5 +1,8 @@
 # Documentation specification
 
+!!! warning
+    This page is an in-progress specification of functionality that has not been implemented yet.
+
 -----
 
 Building on top of the [configuration spec](config-specs.md) implementation, we also incorporate a documentation spec.
@@ -8,7 +11,7 @@ Similar to configuration specs, these YAML files are located at `<INTEGRATION>/a
 
 ## Producer
 
-The [producer][doc-spec-producer]'s job is to read a specification and:
+The [producer](#TODO)'s job is to read a specification and:
 
 1. Validate for correctness
 1. Populate all unset default fields
@@ -60,7 +63,7 @@ Every file has 3 possible attributes:
 Every section has these possible attributes:
 
 - `name` - The title of the section.
-- `header_level` - Level of indentation.  
+- `header_level` - Level of indentation.
 - `tab` - If not null, then the name of the tab, and all sections of the same indent must specify.
 - `description` - Actual text content for the section.  May be parameterized using keyword argument formatter
   strings, see [parameterization](#parameters) for more info. Hyperlinks may be embedded or reference-style.
@@ -85,7 +88,7 @@ Default parameters which will be present for all sections and passed as keyword 
 
 ## Templates
 
-Every [section](#section) may reference [pre-defined doc templates][doc-spec-templates] using a key called `template`.
+Every [section](#section) may reference [pre-defined doc templates](#TODO) using a key called `template`.
 The template format looks like `path/to/template_file` where `path/to` must point an existing directory relative
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
@@ -101,7 +104,7 @@ sections:
 - template: setup/installation
   overrides:
     description: |
-      The Nagios check is included in the [Datadog Agent][1] package, 
+      The Nagios check is included in the [Datadog Agent][1] package,
       so you don't need to install anything else on your Nagios servers.
 
       [1]: https://docs.datadoghq.com/agent/
