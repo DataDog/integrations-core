@@ -6,7 +6,7 @@ from typing import List
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.types import InstanceType
 
-from .metrics import EDGE_AGENT_METRICS, EDGE_HUB_METRICS
+from .metrics import EDGE_AGENT_METRICS, EDGE_AGENT_TYPE_OVERRIDES, EDGE_HUB_METRICS
 from .types import Instance
 
 
@@ -39,6 +39,7 @@ class Config(object):
         edge_agent_instance = self._create_prometheus_instance(
             edge_agent_prometheus_url, namespace='edge_agent', metrics=EDGE_AGENT_METRICS, tags=tags
         )
+        edge_agent_instance['type_overrides'] = EDGE_AGENT_TYPE_OVERRIDES
 
         # Configure version metadata collection.
         edge_agent_instance['metadata_metric_name'] = 'edgeAgent_metadata'
