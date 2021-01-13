@@ -137,7 +137,7 @@ def test(
     api_key = org.get('api_key') or ctx.obj['dd_api_key'] or os.getenv('DD_API_KEY')
     if api_key:
         test_env_vars['DD_API_KEY'] = api_key
-        test_env_vars['TOX_TESTENV_PASSENV'] += f' DD_API_KEY'
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' DD_API_KEY'
 
     check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
     tests_ran = False
