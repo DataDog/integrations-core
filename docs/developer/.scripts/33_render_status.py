@@ -13,7 +13,7 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only,
+    is_tile_only, get_default_docs_spec,
 )
 
 MARKER = '<docs-insert-status>'
@@ -32,6 +32,7 @@ def patch(lines):
         render_logs_progress,
         render_recommended_monitors_progress,
         render_config_spec_progress,
+        render_docs_spec_progress,
         render_e2e_progress,
         render_metadata_progress,
         render_process_signatures_progress,
@@ -48,28 +49,43 @@ def patch(lines):
     return new_lines
 
 
-def render_config_spec_progress():
+def _spec_progress(spec_type):
+    if spec_type == 'config':
+        name = 'Config'
+        func = get_default_config_spec
+    elif spec_type == 'docs':
+        name = 'Docs'
+        func = get_default_docs_spec
+
     valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
     total_checks = len(valid_checks)
-    checks_with_config_spec = 0
+    checks_with_spec = 0
 
-    lines = ['## Config specs', '', None, '', '??? check "Completed"']
+    lines = [f'## {name} specs', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
-        config_spec_path = get_default_config_spec(check)
-        if os.path.isfile(config_spec_path):
-            checks_with_config_spec += 1
+        spec_path = func(check)
+        if os.path.isfile(spec_path):
+            checks_with_spec += 1
             status = 'X'
         else:
             status = ' '
 
         lines.append(f'    - [{status}] {check}')
 
-    percent = checks_with_config_spec / total_checks * 100
+    percent = checks_with_spec / total_checks * 100
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
-    lines[4] = f'??? check "Completed {checks_with_config_spec}/{total_checks}"'
+    lines[4] = f'??? check "Completed {checks_with_spec}/{total_checks}"'
     return lines
+
+
+def render_config_spec_progress():
+    return _spec_progress('config')
+
+
+def render_docs_spec_progress():
+    return _spec_progress('docs')
 
 
 def render_dashboard_progress():
