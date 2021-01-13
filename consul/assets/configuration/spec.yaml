@@ -87,6 +87,19 @@ files:
           - <SERVICE_1>
           - <SERVICE_2>
 
+    - name: service_blacklist
+      description: |
+        List services to exclude from the consul service caltalog.
+        Note: The service_blacklist will take precedence over service_whitelist.
+        The default settings will still query up to 50 services.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <SERVICE_1>
+          - <SERVICE_2>
+
     - name: max_services
       description: |
         Increase the maximum number of queried services.

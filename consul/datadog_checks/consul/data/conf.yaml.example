@@ -108,6 +108,15 @@ instances:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
+    ## @param service_blacklist - list of strings - optional
+    ## List services to exclude from the consul service caltalog.
+    ## Note: The service_blacklist will take precedence over service_whitelist.
+    ## The default settings will still query up to 50 services.
+    #
+    # service_blacklist:
+    #   - <SERVICE_1>
+    #   - <SERVICE_2>
+
     ## @param max_services - number - optional - default: 50
     ## Increase the maximum number of queried services.
     #
