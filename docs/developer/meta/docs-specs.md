@@ -1,13 +1,11 @@
 # Documentation specification
 
-!!! warning
-    This page is an in-progress specification of functionality that has not been implemented yet.
-
 -----
 
 Building on top of the [configuration spec](config-specs.md) implementation, we also incorporate a documentation spec.
 
-Similar to configuration specs, these YAML files are located at `<INTEGRATION>/assets/documentation/spec.yaml`, and referenced in the check's `manifest.json` file.
+Similar to configuration specs, these YAML files are located at `<INTEGRATION>/assets/documentation/spec.yaml`, and
+referenced in the check's `manifest.json` file.
 
 ## Producer
 
@@ -71,7 +69,9 @@ Every section has these possible attributes:
 - `parameters` - Mapping of extra parameters for string formatting in the `description`.
 - `prepend_text` - Text to insert in front of the description field. Useful for overrides.
 - `append_text` - Text to append after the description field. Useful for overrides.
-- `processor` - Reference to a Python function which should be invoked.  If the function returns `None`, the default description carries forward, otherwise the results of the function will be used for the `description`.  Used by the `data_collected/service_checks` template, for example.
+- `processor` - Reference to a Python function which should be invoked.  If the function returns `None`, 
+  the default description carries forward, otherwise the results of the function will be used for the `description`.
+  Used by the `data_collected/service_checks` template, for example.
 - `hidden` - Whether or not the section should be publicly exposed. It defaults to `false`.
 - `sections` - Nested sections, this will increase the `header_level` of embedded sections accordingly.
 - `template` - See [templates](#templates) below for more.
@@ -79,7 +79,9 @@ Every section has these possible attributes:
 
 #### Parameters
 
-When constructing each text section, the description field will first prepend and append values from `prepend_text` and `append_text`, respectively.  Next string formatting operations will take place by using a default set of parameters joined with any parameters explicitly defined in the `parameter` attribute.
+When constructing each text section, the description field will first prepend and append values from `prepend_text` and
+`append_text`, respectively.  Next string formatting operations will take place by using a default set of parameters
+joined with any parameters explicitly defined in the `parameter` attribute.
 
 Default parameters which will be present for all sections and passed as keyword args during string formatting include:
 
@@ -123,12 +125,15 @@ options:
 
 ## README file consumer
 
-The [README example consumer][docs-spec-example-consumer] uses the documentation spec to render the README files that are included with
-every Integration package.
+The [README example consumer][docs-spec-example-consumer] uses the documentation spec to render the README files that
+are included with every Integration package.
 
 ### Links
 
-As a custom with our README.md files, we use [reference style links](https://www.markdownguide.org/basic-syntax/#reference-style-links). Each section description may have embedded or reference style links, and as part of the [Producer](#producer) step, these will be all normalized to embedded links.  This ensures that any consumers can handle them as needed.  For the README consumer, it will translate everything to reference style as part of its output stage.
+As a custom with our README.md files, we use [reference style links](https://www.markdownguide.org/basic-syntax/#reference-style-links). 
+Each section description may have embedded or reference style links, and as part of the [Producer](#producer) step,
+these will be all normalized to embedded links. This ensures that any consumers can handle them as needed.  For the
+README consumer, it will translate everything to reference style as part of its output stage.
 
 ### Usage
 
