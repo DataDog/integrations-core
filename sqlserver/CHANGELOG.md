@@ -1,5 +1,10 @@
 # CHANGELOG - sqlserver
 
+## 2.3.2 / 2021-01-13
+
+* [Fixed] Handle database specific queries for autodiscovery. See [#8329](https://github.com/DataDog/integrations-core/pull/8329).
+* [Fixed] Small refactor of consts, init and tests. See [#8221](https://github.com/DataDog/integrations-core/pull/8221).
+
 ## 2.3.1 / 2021-01-05
 
 * [Fixed] Add debug messages to SQLServer. See [#8278](https://github.com/DataDog/integrations-core/pull/8278).
