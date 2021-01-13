@@ -264,18 +264,18 @@ class SparkCheck(AgentCheck):
         if self.cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
             pre20 = is_affirmative(self.instance.get(SPARK_PRE_20_MODE, False))
-            return self._standalone_init(self.master_address, pre20, tags)
+            return self._standalone_init(pre20, tags)
 
         elif self.cluster_mode == SPARK_MESOS_MODE:
-            running_apps = self._mesos_init(self.master_address, tags)
+            running_apps = self._mesos_init(tags)
             return self._get_spark_app_ids(running_apps, tags)
 
         elif self.cluster_mode == SPARK_YARN_MODE:
-            running_apps = self._yarn_init(self.master_address, tags)
+            running_apps = self._yarn_init(tags)
             return self._get_spark_app_ids(running_apps, tags)
 
         elif self.cluster_mode == SPARK_DRIVER_MODE:
-            return self._driver_init(self.master_address, tags)
+            return self._driver_init(tags)
 
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, self.cluster_mode))
@@ -291,36 +291,36 @@ class SparkCheck(AgentCheck):
             self.set_metadata('version', version)
             return True
 
-    def _driver_init(self, spark_driver_address, tags):
+    def _driver_init(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
-        self._collect_version(spark_driver_address, tags)
+        self._collect_version(self.master_address, tags)
         running_apps = {}
         metrics_json = self._rest_request_to_json(
-            spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
+            self.master_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
         )
 
         for app_json in metrics_json:
             app_id = app_json.get('id')
             app_name = app_json.get('name')
-            running_apps[app_id] = (app_name, spark_driver_address)
+            running_apps[app_id] = (app_name, self.master_address)
 
         self.service_check(
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % spark_driver_address] + tags,
-            message='Connection to Spark driver "%s" was successful' % spark_driver_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to Spark driver "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
-    def _standalone_init(self, spark_master_address, pre_20_mode, tags):
+    def _standalone_init(self, pre_20_mode, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
         metrics_json = self._rest_request_to_json(
-            spark_master_address, SPARK_MASTER_STATE_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags
+            self.master_address, SPARK_MASTER_STATE_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags
         )
 
         running_apps = {}
@@ -333,7 +333,7 @@ class SparkCheck(AgentCheck):
 
                 # Parse through the HTML to grab the application driver's link
                 try:
-                    app_url = self._get_standalone_app_url(app_id, spark_master_address, tags)
+                    app_url = self._get_standalone_app_url(app_id, tags)
 
                     if app_id and app_name and app_url:
                         if not version_set:
@@ -358,19 +358,19 @@ class SparkCheck(AgentCheck):
         self.service_check(
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % spark_master_address] + tags,
-            message='Connection to Spark master "%s" was successful' % spark_master_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to Spark master "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
-    def _mesos_init(self, master_address, tags):
+    def _mesos_init(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         """
         running_apps = {}
 
-        metrics_json = self._rest_request_to_json(master_address, MESOS_MASTER_APP_PATH, MESOS_SERVICE_CHECK, tags)
+        metrics_json = self._rest_request_to_json(self.master_address, MESOS_MASTER_APP_PATH, MESOS_SERVICE_CHECK, tags)
 
         if metrics_json.get('frameworks'):
             for app_json in metrics_json.get('frameworks'):
@@ -393,36 +393,36 @@ class SparkCheck(AgentCheck):
         self.service_check(
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % master_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
 
-    def _yarn_init(self, rm_address, tags):
+    def _yarn_init(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         """
-        running_apps = self._yarn_get_running_spark_apps(rm_address, tags)
+        running_apps = self._yarn_get_running_spark_apps(tags)
 
         # Report success after gathering all metrics from ResourceManager
         self.service_check(
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % rm_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % rm_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
 
-    def _get_standalone_app_url(self, app_id, spark_master_address, tags):
+    def _get_standalone_app_url(self, app_id, tags):
         """
         Return the application URL from the app info page on the Spark master.
         Due to a bug, we need to parse the HTML manually because we cannot
         fetch JSON data from HTTP interface.
         """
         app_page = self._rest_request(
-            spark_master_address, SPARK_MASTER_APP_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags, appId=app_id
+            self.master_address, SPARK_MASTER_APP_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags, appId=app_id
         )
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
@@ -431,7 +431,7 @@ class SparkCheck(AgentCheck):
         if app_detail_ui_links and len(app_detail_ui_links) == 1:
             return app_detail_ui_links[0].attrs['href']
 
-    def _yarn_get_running_spark_apps(self, rm_address, tags):
+    def _yarn_get_running_spark_apps(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
 
@@ -439,7 +439,7 @@ class SparkCheck(AgentCheck):
         a Spark application ID.
         """
         metrics_json = self._rest_request_to_json(
-            rm_address,
+            self.master_address,
             YARN_APPS_PATH,
             YARN_SERVICE_CHECK,
             tags,
