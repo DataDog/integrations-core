@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 3.11.1-beta.1 / 2021-01-13
+
+
 ## 3.11.0 / 2020-11-19
 
 * [Added] Add new queue stats metrics for IBM MQ. See [#8032](https://github.com/DataDog/integrations-core/pull/8032).
