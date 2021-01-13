@@ -1,13 +1,11 @@
-# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import yaml
 
-from .spec import spec_validator
-from .template import ConfigTemplates
 
-
-class ConfigSpec(object):
+class BaseSpec(object):
     def __init__(self, contents, template_paths=None, source=None, version=None):
         """
         **Parameters:**
@@ -20,9 +18,13 @@ class ConfigSpec(object):
         self.contents = contents
         self.source = source
         self.version = version
-        self.templates = ConfigTemplates(template_paths)
         self.data = None
         self.errors = []
+
+        # To be overridden in subclasses
+        self.spec_type = None
+        self.templates = None
+        self.validator = None
 
     def load(self):
         """
@@ -36,7 +38,8 @@ class ConfigSpec(object):
         will be the fully resolved spec object.
         """
         if self.data is not None and not self.errors:
-            return self.data
+            # spec has already been validated
+            return
 
         try:
             self.data = yaml.safe_load(self.contents)
@@ -44,4 +47,11 @@ class ConfigSpec(object):
             self.errors.append(f'{self.source}: Unable to parse the configuration specification: {e}')
             return
 
-        return spec_validator(self.data, self)
+        self.validate()
+
+    def validate(self):
+        # for subclasses to override
+        raise NotImplementedError()
+
+    def is_valid(self):
+        return not self.errors

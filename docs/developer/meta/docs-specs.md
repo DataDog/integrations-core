@@ -11,7 +11,7 @@ Similar to configuration specs, these YAML files are located at `<INTEGRATION>/a
 
 ## Producer
 
-The [producer](#TODO)'s job is to read a specification and:
+The [producer][docs-spec-producer]s job is to read a specification and:
 
 1. Validate for correctness
 1. Populate all unset default fields
@@ -40,6 +40,7 @@ Consumers may utilize specs in a number of scenarios, such as:
 The root of every spec is a map with 3 keys:
 
 - `name` - The display name of what the spec refers to e.g. `Postgres`, `Nagios`, etc.
+- `version` - The released version of what the spec refers to
 - `options` - Top-level [spec options](#spec-options) related to the check overall (optional)
 - `files` - A list of all [files](#files) that influence behavior
 
@@ -88,12 +89,12 @@ Default parameters which will be present for all sections and passed as keyword 
 
 ## Templates
 
-Every [section](#section) may reference [pre-defined doc templates](#TODO) using a key called `template`.
+Every [section](#section) may reference [pre-defined doc templates][docs-spec-templates] using a key called `template`.
 The template format looks like `path/to/template_file` where `path/to` must point an existing directory relative
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
 You can use custom templates that will take precedence over the pre-defined templates by using the `template_paths`
-parameter of the [ConfigSpec](#datadog_checks.dev.tooling.configuration.core.ConfigSpec) class.
+parameter of the [ConfigSpec](#datadog_checks.dev.tooling.specs.configuration.core.ConfigSpec) class.
 
 ### Overrides
 
@@ -122,7 +123,7 @@ options:
 
 ## README file consumer
 
-The [README example consumer][] uses the documentation spec to render the README files that are included with
+The [README example consumer][docs-spec-example-consumer] uses the documentation spec to render the README files that are included with
 every Integration package.
 
 ### Links
@@ -133,3 +134,12 @@ As a custom with our README.md files, we use [reference style links](https://www
 
 Use the `--sync` flag of the [config validation command](../ddev/cli.md#config_1) to render the README files.
 
+## API
+
+::: datadog_checks.dev.tooling.specs.docs.DocsSpec
+rendering:
+heading_level: 3
+selection:
+members:
+- __init__
+- load

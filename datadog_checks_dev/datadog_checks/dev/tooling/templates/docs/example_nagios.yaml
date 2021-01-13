@@ -17,6 +17,9 @@ files:
             Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
       - template: setup/installation
       - template: setup/configuration
+        overrides:
+          description: |
+            See speficic installation instructions depending on your environment below.
       - template: setup/configuration/host
         overrides:
           description: |
@@ -41,8 +44,8 @@ files:
             | Parameter            | Value                                        |
             | -------------------- | -------------------------------------------- |
             | `<INTEGRATION_NAME>` | `nagios`                                     |
-            | `<INIT_CONFIG>`      | blank or `{}`                                |
-            | `<INSTANCE_CONFIG>`  | `{"nagios_conf": "/etc/nagios3/nagios.cfg"}` |
+            | `<INIT_CONFIG>`      | blank or `{{}}`                                |
+            | `<INSTANCE_CONFIG>`  | `{{"nagios_conf": "/etc/nagios3/nagios.cfg"}}` |
 
             **Note**: The containerized Agent should be able to access the `/etc/nagios3/nagios.cfg` file to enable the Datadog-Nagios integration.
 
