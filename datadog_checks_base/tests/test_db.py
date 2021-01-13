@@ -5,11 +5,12 @@ import logging
 from datetime import datetime, timedelta
 
 import pytest
-import pytz
+from dateutil.tz import gettz
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.time import UTC
 
 pytestmark = pytest.mark.db
 
@@ -1524,7 +1525,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1547,7 +1548,7 @@ class TestColumnTransformers:
                 'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'time_elapsed'}],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1574,7 +1575,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', (datetime.now(pytz.utc) + timedelta(hours=-1)).strftime(time_format)]]),
+            executor=mock_executor([['tag1', (datetime.now(UTC) + timedelta(hours=-1)).strftime(time_format)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1626,7 +1627,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.timezone('EST')) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(gettz('EST')) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()

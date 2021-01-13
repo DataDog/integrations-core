@@ -14,7 +14,6 @@ protobuf==3.7.0
 pyjwt==1.7.1
 pysocks==1.7.0
 python-dateutil==2.8.0
-pytz==2019.3
 pywin32==228; sys_platform == 'win32'
 pyyaml==5.3.1
 requests==2.22.0
