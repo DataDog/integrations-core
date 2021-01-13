@@ -195,9 +195,6 @@ METRIC_TO_SKIP = [
     # See II-153
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
-    # bandwidth
-    'snmp.ifBandwidthInUsage.rate',
-    'snmp.ifBandwidthOutUsage.rate',
     # telemetry
     'snmp.check_duration',
     'snmp.check_interval',
