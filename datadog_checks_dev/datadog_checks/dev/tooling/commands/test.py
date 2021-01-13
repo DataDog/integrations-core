@@ -132,6 +132,13 @@ def test(
         test_env_vars[E2E_PARENT_PYTHON] = sys.executable
         test_env_vars['TOX_TESTENV_PASSENV'] += f' {E2E_PARENT_PYTHON}'
 
+    org_name = ctx.obj['org']
+    org = ctx.obj['orgs'].get(org_name, {})
+    api_key = org.get('api_key') or ctx.obj['dd_api_key'] or os.getenv('DD_API_KEY')
+    if api_key:
+        test_env_vars['DD_API_KEY'] = api_key
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' DD_API_KEY'
+
     check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
     tests_ran = False
 

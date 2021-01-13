@@ -491,6 +491,27 @@ class TestAuth:
         response = http.get(instance["url"])
         assert response.status_code == 200
 
+    @pytest.mark.skipif(True, reason='Test fixture for Agent QA only')
+    def test_kerberos_auth_with_agent(self, kerberos_agent):
+        """
+        Test setup to verify kerberos authorization from an actual Agent container.
+
+        Steps to reproduce:
+        1. Change decorator above from `True` to `False` to enable test
+        2. Edit compose/kerberos-agent/Dockerfile to appropriate Agent release
+        3. Run test via `ddev test -k test_kerberos_auth_with_agent datadog_checks_base:py38`
+        4. After compose builds, and during `time.sleep` exec into Agent container in separate shell
+           via `docker exec -it compose_agent_1 /bin/bash`
+        5. Execute check via `agent check nginx` and verify successful result.
+        6. Exit test via Ctrl-C (test will show as failed, but that's okay)
+        """
+        import time
+
+        time.sleep(3600)
+
+        # Assertion just to provide logical breakpoint.
+        assert True
+
     def test_config_ntlm(self):
         instance = {'auth_type': 'ntlm', 'ntlm_domain': 'domain\\user', 'password': 'pass'}
         init_config = {}
