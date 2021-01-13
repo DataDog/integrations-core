@@ -57,6 +57,7 @@ nav:
     - CD: meta/cd.md
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md
+    - Docs specs: meta/docs-specs.md
     - Status: meta/status.md
   - Tutorials:
     - JMX:
