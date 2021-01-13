@@ -8,10 +8,11 @@ import click
 
 from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
+from ...utils import chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
 from ..constants import get_root
+from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
-from ..utils import complete_testable_checks, get_version_string
+from ..utils import complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -43,7 +44,8 @@ def display_envs(check_envs):
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--skip-env', is_flag=True, help='Skip environment creation and assume it is already running')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
-@click.option('--force-base-package', is_flag=True, help='Force using latest released version of datadog-checks-base')
+@click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
+@click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
 @click.pass_context
 def test(
@@ -68,7 +70,8 @@ def test(
     cov_keep,
     skip_env,
     pytest_args,
-    force_base_package,
+    force_base_unpinned,
+    force_base_min,
     force_env_rebuild,
 ):
     """Run tests for Agent-based checks.
@@ -131,6 +134,13 @@ def test(
     if e2e:
         test_env_vars[E2E_PARENT_PYTHON] = sys.executable
         test_env_vars['TOX_TESTENV_PASSENV'] += f' {E2E_PARENT_PYTHON}'
+
+    org_name = ctx.obj['org']
+    org = ctx.obj['orgs'].get(org_name, {})
+    api_key = org.get('api_key') or ctx.obj['dd_api_key'] or os.getenv('DD_API_KEY')
+    if api_key:
+        test_env_vars['DD_API_KEY'] = api_key
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' DD_API_KEY'
 
     check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
     tests_ran = False
@@ -202,9 +212,21 @@ def test(
 
             env = os.environ.copy()
 
-            if force_base_package:
-                version = get_version_string('datadog_checks_base', '')
+            if force_base_min:
+                check_base_dependencies, errors = read_check_base_dependencies(check)
+                if errors:
+                    abort(f'\nError collecting base package dependencies: {errors}')
+
+                spec_set = list(check_base_dependencies['datadog-checks-base'].keys())[0]
+
+                spec = get_next(spec_set) if spec_set else None
+                if spec is None or spec.operator != '>=':
+                    abort(f'\nFailed to determine minimum version of package `datadog_checks_base`: {spec}')
+
+                version = spec.version
                 env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
+            elif force_base_unpinned:
+                env['TOX_FORCE_UNPINNED'] = "datadog_checks_base"
 
             if force_env_rebuild:
                 command.append('--recreate')

@@ -105,7 +105,7 @@ The template format looks like `path/to/template_file` where `path/to` must poin
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
 You can use custom templates that will take precedence over the pre-defined templates by using the `template_paths`
-parameter of the [ConfigSpec](#datadog_checks.dev.tooling.configuration.core.ConfigSpec) class.
+parameter of the [ConfigSpec](#datadog_checks.dev.tooling.specs.configuration.core.ConfigSpec) class.
 
 ### Override
 
@@ -141,7 +141,7 @@ Use the `--sync` flag of the [config validation command](../ddev/cli.md#config_1
 
 ## API
 
-::: datadog_checks.dev.tooling.configuration.ConfigSpec
+::: datadog_checks.dev.tooling.specs.configuration.ConfigSpec
     rendering:
       heading_level: 3
     selection:

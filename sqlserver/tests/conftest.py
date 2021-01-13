@@ -95,7 +95,7 @@ def instance_ao_docker_secondary():
 def instance_autodiscovery():
     instance = deepcopy(INSTANCE_DOCKER)
     instance['database_autodiscovery'] = True
-    return instance
+    return deepcopy(instance)
 
 
 @pytest.fixture(scope='session')

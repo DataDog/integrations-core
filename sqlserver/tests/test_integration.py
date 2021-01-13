@@ -174,6 +174,35 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    master_tags = [
+        'database:master',
+        'database_files_state_desc:ONLINE',
+        'file_id:1',
+        'file_location:/var/opt/mssql/data/master.mdf',
+        'file_type:data',
+        'optional:tag1',
+    ]
+    msdb_tags = [
+        'database:msdb',
+        'database_files_state_desc:ONLINE',
+        'file_id:1',
+        'file_location:/var/opt/mssql/data/MSDBData.mdf',
+        'file_type:data',
+        'optional:tag1',
+    ]
+    aggregator.assert_metric('sqlserver.database.files.size', tags=master_tags)
+    aggregator.assert_metric('sqlserver.database.files.size', tags=msdb_tags)
+    aggregator.assert_metric('sqlserver.database.files.state', tags=master_tags)
+    aggregator.assert_metric('sqlserver.database.files.state', tags=msdb_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     querya = copy(CUSTOM_QUERY_A)

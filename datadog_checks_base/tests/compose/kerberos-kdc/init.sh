@@ -119,6 +119,10 @@ EOF
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/localhost@${KRB5_REALM}"
 
+    # Add for supporting Agent-based verification
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -randkey ${KRB5_SVC}/compose_web_1.compose_kdc-net@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/compose_web_1.compose_kdc-net@${KRB5_REALM}"
+
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} user/inkeytab@${KRB5_REALM}"
 
     ## Lists all principals in realm

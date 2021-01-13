@@ -1,9 +1,12 @@
 import os
 
 import pytest
+from packaging import version
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.utils import ON_LINUX, ON_MACOS
+
+from ..common import HAPROXY_LEGACY, HAPROXY_VERSION
 
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a', 'haproxy_service:a'], 1),
@@ -51,8 +54,6 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 STATS_SOCKET = "tcp://{0}:{1}".format(HOST, SOCKET_PORT)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
-HAPROXY_VERSION = os.getenv('HAPROXY_VERSION')
-HAPROXY_LEGACY = os.getenv('HAPROXY_LEGACY')
 
 platform_supports_sockets = ON_LINUX or ON_MACOS
 platform_supports_sharing_unix_sockets_through_docker = ON_LINUX
@@ -63,7 +64,7 @@ requires_shareable_unix_socket = pytest.mark.skipif(
     not platform_supports_sharing_unix_sockets_through_docker,
     reason='AF_UNIX sockets cannot be bind-mounted between a macOS host and a linux guest in docker',
 )
-haproxy_less_than_1_6 = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '6']
+haproxy_less_than_1_6 = HAPROXY_VERSION < version.parse('1.6')
 requires_haproxy_tcp_stats = pytest.mark.skipif(
     haproxy_less_than_1_6 or not platform_supports_sockets,
     reason="Multiple `stats socket` definitions aren't supported in 1.4",
@@ -113,67 +114,67 @@ BACKEND_STATUS_METRIC = 'haproxy.count_per_status'
 
 FRONTEND_CHECK = [
     # gauges
-    ('haproxy.frontend.session.current', ['1', '0']),
-    ('haproxy.frontend.session.limit', ['1', '0']),
-    ('haproxy.frontend.session.pct', ['1', '0']),
-    ('haproxy.frontend.requests.rate', ['1', '4']),
-    ('haproxy.frontend.connections.rate', ['1', '7']),
-    ('haproxy.frontend.bytes.in.total', ['1', '0']),
-    ('haproxy.frontend.bytes.out.total', ['1', '0']),
+    ('haproxy.frontend.session.current', '1.0'),
+    ('haproxy.frontend.session.limit', '1.0'),
+    ('haproxy.frontend.session.pct', '1.0'),
+    ('haproxy.frontend.requests.rate', '1.4'),
+    ('haproxy.frontend.connections.rate', '1.7'),
+    ('haproxy.frontend.bytes.in.total', '1.0'),
+    ('haproxy.frontend.bytes.out.total', '1.0'),
     # rates
-    ('haproxy.frontend.bytes.in_rate', ['1', '0']),
-    ('haproxy.frontend.bytes.out_rate', ['1', '0']),
-    ('haproxy.frontend.denied.req_rate', ['1', '0']),
-    ('haproxy.frontend.denied.resp_rate', ['1', '0']),
-    ('haproxy.frontend.errors.req_rate', ['1', '0']),
-    ('haproxy.frontend.session.rate', ['1', '0']),
-    ('haproxy.frontend.response.1xx', ['1', '4']),
-    ('haproxy.frontend.response.2xx', ['1', '4']),
-    ('haproxy.frontend.response.3xx', ['1', '4']),
-    ('haproxy.frontend.response.4xx', ['1', '4']),
-    ('haproxy.frontend.response.5xx', ['1', '4']),
-    ('haproxy.frontend.response.other', ['1', '4']),
-    ('haproxy.frontend.requests.tot_rate', ['1', '4']),
-    ('haproxy.frontend.connections.tot_rate', ['1', '7']),
-    ('haproxy.frontend.requests.intercepted', ['1', '7']),
+    ('haproxy.frontend.bytes.in_rate', '1.0'),
+    ('haproxy.frontend.bytes.out_rate', '1.0'),
+    ('haproxy.frontend.denied.req_rate', '1.0'),
+    ('haproxy.frontend.denied.resp_rate', '1.0'),
+    ('haproxy.frontend.errors.req_rate', '1.0'),
+    ('haproxy.frontend.session.rate', '1.0'),
+    ('haproxy.frontend.response.1xx', '1.4'),
+    ('haproxy.frontend.response.2xx', '1.4'),
+    ('haproxy.frontend.response.3xx', '1.4'),
+    ('haproxy.frontend.response.4xx', '1.4'),
+    ('haproxy.frontend.response.5xx', '1.4'),
+    ('haproxy.frontend.response.other', '1.4'),
+    ('haproxy.frontend.requests.tot_rate', '1.4'),
+    ('haproxy.frontend.connections.tot_rate', '1.7'),
+    ('haproxy.frontend.requests.intercepted', '1.7'),
 ]
 
 BACKEND_CHECK = [
     # gauges
-    ('haproxy.backend.queue.current', ['1', '0']),
-    ('haproxy.backend.session.current', ['1', '0']),
-    ('haproxy.backend.queue.time', ['1', '5']),
-    ('haproxy.backend.connect.time', ['1', '5']),
-    ('haproxy.backend.response.time', ['1', '5']),
-    ('haproxy.backend.session.time', ['1', '5']),
-    ('haproxy.backend.uptime', ['1', '7']),
-    ('haproxy.backend.bytes.in.total', ['1', '0']),
-    ('haproxy.backend.bytes.out.total', ['1', '0']),
+    ('haproxy.backend.queue.current', '1.0'),
+    ('haproxy.backend.session.current', '1.0'),
+    ('haproxy.backend.queue.time', '1.5'),
+    ('haproxy.backend.connect.time', '1.5'),
+    ('haproxy.backend.response.time', '1.5'),
+    ('haproxy.backend.session.time', '1.5'),
+    ('haproxy.backend.uptime', '1.7'),
+    ('haproxy.backend.bytes.in.total', '1.0'),
+    ('haproxy.backend.bytes.out.total', '1.0'),
     # rates
-    ('haproxy.backend.bytes.in_rate', ['1', '0']),
-    ('haproxy.backend.bytes.out_rate', ['1', '0']),
-    ('haproxy.backend.denied.resp_rate', ['1', '0']),
-    ('haproxy.backend.errors.con_rate', ['1', '0']),
-    ('haproxy.backend.errors.resp_rate', ['1', '0']),
-    ('haproxy.backend.session.rate', ['1', '0']),
-    ('haproxy.backend.warnings.redis_rate', ['1', '0']),
-    ('haproxy.backend.warnings.retr_rate', ['1', '0']),
-    ('haproxy.backend.response.1xx', ['1', '4']),
-    ('haproxy.backend.response.2xx', ['1', '4']),
-    ('haproxy.backend.response.3xx', ['1', '4']),
-    ('haproxy.backend.response.4xx', ['1', '4']),
-    ('haproxy.backend.response.5xx', ['1', '4']),
-    ('haproxy.backend.response.other', ['1', '4']),
+    ('haproxy.backend.bytes.in_rate', '1.0'),
+    ('haproxy.backend.bytes.out_rate', '1.0'),
+    ('haproxy.backend.denied.resp_rate', '1.0'),
+    ('haproxy.backend.errors.con_rate', '1.0'),
+    ('haproxy.backend.errors.resp_rate', '1.0'),
+    ('haproxy.backend.session.rate', '1.0'),
+    ('haproxy.backend.warnings.redis_rate', '1.0'),
+    ('haproxy.backend.warnings.retr_rate', '1.0'),
+    ('haproxy.backend.response.1xx', '1.4'),
+    ('haproxy.backend.response.2xx', '1.4'),
+    ('haproxy.backend.response.3xx', '1.4'),
+    ('haproxy.backend.response.4xx', '1.4'),
+    ('haproxy.backend.response.5xx', '1.4'),
+    ('haproxy.backend.response.other', '1.4'),
 ]
 
 BACKEND_AGGREGATE_ONLY_CHECK = [
     # gauges
-    ('haproxy.backend.uptime', ['1', '0']),
-    ('haproxy.backend.session.limit', ['1', '0']),
-    ('haproxy.backend.session.pct', ['1', '5']),
+    ('haproxy.backend.uptime', '1.0'),
+    ('haproxy.backend.session.limit', '1.0'),
+    ('haproxy.backend.session.pct', '1.5'),
     # rates
-    ('haproxy.backend.denied.req_rate', ['1', '0']),
-    ('haproxy.backend.requests.tot_rate', ['1', '7']),
+    ('haproxy.backend.denied.req_rate', '1.0'),
+    ('haproxy.backend.requests.tot_rate', '1.7'),
 ]
 
 SERVICE_CHECK_NAME = 'haproxy.backend_up'

@@ -13,13 +13,15 @@ class MockResponse(Response):
 
         if file_path is not None:
             with open(file_path, 'rb') as f:
-                self.raw = BytesIO(f.read())
+                self._content = f.read()
+                self.raw = BytesIO(self._content)
         else:
             # For multi-line string literals
             if normalize_content:
                 content = dedent(content[1:])
 
-            self.raw = BytesIO(content.encode('utf-8'))
+            self._content = content.encode('utf-8')
+            self.raw = BytesIO(self._content)
 
         # Add new keyword arguments to set as needed
         self.status_code = status_code

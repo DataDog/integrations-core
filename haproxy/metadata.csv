@@ -135,7 +135,7 @@ haproxy.process.current.ssl.rate,gauge,,,,Current number of SSL sessions per sec
 haproxy.process.current.tasks,gauge,,,,Current number of tasks.,0,haproxy,
 haproxy.process.current.zlib.memory,gauge,,,,Current memory used for zlib in bytes.,0,haproxy,
 haproxy.process.dropped.logs.total,count,,,,Total number of dropped logs.,0,haproxy,
-haproxy.process.frontent.ssl.reuse,gauge,,,,SSL session reuse ratio (percent).,0,haproxy,
+haproxy.process.frontend.ssl.reuse,gauge,,,,SSL session reuse ratio (percent).,0,haproxy,
 haproxy.process.hard.max.connections,gauge,,,,Initial Maximum number of concurrent connections.,0,haproxy,
 haproxy.process.http.comp.bytes.in.total,count,,byte,,"Number of bytes per second over last elapsed second, before http compression.",0,haproxy,
 haproxy.process.http.comp.bytes.out.total,count,,byte,,"Number of bytes per second over last elapsed second, after http compression.",0,haproxy,

@@ -161,6 +161,9 @@ jobs:
     - checkName: gitlab_runner
       displayName: Gitlab Runner
       os: linux
+    - checkName: glusterfs
+      displayName: GlusterFS
+      os: linux
     - checkName: go_expvar
       displayName: Go-Expvar
       os: linux

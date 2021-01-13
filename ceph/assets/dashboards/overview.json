@@ -1,0 +1,660 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard displays a high-level overview of Ceph operations and performance, so you can track throughput and latency metrics from your clusters, hosts, and pools and spot performance bottlenecks. Further reading on Ceph monitoring:\n\n- [Datadog's Ceph integration docs](https://docs.datadoghq.com/integrations/ceph/)\n\n- [How to monitor Ceph with Datadog](https://www.datadoghq.com/blog/monitor-ceph-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "cluster",
+            "prefix": "ceph_fsid"
+        },
+        {
+            "default": "*",
+            "name": "pool",
+            "prefix": "ceph_pool"
+        }
+    ],
+    "title": "Ceph - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "This dashboard displays a high-level overview of Ceph operations and performance, so you can track throughput and latency metrics from your clusters, hosts, and pools and spot performance bottlenecks. Further reading on Ceph monitoring:\n\n- [Datadog's Ceph integration docs](https://docs.datadoghq.com/integrations/ceph/)\n\n- [How to monitor Ceph with Datadog](https://www.datadoghq.com/blog/monitor-ceph-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 235863041612358,
+            "layout": {
+                "height": 29,
+                "width": 24,
+                "x": 0,
+                "y": 13
+            }
+        },
+        {
+            "definition": {
+                "sizing": "fit",
+                "type": "image",
+                "url": "/static/images/screenboard/integrations/ceph.png"
+            },
+            "id": 3098944331182854,
+            "layout": {
+                "height": 11,
+                "width": 24,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "content": "Summary",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3887434934160030,
+            "layout": {
+                "height": 5,
+                "width": 63,
+                "x": 25,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "core_host",
+                    "core_service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:ceph",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 3320715068956676,
+            "layout": {
+                "height": 55,
+                "width": 39,
+                "x": 123,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "content": "Logs",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5447937950269810,
+            "layout": {
+                "height": 5,
+                "width": 39,
+                "x": 123,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "check": "ceph.overall_status",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "title": "Cluster Status",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 6912024370482208,
+            "layout": {
+                "height": 8,
+                "width": 15,
+                "x": 39,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(avg:ceph.op_per_sec{$cluster,$pool} by {ceph_pool}, 10, 'mean', 'desc')"
+                    }
+                ],
+                "time": {},
+                "title": "Most active pools over $cluster,$pool (Top 10)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
+            },
+            "id": 7515865290073012,
+            "layout": {
+                "height": 14,
+                "width": 31,
+                "x": 25,
+                "y": 32
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:ceph.aggregate_pct_used{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Cluster CPU usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8511688774416606,
+            "layout": {
+                "height": 8,
+                "width": 16,
+                "x": 55,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_pools{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Pools over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 2062305355451408,
+            "layout": {
+                "height": 9,
+                "width": 15,
+                "x": 39,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "pgs",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_pgs{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Pgs over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 3363288033121744,
+            "layout": {
+                "height": 9,
+                "width": 16,
+                "x": 55,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "osds",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_osds{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Osds over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 947929487000264,
+            "layout": {
+                "height": 8,
+                "width": 16,
+                "x": 72,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_mons{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Monitors over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8238635970749718,
+            "layout": {
+                "height": 9,
+                "width": 16,
+                "x": 72,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(avg:ceph.num_objects{$cluster,$pool} by {ceph_pool}, 25, 'mean', 'desc')"
+                    }
+                ],
+                "time": {},
+                "title": "Most populated pools over $cluster,$pool (top 10)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
+            },
+            "id": 5620900631645414,
+            "layout": {
+                "height": 14,
+                "width": 31,
+                "x": 57,
+                "y": 32
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:ceph.apply_latency_ms{$cluster,$pool}, avg:ceph.commit_latency_ms{$cluster,$pool}",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Commit and apply latency",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1628595526063412,
+            "layout": {
+                "height": 14,
+                "width": 31,
+                "x": 25,
+                "y": 47
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:ceph.read_bytes_sec{$cluster,$pool}, avg:ceph.write_bytes_sec{$cluster,$pool}",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Read/write throughput",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 623625860294090,
+            "layout": {
+                "height": 14,
+                "width": 31,
+                "x": 57,
+                "y": 47
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "content": "Pools",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2363511451930750,
+            "layout": {
+                "height": 5,
+                "width": 96,
+                "x": 25,
+                "y": 26
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If you use more than one cluster, you can easily zero in on one particular cluster by changing the cluster template variable.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2844890023638974,
+            "layout": {
+                "height": 18,
+                "width": 13,
+                "x": 25,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "content": "OSDs",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6618153688871746,
+            "layout": {
+                "height": 5,
+                "width": 31,
+                "x": 90,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_in_osds{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Participating storage daemon over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8074199068993866,
+            "layout": {
+                "height": 8,
+                "width": 15,
+                "x": 90,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_up_osds{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Online storage daemon over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 2155049788656532,
+            "layout": {
+                "height": 8,
+                "width": 15,
+                "x": 106,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_yellow",
+                                "value": 0
+                            },
+                            {
+                                "comparator": "<=",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "q": "sum:ceph.num_near_full_osds{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Nearly full osds over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5783184769328208,
+            "layout": {
+                "height": 9,
+                "width": 15,
+                "x": 90,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 0
+                            },
+                            {
+                                "comparator": "<=",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "q": "sum:ceph.num_full_osds{$cluster}"
+                    }
+                ],
+                "time": {},
+                "title": "Full osds over $cluster",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 4550773149480958,
+            "layout": {
+                "height": 9,
+                "width": 15,
+                "x": 106,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "objs",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:ceph.num_objects{$cluster,$pool}"
+                    }
+                ],
+                "time": {},
+                "title": "Objects over $cluster,$pool",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 4044934278684662,
+            "layout": {
+                "height": 9,
+                "width": 15,
+                "x": 89,
+                "y": 34
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:ceph.pct_used{$cluster,$pool}"
+                    }
+                ],
+                "time": {},
+                "title": "CPU usage over $cluster,$pool",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 855424720598072,
+            "layout": {
+                "height": 9,
+                "width": 15,
+                "x": 106,
+                "y": 34
+            }
+        },
+        {
+            "definition": {
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:ceph.read_op_per_sec{$cluster,$pool}, avg:ceph.write_op_per_sec{$cluster,$pool}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "R/W activity over $cluster,$pool",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3585394507792914,
+            "layout": {
+                "height": 14,
+                "width": 31,
+                "x": 90,
+                "y": 47
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Datadog provides read/write throughput, capacity usage, and number of objects stored with pool-level resolution. You can leverage this feature to gather details about each pool\u2019s usage pattern and quickly spot overloaded pools to tune the application for better performance.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 901565980682372,
+            "layout": {
+                "height": 18,
+                "width": 24,
+                "x": 0,
+                "y": 43
+            }
+        }
+    ]
+}

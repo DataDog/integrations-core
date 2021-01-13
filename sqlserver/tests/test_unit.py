@@ -99,7 +99,52 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
         check.initialize_connection()
 
 
-def test_autodiscovery_patterns(instance_autodiscovery, dd_run_check):
+def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
+    fetchall_results, mock_cursor = _mock_database_list()
+    all_dbs = set([r.name for r in fetchall_results])
+    # check base case of default filters
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == all_dbs
+
+
+def test_autodiscovery_matches_none(instance_autodiscovery):
+    fetchall_results, mock_cursor = _mock_database_list()
+    # check missing additions, but no exclusions
+    mock_cursor.fetchall.return_value = iter(fetchall_results)  # reset the mock results
+    instance_autodiscovery['autodiscovery_include'] = ['missingdb', 'fakedb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set()
+
+
+def test_autodiscovery_matches_some(instance_autodiscovery):
+    fetchall_results, mock_cursor = _mock_database_list()
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'fancy2020db', 'missingdb', 'fakedb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set(['master', 'Fancy2020db'])
+
+
+def test_autodiscovery_exclude_some(instance_autodiscovery):
+    fetchall_results, mock_cursor = _mock_database_list()
+    instance_autodiscovery['autodiscovery_include'] = ['.*']  # replace default `.*`
+    instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set(['tempdb', 'AdventureWorks2017', 'CaseSensitive2018'])
+
+
+def test_autodiscovery_exclude_override(instance_autodiscovery):
+    fetchall_results, mock_cursor = _mock_database_list()
+    instance_autodiscovery['autodiscovery_include'] = ['t.*', 'master']  # remove default `.*`
+    instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == set(['tempdb'])
+
+
+def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [
         Row('master'),
@@ -110,47 +155,11 @@ def test_autodiscovery_patterns(instance_autodiscovery, dd_run_check):
         Row('CaseSensitive2018'),
         Row('Fancy2020db'),
     ]
-    all_dbs = set([r.name for r in fetchall_results])
-
     mock_cursor = mock.MagicMock()
     mock_cursor.fetchall.return_value = iter(fetchall_results)
-
-    instance = copy.deepcopy(instance_autodiscovery)
-
-    # check base case of default filters
-    check = SQLServer(CHECK_NAME, {}, [instance])
-    check.autodiscover_databases(mock_cursor)
-    assert check.databases == all_dbs
-
-    # check missing additions, but no exclusions
-    mock_cursor.fetchall.return_value = iter(fetchall_results)  # reset the mock results
-    instance['autodiscovery_include'] = ['missingdb', 'fakedb']
-    check = SQLServer(CHECK_NAME, {}, [instance])
-    check.autodiscover_databases(mock_cursor)
-    assert check.databases == set()
-
-    # check included found and missing additions
-    mock_cursor.fetchall.return_value = iter(fetchall_results)
-    instance['autodiscovery_include'] = ['master', 'fancy2020db', 'missingdb', 'fakedb']
-    check = SQLServer(CHECK_NAME, {}, [instance])
-    check.autodiscover_databases(mock_cursor)
-    assert check.databases == set(['master', 'Fancy2020db'])
-
-    # check excluded dbs
-    mock_cursor.fetchall.return_value = iter(fetchall_results)
-    instance['autodiscovery_include'] = ['.*']  # replace default `.*`
-    instance['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
-    check = SQLServer(CHECK_NAME, {}, [instance])
-    check.autodiscover_databases(mock_cursor)
-    assert check.databases == set(['tempdb', 'AdventureWorks2017', 'CaseSensitive2018'])
-
     # check excluded overrides included
     mock_cursor.fetchall.return_value = iter(fetchall_results)
-    instance['autodiscovery_include'] = ['t.*', 'master']  # remove default `.*`
-    instance['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
-    check = SQLServer(CHECK_NAME, {}, [instance])
-    check.autodiscover_databases(mock_cursor)
-    assert check.databases == set(['tempdb'])
+    return fetchall_results, mock_cursor
 
 
 def test_set_default_driver_conf():

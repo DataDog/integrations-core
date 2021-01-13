@@ -76,6 +76,7 @@ setup(
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'jsonschema',
+            'markdown',
             'packaging',
             'pip-tools',
             'pyperclip>=1.7.0',

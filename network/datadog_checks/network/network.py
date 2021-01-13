@@ -6,10 +6,13 @@
 Collects network metrics.
 """
 
+import array
 import distutils.spawn
+import fcntl
 import os
 import re
 import socket
+import struct
 from collections import defaultdict
 
 import psutil
@@ -41,6 +44,25 @@ SOLARIS_TCP_METRICS = [
     (re.compile(r"\s*tcpInSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.out_segs'),
 ]
 
+# constants for extracting ethtool data via ioctl
+SIOCETHTOOL = 0x8946
+ETHTOOL_GSTRINGS = 0x0000001B
+ETHTOOL_GSSET_INFO = 0x00000037
+ETHTOOL_GSTATS = 0x0000001D
+ETH_SS_STATS = 0x1
+ETH_GSTRING_LEN = 32
+
+# ENA metrics that we're collecting
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-network-performance.html
+ENA_METRIC_PREFIX = "aws.ec2."
+ENA_METRIC_NAMES = [
+    "bw_in_allowance_exceeded",
+    "bw_out_allowance_exceeded",
+    "conntrack_allowance_exceeded",
+    "linklocal_allowance_exceeded",
+    "pps_allowance_exceeded",
+]
+
 
 class Network(AgentCheck):
 
@@ -64,6 +86,7 @@ class Network(AgentCheck):
         self._collect_cx_queues = instance.get('collect_connection_queues', False)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
+        self._collect_ena_metrics = instance.get('collect_aws_ena_metrics', False)
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -251,6 +274,24 @@ class Network(AgentCheck):
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
 
+    def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return False
+
+        metric_tags = [] if tags is None else tags[:]
+        metric_tags.append('device:{}'.format(iface))
+
+        allowed = [ENA_METRIC_PREFIX + m for m in ENA_METRIC_NAMES]
+        for m in vals_by_metric:
+            assert m in allowed
+
+        count = 0
+        for metric, val in iteritems(vals_by_metric):
+            self.gauge('system.net.%s' % metric, val, tags=metric_tags)
+            count += 1
+        self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
+
     def _parse_value(self, v):
         try:
             return long(v)
@@ -408,6 +449,12 @@ class Network(AgentCheck):
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics, custom_tags)
+
+                # read ENA metrics, if configured and available
+                if self._collect_ena_metrics:
+                    ena_metrics = self._collect_ena(iface)
+                    if ena_metrics:
+                        self._submit_ena_metrics(iface, ena_metrics, custom_tags)
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
@@ -899,3 +946,79 @@ class Network(AgentCheck):
                 continue
 
             yield (state, fields[1], fields[2])
+
+    def _collect_ena(self, iface):
+        """
+        Collect ENA metrics for given interface.
+
+        ENA metrics are collected via the ioctl SIOCETHTOOL call. At the time of writing
+        this method, there are no maintained Python libraries that do this. The solution
+        is based on:
+
+        * https://github.com/safchain/ethtool
+        * https://gist.github.com/yunazuno/d7cd7e1e127a39192834c75d85d45df9
+        """
+        ethtool_socket = None
+        try:
+            ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+            return self._get_ena_metrics(iface, ethtool_socket)
+        except OSError as e:
+            # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
+            self.log.debug('OSError while trying to collect ENA metrics for interface %s: %s', iface, str(e))
+        except Exception:
+            self.log.exception('Unable to collect ENA metrics for interface %s', iface)
+        finally:
+            if ethtool_socket is not None:
+                ethtool_socket.close()
+        return {}
+
+    def _send_ethtool_ioctl(self, iface, sckt, data):
+        """
+        Send an ioctl SIOCETHTOOL call for given interface with given data.
+        """
+        ifr = struct.pack('16sP', iface.encode('utf-8'), data.buffer_info()[0])
+        fcntl.ioctl(sckt.fileno(), SIOCETHTOOL, ifr)
+
+    def _get_ethtool_gstringset(self, iface, sckt):
+        """
+        Retrieve names of all ethtool stats for given interface.
+        """
+        sset_info = array.array('B', struct.pack('IIQI', ETHTOOL_GSSET_INFO, 0, 1 << ETH_SS_STATS, 0))
+        self._send_ethtool_ioctl(iface, sckt, sset_info)
+        sset_mask, sset_len = struct.unpack('8xQI', sset_info)
+        if sset_mask == 0:
+            sset_len = 0
+
+        strings = array.array('B', struct.pack('III', ETHTOOL_GSTRINGS, ETH_SS_STATS, sset_len))
+        strings.extend([0] * sset_len * ETH_GSTRING_LEN)
+        self._send_ethtool_ioctl(iface, sckt, strings)
+
+        all_names = []
+        for i in range(sset_len):
+            offset = 12 + ETH_GSTRING_LEN * i
+            s = strings[offset : offset + ETH_GSTRING_LEN]
+            s = s.tobytes() if PY3 else s.tostring()
+            s = s.partition(b'\x00')[0].decode('utf-8')
+            all_names.append(s)
+        return all_names
+
+    def _get_ena_metrics(self, iface, sckt):
+        """
+        Get all ENA metrics specified in ENA_METRICS_NAMES list and their values from ethtool.
+        """
+        stats_names = list(self._get_ethtool_gstringset(iface, sckt))
+        stats_count = len(stats_names)
+
+        stats = array.array('B', struct.pack('II', ETHTOOL_GSTATS, stats_count))
+        # we need `stats_count * (length of uint64)` for the result
+        stats.extend([0] * len(struct.pack('Q', 0)) * stats_count)
+        self._send_ethtool_ioctl(iface, sckt, stats)
+
+        metrics = {}
+        for i, stat_name in enumerate(stats_names):
+            if stat_name in ENA_METRIC_NAMES:
+                offset = 8 + 8 * i
+                value = struct.unpack('Q', stats[offset : offset + 8])[0]
+                metrics[ENA_METRIC_PREFIX + stat_name] = value
+
+        return metrics
