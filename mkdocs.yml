@@ -37,6 +37,7 @@ nav:
     - About: base/about.md
     - Basics: base/basics.md
     - HTTP: base/http.md
+    - TLS/SSL: base/tls.md
     - Databases: base/databases.md
     - Prometheus: base/prometheus.md
     - Metadata: base/metadata.md
