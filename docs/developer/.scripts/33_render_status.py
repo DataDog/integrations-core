@@ -4,6 +4,7 @@ from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
     get_default_config_spec,
+    get_default_docs_spec,
     get_valid_checks,
     get_valid_integrations,
     has_logs,
@@ -13,7 +14,7 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, get_default_docs_spec,
+    is_tile_only,
 )
 
 MARKER = '<docs-insert-status>'
