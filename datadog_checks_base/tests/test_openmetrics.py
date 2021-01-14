@@ -621,9 +621,7 @@ def test_submit_histograms(
         sum_type = aggregator.MONOTONIC_COUNT
 
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
-    _histo.add_metric(
-        [], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
-    )
+    _histo.add_metric([], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337)
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config.update(config)
 
