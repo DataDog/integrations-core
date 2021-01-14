@@ -1,6 +1,6 @@
 # CHANGELOG - Amazon MSK
 
-## 1.4.0 / 2020-12-11
+## 1.4.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add ability to assume a specified role when retrieving MSK metadata. See [#8118](https://github.com/DataDog/integrations-core/pull/8118). Thanks [garrett528](https://github.com/garrett528).
 

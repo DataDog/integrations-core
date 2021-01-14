@@ -4,7 +4,7 @@
 
 * [Fixed] Do not throw configuration error for missing password when using OAuth. See [#8363](https://github.com/DataDog/integrations-core/pull/8363).
 
-## 3.0.0 / 2020-12-11
+## 3.0.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Support proxy settings. See [#8019](https://github.com/DataDog/integrations-core/pull/8019).
 * [Fixed] Document Snowflake connector proxy configuration and support proxy connection options. See [#8181](https://github.com/DataDog/integrations-core/pull/8181).

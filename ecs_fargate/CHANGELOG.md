@@ -1,6 +1,6 @@
 # CHANGELOG - ECS Fargate
 
-## 2.11.0 / 2020-12-11
+## 2.11.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Amazon fargate config specs. See [#8003](https://github.com/DataDog/integrations-core/pull/8003).
 

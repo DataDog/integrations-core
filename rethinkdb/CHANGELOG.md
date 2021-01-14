@@ -1,6 +1,6 @@
 # CHANGELOG - RethinkDB
 
-## 1.3.1 / 2020-12-11
+## 1.3.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Refactor to use QueryManager. See [#8143](https://github.com/DataDog/integrations-core/pull/8143).
 

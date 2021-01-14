@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-## 1.9.1 / 2020-12-11
+## 1.9.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Skip metrics instead of throwing exceptions. See [#8053](https://github.com/DataDog/integrations-core/pull/8053).
 

@@ -10,7 +10,7 @@
 * [Fixed] Add debug messages to SQLServer. See [#8278](https://github.com/DataDog/integrations-core/pull/8278).
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
 
-## 2.3.0 / 2020-12-04
+## 2.3.0 / 2020-12-04 / Agent 7.25.0
 
 * [Added] Add support for database autodiscovery. See [#8115](https://github.com/DataDog/integrations-core/pull/8115).
 * [Added] Add FCI metrics for SQLServer. See [#8056](https://github.com/DataDog/integrations-core/pull/8056).

@@ -1,6 +1,6 @@
 # CHANGELOG - elastic
 
-## 1.22.1 / 2020-12-17
+## 1.22.1 / 2020-12-17 / Agent 7.25.0
 
 * [Fixed] Fix tags memory leak. See [#8213](https://github.com/DataDog/integrations-core/pull/8213).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-## 1.17.1 / 2020-12-11
+## 1.17.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Add consul 1.9.0 metrics. See [#8095](https://github.com/DataDog/integrations-core/pull/8095).
 

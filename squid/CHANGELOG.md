@@ -1,6 +1,6 @@
 # CHANGELOG - Squid
 
-## 1.9.1 / 2020-12-09
+## 1.9.1 / 2020-12-09 / Agent 7.25.0
 
 * [Fixed] [Squid] Allow https. See [#8122](https://github.com/DataDog/integrations-core/pull/8122).
 

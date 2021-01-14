@@ -1,6 +1,6 @@
 # CHANGELOG - Airflow
 
-## 1.7.1 / 2020-12-11
+## 1.7.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Update check signature. See [#8175](https://github.com/DataDog/integrations-core/pull/8175).
 
