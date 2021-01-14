@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 3.10.0 / 2020-12-07
+## 3.10.0 / 2020-12-07 / Agent 7.25.0
 
 * [Added] Add snmp interface bandwidth usage metric. See [#8093](https://github.com/DataDog/integrations-core/pull/8093).
 * [Added] Add interface alias (ifAlias) as a tag to interface metrics. See [#8018](https://github.com/DataDog/integrations-core/pull/8018). Thanks [loganmc10](https://github.com/loganmc10).

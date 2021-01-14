@@ -1,6 +1,6 @@
 # CHANGELOG - IBM WAS
 
-## 1.8.1 / 2020-12-23
+## 1.8.1 / 2020-12-23 / Agent 7.25.0
 
 * [Fixed] Bump lxml to 4.6.2. See [#8249](https://github.com/DataDog/integrations-core/pull/8249).
 

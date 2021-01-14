@@ -1,6 +1,6 @@
 # CHANGELOG - Hyper-V
 
-## 1.3.1 / 2020-12-11
+## 1.3.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
 * [Fixed] Fix pdh configuration spec. See [#8106](https://github.com/DataDog/integrations-core/pull/8106).

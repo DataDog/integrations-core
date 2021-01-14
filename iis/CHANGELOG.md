@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.10.3 / 2020-12-11
+## 2.10.3 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Add config specs. See [#8109](https://github.com/DataDog/integrations-core/pull/8109).
 

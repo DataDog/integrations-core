@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## 3.3.0 / 2021-01-06
+## 3.3.0 / 2021-01-06 / Agent 7.25.0
 
 * [Added] Update redis dependency. See [#8301](https://github.com/DataDog/integrations-core/pull/8301).
 

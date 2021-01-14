@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.8.1 / 2020-12-15
+## 2.8.1 / 2020-12-15 / Agent 7.25.0
 
 * [Fixed] Use spec template. See [#8192](https://github.com/DataDog/integrations-core/pull/8192).
 
