@@ -47,12 +47,16 @@ class Config(object):
         if account is None:
             raise ConfigurationError('Must specify an account')
 
-        if authenticator == 'snowflake':
-            if user is None or password is None:
-                raise ConfigurationError('Must specify a user and password')
+        if user is None:
+            raise ConfigurationError('Must specify a user')
 
+        if authenticator == 'snowflake':
             if is_affirmative(passcode_in_password) and passcode is None:
                 raise ConfigurationError('MFA enabled, please specify a passcode')
+
+            if password is None:
+                raise ConfigurationError('Must specify a password if using snowflake authentication')
+
         else:
             if authenticator == 'oauth' and token is None:
                 raise ConfigurationError('If using OAuth, you must specify a token')
