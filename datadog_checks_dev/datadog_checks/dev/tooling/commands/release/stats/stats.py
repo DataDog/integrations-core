@@ -35,8 +35,11 @@ def parse_commit(commit):
 @click.option('--from-ref', '-f', help="Reference to start stats on (first RC tagged)", required=True)
 @click.option('--to-ref', '-t', help="Reference to end stats at (current RC/final tag)", required=True)
 @click.option('--release-milestone', '-r', help="Github release milestone", required=True)
+@click.option(
+    '--exclude-releases', '-e', help="Flag to exclude the release PRs from the list", required=False, is_flag=True
+)
 @click.pass_context
-def merged_prs(ctx, from_ref, to_ref, release_milestone):
+def merged_prs(ctx, from_ref, to_ref, release_milestone, exclude_releases):
 
     agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
     integrations_release = Release.from_github(
@@ -44,6 +47,15 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone):
     )
 
     changes = [parse_commit(commit) for commit in agent_release.commits + integrations_release.commits]
+
+    if exclude_releases:
+        filtered_changes = []
+        for change in changes:
+            title = change['title'].lower()
+            if not title.startswith('[release]') and not title.startswith('release'):
+                filtered_changes.append(change)
+        changes = filtered_changes
+
     changes = sorted(changes, key=lambda x: x['next_tag'])  # sort by RC
     for change in changes:
         print(','.join([change[field] for field in ['url', 'teams', 'next_tag', 'title']]))
