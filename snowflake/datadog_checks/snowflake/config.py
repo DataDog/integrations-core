@@ -47,20 +47,21 @@ class Config(object):
         if account is None:
             raise ConfigurationError('Must specify an account')
 
-        if user is None or password is None:
-            raise ConfigurationError('Must specify a user and password')
+        if authenticator == 'snowflake':
+            if user is None or password is None:
+                raise ConfigurationError('Must specify a user and password')
+
+            if is_affirmative(passcode_in_password) and passcode is None:
+                raise ConfigurationError('MFA enabled, please specify a passcode')
+        else:
+            if authenticator == 'oauth' and token is None:
+                raise ConfigurationError('If using OAuth, you must specify a token')
+
+            if authenticator not in self.AUTHENTICATION_MODES:
+                raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
 
         if not isinstance(tags, list):
             raise ConfigurationError('tags {!r} must be a list (got {!r})'.format(tags, type(tags)))
-
-        if is_affirmative(passcode_in_password) and passcode is None:
-            raise ConfigurationError('MFA enabled, please specify a passcode')
-
-        if authenticator not in self.AUTHENTICATION_MODES:
-            raise ConfigurationError('The Authenticator method set is invalid: {}'.format(authenticator))
-
-        if authenticator == 'oauth' and token is None:
-            raise ConfigurationError('If using OAuth, you must specify a token')
 
         if role is None:
             raise ConfigurationError('Must specify a role')
