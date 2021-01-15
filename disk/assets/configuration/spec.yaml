@@ -252,4 +252,4 @@ files:
               - name: share
                 type: string
               - name: type
-                type: nfs
+                type: string
