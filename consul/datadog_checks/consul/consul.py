@@ -283,8 +283,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
             )
 
             if len(allowed_services) <= self.max_services:
-                log_line = 'Consul service whitelist not defined. Agent will poll for all %s services found', len(allowed_services)
-                         
+                log_line = (
+                    'Consul service whitelist not defined.' 
+                    'Agent will poll for all %s services found', len(allowed_services)
+                )         
                 self.log.debug(log_line)
                 services = allowed_services
             else:
