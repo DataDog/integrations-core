@@ -1,22 +1,20 @@
-FROM ubuntu:18.04
+FROM python:alpine
 
 # Update sources and install required packages
-RUN apt-get update \
- && apt-get -y install --no-install-recommends \
-      apt-transport-https \
-      build-essential \
+RUN apk update \
+ && apk add --virtual build-dependencies \
+     build-base \
+     gcc \
+ && apk add \
       ca-certificates \
       curl \
       gcc \
       git \
       libffi-dev \
-      libssl-dev \
+      libressl-dev \
       moreutils \
       openssh-client \
       python3-dev \
- # Clean up
- && apt-get -y autoremove \
- && apt-get -y clean \
  && rm -rf /tmp/* \
  && rm -rf /var/lib/apt/lists/* \
  && rm -rf /var/tmp/*
