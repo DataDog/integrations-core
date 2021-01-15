@@ -486,6 +486,13 @@ CLUSTER_PENDING_TASKS = {
     'elasticsearch.pending_tasks_time_in_queue': ('gauge', 'pending_tasks_time_in_queue'),
 }
 
+SLM_POLICY_METRICS = {
+    'elasticsearch.slm.snapshot_deletion_failures': ('gauge', 'stats.snapshot_deletion_failures'),
+    'elasticsearch.slm.snapshots_deleted': ('gauge', 'stats.snapshots_deleted'),
+    'elasticsearch.slm.snapshots_failed': ('gauge', 'stats.snapshots_failed'),
+    'elasticsearch.slm.snapshots_taken': ('gauge', 'stats.snapshots_taken'),
+}
+
 NODE_SYSTEM_METRICS = {
     'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
     'system.mem.usable': ('gauge', 'os.mem.free_in_bytes'),
@@ -609,6 +616,17 @@ def health_stats_for_version(version):
         cluster_health_metrics.update(CLUSTER_HEALTH_METRICS_POST_2_4)
 
     return cluster_health_metrics
+
+
+def slm_stats_for_version(version):
+    """
+    Get the proper set of SLM metrics for the specified ES version
+    """
+    slm_health_metrics = {}
+    if version >= [7, 4, 0]:
+        slm_health_metrics.update(dict(SLM_POLICY_METRICS))
+
+    return slm_health_metrics
 
 
 def index_stats_for_version(version):

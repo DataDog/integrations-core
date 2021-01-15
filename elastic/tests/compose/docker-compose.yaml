@@ -8,6 +8,7 @@ services:
       - "cluster.name=test-cluster"
       - "node.name=test-node"
       - "discovery.type=single-node"
+      - "path.repo=[\"/backup/my_backup_location\"]"
     ports:
       - "9200:9200"
     ulimits:
