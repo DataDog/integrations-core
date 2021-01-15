@@ -399,6 +399,26 @@ def test_collect_ena(send_ethtool_ioctl, check):
 
 
 @mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
+def test_submit_ena(send_ethtool_ioctl, check, aggregator):
+    send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
+    metrics = check._collect_ena('eth0')
+    check._excluded_ifaces = []
+    check._exclude_iface_re = ''
+    check._submit_ena_metrics('eth0', metrics, [])
+
+    expected_metrics = [
+        'system.net.aws.ec2.bw_in_allowance_exceeded',
+        'system.net.aws.ec2.bw_out_allowance_exceeded',
+        'system.net.aws.ec2.conntrack_allowance_exceeded',
+        'system.net.aws.ec2.linklocal_allowance_exceeded',
+        'system.net.aws.ec2.pps_allowance_exceeded',
+    ]
+
+    for m in expected_metrics:
+        aggregator.assert_metric(m, count=1, value=0, tags=['device:eth0'])
+
+
+@mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
 def test_collect_ena_values_not_present(send_ethtool_ioctl, check):
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     assert check._collect_ena('enp0s3') == {}
