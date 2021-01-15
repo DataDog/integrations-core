@@ -34,7 +34,7 @@ Create an Agent user for your default vhost with the following commands:
 
 ```text
 rabbitmqctl add_user datadog <SECRET>
-rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq\.default$" ".*"
+rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq.default$" ".*"
 rabbitmqctl set_user_tags datadog monitoring
 ```
 
