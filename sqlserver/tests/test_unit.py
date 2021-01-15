@@ -57,6 +57,7 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
         Row('tempdb', 'SQL_Latin1_General_CP1_CI_AS'),
         Row('AdventureWorks2017', 'SQL_Latin1_General_CP1_CI_AS'),
         Row('CaseSensitive2018', 'SQL_Latin1_General_CP1_CS_AS'),
+        Row('OfflineDB', None),
     ]
 
     mock_connect.__enter__ = mock.Mock(return_value='foo')
@@ -97,6 +98,12 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
     check = SQLServer(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.initialize_connection()
+
+    # check offline but exists db
+    instance['database'] = 'Offlinedb'
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.initialize_connection()
+    assert check.do_check is True
 
 
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
