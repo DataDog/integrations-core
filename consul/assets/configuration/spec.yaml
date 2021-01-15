@@ -89,7 +89,7 @@ files:
 
     - name: services_exclude
       description: |
-        List services to exclude from the consul service caltalog.
+        List services to exclude from the Consul service catalog.
         Note: The excluded services will take precedence over service_whitelist.
         The default settings will still query up to 50 services.
       value:

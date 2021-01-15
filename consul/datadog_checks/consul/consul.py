@@ -277,7 +277,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
             services = {s: services[s] for s in whitelisted_services[: self.max_services]}
         else:
             allowed_services = {s: services[s] for s in services if s not in self.services_exclude}
-            self.warning(str(services) + " " + str(allowed_services))
 
             self.log.debug(
                 'Filtered services %s with service services_exclude %s', services, self.services_exclude
