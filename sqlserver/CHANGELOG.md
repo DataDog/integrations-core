@@ -1,5 +1,10 @@
 # CHANGELOG - sqlserver
 
+## 2.3.3 / 2021-01-15
+
+* [Fixed] Handle offline databases for existence check. See [#8374](https://github.com/DataDog/integrations-core/pull/8374).
+* [Fixed] Handle overflow error for certain sql queries. See [#8366](https://github.com/DataDog/integrations-core/pull/8366).
+
 ## 2.3.2 / 2021-01-13
 
 * [Fixed] Handle database specific queries for autodiscovery. See [#8329](https://github.com/DataDog/integrations-core/pull/8329).
