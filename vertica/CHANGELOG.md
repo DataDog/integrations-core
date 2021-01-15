@@ -1,6 +1,6 @@
 # CHANGELOG - Vertica
 
-## 1.9.0 / 2020-12-11
+## 1.9.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add option to limit metric collection. See [#7997](https://github.com/DataDog/integrations-core/pull/7997).
 

@@ -58,19 +58,19 @@ _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```yaml
-  logs_enabled: true
-  ```
+    ```yaml
+    logs_enabled: true
+    ```
 
 2. Add this configuration block to your `rethinkdb.d/conf.yaml` file to start collecting your RethinkDB logs:
 
-  ```yaml
-logs:
-  - type: file
-    path: "<LOG_FILE_PATH>"
-    source: rethinkdb
-    service: "<SERVICE_NAME>"
-```
+    ```yaml
+    logs:
+      - type: file
+        path: "<LOG_FILE_PATH>"
+        source: rethinkdb
+        service: "<SERVICE_NAME>"
+    ```
 
 
   Change the `path` and `service` parameter values based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/rethinkdb/datadog_checks/rethinkdb/data/conf.yaml.example for all available configuration options.

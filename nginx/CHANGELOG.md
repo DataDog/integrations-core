@@ -1,6 +1,6 @@
 # CHANGELOG - nginx
 
-## 3.10.1 / 2020-11-16
+## 3.10.1 / 2020-11-16 / Agent 7.25.0
 
 * [Fixed] Fix version metadata collection. See [#7972](https://github.com/DataDog/integrations-core/pull/7972).
 

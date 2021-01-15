@@ -12,7 +12,7 @@
 * [Fixed] Fix aggregator stub's `assert_histogram_bucket` method. See [#8291](https://github.com/DataDog/integrations-core/pull/8291).
 * [Removed] Remove unneccessary `pytz` dependency. See [#8354](https://github.com/DataDog/integrations-core/pull/8354).
 
-## 15.7.2 / 2020-12-23
+## 15.7.2 / 2020-12-23 / Agent 7.25.0
 
 * [Fixed] Bump lxml to 4.6.2. See [#8249](https://github.com/DataDog/integrations-core/pull/8249).
 

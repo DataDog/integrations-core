@@ -17,6 +17,7 @@ from .metrics import (
     index_stats_for_version,
     node_system_stats_for_version,
     pshard_stats_for_version,
+    slm_stats_for_version,
     stats_for_version,
 )
 
@@ -64,7 +65,7 @@ class ESCheck(AgentCheck):
             self.log.exception("The ElasticSearch credentials are incorrect")
             raise
 
-        health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version)
+        health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = self._get_urls(version)
         stats_metrics = stats_for_version(version, jvm_rate)
         if self.config.cluster_stats:
             # Include Node System metrics
@@ -96,6 +97,12 @@ class ESCheck(AgentCheck):
                 if bubble_ex:
                     raise
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
+
+        # Get Snapshot Lifecycle Management (SLM) policies
+        if slm_url is not None:
+            slm_url = self._join_url(slm_url, admin_forwarder)
+            policy_data = self._get_data(slm_url)
+            self._process_policy_data(policy_data, version, base_tags)
 
         # Load the health data.
         health_url = self._join_url(health_url, admin_forwarder)
@@ -154,6 +161,7 @@ class ESCheck(AgentCheck):
         index_resp = self._get_data(index_url)
         index_stats_metrics = index_stats_for_version(version)
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
+        reversed_health_stat = {'red': 0, 'yellow': 1, 'green': 2}
         for idx in index_resp:
             tags = base_tags + ['index_name:' + idx['index']]
             # we need to remap metric names because the ones from elastic
@@ -170,7 +178,9 @@ class ESCheck(AgentCheck):
 
             # Convert the health status value
             if index_data['health'] is not None:
-                index_data['health'] = health_stat[index_data['health'].lower()]
+                status = index_data['health'].lower()
+                index_data['health'] = health_stat[status]
+                index_data['health_reverse'] = reversed_health_stat[status]
 
             # Ensure that index_data does not contain None values
             for key, value in list(iteritems(index_data)):
@@ -189,6 +199,7 @@ class ESCheck(AgentCheck):
         """
         pshard_stats_url = "/_stats"
         health_url = "/_cluster/health"
+        slm_url = None
 
         if version >= [0, 90, 10]:
             pending_tasks_url = "/_cluster/pending_tasks"
@@ -196,6 +207,8 @@ class ESCheck(AgentCheck):
             if version < [5, 0, 0]:
                 # version 5 errors out if the `all` parameter is set
                 stats_url += "?all=true"
+            if version >= [7, 4, 0]:
+                slm_url = "/_slm/policy"
         else:
             # legacy
             pending_tasks_url = None
@@ -205,7 +218,7 @@ class ESCheck(AgentCheck):
                 else "/_cluster/nodes/_local/stats?all=true"
             )
 
-        return health_url, stats_url, pshard_stats_url, pending_tasks_url
+        return health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url
 
     def _get_data(self, url, send_sc=True):
         """
@@ -355,6 +368,15 @@ class ESCheck(AgentCheck):
         )
 
         self.service_check(self.SERVICE_CHECK_CLUSTER_STATUS, status, message=msg, tags=service_check_tags)
+
+    def _process_policy_data(self, data, version, base_tags):
+        for policy, policy_data in iteritems(data):
+            repo = policy_data.get('policy', {}).get('repository', 'unknown')
+            tags = base_tags + ['policy:{}'.format(policy), 'repository:{}'.format(repo)]
+
+            slm_stats = slm_stats_for_version(version)
+            for metric, desc in iteritems(slm_stats):
+                self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

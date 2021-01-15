@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import string
+import textwrap
 from collections import namedtuple
-from string import Formatter
 
 from ...utils import load_manifest, load_service_checks
 
@@ -240,7 +241,21 @@ def section_validator(sections, loader, file_name, *prev_sections):
         # perform parameter expansion on the description text
         # first check if there are any fields to be replaced
         description = section['description']
-        if len(list(Formatter().parse(description))) > 1:
+
+        def on_indent_parse_error(value, spec):
+            loader.errors.append(
+                '{}, {}, {}section #{}: Could not parse indent level in format spec `{}`'.format(
+                    loader.source,
+                    file_name,
+                    sections_display,
+                    section_index,
+                    spec,
+                )
+            )
+
+        formatter = ParamsFormatter(on_indent_parse_error)
+
+        if len(list(formatter.parse(description))) > 1:
             params = copy.deepcopy(section['parameters'])
             if params:
                 # perform parameter expansion for any parameter values
@@ -251,7 +266,7 @@ def section_validator(sections, loader, file_name, *prev_sections):
             else:
                 params = base_params
 
-            section['description'] = description.format(**params)
+            section['description'] = formatter.format(description, **params)
 
         if 'sections' in section:
             nested_sections = section['sections']
@@ -274,3 +289,25 @@ def section_validator(sections, loader, file_name, *prev_sections):
             loader.errors.append(
                 f'{loader.source}, {file_name}, {sections_display}section #{section_index}: {error_message}'
             )
+
+
+class ParamsFormatter(string.Formatter):
+    def __init__(self, on_indent_parse_error):
+        super().__init__()
+        self._on_indent_parse_error = on_indent_parse_error
+
+    def format_field(self, value, spec):
+        if spec.endswith('i'):
+            # Accept specifiers like `{param:4i}` to indent lines in `param` by 4 spaces.
+            # Useful for multiline code blocks.
+            # Inspired by: https://stackoverflow.com/a/19864787/10705285
+            try:
+                num_spaces = spec[-2]  # 4i -> 4
+                num_spaces = int(num_spaces)
+            except (IndexError, ValueError, TypeError):
+                self._on_indent_parse_error(value, spec)
+            else:
+                value = textwrap.indent(value, num_spaces * ' ')
+            spec = spec[:-2]
+
+        return super().format_field(value, spec)

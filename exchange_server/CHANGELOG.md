@@ -1,6 +1,6 @@
 # CHANGELOG - exchange_server
 
-## 1.8.1 / 2020-12-11
+## 1.8.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Fix line wrap in conf.yaml. See [#8016](https://github.com/DataDog/integrations-core/pull/8016).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - Vault
 
-## 2.10.0 / 2020-12-11
+## 2.10.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add new Vault 1.5+ metrics. See [#8031](https://github.com/DataDog/integrations-core/pull/8031).
 

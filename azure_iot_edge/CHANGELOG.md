@@ -1,6 +1,6 @@
 # CHANGELOG - Azure IoT Edge
 
-## 1.1.1 / 2020-12-11
+## 1.1.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Fix openmetrics integrations config specs. See [#8000](https://github.com/DataDog/integrations-core/pull/8000).
 

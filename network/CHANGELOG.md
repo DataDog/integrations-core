@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 2.0.0 / 2020-12-11
+## 2.0.0 / 2020-12-11 / Agent 7.25.0
 
 * [Changed] [network] Set the collect_connection_queues parameter default value to false. See [#8059](https://github.com/DataDog/integrations-core/pull/8059).
 

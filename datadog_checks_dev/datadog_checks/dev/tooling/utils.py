@@ -329,6 +329,10 @@ def get_docs_spec(check_name):
     return os.path.join(get_root(), check_name, *path.split('/'))
 
 
+def get_default_docs_spec(check_name):
+    return os.path.join(get_root(), check_name, 'assets', 'docs', 'spec.yaml')
+
+
 def get_assets_directory(check_name):
     return os.path.join(get_root(), check_name, 'assets')
 

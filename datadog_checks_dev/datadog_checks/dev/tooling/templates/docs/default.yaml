@@ -85,13 +85,13 @@
 
     1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-      ```yaml
-      logs_enabled: true
-      ```
+        ```yaml
+        logs_enabled: true
+        ```
 
     2. Add this configuration block to your `{check_conf_path}` file to start collecting your {display_name} logs:
 
-      {check_log_conf_snippet}
+    {check_log_conf_snippet:4i}
 
       Change the `path` and `service` parameter values based on your environment. See the {check_conf_link} for all available configuration options.
 

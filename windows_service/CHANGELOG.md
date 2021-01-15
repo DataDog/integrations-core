@@ -1,6 +1,6 @@
 # CHANGELOG - windows_service
 
-## 2.8.0 / 2020-12-11
+## 2.8.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] windows service config specs. See [#7974](https://github.com/DataDog/integrations-core/pull/7974).
 

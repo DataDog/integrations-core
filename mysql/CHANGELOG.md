@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 2.1.2 / 2020-11-17
+## 2.1.2 / 2020-11-17 / Agent 7.25.0
 
 * [Fixed] Add debug log line for replication status. See [#8040](https://github.com/DataDog/integrations-core/pull/8040).
 

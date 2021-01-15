@@ -7,6 +7,7 @@ import os
 import mock
 import pytest
 import requests
+from packaging import version
 
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
@@ -34,13 +35,40 @@ def ping_elastic():
     response.raise_for_status()
 
 
+def create_slm():
+    if version.parse(ELASTIC_VERSION) < version.parse('7.4.0'):
+        return
+
+    create_backup_body = {"type": "fs", "settings": {"location": "my_backup_location"}}
+    response = requests.put(
+        '{}/_snapshot/my_repository?pretty'.format(INSTANCE['url']),
+        json=create_backup_body,
+        auth=(INSTANCE['username'], INSTANCE['password']),
+    )
+    response.raise_for_status()
+
+    create_slm_body = {
+        "schedule": "0 30 1 * * ?",
+        "name": "<daily-snap-{now/d}>",
+        "repository": "my_repository",
+        "config": {"indices": ["data-*", "important"], "ignore_unavailable": False, "include_global_state": False},
+        "retention": {"expire_after": "30d", "min_count": 5, "max_count": 50},
+    }
+    response = requests.put(
+        '{}/_slm/policy/daily-snapshots?pretty'.format(INSTANCE['url']),
+        json=create_slm_body,
+        auth=(INSTANCE['username'], INSTANCE['password']),
+    )
+    response.raise_for_status()
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     image_name = os.environ.get('ELASTIC_IMAGE')
     compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
     compose_file = os.path.join(HERE, 'compose', compose_file)
 
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(ping_elastic)]):
+    with docker_run(compose_file=compose_file, conditions=[WaitFor(ping_elastic), WaitFor(create_slm, attempts=5)]):
         yield instance
 
 
@@ -99,4 +127,12 @@ def cluster_tags():
 def node_tags():
     tags = _cluster_tags()
     tags.append('node_name:test-node')
+    return tags
+
+
+@pytest.fixture
+def slm_tags():
+    tags = _cluster_tags()
+    tags.append('policy:daily-snapshots')
+    tags.append('repository:my_repository')
     return tags

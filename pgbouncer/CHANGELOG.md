@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 1.12.1 / 2020-12-11
+## 1.12.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Make pgbouncer more reslient. See [#8124](https://github.com/DataDog/integrations-core/pull/8124).
 
