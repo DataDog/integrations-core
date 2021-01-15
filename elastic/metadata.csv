@@ -249,7 +249,8 @@ jvm.mem.pools.survivor.used,gauge,,byte,,The amount of memory in bytes currently
 jvm.mem.pools.survivor.max,gauge,,byte,,The maximum amount of memory that can be used by the Survivor Space.,0,elasticsearch,jvm survivor max
 jvm.threads.count,gauge,,thread,,The number of active threads in the JVM.,0,elasticsearch,jvm threads
 jvm.threads.peak_count,gauge,,thread,,The peak number of threads used by the JVM.,0,elasticsearch,jvm peak threads
-elasticsearch.index.health,gauge,,,,The status of the index,0,elasticsearch,index health
+elasticsearch.index.health,gauge,,,,"The status of the index as a number: green = 0, yellow = 1, red = 2",0,elasticsearch,index health
+elasticsearch.index.health.reverse,gauge,,,,"The status of the index as a number: red = 0, yellow = 1, green = 2",0,elasticsearch,index health r
 elasticsearch.index.docs.count,gauge,,document,,The number of documents in the index,0,elasticsearch,index doc count
 elasticsearch.index.docs.deleted,gauge,,document,,The number of deleted documents in the index,0,elasticsearch,index doc deleted count
 elasticsearch.index.primary_shards,gauge,,shard,,The number of primary shards in the index,0,elasticsearch,index primary shards count

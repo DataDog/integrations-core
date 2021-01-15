@@ -154,6 +154,7 @@ class ESCheck(AgentCheck):
         index_resp = self._get_data(index_url)
         index_stats_metrics = index_stats_for_version(version)
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
+        reversed_health_stat = {'red': 0, 'yellow': 1, 'green': 2}
         for idx in index_resp:
             tags = base_tags + ['index_name:' + idx['index']]
             # we need to remap metric names because the ones from elastic
@@ -170,7 +171,9 @@ class ESCheck(AgentCheck):
 
             # Convert the health status value
             if index_data['health'] is not None:
-                index_data['health'] = health_stat[index_data['health'].lower()]
+                status = index_data['health'].lower()
+                index_data['health'] = health_stat[status]
+                index_data['health_reverse'] = reversed_health_stat[status]
 
             # Ensure that index_data does not contain None values
             for key, value in list(iteritems(index_data)):

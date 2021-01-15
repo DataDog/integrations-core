@@ -235,6 +235,7 @@ ADDITIONAL_METRICS_PRE_5_0_0 = {
 # Metrics for index level
 INDEX_STATS_METRICS = {
     'elasticsearch.index.health': ('gauge', 'health'),
+    'elasticsearch.index.health.reverse': ('gauge', 'health_reverse'),
     'elasticsearch.index.docs.count': ('gauge', 'docs_count'),
     'elasticsearch.index.docs.deleted': ('gauge', 'docs_deleted'),
     'elasticsearch.index.primary_shards': ('gauge', 'primary_shards'),
