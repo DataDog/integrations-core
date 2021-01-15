@@ -109,7 +109,7 @@ instances:
     #   - <SERVICE_2>
 
     ## @param services_exclude - list of strings - optional
-    ## List services to exclude from the consul service caltalog.
+    ## List services to exclude from the Consul service catalog.
     ## Note: The excluded services will take precedence over service_whitelist.
     ## The default settings will still query up to 50 services.
     #
