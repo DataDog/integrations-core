@@ -320,11 +320,9 @@ def test_cull_services_list():
     consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
     assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
 
-    # Excluded services will not be in final service list 
+    # Excluded services will not be in final service list
     consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
     assert set(consul_check.services_exclude) not in set(consul_check._cull_services_list(services))
-
-
 
 
 def test_new_leader_event(aggregator):

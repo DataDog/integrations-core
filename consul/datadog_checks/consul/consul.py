@@ -263,7 +263,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
     def _cull_services_list(self, services):
 
         if self.service_whitelist and self.services_exclude:
-            self.warning('Detected both whitelist and services_exclude options are configured. Consul check will only consider blacklist.')
+            self.warning(
+                'Detected both whitelist and services_exclude options are configured.'
+                'Consul check will only consider blacklist.'
+            )
             self.service_whitelist = None
 
         if self.service_whitelist:
@@ -276,7 +279,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
             allowed_services = {s: services[s] for s in services if s not in self.services_exclude}
             self.warning(str(services) + " " + str(allowed_services))
 
-            self.log.debug('Filtered services {} with service services_exclude {}'.format(services, self.services_exclude))
+            self.log.debug(
+                'Filtered services {} with service services_exclude {}'.format(services, self.services_exclude)
+            )
 
             if len(allowed_services) <= self.max_services:
                 log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'.format(
@@ -289,7 +294,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                     self.max_services
                 )
                 self.warning(log_line)
-                
+
                 services = {s: services[s] for s in list(islice(iterkeys(allowed_services), 0, self.max_services))}
 
         return services
