@@ -279,7 +279,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             allowed_services = {s: services[s] for s in services if s not in self.services_exclude}
 
             self.log.debug(
-                'Filtered services {} with service services_exclude {}'.format(services, self.services_exclude)
+                'Filtered services %s with service services_exclude %s', services, self.services_exclude
             )
 
             if len(allowed_services) <= self.max_services:
