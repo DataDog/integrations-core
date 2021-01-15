@@ -87,10 +87,10 @@ files:
           - <SERVICE_1>
           - <SERVICE_2>
 
-    - name: service_blocked_list
+    - name: services_exclude
       description: |
         List services to exclude from the consul service caltalog.
-        Note: The service_blocked_list will take precedence over service_whitelist.
+        Note: The excluded services will take precedence over service_whitelist.
         The default settings will still query up to 50 services.
       value:
         type: array
