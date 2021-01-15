@@ -2,10 +2,8 @@ FROM python:alpine
 
 # Update sources and install required packages
 RUN apk update \
- && apk add --virtual build-dependencies \
-     build-base \
-     gcc \
- && apk add \
+ && apk add --no-cache \
+      build-base \
       ca-certificates \
       curl \
       gcc \
@@ -16,7 +14,6 @@ RUN apk update \
       openssh-client \
       python3-dev \
  && rm -rf /tmp/* \
- && rm -rf /var/lib/apt/lists/* \
  && rm -rf /var/tmp/*
 
 # Add GitHub public host key to the list of known hosts
