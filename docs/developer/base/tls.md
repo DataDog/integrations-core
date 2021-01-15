@@ -3,7 +3,7 @@
 -----
 
 TLS/SSL is widely used to provide communications over a secure network. Many of the software that Datadog supports has features to allow TLS/SSL,
-and thus the Datadog Agent may need to connect via TLS/SSL in order to get metrics.
+Therefore, the Datadog Agent may need to connect with TLS/SSL to get metrics.
 
 
 ## Getting started
