@@ -1,20 +1,24 @@
-FROM python:alpine
+FROM ubuntu:20.04
 
 # Update sources and install required packages
-RUN apk update \
- && apk add --no-cache --virtual build-dependencies \
-     build-base \
-     gcc \
- && apk add --no-cache \
+RUN apt-get update \
+ && apt-get -y install --no-install-recommends \
+      apt-transport-https \
+      build-essential \
       ca-certificates \
       curl \
+      gcc \
       git \
       libffi-dev \
-      libressl-dev \
+      libssl-dev \
       moreutils \
       openssh-client \
       python3-dev \
+ # Clean up
+ && apt-get -y autoremove \
+ && apt-get -y clean \
  && rm -rf /tmp/* \
+ && rm -rf /var/lib/apt/lists/* \
  && rm -rf /var/tmp/*
 
 # Add GitHub public host key to the list of known hosts
@@ -37,7 +41,3 @@ RUN curl -sSL https://raw.githubusercontent.com/pypa/get-pip/master/get-pip.py |
  && pip3 install --no-cache-dir ${DDEV_ROOT}[cli] \
  # Install awscli for access to GitHub deploy key stored in SSM
  && pip3 install --no-cache-dir awscli==1.16.129
-
-# Clean up
-RUN apk del build-dependencies
-RUN rm -rf /var/cache/apk/*
