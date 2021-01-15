@@ -98,7 +98,7 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4303)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
