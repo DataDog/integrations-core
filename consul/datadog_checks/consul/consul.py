@@ -97,7 +97,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
         self.service_whitelist = self.instance.get('service_whitelist', self.init_config.get('service_whitelist', []))
-        self.service_blacklist = self.instance.get('service_blacklist', self.init_config.get('service_blacklist', []))
+        self.service_blocked_list = self.instance.get('service_blocked_list', self.init_config.get('service_blocked_list', []))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
 
         self._local_config = None
@@ -262,8 +262,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
     def _cull_services_list(self, services):
 
-        if self.service_whitelist and self.service_blacklist:
-            self.warning('Detected both whitelist and blacklist options are configured. Consule check will only consider blacklist.')
+        if self.service_whitelist and self.service_blocked_list:
+            self.warning('Detected both whitelist and blocked_list options are configured. Consul check will only consider blacklist.')
             self.service_whitelist = None
 
         if self.service_whitelist:
@@ -273,10 +273,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
             whitelisted_services = [s for s in services if s in self.service_whitelist]
             services = {s: services[s] for s in whitelisted_services[: self.max_services]}
         else:
-            allowed_services = {s: services[s] for s in services if s not in self.service_blacklist}
+            allowed_services = {s: services[s] for s in services if s not in self.service_blocked_list}
             self.warning(str(services) + " " + str(allowed_services))
 
-            self.log.debug('Filtered services {} with service blacklist {}'.format(services, self.service_blacklist))
+            self.log.debug('Filtered services {} with service blocked_list {}'.format(services, self.service_blocked_list))
 
             if len(allowed_services) <= self.max_services:
                 log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'.format(

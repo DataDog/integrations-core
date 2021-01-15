@@ -108,12 +108,12 @@ instances:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
-    ## @param service_blacklist - list of strings - optional
+    ## @param service_blocked_list - list of strings - optional
     ## List services to exclude from the consul service caltalog.
-    ## Note: The service_blacklist will take precedence over service_whitelist.
+    ## Note: The service_blocked_list will take precedence over service_whitelist.
     ## The default settings will still query up to 50 services.
     #
-    # service_blacklist:
+    # service_blocked_list:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
