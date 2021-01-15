@@ -209,7 +209,8 @@ class Connection(object):
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
                 for row in cursor:
-                    case_insensitive = 'CI' in row.collation_name
+                    # collation_name can be NULL if db offline, in that case assume its case_insensitive
+                    case_insensitive = not row.collation_name or 'CI' in row.collation_name
                     self.existing_databases[row.name.lower()] = case_insensitive, row.name
 
             except Exception as e:
