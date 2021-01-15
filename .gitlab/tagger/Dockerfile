@@ -2,11 +2,12 @@ FROM python:alpine
 
 # Update sources and install required packages
 RUN apk update \
+ && apk add --no-cache --virtual build-dependencies \
+     build-base \
+     gcc \
  && apk add --no-cache \
-      build-base \
       ca-certificates \
       curl \
-      gcc \
       git \
       libffi-dev \
       libressl-dev \
@@ -33,6 +34,10 @@ COPY . ${DDEV_ROOT}
 # Install pip
 RUN curl -sSL https://raw.githubusercontent.com/pypa/get-pip/master/get-pip.py | python3 \
  # Install ddev for release tagging
- && pip3 install ${DDEV_ROOT}[cli] \
+ && pip3 install --no-cache-dir ${DDEV_ROOT}[cli] \
  # Install awscli for access to GitHub deploy key stored in SSM
- && pip3 install awscli==1.16.129
+ && pip3 install --no-cache-dir awscli==1.16.129
+
+# Clean up
+RUN apk del build-dependencies
+RUN rm -rf /var/cache/apk/*
