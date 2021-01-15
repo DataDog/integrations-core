@@ -6,7 +6,7 @@ TLS/SSL is widely used to provide communications over a secure network. Many of 
 and thus the Datadog Agent may need to connect via TLS/SSL in order to get metrics.
 
 
-## Getting Started
+## Getting started
 For Agent v7.24+, checks compatible with TLS/SSL should not manually create a raw `ssl.SSLContext`.
 Instead, check implementations should use `AgentCheck.get_tls_context()` to obtain a TLS/SSL context. 
 
