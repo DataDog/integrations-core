@@ -453,7 +453,12 @@ class SQLServer(AgentCheck):
                     if not metric_names:
                         instance_results[cls] = None, None
                     else:
-                        rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
+                        try:
+                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
+                        except Exception as e:
+                            self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
+                            continue
+
                         instance_results[cls] = rows, cols
 
                 # Using the cached data, extract and report individual metrics
