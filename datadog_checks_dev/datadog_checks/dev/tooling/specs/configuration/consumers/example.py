@@ -37,19 +37,22 @@ def construct_yaml(obj, **kwargs):
 
 
 def value_type_string(value):
-    value_type = value['type']
-    if value_type == 'object':
-        return 'mapping'
-    elif value_type == 'array':
-        item_type = value['items']['type']
-        if item_type == 'object':
-            return 'list of mappings'
-        elif item_type == 'array':
-            return 'list of lists'
-        else:
-            return f'list of {item_type}s'
+    if 'oneOf' in value:
+        return ' or '.join(value_type_string(type_data) for type_data in value['oneOf'])
     else:
-        return value_type
+        value_type = value['type']
+        if value_type == 'object':
+            return 'mapping'
+        elif value_type == 'array':
+            item_type = value['items']['type']
+            if item_type == 'object':
+                return 'list of mappings'
+            elif item_type == 'array':
+                return 'list of lists'
+            else:
+                return f'list of {item_type}s'
+        else:
+            return value_type
 
 
 def option_enabled(option):
