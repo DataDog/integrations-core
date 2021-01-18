@@ -310,7 +310,12 @@ class MySql(AgentCheck):
                         slave_running_status = AgentCheck.WARNING
                 elif slave_running:  # slave (or standalone)
                     if slave_running.lower().strip() == 'on':
-                        slave_running_status = AgentCheck.OK
+                        if not slave_io_running or not slave_sql_running:
+                            self.log.debug(
+                                "Slave_running is on but Slave_IO_Running or Slave_SQL_Running are not ok.")
+                            slave_running_status = AgentCheck.WARNING
+                        else:
+                            slave_running_status = AgentCheck.OK
                     else:
                         slave_running_status = AgentCheck.CRITICAL
 
