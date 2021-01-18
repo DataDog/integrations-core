@@ -54,6 +54,9 @@ def export_changes_as_csv(changes, filename):
                     change['teams'],
                     change['next_tag'].split('-')[-1] if '-' in change['next_tag'] else change['next_tag'],
                     change['title'],
+                    '',
+                    '',
+                    '',
                 ]
             )
 
