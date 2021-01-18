@@ -369,8 +369,8 @@ class SnmpCheck(AgentCheck):
         start_time = time.time()
         self._submitted_metrics = 0
         self.telemetry_tags = self._config.tags[:]
-        self.monotonic_count('snmp.check_interval', time.time(), tags=self.telemetry_tags)
         config = self._config
+
         if config.ip_network:
             if self._thread is None:
                 self._start_discovery()
@@ -392,8 +392,11 @@ class SnmpCheck(AgentCheck):
         else:
             self._check_device(config)
         check_duration = time.time() - start_time
-        self.gauge('snmp.check_duration', check_duration, tags=self.telemetry_tags)
-        self.gauge('snmp.submitted_metrics', self._submitted_metrics, tags=self.telemetry_tags)
+
+        # SNMP Performance metrics
+        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=self.telemetry_tags)
+        self.gauge('datadog.snmp.check_duration', check_duration, tags=self.telemetry_tags)
+        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=self.telemetry_tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
