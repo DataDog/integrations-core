@@ -274,16 +274,21 @@ class MySql(AgentCheck):
 
             # get slave running form global status page
             slave_running_status = AgentCheck.UNKNOWN
+            # This is ON if this server is a replica that is connected to a replication source,
+            # and both the I/O and SQL threads are running; otherwise, it is OFF.
             slave_running = collect_string('Slave_running', results)
-            binlog_running = results.get('Binlog_enabled', False)
-            # slaves will only be collected iff user has PROCESS privileges.
-            slaves = collect_scalar('Slaves_connected', results)
+            # Slave_IO_Running: Whether the I/O thread for reading the source's binary log is running.
+            # You want this to be Yes unless you have not yet started replication or have explicitly stopped it.
             slave_io_running = collect_type('Slave_IO_Running', results, dict)
+            # Slave_SQL_Running: Whether the SQL thread for executing events in the relay log is running.
             slave_sql_running = collect_type('Slave_SQL_Running', results, dict)
             if slave_io_running:
                 slave_io_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_io_running))
             if slave_sql_running:
                 slave_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_sql_running))
+            binlog_running = results.get('Binlog_enabled', False)
+            # slaves will only be collected iff user has PROCESS privileges.
+            slaves = collect_scalar('Slaves_connected', results)
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
@@ -299,7 +304,11 @@ class MySql(AgentCheck):
             elif slave_running.lower().strip() == 'off':
                 if not (slave_io_running is None and slave_sql_running is None):
                     if not slave_io_running and not slave_sql_running:
+                        self.log.debug("Neither Slave_IO_Running or Slave_SQL_Running are not ok")
                         slave_running_status = AgentCheck.CRITICAL
+                    elif not slave_io_running or not slave_sql_running:
+                        self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
+                        slave_running_status = AgentCheck.WARNING
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
@@ -310,7 +319,12 @@ class MySql(AgentCheck):
                         slave_running_status = AgentCheck.WARNING
                 elif slave_running:  # slave (or standalone)
                     if slave_running.lower().strip() == 'on':
-                        slave_running_status = AgentCheck.OK
+                        if not slave_io_running or not slave_sql_running:
+                            # This situation should not happen according to MySQL documentation.
+                            self.log.debug("Slave_running is on but Slave_IO_Running or Slave_SQL_Running are not ok.")
+                            slave_running_status = AgentCheck.WARNING
+                        else:
+                            slave_running_status = AgentCheck.OK
                     else:
                         slave_running_status = AgentCheck.CRITICAL
 
