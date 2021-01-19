@@ -56,7 +56,7 @@ Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQu
 
 ### Metrics
 
-For each container or a pod, tcp_queue_length integration returns the connection read/write buffer which is the mostly used. For example, if a container has three TCP connections, for which their read buffers are used 40%, 25% and 80% respectively, the metric `tcp_queue.read_buffer_max_usage_pct` will return 0.8
+For each container, tcp_queue_length integration returns the read/write buffer's fill percentage of busiest TCP connection. For example, if a container has three TCP connections, for which their read buffers are used 40%, 25% and 80% respectively, the metric `tcp_queue.read_buffer_max_usage_pct` will return 0.8 (80%).
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
