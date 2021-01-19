@@ -97,7 +97,7 @@ LABEL "com.datadoghq.ad.init_configs"='[{}]'
 LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]'
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation.
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation for more details. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
@@ -165,7 +165,7 @@ spec:
         - containerPort: 6379
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation.
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
@@ -233,7 +233,7 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 }
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation.
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
@@ -354,3 +354,4 @@ Additional helpful documentation, links, and articles:
 [24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
 [25]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
 [26]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[27]: https://docs.datadoghq.com/agent/guide/secrets-management/?tab=linux
