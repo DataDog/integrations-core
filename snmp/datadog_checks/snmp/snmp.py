@@ -719,6 +719,6 @@ class SnmpCheck(AgentCheck):
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
 
-        if metric_name == 'monotonic_count_and_rate':
+        if metric['type'] == 'monotonic_count_and_rate':
             self._submitted_metrics += 1
         self._submitted_metrics += 1
