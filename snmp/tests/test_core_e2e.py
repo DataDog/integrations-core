@@ -133,7 +133,21 @@ def test_e2e_profile_cisco_icm(dd_agent_check):
 
 def test_e2e_profile_dell_poweredge(dd_agent_check):
     config = common.generate_container_profile_config('dell-poweredge')
-    assert_python_vs_core(dd_agent_check, config)
+
+    # TODO: Fix python implementation for duplicate declarations
+    metric_to_skip = [
+        # Following metrics are declared multiple times in profiles.
+        # Example: snmp.networkDeviceStatus and snmp.memoryDeviceStatus are declared twice
+        # in dell-poweredge.yaml and _dell-rac.yaml
+        # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
+        # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
+        # See II-153
+        'snmp.networkDeviceStatus',
+        'snmp.memoryDeviceStatus',
+        # we can't assert `datadog.snmp.submitted_metrics` value since some metrics are missing for python
+        'datadog.snmp.submitted_metrics',
+    ]
+    assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
 
 
 def test_e2e_profile_f5_big_ip(dd_agent_check):
@@ -186,30 +200,20 @@ def test_e2e_profile_palo_alto(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-METRIC_TO_SKIP = [
-    # Following metrics are declared multiple times in profiles.
-    # Example: snmp.networkDeviceStatus and snmp.memoryDeviceStatus are declared twice
-    # in dell-poweredge.yaml and _dell-rac.yaml
-    # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
-    # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
-    # See II-153
-    'snmp.networkDeviceStatus',
-    'snmp.memoryDeviceStatus',
-]
-
 ASSERT_VALUE_METRICS = ["datadog.snmp.submitted_metrics"]
 
 
-def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
+def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
     python_config = deepcopy(config)
     python_config['init_config']['loader'] = 'python'
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
     aggregator = dd_agent_check(python_config, rate=True)
     expected_metrics = defaultdict(list)
+    metrics_to_skip = metrics_to_skip or []
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
-            if stub.name in METRIC_TO_SKIP:
+            if stub.name in metrics_to_skip:
                 continue
             assert "loader:python" in stub.tags, "Stub: %s\nAll snmp python check metrics: %s" % (stub, metrics)
             stub = normalize_stub_metric(stub)
@@ -224,7 +228,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
             assert "loader:core" in stub.tags, "Stub: %s\nAll snmp core check metrics: %s" % (stub, aggregator_metrics)
-            if stub.name in METRIC_TO_SKIP:
+            if stub.name in metrics_to_skip:
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
 
