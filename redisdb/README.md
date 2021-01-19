@@ -209,6 +209,69 @@ See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] 
 Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
 <!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "redis",
+    "image": "redis:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"redisdb\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"host\":\"%%host%%\",\"port\":\"6379\",\"password\":\"%%env_REDIS_PASSWORD%%\"}]"
+    }
+  }]
+}
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation.
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][18].
+
+Then, set [Log Integrations][20] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "redis",
+    "image": "redis:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"redis\",\"service\":\"<YOUR_APP_NAME>\"}]"
+    }
+  }]
+}
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
