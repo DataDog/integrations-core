@@ -103,7 +103,7 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%","port":"6379","password"
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][18].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][18].
 
 Then, set [Log Integrations][20] as Docker labels:
 
@@ -171,7 +171,7 @@ spec:
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][13].
 
 Then, set [Log Integrations][20] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][24].
 
@@ -239,7 +239,7 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][18].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][26].
 
 Then, set [Log Integrations][20] as Docker labels:
 
@@ -353,3 +353,4 @@ Additional helpful documentation, links, and articles:
 [23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
 [25]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[26]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
