@@ -21,12 +21,12 @@ No additional installation is needed on your server.
     gem install dogstatsd-ruby
    ```
 
-2. Enable Sidekiq Pro metric collection by including this in your initializer:
+2. Enable Sidekiq Pro metric collection by including this in your initializer (For a containerized deployment, update localhost to your Agent container address):
 
    ```ruby
         require 'datadog/statsd' # gem 'dogstatsd-ruby'
 
-        Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('metrics.example.com', 8125, namespace:'sidekiq') }
+        Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('localhost', 8125, namespace:'sidekiq') }
 
         Sidekiq.configure_server do |config|
           config.server_middleware do |chain|
@@ -35,7 +35,7 @@ No additional installation is needed on your server.
           end
         end
    ```
-
+   
     If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
 
    ```ruby
