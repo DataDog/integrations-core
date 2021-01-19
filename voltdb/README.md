@@ -78,6 +78,32 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 3. [Restart the Agent][4].
 
+#### Log Collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `voltdb.d/conf.yaml` file to start collecting your RethinkDB logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: "<LOG_FILE_PATH>"
+        source: voltdb
+        service: "<SERVICE_NAME>"
+    ```
+
+  Change the `path` and `service` parameter values based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/rethinkdb/datadog_checks/rethinkdb/data/conf.yaml.example for all available configuration options.
+
+  3. [Restart the Agent][4].
+
+  See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `voltdb` under the Checks section.
@@ -109,3 +135,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
