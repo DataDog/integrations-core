@@ -1,0 +1,485 @@
+{
+  "author_name": "Datadog",
+  "title": "Azure IoT Edge - Overview",
+  "description": "Using this dashboard, you can get a high-level view of your Azure IoT Edge metrics related to device status, activity and resource utilization.\n\nTo learn more about our Azure IoT Edge integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/azure_iot_edge/?tab=host).\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+  "layout_type": "free",
+  "template_variables": [
+    {
+      "default": "*",
+      "name": "module_name",
+      "prefix": "module_name"
+      }
+  ],
+  "widgets": [
+    {
+      "id": 4297337286767528,
+      "layout": { "x": 1, "y": 1, "width": 30, "height": 11 },
+      "definition": {
+        "type": "image",
+        "url": "/static/images/saas_logos/bot/azure_iot_edge.png",
+        "sizing": "center"
+      }
+    },
+    {
+      "id": 8274020278734860,
+      "layout": { "x": 141, "y": 29, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Queue Length",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:azure.iot_edge.edge_hub.queue_length{*} by {priority}",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "purple",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 3634680577316064,
+      "layout": { "x": 141, "y": 44, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Failed Client Connections",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "max:azure.iot_edge.edge_hub.client_connect_failed_total{*}.as_count()",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": { "include_zero": false },
+        "markers": []
+      }
+    },
+    {
+      "id": 260647508405858,
+      "layout": { "x": 141, "y": 7, "width": 34, "height": 14 },
+      "definition": {
+        "title": "IoT Hub Syncs",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_agent.iothub_syncs_total{*} by {host}.as_count()",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 2072741318947592,
+      "layout": { "x": 33, "y": 29, "width": 34, "height": 14 },
+      "definition": {
+        "title": "CPU usage (%)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_agent.used_cpu_percent.quantile{*} by {quantile}, avg:azure.iot_edge.edge_agent.used_cpu_percent.quantile{*} by {quantile}",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 5115565557450510,
+      "layout": { "x": 33, "y": 44, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Network recv (bytes)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_agent.total_network_in_bytes{*}",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 7556098520953482,
+      "layout": { "x": 105, "y": 44, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Operation Retries",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_hub.operation_retry_total{*}.as_count()",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 6686012323633856,
+      "layout": { "x": 33, "y": 15, "width": 25, "height": 6 },
+      "definition": {
+        "title": "Available Edge Hubs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "check_status",
+        "check": "azure.iot_edge.edge_hub.prometheus.health",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": ["*"]
+      }
+    },
+    {
+      "id": 448087193511044,
+      "layout": { "x": 33, "y": 7, "width": 25, "height": 6 },
+      "definition": {
+        "title": "Available Edge Agents",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "check_status",
+        "check": "azure.iot_edge.edge_agent.prometheus.health",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": ["*"]
+      }
+    },
+    {
+      "id": 6018895484794152,
+      "layout": { "x": 69, "y": 29, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Memory usage",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_agent.used_memory_bytes{*}, avg:azure.iot_edge.edge_agent.total_memory_bytes{*}-avg:azure.iot_edge.edge_agent.used_memory_bytes{*}",
+            "on_right_yaxis": false,
+            "metadata": [
+              {
+                "expression": "avg:azure.iot_edge.edge_agent.used_memory_bytes{*}",
+                "alias_name": "used"
+              },
+              {
+                "expression": "avg:azure.iot_edge.edge_agent.total_memory_bytes{*}-avg:azure.iot_edge.edge_agent.used_memory_bytes{*}",
+                "alias_name": "usable"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "area"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 2593778738256426,
+      "layout": { "x": 1, "y": 13, "width": 30, "height": 25 },
+      "definition": {
+        "type": "note",
+        "content": "Using this dashboard, you can get a high-level view of your Azure IoT Edge metrics related to device status, activity and resource utilization.\n\nTo learn more about our Azure IoT Edge integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/azure_iot_edge/?tab=host).\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.\n\n",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 6475630119491834,
+      "layout": { "x": 33, "y": 23, "width": 70, "height": 5 },
+      "definition": {
+        "type": "note",
+        "content": "System Resource Utilization",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 8991912615041488,
+      "layout": { "x": 105, "y": 1, "width": 70, "height": 5 },
+      "definition": {
+        "type": "note",
+        "content": "Edge Agent",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 7816526635883170,
+      "layout": { "x": 33, "y": 1, "width": 70, "height": 5 },
+      "definition": {
+        "type": "note",
+        "content": "Status",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 6834730324340690,
+      "layout": { "x": 105, "y": 23, "width": 70, "height": 5 },
+      "definition": {
+        "type": "note",
+        "content": "Edge Hub",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 5855608187819428,
+      "layout": { "x": 105, "y": 29, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Messages",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_hub.messages_received_total{*}.as_count(), avg:azure.iot_edge.edge_hub.messages_sent_total{*}.as_count()",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 5230299109331620,
+      "layout": { "x": 59, "y": 7, "width": 21, "height": 14 },
+      "definition": {
+        "title": "Minimum host uptime",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "min:azure.iot_edge.edge_agent.host_uptime_seconds{*}",
+            "aggregator": "avg"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    },
+    {
+      "id": 6705455333988260,
+      "layout": { "x": 82, "y": 7, "width": 21, "height": 14 },
+      "definition": {
+        "title": "Minimum iotedged Uptime",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "min:azure.iot_edge.edge_agent.iotedged_uptime_seconds{*}",
+            "aggregator": "avg"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    },
+    {
+      "id": 5020929248840950,
+      "layout": { "x": 105, "y": 7, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Module activity",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_agent.module_start_total{$module_name} by {module_name}.as_count(), avg:azure.iot_edge.edge_agent.module_stop_total{$module_name} by {module_name}.as_count()",
+            "on_right_yaxis": false,
+            "metadata": [
+              {
+                "expression": "avg:azure.iot_edge.edge_agent.module_start_total{$module_name} by {module_name}.as_count()",
+                "alias_name": "started"
+              },
+              {
+                "expression": "avg:azure.iot_edge.edge_agent.module_stop_total{$module_name} by {module_name}.as_count()",
+                "alias_name": "stopped"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 2522193840831786,
+      "layout": { "x": 69, "y": 44, "width": 34, "height": 14 },
+      "definition": {
+        "title": "Network send (bytes)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:azure.iot_edge.edge_agent.total_network_out_bytes{*}.as_count()",
+            "on_right_yaxis": false,
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    }
+  ],
+  "is_read_only": false,
+  "notify_list": [],
+  "id": "pkf-z3b-32g"
+}
