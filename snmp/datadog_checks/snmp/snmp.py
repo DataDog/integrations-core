@@ -84,7 +84,7 @@ class SnmpCheck(AgentCheck):
         self._last_fetch_number = 0
 
         self._submitted_metrics = 0
-        self.telemetry_tags = []
+        self.telemetry_tags = []  # type: List[str]
 
     def _get_next_fetch_id(self):
         # type: () -> str
@@ -613,6 +613,7 @@ class SnmpCheck(AgentCheck):
             bandwidth_usage_value,
             tags,
         )
+        self._submitted_metrics += 1
 
     def get_index_tags(
         self,
@@ -717,4 +718,7 @@ class SnmpCheck(AgentCheck):
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
+
+        if metric_name == 'monotonic_count_and_rate':
+            self._submitted_metrics += 1
         self._submitted_metrics += 1
