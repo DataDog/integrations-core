@@ -7,6 +7,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.base.stubs.common import MetricStub
+from .common import SCALAR_OBJECTS
 
 from . import common
 
@@ -63,6 +64,11 @@ def test_e2e_table_regex_match(dd_agent_check):
         }
     ]
     instance = common.generate_container_instance_config(metrics)
+    assert_python_vs_core(dd_agent_check, instance)
+
+
+def test_e2e_symbol_metric_tags(dd_agent_check):
+    instance = common.generate_container_instance_config(SCALAR_OBJECTS)
     assert_python_vs_core(dd_agent_check, instance)
 
 
