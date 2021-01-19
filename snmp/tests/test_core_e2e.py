@@ -7,7 +7,6 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.base.stubs.common import MetricStub
-from .common import SCALAR_OBJECTS
 
 from . import common
 
@@ -64,6 +63,14 @@ def test_e2e_table_regex_match(dd_agent_check):
         }
     ]
     instance = common.generate_container_instance_config(metrics)
+    assert_python_vs_core(dd_agent_check, instance)
+
+
+def test_e2e_scalar_oid_retry(dd_agent_check):
+    scalar_objects_with_tags = [
+        {'OID': "1.3.6.1.2.1.7.1", 'name': "udpDatagrams"},
+    ]
+    instance = common.generate_container_instance_config(scalar_objects_with_tags)
     assert_python_vs_core(dd_agent_check, instance)
 
 
