@@ -68,7 +68,11 @@ def test_e2e_table_regex_match(dd_agent_check):
 
 
 def test_e2e_symbol_metric_tags(dd_agent_check):
-    instance = common.generate_container_instance_config(SCALAR_OBJECTS)
+    scalar_objects_with_tags = [
+        {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams", 'metric_tags': ['udpdgrams', 'UDP']},
+        {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs", 'metric_tags': ['tcpinsegs', 'TCP']},
+    ]
+    instance = common.generate_container_instance_config(scalar_objects_with_tags)
     assert_python_vs_core(dd_agent_check, instance)
 
 
