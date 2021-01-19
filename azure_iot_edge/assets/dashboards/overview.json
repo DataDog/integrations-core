@@ -381,7 +381,7 @@
         "requests": [
           {
             "q": "min:azure.iot_edge.edge_agent.host_uptime_seconds{*}",
-            "aggregator": "avg"
+            "aggregator": "min"
           }
         ],
         "autoscale": true,
@@ -399,7 +399,7 @@
         "requests": [
           {
             "q": "min:azure.iot_edge.edge_agent.iotedged_uptime_seconds{*}",
-            "aggregator": "avg"
+            "aggregator": "min"
           }
         ],
         "autoscale": true,
