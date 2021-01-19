@@ -111,7 +111,7 @@
       "id": 2072741318947592,
       "layout": { "x": 33, "y": 29, "width": 34, "height": 14 },
       "definition": {
-        "title": "CPU usage (%)",
+        "title": "CPU Usage",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
@@ -142,7 +142,7 @@
       "id": 5115565557450510,
       "layout": { "x": 33, "y": 44, "width": 34, "height": 14 },
       "definition": {
-        "title": "Network recv (bytes)",
+        "title": "Network Recv",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
@@ -232,7 +232,7 @@
       "id": 6018895484794152,
       "layout": { "x": 69, "y": 29, "width": 34, "height": 14 },
       "definition": {
-        "title": "Memory usage",
+        "title": "Memory Usage",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
@@ -374,7 +374,7 @@
       "id": 5230299109331620,
       "layout": { "x": 59, "y": 7, "width": 21, "height": 14 },
       "definition": {
-        "title": "Minimum host uptime",
+        "title": "Minimum Host Uptime",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -410,7 +410,7 @@
       "id": 5020929248840950,
       "layout": { "x": 105, "y": 7, "width": 34, "height": 14 },
       "definition": {
-        "title": "Module activity",
+        "title": "Module Activity",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
@@ -451,7 +451,7 @@
       "id": 2522193840831786,
       "layout": { "x": 69, "y": 44, "width": 34, "height": 14 },
       "definition": {
-        "title": "Network send (bytes)",
+        "title": "Network Send",
         "title_size": "16",
         "title_align": "left",
         "show_legend": false,
