@@ -206,7 +206,7 @@ Required environment variables on the Agent container:
 
 See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container that makes requests to Redis][7].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "ECS" xxx -->
@@ -269,7 +269,7 @@ Required environment variables on the Agent container:
 
 See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][25].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -352,3 +352,4 @@ Additional helpful documentation, links, and articles:
 [22]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
 [23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[25]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
