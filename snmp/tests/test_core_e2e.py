@@ -73,32 +73,32 @@ def test_e2e_table_regex_match(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=47)
 
 
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=14)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=19)
 
 
 def test_e2e_profile_aruba(dd_agent_check):
     config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=67)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=72)
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     config = common.generate_container_profile_config('chatsworth_pdu')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=225)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=230)
 
 
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
     config = common.generate_container_profile_config('checkpoint-firewall')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=301)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=306)
 
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=4559)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
@@ -195,10 +195,6 @@ METRIC_TO_SKIP = [
     # See II-153
     'snmp.networkDeviceStatus',
     'snmp.memoryDeviceStatus',
-    # telemetry
-    'snmp.check_duration',
-    'snmp.check_interval',
-    'snmp.submitted_metrics',
 ]
 
 
