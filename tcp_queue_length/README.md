@@ -56,7 +56,7 @@ Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQu
 
 ### Metrics
 
-For each container, tcp_queue_length integration returns the read/write buffer's fill percentage of the busiest TCP connection. For example, if a container has three TCP connections, for which their read buffers (i.e. receive queues) are 40%, 25% and 80% full (respectively), the metric `tcp_queue.read_buffer_max_usage_pct` will return 0.8 (80%), which is the maximum.
+For each container, the `tcp_queue_length` integration returns the read/write buffer's fill percentage of the busiest TCP connection. For example, if a container has three TCP connections, for which their read buffers (that is, receive queues) are 40%, 25%, and 80% full (respectively), the metric `tcp_queue.read_buffer_max_usage_pct` returns the maximum, 0.8 (80%).
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
