@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the size of the Linux TCP receive and send queues.
+This check monitors the usage of the Linux TCP receive and send queues, and can detect if a TCP receive or send queue is full for individual containers.
 
 ## Setup
 
@@ -40,8 +40,6 @@ system_probe_config:
    Agent's configuration directory to start collecting your tcp_queue_length performance data.
    See the [sample tcp_queue_length.d/conf.yaml][1] for all available configuration options.
 
-    The `only_count_nb_contexts` parameter is enabled by default and collects only the number of timeseries it would normally collect. If disabled, the check will collect all data-- that is, the size of the TCP queues for every single connection.
-
 2. [Restart the Agent][3].
 
 
@@ -58,7 +56,7 @@ Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQu
 
 ### Metrics
 
-For each TCP connection, `tcp_queue_length` collects the minimum and the maximum amount of data in the send and receive buffers between each data collection time point.
+For each container or a pod, tcp_queue_length integration returns the connection read/write buffer which is the mostly used. For example, if a container has three TCP connections, for which their read buffers are used 40%, 25% and 80% respectively, the metric `tcp_queue.read_buffer_max_usage_pct` will return 0.8
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
