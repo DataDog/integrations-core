@@ -197,6 +197,8 @@ METRIC_TO_SKIP = [
     'snmp.memoryDeviceStatus',
 ]
 
+ASSERT_VALUE_METRICS = ["datadog.snmp.submitted_metrics"]
+
 
 def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
     python_config = deepcopy(config)
@@ -204,15 +206,15 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
     aggregator = dd_agent_check(python_config, rate=True)
-    expected_metrics = defaultdict(int)
+    expected_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
             if stub.name in METRIC_TO_SKIP:
                 continue
             assert "loader:python" in stub.tags, "Stub: %s\nAll snmp python check metrics: %s" % (stub, metrics)
             stub = normalize_stub_metric(stub)
-            expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))] += 1
-    total_count_python = sum(count for count in expected_metrics.values())
+            expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
+    total_count_python = sum(len(stubs) for stubs in expected_metrics.values())
 
     aggregator.reset()
     aggregator = dd_agent_check(core_config, rate=True)
@@ -226,10 +228,10 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
 
-    actual_metrics = defaultdict(int)
+    actual_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for metric in metrics:
-            actual_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))] += 1
+            actual_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))].append(metric)
 
     print("Python metrics not found in Corecheck metrics:")
     for key in sorted(expected_metrics):
@@ -241,8 +243,12 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None):
         if key not in expected_metrics:
             print("\t{}".format(key))
 
-    for (name, mtype, tags), count in expected_metrics.items():
-        aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
+    for (name, mtype, tags), stubs in expected_metrics.items():
+        if name in ASSERT_VALUE_METRICS:
+            for stub in stubs:
+                aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs), value=stub.value)
+        else:
+            aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs))
 
     aggregator.assert_all_metrics_covered()
 
