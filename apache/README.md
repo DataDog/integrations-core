@@ -59,11 +59,13 @@ _Available for Agent versions >6.0_
        path: /var/log/apache2/access.log
        source: apache
        service: apache
+       sourcecategory: http_web_access
 
      - type: file
        path: /var/log/apache2/error.log
        source: apache
        service: apache
+       sourcecategory: http_web_error
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample apache.d/conf.yaml][4] for all available configuration options.
