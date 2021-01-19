@@ -180,4 +180,11 @@ nginx.upstream.peers.sent_count,count,,byte,,The total amount of data sent to th
 nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
 nginx.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold (shown as count).,0,nginx,upstr peers unavail
 nginx.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
+nginx.stream.zone_sync.status.nodes_online,gauge,,,,The number of peers this node is connected to.,0,nginx,Count of nodes online.
+nginx.stream.zone_sync.status.msgs_in,gauge,,,,The number of messages received by this node.,0,nginx,Total count of messages received. 
+nginx.stream.zone_sync.status.msgs_out,gauge,,,,The number of messages sent by this node.,0,nginx,Total count of messages sent.
+nginx.stream.zone_sync.status.bytes_in,gauge,,,,The number of bytes received by this node.,0,nginx,Total count of bytes received.
+nginx.stream.zone_sync.status.bytes_out,gauge,,,,The number of bytes sent by this node.,0,nginx,Total coun tof bytes sent. 
+nginx.stream.zone_sync.zone.records_total,gauge,,,,The total number of records stored in the shared memory zone.,0,nginx,Count of records in memory zone.
+nginx.stream.zone_sync.zone.records_pending,gauge,,,,The number of records that need to be sent to the cluster.,0,nginx, Count of records pending. 
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version

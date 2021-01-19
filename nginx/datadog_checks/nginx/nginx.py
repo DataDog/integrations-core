@@ -43,6 +43,10 @@ PLUS_API_STREAM_ENDPOINTS = {
     "stream/upstreams": ["stream", "upstreams"],
 }
 
+PLUS_API_V3_STREAM_ENDPOINTS = {
+    "stream/zone_sync": ["stream", "zone_sync"],
+}
+
 TAGGED_KEYS = {
     'caches': 'cache',
     'server_zones': 'server_zone',
@@ -51,6 +55,7 @@ TAGGED_KEYS = {
     'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
     'slots': 'slot',
+    'zones': 'zone',
 }
 
 
@@ -98,8 +103,11 @@ class Nginx(AgentCheck):
 
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
+
             if use_plus_api_stream:
-                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS))
+                plus_api_chain_list = chain(
+                    iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints(plus_api_version)
+                )
             else:
                 plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
 
@@ -207,6 +215,12 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
+    def _get_plus_api_stream_endpoints(self, plus_api_version):
+        endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
+        if int(plus_api_version) >= 3:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
+        return endpoints
+
     def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
@@ -218,7 +232,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS:
+            if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
                 self.log.warning(
                     "Stream may not be initialized. " "Error querying %s metrics at %s: %s", endpoint, url, e
                 )

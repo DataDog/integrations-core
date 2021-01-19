@@ -78,7 +78,7 @@ instances:
     # use_plus_api_stream: false
 
     ## @param plus_api_version - integer - optional - default: 2
-    ## Specify the version of the Plus API to use. The check supports versions 1 & 2.
+    ## Specify the version of the Plus API to use. The check supports versions 1-3.
     #
     # plus_api_version: <PLUS_API_VERSION>
 
@@ -94,7 +94,7 @@ instances:
     ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported, for example:
+    ## The SOCKS protocol is also supported like so:
     ##
     ##   socks5://user:pass@host:port
     ##
@@ -145,7 +145,7 @@ instances:
     ##     |__ aws_host
     ##     |__ aws_service
     ##
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
@@ -166,11 +166,11 @@ instances:
     # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
-    ## If your services use NTLM authentication, specify
-    ## the domain used in the check. For NTLM Auth, append
+    ## If your services use NTLM authentication, you can specify
+    ## a domain that is used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
-    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
+    # ntlm_domain: <NTLM_DOMAIN>/<USERNAME>
 
     ## @param kerberos_auth - string - optional - default: disabled
     ## If your services use Kerberos authentication, you can specify the Kerberos
@@ -191,7 +191,7 @@ instances:
     # kerberos_cache: <KERBEROS_CACHE>
 
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
     ##
     ## See https://github.com/requests/requests-kerberos#delegation
     #
@@ -207,7 +207,7 @@ instances:
 
     ## @param kerberos_hostname - string - optional
     ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    ## match its Kerberos hostname, for example: behind a content switch or load balancer.
+    ## match its kerberos hostname (e.g. behind a content switch or load balancer).
     ##
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
@@ -255,26 +255,26 @@ instances:
     #     <OPTION_2>: <VALUE_2>
 
     ## @param aws_region - string - optional
-    ## If your services require AWS Signature Version 4 signing, set the region.
+    ## If your services require AWS Signature Version 4 Signing, set the region.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
     # aws_region: <AWS_REGION>
 
     ## @param aws_host - string - optional
-    ## If your services require AWS Signature Version 4 signing, set the host.
+    ## If your services require AWS Signature Version 4 Signing, set the host.
     ##
-    ## Note: This setting is not necessary for official integrations.
+    ## Note that this setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
     # aws_host: <AWS_HOST>
 
     ## @param aws_service - string - optional
-    ## If your services require AWS Signature Version 4 signing, set the service code. For a list
+    ## If your services require AWS Signature Version 4 Signing, set the service code. For a list
     ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
     ##
-    ## Note: This setting is not necessary for official integrations.
+    ## Note that this setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
@@ -293,10 +293,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -406,7 +402,7 @@ instances:
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs.
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
