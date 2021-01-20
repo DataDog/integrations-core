@@ -1,11 +1,9 @@
 ## On a slave host:
-* For MySQL >= 5.7.0
-  * If the SQL and the IO threads are running, returns OK
-  * If one of them is down, returns WARNING
-  * If both are down, returns CRITICAL
-* For MySQL < 5.7.0
-  * If both threads are running, returns OK
-  * If at least one of them is down, returns CRITICAL
+
+* If the SQL and the IO threads are running, returns OK
+    * In the case of version > 5.7.0 Slave_running need to also be on
+* If one of them is down, returns WARNING
+* If both are down, returns CRITICAL
 * Else, if none of the condition above was satisfied
   * If the IO and the SQL threads are healthy, returns OK
   * Else, returns CRITICAL
