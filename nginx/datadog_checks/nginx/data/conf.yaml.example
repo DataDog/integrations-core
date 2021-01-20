@@ -78,7 +78,7 @@ instances:
     # use_plus_api_stream: false
 
     ## @param plus_api_version - integer - optional - default: 2
-    ## Specify the version of the Plus API to use. The check supports versions 1 & 2.
+    ## Specify the version of the Plus API to use. The check supports versions 1-3.
     #
     # plus_api_version: <PLUS_API_VERSION>
 
