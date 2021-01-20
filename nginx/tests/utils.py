@@ -52,7 +52,7 @@ def mocked_perform_request(*args, **kwargs):
     elif re.search('/[23]/stream/server_zones', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_stream_server_zones.json'))
         response.json.return_value = json.loads(file_contents)
-    elif re.search('/[3]/stream/zone_sync', url):
+    elif '/3/stream/zone_sync' in url:
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_stream_zone_sync.json'))
         response.json.return_value = json.loads(file_contents)
     else:
