@@ -54,7 +54,6 @@ configuration options.
 
 #### Log Collection
 
-_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -73,7 +72,7 @@ _Available for Agent versions >6.0_
     ```
 
 
-  Change the `path` and `service` parameter values based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/rethinkdb/datadog_checks/rethinkdb/data/conf.yaml.example for all available configuration options.
+  Change the `path` parameter value based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/rethinkdb/datadog_checks/rethinkdb/data/conf.yaml.example for all available configuration options.
 
   3. [Restart the Agent][8].
 
