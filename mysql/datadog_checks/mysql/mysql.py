@@ -315,9 +315,6 @@ class MySql(AgentCheck):
     def _check_replication_status(self, results):
         # get slave running form global status page
         slave_running_status = AgentCheck.UNKNOWN
-        # This is ON if this server is a replica that is connected to a replication source,
-        # and both the I/O and SQL threads are running; otherwise, it is OFF.
-        slave_running = collect_string('Slave_running', results)
         # Slave_IO_Running: Whether the I/O thread for reading the source's binary log is running.
         # You want this to be Yes unless you have not yet started replication or have explicitly stopped it.
         slave_io_running = collect_type('Slave_IO_Running', results, dict)
