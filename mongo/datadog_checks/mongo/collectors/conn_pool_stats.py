@@ -1,4 +1,5 @@
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.common import ReplicaSetDeployment
 
 
 class ConnPoolStatsCollector(MongoCollector):
@@ -9,7 +10,15 @@ class ConnPoolStatsCollector(MongoCollector):
     which you run connPoolStats among other factors.
     """
 
-    def collect(self, client):
-        db = client["admin"]
+    def compatible_with(self, deployment):
+        # Can only be run on:
+        #  - a mongod node in a sharded cluster, as long as it's not an arbiter
+        #  - a mongos
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            return False
+        return deployment.use_shards
+
+    def collect(self, api):
+        db = api["admin"]
         stats = {'connection_pool': db.command('connPoolStats')}
         self._submit_payload(stats)

@@ -49,21 +49,25 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
 
 [Run the Agent's `status` subcommand][8] and look for `process` under the Checks section.
 
-## Data Collected
-
-### Metrics
+### Metrics notes
 
 **Note**: Some metrics are not available on Linux or OSX:
 
 - Process I/O metrics are **not** available on Linux or OSX since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][9]
 - `system.cpu.iowait` is not available on Windows.
 
-See [metadata.csv][10] for a list of metrics provided by this check.
-
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
 
 The `system.processes.cpu.pct` metric sent by this check is only accurate for processes that live for more 
 than 30 seconds. Do not expect its value to be accurate for shorter-lived processes.
+
+For the full list of metrics, see the [Metrics section](#metrics).
+
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Events
 

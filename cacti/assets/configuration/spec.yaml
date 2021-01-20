@@ -3,6 +3,8 @@ files:
   - name: cacti.yaml
     options:
       - template: init_config
+        options:
+          - template: init_config/default
       - template: instances
         options:
           - name: mysql_host
@@ -72,7 +74,7 @@ files:
             value:
               example: <RRD_WHITELIST_FILE_PATH>
               type: string
-          - template: instances/tags
+          - template: instances/default
       - template: logs
         example:
           - type: file

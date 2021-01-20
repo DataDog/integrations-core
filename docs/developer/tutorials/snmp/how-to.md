@@ -233,7 +233,7 @@ snmpwalk -v 2c -c public -OentU 127.0.0.1:1161 1.3.6.1.2.1.2.2
 
 ## Generate table simulation data
 
-If you'd like to generate [simulation data for tables](./sim-format.md#tables) automatically, you can use the [`mib2dev.py`](http://snmplabs.com/snmpsim/documentation/building-simulation-data.html?highlight=snmpsim-record-mibs#examples) tool shipped with `snmpsim`. (This tool will be renamed as `snmpsim-record-mibs` in the upcoming 1.0 release of the library.)
+To generate [simulation data for tables](./sim-format.md#tables) automatically, use the [`mib2dev.py`](https://github.com/etingof/snmpsim/blob/master/docs/source/documentation/building-simulation-data.rst#examples) tool shipped with `snmpsim`. This tool will be renamed as `snmpsim-record-mibs` in the upcoming 1.0 release of the library.
 
 First, install snmpsim:
 
@@ -247,6 +247,26 @@ For example:
 
 ```bash
 mib2dev.py --mib-module=<MIB> --start-oid=1.3.6.1.4.1.674.10892.1.400.20 --stop-oid=1.3.6.1.4.1.674.10892.1.600.12 > /path/to/mytable.snmprec
+```
+
+The following command generates 4 rows for the `IF-MIB:ifTable (1.3.6.1.2.1.2.2)`:
+
+```bash
+mib2dev.py --mib-module=IF-MIB --start-oid=1.3.6.1.2.1.2.2 --stop-oid=1.3.6.1.2.1.2.3 --table-size=4 > /path/to/mytable.snmprec
+```
+
+### Known issues
+`mib2dev` has a known issue with `IF-MIB::ifPhysAddress`, that is expected to contain an hexadecimal string, but `mib2dev` fills it with a string. To fix this, provide a valid hextring when prompted on the command line:
+
+```bash
+# Synthesizing row #1 of table 1.3.6.1.2.1.2.2.1
+*** Inconsistent value: Display format eval failure: b'driving kept zombies quaintly forward zombies': invalid literal for int() with base 16: 'driving kept zombies quaintly forward zombies'caused by <class 'ValueError'>: invalid literal for int() with base 16: 'driving kept zombies quaintly forward zombies'
+*** See constraints and suggest a better one for:
+# Table IF-MIB::ifTable
+# Row IF-MIB::ifEntry
+# Index IF-MIB::ifIndex (type InterfaceIndex)
+# Column IF-MIB::ifPhysAddress (type PhysAddress)
+# Value ['driving kept zombies quaintly forward zombies'] ? 001122334455
 ```
 
 ## Generate simulation data from a walk

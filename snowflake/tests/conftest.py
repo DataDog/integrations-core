@@ -12,6 +12,16 @@ INSTANCE = {
     'role': "ACCOUNTADMIN",
 }
 
+OAUTH_INSTANCE = {
+    "user": "testuser",
+    "account": "test_acct.us-central1.gcp",
+    "database": "SNOWFLAKE",
+    "schema": "ACCOUNT_USAGE",
+    'role': "ACCOUNTADMIN",
+    "authenticator": "oauth",
+    "token": "testtoken",
+}
+
 CHECK_NAME = 'snowflake'
 
 
@@ -23,3 +33,8 @@ def dd_environment(instance):
 @pytest.fixture(scope='session')
 def instance():
     return INSTANCE
+
+
+@pytest.fixture(scope='session')
+def oauth_instance():
+    return OAUTH_INSTANCE

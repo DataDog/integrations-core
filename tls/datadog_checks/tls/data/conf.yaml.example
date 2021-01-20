@@ -53,23 +53,6 @@ instances:
     #
     # server_hostname: <SERVER_HOSTNAME>
 
-    ## @param validate_hostname - boolean - optional - default: true
-    ## Whether or not to verify the certificate was issued for `server_hostname`. If enabled,
-    ## this is an additional requirement for the service check `tls.cert_validation`.
-    #
-    # validate_hostname: true
-
-    ## @param validate_cert - boolean - optional - default: true
-    ## Whether or not to validate the certificate. If disabled, the service check
-    ## `tls.cert_validation` always reports as OK except for:
-    ##
-    ## 1. parsing errors
-    ## 2. hostname mismatch, if `validate_hostname` is true
-    ##
-    ## Disabling this is useful when only the monitoring of certificate expiration is desired.
-    #
-    # validate_cert: true
-
     ## @param allowed_versions - list of strings - optional
     ## The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
     ## negotiated by connections that are not in this list makes the service check
@@ -112,27 +95,6 @@ instances:
     #
     # seconds_critical: <SECONDS_CRITICAL>
 
-    ## @param cert - string - optional
-    ## The path to a single file in PEM format containing a certificate as well as any
-    ## number of CA certificates needed to establish the certificate’s authenticity for
-    ## use when connecting to `server`. It may also contain an unencrypted private key to use.
-    #
-    # cert: <CERT_PATH>
-
-    ## @param private_key - string - optional
-    ## The unencrypted private key to use for `cert` when connecting to `server`. This is
-    ## required if `cert` is set and it does not already contain a private key.
-    #
-    # private_key: <PRIVATE_KEY_PATH>
-
-    ## @param ca_cert - string - optional
-    ## The path to a file of concatenated CA certificates in PEM format or a directory
-    ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
-    #
-    # ca_cert: <CA_CERT_PATH>
-
     ## @param timeout - integer - optional - default: 10
     ## The timeout for connecting to `server`.
     #
@@ -171,3 +133,47 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate(s) of the service(s).
+    #
+    # tls_verify: true
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_private_key_password - string - optional
+    ## Optional password to decrypt tls_private_key.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
+    #
+    # tls_private_key_password: <PRIVATE_KEY_PASSWORD>
+
+    ## @param tls_validate_hostname - boolean - optional - default: true
+    ## Verifies that the server's cert hostname matches the one requested.
+    #
+    # tls_validate_hostname: true

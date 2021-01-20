@@ -14,24 +14,26 @@ The SAP HANA check is included in the [Datadog Agent][2] package.
 
 To query certain views, specific privileges must be granted to the chosen HANA monitoring user. For more information, see [Granting privileges](#granting-privileges).
 
+To learn how to set the port number for HANA tenant, single-tenant, and system databases, see the [Connect to SAP documentation][8].
+
 ##### User creation
 
 1. Connect to the system database and run the following command to create a user:
 
    ```shell
-   CREATE RESTRICTED USER <USER> PASSWORD <PASSWORD>
+   CREATE RESTRICTED USER <USER> PASSWORD <PASSWORD>;
    ```
 
 2. Run the following command to allow the user to connect to the system:
 
    ```shell
-   ALTER USER <USER> ENABLE CLIENT CONNECT
+   ALTER USER <USER> ENABLE CLIENT CONNECT;
    ```
 
 3. (optional) To avoid service interruption you may want to make the password long-lived:
 
    ```shell
-   ALTER USER <USER> DISABLE PASSWORD LIFETIME
+   ALTER USER <USER> DISABLE PASSWORD LIFETIME;
    ```
 
 ##### Granting privileges
@@ -39,35 +41,35 @@ To query certain views, specific privileges must be granted to the chosen HANA m
 1. Run the following command to create a monitoring role (we'll call it `DD_MONITOR` for these examples):
 
    ```shell
-   CREATE ROLE DD_MONITOR
+   CREATE ROLE DD_MONITOR;
    ```
 
 2. Run the following command to grant read-only access to all system views:
 
    ```shell
-   GRANT CATALOG READ TO DD_MONITOR
+   GRANT CATALOG READ TO DD_MONITOR;
    ```
 
 3. Then run the following commands to grant select privileges on each system view:
 
    ```shell
-   GRANT SELECT ON SYS.M_DATABASE TO DD_MONITOR
-   GRANT SELECT ON SYS.M_DATABASES TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_BACKUP_PROGRESS TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_CONNECTIONS TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_DISK_USAGE TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_LICENSES TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_RS_MEMORY TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_SERVICE_MEMORY TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_SERVICE_STATISTICS TO DD_MONITOR
-   GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR
+   GRANT SELECT ON SYS.M_DATABASE TO DD_MONITOR;
+   GRANT SELECT ON SYS.M_DATABASES TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_BACKUP_PROGRESS TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_CONNECTIONS TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_DISK_USAGE TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_LICENSES TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_RS_MEMORY TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_SERVICE_MEMORY TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_SERVICE_STATISTICS TO DD_MONITOR;
+   GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR;
    ```
 
 4. Finally, run the following command to assign the monitoring role to the desired user:
 
    ```shell
-   GRANT DD_MONITOR TO <USER>
+   GRANT DD_MONITOR TO <USER>;
    ```
 
 ### Configuration
@@ -109,3 +111,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/d12c86af7cb442d1b9f8520e2aba7758.html

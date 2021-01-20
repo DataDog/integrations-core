@@ -200,7 +200,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         for broker in self._kafka_client.cluster.brokers():
             if len(self._highwater_offsets) >= contexts_limit:
-                self.log.debug("Context limit reached. Skipping highwater offsets collection.")
+                self.warning("Context limit reached. Skipping highwater offsets collection.")
                 return
             broker_led_partitions = self._kafka_client.cluster.partitions_for_broker(broker.nodeId)
             if broker_led_partitions is None:
@@ -237,7 +237,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
                     if len(self._highwater_offsets) >= contexts_limit:
-                        self.log.debug("Context limit reached. Skipping highwater offsets processing.")
+                        self.warning("Context limit reached. Skipping highwater offsets processing.")
                         return
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
@@ -374,7 +374,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         self._zk_consumer_offsets[key] = consumer_offset
 
                         if len(self._zk_consumer_offsets) >= contexts_limit:
-                            self.log.debug("Context limit reached. Skipping zk consumer offsets collection.")
+                            self.warning("Context limit reached. Skipping zk consumer offsets collection.")
                             return
                     except NoNodeError:
                         self.log.info('No zookeeper node at %s', zk_path)
@@ -424,7 +424,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                             self._kafka_consumer_offsets[key] = offset
 
                             if len(self._kafka_consumer_offsets) >= contexts_limit:
-                                self.log.debug("Context limit reached. Skipping kafka consumer offsets collection.")
+                                self.warning("Context limit reached. Skipping kafka consumer offsets collection.")
                                 return
                 else:
                     self.log.info("unable to find group coordinator for %s", consumer_group)

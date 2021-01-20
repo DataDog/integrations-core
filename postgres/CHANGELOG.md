@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 5.3.1 / 2020-12-11
+## 5.3.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Removed duplicated metrics. See [#8116](https://github.com/DataDog/integrations-core/pull/8116).
 

@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.8.1 / 2020-12-15 / Agent 7.25.0
+
+* [Fixed] Use spec template. See [#8192](https://github.com/DataDog/integrations-core/pull/8192).
+
 ## 2.8.0 / 2020-12-11
 
 * [Added] Add Kafka Consumer spec. See [#8108](https://github.com/DataDog/integrations-core/pull/8108).

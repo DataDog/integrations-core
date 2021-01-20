@@ -1,0 +1,41 @@
+{
+  "display_name": "GlusterFS",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "GlusterFS",
+  "metric_prefix": "glusterfs.",
+  "metric_to_check": "glusterfs.cluster.nodes.count",
+  "creates_events": false,
+  "short_description": "Monitor GlusterFS cluster node, volume, and brick status metrics.",
+  "guid": "1cb9a21c-8cc4-4727-a4b1-ab7015c7ae24",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Red Hat Gluster Storage",
+  "process_signatures": [
+    "glusterd",
+    "gluster"
+  ],
+  "categories": [
+    "data store"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "glusterfs",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {
+      "Red Hat Gluster Storage": "assets/dashboards/red_hat_gluster_storage.json"
+    },
+    "monitors": {
+      "brick status": "assets/monitors/brick_status.json"
+    },
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

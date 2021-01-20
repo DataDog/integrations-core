@@ -89,7 +89,7 @@ METRIC_MAP = {
     'haproxy_process_current_tasks': 'process.current.tasks',
     'haproxy_process_current_zlib_memory': 'process.current.zlib.memory',
     'haproxy_process_dropped_logs_total': 'process.dropped.logs.total',
-    'haproxy_process_frontent_ssl_reuse': 'process.frontent.ssl.reuse',
+    'haproxy_process_frontend_ssl_reuse': 'process.frontend.ssl.reuse',
     'haproxy_process_hard_max_connections': 'process.hard.max.connections',
     'haproxy_process_http_comp_bytes_in_total': 'process.http.comp.bytes.in.total',
     'haproxy_process_http_comp_bytes_out_total': 'process.http.comp.bytes.out.total',
@@ -162,7 +162,9 @@ METRIC_MAP = {
     'haproxy_server_retry_warnings_total': 'server.retry.warnings.total',
     'haproxy_server_server_aborts_total': 'server.server.aborts.total',
     'haproxy_server_server_idle_connections_current': 'server.server.idle.connections.current',
+    'haproxy_server_idle_connections_current': 'server.idle.connections.current',  # rename since >= v2.3
     'haproxy_server_server_idle_connections_limit': 'server.server.idle.connections.limit',
+    'haproxy_server_idle_connections_limit': 'server.idle.connections.limit',  # rename since >= 2.3
     'haproxy_server_sessions_total': 'server.sessions.total',
     'haproxy_server_status': 'server.status',
     'haproxy_server_total_time_average_seconds': 'server.total.time.average.seconds',

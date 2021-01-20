@@ -3,13 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
-import os
 
 import pytest
+from packaging import version
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.haproxy import HAProxyCheck
 
+from ..common import HAPROXY_VERSION
 from .common import (
     BACKEND_AGGREGATE_ONLY_CHECK,
     BACKEND_CHECK,
@@ -38,16 +39,14 @@ pytestmark = [requires_legacy_environment]
 
 
 def _test_frontend_metrics(aggregator, shared_tag, count=1):
-    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     frontend_tags = shared_tag + ['type:FRONTEND', 'service:public', 'haproxy_service:public']
     for metric_name, min_version in FRONTEND_CHECK:
-        if haproxy_version >= min_version:
+        if HAPROXY_VERSION >= version.parse(min_version):
             aggregator.assert_metric(metric_name, tags=frontend_tags, count=count)
 
 
 def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False, check_aggregates=False, count=1):
     backend_tags = shared_tag + ['type:BACKEND']
-    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     if not services:
         services = BACKEND_SERVICES
     for service in services:
@@ -55,17 +54,17 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
 
         if check_aggregates:
             for metric_name, min_version in BACKEND_AGGREGATE_ONLY_CHECK:
-                if haproxy_version >= min_version:
+                if HAPROXY_VERSION >= version.parse(min_version):
                     aggregator.assert_metric(metric_name, tags=tags, count=count)
 
         for backend in BACKEND_LIST:
             tags = backend_tags + ['service:' + service, 'haproxy_service:' + service, 'backend:' + backend]
 
-            if add_addr_tag and haproxy_version >= ['1', '7']:
+            if add_addr_tag and HAPROXY_VERSION >= version.parse('1.7'):
                 tags.append('server_address:{}'.format(BACKEND_TO_ADDR[backend]))
 
             for metric_name, min_version in BACKEND_CHECK:
-                if haproxy_version >= min_version:
+                if HAPROXY_VERSION >= version.parse(min_version):
                     aggregator.assert_metric(metric_name, tags=tags, count=count)
 
 
@@ -97,8 +96,7 @@ def _test_sticktable_metrics(aggregator, services=None, count=1):
     check to be done over a proper stats socket (not http)
     """
 
-    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
-    if haproxy_version < ['1', '5']:
+    if HAPROXY_VERSION < version.parse('1.5'):
         # We can't gather stick-table metrics for version 1.4
         return
     if not services:

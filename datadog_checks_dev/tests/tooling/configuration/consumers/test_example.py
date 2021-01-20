@@ -4,7 +4,7 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
+from datadog_checks.dev.tooling.specs.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
 
@@ -1425,5 +1425,45 @@ def test_enabled_override_required():
             ## bar words
             #
             # bar: <BAR>
+        """
+    )
+
+
+def test_option_multiple_types():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: foo
+              description: words
+              value:
+                oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+          -
+            ## @param foo - string or list of strings - optional
+            ## words
+            #
+            # foo: <FOO>
         """
     )

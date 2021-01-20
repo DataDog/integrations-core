@@ -9,6 +9,8 @@ files:
           To make modifications to the check configuration, please copy this file
           to `network.yaml` and make your changes on that file.
         required: true
+        options:
+          - template: init_config/default
       - template: instances
         description: Network check only supports one configured instance
         options:
@@ -124,4 +126,18 @@ files:
               type: array
               items: 
                 type: string
-          - template: instances/tags
+          - name: collect_aws_ena_metrics
+            description: |
+              Turn on collection of the AWS Elastic Network Adapter (ENA) statistics for network interfaces.
+
+              This will only work on ENA-enabled instances, see:
+              https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html#ena-requirements
+
+              Note that when running this check in container, it will return metrics for the container
+              network interfaces. To get host-level ENA metrics from a container, it needs to be executed
+              with `CAP_NET_ADMIN` capability and use the `host` network mode.
+            value:
+              default: false
+              example: false
+              type: boolean
+          - template: instances/default

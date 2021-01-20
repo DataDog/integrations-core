@@ -1,6 +1,6 @@
 # CHANGELOG - ceph
 
-## 2.3.0 / 2020-11-25
+## 2.3.0 / 2020-11-25 / Agent 7.25.0
 
 * [Added] Support octopus version. See [#8077](https://github.com/DataDog/integrations-core/pull/8077).
 

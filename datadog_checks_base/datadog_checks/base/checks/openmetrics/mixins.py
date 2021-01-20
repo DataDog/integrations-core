@@ -497,7 +497,10 @@ class OpenMetricsScraperMixin(object):
             # Garbage collect unused mapping and reset active labels
             for metric, mapping in list(iteritems(scraper_config['_label_mapping'])):
                 for key in list(mapping):
-                    if key not in scraper_config['_active_label_mapping'][metric]:
+                    if (
+                        metric in scraper_config['_active_label_mapping']
+                        and key not in scraper_config['_active_label_mapping'][metric]
+                    ):
                         del scraper_config['_label_mapping'][metric][key]
             scraper_config['_active_label_mapping'] = {}
         finally:

@@ -10,7 +10,8 @@ from ... import is_affirmative
 from ...constants import ServiceCheck
 from .. import constants
 from ..common import compute_percent, total_time_to_temporal_percent
-from .utils import create_extra_transformer, normalize_datetime
+from ..time import ensure_aware_datetime
+from .utils import create_extra_transformer
 
 # Used for the user-defined `expression`s
 ALLOWED_GLOBALS = {
@@ -258,13 +259,13 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     if time_format == 'native':
 
         def time_elapsed(_, value, **kwargs):
-            value = normalize_datetime(value)
+            value = ensure_aware_datetime(value)
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
     else:
 
         def time_elapsed(_, value, **kwargs):
-            value = normalize_datetime(datetime.strptime(value, time_format))
+            value = ensure_aware_datetime(datetime.strptime(value, time_format))
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
     return time_elapsed

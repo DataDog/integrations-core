@@ -1,7 +1,8 @@
 {
   "categories": [
     "configuration & deployment",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": true,
   "display_name": "Teamcity",

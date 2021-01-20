@@ -28,6 +28,7 @@ mongodb.dur.timems.writetodatafiles,gauge,,millisecond,,Amount of time spent wri
 mongodb.dur.timems.writetojournal,gauge,,millisecond,,Amount of time spent writing to the journal,-1,mongodb,dur time ms write to journal
 mongodb.dur.writetodatafilesmb,gauge,,mebibyte,,Amount of data written from journal to the data files during the last journal group commit interval.,-1,mongodb,dur write to data files mb
 mongodb.extra_info.page_faultsps,gauge,,fault,second,Number of page faults per second that require disk operations.,0,mongodb,pagefaults ps
+mongodb.extra_info.heap_usage_bytesps,gauge,,byte,second,The total size in bytes of heap space used by the database process. Available on Unix/Linux systems only.,0,mongodb,heap usage bytesps
 mongodb.fsynclocked,gauge,,,,Number of fsynclocked performed on a mongo instance.,0,mongodb,fsynclocked
 mongodb.globallock.activeclients.readers,gauge,,connection,,Count of the active client connections performing read operations.,0,mongodb,active clients readers
 mongodb.globallock.activeclients.total,gauge,,connection,,Total number of active client connections to the database.,0,mongodb,active clients total

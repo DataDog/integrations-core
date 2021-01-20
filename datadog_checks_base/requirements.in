@@ -9,12 +9,11 @@ ipaddress==1.0.22; python_version < '3.0'
 kubernetes==8.0.1
 mmh3==2.5.1
 orjson==2.6.1; python_version > '3.0'
-prometheus-client==0.7.1
+prometheus-client==0.9.0
 protobuf==3.7.0
 pyjwt==1.7.1
 pysocks==1.7.0
 python-dateutil==2.8.0
-pytz==2019.3
 pywin32==228; sys_platform == 'win32'
 pyyaml==5.3.1
 requests==2.22.0

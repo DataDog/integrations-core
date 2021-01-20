@@ -93,14 +93,8 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle.
-
-```
-#agent-integrations status:
-1. Status of the testing: [cards left | finished]
-2. Bugs found pending to fix: [description of bugs]
-3. Fixes done pending a new RC build: [link PRs of fixes]
-```
+The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle. 
+Reply in the thread with any pending PRs meant for the next RC and update the spreadsheet `PRs included in Agent RCs`.
 
 ### Logs
 
@@ -113,3 +107,5 @@ Each release candidate is deployed in a staging environment. We observe the `WAR
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
 the same process outlined above.
+
+Notify the Agent Release Manager when code freeze ends.

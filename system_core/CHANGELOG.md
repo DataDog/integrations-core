@@ -1,6 +1,6 @@
 # CHANGELOG - system_core
 
-## 1.9.0 / 2020-12-11
+## 1.9.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add config specs. See [#7977](https://github.com/DataDog/integrations-core/pull/7977).
 

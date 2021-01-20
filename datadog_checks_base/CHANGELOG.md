@@ -1,5 +1,25 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.0.0 / 2021-01-13
+
+* [Added] Add `no_op` utility. See [#8356](https://github.com/DataDog/integrations-core/pull/8356).
+* [Added] Support tags set at runtime on the DB QueryManager. See [#8304](https://github.com/DataDog/integrations-core/pull/8304).
+* [Added] Add the `host` tag to RDS instances' parsed tags. See [#8292](https://github.com/DataDog/integrations-core/pull/8292).
+* [Added] Update prometheus mixin to use the request wrapper. See [#8223](https://github.com/DataDog/integrations-core/pull/8223).
+* [Added] Add optional argument for overriding get_tls_context() parameters. See [#8275](https://github.com/DataDog/integrations-core/pull/8275).
+* [Added] Allow semver version metadata to start with an optional `v`. See [#8303](https://github.com/DataDog/integrations-core/pull/8303).
+* [Added] Update redis dependency. See [#8301](https://github.com/DataDog/integrations-core/pull/8301).
+* [Fixed] Fix aggregator stub's `assert_histogram_bucket` method. See [#8291](https://github.com/DataDog/integrations-core/pull/8291).
+* [Removed] Remove unneccessary `pytz` dependency. See [#8354](https://github.com/DataDog/integrations-core/pull/8354).
+
+## 15.7.2 / 2020-12-23 / Agent 7.25.0
+
+* [Fixed] Bump lxml to 4.6.2. See [#8249](https://github.com/DataDog/integrations-core/pull/8249).
+
+## 15.7.1 / 2020-12-15
+
+* [Fixed] openmetrics: fix error in label_joins when metrics in label_mapping are not present anymore in active_label_mapping. See [#8167](https://github.com/DataDog/integrations-core/pull/8167).
+
 ## 15.7.0 / 2020-12-10
 
 * [Added] Add `tag_list` column type, allowing to ingest variable-size database-provided tags. See [#8147](https://github.com/DataDog/integrations-core/pull/8147).

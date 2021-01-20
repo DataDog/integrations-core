@@ -66,6 +66,7 @@ class BaseSqlServerMetric(object):
 
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
+        logger.debug("%s: received %d rows and %d columns", cls.__name__, len(rows), len(columns))
         return rows, columns
 
     @classmethod
@@ -374,8 +375,8 @@ class SqlOsTasks(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """
     select scheduler_id,
-           SUM(context_switches_count) as context_switches_count,
-           SUM(pending_io_count) as pending_io_count,
+           SUM(CAST(context_switches_count AS BIGINT)) as context_switches_count,
+           SUM(CAST(pending_io_count AS BIGINT)) as pending_io_count,
            SUM(pending_io_byte_count) as pending_io_byte_count,
            AVG(pending_io_byte_average) as pending_io_byte_average
     from {table} group by scheduler_id;
@@ -409,12 +410,56 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
     QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
+    _DATABASES = []
+
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+        super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
+        self._DATABASES.append(self.instance)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        return cls._fetch_generic_values(cursor, None, logger)
+        # special case since this table is specific to databases, need to run query for each database instance
+        rows = []
+        columns = []
+
+        data = cursor.execute('select DB_NAME()').fetchall()
+        current_db = data[0][0]
+        logger.debug("%s: current db is %s", cls.__name__, current_db)
+
+        for db in cls._DATABASES:
+            # use statements need to be executed separate from select queries
+            ctx = 'use {}'.format(db)
+            logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+            cursor.execute(ctx)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+            cursor.execute(cls.QUERY_BASE)
+
+            data = cursor.fetchall()
+            query_columns = ['database'] + [i[0] for i in cursor.description]
+            if columns:
+                assert columns == query_columns
+            else:
+                columns = query_columns
+
+            results = []
+            # insert database name as new column for each row
+            for row in data:
+                r = list(row)
+                r.insert(0, db)
+                results.append(r)
+
+            rows.extend(results)
+
+            logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
+
+        # reset back to previous db
+        logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
+        cursor.execute('use {}'.format(str(current_db)))
+
+        return rows, columns
 
     def fetch_metric(self, rows, columns):
+        db_name = columns.index('database')
         file_id = columns.index("file_id")
         file_type = columns.index("type")
         file_location = columns.index("physical_name")
@@ -422,6 +467,8 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         for row in rows:
+            if row[db_name] != self.instance:
+                continue
             column_val = row[value_column_index]
             if self.column in ('size', 'max_size'):
                 column_val *= 8  # size reported in 8 KB pages

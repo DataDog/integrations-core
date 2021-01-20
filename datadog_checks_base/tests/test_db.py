@@ -5,11 +5,12 @@ import logging
 from datetime import datetime, timedelta
 
 import pytest
-import pytz
+from dateutil.tz import gettz
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.time import UTC
 
 pytestmark = pytest.mark.db
 
@@ -995,6 +996,27 @@ class TestSubmission:
         aggregator.assert_metric('test.foo', 7, metric_type=aggregator.COUNT, tags=['test:foo', 'tag:tag2'])
         aggregator.assert_all_metrics_covered()
 
+    def test_runtime_tags(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'count'}, {'name': 'tag', 'type': 'tag'}],
+            },
+            executor=mock_executor([[3, 'tag1'], [7, 'tag2'], [5, 'tag1']]),
+            tags=['test:init'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute(extra_tags=['test:runtime', 'test:init'])
+
+        aggregator.assert_metric(
+            'test.foo', 8, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag1']
+        )
+        aggregator.assert_metric(
+            'test.foo', 7, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag2']
+        )
+        aggregator.assert_all_metrics_covered()
+
     def test_kwarg_passing(self, aggregator):
         class MyCheck(AgentCheck):
             __NAMESPACE__ = 'test_check'
@@ -1503,7 +1525,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1526,7 +1548,7 @@ class TestColumnTransformers:
                 'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'time_elapsed'}],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1553,7 +1575,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', (datetime.now(pytz.utc) + timedelta(hours=-1)).strftime(time_format)]]),
+            executor=mock_executor([['tag1', (datetime.now(UTC) + timedelta(hours=-1)).strftime(time_format)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1605,7 +1627,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.timezone('EST')) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(gettz('EST')) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()

@@ -1,6 +1,6 @@
 # CHANGELOG - Hazelcast
 
-## 1.3.0 / 2020-12-11
+## 1.3.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
 

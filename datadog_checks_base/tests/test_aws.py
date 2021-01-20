@@ -21,6 +21,7 @@ class TestRDS:
                 [
                     'dbinstanceidentifier:my_db',
                     'hostname:my_db.cfxdfe8cpixl.us-east-2.rds.amazonaws.com',
+                    'host:my_db.cfxdfe8cpixl.us-east-2.rds.amazonaws.com',
                     'region:us-east-2',
                 ],
             ),
@@ -29,6 +30,7 @@ class TestRDS:
                 [
                     'dbinstanceidentifier:customers-04',
                     'hostname:customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com',
+                    'host:customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com',
                     'region:us-west-2',
                 ],
             ),
