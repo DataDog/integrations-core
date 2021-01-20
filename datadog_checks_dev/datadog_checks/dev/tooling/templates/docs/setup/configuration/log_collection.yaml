@@ -1,7 +1,6 @@
 name: Log Collection
 header_level: 4
 description: |
-  _Available for Agent versions >6.0_
 
   1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -13,7 +12,7 @@ description: |
 
   {check_log_conf_snippet:4i}
 
-    Change the `path` and `service` parameter values based on your environment. See the {check_conf_link} for all available configuration options.
+    Change the `path` parameter value based on your environment. See the {check_conf_link} for all available configuration options.
 
     3. [Restart the Agent][1].
 
