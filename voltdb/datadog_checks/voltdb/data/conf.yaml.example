@@ -286,4 +286,3 @@ instances:
 #   - type: file
 #     path: /var/log/voltdb.log
 #     source: voltdb
-#     service: voltdb
