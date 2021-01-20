@@ -477,9 +477,37 @@
         },
         "markers": []
       }
+    },
+    {
+      "id": 7322587671885830,
+      "layout": { "x": 177, "y": 1, "width": 47, "height": 5 },
+      "definition": {
+        "type": "note",
+        "content": "Logs",
+        "background_color": "vivid_blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 2046799467917206,
+      "layout": { "x": 177, "y": 7, "width": 47, "height": 36 },
+      "definition": {
+        "title": "Log Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "log_stream",
+        "indexes": [],
+        "query": "source:azure.iot_edge",
+        "sort": { "column": "time", "order": "desc" },
+        "columns": ["host", "service"],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-md"
+      }
     }
-  ],
-  "is_read_only": false,
-  "notify_list": [],
-  "id": "pkf-z3b-32g"
+  ]
 }
