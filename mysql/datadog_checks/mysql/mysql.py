@@ -342,13 +342,13 @@ class MySql(AgentCheck):
         else:  # replica (or standalone)
             if not (replica_io_running is None and replica_sql_running is None):
                 if replica_io_running and replica_sql_running:
-                    self.log.debug("Slave_IO_Running and Slave_SQL_Running are ok")
+                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
                     replica_running_status = AgentCheck.OK
                 elif not replica_io_running and not replica_sql_running:
-                    self.log.debug("Slave_IO_Running and Slave_SQL_Running are not ok")
+                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
                     replica_running_status = AgentCheck.CRITICAL
                 else:
-                    self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
+                    self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
                     # not everything is running smoothly
                     replica_running_status = AgentCheck.WARNING
 
