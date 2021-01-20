@@ -34,11 +34,10 @@ WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
 
 
 def show_replica_status_query(version, is_mariadb, channel=''):
-    base_query = ''
-    if version <  8.0.22 or is_mariadb and version < 10.5.1:
-        base_query = "SHOW SLAVE STATUS"
-    else:
+    if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
         base_query = "SHOW REPLICA STATUS"
+    else:
+        base_query = "SHOW SLAVE STATUS"
     if channel and not is_mariadb:
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
