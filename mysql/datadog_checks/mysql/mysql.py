@@ -42,6 +42,7 @@ from .queries import (
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
     SQL_WORKER_THREADS,
+    show_replica_status_query
 )
 from .statements import MySQLStatementMetrics
 from .version_utils import get_version
@@ -568,11 +569,7 @@ class MySql(AgentCheck):
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 if is_mariadb and replication_channel:
                     cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
-                    cursor.execute("SHOW SLAVE STATUS;")
-                elif replication_channel:
-                    cursor.execute("SHOW SLAVE STATUS FOR CHANNEL '{0}';".format(replication_channel))
-                else:
-                    cursor.execute("SHOW SLAVE STATUS;")
+                cursor.execute(show_replica_status_query(self.version. is_mariadb, replication_channel))
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)
