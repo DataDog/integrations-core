@@ -328,24 +328,26 @@ class MySql(AgentCheck):
         # slaves will only be collected iff user has PROCESS privileges.
         slaves = collect_scalar('Slaves_connected', results)
 
-        if self._is_master(slaves, results):  # master
-            if slaves > 0 and binlog_running:
-                self.log.debug("Host is master, there are replicas and binlog is running")
-                slave_running_status = AgentCheck.OK
-            else:
+        if not (slave_io_running is None and slave_sql_running is None):
+            if not slave_io_running and not slave_sql_running:
+                self.log.debug("Slave_IO_Running and Slave_SQL_Running are not ok")
+                slave_running_status = AgentCheck.CRITICAL
+            if not slave_io_running or not slave_sql_running:
+                self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
                 slave_running_status = AgentCheck.WARNING
-        else:  # replica (or standalone)
-            if not (slave_io_running is None and slave_sql_running is None):
-                if slave_io_running and slave_sql_running:
-                    self.log.debug("Slave_IO_Running and Slave_SQL_Running are ok")
+
+        if slave_running_status == AgentCheck.UNKNOWN:
+            if self._is_master(slaves, results):  # master
+                if slaves > 0 and binlog_running:
+                    self.log.debug("Host is master, there are replicas and binlog is running")
                     slave_running_status = AgentCheck.OK
-                elif not slave_io_running and not slave_sql_running:
-                    self.log.debug("Slave_IO_Running and Slave_SQL_Running are not ok")
-                    slave_running_status = AgentCheck.CRITICAL
                 else:
-                    self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
-                    # not everything is running smoothly
                     slave_running_status = AgentCheck.WARNING
+            else:  # replica (or standalone)
+                if not (slave_io_running is None and slave_sql_running is None):
+                    if slave_io_running and slave_sql_running:
+                        self.log.debug("Slave_IO_Running and Slave_SQL_Running are ok")
+                        slave_running_status = AgentCheck.OK
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
