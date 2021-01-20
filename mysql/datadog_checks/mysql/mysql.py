@@ -330,6 +330,7 @@ class MySql(AgentCheck):
         if replica_sql_running:
             replica_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_sql_running))
         binlog_running = results.get('Binlog_enabled', False)
+
         # replicas will only be collected iff user has PROCESS privileges.
         replicas = collect_scalar('Replicas_connected', results)
 
@@ -351,6 +352,7 @@ class MySql(AgentCheck):
                     self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
                     # not everything is running smoothly
                     replica_running_status = AgentCheck.WARNING
+
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(

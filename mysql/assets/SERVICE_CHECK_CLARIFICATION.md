@@ -7,8 +7,8 @@
   * If the IO and the SQL threads are healthy, returns OK
   * Else, returns CRITICAL
 
-## On a master host:
-* If `Slave_IO_Running` and `Slave_SQL_Running` are present, but the IO and the SQL thread is not healthy, returns CRTITICAL
+## On a source host:
+* If `Replica_IO_Running` and `Replica_SQL_Running` are present, but the IO and the SQL thread is not healthy, returns CRITICAL
 * If binary log is enabled and at least 1 binlog_dump is running, returns OK
 * If binary log and `nonblocking` option are enabled, MySQL >= 5.6.0 and one worker thread running, returns OK
 * Else, returns WARNING
