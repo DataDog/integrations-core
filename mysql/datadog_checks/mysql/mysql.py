@@ -331,10 +331,13 @@ class MySql(AgentCheck):
         # slaves will only be collected iff user has PROCESS privileges.
         slaves = collect_scalar('Slaves_connected', results)
 
-        # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
-        # look at replica vars collected at the top of if-block
-        if self.version.version_compatible((5, 7, 0)):
-            self.log.debug("Ignoring Slave_running for MySQL 5.7.0")
+        if self._is_master(slaves, results):  # master
+            if slaves > 0 and binlog_running:
+                self.log.debug("Host is master, there are replicas and binlog is running")
+                slave_running_status = AgentCheck.OK
+            else:
+                slave_running_status = AgentCheck.WARNING
+        else:  # replica (or standalone)
             if not (slave_io_running is None and slave_sql_running is None):
                 if slave_io_running and slave_sql_running:
                     self.log.debug("Slave_IO_Running and Slave_SQL_Running are ok")
@@ -346,35 +349,6 @@ class MySql(AgentCheck):
                     self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
                     # not everything is running smoothly
                     slave_running_status = AgentCheck.WARNING
-        elif slave_running.lower().strip() == 'off':
-            if not (slave_io_running is None and slave_sql_running is None):
-                if not slave_io_running and not slave_sql_running:
-                    self.log.debug("Neither Slave_IO_Running or Slave_SQL_Running are not ok")
-                    slave_running_status = AgentCheck.CRITICAL
-                elif not slave_io_running or not slave_sql_running:
-                    self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
-                    slave_running_status = AgentCheck.WARNING
-
-        # if we don't yet have a status - inspect
-        if slave_running_status == AgentCheck.UNKNOWN:
-            if self._is_master(slaves, results):  # master
-                if slaves > 0 and binlog_running:
-                    self.log.debug("Host is master, there are slaves and binlog is running")
-                    slave_running_status = AgentCheck.OK
-                else:
-                    slave_running_status = AgentCheck.WARNING
-            elif slave_running:  # slave (or standalone)
-                if slave_running.lower().strip() == 'on':
-                    if not slave_io_running or not slave_sql_running:
-                        # This situation should not happen according to MySQL documentation.
-                        self.log.debug("Slave_running is on but Slave_IO_Running or Slave_SQL_Running are not ok.")
-                        slave_running_status = AgentCheck.WARNING
-                    else:
-                        self.log.debug("Slave_running is on")
-                        slave_running_status = AgentCheck.OK
-                else:
-                    self.log.debug("Slave_running is off")
-                    slave_running_status = AgentCheck.CRITICAL
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
