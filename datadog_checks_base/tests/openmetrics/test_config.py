@@ -372,7 +372,7 @@ class TestShareLabels:
         check = get_check({'share_labels': {'foo': {option: 9000}}})
 
         with pytest.raises(
-            Exception, match=f'^Option `{option}` for metric `foo` of setting `share_labels` must be an array$'
+            Exception, match='^Option `{}` for metric `foo` of setting `share_labels` must be an array$'.format(option)
         ):
             dd_run_check(check, extract_message=True)
 
@@ -382,6 +382,8 @@ class TestShareLabels:
 
         with pytest.raises(
             Exception,
-            match=f'^Entry #1 of option `{option}` for metric `foo` of setting `share_labels` must be a string$',
+            match=(
+                '^Entry #1 of option `{}` for metric `foo` of setting `share_labels` must be a string$'.format(option)
+            ),
         ):
             dd_run_check(check, extract_message=True)
