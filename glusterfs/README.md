@@ -73,7 +73,7 @@ No additional installation is needed on your server.
     ```
 
 
-  Change the `path` parameter value based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/glusterfs/datadog_checks/glusterfs/data/conf.yaml.example for all available configuration options.
+  Change the `path` parameter value based on your environment. See the [sample conf.yaml][3] for all available configuration options.
 
   3. [Restart the Agent][4].
 
