@@ -60,7 +60,7 @@ No additional installation is needed on your server.
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `glusterfs.d/conf.yaml` file to start collecting your GlusterFS logs:
+2. Edit this configuration block in your `glusterfs.d/conf.yaml` file to start collecting your GlusterFS logs:
 
     ```yaml
     logs:
