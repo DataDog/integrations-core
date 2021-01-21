@@ -50,7 +50,7 @@ Create the environment variable `SPARK_UI_PORT` with the same value to use the i
 
 ### Metrics
 
-Databricks does not include any metrics.
+The Databricks integration does not include any metrics.
 
 ### Service Checks
 
