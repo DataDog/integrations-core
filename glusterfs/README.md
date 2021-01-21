@@ -51,6 +51,34 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][4].
 
+#### Log Collection
+
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `glusterfs.d/conf.yaml` file to start collecting your GlusterFS logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /var/log/glusterfs/glusterd.log
+        source: glusterfs
+      - type: file
+        path: /var/log/glusterfs/cli.log
+        source: glusterfs
+    ```
+
+
+  Change the `path` parameter value based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/glusterfs/datadog_checks/glusterfs/data/conf.yaml.example for all available configuration options.
+
+  3. [Restart the Agent][4].
+
+  See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `glusterfs` under the Checks section.
@@ -88,3 +116,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://github.com/gluster/gstatus#install
+[9]:  https://docs.datadoghq.com/agent/kubernetes/log/
