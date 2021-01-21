@@ -66,22 +66,29 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     cursor.execute(sqlDropSP)
 
     # Stored Procedure Create Statement
-    sqlCreateSP = 'CREATE PROCEDURE {0} AS \
-                BEGIN \
-                    CREATE TABLE #Datadog \
-                    ( \
-                      [metric] varchar(255) not null, \
-                      [type] varchar(50) not null, \
-                      [value] float not null, \
-                      [tags] varchar(255) \
-                    ) \
-                    SET NOCOUNT ON; \
-                    INSERT INTO #Datadog (metric, type, value, tags) VALUES \
-                        ("sql.sp.testa", "gauge", 100, "{1}"), \
-                        ("sql.sp.testb", "gauge", 1, "{1}"), \
-                        ("sql.sp.testb", "gauge", 2, "{1}"); \
-                    SELECT * FROM #Datadog; \
-                END;'.format(proc, sp_tags)
+    # Note: the INSERT statement uses single quotes (') intentionally
+    # Double-quotes caused the odd error: "Invalid column name 'sql.sp.testa'."
+    # https://dba.stackexchange.com/a/219875
+    sqlCreateSP = """\
+        CREATE PROCEDURE {0} AS
+            BEGIN
+                CREATE TABLE #Datadog
+                (
+                  [metric] varchar(255) not null,
+                  [type] varchar(50) not null,
+                  [value] float not null,
+                  [tags] varchar(255)
+                )
+                SET NOCOUNT ON;
+                INSERT INTO #Datadog (metric, type, value, tags) VALUES
+                    ('sql.sp.testa', 'gauge', 100, '{1}'),
+                    ('sql.sp.testb', 'gauge', 1, '{1}'),
+                    ('sql.sp.testb', 'gauge', 2, '{1}');
+                SELECT * FROM #Datadog;
+            END;
+            """.format(
+        proc, sp_tags
+    )
     cursor.execute(sqlCreateSP)
 
     # For debugging. Calls the stored procedure and prints the results.
