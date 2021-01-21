@@ -40,7 +40,7 @@ instances:
 ```
 
 **Note**: The Spark UI port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the cluster configuration page.
-Be sure to create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
+Create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
 
 ### Validation
 
