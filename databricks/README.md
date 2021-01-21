@@ -39,7 +39,7 @@ instances:
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
 ```
 
-**NOTE**: The Spark UI Port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the Cluster Configuration page.
+**Note**: The Spark UI port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the cluster configuration page.
 Be sure to create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
 
 ### Validation
