@@ -26,7 +26,7 @@ REQUIRES = [
     'coverage>=5.0.3',
     'mock',
     'psutil',
-    'PyYAML>=5.3',
+    'PyYAML==5.3.1',
     'pytest',
     'pytest-benchmark[histogram]>=3.2.1',
     'pytest-cov>=2.6.1',

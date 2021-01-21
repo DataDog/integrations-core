@@ -334,25 +334,26 @@ class MySql(AgentCheck):
         # replicas will only be collected iff user has PROCESS privileges.
         replicas = collect_scalar('Replicas_connected', results)
 
-        if self._is_master(replicas, results):  # master
-            if replicas > 0 and binlog_running:
-                self.log.debug("Host is master, there are replicas and binlog is running")
-                replica_running_status = AgentCheck.OK
-            else:
+        if not (replica_io_running is None and replica_sql_running is None):
+            if not replica_io_running and not replica_sql_running:
+                self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
+                replica_running_status = AgentCheck.CRITICAL
+            if not replica_io_running or not replica_sql_running:
+                self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
                 replica_running_status = AgentCheck.WARNING
-        else:  # replica (or standalone)
-            if not (replica_io_running is None and replica_sql_running is None):
-                if replica_io_running and replica_sql_running:
-                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
-                    replica_running_status = AgentCheck.OK
-                elif not replica_io_running and not replica_sql_running:
-                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
-                    replica_running_status = AgentCheck.CRITICAL
-                else:
-                    self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
-                    # not everything is running smoothly
-                    replica_running_status = AgentCheck.WARNING
 
+        if replica_running_status == AgentCheck.UNKNOWN:
+            if self._is_master(replicas, results):  # master
+                if replicas > 0 and binlog_running:
+                    self.log.debug("Host is master, there are replicas and binlog is running")
+                    replica_running_status = AgentCheck.OK
+                else:
+                    replica_running_status = AgentCheck.WARNING
+            else:  # replica (or standalone)
+                if not (replica_io_running is None and replica_sql_running is None):
+                    if replica_io_running and replica_sql_running:
+                        self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
+                        replica_running_status = AgentCheck.OK
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
