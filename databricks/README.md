@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 Use the [Spark Integration][2] to monitor your Apache Spark Cluster.
 
-#### Standard Cluster
+#### Standard cluster
 
 Use the [Datadog Init Script][4] Databricks notebook to install the Datadog Agent and collect system and Spark metrics.
 
