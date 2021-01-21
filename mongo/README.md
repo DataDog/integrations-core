@@ -116,15 +116,16 @@ db.createUser({
 })
 ```
 
-Then create the same user from a mongos proxy, this also has the side effect of creating the local user in the config servers and allows direct connection.
+Then create the same user from a mongos proxy. This action creates the local user in the config servers and allows direct connection.
 
-
-##### Configure the agents
+##### Configure the Agents
 1. Configure one Agent for each member of each shard.
 2. Configure one Agent for each member of the config servers.
-3. Configure one extra Agent to connect to the cluster through a mongos proxy. This mongos can be a new one dedicated to monitoring purposes or an existing one.
+3. Configure one extra Agent to connect to the cluster through a mongos proxy. This mongos proxy can be a new one dedicated to monitoring purposes, or an existing mongos proxy.
 
-Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
+**Note**: Monitoring of arbiter nodes is not supported (see the [MongoDB documentation][18] for more details). However, any status change of an arbiter node is reported by the Agent connected to the primary.
+
+[18]: https://docs.mongodb.com/manual/core/replica-set-arbiter/#authentication
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
