@@ -35,7 +35,8 @@ Databricks does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][1].
+Need help? Contact [Datadog support][3].
 
-[1]: https://docs.datadoghq.com/help/
+[1]: https://databricks.com/
 [2]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
+[3]: https://docs.datadoghq.com/help/
