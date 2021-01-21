@@ -1,4 +1,4 @@
-name: Log Collection
+name: Log collection
 header_level: 4
 description: |
 
@@ -8,11 +8,11 @@ description: |
       logs_enabled: true
       ```
 
-  2. Add this configuration block to your `{check_conf_path}` file to start collecting your {display_name} logs:
+  2. Edit this configuration block in your `{check_conf_path}` file to start collecting your {display_name} logs:
 
   {check_log_conf_snippet:4i}
 
-    Change the `path` parameter value based on your environment. See the {check_conf_link} for all available configuration options.
+    Change the `path` parameter value based on your environment. See the [sample conf.yaml]({check_conf_link}) for all available configuration options.
 
     3. [Restart the Agent][1].
 
