@@ -20,6 +20,13 @@ SUPPORTED_METRIC_TYPES = [
 ]
 
 
+CORECHECK_ONLY_METRICS = [
+    'datadog.snmp.check_duration',
+    'datadog.snmp.check_interval',
+    'datadog.snmp.submitted_metrics',
+]
+
+
 def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
     assert_python_vs_core(dd_agent_check, instance)
@@ -232,7 +239,6 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
         for stub in metrics:
             if stub.name in metrics_to_skip:
                 continue
-            assert "loader:python" in stub.tags, "Stub: %s\nAll snmp python check metrics: %s" % (stub, metrics)
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
     total_count_python = sum(len(stubs) for stubs in expected_metrics.values())
@@ -244,7 +250,6 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
-            assert "loader:core" in stub.tags, "Stub: %s\nAll snmp core check metrics: %s" % (stub, aggregator_metrics)
             if stub.name in metrics_to_skip:
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
@@ -271,10 +276,15 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
         else:
             aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs))
 
+    for metric in CORECHECK_ONLY_METRICS:
+        aggregator.assert_metric(metric)
+
     aggregator.assert_all_metrics_covered()
 
     # assert count
-    total_count_corecheck = sum(len(metrics) for metrics in aggregator._metrics.values())
+    total_count_corecheck = sum(
+        len(metrics) for key, metrics in aggregator._metrics.items() if key not in CORECHECK_ONLY_METRICS
+    )
     assert total_count_python == total_count_corecheck
     if expected_total_count is not None:
         assert expected_total_count == total_count_corecheck
