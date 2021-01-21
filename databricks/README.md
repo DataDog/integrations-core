@@ -58,7 +58,7 @@ The Databricks integration does not include any service checks.
 
 ### Events
 
-Databricks does not include any events.
+The Databricks integration does not include any events.
 
 ## Troubleshooting
 
