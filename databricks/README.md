@@ -27,7 +27,7 @@ instances:
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
 ```
 
-#### Job Cluster
+#### Job cluster
 
 Modify the Spark integration configuration in the [Datadog Init Script][4] to monitor job clusters:
 
