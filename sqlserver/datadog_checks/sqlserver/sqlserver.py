@@ -382,7 +382,7 @@ class SQLServer(AgentCheck):
             conn_str = 'DSN={};'.format(dsn)
 
         if driver:
-            conn_str += 'Driver={};'.format(driver)
+            conn_str += 'DRIVER={};'.format(driver)
         if host:
             conn_str += 'Server={};'.format(host)
         if database:
@@ -392,7 +392,7 @@ class SQLServer(AgentCheck):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) {}".format(conn_str))
         if password:
-            conn_str += 'Password={};'.format(password)
+            conn_str += 'PWD={};'.format(password)
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, instance=None, conn_key=None, db_name=None):
@@ -640,10 +640,9 @@ class SQLServer(AgentCheck):
         custom_tags = instance.get("tags", [])
         if custom_tags is None:
             custom_tags = []
-        service_check_tags = [
-            'host:{}'.format(host),
-            'db:{}'.format(database)
-        ]
+        service_check_tags = ['host:{}'.format(host)]
+        if database:
+            service_check_tags.append('db:{}'.format(database))
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 

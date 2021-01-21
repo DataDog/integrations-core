@@ -33,6 +33,7 @@ INSTANCE_DOCKER = {
     'driver': lib_tds_path(),
     'username': 'sa',
     'password': 'Password123',
+    'database': 'master',
     'tags': ['optional:tag1'],
 }
 
@@ -40,6 +41,7 @@ INSTANCE_SQL2017 = {
     'host': r'(local)\SQL2017',
     'username': 'sa',
     'password': 'Password12!',
+    'database': 'master',
 }
 
 INIT_CONFIG = {
