@@ -54,7 +54,7 @@ Databricks does not include any metrics.
 
 ### Service Checks
 
-Databricks does not include any service checks.
+The Databricks integration does not include any service checks.
 
 ### Events
 
