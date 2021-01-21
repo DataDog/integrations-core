@@ -168,8 +168,6 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
         # See II-153
         'snmp.networkDeviceStatus',
         'snmp.memoryDeviceStatus',
-        # we can't assert `datadog.snmp.submitted_metrics` value since some metrics are missing for python
-        'datadog.snmp.submitted_metrics',
     ]
     assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
 
@@ -224,7 +222,7 @@ def test_e2e_profile_palo_alto(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-ASSERT_VALUE_METRICS = ["datadog.snmp.submitted_metrics"]
+ASSERT_VALUE_METRICS = []
 
 
 def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
