@@ -146,7 +146,7 @@ class SQLServer(AgentCheck):
                 self.do_check[instance_key] = True
 
                 # check to see if the database exists before we try any connections to it
-                with self.open_managed_db_connections(instance, None, db_name=self.DEFAULT_DATABASE):
+                with self.open_managed_db_connections(instance, None, db_name=instance.get('database')):
                     db_exists, context = self._check_db_exists(instance)
 
                 if db_exists:
@@ -182,7 +182,7 @@ class SQLServer(AgentCheck):
         dsn, host, username, password, database, driver = self._get_access_info(instance, self.DEFAULT_DB_KEY)
         context = "{} - {}".format(host, database)
         if self.existing_databases is None:
-            cursor = self.get_cursor(instance, None, self.DEFAULT_DATABASE)
+            cursor = self.get_cursor(instance, None, instance.get('database'))
 
             try:
                 self.existing_databases = {}
@@ -359,8 +359,6 @@ class SQLServer(AgentCheck):
         if not dsn:
             if not host:
                 host = '127.0.0.1,1433'
-            if not database:
-                database = self.DEFAULT_DATABASE
             if not driver:
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
@@ -384,7 +382,7 @@ class SQLServer(AgentCheck):
             conn_str = 'DSN={};'.format(dsn)
 
         if driver:
-            conn_str += 'DRIVER={};'.format(driver)
+            conn_str += 'Driver={};'.format(driver)
         if host:
             conn_str += 'Server={};'.format(host)
         if database:
@@ -394,7 +392,7 @@ class SQLServer(AgentCheck):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) {}".format(conn_str))
         if password:
-            conn_str += 'PWD={};'.format(password)
+            conn_str += 'Password={};'.format(password)
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, instance=None, conn_key=None, db_name=None):
@@ -659,6 +657,7 @@ class SQLServer(AgentCheck):
                 rawconn = adodbapi.connect(cs, {'timeout': timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, instance=instance, db_name=db_name)
+                self.log.debug("Connection string: {}".format(cs.replace(self.instance.get('password'), '*******')))
                 rawconn = pyodbc.connect(cs, timeout=timeout)
 
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,

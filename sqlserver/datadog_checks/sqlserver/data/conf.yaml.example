@@ -29,10 +29,11 @@ instances:
   #
     password: <PASSWORD>
 
-  ## @param database - string - optional - default: master
-  ## Database name to query
+  ## @param database - string - optional - default: none
+  ## Database name to query. You can comment this and then the connection will be made to the configured
+  ## default database of the login that's connecting to SQL Server.
   #
-  #  database: master
+    database: master
 
   ## @param adoprovider - string - optional - default: SQLOLEDB
   ## Choose the ADO provider.  Note that the (default) provider
