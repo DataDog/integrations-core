@@ -13,11 +13,38 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-To monitor Spark in your Databricks cluster, use [Spark Integration][2]
+Use the [Spark Integration][2] to monitor your Apache Spark Cluster.
+
+#### Standard Cluster
+
+Use the [Datadog Init Script][4] Databricks notebook to install the Datadog Agent and collect system and Spark metrics.
+
+```yaml
+init_config:
+instances:
+    - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
+      spark_cluster_mode: spark_standalone_mode
+      cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
+```
+
+#### Job Cluster
+
+Modify the Spark integration configuration in the [Datadog Init Script][4] to monitor job clusters:
+
+```yaml
+init_config:
+instances:
+    - spark_url: http://\$DB_DRIVER_IP:\$SPARK_UI_PORT
+      spark_cluster_mode: spark_driver_mode
+      cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
+```
+
+**NOTE**: The Spark UI Port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the Cluster Configuration page.
+Be sure to create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
 
 ### Validation
 
-<Steps to validate integration is functioning as expected>
+[Run the Agent's status subcommand][8] and look for `spark` under the Checks section.
 
 ## Data Collected
 
@@ -40,3 +67,4 @@ Need help? Contact [Datadog support][3].
 [1]: https://databricks.com/
 [2]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
 [3]: https://docs.datadoghq.com/help/
+[4]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
