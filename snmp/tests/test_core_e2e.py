@@ -263,6 +263,10 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
             print("\t{}".format(key))
 
     print("Corecheck metrics not found in Python metrics:")
+    print(
+        "(expected to be listed here: datadog.snmp.check_duration, datadog.snmp.check_interval, "
+        "datadog.snmp.submitted_metrics)"
+    )
     for key in sorted(actual_metrics):
         if key not in expected_metrics:
             print("\t{}".format(key))
