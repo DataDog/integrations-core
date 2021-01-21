@@ -1,0 +1,31 @@
+{
+  "display_name": "Databricks",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "databricks",
+  "metric_prefix": "databricks.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "3e1c7918-f224-46c6-836f-1169857e2564",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Databricks",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "databricks",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
