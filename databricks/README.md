@@ -44,7 +44,7 @@ Be sure to create the environment variable `SPARK_UI_PORT` with the same value t
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `spark` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `spark` under the Checks section.
 
 ## Data Collected
 
@@ -68,3 +68,4 @@ Need help? Contact [Datadog support][3].
 [2]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
