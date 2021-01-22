@@ -29,6 +29,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
+    "docs": {
+      "spec": "assets/docs/spec.yaml"
+    },
     "monitors": {
       "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
       "[NGINX] 4xx Errors higher than usual": "assets/monitors/4xx.json",
