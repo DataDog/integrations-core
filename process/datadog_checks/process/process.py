@@ -279,8 +279,9 @@ class ProcessCheck(AgentCheck):
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
                     self.warning('Process %s disappeared while scanning', pid)
-                    # reset the PID cache now, something changed
+                    # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
+                    self.process_list_cache.reset()
                     continue
 
             p = self.process_cache[name][pid]
@@ -452,8 +453,9 @@ class ProcessCheck(AgentCheck):
 
         if len(pids) == 0:
             self.warning("No matching process '%s' was found", name)
-            # reset the PID cache now, something changed
+            # reset the process caches now, something changed
             self.last_pid_cache_ts[name] = 0
+            self.process_list_cache.reset()
 
         for attr, mname in iteritems(ATTR_TO_METRIC):
             vals = [x for x in proc_state[attr] if x is not None]
