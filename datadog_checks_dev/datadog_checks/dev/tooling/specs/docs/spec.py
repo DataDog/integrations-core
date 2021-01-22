@@ -213,11 +213,11 @@ def section_validator(sections, loader, file_name, *prev_sections):
 
         MISSING = (
             f'{loader.source}, {file_name}, {sections_display}section #{section_index}: '
-            'Every section must contain a `{{key}}` attribute'
+            f'Every section must contain a `{{key}}` attribute'
         )
         INVALID = (
             f'{loader.source}, {file_name}, {sections_display}section #{section_index}: '
-            'Attribute `{{key}}` must be a {{type}}'
+            f'Attribute `{{key}}` must be a {{type}}'
         )
 
         # now validate the expanded section object
