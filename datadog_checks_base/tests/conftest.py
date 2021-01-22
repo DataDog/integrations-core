@@ -116,3 +116,8 @@ def uds_path():
             },
         ):
             yield uds_path
+
+
+def pytest_configure(config):
+    config.addinivalue_line('markers', 'openmetrics: base/checks/openmetrics/v2/*')
+    config.addinivalue_line('markers', 'openmetrics_transformers: base/checks/openmetrics/v2/transformers/*')

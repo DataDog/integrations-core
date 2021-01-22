@@ -40,6 +40,6 @@ class Istio(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
         if instance.get('istiod_endpoint'):
-            return super(Istio, cls).__new__(cls)
+            return super(Istio, cls).__new__(cls, name, init_config, instances)
         else:
             return LegacyIstioCheck_1_4(name, init_config, instances)
