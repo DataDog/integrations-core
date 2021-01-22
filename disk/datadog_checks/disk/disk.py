@@ -480,7 +480,7 @@ class Disk(AgentCheck):
 
                 nr = win32wnet.NETRESOURCE()
                 if not remote_machine or not share:
-                    self.log.warning("Invalid configuration.  Drive mount requires remote machine and share point")
+                    self.log.error("Invalid configuration.  Drive mount requires remote machine and share point")
                     continue
 
                 if mtype and mtype.lower() == "nfs":
@@ -496,7 +496,7 @@ class Disk(AgentCheck):
                     win32wnet.WNetAddConnection2(nr, pword, uname, 0)
                     self.log.debug("Successfully mounted %s as %s", mountpoint, nr.lpRemoteName)
                 except Exception as e:
-                    self.log.warning("Failed to mount %s %s", nr.lpRemoteName, str(e))
+                    self.log.error("Failed to mount %s %s", nr.lpRemoteName, str(e))
                     pass
 
     @staticmethod
