@@ -6,6 +6,7 @@ import re
 from itertools import chain
 from math import isinf, isnan
 
+from binary import KIBIBYTE
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
 
@@ -20,9 +21,6 @@ from .transform import MetricTransformer
 
 class OpenMetricsScraper:
     SERVICE_CHECK_HEALTH = 'openmetrics.health'
-
-    # 32 KiB seems optimal, and is also the recommended chunk size of the Bittorrent protocol.
-    STREAM_CHUNK_SIZE = 1024 * 32
 
     def __init__(self, check, config):
         self.config = config
@@ -144,6 +142,10 @@ class OpenMetricsScraper:
             if not isinstance(entry, str):
                 raise ConfigurationError(f'Entry #{i} of setting `tags` must be a string')
 
+        # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
+        # https://www.bittorrent.org/beps/bep_0003.html
+        self.request_size = int(float(config.get('request_size') or 16) * KIBIBYTE)
+
         # These will be applied only to service checks
         self.static_tags = [f'endpoint:{self.endpoint}']
         self.static_tags.extend(custom_tags)
@@ -165,9 +167,6 @@ class OpenMetricsScraper:
 
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
 
-        # Used for monotonic counts
-        self.has_successfully_executed = False
-
         # Decide how strictly we will adhere to the latest version of the specification
         if is_affirmative(config.get('use_latest_spec', False)):
             self.parse_metric_families = parse_metric_families_strict
@@ -178,6 +177,9 @@ class OpenMetricsScraper:
         else:
             self.parse_metric_families = parse_metric_families
             self.http.options['headers'].setdefault('Accept', 'text/plain')
+
+        # Used for monotonic counts
+        self.has_successfully_executed = False
 
     def scrape(self):
         runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
@@ -257,7 +259,7 @@ class OpenMetricsScraper:
 
     def stream_connection_lines(self):
         with self.get_connection() as connection:
-            for line in connection.iter_lines(chunk_size=self.STREAM_CHUNK_SIZE, decode_unicode=True):
+            for line in connection.iter_lines(chunk_size=self.request_size, decode_unicode=True):
                 yield line
 
     def filter_connection_lines(self, line_streamer):
@@ -327,3 +329,15 @@ class OpenMetricsScraper:
         attribute = getattr(self.check, name)
         setattr(self, name, attribute)
         return attribute
+
+
+class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
+    """
+    This class is designed for existing checks that are transitioning to the new OpenMetrics implementation.
+    Checks would use this by overriding the `create_scraper` method like so:
+
+    def create_scraper(self, config):
+        return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
+    """
+
+    SERVICE_CHECK_HEALTH = 'prometheus.health'

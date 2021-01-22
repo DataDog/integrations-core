@@ -73,3 +73,21 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
 
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_check_names) == 2
+
+
+def test_scraper_override(aggregator, dd_run_check, mock_http_response):
+    # TODO: when we drop Python 2 move this up top
+    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
+
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
+        """
+    )
+    check = get_check({'metrics': ['.+']})
+    check.create_scraper = lambda config: OpenMetricsCompatibilityScraper(check, check.get_config_with_defaults(config))
+    dd_run_check(check)
+
+    aggregator.assert_service_check('test.prometheus.health', ServiceCheck.OK, tags=['endpoint:test'])
