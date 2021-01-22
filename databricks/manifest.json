@@ -6,7 +6,7 @@
   "metric_prefix": "databricks.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor Apache Spark in Databricks clusters.",
   "guid": "3e1c7918-f224-46c6-836f-1169857e2564",
   "support": "core",
   "supported_os": [
@@ -26,6 +26,7 @@
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }
