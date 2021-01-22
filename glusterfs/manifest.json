@@ -18,7 +18,8 @@
     "gluster"
   ],
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
@@ -35,7 +36,9 @@
     },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "glusterfs"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }
