@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.1.0 / 2021-01-22
+
+* [Added] Add new version of OpenMetrics base class. See [#8300](https://github.com/DataDog/integrations-core/pull/8300).
+* [Fixed] Properly support check namespacing for the `submit_histogram_bucket` method. See [#8390](https://github.com/DataDog/integrations-core/pull/8390).
+
 ## 16.0.0 / 2021-01-13
 
 * [Added] Add `no_op` utility. See [#8356](https://github.com/DataDog/integrations-core/pull/8356).
