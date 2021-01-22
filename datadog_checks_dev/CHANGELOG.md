@@ -1,5 +1,30 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 7.0.0 / 2021-01-22
+
+* [Added] Add --export-csv option. See [#8350](https://github.com/DataDog/integrations-core/pull/8350).
+* [Added] Add config spec support for options with multiple types. See [#8378](https://github.com/DataDog/integrations-core/pull/8378).
+* [Added] Add docs spec progress to docs status board. See [#8357](https://github.com/DataDog/integrations-core/pull/8357).
+* [Added] Add option to exclude release prs. See [#8351](https://github.com/DataDog/integrations-core/pull/8351).
+* [Added] Support installing minimum and unpinned datadog_checks_base dependencies for tests. See [#8318](https://github.com/DataDog/integrations-core/pull/8318).
+* [Added] Allow MockResponse method `iter_lines` to be called multiple times. See [#8353](https://github.com/DataDog/integrations-core/pull/8353).
+* [Added] [1/3] Add units to metadata check. See [#8308](https://github.com/DataDog/integrations-core/pull/8308).
+* [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
+* [Added] Support nightly datadog_checks_base package checks. See [#8293](https://github.com/DataDog/integrations-core/pull/8293).
+* [Added] Add snmp_tile template to ddev create --type. See [#8216](https://github.com/DataDog/integrations-core/pull/8216).
+* [Added] Add new global fixture to mock HTTP requests. See [#8276](https://github.com/DataDog/integrations-core/pull/8276).
+* [Added] Update Codecov config validation with new flag carryforward options. See [#8085](https://github.com/DataDog/integrations-core/pull/8085).
+* [Added] Ensure default templates are included in config spec. See [#8232](https://github.com/DataDog/integrations-core/pull/8232).
+* [Fixed] Update logs template with docs feedback. See [#8412](https://github.com/DataDog/integrations-core/pull/8412).
+* [Fixed] Fix conflicting link references in tile readme template. See [#8409](https://github.com/DataDog/integrations-core/pull/8409).
+* [Fixed] Update logs readme template. See [#8399](https://github.com/DataDog/integrations-core/pull/8399).
+* [Fixed] Increase indentation of log snippets. See [#8360](https://github.com/DataDog/integrations-core/pull/8360).
+* [Fixed] Fix dep validation to work on single checks for PRs. See [#8297](https://github.com/DataDog/integrations-core/pull/8297).
+* [Fixed] Fix ddev env test last error. See [#8264](https://github.com/DataDog/integrations-core/pull/8264).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+* [Changed] Rename legacy OpenMetrics config spec. See [#8413](https://github.com/DataDog/integrations-core/pull/8413).
+* [Changed] Small changes in template for "SNMP tiles". See [#8289](https://github.com/DataDog/integrations-core/pull/8289).
+
 ## 6.1.0 / 2020-12-22
 
 * [Added] Add metric_to_check validation redirection for snmp_<vendor> integrations. See [#8215](https://github.com/DataDog/integrations-core/pull/8215).
