@@ -35,7 +35,9 @@
     },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "voltdb"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }
