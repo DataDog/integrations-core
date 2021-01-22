@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import re
 
 import mock
 
@@ -18,38 +19,41 @@ def mocked_perform_request(*args, **kwargs):
     response = mock.MagicMock()
     url = args[0]
 
-    if '/2/nginx' in url:
+    if re.search('/[23]/nginx', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_nginx.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/processes' in url:
+    elif re.search('/[23]/processes', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_processes.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/connections' in url:
+    elif re.search('/[23]/connections', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_connections.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/ssl' in url:
+    elif re.search('/[23]/ssl', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_ssl.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/slabs' in url:
+    elif re.search('/[23]/slabs', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_slabs.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/http/requests' in url:
+    elif re.search('/[23]/http/requests', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_http_requests.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/http/server_zones' in url:
+    elif re.search('/[23]/http/server_zones', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_http_server_zones.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/http/caches' in url:
+    elif re.search('/[23]/http/caches', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_http_caches.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/http/upstreams' in url:
+    elif re.search('/[23]/http/upstreams', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_http_upstreams.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/stream/upstreams' in url:
+    elif re.search('/[23]/stream/upstreams', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_stream_upstreams.json'))
         response.json.return_value = json.loads(file_contents)
-    elif '/2/stream/server_zones' in url:
+    elif re.search('/[23]/stream/server_zones', url):
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_stream_server_zones.json'))
+        response.json.return_value = json.loads(file_contents)
+    elif '/3/stream/zone_sync' in url:
+        file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_stream_zone_sync.json'))
         response.json.return_value = json.loads(file_contents)
     else:
         response.json.return_value = ''
