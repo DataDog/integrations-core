@@ -56,6 +56,11 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_total',
         NAMESPACE + '.rest_client_request_latency_seconds.sum',
         NAMESPACE + '.rest_client_request_latency_seconds.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
+        NAMESPACE + '.admission_step_admission_latencies_seconds.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.sum',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
         NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
         NAMESPACE + '.admission_controller_admission_duration_seconds.count',
     ]

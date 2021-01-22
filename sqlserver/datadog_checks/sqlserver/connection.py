@@ -135,9 +135,11 @@ class Connection(object):
 
         conn_key = self._conn_key(db_key, db_name)
 
-        dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
+        _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
+        if 'Trusted_Connection=yes' in cs and (username or password):
+            self.log.warning("Username and password are ignored when using Windows authentication")
         cs += ';' if cs != '' else ''
 
         try:
@@ -200,7 +202,7 @@ class Connection(object):
         with a ConfigurationError otherwise.
         """
 
-        dsn, host, username, password, database, driver = self._get_access_info(self.DEFAULT_DB_KEY)
+        _, host, _, _, database, _ = self._get_access_info(self.DEFAULT_DB_KEY)
         context = "{} - {}".format(host, database)
         if self.existing_databases is None:
             cursor = self.get_cursor(None, self.DEFAULT_DATABASE)

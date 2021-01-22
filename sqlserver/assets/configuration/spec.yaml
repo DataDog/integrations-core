@@ -32,11 +32,11 @@ files:
         type: string
         example: <HOST>,<PORT>
     - name: username
-      description: Username for the Datadog-SQL server check user
+      description: Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
     - name: password
-      description: Password for the Datadog-SQL server check user
+      description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
     - name: database

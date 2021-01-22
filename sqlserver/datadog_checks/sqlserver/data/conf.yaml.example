@@ -42,12 +42,12 @@ instances:
   - host: <HOST>,<PORT>
 
     ## @param username - string - optional
-    ## Username for the Datadog-SQL server check user
+    ## Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## Password for the Datadog-SQL server check user
+    ## Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
     #
     # password: <PASSWORD>
 

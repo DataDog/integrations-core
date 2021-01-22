@@ -20,6 +20,9 @@ class MySQLConfig(object):
         self.password = str(instance.get('pass', ''))
         self.tags = self._build_tags(instance.get('tags', []))
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
+        replication_channel = self.options.get('replication_channel')
+        if replication_channel:
+            self.tags.append("channel:{0}".format(replication_channel))
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
         self.connect_timeout = instance.get('connect_timeout', 10)
