@@ -265,7 +265,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if self.service_whitelist and self.services_exclude:
             self.warning(
                 'Detected both whitelist and services_exclude options are configured.'
-                'Consul check will only consider blacklist.'
+                'Consul check will only consider the exclude list.'
             )
             self.service_whitelist = None
 
