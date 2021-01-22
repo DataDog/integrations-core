@@ -16,7 +16,8 @@
   ],
   "public_title": "VoltDB",
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "process_signatures": [
     "voltdb"
