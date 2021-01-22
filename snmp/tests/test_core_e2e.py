@@ -32,7 +32,7 @@ def test_e2e_metric_types(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
-def test_e2e_table_regex_match(dd_agent_check):
+def test_e2e_regex_match(dd_agent_check):
     metrics = [
         {
             'MIB': "IF-MIB",
@@ -69,8 +69,26 @@ def test_e2e_table_regex_match(dd_agent_check):
             ],
         }
     ]
-    instance = common.generate_container_instance_config(metrics)
-    assert_python_vs_core(dd_agent_check, instance)
+    config = common.generate_container_instance_config(metrics)
+    config['instances'][0]['metric_tags'] = [
+        {
+            "OID": "1.3.6.1.2.1.1.5.0",
+            "symbol": "sysName",
+            "match": "(\\d+)(\\w+)",
+            "tags": {
+                "digits": "\\1",
+                "remainder": "\\2",
+            },
+        }
+    ]
+    assert_python_vs_core(dd_agent_check, config)
+
+    config['init_config']['loader'] = 'core'
+    aggregator = dd_agent_check(config, rate=True)
+
+    aggregator.assert_metric(
+        'snmp.devices_monitored', tags=['digits:41', 'remainder:ba948911b9', 'snmp_device:172.18.0.2']
+    )
 
 
 def test_e2e_scalar_oid_retry(dd_agent_check):
