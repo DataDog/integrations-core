@@ -80,3 +80,59 @@ def test_amazon_msk_jmx_metrics_old(benchmark, dd_run_check, mock_http_response,
     dd_run_check(c)
 
     benchmark(c.check, instance)
+
+
+def test_label_joins_new(benchmark, dd_run_check, mock_http_response, fixture_ksm):
+    mock_http_response(file_path=fixture_ksm)
+    instance = {
+        'openmetrics_endpoint': 'foo',
+        'namespace': 'bar',
+        'hostname_label': 'node',
+        'metrics': ['.+'],
+        'share_labels': {
+            'kube_pod_info': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '1': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '2': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '3': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '4': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '5': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '6': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '7': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '8': {'match': ['pod', 'namespace'], 'labels': ['node']},
+            '9': {'match': ['pod', 'namespace'], 'labels': ['node']},
+        },
+    }
+    c = OpenMetricsBaseCheck('test', {}, [instance])
+
+    # Run once to get initialization steps out of the way.
+    dd_run_check(c)
+
+    benchmark(c.check, None)
+
+
+def test_label_joins_old(benchmark, dd_run_check, mock_http_response, fixture_ksm):
+    mock_http_response(file_path=fixture_ksm)
+    instance = {
+        'prometheus_url': 'foo',
+        'namespace': 'bar',
+        'label_to_hostname': 'node',
+        'metrics': ['*'],
+        'label_joins': {
+            'kube_pod_info': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '1': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '2': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '3': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '4': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '5': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '6': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '7': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '8': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+            '9': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        },
+    }
+    c = OpenMetricsBaseCheck('test', {}, [instance])
+
+    # Run once to get initialization steps out of the way.
+    dd_run_check(c)
+
+    benchmark(c.check, instance)
