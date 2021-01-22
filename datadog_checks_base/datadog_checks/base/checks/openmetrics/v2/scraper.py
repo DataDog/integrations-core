@@ -325,7 +325,7 @@ class OpenMetricsScraper:
         self.gauge('telemetry.payload.size', content_length, tags=self.tags)
 
     def __getattr__(self, name):
-        # Forward all unknown attribute lookups to the check instance
+        # Forward all unknown attribute lookups to the check instance for access to submission methods, hostname, etc.
         attribute = getattr(self.check, name)
         setattr(self, name, attribute)
         return attribute
