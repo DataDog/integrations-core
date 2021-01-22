@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 Use the [Spark Integration][2] to monitor your Apache Spark Cluster.
 
-#### Standard Cluster
+#### Standard cluster
 
 Use the [Datadog Init Script][4] Databricks notebook to install the Datadog Agent and collect system and Spark metrics.
 
@@ -27,7 +27,7 @@ instances:
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
 ```
 
-#### Job Cluster
+#### Job cluster
 
 Modify the Spark integration configuration in the [Datadog Init Script][4] to monitor job clusters:
 
@@ -39,8 +39,8 @@ instances:
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
 ```
 
-**NOTE**: The Spark UI Port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the Cluster Configuration page.
-Be sure to create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
+**Note**: The Spark UI port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the cluster configuration page.
+Create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
 
 ### Validation
 
@@ -50,15 +50,15 @@ Be sure to create the environment variable `SPARK_UI_PORT` with the same value t
 
 ### Metrics
 
-Databricks does not include any metrics.
+The Databricks integration does not include any metrics.
 
 ### Service Checks
 
-Databricks does not include any service checks.
+The Databricks integration does not include any service checks.
 
 ### Events
 
-Databricks does not include any events.
+The Databricks integration does not include any events.
 
 ## Troubleshooting
 
