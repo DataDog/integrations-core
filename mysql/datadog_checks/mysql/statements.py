@@ -43,6 +43,11 @@ STATEMENT_METRICS = {
 DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
 
 
+# Metric indicating the number of queries dropped due to reaching the max size of
+# performance_schema.events_statements_summary_by_digest
+DROPPED_QUERIES_METRIC = 'mysql.queries.untracked'
+
+
 class MySQLStatementMetrics(object):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
@@ -82,7 +87,17 @@ class MySQLStatementMetrics(object):
 
         for row in rows:
             tags = []
+
+            # A NULL digest indicates that some queries are not captured in metrics because
+            # the performance_schema query limit was hit. This metric will enable customers
+            # to monitor the number of queries dropped from tracking.
+            # See: https://dev.mysql.com/doc/refman/5.7/en/statement-summary-tables.html
+            if row['digest'] is None:
+                metrics.append((DROPPED_QUERIES_METRIC, row['count'], tags))
+                continue
+
             tags.append('digest:' + row['digest'])
+
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
 
