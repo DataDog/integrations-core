@@ -1,5 +1,10 @@
 # CHANGELOG - haproxy
 
+## 2.15.0 / 2021-01-22
+
+* [Added] Update base package pin. See [#8426](https://github.com/DataDog/integrations-core/pull/8426).
+* [Fixed] Adding support for v2.3. See [#8325](https://github.com/DataDog/integrations-core/pull/8325). Thanks [wdauchy](https://github.com/wdauchy).
+
 ## 2.14.2 / 2021-01-11
 
 * [Fixed] Fix typo for ssl reuse metric. See [#8203](https://github.com/DataDog/integrations-core/pull/8203). Thanks [wdauchy](https://github.com/wdauchy).
