@@ -131,7 +131,7 @@ def section_validator(sections, loader, file_name, *prev_sections):
         Validation(key='append_text', type=str, required=False),
         Validation(key='processor', type=str, required=False),
         Validation(key='hidden', type=bool, required=False),
-        Validation(key='sections', type=list, required=False, children='self'),
+        Validation(key='sections', type=list, required=False),
         Validation(key='overrides', type=list, required=False),
     ]
 
