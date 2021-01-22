@@ -97,7 +97,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
         self.service_whitelist = self.instance.get('service_whitelist', self.init_config.get('service_whitelist', []))
-        self.services_exclude = self.instance.get('services_exclude', self.init_config.get('services_exclude', []))
+        self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
 
         self._local_config = None
