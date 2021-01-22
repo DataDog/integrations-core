@@ -52,7 +52,7 @@ configuration options.
 
 **Note**: this integration collects metrics from all servers in the cluster, so you only need a single Agent.
 
-#### Log Collection
+#### Log collection
 
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -61,7 +61,7 @@ configuration options.
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `rethinkdb.d/conf.yaml` file to start collecting your RethinkDB logs:
+2. Edit this configuration block in your `rethinkdb.d/conf.yaml` file to start collecting your RethinkDB logs:
 
     ```yaml
     logs:
@@ -72,7 +72,7 @@ configuration options.
     ```
 
 
-  Change the `path` parameter value based on your environment. See the https://github.com/DataDog/integrations-core/blob/master/rethinkdb/datadog_checks/rethinkdb/data/conf.yaml.example for all available configuration options.
+  Change the `path` parameter value based on your environment. See the [sample conf.yaml][7] for all available configuration options.
 
   3. [Restart the Agent][8].
 
