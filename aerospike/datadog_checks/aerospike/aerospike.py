@@ -40,6 +40,8 @@ AEROSPIKE_CAP_CONFIG_KEY_MAP = {SINDEX_METRIC_TYPE: "max_sindexs", SET_METRIC_TY
 ENABLED_VALUES = {'true', 'on', 'enable', 'enabled'}
 DISABLED_VALUES = {'false', 'off', 'disable', 'disabled'}
 
+V5_3 = [5, 3, 0, 0]
+
 
 def parse_namespace(data, namespace, secondary):
     idxs = []
@@ -151,17 +153,35 @@ class AerospikeCheck(AgentCheck):
         except Exception as e:
             self.log.debug("There were no datacenters found: %s", e)
 
+        version = self.collect_version()
+        if version is None:
+            self.log.warning("Could not determine version, assuming greater than Aerospike V5.3")
+            version = V5_3
+
         # https://www.aerospike.com/docs/reference/info/#throughput
-        self.collect_throughput(namespaces)
+        self.collect_throughput(namespaces, version)
 
         # https://www.aerospike.com/docs/reference/info/#latency
-        self.collect_latency(namespaces)
-        self.collect_version()
+        self.collect_latency(namespaces, version)
 
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
     def collect_version(self):
-        version = self.get_info("build")[0]
+        raw_version = self.get_info("build")[0]
+        self.submit_version_metadata(raw_version)
+
+        try:
+            parse_version = raw_version.split('.')
+            version = [int(p) for p in parse_version]
+        except Exception as e:
+            self.log.debug("Unable to parse version: %s", str(e))
+            return None
+
+        return version
+
+
+    @AgentCheck.metadata_entrypoint
+    def submit_version_metadata(self, version):
         self.set_metadata('version', version)
 
     def collect_info(self, command, metric_type, separator=';', required_keys=None, tags=None):
@@ -259,8 +279,11 @@ class AerospikeCheck(AgentCheck):
                     continue
             self.send(DATACENTER_METRIC_TYPE, key, value, datacenter_tags)
 
-    def collect_latency(self, namespaces):
-        data = self.get_info('latency:')
+    def collect_latency(self, namespaces, version):
+        if version >= V5_3:
+            data = self.get_info('latencies:')
+        else:
+            data = self.get_info('latency:')
 
         ns = None
 
@@ -322,7 +345,11 @@ class AerospikeCheck(AgentCheck):
                 for i in range(len(metric_names)):
                     self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
 
-    def collect_throughput(self, namespaces):
+    def collect_throughput(self, namespaces, version):
+        if version >= V5_3:
+            self.log.debug("`throughput` is deprecated for Aerospike > v5.3, skipping metrics")
+            return
+
         data = self.get_info('throughput:')
 
         while data:
