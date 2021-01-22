@@ -1,0 +1,28 @@
+name: Nginx
+files:
+  - name: README.md
+    sections:
+      - template: overview
+        overrides:
+          description: |
+            The Datadog Agent can collect many metrics from NGINX instances, including (but not limited to)::
+
+            - Total requests
+            - Connections (e.g. accepted, handled, active)
+
+            For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
+
+            - Errors (e.g. 4xx codes, 5xx codes)
+            - Upstream servers (e.g. active connections, 5xx codes, health checks, etc.)
+            - Caches (e.g. size, hits, misses, etc.)
+            - SSL (e.g. handshakes, failed handshakes, etc.)
+      - template: setup
+      - name: Top Level section
+        header_level: 4
+        description: |
+          this is a section
+        sections:
+          - name: Nested section
+            header_level: 5
+            description: |
+              this is a second section
