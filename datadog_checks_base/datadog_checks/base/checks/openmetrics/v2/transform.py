@@ -94,6 +94,10 @@ class MetricTransformer:
         if metric.type == 'unknown':
             self.logger.debug('Metric `%s` has no type, so you must define one in the `metrics` setting', metric.name)
             return True
+        # We don't support all of the metric types:
+        # https://github.com/OpenObservability/OpenMetrics/blob/master/specification/OpenMetrics.md#metric-types
+        #
+        # We should keep this edge case check even if we do to account for even newer types or bad output
         elif metric.type not in NATIVE_TRANSFORMERS:
             self.logger.debug('Metric `%s` has unsupported type `%s`', metric.name, metric.type)
             return True
