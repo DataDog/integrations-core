@@ -161,6 +161,7 @@ TRANSFORMERS = {
     'counter_gauge': transformers.get_counter_gauge,
     'metadata': transformers.get_metadata,
     'native': get_native_transformer,
+    'rate': transformers.get_rate,
     'service_check': transformers.get_service_check,
     'temporal_percent': transformers.get_temporal_percent,
     'time_elapsed': transformers.get_time_elapsed,

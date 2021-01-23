@@ -6,6 +6,7 @@ from .counter_gauge import get_counter_gauge
 from .gauge import get_gauge
 from .histogram import get_histogram
 from .metadata import get_metadata
+from .rate import get_rate
 from .service_check import get_service_check
 from .summary import get_summary
 from .temporal_percent import get_temporal_percent
