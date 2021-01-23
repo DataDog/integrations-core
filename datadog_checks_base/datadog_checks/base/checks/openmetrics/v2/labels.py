@@ -22,17 +22,26 @@ class LabelAggregator:
             elif not isinstance(config, dict):
                 raise TypeError(f'Metric `{metric}` of setting `share_labels` must be a mapping or set to `true`')
 
-            if 'value' in config:
-                value = str(config['value'])
+            if 'values' in config:
+                values = config['values']
+                if not isinstance(values, list):
+                    raise TypeError(f'Option `values` for metric `{metric}` of setting `share_labels` must be an array')
 
-                try:
-                    value = int(value)
-                except Exception:
-                    raise TypeError(
-                        f'Option `value` for metric `{metric}` of setting `share_labels` must represent an integer'
-                    ) from None
-                else:
-                    data['value'] = value
+                allowed_values = set()
+                for i, value in enumerate(values, 1):
+                    value = str(value)
+
+                    try:
+                        value = int(value)
+                    except Exception:
+                        raise TypeError(
+                            f'Entry #{i} of option `values` for metric `{metric}` of '
+                            f'setting `share_labels` must represent an integer'
+                        ) from None
+                    else:
+                        allowed_values.add(value)
+
+                data['values'] = frozenset(allowed_values)
 
             for option_name in ('labels', 'match'):
                 if option_name not in config:
@@ -73,13 +82,13 @@ class LabelAggregator:
                 yield metric
 
     def collect(self, metric, config):
-        value = config.get('value')
+        allowed_values = config.get('values')
 
         if 'match' in config:
             matching_labels = config['match']
             if 'labels' in config:
                 labels = config['labels']
-                for sample in self.allowed_samples(metric, value):
+                for sample in self.allowed_samples(metric, allowed_values):
                     label_set = set()
                     shared_labels = {}
 
@@ -92,7 +101,7 @@ class LabelAggregator:
 
                     self.label_sets.append((label_set, shared_labels))
             else:
-                for sample in self.allowed_samples(metric, value):
+                for sample in self.allowed_samples(metric, allowed_values):
                     label_set = set()
                     shared_labels = {}
 
@@ -106,17 +115,17 @@ class LabelAggregator:
         else:
             if 'labels' in config:
                 labels = config['labels']
-                for sample in self.allowed_samples(metric, value):
+                for sample in self.allowed_samples(metric, allowed_values):
                     for label, value in sample.labels.items():
                         if label in labels:
                             self.unconditional_labels[label] = value
             else:
-                for sample in self.allowed_samples(metric, value):
+                for sample in self.allowed_samples(metric, allowed_values):
                     for label, value in sample.labels.items():
                         self.unconditional_labels[label] = value
 
     def populate(self, labels):
-        label_set = set(labels.items())
+        label_set = frozenset(labels.items())
         labels.update(self.unconditional_labels)
 
         for matching_label_set, shared_labels in self.label_sets:
@@ -125,13 +134,13 @@ class LabelAggregator:
                 labels.update(shared_labels)
 
     @staticmethod
-    def allowed_samples(metric, value):
-        if value is None:
+    def allowed_samples(metric, allowed_values):
+        if allowed_values is None:
             for sample in metric.samples:
                 yield sample
         else:
             for sample in metric.samples:
-                if sample.value == value:
+                if sample.value in allowed_values:
                     yield sample
 
     @property

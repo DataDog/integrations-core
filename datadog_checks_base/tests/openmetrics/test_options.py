@@ -448,8 +448,8 @@ class TestShareLabels:
 
         aggregator.assert_all_metrics_covered()
 
-    @pytest.mark.parametrize('value', [pytest.param(6396288, id='integer'), pytest.param('6396288', id='string')])
-    def test_value_match(self, aggregator, dd_run_check, mock_http_response, value):
+    @pytest.mark.parametrize('values', [pytest.param([6396288], id='integer'), pytest.param(['6396288'], id='string')])
+    def test_values_match(self, aggregator, dd_run_check, mock_http_response, values):
         mock_http_response(
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -463,7 +463,7 @@ class TestShareLabels:
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
             """
         )
-        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'value': value}}})
+        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'values': values}}})
         dd_run_check(check)
 
         aggregator.assert_metric(
@@ -484,7 +484,7 @@ class TestShareLabels:
 
         aggregator.assert_all_metrics_covered()
 
-    def test_value_no_match(self, aggregator, dd_run_check, mock_http_response):
+    def test_values_no_match(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
             """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -498,7 +498,7 @@ class TestShareLabels:
             go_memstats_free_bytes{bar="baz"} 6.396288e+06
             """
         )
-        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'value': 9000}}})
+        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'values': [9000]}}})
         dd_run_check(check)
 
         aggregator.assert_metric(
