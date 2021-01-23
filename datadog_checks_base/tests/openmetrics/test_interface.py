@@ -12,6 +12,12 @@ pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_int
 
 
 def test_default_config(aggregator, dd_run_check, mock_http_response):
+    from datadog_checks.base import OpenMetricsBaseCheck
+
+    class Check(OpenMetricsBaseCheck):
+        def get_default_config(self):
+            return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
+
     mock_http_response(
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -19,8 +25,7 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
         """
     )
-    check = get_check()
-    check.get_default_config = lambda: {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -77,7 +82,12 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
 
 def test_scraper_override(aggregator, dd_run_check, mock_http_response):
     # TODO: when we drop Python 2 move this up top
+    from datadog_checks.base import OpenMetricsBaseCheck
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
+
+    class Check(OpenMetricsBaseCheck):
+        def create_scraper(self, config):
+            return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
     mock_http_response(
         """
@@ -86,8 +96,7 @@ def test_scraper_override(aggregator, dd_run_check, mock_http_response):
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
         """
     )
-    check = get_check({'metrics': ['.+']})
-    check.create_scraper = lambda config: OpenMetricsCompatibilityScraper(check, check.get_config_with_defaults(config))
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test', 'metrics': ['.+']}])
     dd_run_check(check)
 
     aggregator.assert_service_check('test.prometheus.health', ServiceCheck.OK, tags=['endpoint:test'])
