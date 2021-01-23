@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 from ..utils import requires_py3
@@ -12,9 +13,9 @@ pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_int
 
 
 def test_default_config(aggregator, dd_run_check, mock_http_response):
-    from datadog_checks.base import OpenMetricsBaseCheck
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
 
-    class Check(OpenMetricsBaseCheck):
         def get_default_config(self):
             return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
 
@@ -82,10 +83,11 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
 
 def test_scraper_override(aggregator, dd_run_check, mock_http_response):
     # TODO: when we drop Python 2 move this up top
-    from datadog_checks.base import OpenMetricsBaseCheck
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-    class Check(OpenMetricsBaseCheck):
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
         def create_scraper(self, config):
             return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
