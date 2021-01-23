@@ -447,3 +447,68 @@ class TestShareLabels:
         )
 
         aggregator.assert_all_metrics_covered()
+
+    @pytest.mark.parametrize('value', [pytest.param(6396288, id='integer'), pytest.param('6396288', id='string')])
+    def test_value_match(self, aggregator, dd_run_check, mock_http_response, value):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+            # TYPE go_memstats_gc_sys_bytes gauge
+            go_memstats_gc_sys_bytes{bar="foo"} 901120
+            # HELP go_memstats_free_bytes Number of bytes free and available for use.
+            # TYPE go_memstats_free_bytes gauge
+            go_memstats_free_bytes{bar="baz"} 6.396288e+06
+            """
+        )
+        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'value': value}}})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_gc_sys_bytes',
+            901120,
+            metric_type=aggregator.GAUGE,
+            tags=['endpoint:test', 'bar:foo', 'foo:bar'],
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_free_bytes',
+            6396288,
+            metric_type=aggregator.GAUGE,
+            tags=['endpoint:test', 'bar:baz', 'foo:bar'],
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+    def test_value_no_match(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+            # TYPE go_memstats_gc_sys_bytes gauge
+            go_memstats_gc_sys_bytes{bar="foo"} 901120
+            # HELP go_memstats_free_bytes Number of bytes free and available for use.
+            # TYPE go_memstats_free_bytes gauge
+            go_memstats_free_bytes{bar="baz"} 6.396288e+06
+            """
+        )
+        check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': {'value': 9000}}})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_gc_sys_bytes', 901120, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'bar:foo']
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_free_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'bar:baz']
+        )
+
+        aggregator.assert_all_metrics_covered()

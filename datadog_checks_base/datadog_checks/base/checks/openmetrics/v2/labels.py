@@ -22,6 +22,18 @@ class LabelAggregator:
             elif not isinstance(config, dict):
                 raise TypeError(f'Metric `{metric}` of setting `share_labels` must be a mapping or set to `true`')
 
+            if 'value' in config:
+                value = str(config['value'])
+
+                try:
+                    value = int(value)
+                except Exception:
+                    raise TypeError(
+                        f'Option `value` for metric `{metric}` of setting `share_labels` must represent an integer'
+                    ) from None
+                else:
+                    data['value'] = value
+
             for option_name in ('labels', 'match'):
                 if option_name not in config:
                     continue
@@ -61,11 +73,13 @@ class LabelAggregator:
                 yield metric
 
     def collect(self, metric, config):
+        value = config.get('value')
+
         if 'match' in config:
             matching_labels = config['match']
             if 'labels' in config:
                 labels = config['labels']
-                for sample in metric.samples:
+                for sample in self.allowed_samples(metric, value):
                     label_set = set()
                     shared_labels = {}
 
@@ -78,7 +92,7 @@ class LabelAggregator:
 
                     self.label_sets.append((label_set, shared_labels))
             else:
-                for sample in metric.samples:
+                for sample in self.allowed_samples(metric, value):
                     label_set = set()
                     shared_labels = {}
 
@@ -92,12 +106,12 @@ class LabelAggregator:
         else:
             if 'labels' in config:
                 labels = config['labels']
-                for sample in metric.samples:
+                for sample in self.allowed_samples(metric, value):
                     for label, value in sample.labels.items():
                         if label in labels:
                             self.unconditional_labels[label] = value
             else:
-                for sample in metric.samples:
+                for sample in self.allowed_samples(metric, value):
                     for label, value in sample.labels.items():
                         self.unconditional_labels[label] = value
 
@@ -106,8 +120,19 @@ class LabelAggregator:
         labels.update(self.unconditional_labels)
 
         for matching_label_set, shared_labels in self.label_sets:
-            if matching_label_set.issubset(label_set):
+            # Check for subset without incurring the cost of a `.issubset` lookup and call
+            if matching_label_set <= label_set:
                 labels.update(shared_labels)
+
+    @staticmethod
+    def allowed_samples(metric, value):
+        if value is None:
+            for sample in metric.samples:
+                yield sample
+        else:
+            for sample in metric.samples:
+                if sample.value == value:
+                    yield sample
 
     @property
     def configured(self):
