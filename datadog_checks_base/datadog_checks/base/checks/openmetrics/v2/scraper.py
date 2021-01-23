@@ -184,11 +184,7 @@ class OpenMetricsScraper:
     def scrape(self):
         runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
 
-        metric_parser = self.parse_metrics()
-        if self.label_aggregator.configured:
-            metric_parser = self.label_aggregator(metric_parser)
-
-        for metric in metric_parser:
+        for metric in self.consume_metrics():
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
@@ -196,6 +192,20 @@ class OpenMetricsScraper:
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
         self.has_successfully_executed = True
+
+    def consume_metrics(self):
+        metric_parser = self.parse_metrics()
+        if self.label_aggregator.configured:
+            metric_parser = self.label_aggregator(metric_parser)
+
+        for metric in metric_parser:
+            if metric.name in self.exclude_metrics or (
+                self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
+            ):
+                self.submit_telemetry_number_of_ignored_metric_samples(metric)
+                continue
+
+            yield metric
 
     def parse_metrics(self):
         line_streamer = self.stream_connection_lines()
@@ -205,15 +215,10 @@ class OpenMetricsScraper:
         for metric in self.parse_metric_families(line_streamer):
             self.submit_telemetry_number_of_total_metric_samples(metric)
 
-            metric_name = metric.name
-            if metric_name in self.exclude_metrics or (
-                self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric_name)
-            ):
-                self.submit_telemetry_number_of_ignored_metric_samples(metric)
-                continue
-
-            if self.raw_metric_prefix and metric_name.startswith(self.raw_metric_prefix):
-                metric.name = metric_name[len(self.raw_metric_prefix) :]
+            # It is critical that the prefix is removed immediately so that
+            # all other configuration may reference the trimmed metric name
+            if self.raw_metric_prefix and metric.name.startswith(self.raw_metric_prefix):
+                metric.name = metric.name[len(self.raw_metric_prefix) :]
 
             yield metric
 
