@@ -367,6 +367,25 @@ class TestShareLabels:
         ):
             dd_run_check(check, extract_message=True)
 
+    def test_values_not_array(self, dd_run_check):
+        check = get_check({'share_labels': {'foo': {'values': 9000}}})
+
+        with pytest.raises(
+            Exception, match='^Option `values` for metric `foo` of setting `share_labels` must be an array$'
+        ):
+            dd_run_check(check, extract_message=True)
+
+    def test_values_entry_not_integer(self, dd_run_check):
+        check = get_check({'share_labels': {'foo': {'values': [1.0]}}})
+
+        with pytest.raises(
+            Exception,
+            match=(
+                '^Entry #1 of option `values` for metric `foo` of setting `share_labels` must represent an integer$'
+            ),
+        ):
+            dd_run_check(check, extract_message=True)
+
     @pytest.mark.parametrize('option', ['labels', 'match'])
     def test_option_not_array(self, dd_run_check, option):
         check = get_check({'share_labels': {'foo': {option: 9000}}})
