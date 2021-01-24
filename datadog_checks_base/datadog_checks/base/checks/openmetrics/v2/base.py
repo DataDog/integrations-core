@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+# TODO: remove ignore when we stop invoking Mypy with --py2
+# type: ignore
 from collections import ChainMap
 from contextlib import contextmanager
 

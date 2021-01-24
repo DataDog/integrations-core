@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.base import OpenMetricsBaseCheck
+from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.dev import get_here
 
 from ..utils import requires_py3
@@ -28,7 +28,7 @@ def fixture_amazon_msk_jmx_metrics():
 
 def test_ksm_new(benchmark, dd_run_check, mock_http_response, fixture_ksm):
     mock_http_response(file_path=fixture_ksm)
-    c = OpenMetricsBaseCheck('test', {}, [{'openmetrics_endpoint': 'foo', 'namespace': 'bar', 'metrics': ['.+']}])
+    c = OpenMetricsBaseCheckV2('test', {}, [{'openmetrics_endpoint': 'foo', 'namespace': 'bar', 'metrics': ['.+']}])
 
     # Run once to get initialization steps out of the way.
     dd_run_check(c)
@@ -58,7 +58,7 @@ def test_amazon_msk_jmx_metrics_new(benchmark, dd_run_check, mock_http_response,
 
         metrics.append(config)
 
-    c = OpenMetricsBaseCheck('test', {}, [{'openmetrics_endpoint': 'foo', 'namespace': 'bar', 'metrics': metrics}])
+    c = OpenMetricsBaseCheckV2('test', {}, [{'openmetrics_endpoint': 'foo', 'namespace': 'bar', 'metrics': metrics}])
 
     # Run once to get initialization steps out of the way.
     dd_run_check(c)
@@ -102,7 +102,7 @@ def test_label_joins_new(benchmark, dd_run_check, mock_http_response, fixture_ks
             '9': {'match': ['pod', 'namespace'], 'labels': ['node'], 'values': [1]},
         },
     }
-    c = OpenMetricsBaseCheck('test', {}, [instance])
+    c = OpenMetricsBaseCheckV2('test', {}, [instance])
 
     # Run once to get initialization steps out of the way.
     dd_run_check(c)
