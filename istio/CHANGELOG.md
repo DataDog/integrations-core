@@ -1,5 +1,10 @@
 # CHANGELOG - istio
 
+## 3.9.0 / 2021-01-24
+
+* [Added] Revert "Update base package pin (#8426)". See [#8436](https://github.com/DataDog/integrations-core/pull/8436).
+* [Fixed] Remove class substitution logic for new OpenMetrics base class. See [#8435](https://github.com/DataDog/integrations-core/pull/8435).
+
 ## 3.8.0 / 2021-01-22
 
 * [Added] Update base package pin. See [#8426](https://github.com/DataDog/integrations-core/pull/8426).
