@@ -29,18 +29,56 @@ instances:
 
 #### Job cluster
 
-Modify the Spark integration configuration in the [Datadog Init Script][4] to monitor job clusters:
+For job clusters, please use the following script to monitor.
 
-```yaml
-init_config:
+The main differences is the use the `spark_driver_mode` in the Spark integration configuration and the port used is the Spark UI port.
+
+```shell script
+#!/bin/bash
+
+echo "Running on the driver? $DB_IS_DRIVER"
+echo "Driver ip: $DB_DRIVER_IP"
+
+cat <<EOF >> /tmp/start_datadog.sh
+#!/bin/bash
+
+if [ \$DB_IS_DRIVER ]; then
+  echo "On the driver. Installing Datadog ..."
+
+  # install the Datadog agent
+  DD_API_KEY=<API_KEY> bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+
+  while [ -z \$gotparams ]; do
+    if [ -e "/tmp/driver-env.sh" ]; then
+      DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
+      gotparams=TRUE
+    fi
+    sleep 2
+  done
+
+  current=\$(hostname -I | xargs)
+
+  # WRITING SPARK CONFIG FILE FOR STREAMING SPARK METRICS
+  echo "init_config:
 instances:
-    - spark_url: http://\$DB_DRIVER_IP:\$SPARK_UI_PORT
+    - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
       spark_cluster_mode: spark_driver_mode
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
+
+  # RESTARTING AGENT
+  sudo service datadog-agent restart
+
+fi
+EOF
+
+# CLEANING UP
+if [ \$DB_IS_DRIVER ]; then
+  chmod a+x /tmp/start_datadog.sh
+  /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
+fi
+
 ```
 
-**Note**: The Spark UI port is dynamically set unless you configure the `spark.ui.port` in the `Spark Config` of the cluster configuration page.
-Create the environment variable `SPARK_UI_PORT` with the same value to use the init script.
 
 ### Validation
 
