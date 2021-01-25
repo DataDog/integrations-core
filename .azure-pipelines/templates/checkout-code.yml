@@ -13,6 +13,11 @@ steps:
   condition: eq(variables['Build.Reason'], 'PullRequest')
   displayName: 'Create branch from PR'
 
+# Allow manual builds.
+- script: git checkout -B azure/$(System.SourceBranch)
+  condition: eq(variables['Build.Reason'], 'Manual')
+  displayName: 'Create branch from PR (Manual)'
+
 # Azure pulls a commit hash via git fetch rather than clone so
 # we checkout the branches we need which also gets us out of a
 # detached HEAD state. This may be fixed soon, see:
@@ -25,3 +30,8 @@ steps:
 - script: git checkout azure/$(System.PullRequest.SourceBranch)
   condition: eq(variables['Build.Reason'], 'PullRequest')
   displayName: 'Checkout branch'
+
+# Allow manual builds.
+- script: git checkout azure/$(System.SourceBranch)
+  condition: eq(variables['Build.Reason'], 'Manual')
+  displayName: 'Checkout branch (Manual)'
