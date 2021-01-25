@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 3.11.0 / 2021-01-25
+
+* [Added] Add support for nginx API v3. See [#8392](https://github.com/DataDog/integrations-core/pull/8392).
+
 ## 3.10.1 / 2020-11-16 / Agent 7.25.0
 
 * [Fixed] Fix version metadata collection. See [#7972](https://github.com/DataDog/integrations-core/pull/7972).
