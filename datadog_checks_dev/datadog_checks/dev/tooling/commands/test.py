@@ -212,7 +212,8 @@ def test(
 
             env = os.environ.copy()
 
-            if force_base_min:
+            base_or_dev = check in ('datadog_checks_base', 'datadog_checks_dev')
+            if force_base_min and not base_or_dev:
                 check_base_dependencies, errors = read_check_base_dependencies(check)
                 if errors:
                     abort(f'\nError collecting base package dependencies: {errors}')
@@ -225,8 +226,10 @@ def test(
 
                 version = spec.version
                 env['TOX_FORCE_INSTALL'] = f"datadog_checks_base[deps]=={version}"
-            elif force_base_unpinned:
+            elif force_base_unpinned and not base_or_dev:
                 env['TOX_FORCE_UNPINNED'] = "datadog_checks_base"
+            elif (force_base_min or force_base_unpinned) and base_or_dev:
+                echo_info(f'Skipping forcing base dependency for check {check}')
 
             if force_env_rebuild:
                 command.append('--recreate')
