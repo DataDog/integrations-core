@@ -1,5 +1,9 @@
 # CHANGELOG - exchange_server
 
+## 1.8.2 / 2021-01-25
+
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 1.8.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Fix line wrap in conf.yaml. See [#8016](https://github.com/DataDog/integrations-core/pull/8016).

@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 5.1.0 / 2021-01-25
+
+* [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
+
 ## 5.0.0 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

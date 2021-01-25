@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 7.0.1 / 2021-01-25
+
+* [Fixed] Minor error message fix. See [#8424](https://github.com/DataDog/integrations-core/pull/8424).
+
 ## 7.0.0 / 2021-01-22
 
 * [Added] Add --export-csv option. See [#8350](https://github.com/DataDog/integrations-core/pull/8350).

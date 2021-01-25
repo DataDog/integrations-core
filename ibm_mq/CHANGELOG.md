@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.11.1 / 2021-01-25
+
+* [Fixed] Better explain ssl_key_repository_location. See [#8417](https://github.com/DataDog/integrations-core/pull/8417).
+
 ## 3.11.0 / 2020-11-19 / Agent 7.25.0
 
 * [Added] Add new queue stats metrics for IBM MQ. See [#8032](https://github.com/DataDog/integrations-core/pull/8032).
