@@ -136,7 +136,7 @@ datadog-twemproxy==1.8.0
 datadog-twistlock==1.10.0
 datadog-varnish==1.9.1
 datadog-vault==2.10.0
-datadog-vertica==1.9.0
+datadog-vertica==2.0.0
 datadog-voltdb==1.0.0
 datadog-vsphere==5.7.1
 datadog-win32-event-log==2.7.0; sys_platform == 'win32'
