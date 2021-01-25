@@ -755,9 +755,8 @@
         "id": 26,
         "definition": {
           "type": "image",
-          "url": "/static/images/screenboard/integrations/oracle_database.png",
-          "sizing": "fit",
-          "margin": "small"
+          "url": "/static/images/logos/oracle_large.svg",
+          "sizing": "fit"
         },
         "layout": {
           "x": 1,

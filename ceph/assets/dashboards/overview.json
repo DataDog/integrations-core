@@ -37,9 +37,9 @@
         },
         {
             "definition": {
-                "sizing": "fit",
+                "sizing": "zoom",
                 "type": "image",
-                "url": "/static/images/screenboard/integrations/ceph.png"
+                "url": "/static/images/logos/ceph_large.svg"
             },
             "id": 3098944331182854,
             "layout": {

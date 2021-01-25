@@ -115,8 +115,8 @@
       },
       "definition": {
         "type": "image",
-        "url": "/static/images/saas_logos/bot/postgres.png",
-        "sizing": "center"
+        "url": "/static/images/logos/postgres_large.svg",
+        "sizing": "zoom"
       }
     },
     {

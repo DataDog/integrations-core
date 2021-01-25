@@ -6,7 +6,7 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "https://s3.amazonaws.com/dd-integrations/druid/configuration/tile/logo.png",
+                "url": "/static/images/logos/druid_large.svg",
                 "sizing": "fit"
             },
             "layout": {

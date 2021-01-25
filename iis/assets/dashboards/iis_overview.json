@@ -556,9 +556,9 @@
         },
         {
             "definition": {
-                "sizing": "center",
+                "sizing": "fit",
                 "type": "image",
-                "url": "/static/images/saas_logos/small/iis@2x.png"
+                "url": "/static/images/logos/iis_large.svg"
             },
             "id": 19,
             "layout": {

@@ -920,7 +920,7 @@
       },
       "definition": {
         "type": "image",
-        "url": "/static/images/saas_logos/bot/mysql@2x.png",
+        "url": "/static/images/logos/mysql_large.svg",
         "sizing": "fit"
       }
     }
