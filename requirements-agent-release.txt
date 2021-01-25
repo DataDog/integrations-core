@@ -4,7 +4,7 @@ datadog-activemq==1.9.0
 datadog-aerospike==1.9.0; sys_platform == 'linux2'
 datadog-airflow==1.7.1
 datadog-amazon-msk==1.4.1
-datadog-ambari==1.6.0; sys_platform != 'win32'
+datadog-ambari==1.6.1; sys_platform != 'win32'
 datadog-apache==1.15.0
 datadog-aspdotnet==1.6.1; sys_platform == 'win32'
 datadog-azure-iot-edge==1.1.1
