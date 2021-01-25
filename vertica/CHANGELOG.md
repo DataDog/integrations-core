@@ -4,7 +4,7 @@
 
 * [Added] Update Vertica to use use_tls config. See [#8250](https://github.com/DataDog/integrations-core/pull/8250).
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
-* [Changed] Update Vertica TLS implementation with in-house TLS library.. See [#8228](https://github.com/DataDog/integrations-core/pull/8228).
+* [Changed] Update Vertica TLS implementation with in-house TLS library. See [#8228](https://github.com/DataDog/integrations-core/pull/8228).
 
 ## 1.9.0 / 2020-12-11 / Agent 7.25.0
 
