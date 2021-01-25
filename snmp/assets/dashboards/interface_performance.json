@@ -3,519 +3,627 @@
   "description": "Use this dashboard to view the performance of all the interfaces on your network devices. This dashboard can be filtered across a specific interfaces to view the specific performance of one single interface, or across a device by name to see the entire device's performance. (cloned)",
   "widgets": [
     {
-      "id": 0,
-      "layout": { "x": 21, "y": 7, "width": 56, "height": 19 },
+      "id": 5803655382122172,
       "definition": {
-        "title": "Inbound Bandwidth (%) ",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
+        "title": "Utilization",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 1,
-      "layout": { "x": 78, "y": 7, "width": 56, "height": 19 },
-      "definition": {
-        "title": "Outbound Bandwidth (%)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:snmp.ifBandwidthOutUsage.rate{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 2,
-      "layout": { "x": 21, "y": 0, "width": 113, "height": 6 },
-      "definition": {
-        "type": "note",
-        "content": "Utilization",
-        "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 3,
-      "layout": { "x": 21, "y": 76, "width": 113, "height": 6 },
-      "definition": {
-        "type": "note",
-        "content": "Errors & Discards",
-        "background_color": "purple",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 4,
-      "layout": { "x": 21, "y": 83, "width": 56, "height": 19 },
-      "definition": {
-        "title": "Errors",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:snmp.ifInErrors{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "purple",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "avg:snmp.ifOutErrors{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "purple",
-              "line_type": "dotted",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "custom_links": []
-      }
-    },
-    {
-      "id": 5,
-      "layout": { "x": 78, "y": 83, "width": 56, "height": 19 },
-      "definition": {
-        "title": "Discards",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:snmp.ifInDiscards{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "purple",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "avg:snmp.ifOutDiscards{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "purple",
-              "line_type": "dotted",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "custom_links": []
-      }
-    },
-    {
-      "id": 6,
-      "layout": { "x": 21, "y": 27, "width": 113, "height": 48 },
-      "definition": {
-        "title": "Octets Sent/Received & Max Speed",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "aggregator": "avg",
-            "cell_display_mode": ["bar"],
-            "q": "avg:snmp.ifHCInOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
-            "alias": "Octets In",
-            "limit": 50,
-            "order": "desc"
-          },
-          {
-            "q": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}",
-            "aggregator": "avg",
-            "cell_display_mode": ["bar"],
-            "alias": "Octets Out"
-          },
-          {
-            "q": "avg:snmp.ifHighSpeed{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
-            "aggregator": "avg",
-            "cell_display_mode": ["bar"],
-            "alias": "Speed"
-          }
-        ],
-        "has_search_bar": "auto",
-        "custom_links": []
-      }
-    },
-    {
-      "id": 7,
-      "layout": { "x": 21, "y": 103, "width": 113, "height": 6 },
-      "definition": {
-        "type": "note",
-        "content": "Packets",
-        "background_color": "yellow",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 8,
-      "layout": { "x": 21, "y": 110, "width": 56, "height": 19 },
-      "definition": {
-        "title": "Packets In (uni, multi and broadcast)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:snmp.ifHCInUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "avg:snmp.ifHCInBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "dotted",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "avg:snmp.ifHCInMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "dashed",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        }
-      }
-    },
-    {
-      "id": 9,
-      "layout": { "x": 78, "y": 110, "width": 56, "height": 19 },
-      "definition": {
-        "title": "Packets Out (uni, multi and broadcast)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:snmp.ifHCOutUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "dotted",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-            "on_right_yaxis": false,
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "dashed",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        }
-      }
-    },
-    {
-      "id": 10,
-      "layout": { "x": 0, "y": 0, "width": 20, "height": 26 },
-      "definition": {
-        "type": "note",
-        "content": "Use this dashboard to track key metrics about the performance of all the interfaces (ports) on any device. \n\nUse template variables `$snmp_host` and \n`$interface` to filter the entire dashboard by a specific devices name and port. ",
-        "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 11,
-      "layout": { "x": 135, "y": 7, "width": 31, "height": 34 },
-      "definition": {
-        "type": "note",
-        "content": "Bandwidth is calculation measured as the rate at which traffic is sent or received on a specific port over the max speed that traffic can be sent. \n\nWe use the following formula: \n\ninbound % bandwidth\n![inbound-eq](https://microsoft.codecogs.com/svg.latex?=\\frac{snmp.ifHCInOctets.rate%20*8*100}{snmp.ifHighSpeed%20*%201000000})\n\noutbound % bandwidth\n![inbound-eq](https://microsoft.codecogs.com/svg.latex?=\\frac{snmp.ifHCOutOctets.rate%20*8*100}{snmp.ifHighSpeed%20*%201000000})\n\nDatadog Agent version 7.25+ includes a packaged metric that calculates bandwidth:\n\n* `snmp.ifBandwidthInUsage.rate`\n* `snmp.ifBandwidthOutUsage.rate`",
-        "background_color": "blue",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 12,
-      "layout": { "x": 21, "y": 143, "width": 56, "height": 32 },
-      "definition": {
-        "title": "Interface Status",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "aggregator": "avg",
-            "cell_display_mode": ["bar"],
-            "conditional_formats": [
-              {
-                "comparator": "<",
-                "palette": "black_on_light_green",
-                "value": 2
+            "id": 3306437627726454,
+            "definition": {
+              "title": "Inbound Bandwidth (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
               },
-              {
-                "comparator": "<=",
-                "palette": "black_on_light_red",
-                "value": 2
-              },
-              {
-                "comparator": "<=",
-                "palette": "black_on_light_yellow",
-                "value": 3
-              },
-              {
-                "custom_bg_color": "#cfcdcd",
-                "comparator": ">",
-                "palette": "custom_bg",
-                "value": 3
-              }
-            ],
-            "q": "avg:snmp.ifOperStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
-            "alias": "oper status",
-            "limit": 50,
-            "order": "desc"
-          }
-        ],
-        "has_search_bar": "auto"
-      }
-    },
-    {
-      "id": 13,
-      "layout": { "x": 21, "y": 130, "width": 113, "height": 6 },
-      "definition": {
-        "type": "note",
-        "content": "State",
-        "background_color": "orange",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 14,
-      "layout": { "x": 21, "y": 137, "width": 56, "height": 5 },
-      "definition": {
-        "type": "note",
-        "content": "Current State",
-        "background_color": "orange",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 15,
-      "layout": { "x": 78, "y": 137, "width": 56, "height": 5 },
-      "definition": {
-        "type": "note",
-        "content": "User-defined State",
-        "background_color": "orange",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      }
-    },
-    {
-      "id": 16,
-      "layout": { "x": 78, "y": 143, "width": 56, "height": 32 },
-      "definition": {
-        "title": "Interface Status",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
           {
-            "aggregator": "avg",
-            "conditional_formats": [
-              {
-                "comparator": "<=",
-                "palette": "black_on_light_green",
-                "value": 1
+            "id": 2898630490041394,
+            "definition": {
+              "title": "Outbound Bandwidth (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifBandwidthOutUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
               },
-              {
-                "comparator": "<=",
-                "palette": "black_on_light_red",
-                "value": 2
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 2923885312771994,
+            "definition": {
+              "title": "Bits Received by Interface",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifHCInOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCInOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
+                      "alias_name": "bits in"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
               },
-              {
-                "comparator": ">",
-                "palette": "black_on_light_yellow",
-                "value": 2
-              }
-            ],
-            "order": "desc",
-            "q": "avg:snmp.ifAdminStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
-            "alias": "admin status",
-            "limit": 50,
-            "cell_display_mode": ["bar"]
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+          },
+          {
+            "id": 6773822003742794,
+            "definition": {
+              "title": "Bits Sent by Interface",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifHCOutOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCOutOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
+                      "alias_name": "bits out"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+          },
+          {
+            "id": 7393572788857220,
+            "definition": {
+              "title": "In/Out Octets & Max Speed",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:snmp.ifHCInOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
+                  "alias": "Octets In",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Octets Out"
+                },
+                {
+                  "q": "avg:snmp.ifHighSpeed{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "alias": "Speed"
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": { "x": 0, "y": 6, "width": 12, "height": 6 }
+          },
+          {
+            "id": 6062104962740908,
+            "definition": {
+              "type": "note",
+              "content": "**Tip:** Bandwidth is calculation measured as the rate at which traffic is sent or received on a specific port over the max speed that traffic can be sent. \n\nWe use the following formula: \n\n![bandwidth usage formula](https://github.com/DataDog/integrations-core/blob/5c17b0323172687c4ae0fdd75c56b5f8dd1c2dec/snmp/assets/images/bandwidth-usage-formula-small.png?raw=true)\n\nDatadog Agent version 7.25+ includes a packaged metric that calculates bandwidth automatically:\n\n`snmp.ifBandwidthInUsage.rate` & `snmp.ifBandwidthOutUsage.rate`",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 0, "y": 12, "width": 12, "height": 3 }
           }
-        ],
-        "has_search_bar": "auto"
+        ]
       }
     },
     {
-      "id": 17,
-      "layout": { "x": 0, "y": 137, "width": 20, "height": 28 },
+      "id": 1483901448268600,
       "definition": {
-        "type": "note",
-        "content": "To fully understand the current state of a port, we compare two different metrics, `snmp.AdminStatus` and `snmp.OperStatus`. \n\n**Admin Status** is defined by the SNMP manager. This is the state a port is supposed to be at configuration time. \n\nMeanwhile, the actual current state of the port is known as the **Operational Status**.",
-        "background_color": "orange",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
+        "title": "Errors & Discards",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1700626972109850,
+            "definition": {
+              "title": "Inbound Errors by Interface",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifInErrors{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 8896998123028100,
+            "definition": {
+              "title": "Outbound Errors by Interface",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifOutErrors{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 169728333312990,
+            "definition": {
+              "title": "Inbound Discarded Packets by Interface",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifInDiscards{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+          },
+          {
+            "id": 4219009026623818,
+            "definition": {
+              "title": "Outbound Discarded Packets by Interface",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifOutDiscards{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+          }
+        ]
       }
     },
     {
-      "id": 18,
-      "layout": { "x": 135, "y": 143, "width": 23, "height": 28 },
+      "id": 228168866067746,
       "definition": {
-        "type": "note",
-        "content": "**Oper Status**\n\n```\n1 - up\n2 - down\n3 - testing\n4 - unknown\n5 - dormant\n6 - notPresent\n7 - lowerLayerDown\n```\n\n**Admin Status**\n```\n1 - up\n2 - down\n3 - testing\n```",
-        "background_color": "orange",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
+        "title": "Packets",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5588540879200634,
+            "definition": {
+              "title": "Packets In (uni, multi & broadcast)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifHCInUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCInUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                      "alias_name": "unicast"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "avg:snmp.ifHCInBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCInBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                      "alias_name": "broadcast"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "dotted",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "avg:snmp.ifHCInMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCInMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                      "alias_name": "multicast"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "dashed",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 1878660176861228,
+            "definition": {
+              "title": "Packets Out (uni, multi & broadcast)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.ifHCOutUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCOutUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                      "alias_name": "unicast"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                      "alias_name": "broadcast"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "dotted",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "avg:snmp.ifHCOutMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.ifHCOutMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
+                      "alias_name": "multicast"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "dashed",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 2411712431918596,
+      "definition": {
+        "title": "Interface State",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7158881371559176,
+            "definition": {
+              "type": "note",
+              "content": "**Tip:** To fully understand the current state of an interface, we compare two different metrics, `snmp.AdminStatus` and `snmp.OperStatus`.\n\n**Admin Status** is defined by the owner of the device. This is the state a port is supposed to be at configuration time.\n\nMeanwhile, the actual current state of the interface is known as the **Operational Status**.\n\nWe can infer a healthy interface when the interface is operationally the same as its administratively defined states. ",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 0, "y": 0, "width": 8, "height": 3 }
+          },
+          {
+            "id": 5324644455644750,
+            "definition": {
+              "type": "note",
+              "content": "**Oper Status** \n```\n1 - up\n2 - down\n3 - testing\n4 - unknown\n5 - dormant\n6 - notPresent\n7 - lowerLayerDown\n```",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 8, "y": 0, "width": 2, "height": 3 }
+          },
+          {
+            "id": 6121921241158846,
+            "definition": {
+              "type": "note",
+              "content": "**Admin Status**\n```\n1 - up \n2 - down\n3 - testing\n```",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 10, "y": 0, "width": 2, "height": 3 }
+          },
+          {
+            "id": 6490840222049614,
+            "definition": {
+              "title": "Current State",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "last",
+                  "cell_display_mode": ["bar"],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 2
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_red",
+                      "value": 2
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_yellow",
+                      "value": 3
+                    },
+                    {
+                      "custom_bg_color": "#cfcdcd",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 3
+                    }
+                  ],
+                  "q": "avg:snmp.ifOperStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                  "alias": "oper status",
+                  "limit": 50,
+                  "order": "desc"
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 6 }
+          },
+          {
+            "id": 6987392975637046,
+            "definition": {
+              "title": "User/Pre-Defined State",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "last",
+                  "cell_display_mode": ["bar"],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_yellow",
+                      "value": 2
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_red",
+                      "value": 2
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 1
+                    }
+                  ],
+                  "q": "avg:snmp.ifAdminStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                  "alias": "admin status",
+                  "limit": 50,
+                  "order": "desc"
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 6 }
+          }
+        ]
       }
     }
   ],
   "template_variables": [
     { "name": "snmp_host", "default": "*", "prefix": "snmp_host" },
-    { "name": "interface", "default": "*", "prefix": "interface" },
-    { "name": "snmp_device", "default": "*", "prefix": "snmp_device" }
+    { "name": "snmp_device", "default": "*", "prefix": "snmp_device" },
+    { "name": "interface", "default": "*", "prefix": "interface" }
   ],
-  "layout_type": "free",
+  "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "id": "3yi-2u7-939"
+  "id": "3yi-2u7-939",
+  "reflow_type": "fixed"
 }
