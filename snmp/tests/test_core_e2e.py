@@ -71,23 +71,38 @@ def test_e2e_regex_match(dd_agent_check):
     ]
     config = common.generate_container_instance_config(metrics)
     config['instances'][0]['metric_tags'] = [
+        # {
+        #     "OID": "1.3.6.1.2.1.1.5.0",
+        #     "symbol": "sysName",
+        #     "match": "(\\d+)(\\w+)",
+        #     "tags": {
+        #         "digits": "\\1",
+        #         "remainder": "\\2",
+        #     },
+        # },
         {
             "OID": "1.3.6.1.2.1.1.5.0",
             "symbol": "sysName",
-            "match": "(\\d+)(\\w+)",
+            "match": "(\\w)(\\w)",
             "tags": {
-                "digits": "\\1",
-                "remainder": "\\2",
+                "letter1": "\\1",
+                "letter2": "\\2",
             },
-        }
+        },
     ]
     assert_python_vs_core(dd_agent_check, config)
 
     config['init_config']['loader'] = 'core'
     aggregator = dd_agent_check(config, rate=True)
 
+    # raw sysName: 41ba948911b9
     aggregator.assert_metric(
-        'snmp.devices_monitored', tags=['digits:41', 'remainder:ba948911b9', 'snmp_device:172.18.0.2']
+        'snmp.devices_monitored',
+        tags=[
+            'letter1:4',
+            'letter2:1',
+            'snmp_device:172.18.0.2',
+        ],
     )
 
 
