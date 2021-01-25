@@ -249,7 +249,7 @@ class Nginx(AgentCheck):
 
             self.log.debug("Nginx version `server`: %s", version)
         else:
-            self.log.warning(u"could not retrieve nginx version info")
+            self.log.debug(u"could not retrieve nginx version info")
 
     @classmethod
     def parse_text(cls, raw, tags=None):
