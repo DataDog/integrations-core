@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.8.1 / 2021-01-25
+
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 1.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add log support. See [#7699](https://github.com/DataDog/integrations-core/pull/7699).
