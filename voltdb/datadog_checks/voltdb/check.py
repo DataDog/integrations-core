@@ -3,19 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, List, Optional, cast
 
-import pkg_resources
 import requests
 from six import raise_from
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db import Query, QueryManager
+from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
 from .client import Client
 from .config import Config
 from .types import Instance
-
-BASE_PARSED_VERSION = pkg_resources.get_distribution('datadog-checks-base').parsed_version
 
 
 class VoltDBCheck(AgentCheck):
@@ -35,27 +32,21 @@ class VoltDBCheck(AgentCheck):
             password_hashed=self._config.password_hashed,
         )
 
-        manager_queries = [
-            queries.CPUMetrics,
-            queries.MemoryMetrics,
-            queries.SnapshotStatusMetrics,
-            queries.CommandLogMetrics,
-            queries.ProcedureMetrics,
-            queries.LatencyMetrics,
-            queries.GCMetrics,
-            queries.IOStatsMetrics,
-            queries.TableMetrics,
-            queries.IndexMetrics,
-        ]
-
-        if BASE_PARSED_VERSION < pkg_resources.parse_version('15.0.0'):
-            # On Agent < 7.24.0 we must to pass `Query` objects instead of dicts.
-            manager_queries = [Query(query) for query in manager_queries]  # type: ignore
-
         self._query_manager = QueryManager(
             self,
             self._execute_query_raw,
-            queries=manager_queries,
+            queries=[
+                queries.CPUMetrics,
+                queries.MemoryMetrics,
+                queries.SnapshotStatusMetrics,
+                queries.CommandLogMetrics,
+                queries.ProcedureMetrics,
+                queries.LatencyMetrics,
+                queries.GCMetrics,
+                queries.IOStatsMetrics,
+                queries.TableMetrics,
+                queries.IndexMetrics,
+            ],
             tags=self._config.tags,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
