@@ -84,7 +84,7 @@ datadog-marklogic==1.1.2
 datadog-mcache==1.11.0; sys_platform != 'win32'
 datadog-mesos-master==1.12.0; sys_platform != 'win32'
 datadog-mesos-slave==2.7.0; sys_platform != 'win32'
-datadog-mongo==2.1.1
+datadog-mongo==2.2.0
 datadog-mysql==2.1.2
 datadog-nagios==1.7.0
 datadog-network==2.0.0

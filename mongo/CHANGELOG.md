@@ -1,5 +1,10 @@
 # CHANGELOG - mongo
 
+## 2.2.0 / 2021-01-25
+
+* [Added] Better arbiter support. See [#8294](https://github.com/DataDog/integrations-core/pull/8294).
+* [Fixed] Refactor connection and api. See [#8283](https://github.com/DataDog/integrations-core/pull/8283).
+
 ## 2.1.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Log custom queries which return an empty result set. See [#8105](https://github.com/DataDog/integrations-core/pull/8105).
