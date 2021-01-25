@@ -18,7 +18,6 @@ jobs:
     job_name: Changed
     display: Linux
     validate: true
-    force_base_package: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |
