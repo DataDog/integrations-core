@@ -324,7 +324,7 @@ def test_cull_services_list():
     consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
     assert set(consul_check.services_exclude) not in set(consul_check._cull_services_list(services))
 
-   # Excluded services will be prioritized over whitelisted services 
+    # Excluded services will be prioritized over whitelisted services
     consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
     consul_check.service_whitelist = ['service_4', 'service_5', 'service_6']
     test_whitelist_length = len(consul_check.service_whitelist)
@@ -332,9 +332,9 @@ def test_cull_services_list():
     assert (
         set(consul_check.services_exclude) not in set(consul_check._cull_services_list(services))
         and test_service_list_length > test_whitelist_length
-        )
+    )
 
-    # Use of services exclude will still trigger truncation logic 
+    # Use of services exclude will still trigger truncation logic
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
     consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
     consul_check.max_services = MAX_SERVICES
@@ -345,6 +345,7 @@ def test_cull_services_list():
     consul_check.services_exclude = []
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
     assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
+
 
 def test_new_leader_event(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_LEADER_CHECK])
