@@ -257,6 +257,12 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
                 continue
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
+
+    expected_sc = defaultdict(list)
+    for _, service_checks in aggregator._service_checks.items():
+        for stub in service_checks:
+            expected_sc[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
+
     total_count_python = sum(len(stubs) for stubs in expected_metrics.values())
 
     aggregator.reset()
@@ -300,6 +306,9 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
+
+    for (name, status, tags, message), stubs in expected_sc.items():
+        aggregator.assert_service_check(name, status, tags, count=len(stubs), message=message)
 
     # assert count
     total_count_corecheck = sum(
