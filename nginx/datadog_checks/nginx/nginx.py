@@ -241,6 +241,7 @@ class Nginx(AgentCheck):
 
         return payload
 
+    @AgentCheck.metadata_entrypoint
     def _set_version_metadata(self, version):
         if version and version != 'nginx':
             if '/' in version:
