@@ -217,7 +217,9 @@ def test(
                 if errors:
                     abort(f'\nError collecting base package dependencies: {errors}')
 
-                spec_set = list(check_base_dependencies['datadog-checks-base'].keys())[0]
+                spec_set = list(check_base_dependencies['datadog-checks-base'].keys())
+                if len(spec_set) >= 1:
+                    spec_set = spec_set[0]
 
                 spec = get_next(spec_set) if spec_set else None
                 if spec is None or spec.operator != '>=':
