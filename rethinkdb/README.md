@@ -72,11 +72,11 @@ configuration options.
     ```
 
 
-  Change the `path` parameter value based on your environment. See the [sample conf.yaml][7] for all available configuration options.
+    Change the `path` parameter value based on your environment. See the [sample conf.yaml][7] for all available configuration options.
 
-  3. [Restart the Agent][8].
+3. [Restart the Agent][8].
 
-  See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 ### Validation
 

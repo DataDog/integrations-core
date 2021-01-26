@@ -12,11 +12,11 @@ description: |
 
   {check_log_conf_snippet:4i}
 
-    Change the `path` parameter value based on your environment. See the [sample conf.yaml]({check_conf_link}) for all available configuration options.
+      Change the `path` parameter value based on your environment. See the [sample conf.yaml]({check_conf_link}) for all available configuration options.
 
-    3. [Restart the Agent][1].
+  3. [Restart the Agent][1].
 
-    See [Datadog's documentation][2] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+  See [Datadog's documentation][2] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
   [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
   [2]: https://docs.datadoghq.com/agent/kubernetes/log/
