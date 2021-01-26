@@ -241,6 +241,7 @@ class Nginx(AgentCheck):
 
         return payload
 
+    @AgentCheck.metadata_entrypoint
     def _set_version_metadata(self, version):
         if version and version != 'nginx':
             if '/' in version:
@@ -249,7 +250,7 @@ class Nginx(AgentCheck):
 
             self.log.debug("Nginx version `server`: %s", version)
         else:
-            self.log.warning(u"could not retrieve nginx version info")
+            self.log.debug(u"could not retrieve nginx version info")
 
     @classmethod
     def parse_text(cls, raw, tags=None):
