@@ -290,11 +290,11 @@ jobs:
     - checkName: nagios
       displayName: Nagios
       os: linux
-    - checkName: network (Linux)
-      displayName: Network
+    - checkName: network
+      displayName: Network (Linux)
       os: linux
-    - checkName: network (Windows)
-      displayName: Network
+    - checkName: network
+      displayName: Network (Windows)
       os: windows
     - checkName: nfsstat
       displayName: NFSstat
