@@ -176,7 +176,14 @@ def dep(check, require_base_check_version, min_base_check_version):
         ):
             failed = True
 
-    for name, versions in sorted(agent_dependencies.items()):
+    agent_dependencies_to_compare = (
+        agent_dependencies
+        if check is None
+        # If validating a single check, whether all Agent dependencies are included in check dependencies is irrelevant.
+        else {}
+    )
+
+    for name, versions in sorted(agent_dependencies_to_compare.items()):
         if not verify_dependency('Agent', name, versions):
             failed = True
 
