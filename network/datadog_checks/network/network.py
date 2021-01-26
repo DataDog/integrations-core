@@ -92,7 +92,7 @@ class Network(AgentCheck):
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
         self._collect_ena_metrics = instance.get('collect_aws_ena_metrics', False)
         if fcntl is None and self._collect_ena_metrics:
-            raise ConfigurationError("fcntl not importable, deactivating collection of AWS ENA metrics")
+            raise ConfigurationError("fcntl not importable, collect_aws_ena_metrics should be disabled")
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
