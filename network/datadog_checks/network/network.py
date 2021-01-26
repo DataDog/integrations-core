@@ -98,6 +98,7 @@ class Network(AgentCheck):
         # along with a few other things
         self._setup_metrics(instance)
 
+
         self._exclude_iface_re = None
         exclude_re = instance.get('excluded_interface_re', None)
         if exclude_re:
