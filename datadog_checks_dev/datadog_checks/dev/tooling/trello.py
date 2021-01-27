@@ -155,17 +155,19 @@ class TrelloClient:
             for label in labels:
                 if label['name'] in self.label_map:
                     team = label['name']
-                    id_list = card['idList']                    
+                    id_list = card['idList']
                     if id_list in map_team_list:
                         counts[team]['Total'] += 1
                         counts[team]['Inbox'] += 1
                     elif id_list in self.progress_columns:
                         counts[team]['Total'] += 1
-                        counts[team][self.progress_columns[id_list]] += 1                    
+                        counts[team][self.progress_columns[id_list]] += 1
                     team_found = True
             if not team_found and len(labels) >= 1 and card['idList'] != self.RC_BUILDS_COLUMN:
-                label_names = list(map(lambda label:label['name'], labels))
-                raise Exception(f'{card["url"]}: Cannot find a team from the labels {label_names}. Was a label updated?')
+                label_names = list(map(lambda label: label['name'], labels))
+                raise Exception(
+                    f'{card["url"]}: Cannot find a team from the labels {label_names}. Was a label updated?'
+                )
         return counts
 
     def get_card(self, card_id):
