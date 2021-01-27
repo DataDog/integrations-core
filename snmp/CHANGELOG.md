@@ -1,5 +1,11 @@
 # CHANGELOG - snmp
 
+## 4.0.0 / 2021-01-25
+
+* [Added] Snmp Juniper profiles for EX (switches), MX (routers) and SRX (firewalls) series. See [#8206](https://github.com/DataDog/integrations-core/pull/8206).
+* [Fixed] Use mibless syntax for _generic-host-resources.yaml. See [#8305](https://github.com/DataDog/integrations-core/pull/8305).
+* [Changed] Add missing metrics to hp-ilo4 profile. See [#8220](https://github.com/DataDog/integrations-core/pull/8220).
+
 ## 3.10.0 / 2020-12-07 / Agent 7.25.0
 
 * [Added] Add snmp interface bandwidth usage metric. See [#8093](https://github.com/DataDog/integrations-core/pull/8093).

@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 3.1.1 / 2021-01-25
+
+* [Fixed] Make more explicit which connection was established. See [#8416](https://github.com/DataDog/integrations-core/pull/8416).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 3.1.0 / 2020-11-25 / Agent 7.25.0
 
 * [Added] Cache the client connection when there are no errors. See [#8083](https://github.com/DataDog/integrations-core/pull/8083).

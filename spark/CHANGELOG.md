@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.19.1 / 2021-01-25
+
+* [Fixed] Update check signature. See [#8259](https://github.com/DataDog/integrations-core/pull/8259).
+
 ## 1.19.0 / 2020-12-29
 
 * [Added] Add metrics for structured streams. See [#8078](https://github.com/DataDog/integrations-core/pull/8078).

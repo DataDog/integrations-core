@@ -1,5 +1,10 @@
 # CHANGELOG - gitlab
 
+## 4.4.1 / 2021-01-25
+
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+* [Fixed] Update check signature. See [#8248](https://github.com/DataDog/integrations-core/pull/8248).
+
 ## 4.4.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

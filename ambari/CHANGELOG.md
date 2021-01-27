@@ -1,5 +1,9 @@
 # CHANGELOG - Ambari
 
+## 1.6.1 / 2021-01-25
+
+* [Fixed] Update check signature. See [#8176](https://github.com/DataDog/integrations-core/pull/8176).
+
 ## 1.6.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
