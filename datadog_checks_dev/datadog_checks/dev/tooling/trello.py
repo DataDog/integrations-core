@@ -78,10 +78,10 @@ class TrelloClient:
             'Infra Integrations': '5f9fa48537fb6633584b0e3e',
         }
         self.progress_columns = {
-            '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
+            '600ec7ad2b78475e13c04cfc': 'In Progress',  # INPROGRESS
             self.HAVE_BUG_FIXE_ME_COLUMN: 'Issues Found',  # HAVE BUGS
             self.FIXED_READY_TO_REBUILD_COLUMN: 'Awaiting Build',  # WAITING
-            '5dfb4eef503607473af708ab': 'Done',
+            '600eab615842d6560f6ce898': 'Done',
         }
 
         self.__check_map_consistency(self.team_list_map, self.label_team_map, self.label_map)
@@ -153,14 +153,13 @@ class TrelloClient:
             for label in labels:
                 if label['name'] in self.label_map:
                     team = label['name']
-                    id_list = card['idList']
-
+                    id_list = card['idList']                    
                     if id_list in map_team_list:
                         counts[team]['Total'] += 1
                         counts[team]['Inbox'] += 1
                     elif id_list in self.progress_columns:
                         counts[team]['Total'] += 1
-                        counts[team][self.progress_columns[id_list]] += 1
+                        counts[team][self.progress_columns[id_list]] += 1                    
 
         return counts
 
