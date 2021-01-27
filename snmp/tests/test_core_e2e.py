@@ -32,7 +32,23 @@ def test_e2e_metric_types(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance, expected_total_count=10)
 
 
-def test_e2e_v3(dd_agent_check):
+def test_e2e_v3_version_autodetection(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogSHADES',
+            'authKey': 'doggiepass',
+            'authProtocol': 'sha',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'des',
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
+
+
+def test_e2e_v3_explicit_version(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['instances'][0].update(
         {
