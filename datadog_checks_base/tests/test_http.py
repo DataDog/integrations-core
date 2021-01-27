@@ -504,6 +504,9 @@ class TestAuth:
            via `docker exec -it compose_agent_1 /bin/bash`
         5. Execute check via `agent check nginx` and verify successful result.
         6. Exit test via Ctrl-C (test will show as failed, but that's okay)
+
+        NOTE: if encountering issues (GSS auth error, nginx 403 error, ...), delete the images for the Agent, KDC
+        and nginx containers, and try again to start off from fresh images.
         """
         import time
 
