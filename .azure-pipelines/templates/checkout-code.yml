@@ -23,5 +23,11 @@ steps:
 # Switch to the pull request branch last. Also see:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables#system-variables
 - script: git checkout azure/$(System.PullRequest.SourceBranch)
-  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+  displayName: 'Checkout branch'
+
+# Switch to the branch where the manual run is triggered. Also see:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables#system-variables
+- script: git checkout azure/$(Build.SourceBranch)
+  condition: eq(variables['Build.Reason'], 'Manual')
   displayName: 'Checkout branch'
