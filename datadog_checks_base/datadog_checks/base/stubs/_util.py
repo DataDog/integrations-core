@@ -30,7 +30,7 @@ def subprocess_output(command, raise_on_empty_output, env=None):
     if not output and raise_on_empty_output:
         msg = "expected subprocess output but had none."
         if err:
-            msg += " Error: %s".format(err)
+            msg += " Error: {}".format(str(err))
         raise SubprocessOutputEmptyError(msg)
 
     return output, err, proc.returncode
