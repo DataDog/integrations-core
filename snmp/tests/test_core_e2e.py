@@ -57,9 +57,20 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'authProtocol': 'sha',
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'des',
-            'snmp_version': 3,
+            'snmp_version': '3',
             'context_name': 'f5-big-ip',
             'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
+
+
+def test_e2e_v1_explicit_version(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'snmp_version': '1',
+            'community_string': 'f5-big-ip',
         }
     )
     assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
