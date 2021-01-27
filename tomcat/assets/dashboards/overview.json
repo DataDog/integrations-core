@@ -20,7 +20,7 @@
             "definition": {
                 "sizing": "fit",
                 "type": "image",
-                "url": "/static/images/saas_logos/small/tomcat@2x.png"
+                "url": "/static/images/logos/tomcat_small.svg"
             },
             "id": 1683694205758744,
             "layout": {

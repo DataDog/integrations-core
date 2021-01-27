@@ -514,7 +514,7 @@
         "id": 16,
         "definition": {
           "type": "image",
-          "url": "https://static.datadoghq.com/static/images/avatars/bot/rethinkdb.png",
+          "url": "/static/images/logos/rethinkdb_avatar.svg",
           "sizing": "center"
         },
         "layout": {
