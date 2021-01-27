@@ -32,7 +32,7 @@ all integrations with pending changes then branch off.
 
 1. Make a pull request to release [any new integrations](../integration-release.md#new-integrations), then merge it and pull `master`
 1. Make a pull request to release [all changed integrations](../integration-release.md#bulk-releases), then merge it and pull `master`
-    * Get 2+ thorough reviews on the changelogs. Titles should have good copy, and appropriate SemVer levels (e.g. `Changed` entries must refer to breaking changes only).
+    * Get 2+ thorough reviews on the changelogs. Entries should have appropriate SemVer levels (e.g. `Changed` entries must refer to breaking changes only). See also [PR guidelines](../../guidelines/pr.md).
     * Consider x-posting the PR to Agent teams that have integrations in `integrations-core`, so they can check relevant changelogs too.
 
 !!! important
