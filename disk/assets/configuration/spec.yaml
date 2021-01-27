@@ -238,17 +238,19 @@ files:
                 host: nfsserver
                 share: /mnt/nfs_share
                 type: nfs
-              type: object
-              properties:
-              - name: mountpoint
-                type: string
-              - name: user
-                type: string
-              - name: password
-                type: string
-              - name: host
-                type: string
-              - name: share
-                type: string
-              - name: type
-                type: string
+              type: array
+              items:
+                type: object
+                properties:
+                - name: mountpoint
+                  type: string
+                - name: user
+                  type: string
+                - name: password
+                  type: string
+                - name: host
+                  type: string
+                - name: share
+                  type: string
+                - name: type
+                  type: string
