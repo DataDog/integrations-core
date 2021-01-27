@@ -69,6 +69,8 @@ def test_e2e_v1_explicit_version(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['instances'][0].update(
         {
+            'timeout': '1',
+            'retries': '0',
             'snmp_version': '1',
             'community_string': 'f5-big-ip',
         }
