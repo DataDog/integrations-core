@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-from typing import List, Dict, Any, Callable
+from typing import Any, Callable, Dict, List
 
 from six import raise_from
 
@@ -21,17 +21,18 @@ class Query(object):
 
     def __init__(self, query_data):
         # type: (Dict[str, Any]) -> Query
-        self.query_data = deepcopy(query_data or {})   # type: Dict[str, Any]
+        self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
         self.name = None  # type: str
         self.query = None  # type: str
         self.columns = None  # type: List[str]
         self.extras = None  # type: List[Dict[str, str]]
         self.tags = None  # type: List[str]
 
-    def compile(self,
-                column_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
-                extra_transformers  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
-                ):
+    def compile(
+        self,
+        column_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
+        extra_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
+    ):
         # type: (...) -> None
 
         """

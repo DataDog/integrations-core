@@ -5,7 +5,7 @@ from __future__ import division
 
 import re
 from datetime import datetime
-from typing import Dict, Callable, Any, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 from datadog_checks.base.types import ServiceCheckStatus
 
