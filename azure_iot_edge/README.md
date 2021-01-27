@@ -127,6 +127,10 @@ Azure IoT Edge does not include any events.
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+- [Monitor Azure IoT Edge with Datadog][10]
+
 [1]: https://azure.microsoft.com/en-us/services/iot-edge/
 [2]: https://docs.datadoghq.com/agent/
 [3]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-portal
@@ -136,3 +140,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/
