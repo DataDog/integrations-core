@@ -83,7 +83,11 @@ class QueryManager(object):
     def execute(self, extra_tags=None):
         """This method is what you call every check run."""
         logger = self.check.log
-        global_tags = list(set(self.tags + (extra_tags or [])))
+        if extra_tags:
+            global_tags = list(extra_tags)
+            global_tags.extend(self.tags)
+        else:
+            global_tags = self.tags
 
         for query in self.queries:
             query_name = query.name
