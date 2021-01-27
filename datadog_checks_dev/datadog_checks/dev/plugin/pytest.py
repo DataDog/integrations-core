@@ -9,6 +9,7 @@ import re
 from base64 import urlsafe_b64encode
 
 import pytest
+from datadog_checks.dev.subprocess import run_command_print
 
 from .._env import (
     AGENT_COLLECTOR_SEPARATOR,
@@ -180,7 +181,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
                     check_command.append(str(value))
 
         print("check_command:", " ".join(check_command))
-        result = run_command(check_command, capture=True)
+        result = run_command_print(check_command, capture=True)
         print("result.stdout:", result.stdout)
         print("result.stdout:", result.stdout)
 

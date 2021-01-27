@@ -301,9 +301,9 @@ def test_e2e_v3_explicit_version(dd_agent_check):
 # def test_e2e_profile_palo_alto(dd_agent_check):
 #     config = common.generate_container_profile_config('palo-alto')
 #     assert_python_vs_core(dd_agent_check, config)
-#
-#
-# ASSERT_VALUE_METRICS = []
+
+
+ASSERT_VALUE_METRICS = []
 
 
 def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
