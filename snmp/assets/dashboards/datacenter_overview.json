@@ -290,7 +290,7 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "q": "forecast(top(avg:snmp.ifBandwidthInUsage.rate{$snmp_device,$snmp_host,$interface} by {interface,snmp_device}, 5, 'mean', 'desc'), 'linear', 1)",
+                  "q": "forecast(top(avg:snmp.ifBandwidthInUsage.rate{$snmp_device,$snmp_host,$interface} by {interface,snmp_device,snmp_host}, 5, 'mean', 'desc'), 'linear', 1)",
                   "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
@@ -328,7 +328,7 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "q": "forecast(top(avg:snmp.ifBandwidthInUsage.rate{$snmp_device,$snmp_host,$interface} by {interface,snmp_device,snmp_host}, 5, 'mean', 'desc'), 'linear', 1)",
+                  "q": "forecast(top(avg:snmp.ifBandwidthOutUsage.rate{$snmp_device,$snmp_host,$interface} by {interface,snmp_device,snmp_host}, 5, 'mean', 'desc'), 'linear', 1)",
                   "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
