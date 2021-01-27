@@ -29,7 +29,24 @@ CORECHECK_ONLY_METRICS = [
 
 def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
-    assert_python_vs_core(dd_agent_check, instance)
+    assert_python_vs_core(dd_agent_check, instance, expected_total_count=10)
+
+
+def test_e2e_v3(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogSHADES',
+            'authKey': 'doggiepass',
+            'authProtocol': 'sha',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'des',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
 
 
 def test_e2e_regex_match(dd_agent_check):
