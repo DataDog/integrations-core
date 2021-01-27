@@ -15,10 +15,10 @@ redis.aof.loading_eta_seconds,gauge,,second,,The estimated amount of time left t
 redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections.,0,redis,biggest input buf
 redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked
 redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections.,0,redis,long output list
-redis.cpu.sys,gauge,,second,,System CPU consumed by the Redis server.,-1,redis,cpu sys
-redis.cpu.sys_children,gauge,,second,,System CPU consumed by the background processes.,-1,redis,cpu sys children
-redis.cpu.user,gauge,,second,,User CPU consumed by the Redis server.,-1,redis,cpu user
-redis.cpu.user_children,gauge,,second,,User CPU consumed by the background processes.,-1,redis,cpu user children
+redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys
+redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children
+redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user
+redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency
@@ -62,7 +62,7 @@ redis.slowlog.micros.avg,gauge,,microsecond,,The average duration of queries rep
 redis.slowlog.micros.count,rate,,query,second,The rate of queries reported in the slow log.,0,redis,slowlog count
 redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries reported in the slow log.,0,redis,slowlog max
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median
-redis.stats.keyspace_hits,gauge,,key,,The rate of successful lookups in the main db.,0,redis,keyspace hits
-redis.stats.keyspace_misses,gauge,,key,,The rate of missed lookups in the main db.,0,redis,keyspace misses
+redis.stats.keyspace_hits,gauge,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits
+redis.stats.keyspace_misses,gauge,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses
 redis.command.calls,gauge,,,,"The number of times a redis command has been called, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,cmd calls
 redis.command.usec_per_call,gauge,,,,"The CPU time consumed per redis command call, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,usec per cmd
