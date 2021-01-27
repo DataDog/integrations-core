@@ -15,10 +15,10 @@ redis.aof.loading_eta_seconds,gauge,,second,,The estimated amount of time left t
 redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections.,0,redis,biggest input buf
 redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked
 redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections.,0,redis,long output list
-redis.cpu.sys,gauge,,second,,System CPU consumed by the Redis server.,-1,redis,cpu sys
-redis.cpu.sys_children,gauge,,second,,System CPU consumed by the background processes.,-1,redis,cpu sys children
-redis.cpu.user,gauge,,second,,User CPU consumed by the Redis server.,-1,redis,cpu user
-redis.cpu.user_children,gauge,,second,,User CPU consumed by the background processes.,-1,redis,cpu user children
+redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys
+redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children
+redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user
+redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency
