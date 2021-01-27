@@ -72,10 +72,10 @@ def test_e2e_v1_explicit_version(dd_agent_check):
             'timeout': 1,
             'retries': 0,
             'snmp_version': 1,
-            'community_string': 'f5-big-ip',
+            'community_string': 'apc_ups',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=42)
 
 
 def test_e2e_regex_match(dd_agent_check):

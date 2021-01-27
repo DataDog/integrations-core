@@ -130,10 +130,6 @@ def run_command_print(command, capture=None, check=False, encoding='utf-8', shel
             stdout = ''
         else:
             stdout.seek(0)
-            print("==== stdout.read() ===")
-            print(stdout.read())
-            print("==== stdout.read() ===")
-            stdout.seek(0)
             stdout = stdout.read().decode(encoding)
 
         if stderr is None:
