@@ -1,5 +1,10 @@
 # CHANGELOG - ProxySQL
 
+## 3.0.0 / 2021-01-25
+
+* [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
+* [Changed] Update ProxySQL check to use TLS context wrapper. See [#8243](https://github.com/DataDog/integrations-core/pull/8243).
+
 ## 2.0.0 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Fix config typo. See [#7843](https://github.com/DataDog/integrations-core/pull/7843).

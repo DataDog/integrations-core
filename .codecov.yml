@@ -344,7 +344,7 @@ coverage:
         flags:
         - openmetrics
       OpenStack:
-        target: 75
+        target: 50
         flags:
         - openstack
       OpenStack_Controller:

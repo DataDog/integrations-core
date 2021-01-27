@@ -1,5 +1,17 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.2.0 / 2021-01-24
+
+* [Added] Add `rate` OpenMetrics transformer. See [#8434](https://github.com/DataDog/integrations-core/pull/8434).
+* [Added] Remove any OpenMetrics metric prefixes immediately during parsing. See [#8432](https://github.com/DataDog/integrations-core/pull/8432).
+* [Added] Add OpenMetrics option to share labels conditionally based on sample values. See [#8431](https://github.com/DataDog/integrations-core/pull/8431).
+* [Fixed] Remove class substitution logic for new OpenMetrics base class. See [#8435](https://github.com/DataDog/integrations-core/pull/8435).
+
+## 16.1.0 / 2021-01-22
+
+* [Added] Add new version of OpenMetrics base class. See [#8300](https://github.com/DataDog/integrations-core/pull/8300).
+* [Fixed] Properly support check namespacing for the `submit_histogram_bucket` method. See [#8390](https://github.com/DataDog/integrations-core/pull/8390).
+
 ## 16.0.0 / 2021-01-13
 
 * [Added] Add `no_op` utility. See [#8356](https://github.com/DataDog/integrations-core/pull/8356).

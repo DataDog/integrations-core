@@ -4,7 +4,6 @@
 
 import os
 
-import mock
 import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
@@ -24,7 +23,7 @@ def dd_environment():
 
 
 @pytest.fixture
-def poll_mock():
+def poll_mock(mock_http_response):
     registry = CollectorRegistry()
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
     g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
@@ -35,13 +34,4 @@ def poll_mock():
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
-    poll_mock_patch = mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
-    )
-    with poll_mock_patch:
-        yield
+    mock_http_response(ensure_unicode(generate_latest(registry)), normalize_content=False)

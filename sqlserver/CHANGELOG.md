@@ -1,5 +1,18 @@
 # CHANGELOG - sqlserver
 
+## 2.3.5 / 2021-01-26
+
+* [Fixed] Avoid redundant queries. See [#8447](https://github.com/DataDog/integrations-core/pull/8447).
+
+## 2.3.4 / 2021-01-25
+
+* [Fixed] Clarify authentication in SQL Server. See [#8396](https://github.com/DataDog/integrations-core/pull/8396).
+
+## 2.3.3 / 2021-01-15
+
+* [Fixed] Handle offline databases for existence check. See [#8374](https://github.com/DataDog/integrations-core/pull/8374).
+* [Fixed] Handle overflow error for certain sql queries. See [#8366](https://github.com/DataDog/integrations-core/pull/8366).
+
 ## 2.3.2 / 2021-01-13
 
 * [Fixed] Handle database specific queries for autodiscovery. See [#8329](https://github.com/DataDog/integrations-core/pull/8329).

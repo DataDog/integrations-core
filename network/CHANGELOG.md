@@ -1,5 +1,14 @@
 # CHANGELOG - network
 
+## 2.1.1 / 2021-01-26
+
+* [Fixed] Ensure network check doesn't fail on importing fcntl on Windows. See [#8459](https://github.com/DataDog/integrations-core/pull/8459).
+
+## 2.1.0 / 2021-01-25
+
+* [Added] Collect AWS ENA metrics. See [#8331](https://github.com/DataDog/integrations-core/pull/8331).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 2.0.0 / 2020-12-11 / Agent 7.25.0
 
 * [Changed] [network] Set the collect_connection_queues parameter default value to false. See [#8059](https://github.com/DataDog/integrations-core/pull/8059).

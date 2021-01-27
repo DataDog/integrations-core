@@ -4,7 +4,7 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/openmetrics
+      - template: init_config/openmetrics_legacy
   - template: instances
     options:
     - name: agent_endpoint
@@ -25,7 +25,7 @@ files:
         type: string
         example: http://localhost:6942/metrics
         default: None
-    - template: instances/openmetrics
+    - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.hidden: true
 

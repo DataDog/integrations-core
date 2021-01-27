@@ -316,7 +316,7 @@ class HTTPCheck(AgentCheck):
                 self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
                 return AgentCheck.UNKNOWN, None, None, msg
             else:
-                self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
+                self.log.debug("Unable to connect to site to get cert expiration: %s", e)
                 return AgentCheck.UNKNOWN, None, None, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")

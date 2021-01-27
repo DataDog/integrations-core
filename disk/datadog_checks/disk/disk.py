@@ -17,6 +17,8 @@ from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyErr
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
 if platform.system() == 'Windows':
+    import win32wnet
+
     # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
     IGNORE_CASE = re.I
 
@@ -64,6 +66,10 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        if platform.system() == 'Windows':
+            self._manual_mounts = instance.get('create_mounts', [])
+            self._create_manual_mounts()
 
         deprecations_init_conf = {
             'file_system_global_blacklist': 'file_system_global_exclude',
@@ -453,6 +459,45 @@ class Disk(AgentCheck):
                 )
 
         return devices_label
+
+    def _create_manual_mounts(self):
+        """
+        on Windows, in order to collect statistics on remote (SMB/NFS) drives, the drive must be mounted
+        as the agent user in the agent context, otherwise the agent can't 'see' the drive.  If so configured,
+        attempt to mount desired drives
+        """
+        if not self._manual_mounts:
+            self.log.debug("No manual mounts")
+        else:
+            self.log.debug("Attempting to create %d mounts: ", len(self._manual_mounts))
+            for manual_mount in self._manual_mounts:
+                remote_machine = manual_mount.get('host')
+                share = manual_mount.get('share')
+                uname = manual_mount.get('user')
+                pword = manual_mount.get('password')
+                mtype = manual_mount.get('type')
+                mountpoint = manual_mount.get('mountpoint')
+
+                nr = win32wnet.NETRESOURCE()
+                if not remote_machine or not share:
+                    self.log.error("Invalid configuration.  Drive mount requires remote machine and share point")
+                    continue
+
+                if mtype and mtype.lower() == "nfs":
+                    nr.lpRemoteName = r"{}:{}".format(remote_machine, share)
+                    self.log.debug("Attempting NFS mount: %s", nr.lpRemoteName)
+                else:
+                    nr.lpRemoteName = r"\\{}\{}".format(remote_machine, share).rstrip('\\')
+                    self.log.debug("Attempting SMB mount: %s", nr.lpRemoteName)
+
+                nr.dwType = 0
+                nr.lpLocalName = mountpoint
+                try:
+                    win32wnet.WNetAddConnection2(nr, pword, uname, 0)
+                    self.log.debug("Successfully mounted %s as %s", mountpoint, nr.lpRemoteName)
+                except Exception as e:
+                    self.log.error("Failed to mount %s %s", nr.lpRemoteName, str(e))
+                    pass
 
     @staticmethod
     def get_default_file_system_exclude():

@@ -62,6 +62,8 @@ class OpenMetricsScraperMixin(object):
 
         A default mixin configuration will be returned if there is no instance.
         """
+        if 'openmetrics_endpoint' in instance:
+            raise CheckException('The setting `openmetrics_endpoint` is only available for Agent version 7 or later')
 
         # We can choose to create a default mixin configuration for an empty instance
         if instance is None:

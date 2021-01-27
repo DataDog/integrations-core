@@ -156,9 +156,12 @@ def validate_default_template(spec_file):
         return True
 
     for line in spec_file.split('\n'):
-        if any(template in line for template in ['init_config/default', 'init_config/openmetrics', 'init_config/jmx']):
+        if any(
+            template in line
+            for template in ['init_config/default', 'init_config/openmetrics_legacy', 'init_config/jmx']
+        ):
             init_config_default = True
-        if any(template in line for template in ['instances/default', 'instances/openmetrics', 'instances/jmx']):
+        if any(template in line for template in ['instances/default', 'instances/openmetrics_legacy', 'instances/jmx']):
             instances_default = True
 
         if instances_default and init_config_default:

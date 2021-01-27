@@ -1,5 +1,9 @@
 # CHANGELOG - ClickHouse
 
+## 2.0.1 / 2021-01-25
+
+* [Fixed] Remove `calculate_text_stack_trace` setting to allow the use of read-only accounts. See [#6637](https://github.com/DataDog/integrations-core/pull/6637). Thanks [TheMcGoose](https://github.com/TheMcGoose).
+
 ## 2.0.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

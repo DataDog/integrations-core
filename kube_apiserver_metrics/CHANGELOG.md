@@ -1,5 +1,10 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 1.7.1 / 2021-01-25
+
+* [Fixed] Update metrics whose name has changed in Kubernetes 1.14. See [#8337](https://github.com/DataDog/integrations-core/pull/8337).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 1.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

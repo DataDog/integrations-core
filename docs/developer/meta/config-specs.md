@@ -87,7 +87,6 @@ The type system is based on a loose subset of OpenAPI 3 [data types][openapi-dat
 
 The differences are:
 
-- Types cannot be mixed e.g. `oneOf` is invalid in all cases
 - Only the `minimum` and `maximum` numeric modifiers are supported
 - Only the `pattern` string modifier is supported
 - The `properties` object modifier is not a map, but rather a list of maps with a required `name`
@@ -126,7 +125,7 @@ are shipped with every Agent and individual Integration release.
 
 It respects a few extra [option](#options)-level attributes:
 
-- `example` - A complete example of a option in lieu of a strictly typed `value` attribute
+- `example` - A complete example of an option in lieu of a strictly typed `value` attribute
 - `enabled` - Whether or not to un-comment the option, overriding the behavior of `required`
 
 It also respects a few extra fields under the `value` attribute of each option:

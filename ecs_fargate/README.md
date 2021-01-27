@@ -250,7 +250,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
    }
    ```
 
-    This converts serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][24] for more details.
+    This converts serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][23] for more details.
 
 2. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and with data being output to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data to Fluent Bit:
 

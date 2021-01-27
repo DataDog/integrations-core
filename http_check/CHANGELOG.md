@@ -1,5 +1,12 @@
 # CHANGELOG - http_check
 
+## 5.0.0 / 2021-01-21
+
+* [Added] Support combined client cert files. See [#8298](https://github.com/DataDog/integrations-core/pull/8298).
+* [Fixed] Fix misleading debug message. See [#8379](https://github.com/DataDog/integrations-core/pull/8379).
+* [Changed] Update http_check to use TLS context wrapper. See [#8268](https://github.com/DataDog/integrations-core/pull/8268).
+* [Changed] Only send ssl metrics if a connection succeeded. See [#8102](https://github.com/DataDog/integrations-core/pull/8102).
+
 ## 4.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add support for OPTIONS method. See [#7894](https://github.com/DataDog/integrations-core/pull/7894).
