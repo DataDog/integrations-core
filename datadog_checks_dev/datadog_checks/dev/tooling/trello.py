@@ -16,6 +16,7 @@ class TrelloClient:
     MEMBER_ENPOINT = API_URL + '/1/members'
     HAVE_BUG_FIXE_ME_COLUMN = '58f0c271cbf2d534bd626916'
     FIXED_READY_TO_REBUILD_COLUMN = '5d5a8a50ca7a0189ae8ac5ac'
+    RC_BUILDS_COLUMN = '5727778db5367f8b4cb520ca'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -150,6 +151,7 @@ class TrelloClient:
         cards = requests.get(self.BOARD_ENDPOINT, params=self.auth)
         for card in cards.json():
             labels = card.get('labels', [])
+            team_found = False
             for label in labels:
                 if label['name'] in self.label_map:
                     team = label['name']
@@ -160,7 +162,10 @@ class TrelloClient:
                     elif id_list in self.progress_columns:
                         counts[team]['Total'] += 1
                         counts[team][self.progress_columns[id_list]] += 1                    
-
+                    team_found = True
+            if not team_found and len(labels) >= 1 and card['idList'] != self.RC_BUILDS_COLUMN:
+                label_names = list(map(lambda label:label['name'], labels))
+                raise Exception(f'{card["url"]}: Cannot find a team from the labels {label_names}. Was a label updated?')
         return counts
 
     def get_card(self, card_id):
