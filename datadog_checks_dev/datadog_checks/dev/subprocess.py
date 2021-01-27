@@ -65,6 +65,9 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
             stdout = ''
         else:
             stdout.seek(0)
+            print("=== stdout.read() ===")
+            print(stdout.read())
+            print("=== END stdout.read() ===")
             stdout = stdout.read().decode(encoding)
 
         if stderr is None:

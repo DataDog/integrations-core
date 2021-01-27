@@ -26,26 +26,26 @@ CORECHECK_ONLY_METRICS = [
     'datadog.snmp.submitted_metrics',
 ]
 
-
-def test_e2e_metric_types(dd_agent_check):
-    instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
-    assert_python_vs_core(dd_agent_check, instance, expected_total_count=10)
-
-
-def test_e2e_v3_version_autodetection(dd_agent_check):
-    config = common.generate_container_instance_config([])
-    config['instances'][0].update(
-        {
-            'user': 'datadogSHADES',
-            'authKey': 'doggiepass',
-            'authProtocol': 'sha',
-            'privKey': 'doggiePRIVkey',
-            'privProtocol': 'des',
-            'context_name': 'f5-big-ip',
-            'community_string': '',
-        }
-    )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
+#
+# def test_e2e_metric_types(dd_agent_check):
+#     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
+#     assert_python_vs_core(dd_agent_check, instance, expected_total_count=10)
+#
+#
+# def test_e2e_v3_version_autodetection(dd_agent_check):
+#     config = common.generate_container_instance_config([])
+#     config['instances'][0].update(
+#         {
+#             'user': 'datadogSHADES',
+#             'authKey': 'doggiepass',
+#             'authProtocol': 'sha',
+#             'privKey': 'doggiePRIVkey',
+#             'privProtocol': 'des',
+#             'context_name': 'f5-big-ip',
+#             'community_string': '',
+#         }
+#     )
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -64,246 +64,246 @@ def test_e2e_v3_explicit_version(dd_agent_check):
     )
     assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
 
-
-def test_e2e_v1_explicit_version(dd_agent_check):
-    config = common.generate_container_instance_config([])
-    config['instances'][0].update(
-        {
-            'timeout': 1,
-            'retries': 0,
-            'snmp_version': 1,
-            'community_string': 'f5-big-ip',
-        }
-    )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
-
-
-def test_e2e_regex_match(dd_agent_check):
-    metrics = [
-        {
-            'MIB': "IF-MIB",
-            'table': {
-                "name": "ifTable",
-                "OID": "1.3.6.1.2.1.2.2",
-            },
-            'symbols': [
-                {
-                    "name": "ifInOctets",
-                    "OID": "1.3.6.1.2.1.2.2.1.10",
-                },
-                {
-                    "name": "ifOutOctets",
-                    "OID": "1.3.6.1.2.1.2.2.1.16",
-                },
-            ],
-            'metric_tags': [
-                {
-                    'tag': "interface",
-                    'column': {
-                        "name": "ifDescr",
-                        "OID": "1.3.6.1.2.1.2.2.1.2",
-                    },
-                },
-                {
-                    'column': {
-                        "name": "ifDescr",
-                        "OID": "1.3.6.1.2.1.2.2.1.2",
-                    },
-                    'match': '(\\w)(\\w+)',
-                    'tags': {'prefix': '\\1', 'suffix': '\\2'},
-                },
-            ],
-        }
-    ]
-    config = common.generate_container_instance_config(metrics)
-    config['instances'][0]['metric_tags'] = [
-        {
-            "OID": "1.3.6.1.2.1.1.5.0",
-            "symbol": "sysName",
-            "match": "(\\d+)(\\w+)",
-            "tags": {
-                "digits": "\\1",
-                "remainder": "\\2",
-            },
-        },
-        {
-            "OID": "1.3.6.1.2.1.1.5.0",
-            "symbol": "sysName",
-            "match": "(\\w)(\\w)",
-            "tags": {
-                "letter1": "\\1",
-                "letter2": "\\2",
-            },
-        },
-    ]
-    assert_python_vs_core(dd_agent_check, config)
-
-    config['init_config']['loader'] = 'core'
-    aggregator = dd_agent_check(config, rate=True)
-
-    # raw sysName: 41ba948911b9
-    aggregator.assert_metric(
-        'snmp.devices_monitored',
-        tags=[
-            'digits:41',
-            'remainder:ba948911b9',
-            'letter1:4',
-            'letter2:1',
-            'snmp_device:172.18.0.2',
-        ],
-    )
-
-
-def test_e2e_scalar_oid_retry(dd_agent_check):
-    scalar_objects_with_tags = [
-        {'OID': "1.3.6.1.2.1.7.1", 'name': "udpDatagrams"},
-    ]
-    instance = common.generate_container_instance_config(scalar_objects_with_tags)
-    assert_python_vs_core(dd_agent_check, instance)
-
-
-def test_e2e_symbol_metric_tags(dd_agent_check):
-    scalar_objects_with_tags = [
-        {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams", 'metric_tags': ['udpdgrams', 'UDP']},
-        {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs", 'metric_tags': ['tcpinsegs', 'TCP']},
-    ]
-    instance = common.generate_container_instance_config(scalar_objects_with_tags)
-    assert_python_vs_core(dd_agent_check, instance)
-
-
-# Profile tests
-# expected_total_count: Test with some expected_total_count to be sure that both python and corecheck impl
-# are collecting some metrics.
-
-
-def test_e2e_profile_apc_ups(dd_agent_check):
-    config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42)
-
-
-def test_e2e_profile_arista(dd_agent_check):
-    config = common.generate_container_profile_config('arista')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=14)
-
-
-def test_e2e_profile_aruba(dd_agent_check):
-    config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=67)
-
-
-def test_e2e_profile_chatsworth_pdu(dd_agent_check):
-    config = common.generate_container_profile_config('chatsworth_pdu')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=225)
-
-
-def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-    config = common.generate_container_profile_config('checkpoint-firewall')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=301)
-
-
-def test_e2e_profile_cisco_3850(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554)
-
-
-def test_e2e_profile_cisco_asa(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-asa')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_cisco_asa_5525(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-asa-5525')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_cisco_catalyst(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-catalyst')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_cisco_csr1000v(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-csr1000v')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_cisco_nexus(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-nexus')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_cisco_icm(dd_agent_check):
-    config = common.generate_container_profile_config('cisco_icm')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_dell_poweredge(dd_agent_check):
-    config = common.generate_container_profile_config('dell-poweredge')
-
-    # TODO: Fix python implementation for duplicate declarations
-    metric_to_skip = [
-        # Following metrics are declared multiple times in profiles.
-        # Example: snmp.networkDeviceStatus and snmp.memoryDeviceStatus are declared twice
-        # in dell-poweredge.yaml and _dell-rac.yaml
-        # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
-        # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
-        # See II-153
-        'snmp.networkDeviceStatus',
-        'snmp.memoryDeviceStatus',
-    ]
-    assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
-
-
-def test_e2e_profile_f5_big_ip(dd_agent_check):
-    config = common.generate_container_profile_config('f5-big-ip')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_fortinet_fortigate(dd_agent_check):
-    config = common.generate_container_profile_config('fortinet-fortigate')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_generic_router(dd_agent_check):
-    config = common.generate_container_profile_config('generic-router')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_hp_ilo4(dd_agent_check):
-    config = common.generate_container_profile_config('hp-ilo4')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_hpe_proliant(dd_agent_check):
-    config = common.generate_container_profile_config('hpe-proliant')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_idrac(dd_agent_check):
-    config = common.generate_container_profile_config('idrac')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_isilon(dd_agent_check):
-    config = common.generate_container_profile_config('isilon')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
-    config = common.generate_container_profile_config('meraki-cloud-controller')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_netapp(dd_agent_check):
-    config = common.generate_container_profile_config('netapp')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_palo_alto(dd_agent_check):
-    config = common.generate_container_profile_config('palo-alto')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-ASSERT_VALUE_METRICS = []
+#
+# def test_e2e_v1_explicit_version(dd_agent_check):
+#     config = common.generate_container_instance_config([])
+#     config['instances'][0].update(
+#         {
+#             'timeout': 1,
+#             'retries': 0,
+#             'snmp_version': 1,
+#             'community_string': 'f5-big-ip',
+#         }
+#     )
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
+#
+#
+# def test_e2e_regex_match(dd_agent_check):
+#     metrics = [
+#         {
+#             'MIB': "IF-MIB",
+#             'table': {
+#                 "name": "ifTable",
+#                 "OID": "1.3.6.1.2.1.2.2",
+#             },
+#             'symbols': [
+#                 {
+#                     "name": "ifInOctets",
+#                     "OID": "1.3.6.1.2.1.2.2.1.10",
+#                 },
+#                 {
+#                     "name": "ifOutOctets",
+#                     "OID": "1.3.6.1.2.1.2.2.1.16",
+#                 },
+#             ],
+#             'metric_tags': [
+#                 {
+#                     'tag': "interface",
+#                     'column': {
+#                         "name": "ifDescr",
+#                         "OID": "1.3.6.1.2.1.2.2.1.2",
+#                     },
+#                 },
+#                 {
+#                     'column': {
+#                         "name": "ifDescr",
+#                         "OID": "1.3.6.1.2.1.2.2.1.2",
+#                     },
+#                     'match': '(\\w)(\\w+)',
+#                     'tags': {'prefix': '\\1', 'suffix': '\\2'},
+#                 },
+#             ],
+#         }
+#     ]
+#     config = common.generate_container_instance_config(metrics)
+#     config['instances'][0]['metric_tags'] = [
+#         {
+#             "OID": "1.3.6.1.2.1.1.5.0",
+#             "symbol": "sysName",
+#             "match": "(\\d+)(\\w+)",
+#             "tags": {
+#                 "digits": "\\1",
+#                 "remainder": "\\2",
+#             },
+#         },
+#         {
+#             "OID": "1.3.6.1.2.1.1.5.0",
+#             "symbol": "sysName",
+#             "match": "(\\w)(\\w)",
+#             "tags": {
+#                 "letter1": "\\1",
+#                 "letter2": "\\2",
+#             },
+#         },
+#     ]
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#     config['init_config']['loader'] = 'core'
+#     aggregator = dd_agent_check(config, rate=True)
+#
+#     # raw sysName: 41ba948911b9
+#     aggregator.assert_metric(
+#         'snmp.devices_monitored',
+#         tags=[
+#             'digits:41',
+#             'remainder:ba948911b9',
+#             'letter1:4',
+#             'letter2:1',
+#             'snmp_device:172.18.0.2',
+#         ],
+#     )
+#
+#
+# def test_e2e_scalar_oid_retry(dd_agent_check):
+#     scalar_objects_with_tags = [
+#         {'OID': "1.3.6.1.2.1.7.1", 'name': "udpDatagrams"},
+#     ]
+#     instance = common.generate_container_instance_config(scalar_objects_with_tags)
+#     assert_python_vs_core(dd_agent_check, instance)
+#
+#
+# def test_e2e_symbol_metric_tags(dd_agent_check):
+#     scalar_objects_with_tags = [
+#         {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams", 'metric_tags': ['udpdgrams', 'UDP']},
+#         {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs", 'metric_tags': ['tcpinsegs', 'TCP']},
+#     ]
+#     instance = common.generate_container_instance_config(scalar_objects_with_tags)
+#     assert_python_vs_core(dd_agent_check, instance)
+#
+#
+# # Profile tests
+# # expected_total_count: Test with some expected_total_count to be sure that both python and corecheck impl
+# # are collecting some metrics.
+#
+#
+# def test_e2e_profile_apc_ups(dd_agent_check):
+#     config = common.generate_container_profile_config('apc_ups')
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=42)
+#
+#
+# def test_e2e_profile_arista(dd_agent_check):
+#     config = common.generate_container_profile_config('arista')
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=14)
+#
+#
+# def test_e2e_profile_aruba(dd_agent_check):
+#     config = common.generate_container_profile_config('aruba')
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=67)
+#
+#
+# def test_e2e_profile_chatsworth_pdu(dd_agent_check):
+#     config = common.generate_container_profile_config('chatsworth_pdu')
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=225)
+#
+#
+# def test_e2e_profile_checkpoint_firewall(dd_agent_check):
+#     config = common.generate_container_profile_config('checkpoint-firewall')
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=301)
+#
+#
+# def test_e2e_profile_cisco_3850(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco-3850')
+#     assert_python_vs_core(dd_agent_check, config, expected_total_count=4554)
+#
+#
+# def test_e2e_profile_cisco_asa(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco-asa')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_cisco_asa_5525(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco-asa-5525')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_cisco_catalyst(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco-catalyst')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_cisco_csr1000v(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco-csr1000v')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_cisco_nexus(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco-nexus')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_cisco_icm(dd_agent_check):
+#     config = common.generate_container_profile_config('cisco_icm')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_dell_poweredge(dd_agent_check):
+#     config = common.generate_container_profile_config('dell-poweredge')
+#
+#     # TODO: Fix python implementation for duplicate declarations
+#     metric_to_skip = [
+#         # Following metrics are declared multiple times in profiles.
+#         # Example: snmp.networkDeviceStatus and snmp.memoryDeviceStatus are declared twice
+#         # in dell-poweredge.yaml and _dell-rac.yaml
+#         # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
+#         # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
+#         # See II-153
+#         'snmp.networkDeviceStatus',
+#         'snmp.memoryDeviceStatus',
+#     ]
+#     assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
+#
+#
+# def test_e2e_profile_f5_big_ip(dd_agent_check):
+#     config = common.generate_container_profile_config('f5-big-ip')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_fortinet_fortigate(dd_agent_check):
+#     config = common.generate_container_profile_config('fortinet-fortigate')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_generic_router(dd_agent_check):
+#     config = common.generate_container_profile_config('generic-router')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_hp_ilo4(dd_agent_check):
+#     config = common.generate_container_profile_config('hp-ilo4')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_hpe_proliant(dd_agent_check):
+#     config = common.generate_container_profile_config('hpe-proliant')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_idrac(dd_agent_check):
+#     config = common.generate_container_profile_config('idrac')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_isilon(dd_agent_check):
+#     config = common.generate_container_profile_config('isilon')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
+#     config = common.generate_container_profile_config('meraki-cloud-controller')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_netapp(dd_agent_check):
+#     config = common.generate_container_profile_config('netapp')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# def test_e2e_profile_palo_alto(dd_agent_check):
+#     config = common.generate_container_profile_config('palo-alto')
+#     assert_python_vs_core(dd_agent_check, config)
+#
+#
+# ASSERT_VALUE_METRICS = []
 
 
 def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
