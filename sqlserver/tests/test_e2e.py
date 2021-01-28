@@ -85,3 +85,17 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+
+
+def test_check_docker_defaults(dd_agent_check, init_config, instance_e2e_defaults):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e_defaults]}, rate=True)
+
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname)
+
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)

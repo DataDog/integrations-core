@@ -19,6 +19,7 @@ from .common import (
     INIT_CONFIG_OBJECT_NAME,
     INSTANCE_AO_DOCKER_SECONDARY,
     INSTANCE_DOCKER,
+    INSTANCE_DOCKER_DEFAULTS,
     INSTANCE_E2E,
     INSTANCE_SQL2017,
     get_local_driver,
@@ -59,6 +60,9 @@ def instance_docker():
 def instance_e2e():
     return deepcopy(INSTANCE_E2E)
 
+@pytest.fixture
+def instance_e2e_defaults():
+    return deepcopy(INSTANCE_DOCKER_DEFAULTS)
 
 @pytest.fixture
 def instance_ao_docker_primary():
