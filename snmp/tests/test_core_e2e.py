@@ -69,13 +69,11 @@ def test_e2e_v1_explicit_version(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['instances'][0].update(
         {
-            'timeout': 1,
-            'retries': 0,
             'snmp_version': 1,
-            'community_string': 'apc_ups',
+            'community_string': 'aruba',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=65)
 
 
 def test_e2e_regex_match(dd_agent_check):
