@@ -5,7 +5,6 @@ from copy import copy, deepcopy
 
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
