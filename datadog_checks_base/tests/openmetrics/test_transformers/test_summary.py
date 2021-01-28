@@ -131,13 +131,13 @@ def test_quantiles_remapped_metric_name(aggregator, dd_run_check, mock_http_resp
         'test.target_interval_seconds.sum',
         26649.83516454906,
         metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:prometheus'],
+        tags=['endpoint:test', 'interval:1s'],
     )
     aggregator.assert_metric(
         'test.target_interval_seconds.count',
         26032,
         metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:prometheus'],
+        tags=['endpoint:test', 'interval:1s'],
     )
 
     aggregator.assert_metric(
