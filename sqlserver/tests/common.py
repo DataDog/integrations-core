@@ -59,25 +59,18 @@ EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
 EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
 
-INSTANCE_DOCKER_DEFAULTS = {
+INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
+    'connector': 'odbc',
+    'driver': get_local_driver(),
     'username': 'sa',
     'password': 'Password123',
-    'tags': ['optional:defaults'],
+    'tags': ['optional:tag1'],
+    'include_task_scheduler_metrics': True,
+    'include_db_fragmentation_metrics': True,
+    'include_fci_metrics': True,
+    'include_ao_metrics': False,
 }
-
-INSTANCE_DOCKER = INSTANCE_DOCKER_DEFAULTS.copy()
-INSTANCE_DOCKER.update(
-    {
-        'connector': 'odbc',
-        'driver': get_local_driver(),
-        'tags': ['optional:tag1'],
-        'include_task_scheduler_metrics': True,
-        'include_db_fragmentation_metrics': True,
-        'include_fci_metrics': True,
-        'include_ao_metrics': False,
-    }
-)
 
 INSTANCE_AO_DOCKER_SECONDARY = {
     'host': '{},1434'.format(HOST),
@@ -104,17 +97,22 @@ CUSTOM_QUERY_B = {
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
 INSTANCE_E2E['driver'] = 'FreeTDS'
 
-INSTANCE_SQL2017 = {
+INSTANCE_SQL2017_DEFAULTS = {
     'host': LOCAL_SERVER,
     'username': 'sa',
     'password': 'Password12!',
-    'connector': 'odbc',
-    'driver': '{ODBC Driver 17 for SQL Server}',
-    'include_task_scheduler_metrics': True,
-    'include_db_fragmentation_metrics': True,
-    'include_fci_metrics': True,
-    'include_ao_metrics': False,
 }
+INSTANCE_SQL2017 = INSTANCE_SQL2017_DEFAULTS.copy()
+INSTANCE_SQL2017.update(
+    {
+        'connector': 'odbc',
+        'driver': '{ODBC Driver 17 for SQL Server}',
+        'include_task_scheduler_metrics': True,
+        'include_db_fragmentation_metrics': True,
+        'include_fci_metrics': True,
+        'include_ao_metrics': False,
+    }
+)
 
 INIT_CONFIG = {
     'custom_metrics': [

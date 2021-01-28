@@ -10,7 +10,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
 from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_METRICS, assert_metrics
-from .utils import not_windows_ci
+from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -191,6 +191,7 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
 
 
+@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autodiscovery):
@@ -220,6 +221,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     aggregator.assert_metric('sqlserver.database.files.state', tags=msdb_tags)
 
 
+@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, dd_run_check, instance_docker):
@@ -241,8 +243,8 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker):
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
 
 
+@windows_ci
 @pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_check_docker_defaults(dd_agent_check, init_config, instance_e2e_defaults):
     aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e_defaults]}, rate=True)
 
