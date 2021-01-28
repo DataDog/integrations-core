@@ -246,7 +246,8 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker):
 @windows_ci
 @pytest.mark.integration
 def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_sql2017_defaults):
-    aggregator = dd_run_check({'init_config': init_config, 'instances': [instance_sql2017_defaults]})
+    check = SQLServer(CHECK_NAME, init_config, [instance_sql2017_defaults])
+    dd_run_check(check)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
