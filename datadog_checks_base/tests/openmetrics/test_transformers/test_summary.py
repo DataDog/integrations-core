@@ -111,6 +111,7 @@ def test_no_quantiles(aggregator, dd_run_check, mock_http_response):
 
     aggregator.assert_all_metrics_covered()
 
+
 def test_quantiles_remapped_metric_name(aggregator, dd_run_check, mock_http_response):
     payload = """
         # HELP prometheus_target_interval_length_seconds Actual intervals between scrapes.
