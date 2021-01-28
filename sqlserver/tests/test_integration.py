@@ -5,10 +5,11 @@ from copy import copy, deepcopy
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
-from .common import CHECK_NAME, CUSTOM_QUERY_A, CUSTOM_QUERY_B, assert_metrics
+from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_METRICS, assert_metrics
 from .utils import not_windows_ci
 
 try:
@@ -220,3 +221,19 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker):
 
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:custom'])
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_docker_defaults(dd_agent_check, init_config, instance_e2e_defaults):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e_defaults]}, rate=True)
+
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname)
+
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)

@@ -60,9 +60,11 @@ def instance_docker():
 def instance_e2e():
     return deepcopy(INSTANCE_E2E)
 
+
 @pytest.fixture
 def instance_e2e_defaults():
     return deepcopy(INSTANCE_DOCKER_DEFAULTS)
+
 
 @pytest.fixture
 def instance_ao_docker_primary():
