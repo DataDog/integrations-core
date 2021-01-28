@@ -27,7 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.2'
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.2.0'
 
 setup(
     name='datadog-lighttpd',
