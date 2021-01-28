@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.3.0 / 2021-01-28
+
+* [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
+
 ## 16.2.0 / 2021-01-24
 
 * [Added] Add `rate` OpenMetrics transformer. See [#8434](https://github.com/DataDog/integrations-core/pull/8434).
