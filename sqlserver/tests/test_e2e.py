@@ -85,4 +85,3 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
-
