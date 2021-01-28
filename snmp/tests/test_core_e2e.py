@@ -65,15 +65,78 @@ def test_e2e_v3_explicit_version(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=489)
 
 
-def test_e2e_v1_explicit_version(dd_agent_check):
+def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
     config = common.generate_container_instance_config([])
-    config['instances'][0].update(
+    instance = config['instances'][0]
+    instance.update(
         {
             'snmp_version': 1,
-            'community_string': 'aruba',
+            'community_string': 'apc_ups',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=65)
+    config['init_config']['loader'] = 'core'
+
+    aggregator = dd_agent_check(config, rate=True)
+
+    profile_tags = [
+        'snmp_profile:apc_ups',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        'device_vendor:apc',
+    ]
+    tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
+
+    metrics = [
+        'upsAdvBatteryNumOfBadBattPacks',
+        'upsAdvBatteryReplaceIndicator',
+        'upsAdvBatteryRunTimeRemaining',
+        'upsAdvBatteryTemperature',
+        'upsAdvBatteryCapacity',
+        'upsHighPrecInputFrequency',
+        'upsHighPrecInputLineVoltage',
+        'upsHighPrecOutputCurrent',
+        'upsAdvInputLineFailCause',
+        'upsAdvOutputLoad',
+        'upsBasicBatteryTimeOnBattery',
+        'upsAdvTestDiagnosticsResults',
+    ]
+
+    common.assert_common_metrics(aggregator, tags)
+
+    for metric in metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        tags=['outlet_group_name:test_outlet'] + tags,
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.AVRTrimActive', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.BatteriesDischarged', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.NoBatteriesAttached', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.OnLine', 0, metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric('datadog.snmp.check_interval', metric_type=aggregator.COUNT, tags=tags, count=1)
+    aggregator.assert_metric('datadog.snmp.submitted_metrics', 20, metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    aggregator.assert_all_metrics_covered()
 
 
 def test_e2e_regex_match(dd_agent_check):
