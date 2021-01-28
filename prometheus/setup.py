@@ -27,7 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.2'
 
 setup(
     name='datadog-prometheus',
