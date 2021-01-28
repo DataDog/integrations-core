@@ -35,7 +35,7 @@ def get_summary(check, metric_name, modifiers, global_options):
                     hostname=hostname,
                     flush_first_value=has_successfully_executed,
                 )
-            elif sample_name == metric_name:
+            elif sample_name == metric.name:
                 gauge_method(quantile_metric, sample.value, tags=tags, hostname=hostname)
 
     del check
