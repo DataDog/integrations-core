@@ -9,7 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
-from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_METRICS, assert_metrics
+from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
 
 try:
@@ -251,7 +251,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
-    for mname in EXPECTED_METRICS:
+    for mname in EXPECTED_DEFAULT_METRICS:
         aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)

@@ -43,13 +43,18 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
-EXPECTED_METRICS = [
+EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
         INSTANCE_METRICS,
         INSTANCE_METRICS_TOTAL,
-        TASK_SCHEDULER_METRICS,
         DATABASE_METRICS,
+    )
+]
+EXPECTED_METRICS = EXPECTED_DEFAULT_METRICS + [
+    m[0]
+    for m in chain(
+        TASK_SCHEDULER_METRICS,
         DATABASE_FRAGMENTATION_METRICS,
         FCI_METRICS,
     )
