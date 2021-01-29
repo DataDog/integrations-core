@@ -28,37 +28,37 @@
     1. If the item is a string, then it represents the exposed metric name, and
        the sent metric name will be identical. For example:
 
-         - metrics:
-           - <METRIC_1>
-           - <METRIC_2>
+         metrics:
+         - <METRIC_1>
+         - <METRIC_2>
     2. If the item is a mapping, then the keys represent the exposed metric names.
 
          a. If a value is a string, then it represents the sent metric name. For example:
 
-              - metrics:
-                - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
-                - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+              metrics:
+              - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+              - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
          b. If a value is a mapping, then it must have a `name` and/or `type` key.
             The `name` represents the sent metric name, and the `type` represents how
             the metric should be handled, overriding any type information the endpoint
             may provide. For example:
 
-              - metrics:
-                - <EXPOSED_METRIC_1>:
-                    name: <SENT_METRIC_1>
-                    type: <METRIC_TYPE_1>
-                - <EXPOSED_METRIC_2>:
-                    name: <SENT_METRIC_2>
-                    type: <METRIC_TYPE_2>
+              metrics:
+              - <EXPOSED_METRIC_1>:
+                  name: <SENT_METRIC_1>
+                  type: <METRIC_TYPE_1>
+              - <EXPOSED_METRIC_2>:
+                  name: <SENT_METRIC_2>
+                  type: <METRIC_TYPE_2>
 
             The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
 
     Regular expressions may be used to match the exposed metric names, for example:
 
-      - metrics:
-        - ^network_(ingress|egress)_.+
-        - .+:
-            type: gauge
+      metrics:
+      - ^network_(ingress|egress)_.+
+      - .+:
+          type: gauge
   value:
     type: array
     items:
@@ -70,10 +70,10 @@
           - type: string
           - type: object
             properties:
-              name:
-                type: string
-              type:
-                type: string
+            - name: name
+              type: string
+            - name: type
+              type: string
             additionalProperties: true
 - name: extra_metrics  # Hidden for the `openmetrics` provider integration
   description: |
@@ -84,37 +84,37 @@
     1. If the item is a string, then it represents the exposed metric name, and
        the sent metric name will be identical. For example:
 
-         - metrics:
-           - <METRIC_1>
-           - <METRIC_2>
+         metrics:
+         - <METRIC_1>
+         - <METRIC_2>
     2. If the item is a mapping, then the keys represent the exposed metric names.
 
          a. If a value is a string, then it represents the sent metric name. For example:
 
-              - metrics:
-                - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
-                - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+              metrics:
+              - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+              - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
          b. If a value is a mapping, then it must have a `name` and/or `type` key.
             The `name` represents the sent metric name, and the `type` represents how
             the metric should be handled, overriding any type information the endpoint
             may provide. For example:
 
-              - metrics:
-                - <EXPOSED_METRIC_1>:
-                    name: <SENT_METRIC_1>
-                    type: <METRIC_TYPE_1>
-                - <EXPOSED_METRIC_2>:
-                    name: <SENT_METRIC_2>
-                    type: <METRIC_TYPE_2>
+              metrics:
+              - <EXPOSED_METRIC_1>:
+                  name: <SENT_METRIC_1>
+                  type: <METRIC_TYPE_1>
+              - <EXPOSED_METRIC_2>:
+                  name: <SENT_METRIC_2>
+                  type: <METRIC_TYPE_2>
 
             The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
 
     Regular expressions may be used to match the exposed metric names, for example:
 
-      - metrics:
-        - ^network_(ingress|egress)_.+
-        - .+:
-            type: gauge
+      metrics:
+      - ^network_(ingress|egress)_.+
+      - .+:
+          type: gauge
   value:
     type: array
     items:
@@ -126,10 +126,10 @@
           - type: string
           - type: object
             properties:
-              name:
-                type: string
-              type:
-                type: string
+            - name: name
+              type: string
+            - name: type
+              type: string
             additionalProperties: true
 - name: exclude_metrics
   description: |
@@ -147,11 +147,11 @@
     For example, the following configuration instructs the check to exclude all metrics with
     a label `worker` or a label `pid` with the value of either `23` or `42`.
 
-      - exclude_metrics_by_labels:
-          worker: true
-          pid:
-            - '23'
-            - '42'
+      exclude_metrics_by_labels:
+        worker: true
+        pid:
+        - '23'
+        - '42'
   value:
     type: object
     additionalProperties:
@@ -233,17 +233,17 @@
     label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
     to all other metrics if its value is equal to `23` or `42`.
 
-      - share_labels:
-          metric_a: true
-          metric_b:
-            labels:
-              - node
-            match:
-              - pod
-          metric_c:
-            values:
-              - 23
-              - 42
+      share_labels:
+        metric_a: true
+        metric_b:
+          labels:
+          - node
+          match:
+          - pod
+        metric_c:
+          values:
+          - 23
+          - 42
   value:
     type: object
     additionalProperties:
@@ -283,6 +283,12 @@
 - name: use_latest_spec
   description: |
     Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+  value:
+    example: false
+    type: boolean
+- name: telemetry
+  description: |
+    Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
   value:
     example: false
     type: boolean
