@@ -23,7 +23,7 @@ from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig
 from .discovery import discover_instances
 from .exceptions import PySnmpError
-from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
+from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type, try_varbind_value_to_float
 from .mibs import MIBLoader
 from .models import OID
 from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag
@@ -35,9 +35,12 @@ from .utils import (
     get_profile_definition,
     oid_pattern_specificity,
     recursively_expand_base_profiles,
+    transform_index,
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
+
+_MAX_FETCH_NUMBER = 10 ** 6
 
 
 def reply_invalid(oid):
@@ -68,11 +71,31 @@ class SnmpCheck(AgentCheck):
         self.optimize_mib_memory_usage = is_affirmative(self.init_config.get('optimize_mib_memory_usage', False))
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
+        self.refresh_oids_cache_interval = int(
+            self.init_config.get('refresh_oids_cache_interval', InstanceConfig.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
+        )
 
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
 
         self._config = self._build_config(self.instance)
+
+        self._last_fetch_number = 0
+
+    def _get_next_fetch_id(self):
+        # type: () -> str
+        """
+        Return a unique ID that represents a given "fetch results" operation, for logging purposes.
+
+        Note: this is ad-hoc and dinstinct from the 'request-id' as defined by the SNMP protocol.
+        """
+        self._last_fetch_number += 1
+
+        # Prevent ID from becoming infinitely large.
+        self._last_fetch_number %= _MAX_FETCH_NUMBER
+
+        # Include check ID to avoid conflicts between concurrent instances of the check.
+        return '{}-{}'.format(self.check_id, self._last_fetch_number)
 
     def _load_profiles(self):
         # type: () -> Dict[str, Dict[str, Any]]
@@ -131,6 +154,7 @@ class SnmpCheck(AgentCheck):
             instance,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
+            refresh_oids_cache_interval=self.refresh_oids_cache_interval,
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
             loader=loader,
@@ -165,7 +189,7 @@ class SnmpCheck(AgentCheck):
             return None
 
     def fetch_results(
-        self, config,  # type: InstanceConfig
+        self, config  # type: InstanceConfig
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
@@ -178,13 +202,18 @@ class SnmpCheck(AgentCheck):
         """
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
+        fetch_id = self._get_next_fetch_id()
 
         all_binds, error = self.fetch_oids(
-            config, config.oid_config.scalar_oids, config.oid_config.next_oids, enforce_constraints=enforce_constraints,
+            config,
+            config.oid_config.scalar_oids,
+            config.oid_config.next_oids,
+            enforce_constraints=enforce_constraints,
+            fetch_id=fetch_id,
         )
         for oid in config.oid_config.bulk_oids:
             try:
-                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                self.log.debug('[%s] Running SNMP command getBulk on OID %s', fetch_id, oid)
                 binds = snmp_bulk(
                     config,
                     oid.as_object_type(),
@@ -195,7 +224,7 @@ class SnmpCheck(AgentCheck):
                 )
                 all_binds.extend(binds)
             except (PySnmpError, CheckException) as e:
-                message = 'Failed to collect some metrics: {}'.format(e)
+                message = '[{}] Failed to collect some metrics: {}'.format(fetch_id, e)
                 if not error:
                     error = message
                 self.warning(message)
@@ -206,13 +235,13 @@ class SnmpCheck(AgentCheck):
             scalar_oids.append(oid)
             match = config.resolve_oid(oid)
             results[match.name][match.indexes] = value
-        self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
+        self.log.debug('[%s] Raw results: %s', fetch_id, OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
         return results, scalar_oids, error
 
-    def fetch_oids(self, config, scalar_oids, next_oids, enforce_constraints):
-        # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
+    def fetch_oids(self, config, scalar_oids, next_oids, enforce_constraints, fetch_id):
+        # type: (InstanceConfig, List[OID], List[OID], bool, str) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -226,10 +255,12 @@ class SnmpCheck(AgentCheck):
 
         for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
             try:
-                self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                self.log.debug(
+                    '[%s] Running SNMP command get on OIDS: %s', fetch_id, OIDPrinter(oids_batch, with_values=False)
+                )
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
-                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
+                self.log.debug('[%s] Returned vars: %s', fetch_id, OIDPrinter(var_binds, with_values=True))
 
                 missing_results = []
 
@@ -246,14 +277,16 @@ class SnmpCheck(AgentCheck):
                     next_oids.extend(missing_results)
 
             except (PySnmpError, CheckException) as e:
-                message = 'Failed to collect some metrics: {}'.format(e)
+                message = '[{}] Failed to collect some metrics: {}'.format(fetch_id, e)
                 if not error:
                     error = message
                 self.warning(message)
 
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
-                self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                self.log.debug(
+                    '[%s] Running SNMP command getNext on OIDS: %s', fetch_id, OIDPrinter(oids_batch, with_values=False)
+                )
                 binds = list(
                     snmp_getnext(
                         config,
@@ -262,11 +295,11 @@ class SnmpCheck(AgentCheck):
                         ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
                     )
                 )
-                self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
+                self.log.debug('[%s] Returned vars: %s', fetch_id, OIDPrinter(binds, with_values=True))
                 all_binds.extend(binds)
 
             except (PySnmpError, CheckException) as e:
-                message = 'Failed to collect some metrics: {}'.format(e)
+                message = '[{}] Failed to collect some metrics: {}'.format(fetch_id, e)
                 if not error:
                     error = message
                 self.warning(message)
@@ -456,6 +489,7 @@ class SnmpCheck(AgentCheck):
                 for index, val in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
                     self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                    self.try_submit_bandwidth_usage_metric_if_bandwidth_metric(name, index, results, metric_tags)
             else:
                 result = list(results[name].items())
                 if len(result) > 1:
@@ -466,6 +500,108 @@ class SnmpCheck(AgentCheck):
                 val = result[0][1]
                 metric_tags = tags + metric.tags
                 self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+
+    BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING = {
+        'ifHCInOctets': 'ifBandwidthInUsage',
+        'ifHCOutOctets': 'ifBandwidthOutUsage',
+    }
+
+    @staticmethod
+    def is_bandwidth_metric(name):
+        # type: (str) -> bool
+        return name in SnmpCheck.BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING
+
+    def try_submit_bandwidth_usage_metric_if_bandwidth_metric(
+        self,
+        name,  # type: str
+        index,  # type: Tuple[str, ...]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
+        tags,  # type: List[str]
+    ):
+        # type: (...) -> None
+        """
+        Safely send bandwidth usage metrics if name is a bandwidth metric
+        """
+        try:
+            self.submit_bandwidth_usage_metric_if_bandwidth_metric(name, index, results, tags)
+        except Exception as e:
+            msg = 'Unable submit bandwidth usage metric with name=`{}`, index=`{}`, tags=`{}`: {}'.format(
+                name, index, tags, e
+            )
+            self.log.warning(msg)
+            self.log.debug(msg, exc_info=True)
+
+    def submit_bandwidth_usage_metric_if_bandwidth_metric(
+        self,
+        name,  # type: str
+        index,  # type: Tuple[str, ...]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
+        tags,  # type: List[str]
+    ):
+        # type: (...) -> None
+        """
+        Evaluate and report input/output bandwidth usage. If any of `ifHCInOctets`, `ifHCOutOctets`  or `ifHighSpeed`
+        is missing then bandwidth will not be reported.
+
+        Bandwidth usage is:
+
+        interface[In|Out]Octets(t+dt) - interface[In|Out]Octets(t)
+        ----------------------------------------------------------
+                        dt*interfaceSpeed
+
+        Given:
+        * ifHCInOctets: the total number of octets received on the interface.
+        * ifHCOutOctets: The total number of octets transmitted out of the interface.
+        * ifHighSpeed: An estimate of the interface's current bandwidth in Mb/s (10^6 bits
+                       per second). It is constant in time, can be overwritten by the system admin.
+                       It is the total available bandwidth.
+        Bandwidth usage is evaluated as: ifHC[In|Out]Octets/ifHighSpeed and reported as *rate*
+        """
+        if not self.is_bandwidth_metric(name):
+            return
+
+        if 'ifHighSpeed' not in results:
+            self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping metric %s', name)
+            return
+
+        if name not in results:
+            self.log.debug('[SNMP Bandwidth usage] missing `%s` metric, skipping this row. index=%s', name, index)
+            return
+
+        octets_value = results[name][index]
+        try:
+            if_high_speed_val = results['ifHighSpeed'][index]
+        except KeyError:
+            self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping this row. ' 'index=%s', index)
+            return
+
+        if_high_speed = try_varbind_value_to_float(if_high_speed_val)
+        if if_high_speed is None:
+            err_msg = 'Metric: {} has non float value: {}. Only float values can be submitted as metrics.'.format(
+                repr(name), repr(if_high_speed_val)
+            )
+            self.log.debug(err_msg, exc_info=True)
+            return
+
+        bits_value = try_varbind_value_to_float(octets_value) * 8
+        if bits_value is None:
+            err_msg = 'Metric: {} has non float value: {}. Only float values can be submitted as metrics.'.format(
+                repr(name), repr(octets_value)
+            )
+            self.log.debug(err_msg, exc_info=True)
+            return
+
+        try:
+            bandwidth_usage_value = (bits_value / (if_high_speed * (10 ** 6))) * 100
+        except ZeroDivisionError:
+            self.log.debug('Zero value at ifHighSpeed, skipping this row. index=%s', index)
+            return
+
+        self.rate(
+            "snmp.{}.rate".format(SnmpCheck.BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING[name]),
+            bandwidth_usage_value,
+            tags,
+        )
 
     def get_index_tags(
         self,
@@ -499,10 +635,22 @@ class SnmpCheck(AgentCheck):
 
         for column_tag in column_tags:
             raw_column_value = column_tag.column
+            self.log.trace(
+                'Processing column tag: raw_column_value=%s index_slices=%s', raw_column_value, column_tag.index_slices
+            )
+            if column_tag.index_slices:
+                new_index = transform_index(index, column_tag.index_slices)
+            else:
+                new_index = index
+            self.log.trace('Processing column tag: new_index=%s old_index=%s', new_index, index)
+            if new_index is None:
+                continue
             try:
-                column_value = results[raw_column_value][index]
+                column_value = results[raw_column_value][new_index]
             except KeyError:
-                self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
+                self.log.debug(
+                    'Column `%s not present in the table, skipping this tag. index=%s', raw_column_value, new_index
+                )
                 continue
             if reply_invalid(column_value):
                 self.log.warning("Can't deduct tag from column %s", column_tag.column)

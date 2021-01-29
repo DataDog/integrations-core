@@ -4,6 +4,7 @@
 from __future__ import division
 
 import datetime as dt
+import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -137,6 +138,11 @@ class VSphereCheck(AgentCheck):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
+            self.log.debug(
+                "Set metadata for mor_type %s: %s",
+                mor_type,
+                metadata,
+            )
 
         # TODO: Later - Understand how much data actually changes between check runs
         # Apparently only when the server restarts?
@@ -168,7 +174,10 @@ class VSphereCheck(AgentCheck):
             self.log.error("Failed to collect tags: %s", e)
             return {}
 
-        self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.gauge(
+            'datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True, hostname=self._hostname
+        )
+
         return mor_tags
 
     def refresh_infrastructure_cache(self):
@@ -187,6 +196,7 @@ class VSphereCheck(AgentCheck):
             hostname=self._hostname,
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
+        self.log.debug("Infrastructure cache: %s", infrastructure_data)
 
         all_tags = {}
         if self.config.should_collect_tags:
@@ -233,7 +243,7 @@ class VSphereCheck(AgentCheck):
             else:
                 tags.append('vsphere_{}:{}'.format(mor_type_str, mor_name))
 
-            tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
+            tags.extend(get_parent_tags_recursively(mor, infrastructure_data, self.config))
             tags.append('vsphere_type:{}'.format(mor_type_str))
 
             # Attach tags from fetched attributes.
@@ -274,10 +284,23 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
+            self.log.debug(
+                "Retrieved mor props for entity %s: %s",
+                results_per_mor.entity,
+                mor_props,
+            )
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)
+                if self.log.isEnabledFor(logging.DEBUG):
+                    # Use isEnabledFor to avoid unnecessary processing
+                    self.log.debug(
+                        "Processing metric `%s`: resource_type=`%s`, result=`%s`",
+                        metric_name,
+                        resource_type,
+                        str(result).replace("\n", "\\n"),
+                    )
                 if not metric_name:
                     # Fail-safe
                     self.log.debug(
@@ -296,8 +319,9 @@ class VSphereCheck(AgentCheck):
                 if not valid_values:
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
-                        " is negative (i.e. the metric is not yet available).",
+                        " is negative (i.e. the metric is not yet available). values: %s",
                         to_string(metric_name),
+                        list(result.value),
                     )
                     continue
 
@@ -333,6 +357,13 @@ class VSphereCheck(AgentCheck):
                     # Convert the percentage to a float.
                     value /= 100.0
 
+                self.log.debug(
+                    "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                    metric_name,
+                    value,
+                    hostname,
+                    tags,
+                )
                 # vSphere "rates" should be submitted as gauges (rate is precomputed).
                 self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
@@ -343,7 +374,13 @@ class VSphereCheck(AgentCheck):
         """
         t0 = Timer()
         metrics_values = self.api.query_metrics(query_specs)
-        self.histogram('datadog.vsphere.query_metrics.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.histogram(
+            'datadog.vsphere.query_metrics.time',
+            t0.total(),
+            tags=self.config.base_tags,
+            raw=True,
+            hostname=self._hostname,
+        )
         return metrics_values
 
     def make_query_specs(self):
@@ -351,6 +388,8 @@ class VSphereCheck(AgentCheck):
         """
         Build query specs using MORs and metrics metadata.
         """
+        server_current_time = self.api.get_current_time()
+        self.log.debug("Server current datetime: %s", server_current_time)
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
@@ -379,7 +418,7 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = dt.datetime.now() - dt.timedelta(hours=2)
+                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs

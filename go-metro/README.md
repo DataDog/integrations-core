@@ -36,7 +36,8 @@ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 
 ### Configuration
 
-Edit the `go-metro.yaml` file in your agent's `conf.d` directory. See the [sample go-metro.yaml][3] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+Edit the `go-metro.yaml` file in your agent's `conf.d` directory. See the [sample go-metro.yaml][3] for all available configuration options.
+The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
 ```yaml
 init_config:
@@ -56,6 +57,30 @@ instances:
     hosts:
       - app.datadoghq.com
 ```
+
+*NOTE*: for go-metro to run unprivileged, you will have to set CAP_NET_RAW capabilities on the binary:
+```
+# Install required libraries
+$ sudo apt-get install libcap  # debian
+$ sudo apt-get install libcap2-bin  # debian alternative
+$ sudo yum install libcap  # redhat
+$ sudo yum install compat-libcap1  # redhat alternative
+
+# Set capabilities
+$ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
+```
+
+Because of different package names for different distros, if the instructions above
+don't work for you, please issue an `apt-cache search libcap` or `yum search libcap` and you
+should get a shortlist of packages that might provide the binary. Feel free to reach out
+should you require assistance.
+
+Also, please note that go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`.
+Additionally, go-metro runs standalone so it will *NOT* currently appear on the Agent's info page.
+
+Finally, because the go-metro binary is only bundled with the 64-bit RPM and DEB distributions of the
+Datadog Agent, it is only available in those packaged versions (i.e. go-metro is currently
+unavailable with the source install or the 32-bit packages).
 
 ### Validation
 

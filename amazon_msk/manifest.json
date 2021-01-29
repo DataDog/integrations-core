@@ -24,12 +24,16 @@
   "is_public": true,
   "integration_id": "amazon-kafka",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Amazon MSK Overview": "assets/dashboards/overview.json"
     },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

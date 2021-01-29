@@ -7,6 +7,7 @@ import pytest
 import requests
 from six import iteritems
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
@@ -16,73 +17,90 @@ from datadog_checks.elastic.metrics import (
     health_stats_for_version,
     index_stats_for_version,
     pshard_stats_for_version,
+    slm_stats_for_version,
     stats_for_version,
 )
 
-from .common import CLUSTER_TAG, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, JVM_RATES, PASSWORD, URL, USER
 
 log = logging.getLogger('test_elastic')
 
 
 @pytest.mark.unit
-def test__join_url(elastic_check):
-    adm_forwarder_joined_url = elastic_check._join_url(
-        "https://localhost:9444/elasticsearch-admin", "/stats", admin_forwarder=True
-    )
+def test__join_url():
+    instance = {
+        "url": "https://localhost:9444/elasticsearch-admin",
+        "admin_forwarder": True,
+    }
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    adm_forwarder_joined_url = check._join_url("/stats", admin_forwarder=True)
     assert adm_forwarder_joined_url == "https://localhost:9444/elasticsearch-admin/stats"
 
-    joined_url = elastic_check._join_url("https://localhost:9444/elasticsearch-admin", "/stats")
+    joined_url = check._join_url("/stats", admin_forwarder=False)
     assert joined_url == "https://localhost:9444/stats"
 
 
+@pytest.mark.parametrize(
+    'instance, url_fix',
+    [
+        pytest.param({'url': URL}, '_local/'),
+        pytest.param({'url': URL, "cluster_stats": True}, ''),
+    ],
+)
 @pytest.mark.unit
-def test__get_urls(elastic_check):
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([], True)
+def test__get_urls(instance, url_fix):
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_cluster/nodes/stats?all=true'
+    assert stats_url == '/_cluster/nodes/' + url_fix + 'stats?all=true'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url is None
+    assert slm_url is None
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([], False)
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([1, 0, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_cluster/nodes/_local/stats?all=true'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url is None
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0], True)
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/stats?all=true'
+    assert stats_url == '/_nodes/' + url_fix + 'stats?all=true'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
+    assert slm_url is None
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0], False)
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([6, 0, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/_local/stats?all=true'
+    assert stats_url == '/_nodes/' + url_fix + 'stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
+    assert slm_url is None
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0], True)
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([7, 4, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/stats'
+    assert stats_url == '/_nodes/' + url_fix + 'stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0], False)
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/_local/stats'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url == '/_cluster/pending_tasks'
+    assert slm_url == '/_slm/policy'
 
 
 @pytest.mark.integration
-def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
-    elastic_check.check(instance)
-    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags):
+    elastic_check.check(None)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags)
 
 
-def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
+@pytest.mark.integration
+def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
+    instance['gc_collectors_as_rate'] = True
+    check = ESCheck('elastic', {}, instances=[instance])
+    check.check(instance)
+    for metric in JVM_RATES:
+        aggregator.assert_metric(metric, at_least=1, tags=node_tags)
+
+    _test_check(check, instance, aggregator, cluster_tags, node_tags, slm_tags)
+
+
+def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags):
     config = from_instance(instance)
-    es_version = elastic_check._get_es_version(config)
+    es_version = elastic_check._get_es_version()
 
     # node stats, blacklist metrics that can't be tested in a small, single node instance
     blacklist = ['elasticsearch.indices.segments.index_writer_max_memory_in_bytes']
@@ -98,6 +116,11 @@ def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
     for m_name in expected_metrics:
         aggregator.assert_metric(m_name, at_least=1, tags=cluster_tags)
 
+    # SLM stats
+    slm_metrics = slm_stats_for_version(es_version)
+    for m_name in slm_metrics:
+        aggregator.assert_metric(m_name, at_least=1, tags=slm_tags)
+
     aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=config.service_check_tags)
 
     # Assert service metadata
@@ -112,8 +135,9 @@ def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
 
 
 @pytest.mark.integration
-def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hostname, aggregator, node_tags):
-    elastic_check.check(instance_normalize_hostname)
+def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregator, node_tags):
+    elastic_check = ESCheck('elastic', {}, instances=[instance_normalize_hostname])
+    elastic_check.check(None)
     node_name = node_tags[-1].split(':')[1]
 
     for m_name, _ in iteritems(STATS_METRICS):
@@ -121,12 +145,12 @@ def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hos
 
 
 @pytest.mark.integration
-def test_pshard_metrics(dd_environment, elastic_check, aggregator):
+def test_pshard_metrics(dd_environment, aggregator):
     instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
-    config = from_instance(instance)
-    es_version = elastic_check._get_es_version(config)
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
 
-    elastic_check.check(instance)
+    elastic_check.check(None)
 
     pshard_stats_metrics = pshard_stats_for_version(es_version)
     for m_name, desc in iteritems(pshard_stats_metrics):
@@ -140,29 +164,29 @@ def test_pshard_metrics(dd_environment, elastic_check, aggregator):
 
 
 @pytest.mark.integration
-def test_index_metrics(dd_environment, aggregator, elastic_check, instance, cluster_tags):
+def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['index_stats'] = True
-    config = from_instance(instance)
-    es_version = elastic_check._get_es_version(config)
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
     if es_version < [1, 0, 0]:
         pytest.skip("Index metrics are only tested in version 1.0.0+")
 
-    elastic_check.check(instance)
+    elastic_check.check(None)
     for m_name in index_stats_for_version(es_version):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
 
 
 @pytest.mark.integration
-def test_health_event(dd_environment, aggregator, elastic_check):
+def test_health_event(dd_environment, aggregator):
     dummy_tags = ['elastique:recherche']
     instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
-    config = from_instance(instance)
-    es_version = elastic_check._get_es_version(config)
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
 
     # Should be yellow at first
     requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}')
 
-    elastic_check.check(instance)
+    elastic_check.check(None)
 
     if es_version < [2, 0, 0]:
         assert len(aggregator.events) == 1
@@ -174,7 +198,7 @@ def test_health_event(dd_environment, aggregator, elastic_check):
 @pytest.mark.integration
 def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata, datadog_agent):
     elastic_check.check_id = 'test:123'
-    elastic_check.check(instance)
+    elastic_check.check(None)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
 
@@ -183,7 +207,6 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
 @pytest.mark.parametrize(
     'instance, expected_aws_host, expected_aws_service',
     [
-        pytest.param({}, None, None, id='not aws auth'),
         pytest.param(
             {'auth_type': 'aws', 'aws_region': 'foo', 'url': 'http://example.com'},
             'example.com',
@@ -197,12 +220,6 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
             id='aws_host_custom_with_url',
         ),
         pytest.param(
-            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
-            'foo.com',
-            'es',
-            id='aws_host_custom_no_url',
-        ),
-        pytest.param(
             {'auth_type': 'aws', 'aws_region': 'foo', 'aws_service': 'es-foo', 'url': 'http://example.com'},
             'example.com',
             'es-foo',
@@ -210,7 +227,7 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
         ),
     ],
 )
-def test_aws_auth(instance, expected_aws_host, expected_aws_service):
+def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
     check = ESCheck('elastic', {}, instances=[instance])
 
     assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
@@ -220,7 +237,25 @@ def test_aws_auth(instance, expected_aws_host, expected_aws_service):
     assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'instance, expected_aws_host, expected_aws_service',
+    [
+        pytest.param({}, None, None, id='not aws auth'),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
+            'foo.com',
+            'es',
+            id='aws_host_custom_no_url',
+        ),
+    ],
+)
+def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
+    with pytest.raises(ConfigurationError):
+        ESCheck('elastic', {}, instances=[instance])
+
+
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
+def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags, slm_tags):
     aggregator = dd_agent_check(instance, rate=True)
-    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags)

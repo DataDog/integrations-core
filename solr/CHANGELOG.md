@@ -1,11 +1,35 @@
 # CHANGELOG - solr
 
-## 1.4.1 / 2020-06-29
+## 1.8.0 / 2021-01-25
+
+* [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
+
+## 1.7.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+
+## 1.6.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 1.5.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
+## 1.5.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Convert jmx to in-app types for replay_check_run. See [#7275](https://github.com/DataDog/integrations-core/pull/7275).
+* [Added] Add documentation for solr logs. See [#7162](https://github.com/DataDog/integrations-core/pull/7162).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Add domain to metrics.yaml. See [#7164](https://github.com/DataDog/integrations-core/pull/7164).
+* [Fixed] Add new_gc_metrics to all jmx integrations. See [#7073](https://github.com/DataDog/integrations-core/pull/7073).
+
+## 1.4.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).
 * [Fixed] Adjust jmxfetch config. See [#6864](https://github.com/DataDog/integrations-core/pull/6864).
 
-## 1.4.0 / 2020-05-17
+## 1.4.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
@@ -13,12 +37,12 @@
 
 * [Added] Update metrics and use config spec. See [#6496](https://github.com/DataDog/integrations-core/pull/6496).
 
-## 1.2.0 / 2018-10-12
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].
 * [Fixed] Fix Solr file indenting. See [#2189][2].
 
-## 1.1.0 / 2018-09-04
+## 1.1.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Add metrics for Solr 7. See [#2042][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].

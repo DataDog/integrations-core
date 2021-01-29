@@ -4,7 +4,6 @@
 import socket
 
 from datadog_checks.dev import get_docker_hostname, get_here
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 CHECK_NAME = "kafka"
 
@@ -60,4 +59,4 @@ KAFKA_E2E_METRICS = [
     "kafka.session.zookeeper.expire.rate",
     "kafka.session.zookeeper.readonly.rate",
     "kafka.session.zookeeper.sync.rate",
-] + JVM_E2E_METRICS
+]

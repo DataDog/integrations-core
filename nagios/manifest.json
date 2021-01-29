@@ -1,7 +1,8 @@
 {
   "categories": [
     "monitoring",
-    "notification"
+    "notification",
+    "log collection"
   ],
   "creates_events": true,
   "display_name": "Nagios",
@@ -25,9 +26,15 @@
   "type": "check",
   "integration_id": "nagios",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "nagios"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

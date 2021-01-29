@@ -12,7 +12,8 @@ securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
 from securesystemslib.gpg.constants import GPG_COMMAND
 
-from in_toto import runlib, util
+from in_toto import runlib
+from securesystemslib.interface import import_rsa_privatekey_from_file
 
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git
@@ -82,8 +83,6 @@ def run_in_toto(products, **kwargs):
         product_list=products,
         # Keep file size down
         compact_json=True,
-        # Cross-platform support
-        normalize_line_endings=True,
         # Extra options
         **kwargs,
     )
@@ -107,17 +106,20 @@ def update_link_metadata(checks, core_workflow=True):
         key_id_prefix = key_id[:8].lower()
 
         tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
-        options = {'gpg_keyid': key_id}
+        # Normalize line endings, particularly on Windows, to deal with git.
+        options = {'gpg_keyid': key_id, 'normalize_line_endings': True}
     else:
         signing_key_path = os.getenv('IN_TOTO_SIGNING_KEY_PATH', '')
-        signing_key = util.import_rsa_key_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
+        signing_key = import_rsa_privatekey_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
 
         # NOTE: in-toto currently uses the first 8 characters of the signing keyID,
         # the latter of which we assume is the key filename.
         key_id_prefix = signing_key['keyid'][:8].lower()
 
         tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
-        options = {'signing_key': signing_key}
+        # Do not allow machine to normalize line endings, because it is not on Windows,
+        # for which git might rewrite line endings in files.
+        options = {'signing_key': signing_key, 'normalize_line_endings': False}
 
     # Final location of metadata file.
     metadata_file = path_join(LINK_DIR, tag_link)

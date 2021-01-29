@@ -18,20 +18,24 @@ ERR_MULTIPLE_SOURCES = "The check has a log pipeline but documents multiple sour
 ERR_NOT_DEFINED_WEB_UI = "The check has a log pipeline but does not have a corresponding entry defined in web-ui."
 
 EXCEPTIONS = {
+    'amazon_eks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # eks is just a tile
+    'azure_active_directory': [
+        ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
+        ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
+    ],
     'cilium': [
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # cilium does not need a pipeline to automatically parse the logs
         ERR_UNEXPECTED_LOG_DOC  # The documentation says to use 'source: cilium'
     ],
-    'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
-    'amazon_eks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # eks is just a tile
     'eks_fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
     'fluentd': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # Fluentd is about log collection but we don't collect fluentd logs
     'kubernetes': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from kubernetes environment but there is no pipeline per se
+    'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
+    'linkerd': [
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # linkerd does not need a pipeline to automatically parse the logs
+        ERR_UNEXPECTED_LOG_DOC
+    ],
     'win32_event_log': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # win32_event_log is about log collection but we don't collect win32_event_log logs
-    'azure_active_directory': [
-        ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
-        ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
-    ]
 }
 
 

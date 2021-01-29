@@ -46,11 +46,12 @@ def setup_gunicorn(request):
         proc = start_gunicorn(gunicorn_bin_path, conf_file)
 
         def fin():
-            proc.terminate()
+            proc.kill()
+            time.sleep(5)
 
         request.addfinalizer(fin)
 
-        time.sleep(15)
+        time.sleep(5)
 
         yield {'gunicorn_bin_path': gunicorn_bin_path}
 

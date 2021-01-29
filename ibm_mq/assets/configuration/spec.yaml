@@ -139,9 +139,20 @@ files:
           example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
           type: string
       - name: ssl_key_repository_location
-        description: The location of the ssl keyring.
+        description: |
+          It specifies the location of the key database file in which keys and certificates are stored.
+          The key database file must have a file name of the form zzz.kdb , where zzz is user-selectable.
+          The KeyRepository field contains the path to this file, along with the file name stem
+          (all characters in the file name up to but not including the final .kdb).
+          Each key database file has an associated password stash file. This holds encoded passwords that are used to
+          allow programmatic access to the key database. The password stash file must reside in the same directory and
+          have the same file stem as the key database, and must end with the suffix .sth.
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
+          type: string
+      - name: ssl_certificate_label
+        description: Certificate label used for SSL connection.
+        value:
           type: string
       - name: queue_tag_re
         description: |

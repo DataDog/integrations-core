@@ -1,0 +1,197 @@
+# TODO: To be split into separate files
+
+# filename: overview.yaml
+- name: Overview
+  header_level: 2
+  description: |
+    TODO: General comments
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup.yaml
+- name: Setup
+  header_level: 2
+  description: |
+    Follow the instructions below to install and configure this check for an Agent running on a host. For
+    containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these
+    instructions.
+
+    [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup/installation.yaml
+- name: Installation
+  header_level: 3
+  description: |
+    The {check_name} check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
+
+    [1]: https://docs.datadoghq.com/agent/
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup/configuration.yaml
+- name: Configuration
+  header_level: 3
+  description:
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup/configuration/host.yaml
+- name: Host
+  tab: Host
+  header_level: 4
+  description:
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup/configuration/containerized.yaml
+- name: Containerized
+  tab: Containerized
+  header_level: 4
+  description:
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup/configuration/log_collection.yaml
+- name: Log Collection
+  header_level: 4
+  description: |
+    1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+        ```yaml
+        logs_enabled: true
+        ```
+
+    2. Add this configuration block to your `{check_conf_path}` file to start collecting your {display_name} logs:
+
+    {check_log_conf_snippet:4i}
+
+      Change the `path` parameter value based on your environment. See the {check_conf_link} for all available configuration options.
+
+      3. [Restart the Agent][1].
+
+      See [Datadog's documentation][2] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
+    [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+    [2]: https://docs.datadoghq.com/agent/kubernetes/log/
+
+  parameters:
+    check_log_conf_snippet:
+    check_conf_link:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: setup/validation.yaml
+- name: Validation
+  header_level: 3
+  description: |
+    [Run the Agent's status subcommand][1] and look for `{check_name}` under the Checks section.
+
+    [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: data_collected.yaml
+- name: Data Collected
+  header_level: 2
+  description:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: data_collected/metrics.yaml
+- name: Metrics
+  header_level: 3
+  description: |
+    See [metadata.csv][1] for a list of metrics provided by this check.
+
+    [1]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: data_collected/events.yaml
+- name: Events
+  header_level: 3
+  description: |
+    {display_name} does not include any events.
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: data_collected/service_checks.yaml
+- name: Service Checks
+  header_level: 3
+  description: |
+    The {display_name} does not include any service checks.
+  parameters:
+  prepend_text:
+  append_text:
+  processor: datadog_checks.dev.tooling.specs.docs.service_check_processor
+  hidden: false
+  sections:
+
+# filename: troubleshooting.yaml
+- name: Overview
+  header_level: 2
+  description: |
+    Need help? Contact [Datadog support][1].
+
+    [1]: https://docs.datadoghq.com/help/
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:
+
+# filename: further_reading.yaml
+- name: Further Reading
+  header_level: 2
+  description:
+  parameters:
+  prepend_text:
+  append_text:
+  processor:
+  hidden: false
+  sections:

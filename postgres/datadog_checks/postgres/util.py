@@ -22,6 +22,11 @@ class PartialFormatter(string.Formatter):
             return string.Formatter.get_value(self, key, args, kwargs)
 
 
+def milliseconds_to_nanoseconds(value):
+    """Convert from ms to ns (used for pg_stat* conversion to metrics with units in ns)"""
+    return value * 1000000
+
+
 def get_schema_field(descriptors):
     """Return column containg the schema name for that query."""
     for column, name in descriptors:
@@ -127,12 +132,10 @@ SELECT mode,
 
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-    # This field contains old metrics that need to be deprecated. For now we keep sending them.
-    'deprecated_metrics': {'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate)},
     'metrics': {
         'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
         'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
-        'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
+        'idx_scan': ('postgresql.index_rel_scans', AgentCheck.rate),
         'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', AgentCheck.rate),
         'n_tup_ins': ('postgresql.rows_inserted', AgentCheck.rate),
         'n_tup_upd': ('postgresql.rows_updated', AgentCheck.rate),
@@ -242,6 +245,27 @@ REPLICATION_METRICS = {
     'query': """
 SELECT {metrics_columns}
  WHERE (SELECT pg_is_in_recovery())""",
+}
+
+# Requires postgres 10+
+REPLICATION_STATS_METRICS = {
+    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
+    'metrics': {
+        'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
+            'postgresql.replication.wal_write_lag',
+            AgentCheck.gauge,
+        ),
+        'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
+            'postgresql.replication.wal_flush_lag',
+            AgentCheck.gauge,
+        ),
+        'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
+            'postgresql.replication.wal_replay_lag',
+            AgentCheck.gauge,
+        ),
+    },
+    'relation': False,
+    'query': 'SELECT application_name, state, sync_state, {metrics_columns} FROM pg_stat_replication',
 }
 
 CONNECTION_METRICS = {

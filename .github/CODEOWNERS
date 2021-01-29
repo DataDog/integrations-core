@@ -11,8 +11,8 @@
 conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-core
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
-manifest.json         @DataDog/documentation @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
-assets/               @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+manifest.json         @DataDog/documentation @DataDog/agent-integrations
+assets/               @DataDog/agent-integrations
 
 
 # Container monitoring
@@ -69,6 +69,16 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tenable/                                 @anshumgargdd @DataDog/agent-integrations
 
+# Infrastructure integrations
+/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations               
+/snmp/*.md                                @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation    
+/snmp_*/                                  @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/snmp_*/*.md                              @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/vsphere/                                 @DataDog/infrastructure-integrations @DataDog/agent-integrations               
+/vsphere/*.md                             @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation  
+/openstack/                               @DataDog/infrastructure-integrations @DataDog/agent-integrations               
+/openstack/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation  
+
 # System (and Process) checks
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
 /network/                                 @DataDog/agent-integrations @DataDog/agent-platform
@@ -79,12 +89,11 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 /datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
-# To keep Security up-to-date with changes to requirements.txt.
-requirements.in                                           @trishankatdatadog
-requirements.txt                                          @trishankatdatadog
-# As well as the signing tool.
-datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @trishankatdatadog
+# To keep Security up-to-date with changes to the signing tool.
+/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @trishankatdatadog
 # As well as the secure downloader.
-/datadog_checks_downloader/                               @trishankatdatadog
-# As well as the wheel building process
-.gitlab-ci.yml                                            @trishankatdatadog
+/datadog_checks_downloader/                                           @trishankatdatadog
+docs/developer/process/integration-release.md                         @trishankatdatadog
+# As well as the pipelines.
+/.github/workflows/                                                   @trishankatdatadog
+/.gitlab-ci.yml                                                       @trishankatdatadog

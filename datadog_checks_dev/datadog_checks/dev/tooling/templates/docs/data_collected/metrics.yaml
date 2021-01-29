@@ -1,0 +1,6 @@
+name: Metrics
+header_level: 3
+description: |
+  See [metadata.csv][1] for a list of metrics provided by this check.
+
+  [1]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv

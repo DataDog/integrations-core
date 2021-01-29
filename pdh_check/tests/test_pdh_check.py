@@ -1,15 +1,16 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.pdh_check import PDHCheck
 
 from .common import CHECK_NAME, INSTANCE, INSTANCE_METRICS
 
 
+@pytest.mark.unit
 @pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_basic_check(aggregator):
     """
@@ -25,3 +26,9 @@ def test_basic_check(aggregator):
         aggregator.assert_metric(metric, tags=None, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.unit
+def test_raises_configuration_error():
+    with pytest.raises(ConfigurationError):
+        PDHCheck(CHECK_NAME, {}, [{}])

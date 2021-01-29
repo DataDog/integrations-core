@@ -15,7 +15,7 @@ instances:
 
   -
     ## @param host - string - optional - default: .
-    ## The host the Datadog Active Directory check connects to.
+    ## The host the current check connects to.
     ## "." means the current host
     #
     # host: .
@@ -46,7 +46,8 @@ instances:
     ##               rate, histogram, or count.
     #
     # additional_metrics:
-    #   - [NTDS, none, DS % Writes from LDAP, active_directory.ds.writes_from_ldap, gauge]
+    #   - [Processor, none, '% Processor Time', processor.time, gauge]
+    #   - [Processor, none, '% User Time', processor.user.time, gauge]
 
     ## @param counter_data_types - list of strings - optional
     ## counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> elements that
@@ -55,9 +56,9 @@ instances:
     ## <DATA_TYPE>  : The type of your metric (int or float)
     #
     # counter_data_types:
-    #   - [<METRIC_NAME>, <DATA_TYPE>]
-    #   - [active_directory.dra.inbound.bytes.total, int]
-    #   - [active_directory.ldap.bind_time, float]
+    #   - <METRIC_NAME>,<DATA_TYPE>
+    #   - processor.time,int
+    #   - processor.user.time,float
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

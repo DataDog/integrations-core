@@ -15,7 +15,15 @@ TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
-ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
+
+# Style deps:
+# We pin deps in order to make CI more stable/reliable.
+ISORT_DEP = 'isort[pyproject]==5.5.1'
+BLACK_DEP = 'black==20.8b1'
+FLAKE8_DEP = 'flake8==3.8.3'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
+FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
+MYPY_DEP = 'mypy==0.770'
 
 
 @tox.hookimpl
@@ -62,23 +70,58 @@ def tox_configure(config):
             if E2E_READY_CONDITION in cfg.description:
                 cfg.description = description
 
+    # Next two sections hack the sequencing of Tox's package installation.
+    #
+    # Tox package installation order:
+    #   1. Install `deps`, which typically looks like:
+    #        deps =
+    #            -e../datadog_checks_base[deps]
+    #            -rrequirements-dev.txt
+    #   2. Install check package, editable mode
+    #   3. Execute `commands` which typically looks like:
+    #        commands =
+    #            pip install -r requirements.in
+    #            pytest -v {posargs} --benchmark-skip
+
+    # Forcibly remove any dependencies from the `tox.ini` deps that are meant to be unpinned
+    # This should have the effect of relying on a package's setup.py for installation
+    # We manually pip install `datadog_checks_base[deps]` to ensure that test dependencies are installed,
+    # but this should have no effect on the version of the base package.
+    force_unpinned = os.getenv('TOX_FORCE_UNPINNED', None)
+    if force_unpinned:
+        for env in config.envlist:
+            deps = [d for d in config.envconfigs[env].deps if force_unpinned not in d.name]
+            config.envconfigs[env].deps = deps
+            config.envconfigs[env].commands.insert(0, 'pip install datadog_checks_base[deps]'.split())
+
+    # Workaround for tox's `--force-dep` having limited functionality when package is already installed.
+    # Primarily meant for pinning datadog-checks-base to a specific version, but could be
+    # applied to other packages in the future. Since we typically install checks base via
+    # editable mode, we need to force the reinstall to ensure that the PyPI package installs.
+    force_install = os.getenv('TOX_FORCE_INSTALL', None)
+    if force_install:
+        command = f'pip install --force-reinstall {force_install}'.split()
+
+        for env in config.envlist:
+            config.envconfigs[env].commands.insert(0, command)
+
 
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
 
     dependencies = [
-        'flake8',
-        'flake8-bugbear',
-        'flake8-logging-format',
-        'black',
+        FLAKE8_DEP,
+        FLAKE8_BUGBEAR_DEP,
+        FLAKE8_LOGGING_FORMAT_DEP,
+        BLACK_DEP,
         ISORT_DEP,
     ]
 
     commands = [
         'flake8 --config=../.flake8 .',
         'black --check --diff .',
-        'isort --check-only --diff --recursive .',
+        'isort --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -90,7 +133,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
         mypy_args = mypy_args.replace('\n', ' ')
 
-        dependencies.append('mypy==0.770')  # Use a pinned version to avoid large-scale CI breakage on new releases.
+        dependencies.append(MYPY_DEP)
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
     sections[section] = {
@@ -117,8 +160,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     dependencies = [
-        'flake8',
-        'black',
+        FLAKE8_DEP,
+        BLACK_DEP,
         ISORT_DEP,
     ]
     sections[section] = {
@@ -131,7 +174,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort --recursive .',
+                'isort .',
                 'black .',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',

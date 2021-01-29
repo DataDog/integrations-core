@@ -5,6 +5,7 @@ import re
 from collections import namedtuple
 from contextlib import closing
 
+from datadog_checks.base import to_native_string
 from datadog_checks.base.log import get_check_logger
 
 from .const import BUILDS
@@ -20,7 +21,8 @@ def get_version(db):
         # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
         # https://mariadb.com/kb/en/library/version/
         # and https://mariadb.com/kb/en/library/server-system-variables/#version
-        parts = result[0].split('-')
+        raw_version = to_native_string(result[0])
+        parts = raw_version.split('-')
         version, flavor, build = [parts[0], '', '']
 
         for data in parts:

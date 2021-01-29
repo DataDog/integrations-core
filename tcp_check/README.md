@@ -14,9 +14,12 @@ The TCP check is included in the [Datadog Agent][3] package, so you don't need t
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 Edit the `tcp_check.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample tcp_check.d/conf.yaml][5] for all available configuration options:
 
@@ -41,6 +44,9 @@ Configuration Options:
 
 [Restart the Agent][6] to start sending TCP service checks and response times to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -50,6 +56,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INTEGRATION_NAME>` | `tcp_check`                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                 |
 | `<INSTANCE_CONFIG>`  | `{"name": "<TCP_CHECK_INSTANCE_NAME>", "host":"%%host%%", "port":"%%port%%"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -67,9 +76,8 @@ The TCP check does not include any events.
 
 ### Service Checks
 
-**`tcp.can_connect`**:
-
-Returns DOWN if the Agent cannot connect to the configured `host` and `port`, otherwise UP.
+**tcp.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the configured `host` and `port`, otherwise `OK`.
 
 To create alert conditions on this service check in Datadog, click **Network** on the [Create Monitor][9] page, not **Integration**.
 

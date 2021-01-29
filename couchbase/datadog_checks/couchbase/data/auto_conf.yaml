@@ -1,21 +1,20 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - couchbase
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param server - string - required
     ## The server's url.
     #
   - server: http://%%host%%:8091
-
-    ## @param username - string - optional
-    ## The username to use if `server` or `query_monitoring_url` is behind basic auth.
-    #
-    user: Administrator
-
-    ## @param password - string - optional
-    ## The password to use if `server` or `query_monitoring_url` is behind basic auth.
-    #
-    password: password

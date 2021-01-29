@@ -1,0 +1,27 @@
+{
+	"name": "[Scylla] Server is shutting down",
+	"type": "metric alert",
+	"query": "avg(last_1m):max:scylla.node.operation_mode{*} by {server} > 3",
+	"message": "{{server.name}} is shutting down. Current value of {{value}} \n\nThe operation mode of the current nodes can have values of UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8",
+	"tags": [
+		"integration:scylla"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 3
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notify if Scylla node is in a state other than NORMAL."
+	}
+}

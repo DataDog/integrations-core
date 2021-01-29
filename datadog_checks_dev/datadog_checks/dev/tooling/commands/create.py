@@ -9,7 +9,7 @@ import click
 from ...utils import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
-from ..utils import normalize_package_name
+from ..utils import kebab_case_name, normalize_package_name
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
@@ -92,9 +92,9 @@ def display_path_tree(path_tree):
 @click.pass_context
 def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
     """
-        Create scaffolding for a new integration.
+    Create scaffolding for a new integration.
 
-        NAME: The display name of the integration that will appear in documentation.
+    NAME: The display name of the integration that will appear in documentation.
     """
 
     if name.islower():
@@ -104,17 +104,53 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
 
-    integration_dir = os.path.join(root, normalize_package_name(name))
+    integration_dir_name = normalize_package_name(name)
+    if integration_type == 'snmp_tile':
+        integration_dir_name = 'snmp_' + integration_dir_name
+    integration_dir = os.path.join(root, integration_dir_name)
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
 
     template_fields = {}
-    if repo_choice != 'core' and not non_interactive and not dry_run:
-        template_fields['author'] = click.prompt('Your name')
-        template_fields['email'] = click.prompt('Your email')
-        template_fields['email_packages'] = template_fields['email']
-        click.echo()
+    if non_interactive and repo_choice != 'core':
+        abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 
+    if not non_interactive and not dry_run:
+        if repo_choice != 'core':
+            template_fields['email'] = click.prompt('Email used for support requests')
+            template_fields['email_packages'] = template_fields['email']
+        if repo_choice == 'extras':
+            template_fields['author'] = click.prompt('Your name')
+
+        if repo_choice == 'marketplace':
+            author_name = click.prompt('Your Company Name')
+            homepage = click.prompt('The product or company homepage')
+            template_fields['author'] = author_name
+            template_fields[
+                'author_info'
+            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}"\n  }},'
+
+            eula = 'assets/eula.pdf'
+            legal_email = click.prompt('The Legal email used to receive subscription notifications')
+            template_fields[
+                'terms'
+            ] = f'\n  "terms": {{\n    "eula": "{eula}",\n    "legal_email": "{legal_email}"\n  }},'
+
+            template_fields['pricing_plan'] = '\n  "pricing": [],'
+
+            template_fields['integration_id'] = f'{kebab_case_name(author_name)}-{kebab_case_name(name)}'
+
+            template_fields['package_url'] = ''
+        else:
+            # Fill in all common non Marketplace fields
+            template_fields['pricing_plan'] = ''
+            template_fields['author_info'] = ''
+            template_fields['terms'] = ''
+            template_fields['integration_id'] = kebab_case_name(name)
+            template_fields['package_url'] = (
+                f"\n    # The project's main homepage."
+                f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
+            )
     config = construct_template_fields(name, repo_choice, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)

@@ -1,49 +1,48 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param host - string - required
-    ## the host used to resolve the vCenter IP
+    ## The host used to resolve the vCenter IP. It is either a FQDN or an IP.
     #
   - host: <HOSTNAME>
 
     ## @param username - string - required
-    ## Enter the username of the read-only credentials
-    ## to connect to vCenter
+    ## The username of the read-only credentials to connect to vCenter
     ## see https://app.datadoghq.com/account/settings#integrations/vsphere
     #
     username: <USERNAME>
 
     ## @param password - string - required
-    ## Enter the password of the read-only credentials
-    ## to connect to vCenter
+    ## The password of the read-only credentials to connect to vCenter.
     ## see https://app.datadoghq.com/account/settings#integrations/vsphere
     #
     password: <PASSWORD>
 
     ## @param use_legacy_check_version - boolean - required
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the vSphere integration by
-    ## setting this field to "true".
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the vSphere 
+    ## integration by setting this field to "true".
     #
     use_legacy_check_version: false
 
-    ## @param empty_default_hostname - boolean - optional - default: false
+    ## @param empty_default_hostname - boolean - required
     ## The vSphere integration is a cluster-level check where metrics are usually unrelated to the host
     ## on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
     ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
     ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
-    ##
     #
     empty_default_hostname: true
-
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
 
     ## @param collection_level - integer - optional - default: 1
     ## A number between 1 and 4 to specify how many metrics will be sent
@@ -55,7 +54,7 @@ instances:
     #
     # collection_level: 1
 
-    ## @param collection_type - string - optional - default: 'realtime'
+    ## @param collection_type - string - optional - default: realtime
     ## Should be either 'realtime' or 'historical'
     ## Use 'realtime' to collect metrics about Hosts and VMs.
     ## Use 'historical' to collect metrics about Datastores, Datacenters and Clusters.
@@ -71,9 +70,9 @@ instances:
     ## realtime and historical metrics), you usually want to collect events only once.
     ## By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
     ## `collection_type: historical`
-    ## If `collect_events_only: true`, this option has no effect and events will be collected.
+    ## If `collect_events_only: true`, this option has no effect and events will be collected. 
     #
-    # collect_events: <COLLECT_EVENTS>
+    # collect_events: true
 
     ## @param use_collect_events_fallback - boolean - optional - default: false
     ## Some events might contain invalid types.
@@ -93,10 +92,10 @@ instances:
     # ssl_verify: true
 
     ## @param ssl_capath - string - optional
-    ## Set to the absolute file path of a directory containing CA certificates
+    ## Set to the absolute file path of a directory containing CA certificates 
     ## in PEM format
     #
-    # ssl_capath: "<DIRECTORY_PATH>"
+    # ssl_capath: <DIRECTORY_PATH>
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
@@ -108,7 +107,7 @@ instances:
     #
     # tls_ignore_warning: false
 
-    ## @param resource_filters - list of objects - optional - default: no filter
+    ## @param resource_filters - list of mappings - optional - default: no filter
     ## Each filter in the list is composed of three parameters.
     ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
     ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
@@ -136,84 +135,86 @@ instances:
     #   - resource: vm
     #     property: name
     #     patterns:
-    #       - <VM_REGEX_1>
-    #       - <VM_REGEX_2>
+    #     - <VM_REGEX_1>
+    #     - <VM_REGEX_2>
     #   - resource: vm
     #     property: hostname
     #     patterns:
-    #       - <HOSTNAME_REGEX>
+    #     - <HOSTNAME_REGEX>
     #   - resource: vm
     #     property: tag
     #     type: blacklist
     #     patterns:
-    #       - '^env:staging$'
+    #     - ^env:staging$
     #   - resource: vm
     #     property: tag
     #     type: whitelist
     #     patterns:
-    #       - '^env:.*$'
+    #     - ^env:.*$
     #   - resource: vm
     #     property: guest_hostname
     #     patterns:
-    #       - <GUEST_HOSTNAME_REGEX>
+    #     - <GUEST_HOSTNAME_REGEX>
     #   - resource: host
     #     property: inventory_path
     #     patterns:
-    #       - <INVENTORY_PATH_REGEX>
+    #     - <INVENTORY_PATH_REGEX>
 
-    ## @param metric_filters - object - optional - default: all metrics
+    ## @param metric_filters - mapping - optional - default: all metrics
     ## For each resource type (vm, host, datastore, datacenter, cluster) collected,
     ## you can choose which metric you want to collect using a list of regex.
     ## If you do not specify a regex for the resource, all metrics will be collected.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
     ## for the list of collected metrics (do not prefix them with `vsphere`)
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
-    ##         resources do not have realtime metrics
+    ##         resources do not have realtime metrics. They will work only with "collection_type: historical".
     ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
-    ##         have historical metrics
+    ##         have historical metrics. They will work only with "collection_type: realtime".     
     #
     # metric_filters:
     #   vm:
-    #     - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+    #   - <VM_REGEX>
     #   host:
-    #     - <HOST_REGEX>               # Only possible with "collection_type: realtime"
+    #   - <HOST_REGEX>
     #   datastore:
-    #     - <DATASTORE_REGEX>          # Only possible with "collection_type: historical"
+    #   - <DATASTORE_REGEX>
     #   datacenter:
-    #     - <DATACENTER_REGEX>         # Only possible with "collection_type: historical"
+    #   - <DATACENTER_REGEX>
     #   cluster:
-    #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
+    #   - <CLUSTER_REGEX>
 
-    ## @param collect_per_instance_filters - object - optional - default: none
+    ## @param collect_per_instance_filters - mapping - optional
     ## Some vSphere metrics can be tagged with instance values.
     ## For each resource type (vm, host, datastore, cluster) to collect,
     ## you can choose which metrics you want to collect the instance value as tags using a list of regex.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
     ## for the list of collected metrics (do not prefix them with `vsphere`)
+    ## Note1: 'datastore' and 'cluster' are possible only with "collection_type: historical"
+    ## Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
     ## /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
     #
     # collect_per_instance_filters:
     #   vm:
-    #     - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+    #   - <VM_REGEX>
     #   host:
-    #     - <HOST_REGEX>               # Only possible with "collection_type: realtime"
+    #   - <HOST_REGEX>
     #   datastore:
-    #     - <DATASTORE_REGEX>          # Only possible with "collection_type: historical"
+    #   - <DATASTORE_REGEX>
     #   cluster:
-    #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
+    #   - <CLUSTER_REGEX>
 
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.
     ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
     ## vSphere tag name as value:
-    ##    <TAG_PREFIX><TAG_CATEGORY>:<TAG_NAME>
+    ##   <TAG_PREFIX><TAG_CATEGORY>:<TAG_NAME>
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
     #
     # collect_tags: false
 
-    ## @param tags_prefix - boolean - optional - default: ''
+    ## @param tags_prefix - string - optional
     ## Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:
     ##   - You have vSphere tags that might conflict with vSphere attributes or tags added by this integration or the
@@ -231,14 +232,14 @@ instances:
     ## If true, the vSphere attributes will be collected and submitted as Datadog tags.
     ## The final tag sent to Datadog is composed of 'attribute_prefix' + vSphere attribute category as key and
     ## the vSphere attribute value as value:
-    ##    <ATTR_PREFIX><ATTR_CATEGORY>:<ATTR_VAL>
+    ##   <ATTR_PREFIX><ATTR_CATEGORY>:<ATTR_VAL>
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
     #
     # collect_attributes: false
 
-    ## @param attributes_prefix - boolean - optional - default: ''
+    ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:
     ##   - You have vSphere attributes that might conflict with vSphere tags or tags added by this integration or the
@@ -290,7 +291,7 @@ instances:
     #
     # metrics_per_query: 50
 
-    ## @param max_historical_metrics - integer - optional
+    ## @param max_historical_metrics - integer - optional - default: 256
     ## This value is used to determine the number of historical metrics the check will retrieve in the same API call.
     ## Historical metrics collection is limited by the "config.vpxd.stats.maxQueryMetrics" configuration option
     ## on vCenter, any API call requesting more metrics than this value will be denied.
@@ -324,3 +325,34 @@ instances:
     ## Number of seconds between each refresh of the metrics metadata cache
     #
     # refresh_metrics_metadata_cache_interval: 1800
+
+    ## @param include_datastore_cluster_folder_tag - boolean - optional - default: true
+    ## If a datastore is part of a datastore cluster, the tag "vsphere_datastore_cluster" indicating the datastore
+    ## cluster name is sent along with datastore metrics.
+    ## However, for compatibility reasons, this name is also sent as tag "vsphere_folder".
+    ## You can disable this by setting this property to false.
+    ## The default value is true.
+    #
+    # include_datastore_cluster_folder_tag: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15

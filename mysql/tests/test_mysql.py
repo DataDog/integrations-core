@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import subprocess
+from contextlib import closing
 from os import environ
 
 import mock
@@ -12,7 +13,8 @@ from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.mysql import MySql
+from datadog_checks.mysql import MySql, statements
+from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
 from .common import MYSQL_VERSION_PARSED
@@ -72,7 +74,7 @@ def _assert_complex_config(aggregator):
         + variables.SYNTHETIC_VARS
     )
 
-    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
+    if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS)
 
     # Test metrics
@@ -202,6 +204,54 @@ def test_complex_config_replica(aggregator, instance_complex):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_metrics(aggregator, instance_complex):
+    QUERY = 'select * from information_schema.processlist'
+    QUERY_DIGEST_TEXT = 'SELECT * FROM `information_schema` . `processlist`'
+    # The query signature should match the query and consistency of this tag has product impact. Do not change
+    # the query signature for this test unless you know what you're doing. The query digest is determined by
+    # mysql and varies across versions.
+    QUERY_SIGNATURE = '8cd0f2b4343decc'
+    if environ.get('MYSQL_FLAVOR') == 'mariadb':
+        QUERY_DIGEST = '5d343195f2d7adf4388d42755311c3e3'
+    elif environ.get('MYSQL_VERSION') == '5.6':
+        QUERY_DIGEST = 'acfa199773950cd8cf912f3a19219492'
+    elif environ.get('MYSQL_VERSION') == '5.7':
+        QUERY_DIGEST = '0737e429dc883ba8c86c15ae76e59dda'
+    else:
+        # 8.0+
+        QUERY_DIGEST = '6817a67871eb7edddad5b7836c93330aa3c98801ac759eed1bea6db1a34579c4'
+        QUERY_SIGNATURE = '9d73cb71644af0a2'
+
+    config = copy.deepcopy(instance_complex)
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    # Run a query
+    run_query(QUERY)
+    mysql_check.check(config)
+
+    # Run the query and check a second time so statement metrics are computed from the previous run
+    run_query(QUERY)
+    mysql_check.check(config)
+    for name in statements.STATEMENT_METRICS.values():
+        aggregator.assert_metric(
+            name,
+            tags=tags.SC_TAGS
+            + [
+                'query:{}'.format(QUERY_DIGEST_TEXT),
+                'query_signature:{}'.format(QUERY_SIGNATURE),
+                'digest:{}'.format(QUERY_DIGEST),
+            ],
+            count=1,
+        )
+
+
 def _test_optional_metrics(aggregator, optional_metrics, at_least):
     """
     Check optional metrics - there should be at least `at_least` matches
@@ -250,6 +300,32 @@ def test__get_server_pid():
             # the pid should be none but without errors
             assert mysql_check._get_server_pid(None) is None
             assert mysql_check.log.exception.call_count == 0
+
+
+@pytest.mark.unit
+def test_parse_get_version():
+    class MockCursor:
+        version = (b'5.5.12-log',)
+
+        def execute(self, command):
+            pass
+
+        def close(self):
+            return MockCursor()
+
+        def fetchone(self):
+            return self.version
+
+    class MockDatabase:
+        def cursor(self):
+            return MockCursor()
+
+    mocked_db = MockDatabase()
+    for mocked_db.version in [(b'5.5.12-log',), ('5.5.12-log',)]:
+        v = get_version(mocked_db)
+        assert v.version == '5.5.12'
+        assert v.flavor == 'MySQL'
+        assert v.build == 'log'
 
 
 @pytest.mark.integration

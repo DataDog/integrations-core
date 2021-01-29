@@ -106,15 +106,11 @@ class VSphereAPI(object):
         context = None
         if not self.config.ssl_verify:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(
-                ssl.PROTOCOL_TLS  # type: ignore
-            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(
-                ssl.PROTOCOL_TLS  # type: ignore
-            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_REQUIRED
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
             context.check_hostname = True
@@ -150,9 +146,9 @@ class VSphereAPI(object):
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
-    def check_health(self):
-        # type: () -> None
-        self._conn.CurrentTime()
+    def get_current_time(self):
+        # type: () -> dt.datetime
+        return self._conn.CurrentTime()
 
     @smart_retry
     def get_version(self):
@@ -289,6 +285,12 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
+        self.log.debug("Received %s values from QueryPerf", len(values))
+        self.log.trace(
+            "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
+            query_specs,
+            values,
+        )
         return values
 
     @smart_retry

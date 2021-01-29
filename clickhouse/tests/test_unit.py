@@ -31,7 +31,7 @@ def test_config(instance):
             sync_request_timeout=10,
             compression=False,
             secure=False,
-            settings={'calculate_text_stack_trace': False},
+            settings={},
             client_name='datadog-test-clickhouse',
         )
 
@@ -61,12 +61,12 @@ def test_error_query(instance):
     'metrics, ignored_columns, metric_source_url',
     [
         (
-            queries.SystemMetrics.query_data['columns'][1]['items'],
+            queries.SystemMetrics['columns'][1]['items'],
             {'Revision', 'VersionInteger'},
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/CurrentMetrics.cpp',
         ),
         (
-            queries.SystemEvents.query_data['columns'][1]['items'],
+            queries.SystemEvents['columns'][1]['items'],
             set(),
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/ProfileEvents.cpp',
         ),

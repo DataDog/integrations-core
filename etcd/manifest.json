@@ -3,8 +3,8 @@
     "orchestration",
     "containers",
     "configuration & deployment",
-    "orchestration",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "etcd",
@@ -32,11 +32,21 @@
   "type": "check",
   "integration_id": "etcd",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
-      "Etcd Overview": "assets/dashboards/etcd_overview.json"
+      "Etcd Overview": "assets/dashboards/etcd_overview.json",
+      "etcd-Screenboard": "assets/dashboards/etcd_2_overview.json"
+    },
+    "saved_views": {
+      "etcd_overview": "assets/saved_views/etcd_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "etcd"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

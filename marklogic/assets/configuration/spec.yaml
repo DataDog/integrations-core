@@ -1,0 +1,57 @@
+name: MarkLogic
+files:
+- name: marklogic.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: url
+      required: true
+      description: URL of MarkLogic REST API.
+      value:
+        example: http://localhost:8002
+        type: string
+    - name: enable_health_service_checks
+      description: |
+        If `true`, the integration query the `/manage/v2?view=health` and submit the databases and forests health as 
+        `marklogic.database.health` and `marklogic.forests.health` service checks.
+        To send the service checks, the MarkLogic user must have `manage-admin` permission.
+      value:
+        default: false
+        example: false
+        type: boolean
+    - name: resource_filters
+      # TOOD: Add the "'id' is the resource id to match" option
+      # TODO: Add the `metric_groups` option (storage, status, query)
+      description: |
+        Each filter in the list is composed of two to four parameters.
+        'resource_type' is one of `forest`, `database`, `host`, or `server` on which to apply the filter (required)
+        'pattern' is a pattern to match the resource name (required)
+        'include' is a Boolean indicating whether the filter includes (`true`, the default) or 
+              excludes (`false`) the specified resources.
+              If a resource matches both an exclude pattern and an include pattern, it will be excluded.
+        'group' is the resource group to match (optional)
+      value:
+        type: array
+        items:
+          type: object
+        example:
+        - resource_type: forest
+          pattern: Documents
+        - resource_type: database
+          include: false
+          pattern: Doc*
+          group: Default
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /var/opt/MarkLogic/Logs/ErrorLog.txt
+        source: marklogic
+      - type: file
+        path: /var/opt/MarkLogic/Logs/8002_AccessLog.txt
+        source: marklogic

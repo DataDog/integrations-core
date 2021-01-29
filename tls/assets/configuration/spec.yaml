@@ -1,0 +1,111 @@
+name: TLS
+files:
+- name: tls.yaml
+  options:
+  - template: init_config
+    options:
+    - name: allowed_versions
+      description: |
+        The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
+        negotiated by connections that are not in this list makes the service check
+        `tls.version` send CRITICAL.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 'TLSv1.2'
+          - 'TLSv1.3'
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: server
+      description: The hostname or IP address with which to connect.
+      required: true
+      value:
+        type: string
+    - name: port
+      description: The port that is used. This overrides any port specified in `server`.
+      value:
+        type: integer
+        example: 443
+    - name: transport
+      description: |
+        The transport protocol to use when connecting to `server`.
+        Currently, only TCP is supported.
+      value:
+        type: string
+        example: TCP
+    - name: local_cert_path
+      description: |
+        The path to a local certificate in lieu of a server/port. In this mode, the
+        service checks `tls.can_connect` and `tls.version` are unavailable. The
+        certificate can be in PEM or DER format. If in DER format, the file
+        extension must be either `.cer`, `.crt`, or `.der`.
+      value:
+        type: string
+    - name: server_hostname
+      description: |
+        The hostname of the service with which to connect for servers that support SNI. This
+        is also the value used for hostname validation. If not specified, `server` parameter is used.
+        See: https://en.wikipedia.org/wiki/Server_Name_Indication
+      value:
+        type: string
+    - name: allowed_versions
+      description: |
+        The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
+        negotiated by connections that are not in this list makes the service check
+        `tls.version` send CRITICAL. By default, only TLSv1.2 and TLSv1.3 are allowed.
+        Overrides `allowed_versions` in init_config.
+
+        The supported versions are:
+
+          SSLv3
+          TLSv1
+          TLSv1.1
+          TLSv1.2
+          TLSv1.3
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 'TLSv1.2'
+          - 'TLSv1.3'
+    - name: days_warning
+      description: |
+        Number of days before certificate expiration from which the service check
+        `tls.cert_expiration` begins emitting WARNING.
+      value:
+        type: number
+        example: 14.0
+    - name: days_critical
+      description: |
+        Number of days before certificate expiration from which the service check
+        `tls.cert_expiration` begins emitting CRITICAL.
+      value:
+        type: number
+        example: 7.0
+    - name: seconds_warning
+      description: |
+        Number of seconds before certificate expiration from which the service check
+        `tls.cert_expiration` begins emitting WARNING. Overrides `days_warning`.
+      value:
+        type: integer
+    - name: seconds_critical
+      description: |
+        Number of seconds before certificate expiration from which the service check
+        `tls.cert_expiration` begins emitting CRITICAL. Overrides `days_critical`.
+      value:
+        type: integer
+    - name: timeout
+      description: The timeout for connecting to `server`.
+      value:
+        type: integer
+        example: 10
+    - name: name
+      description: Unique identifier for this instance that is added as a tag to all data emitted.
+      value:
+        type: string
+    - template: instances/default
+    - template: instances/tls

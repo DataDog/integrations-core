@@ -28,8 +28,12 @@
   ],
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Interface Performance": "assets/dashboards/interface_performance.json",
+      "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
+    },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

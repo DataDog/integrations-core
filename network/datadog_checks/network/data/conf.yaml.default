@@ -2,7 +2,14 @@
 ## To make modifications to the check configuration, please copy this file
 ## to `network.yaml` and make your changes on that file.
 #
-init_config: {}
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
 
 ## Network check only supports one configured instance
 #
@@ -14,6 +21,15 @@ instances:
     ## the command `netstat` from the system package `net-tools` to be installed
     #
   - collect_connection_state: false
+
+    ## @param collect_connection_queues - boolean - optional - default: false
+    ## Set to true to enable connection queues collection
+    ## Note: connection queues collections require both
+    ## `collect_connection_state` and `collect_connection_queues` to be true
+    ## because it also requires the command `ss` from system package `iproute2` or
+    ## the command `netstat` from the system package `net-tools` to be installed
+    #
+    # collect_connection_queues: false
 
     ## @param excluded_interfaces - list of strings - optional
     ## List of interface to exclude from the check.
@@ -89,6 +105,18 @@ instances:
     #   - <METRIC_NAME>
     #   - <METRIC_PREFIX>.*
 
+    ## @param collect_aws_ena_metrics - boolean - optional - default: false
+    ## Turn on collection of the AWS Elastic Network Adapter (ENA) statistics for network interfaces.
+    ##
+    ## This will only work on ENA-enabled instances, see:
+    ## https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html#ena-requirements
+    ##
+    ## Note that when running this check in container, it will return metrics for the container
+    ## network interfaces. To get host-level ENA metrics from a container, it needs to be executed
+    ## with `CAP_NET_ADMIN` capability and use the `host` network mode.
+    #
+    # collect_aws_ena_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -97,3 +125,23 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

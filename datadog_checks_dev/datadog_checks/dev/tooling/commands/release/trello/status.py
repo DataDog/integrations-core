@@ -28,7 +28,7 @@ def status(ctx: click.Context, as_json: bool, clipboard: bool) -> None:
 
     counts = trello.count_by_columns()
 
-    row_format = '{:15} | {:<8} | {:<8} | {:<8} | {:<8} | {:<8} | {}'
+    row_format = '{:19} | {:<8} | {:<8} | {:<8} | {:<8} | {:<8} | {}'
     headers = ('Total', 'Inbox', 'In Progress', 'Issues Found', 'Awaiting Build', 'Done')
 
     if as_json:

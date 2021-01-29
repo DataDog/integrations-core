@@ -12,13 +12,37 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 
 ### Configuration
 
-Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origin and Enterprise clusters. Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
+
+If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include SCC (Security Context Constraints) for the Agent to collect data. Follow the instructions below as they relate to your deployment. 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Helm" xxx -->
+
+The SCC can be applied directly within your Datadog agent's `values.yaml`. Add the following block underneath the `agents:` section in the file. 
+
+```yaml
+...
+agents:
+...
+  podSecurity:
+    securityContextConstraints:
+      create: true
+...
+```
+
+You can apply this when you initially deploy the Agent. Or, you can execute a `helm upgrade` after making this change to apply the SCC. 
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Daemonset" xxx -->
+
+
+Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
 
 - [Restricted SCC operations](#restricted-scc-operations)
-- [Host network SCC operations](#host-network-scc-operations)
+- [Host network SCC operations](#host)
 - [Custom Datadog SCC for all features](#custom-datadog-scc-for-all-features)
 
-| Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host-network-scc-operations) | [Custom](#custom-datadog-scc-for-all-features) |
+| Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host) | [Custom](#custom-datadog-scc-for-all-features) |
 | ------------------------------ | ---------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
 | Kubernetes layer monitoring    | ✅                                       | ✅                                           | ✅                                             |
 | Kubernetes-based Autodiscovery | ✅                                       | ✅                                           | ✅                                             |
@@ -34,6 +58,8 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 <div class="alert alert-warning">
 <bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
 </div>
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx --> 
 
 #### Log collection
 
@@ -47,7 +73,7 @@ The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Dat
 
 The Agent suports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
 
-#### Host network SCC operations
+#### Host
 
 Add the `allowHostPorts` permission to the pod (either via the standard `hostnetwork` or `hostaccess` SCC, or by creating your own). In this case, you can add the relevant port bindings in your pod specs:
 
@@ -110,7 +136,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/kubernetes/
-[3]: https://docs.openshift.org/latest/admin_guide/manage_scc.html
+[3]: https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html
 [4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/
 [5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#configure-rbac-permissions
 [6]: https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/agent-kubelet-only.yaml

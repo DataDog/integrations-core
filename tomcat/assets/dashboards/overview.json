@@ -1,0 +1,693 @@
+{
+    "author_name": "Datadog",
+    "description": "## Tomcat Integration\n\nThe Tomcat overview dashboard provides a high-level view and insight into your Tomcat server activity, including performance, utilization, and errors.\n\nFor more information on setup and monitoring, check out the following:\n\n- [Tomcat integration docs](https://docs.datadoghq.com/integrations/tomcat/)\n- [Blog post on key metrics for monitoring Tomcat](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n- [Blog post on collecting metrics with Tomcat monitoring tools](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n- [Blog post on analyzing Tomcat logs and metrics](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": "scope"
+        }
+    ],
+    "title": "Tomcat - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "fit",
+                "type": "image",
+                "url": "/static/images/logos/tomcat_small.svg"
+            },
+            "id": 1683694205758744,
+            "layout": {
+                "height": 11,
+                "width": 27,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Using this dashboard, you can get a high-level view and understanding of your Tomcat server activity, including performance, utilization, and errors.\n\nFor more information on setup and monitoring, check out the following:\n\n- [Tomcat integration docs](https://docs.datadoghq.com/integrations/tomcat/)\n- [Blog post on key metrics for monitoring Tomcat](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n- [Blog post on collecting metrics with Tomcat monitoring tools](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n- [Blog post on analyzing Tomcat logs and metrics](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)\n\nClone this dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4042371488698924,
+            "layout": {
+                "height": 32,
+                "width": 27,
+                "x": 1,
+                "y": 13
+            }
+        },
+        {
+            "definition": {
+                "check": "tomcat.can_connect",
+                "group": "$host",
+                "group_by": [
+                    "host"
+                ],
+                "grouping": "cluster",
+                "tags": [
+                    "$host"
+                ],
+                "title": "Server can connect",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 7764728430178234,
+            "layout": {
+                "height": 17,
+                "width": 17,
+                "x": 30,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 80
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_yellow",
+                                "value": 51
+                            },
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_green",
+                                "value": 50
+                            }
+                        ],
+                        "q": "(sum:jvm.heap_memory{*}/sum:jvm.heap_memory_max{*})*100"
+                    }
+                ],
+                "title": "% of max heap",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 7910555380535230,
+            "layout": {
+                "height": 17,
+                "width": 17,
+                "x": 48,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 80
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_yellow",
+                                "value": 50
+                            },
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_green",
+                                "value": 49
+                            }
+                        ],
+                        "q": "(sum:tomcat.threads.busy{*}/sum:tomcat.threads.max{*})*100"
+                    }
+                ],
+                "title": "% of max threads",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 6919397866035600,
+            "layout": {
+                "height": 17,
+                "width": 17,
+                "x": 66,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "per_second(sum:tomcat.request_count{$host,$scope})",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Requests per second",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3466721686461476,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 30,
+                "y": 32
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Performance",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6254467465992554,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 30,
+                "y": 26
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "q": "sum:tomcat.processing_time{$host,$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Request processing time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 6195523463603978,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 30,
+                "y": 50
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The number of client requests hitting your server. Request counts provide a baseline for understanding the levels of traffic to your server throughout the day.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 780665251554086,
+            "layout": {
+                "height": 13,
+                "width": 21,
+                "x": 79,
+                "y": 32
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The sum of request processing times across all requests handled by the request processors (in milliseconds) per second.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5979476291454282,
+            "layout": {
+                "height": 11,
+                "width": 21,
+                "x": 79,
+                "y": 50
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Overview",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5841688633542606,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 30,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Percentage of threads in use calculated from the set max threads.\n\n- Red if > 80%\n- Yellow if >= 50%\n- Green if < 49%\n",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4318203471039184,
+            "layout": {
+                "height": 16,
+                "width": 15,
+                "x": 85,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Utilization",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5545859939187238,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 102,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:tomcat.threads.max{$host,$scope}, sum:tomcat.threads.busy{$host,$scope}, sum:tomcat.threads.count{$host,$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Busy vs. idle worker threads",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1881392759819002,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 102,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Since the number of available threads directly affects how efficiently Tomcat can process requests, monitoring thread usage is important for understanding request throughput and processing times for the server.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2761215252375072,
+            "layout": {
+                "height": 16,
+                "width": 21,
+                "x": 151,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:tomcat.bytes_sent{$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "q": "-sum:tomcat.bytes_rcvd{$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Bytes sent and received rate (per sec)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8174007808033706,
+            "layout": {
+                "height": 17,
+                "width": 34,
+                "x": 30,
+                "y": 68
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:tomcat.processing_time{$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Average processing time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3988126290738898,
+            "layout": {
+                "height": 17,
+                "width": 34,
+                "x": 66,
+                "y": 68
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(avg:tomcat.request_count{$host,$scope} by {host}, 10, 'mean', 'desc')"
+                    }
+                ],
+                "title": "Request rate per host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
+            },
+            "id": 1010382643249908,
+            "layout": {
+                "height": 17,
+                "width": 34,
+                "x": 102,
+                "y": 25
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:tomcat.max_time{$host,$scope} by {host}, 10, 'max', 'desc')"
+                    }
+                ],
+                "title": "Max processing time per host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
+            },
+            "id": 8192578082270158,
+            "layout": {
+                "height": 17,
+                "width": 34,
+                "x": 138,
+                "y": 25
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "JVM Memory Usage",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 769656040201684,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 102,
+                "y": 44
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:jvm.heap_memory_max{$host,$scope}, avg:jvm.heap_memory{$host,$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Heap memory usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "min": "0"
+                }
+            },
+            "id": 3219675624302886,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 102,
+                "y": 50
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Tomcat (and your servlets) rely on having enough available memory to operate efficiently, so it\u2019s important to also keep track of the memory usage of your JVM.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5461946100591858,
+            "layout": {
+                "height": 13,
+                "width": 21,
+                "x": 151,
+                "y": 50
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "per_minute(sum:jvm.gc.cms.count{$host,$scope})",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "GC count per minute",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8247615584122860,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 102,
+                "y": 68
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "A sudden spike in garbage collection count could indicate a memory leak.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 522996945272358,
+            "layout": {
+                "height": 8,
+                "width": 21,
+                "x": 151,
+                "y": 68
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Errors",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1309146687931732,
+            "layout": {
+                "height": 5,
+                "width": 27,
+                "x": 174,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:tomcat.error_count{$host,$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Error rate",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7941815439888102,
+            "layout": {
+                "height": 17,
+                "width": 27,
+                "x": 174,
+                "y": 7
+            }
+        }
+    ]
+}

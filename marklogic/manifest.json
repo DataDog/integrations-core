@@ -1,0 +1,47 @@
+{
+  "display_name": "MarkLogic",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "marklogic",
+  "metric_prefix": "marklogic.",
+  "metric_to_check": "marklogic.hosts.total_hosts",
+  "process_signatures": [
+    "MarkLogic"
+  ],
+  "creates_events": false,
+  "short_description": "Tracks metrics about MarkLogic databases, forests, hosts and servers.",
+  "guid": "0c200415-731f-4b67-9b2c-d6bd1225eee1",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-MarkLogic Integration",
+  "categories": [
+    "data store",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "marklogic",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {
+      "MarkLogic - Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "Marklogic low cache": "assets/recommended_monitors/marklogic_low_cache.json",
+      "Marklogic high load": "assets/recommended_monitors/marklogic_high_load.json",
+      "Marklogic long requests": "assets/recommended_monitors/marklogic_long_requests.json"
+    },
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "marklogic"
+    },
+    "metrics_metadata": "metadata.csv"
+  }
+}

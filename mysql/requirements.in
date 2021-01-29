@@ -1,2 +1,2 @@
-cryptography==2.8
+cryptography==3.3.1
 pymysql==0.9.3

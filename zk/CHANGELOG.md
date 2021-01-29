@@ -1,10 +1,32 @@
 # CHANGELOG - zk
 
-## 2.6.1 / 2020-06-29
+## 2.9.2 / 2020-12-15 / Agent 7.25.0
+
+* [Fixed] Ensure connection failure message is shown on Python 2. See [#8197](https://github.com/DataDog/integrations-core/pull/8197).
+
+## 2.9.1 / 2020-12-11
+
+* [Fixed] Bump allowed base check package versions. See [#8160](https://github.com/DataDog/integrations-core/pull/8160).
+* [Fixed] Update small typo in tls-specific options documentation. See [#8103](https://github.com/DataDog/integrations-core/pull/8103).
+
+## 2.9.0 / 2020-11-18
+
+* [Added] Add SSL Support for Zookeeper. See [#7884](https://github.com/DataDog/integrations-core/pull/7884).
+
+## 2.8.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 2.7.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Use config specs. See [#6950](https://github.com/DataDog/integrations-core/pull/6950).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 2.6.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Use Agent6 style init. See [#6949](https://github.com/DataDog/integrations-core/pull/6949).
 
-## 2.6.0 / 2020-05-17
+## 2.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
@@ -12,7 +34,7 @@
 
 * [Added] Add new metrics for ZK version 3.6. See [#6421](https://github.com/DataDog/integrations-core/pull/6421).
 
-## 2.4.2 / 2020-04-13
+## 2.4.2 / 2020-04-13 / Agent 7.19.0
 
 * [Fixed] Handle non-integers when parsing latency values. See [#6323](https://github.com/DataDog/integrations-core/pull/6323).
 
@@ -21,27 +43,27 @@
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 2.4.0 / 2020-01-13
+## 2.4.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 
-## 2.3.0 / 2019-12-02
+## 2.3.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Add version metadata. See [#4927](https://github.com/DataDog/integrations-core/pull/4927).
 
-## 2.2.0 / 2019-05-14
+## 2.2.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3586](https://github.com/DataDog/integrations-core/pull/3586).
 
-## 2.1.0 / 2019-01-04
+## 2.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2781][1].
 
-## 2.0.0 / 2018-11-30
+## 2.0.0 / 2018-11-30 / Agent 6.8.0
 
 * [Removed] Removed incorrect metric name 'bytes_outstanding'. See [#2476][2].
 
-## 1.2.1 / 2018-09-04
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 

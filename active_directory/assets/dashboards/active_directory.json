@@ -1,0 +1,590 @@
+{
+    "author_name": "Datadog",
+    "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n",
+    "layout_type": "free",
+    "template_variables": [],
+    "title": "Active Directory",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/logos/active-directory_large.svg"
+            },
+            "id": 1379095520488678,
+            "layout": {
+                "height": 7,
+                "width": 25,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Replication",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1596261819686344,
+            "layout": {
+                "height": 7,
+                "width": 97,
+                "x": 27,
+                "y": 41
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Inbound",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7416390373673270,
+            "layout": {
+                "height": 5,
+                "width": 48,
+                "x": 27,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Outbound",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5434948742553552,
+            "layout": {
+                "height": 5,
+                "width": 48,
+                "x": 76,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Total bytes received",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "limit": 50,
+                        "order": "desc",
+                        "q": "avg:active_directory.dra.inbound.bytes.total{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Bytes compressed size",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.inbound.bytes.after_compression{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Bytes uncompressed",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.inbound.bytes.not_compressed{*} by {host}"
+                    }
+                ],
+                "time": {},
+                "title": "Size of inbound replication data from DSAs",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 789789804077942,
+            "layout": {
+                "height": 21,
+                "width": 48,
+                "x": 27,
+                "y": 71
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Total bytes received",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "limit": 50,
+                        "order": "desc",
+                        "q": "avg:active_directory.dra.outbound.bytes.total{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Bytes compressed size",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.outbound.bytes.after_compression{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Bytes uncompressed",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.outbound.bytes.not_compressed{*} by {host}"
+                    }
+                ],
+                "time": {},
+                "title": "Size of outbound replication data to DSAs",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 5698439822469100,
+            "layout": {
+                "height": 21,
+                "width": 48,
+                "x": 76,
+                "y": 71
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "LDAP",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5308427432228820,
+            "layout": {
+                "height": 7,
+                "width": 97,
+                "x": 27,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:active_directory.ldap.client_sessions{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Number of sessions of connected LDAP clients",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7377683565317882,
+            "layout": {
+                "height": 15,
+                "width": 48,
+                "x": 76,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:active_directory.ldap.bind_time{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "LDAP binding duration",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3674840905379074,
+            "layout": {
+                "height": 15,
+                "width": 48,
+                "x": 76,
+                "y": 25
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:active_directory.ldap.successful_binds_persec{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Number of successful LDAP bindings",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 4718456891816570,
+            "layout": {
+                "height": 15,
+                "width": 48,
+                "x": 27,
+                "y": 25
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:active_directory.ldap.searches_persec{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Search operations per second performed by LDAP clients",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7263309226646508,
+            "layout": {
+                "height": 15,
+                "width": 48,
+                "x": 27,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:active_directory.dra.sync_requests_made{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Number of sync requests to replication partner",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2410845274803236,
+            "layout": {
+                "height": 15,
+                "width": 48,
+                "x": 27,
+                "y": 49
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:active_directory.dra.replication.pending_synchronizations{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Number of synchronizations queued",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8171822497203140,
+            "layout": {
+                "height": 15,
+                "width": 48,
+                "x": 76,
+                "y": 49
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "This dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4946842324034090,
+            "layout": {
+                "height": 31,
+                "width": 25,
+                "x": 1,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "LDAP bind time (in milliseconds) is the time required for the completion of the last successful LDAP binding. \n\nTypically you want to have times measured to be under 5 seconds.  Bind times that start to exceed 15 or 30 seconds may be an indication network issues are present.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 714357545962952,
+            "layout": {
+                "height": 24,
+                "width": 21,
+                "x": 126,
+                "y": 16
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Applied by directory service",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "limit": 50,
+                        "order": "desc",
+                        "q": "avg:active_directory.dra.inbound.objects.applied_persec{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "No updates to apply",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.inbound.objects.filtered_persec{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Remaining in packet",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.inbound.objects.remaining_in_packet{*} by {host}"
+                    }
+                ],
+                "time": {},
+                "title": "Objects received from replication partners",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 5555048165728726,
+            "layout": {
+                "height": 21,
+                "width": 48,
+                "x": 27,
+                "y": 93
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "alias": "Objects acknowledged",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "limit": 50,
+                        "order": "desc",
+                        "q": "avg:active_directory.dra.outbound.objects.filtered_persec{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Objects sent",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.outbound.objects.persec{*} by {host}"
+                    },
+                    {
+                        "aggregator": "avg",
+                        "alias": "Properties",
+                        "cell_display_mode": [
+                            "bar"
+                        ],
+                        "q": "avg:active_directory.dra.outbound.properties.persec{*} by {host}"
+                    }
+                ],
+                "time": {},
+                "title": "Object and properties sent to replication partners",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_table"
+            },
+            "id": 464020198544978,
+            "layout": {
+                "height": 21,
+                "width": 48,
+                "x": 76,
+                "y": 93
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The number of directory synchronizations that are queued for this server that are not yet processed. This counter helps in determining replication backlog - the larger the number, the larger the backlog.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1995720414004692,
+            "layout": {
+                "height": 20,
+                "width": 21,
+                "x": 126,
+                "y": 46
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "**Applied by directory service**\n\nThis excludes changes that are received but not applied (for example, when the update is already made). This counter indicates how many replication updates are occurring on the server as a result of changes generated on other servers.\n\n** Remaining in packet**\n\nThe number of object updates received in the current directory replication update packet that have not yet been applied to the local server. This counter tells you whether the monitored server is receiving changes, but is taking a long time applying them to the database.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 7344411764221438,
+            "layout": {
+                "height": 32,
+                "width": 24,
+                "x": 1,
+                "y": 82
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "**Properties**\n\nThe number of properties sent per second. This counter tells you whether a source server is returning objects or not. Sometimes, the server might stop working correctly and not return objects quickly or at all.\t",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6415563587270692,
+            "layout": {
+                "height": 21,
+                "width": 20,
+                "x": 126,
+                "y": 93
+            }
+        }
+    ]
+}

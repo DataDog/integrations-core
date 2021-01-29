@@ -66,9 +66,12 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 
 #### Configure the OpenLDAP integration
 
-##### Host
+#<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+#### Host
+
+To configure this check for an Agent running on a host:
 
 ###### Metric collection
 
@@ -121,7 +124,10 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][3].
 
-##### Containerized
+#<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
 
 ###### Metric collection
 
@@ -142,6 +148,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                 |
 | -------------- | ----------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "openldap", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

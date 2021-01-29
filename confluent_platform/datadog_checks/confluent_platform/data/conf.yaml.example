@@ -12,7 +12,7 @@ init_config:
     #
     collect_default_metrics: true
 
-    ## @param new_gc_metrics - boolean - optional - default: False
+    ## @param new_gc_metrics - boolean - optional - default: false
     ## Set to true to use better metric names for garbage collection metrics.
     ## jvm.gc.cms.count   => jvm.gc.minor_collection_count
     ##                       jvm.gc.major_collection_count
@@ -154,6 +154,11 @@ instances:
     #
     # rmi_client_timeout: 15000
 
+    ## @param collect_default_jvm_metrics - boolean - optional - default: true
+    ## Configures the collection of default JVM metrics.
+    #
+    # collect_default_jvm_metrics: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -190,7 +195,9 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

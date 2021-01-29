@@ -1,8 +1,8 @@
 {
 	"name": "[kubernetes] Monitor Kubernetes Statefulset Replicas",
 	"type": "query alert",
-	"query": "avg(last_15m):avg:kubernetes_state.statefulset.replicas_desired{*} by {statefulset} - avg:kubernetes_state.statefulset.replicas_ready{*} by {statefulset} >= 2",
-	"message": "More than one Statefulset Replica's pods are down.",
+	"query": "max(last_15m):sum:kubernetes_state.statefulset.replicas_desired{*} by {statefulset} - sum:kubernetes_state.statefulset.replicas_ready{*} by {statefulset} >= 2",
+	"message": "More than one Statefulset Replica's pods are down. This might present an unsafe situation for any further manual operations, such as killing other pods.",
 	"tags": [
 		"integration:kubernetes"
 	],
@@ -11,10 +11,9 @@
 		"locked": false,
 		"timeout_h": 0,
 		"include_tags": true,
-		"no_data_timeframe": 5,
-		"require_full_window": true,
+		"require_full_window": false,
 		"new_host_delay": 300,
-		"notify_no_data": true,
+		"notify_no_data": false,
 		"renotify_interval": 0,
 		"escalation_message": "",
 		"thresholds": {

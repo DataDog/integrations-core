@@ -1,7 +1,8 @@
 {
   "categories": [
     "configuration & deployment",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": true,
   "display_name": "Teamcity",
@@ -26,9 +27,13 @@
   "type": "check",
   "integration_id": "teamcity",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

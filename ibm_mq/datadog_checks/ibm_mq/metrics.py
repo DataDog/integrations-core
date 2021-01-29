@@ -123,6 +123,27 @@ def channel_stats_metrics():
 def queue_stats_metrics():
     return {
         'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
+        'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
+        'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),
+        'get_fail_count': (pymqi.CMQCFC.MQIAMO_GETS_FAILED, COUNT),
+        'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),
+        'browse_fail_count': (pymqi.CMQCFC.MQIAMO_BROWSES_FAILED, COUNT),
+        'non_queued_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_NOT_QUEUED, COUNT),
+        'expired_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_EXPIRED, COUNT),
+        'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
+        # These metrics are returned as a list of two values.
+        # Index 0 = Contains the value for non-persistent messages
+        # Index 1 = Contains the value for persistent messages
+        # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.mon.doc/q037510_.htm#q037510___q037510_2
+        #
+        'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),
+        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT),
+        'get_count': (pymqi.CMQCFC.MQIAMO_GETS, COUNT),
+        'browse_bytes': (pymqi.CMQCFC.MQIAMO64_BROWSE_BYTES, GAUGE),
+        'browse_count': (pymqi.CMQCFC.MQIAMO_BROWSES, COUNT),
+        'get_bytes': (pymqi.CMQCFC.MQIAMO64_GET_BYTES, COUNT),
+        'put_bytes': (pymqi.CMQCFC.MQIAMO64_PUT_BYTES, COUNT),
+        'put1_count': (pymqi.CMQCFC.MQIAMO_PUT1S, COUNT),
     }
 
 

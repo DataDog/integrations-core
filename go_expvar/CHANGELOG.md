@@ -1,20 +1,32 @@
 # CHANGELOG - go_expvar
 
-## 1.10.0 / 2020-06-29
+## 1.11.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Add config specs. See [#8006](https://github.com/DataDog/integrations-core/pull/8006).
+
+## 1.10.2 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
+## 1.10.1 / 2020-08-10 / Agent 7.22.0
+
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 1.10.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 
-## 1.9.0 / 2020-05-17
+## 1.9.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.8.0 / 2020-04-04
+## 1.8.0 / 2020-04-04 / Agent 7.19.0
 
 * [Added] Add additional logging. See [#6128](https://github.com/DataDog/integrations-core/pull/6128).
 * [Added] Add go_expvar.memstats.total_alloc.count . See [#6005](https://github.com/DataDog/integrations-core/pull/6005).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.7.2 / 2020-03-05
+## 1.7.2 / 2020-03-05 / Agent 7.18.0
 
 * [Fixed] Revert "Submit total_alloc as monotonic count". See [#5972](https://github.com/DataDog/integrations-core/pull/5972).
 
@@ -22,17 +34,17 @@
 
 * [Fixed] Submit total_alloc as monotonic count. See [#5703](https://github.com/DataDog/integrations-core/pull/5703).
 
-## 1.7.0 / 2019-12-02
+## 1.7.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Adhere to logging style. See [#5106](https://github.com/DataDog/integrations-core/pull/5106).
 * [Added] Add count type to go_expvar. See [#5097](https://github.com/DataDog/integrations-core/pull/5097).
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
 
-## 1.6.0 / 2019-10-11
+## 1.6.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.5.1 / 2019-09-04
+## 1.5.1 / 2019-09-04 / Agent 6.14.0
 
 * [Fixed] Fix error handling. See [#4505](https://github.com/DataDog/integrations-core/pull/4505).
 
@@ -41,11 +53,11 @@
 * [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).
 * [Added] Add proxy settings support. See [#3743](https://github.com/DataDog/integrations-core/pull/3743).
 
-## 1.4.0 / 2019-06-27
+## 1.4.0 / 2019-06-27 / Agent 6.13.0
 
 * [Added] Add monotonic_counter support to go_expvar. See [#3992](https://github.com/DataDog/integrations-core/pull/3992).
 
-## 1.3.0 / 2019-06-20
+## 1.3.0 / 2019-06-20 / Agent 6.12.0
 
 * [Added] Do not compile regexes on each run. See [#3949](https://github.com/DataDog/integrations-core/pull/3949).
 
@@ -53,15 +65,15 @@
 
 * [Added] Adhere to code style. See [#3511](https://github.com/DataDog/integrations-core/pull/3511).
 
-## 1.1.0 / 2019-01-04
+## 1.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2833][1].
 
-## 1.0.5 / 2018-11-30
+## 1.0.5 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Use raw string literals when \ is present. See [#2465][2].
 
-## 1.0.4 / 2018-09-04
+## 1.0.4 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Move Goexpvar to pytest. See [#2089][3].
 * [Fixed] Add data files to the wheel package. See [#1727][4].

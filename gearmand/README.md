@@ -16,9 +16,12 @@ The Gearman check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Gearman performance data. See the [sample gearmand.d/conf.yaml][4] for all available configuration options.
 
@@ -32,6 +35,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5]
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -41,6 +47,32 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INTEGRATION_NAME>` | `gearmand`                             |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"server":"%%host%%", "port":"4730"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `gearmand.d/conf.yaml` file to start collecting your Gearman logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /var/log/gearmand.log
+        source: gearman
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample gearmand.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
+See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 ### Validation
 
@@ -58,9 +90,8 @@ The Gearmand check does not include any events.
 
 ### Service Checks
 
-`gearman.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
+**gearman.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Gearman to collect metrics.
 
 ## Troubleshooting
 
@@ -74,3 +105,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/gearmand/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/

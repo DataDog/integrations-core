@@ -1,900 +1,785 @@
 {
-    "board_bgtype": "board_graph",
-    "board_title": "Oracle Database - Overview",
+    "title": "Oracle Database - Overview",
     "description": "This dashboard provides an overview of your Oracle databases, so you can track tablespace and disk usage and optimize your caches. Further reading on Oracle Database monitoring:\n\n- [Monitor Oracle Database with Datadog](https://www.datadoghq.com/blog/monitor-oracle-database/)\n\n- [Datadog's Oracle Database integration docs](https://docs.datadoghq.com/integrations/oracle/)\n\nClone this template dashboard to make changes and add your own graph widgets!",
-    "height": 93,
-    "id": "oracle",
-    "template_variables": [
-        {
-            "default": "*",
-            "name": "host",
-            "prefix": "host"
-        },
-        {
-            "default": "*",
-            "name": "scope",
-            "prefix": null
-        }
-    ],
-    "templated": true,
     "widgets": [
-        {
-            "autoscale": true,
-            "board_id": 286414,
-            "height": 8,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": null
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow",
-                                "value": null
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green",
-                                "value": null
-                            }
-                        ],
-                        "q": "avg:oracle.cursor_cachehit_ratio{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": { "live_span": "1h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Cursor Cache",
-            "type": "query_value",
-            "width": 17,
-            "x": 1,
-            "y": 49
+      {
+        "id": 0,
+        "definition": {
+          "type": "query_value",
+          "requests": [
+            {
+              "q": "avg:oracle.cursor_cachehit_ratio{$host,$scope}",
+              "aggregator": "avg"
+            }
+          ],
+          "custom_links": [],
+          "title": "Cursor Cache",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1h"
+          },
+          "autoscale": true,
+          "precision": 2
         },
-        {
-            "autoscale": true,
-            "board_id": 286414,
-            "height": 8,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": null
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow",
-                                "value": null
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green",
-                                "value": null
-                            }
-                        ],
-                        "q": "avg:oracle.library_cachehit_ratio{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": { "live_span": "1h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Library Cache",
-            "type": "query_value",
-            "width": 17,
-            "x": 1,
-            "y": 60
-        },
-        {
-            "autoscale": true,
-            "board_id": 286414,
-            "height": 9,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": null
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow",
-                                "value": null
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green",
-                                "value": null
-                            }
-                        ],
-                        "q": "avg:oracle.buffer_cachehit_ratio{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": { "live_span": "1h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Buffer Cache",
-            "type": "query_value",
-            "width": 17,
-            "x": 1,
-            "y": 37
-        },
-        {
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": 286414,
-            "font_size": "18",
-            "height": 5,
-            "html": "Disk Activity",
-            "isShared": false,
-            "refresh_every": 30000,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "",
-            "type": "note",
-            "width": 45,
-            "x": 67,
-            "y": 1
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.physical_reads{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "cool",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Physical Disk Reads",
-            "type": "timeseries",
-            "width": 45,
-            "x": 67,
-            "y": 7
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.long_table_scans{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Full Table Scans",
-            "type": "timeseries",
-            "width": 45,
-            "x": 67,
-            "y": 55
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.disk_sorts{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Sorts on Disk",
-            "type": "timeseries",
-            "width": 45,
-            "x": 67,
-            "y": 39
-        },
-        {
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": 286414,
-            "font_size": "18",
-            "height": 5,
-            "html": "Database and Buffer Activity",
-            "isShared": false,
-            "refresh_every": 30000,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "",
-            "type": "note",
-            "width": 92,
-            "x": 114,
-            "y": 1
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.active_sessions{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Active Session Count",
-            "type": "timeseries",
-            "width": 45,
-            "x": 20,
-            "y": 7
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.user_rollbacks{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "User Rollbacks",
-            "type": "timeseries",
-            "width": 45,
-            "x": 114,
-            "y": 39
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "markers": [
-                    {
-                        "dim": "y",
-                        "type": "warning dashed",
-                        "val": 85,
-                        "value": "y = 85"
-                    },
-                    {
-                        "dim": "y",
-                        "type": "error dashed",
-                        "val": 97,
-                        "value": "y = 97"
-                    }
-                ],
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.tablespace.in_use{$host,$scope} by {tablespace,host}",
-                        "style": {
-                            "palette": "cool",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Tablespace Usage (%)",
-            "type": "timeseries",
-            "width": 45,
-            "x": 132,
-            "y": 56
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.enqueue_timeouts{$host,$scope}",
-                        "style": {
-                            "palette": "warm",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Enqueue Timeouts",
-            "type": "timeseries",
-            "width": 45,
-            "x": 161,
-            "y": 39
-        },
-        {
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": 286414,
-            "font_size": "18",
-            "height": 31,
-            "html": "Tablespaces",
-            "isShared": false,
-            "refresh_every": 30000,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "right",
-            "tick_pos": "50%",
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "",
-            "type": "note",
-            "width": 17,
-            "x": 114,
-            "y": 56
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.memory_sorts_ratio{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "In-Memory Sorts Ratio (%)",
-            "type": "timeseries",
-            "width": 45,
-            "x": 114,
-            "y": 23
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.temp_space_used{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "cool",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Temp Tablespace Utilization",
-            "type": "timeseries",
-            "width": 45,
-            "x": 132,
-            "y": 72
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.database_wait_time_ratio{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Database Wait Time Ratio (%)",
-            "type": "timeseries",
-            "width": 45,
-            "x": 161,
-            "y": 7
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.service_response_time{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "SQL Service Response Time (seconds)",
-            "type": "timeseries",
-            "width": 45,
-            "x": 114,
-            "y": 7
-        },
-        {
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": 286414,
-            "font_size": "18",
-            "height": 5,
-            "html": "Session Activity",
-            "isShared": false,
-            "refresh_every": 30000,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "",
-            "type": "note",
-            "width": 45,
-            "x": 20,
-            "y": 1
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.session_limit_usage{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Session Limit Usage (%)",
-            "type": "timeseries",
-            "width": 45,
-            "x": 20,
-            "y": 39
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.shared_pool_free{$host,$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Shared Pool Free Memory (%)",
-            "type": "timeseries",
-            "width": 45,
-            "x": 161,
-            "y": 23
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.logons{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Logons Per Second",
-            "type": "timeseries",
-            "width": 45,
-            "x": 20,
-            "y": 55
-        },
-        {
-            "board_id": 286414,
-            "height": 29,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q":
-                            "top(avg:oracle.tablespace.size{$host,$scope} by {tablespace}, 10, 'mean', 'desc')",
-                        "style": {
-                            "palette": "cool"
-                        }
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Tablespace Size",
-            "type": "toplist",
-            "width": 28,
-            "x": 178,
-            "y": 56
-        },
-        {
-            "board_id": 286414,
-            "check": "oracle.can_connect",
-            "group": null,
-            "group_by": [],
-            "grouping": "cluster",
-            "height": 10,
-            "isShared": false,
-            "tags": ["*"],
-            "text_align": "center",
-            "text_size": "auto",
-            "time": { "live_span": "10m" },
-            "title": true,
-            "title_align": "center",
-            "title_size": 13,
-            "title_text": "Connection Status Check",
-            "type": "check_status",
-            "width": 17,
-            "x": 1,
-            "y": 16
-        },
-        {
-            "auto_refresh": false,
-            "bgcolor": "gray",
-            "board_id": 286414,
-            "font_size": "18",
-            "height": 8,
-            "html": "Cache Hit Ratios",
-            "isShared": false,
-            "refresh_every": 30000,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "",
-            "type": "note",
-            "width": 17,
-            "x": 1,
-            "y": 28
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:oracle.session_count{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total Session Count",
-            "type": "timeseries",
-            "width": 45,
-            "x": 20,
-            "y": 23
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q":
-                            "avg:oracle.physical_writes{$host,$scope} by {host}",
-                        "style": {
-                            "palette": "purple",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": { "live_span": "4h" },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Physical Disk Writes",
-            "type": "timeseries",
-            "width": 45,
-            "x": 67,
-            "y": 23
-        },
-        {
-            "board_id": 286414,
-            "height": 13,
-            "isShared": false,
-            "margin": "small",
-            "sizing": "fit",
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "",
-            "type": "image",
-            "url":
-                "/static/images/screenboard/integrations/oracle_database.png",
-            "width": 17,
-            "x": 1,
-            "y": 1
+        "layout": {
+          "x": 1,
+          "y": 49,
+          "width": 17,
+          "height": 10
         }
+      },
+      {
+        "id": 1,
+        "definition": {
+          "type": "query_value",
+          "requests": [
+            {
+              "q": "avg:oracle.library_cachehit_ratio{$host,$scope}",
+              "aggregator": "avg"
+            }
+          ],
+          "custom_links": [],
+          "title": "Library Cache",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1h"
+          },
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 1,
+          "y": 60,
+          "width": 17,
+          "height": 10
+        }
+      },
+      {
+        "id": 2,
+        "definition": {
+          "type": "query_value",
+          "requests": [
+            {
+              "q": "avg:oracle.buffer_cachehit_ratio{$host,$scope}",
+              "aggregator": "avg"
+            }
+          ],
+          "custom_links": [],
+          "title": "Buffer Cache",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "1h"
+          },
+          "autoscale": true,
+          "precision": 2
+        },
+        "layout": {
+          "x": 1,
+          "y": 37,
+          "width": 17,
+          "height": 11
+        }
+      },
+      {
+        "id": 3,
+        "definition": {
+          "type": "note",
+          "content": "Disk Activity",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 67,
+          "y": 1,
+          "width": 45,
+          "height": 5
+        }
+      },
+      {
+        "id": 4,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.physical_reads{$host,$scope} by {host}",
+              "display_type": "bars",
+              "style": {
+                "palette": "cool",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Physical Disk Reads",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 67,
+          "y": 7,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 5,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.long_table_scans{$host,$scope} by {host}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Full Table Scans",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 67,
+          "y": 55,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 6,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.disk_sorts{$host,$scope} by {host}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Sorts on Disk",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 67,
+          "y": 39,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 7,
+        "definition": {
+          "type": "note",
+          "content": "Database and Buffer Activity",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 114,
+          "y": 1,
+          "width": 92,
+          "height": 5
+        }
+      },
+      {
+        "id": 8,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.active_sessions{$host,$scope} by {host}",
+              "display_type": "area",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Active Session Count",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 20,
+          "y": 7,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 9,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.user_rollbacks{$host,$scope}",
+              "display_type": "bars",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "User Rollbacks",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 114,
+          "y": 39,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 10,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.tablespace.in_use{$host,$scope} by {tablespace,host}",
+              "display_type": "line",
+              "style": {
+                "palette": "cool",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "markers": [
+            {
+              "value": "y = 85",
+              "display_type": "warning dashed"
+            },
+            {
+              "value": "y = 97",
+              "display_type": "error dashed"
+            }
+          ],
+          "title": "Tablespace Usage (%)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 132,
+          "y": 56,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 11,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.enqueue_timeouts{$host,$scope}",
+              "display_type": "bars",
+              "style": {
+                "palette": "warm",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Enqueue Timeouts",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 161,
+          "y": 39,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 12,
+        "definition": {
+          "type": "note",
+          "content": "Tablespaces",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "right"
+        },
+        "layout": {
+          "x": 114,
+          "y": 56,
+          "width": 17,
+          "height": 31
+        }
+      },
+      {
+        "id": 13,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.memory_sorts_ratio{$host,$scope}",
+              "display_type": "line",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "In-Memory Sorts Ratio (%)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 114,
+          "y": 23,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 14,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.temp_space_used{$host,$scope} by {host}",
+              "display_type": "line",
+              "style": {
+                "palette": "cool",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Temp Tablespace Utilization",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 132,
+          "y": 72,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 15,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.database_wait_time_ratio{$host,$scope}",
+              "display_type": "line",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Database Wait Time Ratio (%)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 161,
+          "y": 7,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 16,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.service_response_time{$host,$scope}",
+              "display_type": "line",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "SQL Service Response Time (seconds)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 114,
+          "y": 7,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 17,
+        "definition": {
+          "type": "note",
+          "content": "Session Activity",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 20,
+          "y": 1,
+          "width": 45,
+          "height": 5
+        }
+      },
+      {
+        "id": 18,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.session_limit_usage{$host,$scope} by {host}",
+              "display_type": "line",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Session Limit Usage (%)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 20,
+          "y": 39,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 19,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.shared_pool_free{$host,$scope}",
+              "display_type": "line",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Shared Pool Free Memory (%)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 161,
+          "y": 23,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 20,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.logons{$host,$scope} by {host}",
+              "display_type": "area",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Logons Per Second",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 20,
+          "y": 55,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 21,
+        "definition": {
+          "type": "toplist",
+          "requests": [
+            {
+              "q": "top(avg:oracle.tablespace.size{$host,$scope} by {tablespace}, 10, 'mean', 'desc')",
+              "style": {
+                "palette": "cool"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Tablespace Size",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          }
+        },
+        "layout": {
+          "x": 178,
+          "y": 56,
+          "width": 28,
+          "height": 31
+        }
+      },
+      {
+        "id": 22,
+        "definition": {
+          "type": "check_status",
+          "title": "Connection Status Check",
+          "title_size": "13",
+          "title_align": "center",
+          "check": "oracle.can_connect",
+          "grouping": "cluster",
+          "group_by": [],
+          "tags": [
+            "*"
+          ],
+          "time": {
+            "live_span": "10m"
+          }
+        },
+        "layout": {
+          "x": 1,
+          "y": 16,
+          "width": 17,
+          "height": 10
+        }
+      },
+      {
+        "id": 23,
+        "definition": {
+          "type": "note",
+          "content": "Cache Hit Ratios",
+          "background_color": "gray",
+          "font_size": "18",
+          "text_align": "center",
+          "show_tick": true,
+          "tick_pos": "50%",
+          "tick_edge": "bottom"
+        },
+        "layout": {
+          "x": 1,
+          "y": 28,
+          "width": 17,
+          "height": 8
+        }
+      },
+      {
+        "id": 24,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.session_count{$host,$scope} by {host}",
+              "display_type": "area",
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Total Session Count",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 20,
+          "y": 23,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 25,
+        "definition": {
+          "type": "timeseries",
+          "requests": [
+            {
+              "q": "avg:oracle.physical_writes{$host,$scope} by {host}",
+              "display_type": "bars",
+              "style": {
+                "palette": "purple",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ],
+          "custom_links": [],
+          "title": "Physical Disk Writes",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {
+            "live_span": "4h"
+          },
+          "show_legend": false,
+          "legend_size": "0"
+        },
+        "layout": {
+          "x": 67,
+          "y": 23,
+          "width": 45,
+          "height": 15
+        }
+      },
+      {
+        "id": 26,
+        "definition": {
+          "type": "image",
+          "url": "/static/images/logos/oracle_large.svg",
+          "sizing": "fit"
+        },
+        "layout": {
+          "x": 1,
+          "y": 1,
+          "width": 17,
+          "height": 13
+        }
+      }
     ],
-    "width": "100%"
-}
+    "template_variables": [
+      {
+        "name": "host",
+        "default": "*",
+        "prefix": "host"
+      },
+      {
+        "name": "scope",
+        "default": "*",
+        "prefix": null
+      }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 240
+  }

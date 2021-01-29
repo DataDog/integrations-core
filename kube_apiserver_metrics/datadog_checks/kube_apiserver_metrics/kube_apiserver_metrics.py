@@ -16,12 +16,23 @@ METRICS = {
     'go_goroutines': 'go_goroutines',
     'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
     'etcd_object_counts': 'etcd_object_counts',
+    # For Kubernetes < 1.14
     'rest_client_request_latency_seconds': 'rest_client_request_latency_seconds',
     'apiserver_admission_webhook_admission_latencies_seconds': 'admission_webhook_admission_latencies_seconds',
     'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
-    'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
+    'apiserver_admission_controller_admission_latencies_seconds': 'admission_controller_admission_duration_seconds',
     # fmt: off
     'apiserver_admission_step_admission_latencies_seconds_summary':
+        'admission_step_admission_latencies_seconds_summary',
+    # fmt: on
+    # For Kubernetes >= 1.14
+    # (https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.14.md#deprecated-metrics)
+    'rest_client_request_duration_seconds': 'rest_client_request_latency_seconds',
+    'apiserver_admission_webhook_admission_duration_seconds': 'admission_webhook_admission_latencies_seconds',
+    'apiserver_admission_step_admission_duration_seconds': 'admission_step_admission_latencies_seconds',
+    'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
+    # fmt: off
+    'apiserver_admission_step_admission_duration_seconds_summary':
         'admission_step_admission_latencies_seconds_summary',
     # fmt: on
 }

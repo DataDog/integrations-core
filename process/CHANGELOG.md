@@ -1,6 +1,19 @@
 # CHANGELOG - process
 
-## 1.15.1 / 2020-07-02
+## 1.17.1 / 2021-01-25
+
+* [Fixed] Clear process cache if cached PIDs not found. See [#8414](https://github.com/DataDog/integrations-core/pull/8414). Thanks [gingerlime](https://github.com/gingerlime).
+
+## 1.17.0 / 2020-12-28
+
+* [Added] Clear stale PIDs from cache. See [#8263](https://github.com/DataDog/integrations-core/pull/8263). Thanks [gingerlime](https://github.com/gingerlime).
+
+## 1.16.0 / 2020-09-09 / Agent 7.23.0
+
+* [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).
+* [Fixed] Handle unfound processes in no matching PIDs logs. See [#7474](https://github.com/DataDog/integrations-core/pull/7474). Thanks [TheBooper](https://github.com/TheBooper).
+
+## 1.15.1 / 2020-07-02 / Agent 7.21.0
 
 * [Fixed] Fix NoSuchProcess log message level. See [#7045](https://github.com/DataDog/integrations-core/pull/7045).
 
@@ -8,11 +21,11 @@
 
 * [Added] Config specs and new agent signature. See [#6781](https://github.com/DataDog/integrations-core/pull/6781).
 
-## 1.14.0 / 2020-05-17
+## 1.14.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.13.0 / 2020-04-04
+## 1.13.0 / 2020-04-04 / Agent 7.19.0
 
 * [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
@@ -21,7 +34,7 @@
 
 * [Added] Improve check performance. See [#5920](https://github.com/DataDog/integrations-core/pull/5920).
 
-## 1.11.1 / 2020-01-15
+## 1.11.1 / 2020-01-15 / Agent 7.17.0
 
 * [Fixed] Fix debug logging. See [#5460](https://github.com/DataDog/integrations-core/pull/5460).
 
@@ -35,7 +48,7 @@
 
 * [Fixed] Add debug logging when processes are not found. See [#5313](https://github.com/DataDog/integrations-core/pull/5313).
 
-## 1.10.3 / 2019-12-13
+## 1.10.3 / 2019-12-13 / Agent 7.16.0
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
 
@@ -43,12 +56,12 @@
 
 * [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
 
-## 1.10.1 / 2019-10-11
+## 1.10.1 / 2019-10-11 / Agent 6.15.0
 
 * [Fixed] Make iowrite_bytes and ioread_bytes counts. See [#4655](https://github.com/DataDog/integrations-core/pull/4655).
 * [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
 
-## 1.10.0 / 2019-05-14
+## 1.10.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
 
@@ -57,24 +70,24 @@
 * [Fixed] Do not return prematurely when calling `memory_info` on windows and solaris. See [#3618](https://github.com/DataDog/integrations-core/pull/3618).
 * [Added] Adhere to code style. See [#3559](https://github.com/DataDog/integrations-core/pull/3559).
 
-## 1.8.0 / 2019-02-18
+## 1.8.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
 * [Added] Finish Python 3 Support. See [#2950](https://github.com/DataDog/integrations-core/pull/2950).
 
-## 1.7.0 / 2019-01-04
+## 1.7.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2812][1].
 
-## 1.6.0 / 2018-11-30
+## 1.6.0 / 2018-11-30 / Agent 6.8.0
 
 * [Added] Update psutil. See [#2576][2].
 
-## 1.5.0 / 2018-10-12
+## 1.5.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] Upgrade psutil. See [#2190][3].
 
-## 1.4.0 / 2018-09-04
+## 1.4.0 / 2018-09-04 / Agent 6.5.0
 
 * [Added] Added regex support to process check when exact_match is False.. See [#2055][4]. Thanks [asandeep][5].
 * [Added] [Add] Add cpu.normalized_pct metric. See [#1729][6].
@@ -116,7 +129,7 @@
 [5]: https://github.com/asandeep
 [6]: https://github.com/DataDog/integrations-core/pull/1729
 [7]: https://github.com/DataDog/integrations-core/pull/1727
-[8]: 
+[8]: https://github.com/DataDog/integrations-core/pull/1530
 [9]: https://github.com/pdecat
 [10]: https://github.com/DataDog/integrations-core/pull/337
 [11]: https://github.com/DataDog/integrations-core/pull/609

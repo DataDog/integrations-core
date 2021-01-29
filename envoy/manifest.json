@@ -35,6 +35,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "envoy"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -1,6 +1,7 @@
 {
   "categories": [
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Nfsstat",
@@ -26,6 +27,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "nfsstat"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

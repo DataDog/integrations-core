@@ -13,9 +13,9 @@ theme:
   name: material
   language: en
   features:
-    - tabs
+    - navigation.tabs
     # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
-    # - instant
+    # - navigation.instant
   palette:
     scheme: slate
     primary: deep purple
@@ -37,6 +37,7 @@ nav:
     - About: base/about.md
     - Basics: base/basics.md
     - HTTP: base/http.md
+    - TLS/SSL: base/tls.md
     - Databases: base/databases.md
     - Prometheus: base/prometheus.md
     - Metadata: base/metadata.md
@@ -57,9 +58,11 @@ nav:
     - CD: meta/cd.md
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md
+    - Docs specs: meta/docs-specs.md
     - Status: meta/status.md
   - Tutorials:
     - JMX:
+      - tutorials/jmx/integration.md
       - tutorials/jmx/tools.md
     - SNMP:
       - tutorials/snmp/introduction.md
@@ -67,10 +70,12 @@ nav:
       - tutorials/snmp/how-to.md
       - tutorials/snmp/profile-format.md
       - tutorials/snmp/sim-format.md
+      - tutorials/snmp/tools.md
     - Memory profiling: tutorials/memory-profiling.md
   - Architecture:
     - SNMP: architecture/snmp.md
     - vSphere: architecture/vsphere.md
+    - Windows Event Log: architecture/win32_event_log.md
   - Process:
     - Integration release: process/integration-release.md
     - Agent release:

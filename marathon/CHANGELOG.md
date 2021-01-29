@@ -1,52 +1,72 @@
 # CHANGELOG - marathon
 
-## 1.14.0 / 2020-06-29
+## 1.18.0 / 2020-11-06 / Agent 7.24.0
+
+* [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
+
+## 1.17.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 1.16.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Fixed] Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
+
+## 1.15.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Add config specs. See [#7254](https://github.com/DataDog/integrations-core/pull/7254).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 1.14.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 
-## 1.13.0 / 2020-05-17
+## 1.13.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.12.1 / 2020-04-04
+## 1.12.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 
-## 1.12.0 / 2020-01-13
+## 1.12.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.11.0 / 2019-12-02
+## 1.11.0 / 2019-12-02 / Agent 7.16.0
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
 
-## 1.10.0 / 2019-10-11
+## 1.10.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.9.0 / 2019-08-24
+## 1.9.0 / 2019-08-24 / Agent 6.14.0
 
 * [Added] Add request wrapper to marathon. See [#4324](https://github.com/DataDog/integrations-core/pull/4324).
 
-## 1.8.0 / 2019-07-13
+## 1.8.0 / 2019-07-13 / Agent 6.13.0
 
 * [Added] Add log section. See [#4014](https://github.com/DataDog/integrations-core/pull/4014).
 
-## 1.7.0 / 2019-05-14
+## 1.7.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3536](https://github.com/DataDog/integrations-core/pull/3536).
 
-## 1.6.0 / 2019-02-18
+## 1.6.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2871](https://github.com/DataDog/integrations-core/pull/2871).
 
-## 1.5.0 / 2018-10-12
+## 1.5.0 / 2018-10-12 / Agent 6.6.0
 
 * [Fixed] Removed default arguments from process_apps. See [#2337][1].
 * [Added] Add ability to tag metrics based on marathon labels. See [#2165][2]. Thanks [ashirley][3].
 
-## 1.4.1 / 2018-09-04
+## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 

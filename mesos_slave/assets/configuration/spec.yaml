@@ -1,0 +1,57 @@
+name: Mesos Slave
+
+files:
+  - name: mesos_slave.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: url
+            description: URL used to connect to the Mesos instance.
+            required: True
+            value:
+              example: http://localhost:5051
+              type: string
+          - name: master_port
+            description: Port of your Mesos Master instance.
+            value:
+              default: 5050
+              example: 5050
+              type: integer
+          - name: tasks
+            description: Specify the tasks from which you want to send metrics to Datadog.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - <TASK_NAME>
+          - template: instances/http
+            overrides:
+              auth_token.description: |
+                This allows for the use of authentication information from dynamic sources.
+                Both a reader and writer must be configured.
+
+                The available readers are:
+
+                  - type: file
+                    path (required): The absolute path for the file to read from.
+                    pattern: A regular expression pattern with a single capture group used to find the
+                             token rather than using the entire file, for example: Your secret is (.+)
+
+                  - type: dcos_auth
+                    login_url (required): DC/OS login endpoint
+                    service_account (required): The DC/OS service account to authenticate.
+                    private_key_path (required): The absolute path for the DC/OS service account.
+                    expiration: Token expiration in seconds, defaults to 300 (5 min).
+
+                The available writers are:
+
+                  - type: header
+                    name (required): The name of the field, for example: Authorization
+                    value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+                    placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+          - template: instances/default

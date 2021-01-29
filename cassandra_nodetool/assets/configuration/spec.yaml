@@ -1,0 +1,61 @@
+name: Cassandra Nodetool
+files:
+- name: cassandra_nodetool.yaml
+  options:
+  - template: init_config
+    options:
+      - name: nodetool
+        description: |
+          The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
+          can be overwritten on an instance.
+          Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
+          access to the nodetool installation directory for the check to work.
+          The nodetool installation also sets some environment variables (for example, `CASSANDRA_HOME`
+          and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
+          You should set those environment variables as system-wide variables.
+        required: true
+        value:
+          type: string
+          example: nodetool
+      - template: init_config/default
+  - template: instances
+    options:
+    - name: keyspaces
+      description: |
+        The list of keyspaces to monitor.
+        An empty list results in no metrics being sent.
+      required: true
+      value:
+        type: array
+        items:
+          type: string
+    - name: host
+      description: Host that the Datadog Cassandra Nodetool check connects to.
+      value:
+        type: string
+        example: localhost
+    - name: port
+      description: The port JMX listens to for connections.
+      value:
+        type: integer
+        example: 7199
+    - name: username
+      description: |
+        Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
+        For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
+        check can execute the `status` command
+      value:
+        type: string
+    - name: password
+      description: |
+        Password from the credentials needed to connect to the host. These are the credentials for the JMX server.
+        For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
+        check can execute the `status` command
+      value:
+        type: string
+    - name: ssl
+      description: Whether to use the --ssl parameter with nodetool to initiate a connection over SSL to the JMX server.
+      value:
+        type: boolean
+        example: false
+    - template: instances/default

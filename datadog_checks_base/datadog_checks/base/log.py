@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import sys
+import warnings
 from typing import Callable
 
 from six import PY2, text_type
+from urllib3.exceptions import InsecureRequestWarning
 
 from .utils.common import to_native_string
 
@@ -155,6 +157,9 @@ def init_logging():
     rootLogger.addHandler(AgentLogHandler())
     rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))
 
+    # We log instead of emit warnings for unintentionally insecure HTTPS requests
+    warnings.simplefilter('ignore', InsecureRequestWarning)
+
     # `requests` (used in a lot of checks) imports `urllib3`, which logs a bunch of stuff at the info level
     # Therefore, pre emptively increase the default level of that logger to `WARN`
     urllib_logger = logging.getLogger("requests.packages.urllib3")
@@ -165,6 +170,9 @@ def init_logging():
 def get_check_logger(default_logger=None):
     """
     Search the current AgentCheck log starting from closest stack frame.
+
+    Caveat: Frame lookup has a cost so the recommended usage is to retrieve and store the logger once
+    and avoid calling this method on every check run.
     """
     from datadog_checks.base import AgentCheck
 

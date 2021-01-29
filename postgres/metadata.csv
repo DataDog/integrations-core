@@ -26,7 +26,8 @@ postgresql.bgwriter.sync_time,count,,millisecond,,The total amount of checkpoint
 postgresql.locks,gauge,,lock,,The number of locks active for this database.,0,postgres,locks
 postgresql.seq_scans,gauge,,,,The number of sequential scans initiated on this table.,0,postgres,seq scans
 postgresql.seq_rows_read,gauge,,row,second,The number of live rows fetched by sequential scans.,0,postgres,seq rows rd
-postgresql.index_scans,gauge,,,,The number of index scans initiated on this table.,0,postgres,idx scans
+postgresql.index_scans,gauge,,,,"The number of index scans initiated on this table, tagged by index.",0,postgres,idx scans
+postgresql.index_rel_scans,gauge,,,,The overall number of index scans initiated on this table.,0,postgres,idx scans
 postgresql.index_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch
 postgresql.index_rel_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch
 postgresql.rows_hot_updated,gauge,,row,second,"The number of rows HOT updated, meaning no separate index update was needed.",0,postgres,rows hot updated
@@ -42,6 +43,9 @@ postgresql.percent_usage_connections,gauge,,fraction,,The number of connections 
 postgresql.replication_delay,gauge,,second,,The current replication delay in seconds. Only available with postgresql 9.1 and newer,-1,postgres,repl delay
 postgres.replication_delay_bytes,gauge,,byte,,Deprecated please use postgresql.replication_delay_bytes instead,-1,postgres,repl delay bytes
 postgresql.replication_delay_bytes,gauge,,byte,,The current replication delay in bytes. Only available with postgresql 9.2 and newer,-1,postgres,repl delay bytes
+postgresql.replication.wal_write_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written it (but not yet flushed it or applied it). This can be used to gauge the delay that synchronous_commit level remote_write incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl write lag
+postgresql.replication.wal_flush_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written and flushed it (but not yet applied it). This can be used to gauge the delay that synchronous_commit level on incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl flush lag
+postgresql.replication.wal_replay_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written, flushed and applied it. This can be used to gauge the delay that synchronous_commit level remote_apply incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl replay lag
 postgresql.heap_blocks_read,gauge,,block,second,The number of disk blocks read from this table.,0,postgres,heap blks read
 postgresql.heap_blocks_hit,gauge,,hit,second,The number of buffer hits in this table.,0,postgres,heap blks hit
 postgresql.index_blocks_read,gauge,,block,second,The number of disk blocks read from all indexes on this table.,0,postgres,idx blks read
@@ -55,3 +59,16 @@ postgresql.transactions.idle_in_transaction,gauge,,transaction,,The number of 'i
 postgresql.before_xid_wraparound,gauge,,transaction,,The number of transactions that can occur until a transaction wraparound.,0,postgres,tx before xid wraparound
 postgresql.active_queries,gauge,,,,The number of active queries in this database.,0,postgres,active queries
 postgresql.waiting_queries,gauge,,,,The number of waiting queries in this database.,0,postgres,transactions waiting queries
+postgresql.queries.count,count,,query,,The total count of executed queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries count
+postgresql.queries.time,count,,nanosecond,,The total query execution time per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries time
+postgresql.queries.rows,count,,row,,The total number of rows retrieved or affected by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries rows
+postgresql.queries.shared_blks_hit,count,,block,,Total number of shared block cache hits by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks hit
+postgresql.queries.shared_blks_read,count,,block,,Total number of shared blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks read
+postgresql.queries.shared_blks_dirtied,count,,block,,Total number of shared blocks dirtied by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks dirtied
+postgresql.queries.shared_blks_written,count,,block,,Total number of shared blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks written
+postgresql.queries.local_blks_hit,count,,block,,Total number of local block cache hits by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks hit
+postgresql.queries.local_blks_read,count,,block,,Total number of local blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks read
+postgresql.queries.local_blks_dirtied,count,,block,,Total number of local blocks dirtied by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks dirtied
+postgresql.queries.local_blks_written,count,,block,,Total number of local blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks written
+postgresql.queries.temp_blks_read,count,,block,,Total number of temp blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries temp blocks read
+postgresql.queries.temp_blks_written,count,,block,,Total number of temp blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries temp blocks written

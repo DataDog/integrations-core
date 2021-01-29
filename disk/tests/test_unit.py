@@ -11,6 +11,7 @@ from six import iteritems
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.disk import Disk
+from datadog_checks.disk.disk import IGNORE_CASE
 
 from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockDiskMetrics, MockPart, mock_blkid_output
@@ -21,12 +22,12 @@ def test_default_options():
 
     assert check._use_mount is False
     assert check._all_partitions is False
-    assert check._file_system_whitelist is None
-    assert check._file_system_blacklist == re.compile('iso9660$', re.I)
-    assert check._device_whitelist is None
-    assert check._device_blacklist is None
-    assert check._mount_point_whitelist is None
-    assert check._mount_point_blacklist is None
+    assert check._file_system_include is None
+    assert check._file_system_exclude == re.compile('iso9660$', re.I)
+    assert check._device_include is None
+    assert check._device_exclude is None
+    assert check._mount_point_include is None
+    assert check._mount_point_exclude == re.compile('(/host)?/proc/sys/fs/binfmt_misc$', IGNORE_CASE)
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False
@@ -126,7 +127,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label'):
         # _get_devices_label is only called on linux, so devices_label is manually filled
         # to make the test run on everything
-        c.devices_label = {DEFAULT_DEVICE_NAME: 'label:mylab'}
+        c.devices_label = {DEFAULT_DEVICE_NAME: ['label:mylab', 'device_label:mylab']}
         c.check(instance)
 
     # Assert metrics
@@ -137,6 +138,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
         'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
         'optional:tags1',
         'label:mylab',
+        'device_label:mylab',
     ]
 
     for name, value in iteritems(gauge_metrics):
@@ -151,6 +153,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
                 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
                 'optional:tags1',
                 'label:mylab',
+                'device_label:mylab',
             ],
         )
 
@@ -166,7 +169,7 @@ def test_get_devices_label():
         __name__='get_subprocess_output',
     ):
         labels = c._get_devices_label()
-        assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
+        assert labels.get("/dev/mapper/vagrant--vg-root") == ["label:DATA", "device_label:DATA"]
 
 
 @pytest.mark.usefixtures('psutil_mocks')
@@ -198,7 +201,9 @@ def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gau
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
     for metric in chain(gauge_metrics, rate_metrics):
-        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL'])
+        aggregator.assert_metric(
+            metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL', 'device_label:MYLABEL']
+        )
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
@@ -271,3 +276,20 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
         aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_include_all_devices(aggregator, gauge_metrics, rate_metrics):
+    c = Disk('disk', {}, [{}])
+
+    with mock.patch('psutil.disk_partitions', return_value=[]) as m:
+        c.check({})
+        # By default, we include all devices
+        m.assert_called_with(all=True)
+
+    instance = {'include_all_devices': False}
+    c = Disk('disk', {}, [instance])
+
+    with mock.patch('psutil.disk_partitions', return_value=[]) as m:
+        c.check({})
+        m.assert_called_with(all=False)

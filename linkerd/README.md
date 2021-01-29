@@ -12,13 +12,19 @@ The Linkerd check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See [sample linkerd.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -39,6 +45,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INTEGRATION_NAME>` | `linkerd`                                                             |
 | `<INIT_CONFIG>`      | blank or `{}`                                                         |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:4191/metrics"}`                  |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][12].
+
+| Parameter      | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "linkerd", "service": "<SERVICE_NAME>"}` |
+
+To increase the verbosity of the data plane logs, see [the official Linkerd documentation][13].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -68,8 +87,8 @@ Simply follow the examples present in the [default configuration][4].
 
 ### Service Checks
 
-`linkerd.prometheus.health`:
-Returns CRITICAL if the Agent fails to connect to the prometheus endpoint, otherwise returns UP.
+**linkerd.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent fails to connect to the prometheus endpoint, otherwise returns `OK`.
 
 ## Troubleshooting
 
@@ -86,3 +105,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://twitter.github.io/finagle/guide/Metrics.html
 [10]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
 [11]: https://docs.datadoghq.com/help/
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[13]: https://linkerd.io/2/tasks/modifying-proxy-log-level/

@@ -1,0 +1,17 @@
+{
+  "name": "etcd overview",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:etcd",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["host", "service", "status", "@package", "image_name", "container_id", "pod_name"],
+  "options": {
+    "columns": ["@package"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

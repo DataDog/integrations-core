@@ -1,0 +1,535 @@
+{
+  "title": "Datacenter Overview",
+  "description": "## Datacenter Overview Dashboard\n\nKeep track of all of your monitored on-premise appliances monitored with SNMP all in one place. At a glance, see all of the devices currently responding metrics, top interfaces reporting bandwidth and forecasted performance.\nRead more about: \n\nRead more about:\n\n*  [Monitoring datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n* [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n* Learn more about the data collected in our [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+  "widgets": [
+    {
+      "id": 7507125964146004,
+      "definition": {
+        "title": "Network Summary",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5962709499618832,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard provides an overview of how all the network devices in your datacenter are performing. \n\nFor more information on monitoring on-premise gear with Datadog, check out: \n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 3322305298444164,
+            "definition": {
+              "title": "Devices Responding",
+              "title_size": "16",
+              "title_align": "center",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "snmp.can_check",
+              "grouping": "cluster",
+              "group_by": ["snmp_host", "snmp_device"],
+              "tags": ["*"]
+            },
+            "layout": { "x": 4, "y": 0, "width": 8, "height": 2 }
+          },
+          {
+            "id": 5972374734903110,
+            "definition": {
+              "type": "note",
+              "content": "**Tip:** The above box indicates which devices we are currently able to poll for SNMP metrics. \nClick the box to see a list of reachable (green) or unreachable (red) devices by name and IP. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top"
+            },
+            "layout": { "x": 4, "y": 2, "width": 8, "height": 1 }
+          },
+          {
+            "id": 4112468581782098,
+            "definition": {
+              "title": "Top Bandwidth by Interface (inbound)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$interface} by {snmp_host,interface}, 5, 'mean', 'desc')"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?from_ts=1611075730040&live=true&to_ts=1611079330040&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 6552096466900108,
+            "definition": {
+              "title": "Top Bandwidth by Interface (outbound) ",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(avg:snmp.ifBandwidthOutUsage.rate{$snmp_host,$interface} by {snmp_host,interface}, 5, 'mean', 'desc')"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1132807365192448,
+            "definition": {
+              "title": "Interfaces with the Most Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(avg:snmp.ifInErrors{$snmp_host,$interface} by {snmp_host,interface}.as_count()+avg:snmp.ifOutErrors{$snmp_host,$interface} by {snmp_host,interface}.as_count(),5,'mean','desc')"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1701250073322308,
+            "definition": {
+              "title": "Interfaces with the Most Discarded Packets",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(avg:snmp.ifInDiscards{$snmp_host,$interface} by {snmp_host,interface}.as_count()+avg:snmp.ifOutDiscards{$snmp_host,$interface} by {snmp_host,interface}.as_count(),5,'mean','desc')"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_interface={{interface.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 9, "y": 3, "width": 3, "height": 2 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 8097009467479108,
+      "definition": {
+        "title": "Device Inventory",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1932169840365744,
+            "definition": {
+              "title": "Device Inventory",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "conditional_formats": [
+                    { "comparator": "<", "palette": "red_on_white", "value": 1 }
+                  ],
+                  "q": "avg:snmp.sysUpTimeInstance{*,*,$snmp_device,$snmp_host} by {snmp_device,snmp_host}/8640000",
+                  "alias": "uptime (days)",
+                  "limit": 100,
+                  "order": "asc"
+                }
+              ],
+              "has_search_bar": "auto",
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?from_ts=1602800672906&live=true&to_ts=1602804272906&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 7 }
+          },
+          {
+            "id": 7962336691536866,
+            "definition": {
+              "type": "note",
+              "content": "**Tip:** Click any row in the _Device Inventory_  table, and select the `Interface Performance` custom link to drill into the performance across all interfaces filtered to that specific device. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 0, "y": 7, "width": 12, "height": 1 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 5111334103889042,
+      "definition": {
+        "title": "Traffic Patterns",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1444179790663982,
+            "definition": {
+              "title": "Outliers on Total Inbound Device Throughput",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "outliers(avg:snmp.ifHCInOctets.rate{$snmp_device,$snmp_host,$interface} by {snmp_host,snmp_device}.as_count(), 'DBSCAN', 3)",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 6775115446963994,
+            "definition": {
+              "title": "Outliers on Total Outbound Device Throughput ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "outliers(avg:snmp.ifHCOutOctets.rate{$snmp_device,$snmp_host} by {snmp_host,snmp_device}.as_count(), 'DBSCAN', 3)",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 7113375781270598,
+            "definition": {
+              "title": "Forecast Inbound Bandwidth on Top 5 Interfaces",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "forecast(top(avg:snmp.ifBandwidthInUsage.rate{$snmp_device,$snmp_host,$interface} by {interface,snmp_device,snmp_host}, 5, 'mean', 'desc'), 'linear', 1)",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+          },
+          {
+            "id": 5085712062550646,
+            "definition": {
+              "title": "Forecast Outbound Bandwidth on Top 5 Interfaces",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "forecast(top(avg:snmp.ifBandwidthOutUsage.rate{$snmp_device,$snmp_host,$interface} by {interface,snmp_device,snmp_host}, 5, 'mean', 'desc'), 'linear', 1)",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [],
+              "custom_links": [
+                {
+                  "link": "/screen/integration/Interface%20Performance?&tpl_var_snmp_host={{snmp_host.value}}&tpl_var_snmp_device={{snmp_device.value}}&tpl_var_interface={{interface.value}}",
+                  "label": "Interface Performance"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+          },
+          {
+            "id": 4250738380129082,
+            "definition": {
+              "type": "note",
+              "content": "**Tip:** Outlier detection is an algorithmic feature that allows you to detect when a specific group is behaving different compared to its peers. Total throughput outliers measures the total throughput across all interfaces on a device and displays devices whose total throughput is an outlier in relation to its usual total throughput.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 0, "y": 6, "width": 12, "height": 1 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 2041537512615478,
+      "definition": {
+        "title": "Device Health",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2999908314339602,
+            "definition": {
+              "title": "Devices with Highest CPU Utilization (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(avg:snmp.cpmCPUTotalMonIntervalValue{$snmp_device,$snmp_host} by {snmp_host,snmp_device}, 10, 'mean', 'desc')"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 1242618941206424,
+            "definition": {
+              "title": "Average CPU Utilization (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:snmp.cpmCPUTotalMonIntervalValue{$snmp_device,$snmp_host} by {snmp_host}",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.cpmCPUTotalMonIntervalValue{$snmp_device,$snmp_host} by {snmp_host}",
+                      "alias_name": "cpu"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "avg:snmp.hrProcessorLoad{$snmp_device,$snmp_host} by {snmp_host}",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.hrProcessorLoad{$snmp_device,$snmp_host} by {snmp_host}",
+                      "alias_name": "cpu"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "avg:snmp.cpmCPUTotal1minRev{$snmp_device,$snmp_host} by {snmp_host}",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "avg:snmp.cpmCPUTotal1minRev{$snmp_device,$snmp_host} by {snmp_host}",
+                      "alias_name": "cpu"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 4, "y": 0, "width": 8, "height": 3 }
+          },
+          {
+            "id": 2329854184707894,
+            "definition": {
+              "title": "Devices with Highest Memory Utilization (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top((avg:snmp.cpmCPUMemoryUsed{$snmp_device,$snmp_host} by {snmp_host,snmp_device}/(avg:snmp.cpmCPUMemoryUsed{$snmp_device,$snmp_host} by {snmp_host,snmp_device}+avg:snmp.cpmCPUMemoryFree{$snmp_device,$snmp_host} by {snmp_host,snmp_device}))*100,10,'mean','desc')"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 4, "height": 3 }
+          },
+          {
+            "id": 4598955149199596,
+            "definition": {
+              "title": "Average Memory Utilization (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "(avg:snmp.cpmCPUMemoryUsed{$snmp_device,$snmp_host} by {snmp_host,snmp_device}/(avg:snmp.cpmCPUMemoryUsed{$snmp_device,$snmp_host} by {snmp_host,snmp_device}+avg:snmp.cpmCPUMemoryFree{$snmp_device,$snmp_host} by {snmp_host,snmp_device}))*100",
+                  "on_right_yaxis": false,
+                  "metadata": [
+                    {
+                      "expression": "(avg:snmp.cpmCPUMemoryUsed{$snmp_device,$snmp_host} by {snmp_host,snmp_device}/(avg:snmp.cpmCPUMemoryUsed{$snmp_device,$snmp_host} by {snmp_host,snmp_device}+avg:snmp.cpmCPUMemoryFree{$snmp_device,$snmp_host} by {snmp_host,snmp_device}))*100",
+                      "alias_name": "memory"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 4, "y": 3, "width": 8, "height": 3 }
+          }
+        ]
+      }
+    }
+  ],
+  "template_variables": [
+    { "name": "snmp_device", "default": "*", "prefix": "snmp_device" },
+    { "name": "snmp_host", "default": "*", "prefix": "snmp_host" },
+    { "name": "interface", "default": "*", "prefix": "interface" }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": true,
+  "notify_list": [],
+  "reflow_type": "fixed",  
+  "id": "y5x-nan-rkm"
+}

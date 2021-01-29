@@ -8,12 +8,9 @@ from io import StringIO
 import click
 
 from ....utils import read_file, write_file
-from ...constants import get_agent_changelog, get_agent_release_requirements, get_root
-from ...git import git_show_file
-from ...release import DATADOG_PACKAGE_PREFIX, get_folder_name, get_package_name
-from ...utils import parse_agent_req_file
+from ...constants import get_agent_changelog, get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info
-from .common import get_agent_tags
+from .common import get_changes_per_agent
 
 
 @click.command(
@@ -37,45 +34,8 @@ def changelog(since, to, write, force):
     tool will generate the whole changelog since Agent version 6.3.0
     (before that point we don't have enough information to build the log).
     """
-    agent_tags = get_agent_tags(since, to)
 
-    # store the changes in a mapping {agent_version --> {check_name --> current_version}}
-    changes_per_agent = {}
-
-    # to keep indexing easy, we run the loop off-by-one
-    for i in range(1, len(agent_tags)):
-        req_file_name = os.path.basename(get_agent_release_requirements())
-        current_tag = agent_tags[i - 1]
-        # Requirements for current tag
-        file_contents = git_show_file(req_file_name, current_tag)
-        catalog_now = parse_agent_req_file(file_contents)
-        # Requirements for previous tag
-        file_contents = git_show_file(req_file_name, agent_tags[i])
-        catalog_prev = parse_agent_req_file(file_contents)
-
-        changes_per_agent[current_tag] = {}
-
-        for name, ver in catalog_now.items():
-            # at some point in the git history, the requirements file erroneusly
-            # contained the folder name instead of the package name for each check,
-            # let's be resilient
-            old_ver = (
-                catalog_prev.get(name)
-                or catalog_prev.get(get_folder_name(name))
-                or catalog_prev.get(get_package_name(name))
-            )
-
-            # normalize the package name to the check_name
-            if name.startswith(DATADOG_PACKAGE_PREFIX):
-                name = get_folder_name(name)
-
-            if old_ver and old_ver != ver:
-                # determine whether major version changed
-                breaking = old_ver.split('.')[0] < ver.split('.')[0]
-                changes_per_agent[current_tag][name] = (ver, breaking)
-            elif not old_ver:
-                # New integration
-                changes_per_agent[current_tag][name] = (ver, False)
+    changes_per_agent = get_changes_per_agent(since, to)
 
     # store the changelog in memory
     changelog_contents = StringIO()

@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems
+from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -38,6 +40,9 @@ SPARK_VERSION_PATH = 'api/v1/version'
 SPARK_MASTER_STATE_PATH = '/json/'
 SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
+
+# Extract the application name and the dd metric name from the structured streams metrics.
+STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
 
 # Application type and states to collect
 YARN_APPLICATION_TYPES = 'SPARK'
@@ -89,34 +94,31 @@ SPARK_STAGE_METRICS = {
     'diskBytesSpilled': ('spark.stage.disk_bytes_spilled', COUNT),
 }
 
+SPARK_EXECUTOR_TEMPLATE_METRICS = {
+    'rddBlocks': ('spark.{}.rdd_blocks', COUNT),
+    'memoryUsed': ('spark.{}.memory_used', COUNT),
+    'diskUsed': ('spark.{}.disk_used', COUNT),
+    'activeTasks': ('spark.{}.active_tasks', COUNT),
+    'failedTasks': ('spark.{}.failed_tasks', COUNT),
+    'completedTasks': ('spark.{}.completed_tasks', COUNT),
+    'totalTasks': ('spark.{}.total_tasks', COUNT),
+    'totalDuration': ('spark.{}.total_duration', COUNT),
+    'totalInputBytes': ('spark.{}.total_input_bytes', COUNT),
+    'totalShuffleRead': ('spark.{}.total_shuffle_read', COUNT),
+    'totalShuffleWrite': ('spark.{}.total_shuffle_write', COUNT),
+    'maxMemory': ('spark.{}.max_memory', COUNT),
+}
+
 SPARK_DRIVER_METRICS = {
-    'rddBlocks': ('spark.driver.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.driver.memory_used', COUNT),
-    'diskUsed': ('spark.driver.disk_used', COUNT),
-    'activeTasks': ('spark.driver.active_tasks', COUNT),
-    'failedTasks': ('spark.driver.failed_tasks', COUNT),
-    'completedTasks': ('spark.driver.completed_tasks', COUNT),
-    'totalTasks': ('spark.driver.total_tasks', COUNT),
-    'totalDuration': ('spark.driver.total_duration', COUNT),
-    'totalInputBytes': ('spark.driver.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.driver.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.driver.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.driver.max_memory', COUNT),
+    key: (value[0].format('driver'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
 }
 
 SPARK_EXECUTOR_METRICS = {
-    'rddBlocks': ('spark.executor.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.executor.memory_used', COUNT),
-    'diskUsed': ('spark.executor.disk_used', COUNT),
-    'activeTasks': ('spark.executor.active_tasks', COUNT),
-    'failedTasks': ('spark.executor.failed_tasks', COUNT),
-    'completedTasks': ('spark.executor.completed_tasks', COUNT),
-    'totalTasks': ('spark.executor.total_tasks', COUNT),
-    'totalDuration': ('spark.executor.total_duration', COUNT),
-    'totalInputBytes': ('spark.executor.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.executor.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.executor.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.executor.max_memory', COUNT),
+    key: (value[0].format('executor'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
+}
+
+SPARK_EXECUTOR_LEVEL_METRICS = {
+    key: (value[0].format('executor.id'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
 }
 
 SPARK_RDD_METRICS = {
@@ -142,6 +144,14 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
 
+SPARK_STRUCTURED_STREAMING_METRICS = {
+    'inputRate-total': ('spark.structured_streaming.input_rate', GAUGE),
+    'latency': ('spark.structured_streaming.latency', GAUGE),
+    'processingRate-total': ('spark.structured_streaming.processing_rate', GAUGE),
+    'states-rowsTotal': ('spark.structured_streaming.rows_count', GAUGE),
+    'states-usedBytes': ('spark.structured_streaming.used_bytes', GAUGE),
+}
+
 
 class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
@@ -157,42 +167,51 @@ class SparkCheck(AgentCheck):
         # `proxyapproved=true` GET param.
         # The page also sets a cookie that needs to be stored (no need to set persist_connections in the config)
         self.proxy_redirect_cookies = None
+        self.tags = self.instance.get('tags', [])
+        self.cluster_mode = self.instance.get(SPARK_CLUSTER_MODE)
+        if self.cluster_mode is None:
+            self.log.warning(
+                'The value for `spark_cluster_mode` was not set in the configuration. Defaulting to "%s"',
+                SPARK_YARN_MODE,
+            )
+            self.cluster_mode = SPARK_YARN_MODE
 
-    def check(self, instance):
-        # Get additional tags from the conf file
-        tags = instance.get('tags', [])
-        if tags is None:
-            tags = []
-        else:
-            tags = list(set(tags))
+        self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
-        cluster_name = instance.get('cluster_name')
-        if not cluster_name:
+        # Get the cluster name from the instance configuration
+        self.cluster_name = self.instance.get('cluster_name')
+        if self.cluster_name is None:
             raise ConfigurationError('The cluster_name must be specified in the instance configuration')
-        tags.append('cluster_name:%s' % cluster_name)
 
-        spark_apps = self._get_running_apps(instance)
+        self.master_address = self._get_master_address()
+
+    def check(self, _):
+        tags = list(self.tags)
+        tags.append('cluster_name:%s' % self.cluster_name)
+
+        spark_apps = self._get_running_apps()
 
         # Get the job metrics
-        self._spark_job_metrics(instance, spark_apps, tags)
+        self._spark_job_metrics(spark_apps, tags)
 
         # Get the stage metrics
-        self._spark_stage_metrics(instance, spark_apps, tags)
+        self._spark_stage_metrics(spark_apps, tags)
 
         # Get the executor metrics
-        self._spark_executor_metrics(instance, spark_apps, tags)
+        self._spark_executor_metrics(spark_apps, tags)
 
         # Get the rdd metrics
-        self._spark_rdd_metrics(instance, spark_apps, tags)
+        self._spark_rdd_metrics(spark_apps, tags)
 
         # Get the streaming statistics metrics
-        if is_affirmative(instance.get('streaming_metrics', True)):
-            self._spark_streaming_statistics_metrics(instance, spark_apps, tags)
+        if is_affirmative(self.instance.get('streaming_metrics', True)):
+            self._spark_streaming_statistics_metrics(spark_apps, tags)
+            self._spark_structured_streams_metrics(spark_apps, tags)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
             _, (_, tracking_url) = next(iteritems(spark_apps))
-            base_url = self._get_request_url(instance, tracking_url)
+            base_url = self._get_request_url(tracking_url)
             am_address = self._get_url_base(base_url)
 
             self.service_check(
@@ -202,79 +221,64 @@ class SparkCheck(AgentCheck):
                 message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
 
-    def _get_master_address(self, instance):
+    def _get_master_address(self):
         """
         Get the master address from the instance configuration
         """
 
-        master_address = instance.get(MASTER_ADDRESS)
+        master_address = self.instance.get(MASTER_ADDRESS)
         if master_address is None:
-            master_address = instance.get(DEPRECATED_MASTER_ADDRESS)
+            master_address = self.instance.get(DEPRECATED_MASTER_ADDRESS)
 
             if master_address:
                 self.log.warning(
                     'The use of `%s` is deprecated. Please use `%s` instead.', DEPRECATED_MASTER_ADDRESS, MASTER_ADDRESS
                 )
             else:
-                raise Exception('URL for `%s` must be specified in the instance configuration' % MASTER_ADDRESS)
+                raise ConfigurationError(
+                    'URL for `%s` must be specified in the instance configuration' % MASTER_ADDRESS
+                )
 
         return master_address
 
-    def _get_request_url(self, instance, url):
+    def _get_request_url(self, url):
         """
         Get the request address, build with proxy if necessary
         """
         parsed = urlparse(url)
 
         _url = url
-        if not (parsed.netloc and parsed.scheme) and is_affirmative(instance.get('spark_proxy_enabled', False)):
-            master_address = self._get_master_address(instance)
-            _url = urljoin(master_address, parsed.path)
+        if not (parsed.netloc and parsed.scheme) and is_affirmative(self.instance.get('spark_proxy_enabled', False)):
+            _url = urljoin(self.master_address, parsed.path)
 
         self.log.debug('Request URL returned: %s', _url)
         return _url
 
-    def _get_running_apps(self, instance):
+    def _get_running_apps(self):
         """
         Determine what mode was specified
         """
-        tags = instance.get('tags', [])
-        if tags is None:
-            tags = []
-        master_address = self._get_master_address(instance)
-        # Get the cluster name from the instance configuration
-        cluster_name = instance.get('cluster_name')
-        if cluster_name is None:
-            raise Exception('The cluster_name must be specified in the instance configuration')
-        tags.append('cluster_name:%s' % cluster_name)
-        tags = list(set(tags))
-        # Determine the cluster mode
-        cluster_mode = instance.get(SPARK_CLUSTER_MODE)
-        if cluster_mode is None:
-            self.log.warning(
-                'The value for `spark_cluster_mode` was not set in the configuration. Defaulting to "%s"',
-                SPARK_YARN_MODE,
-            )
-            cluster_mode = SPARK_YARN_MODE
+        tags = list(self.tags)
+        tags.append('cluster_name:%s' % self.cluster_name)
 
-        if cluster_mode == SPARK_STANDALONE_MODE:
+        if self.cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
-            pre20 = is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
-            return self._standalone_init(master_address, pre20, tags)
+            pre20 = is_affirmative(self.instance.get(SPARK_PRE_20_MODE, False))
+            return self._standalone_init(pre20, tags)
 
-        elif cluster_mode == SPARK_MESOS_MODE:
-            running_apps = self._mesos_init(instance, master_address, tags)
+        elif self.cluster_mode == SPARK_MESOS_MODE:
+            running_apps = self._mesos_init(tags)
             return self._get_spark_app_ids(running_apps, tags)
 
-        elif cluster_mode == SPARK_YARN_MODE:
-            running_apps = self._yarn_init(master_address, tags)
+        elif self.cluster_mode == SPARK_YARN_MODE:
+            running_apps = self._yarn_init(tags)
             return self._get_spark_app_ids(running_apps, tags)
 
-        elif cluster_mode == SPARK_DRIVER_MODE:
-            return self._driver_init(master_address, tags)
+        elif self.cluster_mode == SPARK_DRIVER_MODE:
+            return self._driver_init(tags)
 
         else:
-            raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
+            raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, self.cluster_mode))
 
     def _collect_version(self, base_url, tags):
         try:
@@ -287,36 +291,36 @@ class SparkCheck(AgentCheck):
             self.set_metadata('version', version)
             return True
 
-    def _driver_init(self, spark_driver_address, tags):
+    def _driver_init(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
-        self._collect_version(spark_driver_address, tags)
+        self._collect_version(self.master_address, tags)
         running_apps = {}
         metrics_json = self._rest_request_to_json(
-            spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
+            self.master_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
         )
 
         for app_json in metrics_json:
             app_id = app_json.get('id')
             app_name = app_json.get('name')
-            running_apps[app_id] = (app_name, spark_driver_address)
+            running_apps[app_id] = (app_name, self.master_address)
 
         self.service_check(
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % spark_driver_address] + tags,
-            message='Connection to Spark driver "%s" was successful' % spark_driver_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to Spark driver "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
-    def _standalone_init(self, spark_master_address, pre_20_mode, tags):
+    def _standalone_init(self, pre_20_mode, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
         metrics_json = self._rest_request_to_json(
-            spark_master_address, SPARK_MASTER_STATE_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags
+            self.master_address, SPARK_MASTER_STATE_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags
         )
 
         running_apps = {}
@@ -329,7 +333,7 @@ class SparkCheck(AgentCheck):
 
                 # Parse through the HTML to grab the application driver's link
                 try:
-                    app_url = self._get_standalone_app_url(app_id, spark_master_address, tags)
+                    app_url = self._get_standalone_app_url(app_id, tags)
 
                     if app_id and app_name and app_url:
                         if not version_set:
@@ -354,19 +358,19 @@ class SparkCheck(AgentCheck):
         self.service_check(
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % spark_master_address] + tags,
-            message='Connection to Spark master "%s" was successful' % spark_master_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to Spark master "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
-    def _mesos_init(self, instance, master_address, tags):
+    def _mesos_init(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         """
         running_apps = {}
 
-        metrics_json = self._rest_request_to_json(master_address, MESOS_MASTER_APP_PATH, MESOS_SERVICE_CHECK, tags)
+        metrics_json = self._rest_request_to_json(self.master_address, MESOS_MASTER_APP_PATH, MESOS_SERVICE_CHECK, tags)
 
         if metrics_json.get('frameworks'):
             for app_json in metrics_json.get('frameworks'):
@@ -375,7 +379,7 @@ class SparkCheck(AgentCheck):
                 app_name = app_json.get('name')
 
                 if app_id and tracking_url and app_name:
-                    spark_ports = instance.get('spark_ui_ports')
+                    spark_ports = self.instance.get('spark_ui_ports')
                     if spark_ports is None:
                         # No filtering by port, just return all the frameworks
                         running_apps[app_id] = (app_name, tracking_url)
@@ -389,36 +393,36 @@ class SparkCheck(AgentCheck):
         self.service_check(
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % master_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
 
-    def _yarn_init(self, rm_address, tags):
+    def _yarn_init(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         """
-        running_apps = self._yarn_get_running_spark_apps(rm_address, tags)
+        running_apps = self._yarn_get_running_spark_apps(tags)
 
         # Report success after gathering all metrics from ResourceManager
         self.service_check(
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % rm_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % rm_address,
+            tags=['url:%s' % self.master_address] + tags,
+            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
 
-    def _get_standalone_app_url(self, app_id, spark_master_address, tags):
+    def _get_standalone_app_url(self, app_id, tags):
         """
         Return the application URL from the app info page on the Spark master.
         Due to a bug, we need to parse the HTML manually because we cannot
         fetch JSON data from HTTP interface.
         """
         app_page = self._rest_request(
-            spark_master_address, SPARK_MASTER_APP_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags, appId=app_id
+            self.master_address, SPARK_MASTER_APP_PATH, SPARK_STANDALONE_SERVICE_CHECK, tags, appId=app_id
         )
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
@@ -427,7 +431,7 @@ class SparkCheck(AgentCheck):
         if app_detail_ui_links and len(app_detail_ui_links) == 1:
             return app_detail_ui_links[0].attrs['href']
 
-    def _yarn_get_running_spark_apps(self, rm_address, tags):
+    def _yarn_get_running_spark_apps(self, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
 
@@ -435,7 +439,7 @@ class SparkCheck(AgentCheck):
         a Spark application ID.
         """
         metrics_json = self._rest_request_to_json(
-            rm_address,
+            self.master_address,
             YARN_APPS_PATH,
             YARN_SERVICE_CHECK,
             tags,
@@ -484,13 +488,13 @@ class SparkCheck(AgentCheck):
 
         return spark_apps
 
-    def _spark_job_metrics(self, instance, running_apps, addl_tags):
+    def _spark_job_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark job.
         """
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
 
-            base_url = self._get_request_url(instance, tracking_url)
+            base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
                 base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'jobs'
             )
@@ -503,16 +507,23 @@ class SparkCheck(AgentCheck):
                 tags.extend(addl_tags)
                 tags.append('status:%s' % str(status).lower())
 
+                job_id = job.get('jobId')
+                if job_id is not None:
+                    tags.append('job_id:{}'.format(job_id))
+
+                for stage_id in job.get('stageIds', []):
+                    tags.append('stage_id:{}'.format(stage_id))
+
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)
 
-    def _spark_stage_metrics(self, instance, running_apps, addl_tags):
+    def _spark_stage_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark stage.
         """
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
 
-            base_url = self._get_request_url(instance, tracking_url)
+            base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
                 base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'stages'
             )
@@ -525,16 +536,20 @@ class SparkCheck(AgentCheck):
                 tags.extend(addl_tags)
                 tags.append('status:%s' % str(status).lower())
 
+                stage_id = stage.get('stageId')
+                if stage_id is not None:
+                    tags.append('stage_id:{}'.format(stage_id))
+
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', COUNT, 1, tags)
 
-    def _spark_executor_metrics(self, instance, running_apps, addl_tags):
+    def _spark_executor_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark executor.
         """
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
 
-            base_url = self._get_request_url(instance, tracking_url)
+            base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
                 base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'executors'
             )
@@ -548,16 +563,23 @@ class SparkCheck(AgentCheck):
                 else:
                     self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
 
+                    if is_affirmative(self.instance.get('executor_level_metrics', False)):
+                        self._set_metrics_from_json(
+                            tags + ['executor_id:{}'.format(executor.get('id', 'unknown'))],
+                            executor,
+                            SPARK_EXECUTOR_LEVEL_METRICS,
+                        )
+
             if len(response):
                 self._set_metric('spark.executor.count', COUNT, len(response), tags)
 
-    def _spark_rdd_metrics(self, instance, running_apps, addl_tags):
+    def _spark_rdd_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each Spark RDD.
         """
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
 
-            base_url = self._get_request_url(instance, tracking_url)
+            base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
                 base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'storage/rdd'
             )
@@ -571,13 +593,13 @@ class SparkCheck(AgentCheck):
             if len(response):
                 self._set_metric('spark.rdd.count', COUNT, len(response), tags)
 
-    def _spark_streaming_statistics_metrics(self, instance, running_apps, addl_tags):
+    def _spark_streaming_statistics_metrics(self, running_apps, addl_tags):
         """
         Get metrics for each application streaming statistics.
         """
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
             try:
-                base_url = self._get_request_url(instance, tracking_url)
+                base_url = self._get_request_url(tracking_url)
                 response = self._rest_request_to_json(
                     base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'streaming/statistics'
                 )
@@ -592,6 +614,44 @@ class SparkCheck(AgentCheck):
                 # then it means that the application is not a streaming application, we should skip metric submission
                 if e.response.status_code != 404:
                     raise
+
+    def _spark_structured_streams_metrics(self, running_apps, addl_tags):
+        """
+        Get metrics for each application structured stream.
+        Requires:
+        - The Metric Servlet to be enabled to path <APP_URL>/metrics/json (enabled by default)
+        - `SET spark.sql.streaming.metricsEnabled=true` in the app
+        """
+
+        for app_name, tracking_url in itervalues(running_apps):
+            try:
+                base_url = self._get_request_url(tracking_url)
+                response = self._rest_request_to_json(
+                    base_url, self.metricsservlet_path, SPARK_SERVICE_CHECK, addl_tags
+                )
+                self.log.debug('Structured streaming metrics: %s', response)
+                response = {
+                    metric_name: v['value']
+                    for metric_name, v in iteritems(response.get('gauges'))
+                    if 'streaming' in metric_name and 'value' in v
+                }
+                for gauge_name, value in iteritems(response):
+                    match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
+                    if not match:
+                        continue
+                    groups = match.groupdict()
+                    metric_name = groups['metric_name']
+                    if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        continue
+                    metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
+                    tags = ['app_name:%s' % str(app_name)]
+                    tags.extend(addl_tags)
+                    self._set_metric(metric_name, submission_type, value, tags=tags)
+            except HTTPError as e:
+                self.log.debug(
+                    "No structured streaming metrics to collect from" " app %s. %s", app_name, e, exc_info=True
+                )
+                pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         """

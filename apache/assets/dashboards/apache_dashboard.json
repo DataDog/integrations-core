@@ -1,0 +1,576 @@
+{
+    "author_name": "Datadog",
+    "description": "## Apache\n\nThis dashboard provides a high-level overview of your Apache web server. Monitor asynchronous connections, network throughput and performance.\n\n- [Apache integration docs](https://docs.datadoghq.com/integrations/apache/?tab=host)\n- [How to monitor Apache web server](https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/)",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        }
+    ],
+    "title": "Apache - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "zoom",
+                "type": "image",
+                "url": "/static/images/logos/apache_large.svg"
+            },
+            "id": 0,
+            "layout": {
+                "height": 9,
+                "width": 18,
+                "x": 0,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# [Throughput](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/#work-metrics)",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1,
+            "layout": {
+                "height": 5,
+                "width": 95,
+                "x": 67,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "sum:apache.net.request_per_s{$host,$scope}",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Rate of requests",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 2,
+            "layout": {
+                "height": 21,
+                "width": 47,
+                "x": 115,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "top(avg:apache.performance.cpu_load{$host,$scope} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Apache process CPU usage (top 10 hosts)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "toplist"
+            },
+            "id": 3,
+            "layout": {
+                "height": 25,
+                "width": 47,
+                "x": 19,
+                "y": 51
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# [Resource utilization](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/#resource-utilization-and-activity-metrics)",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 19,
+                "y": 45
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "q": "sum:apache.performance.idle_workers{$host,$scope}, sum:apache.performance.busy_workers{$host,$scope}",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Busy vs. idle worker threads",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 5,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 19,
+                "y": 77
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Status",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 19,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "q": "sum:apache.conns_async_closing{$host,$scope}.rollup(max), sum:apache.conns_async_writing{$host,$scope}.rollup(max), sum:apache.conns_async_keep_alive{$host,$scope}.rollup(max)",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Async connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7,
+            "layout": {
+                "height": 17,
+                "width": 23,
+                "x": 19,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "group": [],
+                "no_group_hosts": true,
+                "no_metric_hosts": false,
+                "requests": {
+                    "fill": {
+                        "q": "avg:apache.net.request_per_s{$scope} by {host}"
+                    }
+                },
+                "scope": [
+                    "$scope"
+                ],
+                "style": {
+                    "palette": "green_to_orange",
+                    "palette_flip": false
+                },
+                "title": "Requests per second per host",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "hostmap"
+            },
+            "id": 8,
+            "layout": {
+                "height": 25,
+                "width": 47,
+                "x": 67,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "q": "sum:apache.conns_total{$host,$scope}.rollup(max)",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Total async connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 9,
+            "layout": {
+                "height": 17,
+                "width": 23,
+                "x": 43,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "# [Connection](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/#worker-resource-metrics-to-watch)",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 10,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 19,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If you see a lot of connections in a keep-alive state, you may be getting many requests from clients that don\u2019t make subsequent requests (and therefore do not help you reap the intended benefits of keep-alive connections).\n\nAsync connection metrics are only available for event MPM users.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 11,
+            "layout": {
+                "height": 28,
+                "width": 17,
+                "x": 0,
+                "y": 12
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If you see CPU usage continually rising on your Apache servers, this can indicate that you don\u2019t have enough resources to serve the current rate of requests. \n\nIf you are running a database and/or application server on the same host as Apache, you should consider moving them onto separate machines. This gives you more flexibility to scale each layer of your environment (database, application, and web servers) as needed.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 12,
+            "layout": {
+                "height": 33,
+                "width": 17,
+                "x": 0,
+                "y": 42
+            }
+        },
+        {
+            "definition": {
+                "check": "apache.can_connect",
+                "group": "$host",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "$host",
+                    "$scope"
+                ],
+                "time": {
+                    "live_span": "10m"
+                },
+                "title": "Server can connect",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 13,
+            "layout": {
+                "height": 13,
+                "width": 23,
+                "x": 19,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 0
+                            }
+                        ],
+                        "q": "min:apache.performance.uptime{$host,$scope}"
+                    }
+                ],
+                "time": {
+                    "live_span": "1h"
+                },
+                "title": "Minimum uptime",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 14,
+            "layout": {
+                "height": 13,
+                "width": 23,
+                "x": 43,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "sum:apache.net.bytes{$host,$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Bytes served",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 15,
+            "layout": {
+                "height": 17,
+                "width": 47,
+                "x": 67,
+                "y": 33
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "If the rate of requests is dramatically increasing, you may want to take measures to make sure that you have enough resources to handle the load, and/or to determine if it is illegitimate traffic (e.g. a denial of service attack).\n\nIf the rate is rapidly decreasing, it could point to problems elsewhere (for example, your servers may be swapping to disk, or your database could be crashing).",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 16,
+            "layout": {
+                "height": 31,
+                "width": 18,
+                "x": 164,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "A worker is considered \u201cbusy\u201d if it is in any of the following states: reading, writing, keep-alive, logging, closing, or gracefully finishing.\n\nAn \u201cidle\u201d worker is not in any of the busy states; the number of idle workers is shown on Apache\u2019s mod_status page.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 17,
+            "layout": {
+                "height": 22,
+                "width": 17,
+                "x": 0,
+                "y": 77
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "sum:apache.net.bytes_per_s{$host,$scope}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "Rate of bytes served",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 18,
+            "layout": {
+                "height": 21,
+                "width": 47,
+                "x": 115,
+                "y": 29
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitors the average number of bytes served by the Apache Web Server per second.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 19,
+            "layout": {
+                "height": 9,
+                "width": 18,
+                "x": 164,
+                "y": 35
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:apache",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "Log Events",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 6745895158331766,
+            "layout": {
+                "height": 36,
+                "width": 95,
+                "x": 67,
+                "y": 57
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Logs",
+                "font_size": "24",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3962684562665668,
+            "layout": {
+                "height": 5,
+                "width": 95,
+                "x": 67,
+                "y": 51
+            }
+        }
+    ]
+}

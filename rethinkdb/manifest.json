@@ -29,6 +29,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
+    "docs": {
+      "spec": "assets/docs/spec.yaml"
+    },
     "dashboards": {
       "RethinkDB Overview": "assets/dashboards/overview.json"
     },
@@ -37,6 +40,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "rethinkdb"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

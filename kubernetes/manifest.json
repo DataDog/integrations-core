@@ -24,25 +24,23 @@
   "integration_id": "kubernetes",
   "assets": {
     "monitors": {
-      "[kubernetes] Monitor Kubernetes Cluster CPU Usage": "assets/monitors/monitor_cluster_cpu.json",
-      "[kubernetes] Monitor Kubernetes Cluster Memory Usage": "assets/monitors/monitor_cluster_memory.json",
-      "[kubernetes] Monitor Kubernetes Pods Terminated": "assets/monitors/monitor_containers_terminated.json",
       "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",
-      "[kubernetes] Monitor Kubernetes Node High Disk Usage": "assets/monitors/monitor_high_disk_usage_node.json",
-      "[kubernetes] Monitor Unavailable Kubernetes Nodes": "assets/monitors/monitor_node_unavailable.json",
+      "[kubernetes] Monitor Unschedulable Kubernetes Nodes": "assets/monitors/monitor_node_unavailable.json",
       "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_crashloopbackoff.json",
-      "[kubernetes] Monitor Kubernetes Pod Memory Limit Reached": "assets/monitors/monitor_pod_memory_limit.json",
+      "[kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_imagepullbackoff.json",
       "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces": "assets/monitors/monitor_pods_failed_state.json",
       "[kubernetes] Monitor Kubernetes Pods Restarting": "assets/monitors/monitor_pods_restarting.json",
-      "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json",
-      "[kubernetes] Monitor Kubernetes Unavailable Pods in Deployments": "assets/monitors/monitor_unavailable_pods.json"
+      "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
     },
     "dashboards": {
       "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
       "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
-      "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json"
+      "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json",
+      "Kubernetes ReplicaSets Overview": "assets/dashboards/kubernetes_replicasets.json",
+      "Kubernetes Services Overview": "assets/dashboards/kubernetes_services.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

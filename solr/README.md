@@ -16,13 +16,28 @@ This check is JMX-based, so you need to enable JMX Remote on your Solr servers. 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample solr.d/conf.yaml][6] for all available configuration options.
 
    ```yaml
+   init_config:
+
+     ## @param is_jmx - boolean - required
+     ## Whether or not this file is a configuration for a JMX integration.
+     #
+     is_jmx: true
+
+     ## @param collect_default_metrics - boolean - required
+     ## Whether or not the check should collect all default metrics.
+     #
+     collect_default_metrics: true
+    
    instances:
      ## @param host - string - required
      ## Solr host to connect to.
@@ -113,6 +128,9 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
       bean: second_bean_name
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery with JMX][2] guide.
@@ -152,6 +170,8 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
 
 See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Docker environments.
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

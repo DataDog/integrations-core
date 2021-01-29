@@ -1,0 +1,38 @@
+{
+   "pagination": {
+      "total_results": 2,
+      "total_pages": 1,
+      "first": {
+         "href": "https://api.domain.com/v3/organizations?page=1&per_page=50"
+      },
+      "last": {
+         "href": "https://api.domain.com/v3/organizations?page=1&per_page=50"
+      },
+      "next": null,
+      "previous": null
+   },
+   "resources": [
+      {
+         "guid": "321c58b0-777b-472f-812e-c08c53817074",
+         "created_at": "2019-05-17T13:06:27Z",
+         "updated_at": "2020-07-21T14:06:00Z",
+         "name": "org_3",
+         "links": {
+            "self": {
+               "href": "https://api.domain.com/v3/organizations/671557cf-edcd-49df-9863-ee14513d13c7"
+            }
+         }
+      },
+      {
+         "guid": "0ba4c8cb-9e71-4d6e-b6ff-74e301ed6467",
+         "created_at": "2019-05-21T09:42:45Z",
+         "updated_at": "2019-05-21T09:42:45Z",
+         "name": "org_4",
+         "links": {
+            "self": {
+               "href": "https://api.domain.com/v3/organizations/8c19a50e-7974-4c67-adea-9640fae21526"
+            }
+         }
+      }
+   ]
+}

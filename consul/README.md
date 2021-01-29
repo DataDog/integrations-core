@@ -29,9 +29,12 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric Collection
 
@@ -78,6 +81,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
@@ -116,7 +122,7 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
     }
     ```
 
-1. Update the [Datadog Agent main configuration file][16] `datadog.yaml` by adding the following configs to ensure metrics are tagged correctly:
+2. Update the [Datadog Agent main configuration file][16] `datadog.yaml` by adding the following configs to ensure metrics are tagged correctly:
 
    ```yaml
    # dogstatsd_mapper_cache_size: 1000  # default to 1000
@@ -128,26 +134,57 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
            match_type: "regex"
            name: "consul.http.request"
            tags:
-             http_method: "$1"
+             method: "$1"
              path: "$2"
          - match: 'consul\.raft\.replication\.appendEntries\.logs\.([0-9a-f-]+)'
            match_type: "regex"
            name: "consul.raft.replication.appendEntries.logs"
            tags:
-             consul_node_id: "$1"
+             peer_id: "$1"
          - match: 'consul\.raft\.replication\.appendEntries\.rpc\.([0-9a-f-]+)'
            match_type: "regex"
            name: "consul.raft.replication.appendEntries.rpc"
            tags:
-             consul_node_id: "$1"
+             peer_id: "$1"
          - match: 'consul\.raft\.replication\.heartbeat\.([0-9a-f-]+)'
            match_type: "regex"
            name: "consul.raft.replication.heartbeat"
            tags:
-             consul_node_id: "$1"
+             peer_id: "$1"
    ```
 
 3. [Restart the Agent][6].
+
+#### OpenMetrics
+
+Instead of using DogStatsD, you can enable the `use_prometheus_endpoint` configuration option to get the same metrics from the Prometheus endpoint. 
+
+
+**Note**: Use either the DogStatsD method or the Prometheus method, do not enable both for the same instance.
+
+1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
+
+    ```conf
+    {
+      ...
+      "telemetry": {
+        "prometheus_retention_time": "360h"
+      },
+      ...
+    }
+    ```
+
+2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the prometheus endpoint.
+    ```yaml
+    instances:
+        - url: <EXAMPLE>
+          use_prometheus_endpoint: true
+    ```
+
+3. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -222,3 +259,4 @@ Need help? Contact [Datadog support][13].
 [14]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [15]: https://engineering.datadoghq.com/consul-at-datadog
 [16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
+[17]: https://www.consul.io/docs/agent/options#telemetry-prometheus_retention_time

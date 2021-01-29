@@ -7,6 +7,8 @@ Helpers for parsing the `metrics` section of a config file.
 from logging import Logger
 from typing import Dict, List, NamedTuple, Optional, Sequence, TypedDict, Union, cast
 
+import six
+
 from datadog_checks.base import ConfigurationError
 
 from ..models import OID
@@ -153,6 +155,8 @@ def _parse_oid_metric(metric):
     """
     Parse a fully resolved OID/name metric.
 
+    Note: This `OID/name` syntax is deprecated in favour of `symbol` syntax.
+
     Example:
 
     ```
@@ -192,6 +196,12 @@ def _parse_symbol_metric(metric):
     metrics:
       - MIB: IF-MIB
         symbol: <string or OID/name object>
+      - MIB: IF-MIB
+        symbol:                     # MIB-less syntax
+          OID: 1.3.6.1.2.1.6.5.0
+          name: tcpActiveOpens
+      - MIB: IF-MIB
+        symbol: tcpActiveOpens      # require MIB syntax
     ```
     """
     mib = metric['MIB']
@@ -344,7 +354,10 @@ def merge_table_batches(target, source):
 
 
 IndexTag = NamedTuple('IndexTag', [('parsed_metric_tag', ParsedMetricTag), ('index', int)])
-ColumnTag = NamedTuple('ColumnTag', [('parsed_metric_tag', ParsedMetricTag), ('column', str)])
+ColumnTag = NamedTuple(
+    'ColumnTag',
+    [('parsed_metric_tag', ParsedMetricTag), ('column', str), ('index_slices', List[slice])],
+)
 
 ParsedColumnMetricTag = NamedTuple(
     'ParsedColumnMetricTag',
@@ -438,23 +451,18 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
 
 def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     # type: (str, ParsedSymbol, ColumnTableMetricTag) -> ParsedColumnMetricTag
-    column = metric_tag['column']
-
-    if isinstance(column, dict) and 'table' in column:
-        # Prevent a common error due to bad indentation...
-        raise ConfigurationError(
-            'found unexpected "table" key in column {} '
-            '("table" should be set on the `metric_tag` - this is probably an indentation issue)'.format(column)
-        )
-
-    parsed_column = _parse_symbol(mib, column)
+    parsed_column = _parse_symbol(mib, metric_tag['column'])
 
     batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
 
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
         column_tags=[
-            ColumnTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), column=parsed_column.name)
+            ColumnTag(
+                parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)),
+                column=parsed_column.name,
+                index_slices=_parse_index_slices(metric_tag),
+            )
         ],
         table_batches=batches,
     )
@@ -481,3 +489,51 @@ def _parse_index_metric_tag(metric_tag):
     index_mappings = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else {}
 
     return ParsedIndexMetricTag(index_tags=index_tags, index_mappings=index_mappings)
+
+
+def _parse_index_slices(metric_tag):
+    # type: (ColumnTableMetricTag) -> List[slice]
+    """
+    Transform index_transform into list of index slices.
+
+    `index_transform` is needed to support tagging using another table with different indexes.
+
+    Example: TableB have two indexes indexX (1 digit) and indexY (3 digits).
+        We want to tag by an external TableA that have indexY (3 digits).
+
+        For example TableB has a row with full index `1.2.3.4`, indexX is `1` and indexY is `2.3.4`.
+        TableA has a row with full index `2.3.4`, indexY is `2.3.4` (matches indexY of TableB).
+
+        SNMP integration doesn't know how to compare the full indexes from TableB and TableA.
+        We need to extract a subset of the full index of TableB to match with TableA full index.
+
+        Using the below `index_transform` we provide enough info to extract a subset of index that
+        will be used to match TableA's full index.
+
+        ```yaml
+        index_transform:
+          - start: 1
+          - end: 3
+        ```
+    """
+    raw_index_slices = metric_tag.get('index_transform')
+    index_slices = []  # type: List[slice]
+
+    if raw_index_slices:
+        for rule in raw_index_slices:
+            if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
+                raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
+            start, end = rule['start'], rule['end']
+            if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
+                raise ConfigurationError('Transform rule start and end must be integers. Invalid rule: {}'.format(rule))
+            if start > end:
+                raise ConfigurationError(
+                    'Transform rule end should be greater than start. Invalid rule: {}'.format(rule)
+                )
+            if start < 0:
+                raise ConfigurationError('Transform rule start must be greater than 0. Invalid rule: {}'.format(rule))
+            # For a better user experience, the `end` in metrics definition is inclusive.
+            # We +1 to `end` since the `end` in python slices is exclusive.
+            index_slices.append(slice(start, end + 1))
+
+    return index_slices

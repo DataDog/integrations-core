@@ -1,0 +1,28 @@
+{
+	"name": "[MongoDB] High incoming connections",
+	"type": "query alert",
+	"query": "avg(last_5m):100 * sum:mongodb.connections.current{*} by {replset_name} / ( sum:mongodb.connections.current{*} by {replset_name} + sum:mongodb.connections.available{*} by {replset_name} ) > 90",
+	"message": "The number of incoming connections is reaching the maximum. {{value}} % of the available connections have been used on {{replset_name.name}}",
+	"tags": [
+		"integration:mongodb"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 90,
+			"warning": 70
+		}
+	},
+  "recommended_monitor_metadata": {
+    "description": "Notify your team when incoming connections are close to reaching the maximum available."
+  }
+}

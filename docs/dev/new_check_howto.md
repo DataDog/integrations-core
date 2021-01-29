@@ -39,7 +39,7 @@ git clone https://github.com/DataDog/integrations-extras.git
 The [Developer Toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```bash
-pip install "datadog-checks-dev[cli]"
+pip3 install "datadog-checks-dev[cli]"
 ```
 
 If you chose to clone this repository to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file:
@@ -284,7 +284,7 @@ For this example, those files would have the following form:
 The `awesome/assets/configuration/spec.yaml` used to generate `awesome/datadog_checks/awesome/data/conf.yaml.example`:
 
 ```yaml
-name: awesome
+name: Awesome
 files:
 - name: awesome.yaml
   options:
@@ -312,8 +312,9 @@ files:
       value:
         type: boolean
         example: false
-    # Try uncommenting this template to see what happens!
-    #- template: instances/default
+    # Try transposing these templates to see what happens!
+    #- template: instances/http
+    - template: instances/default
 ```
 
 Generate `conf.yaml.example` using `ddev`:

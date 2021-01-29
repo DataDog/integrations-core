@@ -1,0 +1,55 @@
+name: Kube_scheduler
+files:
+- name: kube-scheduler.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+    - name: leader_election
+      description: |
+        Monitor the leader-election process on the kube-system:kube-scheduler endpoints.
+      value:
+        type: boolean
+        example: true
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.value.example: http://localhost:10251/metrics
+        prometheus_url.display_priority: 1
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - kube-scheduler
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: prometheus_url
+      required: true
+      description: The URL where your application metrics are exposed by Prometheus.
+      value:
+        example: http://%%host%%:10251/metrics
+        type: string
+    - name: bearer_token_auth
+      description: |
+        Used if you are using RBACs and need the Agent to authenticate
+        against the APIServer to retrieve metrics. Default to true.
+      value:
+        type: boolean
+        example: true
+    - name: bearer_token_path
+      description: Used to specify the path where the service account token is located.
+      value:
+        type: string
+        default: /var/run/secrets/kubernetes.io/serviceaccount/token
+        example: /var/run/secrets/kubernetes.io/serviceaccount/token
+    - name: ssl_verify
+      description: Used to verify self signed certificates.
+      value:
+        type: boolean
+        default: false
+        example: false

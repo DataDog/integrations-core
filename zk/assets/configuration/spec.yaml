@@ -48,6 +48,14 @@ files:
               type: boolean
 
           - template: instances/default
+          - name: use_tls
+            description: |
+              This instructs the Zookeeper check to connect using TLS.
+            value:
+              example: false
+              type: boolean
+          - template: instances/tls
+
 
       - template: logs
         example:

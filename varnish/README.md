@@ -21,9 +21,12 @@ The Varnish check is included in the [Datadog Agent][3] package. No additional i
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Prepare Varnish
 
@@ -93,12 +96,18 @@ _Available for Agent versions >6.0_
 
 6. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 Configuration of the Varnish check using Autodiscovery in containerized environments is not supported. Collecting metrics in this type of environment may be possible by pushing metrics to DogStatsD using a StatsD plugin. The following 3rd party plugins are available:
 
 - [libvmod-statsd][7]
 - [prometheus_varnish_exporter][8]
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

@@ -1,0 +1,28 @@
+{
+    "shards": {
+        "shard01": 70
+    },
+    "n": 70,
+    "ok": 1.0,
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600331857,
+            "i": 1
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600331857,
+                "i": 1
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    }
+}

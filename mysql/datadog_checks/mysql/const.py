@@ -230,6 +230,9 @@ GALERA_VARS = {
     'wsrep_cluster_size': ('mysql.galera.wsrep_cluster_size', GAUGE),
     'wsrep_local_recv_queue_avg': ('mysql.galera.wsrep_local_recv_queue_avg', GAUGE),
     'wsrep_flow_control_paused': ('mysql.galera.wsrep_flow_control_paused', GAUGE),
+    'wsrep_flow_control_paused_ns': ('mysql.galera.wsrep_flow_control_paused_ns', MONOTONIC),
+    'wsrep_flow_control_recv': ('mysql.galera.wsrep_flow_control_recv', MONOTONIC),
+    'wsrep_flow_control_sent': ('mysql.galera.wsrep_flow_control_sent', MONOTONIC),
     'wsrep_cert_deps_distance': ('mysql.galera.wsrep_cert_deps_distance', GAUGE),
     'wsrep_local_send_queue_avg': ('mysql.galera.wsrep_local_send_queue_avg', GAUGE),
 }

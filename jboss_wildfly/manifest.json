@@ -28,10 +28,13 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "JBoss WildFly": "assets/dashboards/jboss_wildfly.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "jboss_wildfly"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

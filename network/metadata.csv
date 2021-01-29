@@ -1,4 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+system.net.aws.ec2.bw_in_allowance_exceeded,gauge,,packet,,The number of packets shaped because the inbound aggregate bandwidth exceeded the maximum for the instance.,0,system,bw in allowance exceeded
+system.net.aws.ec2.bw_out_allowance_exceeded,gauge,,packet,,The number of packets shaped because the outbound aggregate bandwidth exceeded the maximum for the instance.,0,system,bw out allowance exceeded
+system.net.aws.ec2.conntrack_allowance_exceeded,gauge,,packet,,The number of packets shaped because connection tracking exceeded the maximum for the instance and new connections could not be established.,0,system,conntrack allowance exceeded
+system.net.aws.ec2.linklocal_allowance_exceeded,gauge,,packet,,The number of packets shaped because the PPS of the traffic to local proxy services exceeded the maximum for the network interface.,0,system,linklocal allowance exceeded
+system.net.aws.ec2.pps_allowance_exceeded,gauge,,packet,,The number of packets shaped because the bidirectional PPS exceeded the maximum for the instance.,0,system,pps allowance exceeded
 system.net.bytes_rcvd,gauge,,byte,second,The number of bytes received on a device per second.,0,system,bytes rcvd
 system.net.bytes_sent,gauge,,byte,second,The number of bytes sent from a device per second.,0,system,bytes sent
 system.net.conntrack.acct,gauge,,unit,,Boolean to enable connection tracking flow accounting. 64-bit byte and packet counters per flow are added.,0,system,acct
@@ -58,6 +63,16 @@ system.net.tcp.listen_drops.count,count,,,,Total number of times connections hav
 system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog (Linux only). Available since Agent v5.14.0.,-1,system,tcp backlog drops
 system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog (Linux only).,-1,system,tcp backlog drops
 system.net.tcp.failed_retransmits.count,count,,packet,,Total number of packets that failed to be retransmitted (Linux only).,-1,system,tcp failed retrans
+system.net.tcp.recv_q.95percentile,gauge,,byte,,The 95th percentile of the size of the TCP receive queue.,0,system,recv-q 95th
+system.net.tcp.recv_q.avg,gauge,,byte,,The average TCP receive queue size.,0,system,recv-q avg
+system.net.tcp.recv_q.count,rate,,connection,second,The rate of connections.,0,system,recv-q count
+system.net.tcp.recv_q.max,gauge,,byte,,The maximum TCP receive queue size.,0,system,recv-q max
+system.net.tcp.recv_q.median,gauge,,byte,,The median TCP receive queue size.,0,system,recv-q median
+system.net.tcp.send_q.95percentile,gauge,,byte,,The 95th percentile of the size of the TCP send queue.,0,system,send-q 95th
+system.net.tcp.send_q.avg,gauge,,byte,,The average TCP send queue size.,0,system,send-q avg
+system.net.tcp.send_q.count,rate,,connection,second,The rate of connections.,0,system,send-q count
+system.net.tcp.send_q.max,gauge,,byte,,The maximum TCP send queue size.,0,system,send-q max
+system.net.tcp.send_q.median,gauge,,byte,,The median TCP send queue size.,0,system,send-q median
 system.net.tcp4.closing,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 closing
 system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 established connections. ,0,system,tcp4 established
 system.net.tcp4.listening,gauge,,connection,second,The number of TCP IPv4 listening connections. ,0,system,tcp4 listening

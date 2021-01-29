@@ -5,7 +5,7 @@ import json
 
 import click
 
-from ...utils import complete_valid_checks, get_saved_views, get_valid_integrations, load_saved_views
+from ...utils import complete_valid_checks, get_assets_from_manifest, get_valid_integrations, load_saved_views
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success
 
 REQUIRED_HEADERS = {'name', 'page', 'query', 'type'}
@@ -44,12 +44,12 @@ def saved_views(integration):
     errors = False
     all_saved_views = {}
     if integration:
-        all_saved_views[integration] = get_saved_views(integration)
+        all_saved_views[integration], _ = get_assets_from_manifest(integration, 'saved_views')
     else:
         integrations = sorted(get_valid_integrations())
         all_saved_views = {}
         for integration in integrations:
-            all_saved_views[integration] = get_saved_views(integration)
+            all_saved_views[integration], _ = get_assets_from_manifest(integration, 'saved_views')
 
     for integration, saved_views in all_saved_views.items():
 

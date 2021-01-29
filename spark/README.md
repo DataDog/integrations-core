@@ -21,9 +21,12 @@ The Spark check is included in the [Datadog Agent][3] package. No additional ins
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. The following parameters may require updating. See the [sample spark.d/conf.yaml][5] for all available configuration options.
 
@@ -48,6 +51,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -58,8 +64,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
-##### Log collection
+### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -85,7 +93,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 3. [Restart the Agent][6].
 
 See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
-
 
 ### Validation
 
@@ -124,7 +131,12 @@ Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Res
 
 ### Spark on AWS EMR
 
-To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install the [Datadog Agent][10] and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
+To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install the [Datadog Agent] [10]:
+
+For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
+
+For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configuration file with the [proper values on each EMR node] [11]. 
+
 
 ## Further Reading
 

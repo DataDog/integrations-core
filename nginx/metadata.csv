@@ -14,7 +14,7 @@ nginx.cache.bypass.responses,gauge,,response,,The total number of responses not 
 nginx.cache.bypass.responses_count,count,,response,,The total number of responses not taken from the cache (shown as count),0,nginx,cache bypass responses
 nginx.cache.bypass.responses_written,gauge,,response,,The total number of responses written to the cache,0,nginx,cache bypass responses_written
 nginx.cache.bypass.responses_written_count,count,,response,,The total number of responses written to the cache (shown as count),0,nginx,cache bypass responses_written
-nginx.cache.cold,gauge,,response,,A boolean value indicating whether the "cache loader" process is still loading data from disk into the cache,0,nginx,cache cold
+nginx.cache.cold,gauge,,response,,A boolean value indicating whether the cache loader process is still loading data from disk into the cache,0,nginx,cache cold
 nginx.cache.expired.bytes,gauge,,byte,,The total number of bytes read from the proxied server,0,nginx,cache expired bytes
 nginx.cache.expired.bytes_count,count,,byte,,The total number of bytes read from the proxied server (shown as count),0,nginx,cache expired bytes
 nginx.cache.expired.bytes_written,gauge,,byte,,The total number of bytes written to the cache,0,nginx,cache expired bytes_written
@@ -180,4 +180,11 @@ nginx.upstream.peers.sent_count,count,,byte,,The total amount of data sent to th
 nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
 nginx.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold (shown as count).,0,nginx,upstr peers unavail
 nginx.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
+nginx.stream.zone_sync.status.nodes_online,gauge,,,,The number of peers this node is connected to.,0,nginx,Count of nodes online.
+nginx.stream.zone_sync.status.msgs_in,gauge,,message,,The number of messages received by this node.,0,nginx,Total count of messages received.
+nginx.stream.zone_sync.status.msgs_out,gauge,,message,,The number of messages sent by this node.,0,nginx,Total count of messages sent.
+nginx.stream.zone_sync.status.bytes_in,gauge,,byte,,The number of bytes received by this node.,0,nginx,Total count of bytes received.
+nginx.stream.zone_sync.status.bytes_out,gauge,,byte,,The number of bytes sent by this node.,0,nginx,Total coun tof bytes sent.
+nginx.stream.zone_sync.zone.records_total,gauge,,,,The total number of records stored in the shared memory zone.,0,nginx,Count of records in memory zone.
+nginx.stream.zone_sync.zone.records_pending,gauge,,,,The number of records that need to be sent to the cluster.,0,nginx, Count of records pending.
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version

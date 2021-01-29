@@ -83,7 +83,7 @@ Run `ddev config show` to see if your GitHub user and token is set.
 If not:
 
 1. Run `ddev config set github.user <YOUR_GITHUB_USERNAME>`
-1. Create a [personal access token][github-personal-access-token] with `public_repo` permissions
+1. Create a [personal access token][github-personal-access-token] with `public_repo` and `read:org` permissions
 1. Run `ddev config set github.token` then paste the token
 1. [Enable single sign-on][github-saml-single-sign-on] for the token
 
@@ -106,4 +106,4 @@ If not:
 
 To automatically assign [QA cards](../process/agent-release/pre-release.md#create-items), add a `trello_users_$team` table, with keys being
 GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member
-information in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).
+information in [this document](https://github.com/DataDog/mars-jenkins-scripts/blob/master/release_documentation/users_github_trello.toml).

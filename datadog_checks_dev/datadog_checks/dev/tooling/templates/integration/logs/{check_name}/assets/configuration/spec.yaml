@@ -7,4 +7,3 @@ files:
     - type: file
       path: /var/log/{check_name}.log
       source: {check_name}
-      service: <SERVICE>

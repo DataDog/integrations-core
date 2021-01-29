@@ -12,65 +12,68 @@ The Vault check is included in the [Datadog Agent][3] package. No additional ins
 
 #### Prerequisites
 
-For Vault check to work properly, you need to a) enable unauthenticated access to vault metrics or b) provide a Vault client token.
+1. Ensure you have enabled [Prometheus metrics in the Vault configuration][16].
 
-a) Set Vault [`unauthenticated_metrics_access`][14] configuration to `true`.
+2. For the Vault check to work properly, you need to either enable unauthenticated access to Vault metrics or provide a Vault client token:
 
-This will allow unauthenticated access to the `/v1/sys/metrics` endpoint.
+   **To enable unauthenticated access**, set Vault's [`unauthenticated_metrics_access`][14] configuration to `true`. This allows unauthenticated access to the `/v1/sys/metrics` endpoint.
+   
+     **Note**: The `/sys/metrics` endpoint requires Vault v1.1.0 or higher to collect metrics.
+   
+    **To use a Vault client token**, follow the example below. The example uses the JWT auth method, but you can also use other [auth methods][15]. 
+    
+The Vault integration requires the following capabilities:
 
-b) Use a Vault client token.
+     Content of `metrics_policy.hcl`:
+   ```text
+   path "sys/metrics*" {
+     capabilities = ["read", "list"]
+   }
+   ```
 
-Below is an example using JWT auth method, but you can also use other [auth methods][15].
+      Setup policy and role:
 
-The capabilities needed for Vault integration to work properly are the following:
+   ```text
+   $ vault policy write metrics /path/to/metrics_policy.hcl
+   $ vault auth enable jwt
+   $ vault write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
+   $ vault write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
+   $ vault agent -config=/path/to/agent_config.hcl
+   ```
 
-Content of `metrics_policy.hcl`:
-```text
-path "sys/metrics*" {
-  capabilities = ["read", "list"]
-}
-```
+   Content of `agent_config.hcl`:
+   ```
+   exit_after_auth = true
+   pid_file = "/tmp/agent_pid"
 
-Setup policy and role:
+   auto_auth {
+     method "jwt" {
+       config = {
+         path = "<JWT_CLAIM_PATH>"
+         role = "datadog"
+       }
+     }
 
-```text
-$ vault policy write metrics /path/to/metrics_policy.hcl
-$ vault auth enable jwt
-$ vault write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
-$ vault write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
-$ vault agent -config=/path/to/agent_config.hcl
-```
+     sink "file" {
+       config = {
+         path = "<CLIENT_TOKEN_PATH>"
+       }
+     }
+   }
 
-Content of `agent_config.hcl`:
-```
-exit_after_auth = true
-pid_file = "/tmp/agent_pid"
-
-auto_auth {
-  method "jwt" {
-    config = {
-      path = "<JWT_CLAIM_PATH>"
-      role = "datadog"
-    }
-  }
-
-  sink "file" {
-    config = {
-      path = "<CLIENT_TOKEN_PATH>"
-    }
-  }
-}
-
-vault {
-  address = "http://0.0.0.0:8200"
-}
-```
+   vault {
+     address = "http://0.0.0.0:8200"
+   }
+   ```
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `vault.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your vault performance data. See the [sample vault.d/conf.yaml][5] for all available configuration options.
 
@@ -115,6 +118,9 @@ Follow the instructions below to configure this check for an Agent running on a 
     ```
 
 2. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -171,6 +177,9 @@ _Available for Agent versions >6.0_
        service: "<SERVICE_NAME>"
    ```
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `vault` under the Checks section.
@@ -188,17 +197,17 @@ This event fires when the cluster leader changes.
 
 ### Service Checks
 
-`vault.can_connect`:
-Returns CRITICAL if the Agent cannot connect to Vault, otherwise OK.
+**vault.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Vault, otherwise `OK`.
 
-`vault.unsealed`:
-Returns CRITICAL if Vault is sealed, otherwise OK.
+**vault.unsealed**:<br>
+Returns `CRITICAL` if Vault is sealed, otherwise `OK`.
 
-`vault.initialized`:
-Returns CRITICAL if Vault is not yet initialized, otherwise OK.
+**vault.initialized**:<br>
+Returns `CRITICAL` if Vault is not yet initialized, otherwise `OK`.
 
-`vault.prometheus.health`:
-Returns CRITICAL if the check cannot access the metrics endpoint. Otherwise, returns OK.
+**vault.prometheus.health**:<br>
+Returns `CRITICAL` if the check cannot access the metrics endpoint. Otherwise, returns `OK`.
 
 ## Troubleshooting
 
@@ -225,3 +234,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#not-finding-the-server-logs
 [14]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
 [15]: https://www.vaultproject.io/docs/auth
+[16]: https://www.vaultproject.io/docs/configuration/telemetry#prometheus

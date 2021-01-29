@@ -1,0 +1,220 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ##
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
+
+    ## @param proxy_host - string - optional
+    ## The host of your proxy server.
+    #
+    # proxy_host: <PROXY_HOST>
+
+    ## @param proxy_port - integer - optional
+    ## The port of your proxy server.
+    #
+    # proxy_port: <PROXY_PORT>
+
+    ## @param proxy_user - string - optional
+    ## The username to authenticate your proxy server.
+    #
+    # proxy_user: <PROXY_USER>
+
+    ## @param proxy_password - string - optional
+    ## The password to authenticate your proxy server.
+    #
+    # proxy_password: <PROXY_PASSWORD>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
+instances:
+
+    ## @param account - string - required
+    ## Name of your account (provided by Snowflake), including the platform and region if applicable.
+    ## For more information on Snowflake account names,
+    ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+    #
+  - account: <ACCOUNT>
+
+    ## @param user - string - required
+    ## Login name for the user.
+    #
+    user: <USER>
+
+    ## @param password - string - required
+    ## Password for the user
+    #
+    password: <PASSWORD>
+
+    ## @param role - string - required
+    ## Name of the role to use.
+    ##
+    ## By default, the SNOWFLAKE database is only accessible by the ACCOUNTADMIN role. Snowflake recommends
+    ## configuring a role specific for monitoring:
+    ## https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
+    #
+    role: <ROLE>
+
+    ## @param database - string - optional - default: SNOWFLAKE
+    ## Name of the default database to use.
+    #
+    # database: SNOWFLAKE
+
+    ## @param schema - string - optional - default: ACCOUNT_USAGE
+    ## Name of the default schema to use for the database.
+    #
+    # schema: ACCOUNT_USAGE
+
+    ## @param warehouse - string - optional
+    ## Name of the default warehouse to use.
+    #
+    # warehouse: <WAREHOUSE>
+
+    ## @param client_prefetch_threads - integer - optional - default: 4
+    ## The number of threads used to download the results sets. Increasing the value improves fetch
+    ## performance but requires more memory.
+    #
+    # client_prefetch_threads: 4
+
+    ## @param login_timeout - integer - optional - default: 60
+    ## Timeout in seconds for login. The login request gives up after the timeout length if the HTTP response succeeds.
+    #
+    # login_timeout: 60
+
+    ## @param ocsp_response_cache_filename - string - optional
+    ## Path for the OCSP response cache file. By default, the file is created in the cache directory:
+    ##   Linux   - ~/.cache/snowflake/ocsp_response_cache
+    ##   macOS   - ~/Library/Caches/Snowflake/ocsp_response_cache
+    ##   Windows - %USERPROFILE%\AppData\Local\Snowflake\Caches\ocsp_response_cache
+    #
+    # ocsp_response_cache_filename: <OCSP_RESPONSE_CACHE_FILENAME>
+
+    ## @param authenticator - string - optional - default: snowflake
+    ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
+    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+    #
+    # authenticator: <AUTHENTICATOR>
+
+    ## @param token - string - optional
+    ## Token used for OAuth connection to Snowflake.
+    #
+    # token: <TOKEN>
+
+    ## @param client_session_keep_alive - boolean - optional - default: false
+    ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
+    ## even if there is no activity from the user.
+    ##
+    ## By default, the connection will need to be renewed after four hours of inactivity.
+    #
+    # client_session_keep_alive: false
+
+    ## @param metric_groups - list of strings - optional
+    ## List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+    ##
+    ## The available metric groups are:
+    ##
+    ##   - snowflake.query
+    ##   - snowflake.billing
+    ##   - snowflake.storage
+    ##   - snowflake.storage.database
+    ##   - snowflake.storage.table
+    ##   - snowflake.logins
+    ##   - snowflake.data_transfer
+    ##   - snowflake.auto_recluster
+    ##   - snowflake.pipe
+    ##   - snowflake.replication
+    #
+    # metric_groups:
+    #   - snowflake.query
+    #   - snowflake.billing
+    #   - snowflake.storage
+    #   - snowflake.logins
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column. You can
+    ##                          use the `count` type to perform aggregation for queries that
+    ##                          return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:snowflake
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 3600
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    ##
+    ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
+    ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+    ##
+    ## Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
+    #
+    min_collection_interval: 3600
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

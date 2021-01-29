@@ -40,7 +40,12 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cilium performance data. See the [sample cilium.d/conf.yaml][4] for all available configuration options.
 
    - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
@@ -69,6 +74,9 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
@@ -89,6 +97,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "cilium-agent", "service": "cilium-agent"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -102,7 +112,8 @@ See [metadata.csv][7] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-`cilium.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+**cilium.prometheus.health**:<br>
+ Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ### Events
 

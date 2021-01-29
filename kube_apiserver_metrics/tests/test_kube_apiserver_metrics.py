@@ -49,9 +49,7 @@ def mock_get():
 
 @pytest.fixture()
 def mock_read_bearer_token():
-    with mock.patch(
-        'datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX",
-    ):
+    with mock.patch('datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX"):
         yield
 
 
@@ -82,6 +80,8 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.sum',
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.count',
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
+        NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
+        NAMESPACE + '.admission_controller_admission_duration_seconds.count',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',

@@ -132,9 +132,20 @@ instances:
     # ssl_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
 
     ## @param ssl_key_repository_location - string - optional - default: /var/mqm/ssl-db/client/KeyringClient
-    ## The location of the ssl keyring.
+    ## It specifies the location of the key database file in which keys and certificates are stored.
+    ## The key database file must have a file name of the form zzz.kdb , where zzz is user-selectable.
+    ## The KeyRepository field contains the path to this file, along with the file name stem
+    ## (all characters in the file name up to but not including the final .kdb).
+    ## Each key database file has an associated password stash file. This holds encoded passwords that are used to
+    ## allow programmatic access to the key database. The password stash file must reside in the same directory and
+    ## have the same file stem as the key database, and must end with the suffix .sth.
     #
     # ssl_key_repository_location: /var/mqm/ssl-db/client/KeyringClient
+
+    ## @param ssl_certificate_label - string - optional
+    ## Certificate label used for SSL connection.
+    #
+    # ssl_certificate_label: <SSL_CERTIFICATE_LABEL>
 
     ## @param queue_tag_re - mapping - optional
     ## Instruct the check to apply additional tags to matching
@@ -183,7 +194,9 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

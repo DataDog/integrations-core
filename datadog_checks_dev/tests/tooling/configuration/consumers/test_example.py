@@ -4,7 +4,7 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
+from datadog_checks.dev.tooling.specs.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
 
@@ -319,7 +319,9 @@ def test_section_example_indent():
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which Integration sent the logs.
-        ## service - required - The name of the service that generates the log.
+        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ##                       possible values are utf-16-le and utf-16-be.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
         ## tags - optional - Add tags to the collected logs.
         ##
@@ -381,7 +383,9 @@ def test_section_example_indent_required():
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which Integration sent the logs.
-        ## service - required - The name of the service that generates the log.
+        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ##                       possible values are utf-16-le and utf-16-be.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
         ## tags - optional - Add tags to the collected logs.
         ##
@@ -791,6 +795,68 @@ def test_option_string_type_not_default():
     )
 
 
+def test_option_string_type_not_default_example_default_value_none():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: None
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_string_type_not_default_example_default_value_null():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: null
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
 def test_section_description_length_limit():
     consumer = get_example_consumer(
         """
@@ -1117,6 +1183,50 @@ def test_compact_example():
     )
 
 
+def test_compact_example_long_line():
+    long_str = "This string is very long and has 50 chars in it !!"
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: array
+              compact_example: true
+              example:
+                - - {0}
+                  - {0}
+                  - {0}
+                  - {0}
+              items:
+                type: array
+                items:
+                  type: string
+        """.format(
+            long_str
+        )
+    )
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - list of lists - optional
+        ## words
+        #
+        # foo:
+        #   - [{0}, {0}, {0}, {0}]
+        """.format(
+            long_str
+        )
+    )
+
+
 def test_compact_example_nested():
     consumer = get_example_consumer(
         """
@@ -1315,5 +1425,89 @@ def test_enabled_override_required():
             ## bar words
             #
             # bar: <BAR>
+        """
+    )
+
+
+def test_option_multiple_types():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: foo
+              description: words
+              value:
+                oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+          -
+            ## @param foo - string or list of strings - optional
+            ## words
+            #
+            # foo: <FOO>
+        """
+    )
+
+
+def test_option_multiple_types_nested():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: foo
+              description: words
+              value:
+                oneOf:
+                - type: string
+                - type: array
+                  items:
+                    oneOf:
+                    - type: string
+                    - type: object
+                      required:
+                      - foo
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+          -
+            ## @param foo - string or (list of string or mapping) - optional
+            ## words
+            #
+            # foo: <FOO>
         """
     )

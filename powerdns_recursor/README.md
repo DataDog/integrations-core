@@ -38,9 +38,12 @@ If you're running pdns_recursor >= 4.1, just set `api-key`.
 
 Restart the recursor to enable the statistics API.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options:
 
@@ -81,6 +84,34 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][4].
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add the `dd-agent` user to the `systemd-journal` group by running:
+   ```text
+   usermod -a -G systemd-journal dd-agent
+   ```
+
+3. Add this configuration block to your `powerdns_recursor.d/conf.yaml` file to start collecting your PowerDNS Recursor Logs:
+
+   ```yaml
+   logs:
+     - type: journald
+       source: powerdns
+   ```
+
+    See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options.
+
+4. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
@@ -90,6 +121,17 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INTEGRATION_NAME>` | `powerdns_recursor`                                                              |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":8082, "api_key":"<POWERDNS_API_KEY>", "version": 3}` |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "powerdns"}`                  |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -101,15 +143,15 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+
 ### Events
 
 The PowerDNS Recursor check does not include any events.
 
 ### Service Checks
 
-**`powerdns.recursor.can_connect`**:
-
-Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
+**powerdns.recursor.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the recursor's statistics API, otherwise `OK`.
 
 ## Troubleshooting
 
@@ -123,3 +165,5 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
+

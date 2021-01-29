@@ -37,28 +37,35 @@ class Oracle(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Oracle, self).__init__(name, init_config, instances)
-        (
-            self._server,
-            self._user,
-            self._password,
-            self._service,
-            self._jdbc_driver,
-            self._tags,
-            only_custom_queries,
-        ) = self._get_config(self.instance)
+        self._server = self.instance.get('server')
+        self._user = self.instance.get('user')
+        self._password = self.instance.get('password')
+        self._service = self.instance.get('service_name')
+        self._jdbc_driver = self.instance.get('jdbc_driver_path')
+        self._tags = self.instance.get('tags') or []
+        self._service_check_tags = ['server:{}'.format(self._server)]
+        self._service_check_tags.extend(self._tags)
 
-        self.check_initializations.append(self.validate_config)
-
-        self._connection = None
+        self._cached_connection = None
 
         manager_queries = []
-        if not only_custom_queries:
+        if not self.instance.get('only_custom_queries', False):
             manager_queries.extend([queries.ProcessMetrics, queries.SystemMetrics, queries.TableSpaceMetrics])
 
         self._fix_custom_queries()
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self._tags,)
+        self._query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=manager_queries,
+            error_handler=self.handle_query_error,
+            tags=self._tags,
+        )
+
+        self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
+
+        self._current_errors = 0
 
     def _fix_custom_queries(self):
         """
@@ -86,43 +93,41 @@ class Oracle(AgentCheck):
             # JDBC doesn't support iter protocol
             return cursor.fetchall()
 
+    def handle_query_error(self, error):
+        self._current_errors += 1
+        self._cached_connection = None
+
+        return error
+
     def check(self, _):
-        self.create_connection()
-        with closing(self._connection):
-            self._query_manager.execute()
-            self._connection = None
+        self._current_errors = 0
 
-    def _get_config(self, instance):
-        server = instance.get('server')
-        user = instance.get('user')
-        password = instance.get('password')
-        service = instance.get('service_name')
-        jdbc_driver = instance.get('jdbc_driver_path')
-        tags = instance.get('tags') or []
-        only_custom_queries = instance.get('only_custom_queries', False)
+        self._query_manager.execute()
 
-        return server, user, password, service, jdbc_driver, tags, only_custom_queries
-
-    def create_connection(self):
-        service_check_tags = ['server:%s' % self._server]
-        service_check_tags.extend(self._tags)
-
-        try:
-            # Check if the instantclient is available
-            cx_Oracle.clientversion()
-        except cx_Oracle.DatabaseError as e:
-            # Fallback to JDBC
-            use_oracle_client = False
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
-            connect_string = self.JDBC_CONNECT_STRING.format(self._server, self._service)
+        if self._current_errors:
+            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL, tags=self._service_check_tags)
         else:
-            use_oracle_client = True
-            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
-            connect_string = self.CX_CONNECT_STRING.format(self._user, self._password, self._server, self._service)
+            self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
 
-        try:
+    @property
+    def _connection(self):
+        if self._cached_connection is None:
+            try:
+                # Check if the instantclient is available
+                cx_Oracle.clientversion()
+            except cx_Oracle.DatabaseError as e:
+                # Fallback to JDBC
+                use_oracle_client = False
+                self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
+                connect_string = self.JDBC_CONNECT_STRING.format(self._server, self._service)
+            else:
+                use_oracle_client = True
+                self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
+                connect_string = self.CX_CONNECT_STRING.format(self._user, self._password, self._server, self._service)
+
             if use_oracle_client:
                 connection = cx_Oracle.connect(connect_string)
+                self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
                 self.log.error(
                     "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
@@ -140,6 +145,7 @@ class Oracle(AgentCheck):
                     connection = jdb.connect(
                         self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
                     )
+                    self.log.debug("Connected to Oracle DB using JDBC connector")
                 except Exception as e:
                     if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
@@ -156,10 +162,6 @@ class Oracle(AgentCheck):
                         self.log.error(msg)
                     raise
 
-            self.log.debug("Connected to Oracle DB")
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
-        except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
-            self.log.error(e)
-            raise
-        self._connection = connection
+            self._cached_connection = connection
+
+        return self._cached_connection

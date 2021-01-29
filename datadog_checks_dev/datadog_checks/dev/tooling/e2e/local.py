@@ -144,6 +144,7 @@ class LocalAgentInterface(object):
         delay=None,
         log_level=None,
         as_json=False,
+        as_table=False,
         break_point=None,
         jmx_list=None,
     ):
@@ -169,6 +170,9 @@ class LocalAgentInterface(object):
 
             if as_json:
                 command += f' --json {as_json}'
+
+            if as_table:
+                command += ' --table'
 
             if break_point is not None:
                 command += f' --breakpoint {break_point}'

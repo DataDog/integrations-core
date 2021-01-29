@@ -177,8 +177,8 @@ class CactiCheck(AgentCheck):
         return metric_count
 
     def _fetch_rrd_meta(self, connection, rrd_path_root, whitelist, field_names, tags):
-        """ Fetch metadata about each RRD in this Cacti DB, returning a list of
-            tuples of (hostname, device_name, rrd_path).
+        """Fetch metadata about each RRD in this Cacti DB, returning a list of
+        tuples of (hostname, device_name, rrd_path).
         """
 
         def _in_whitelist(rrd):

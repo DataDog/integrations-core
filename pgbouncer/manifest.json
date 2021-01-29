@@ -26,6 +26,9 @@
   "type": "check",
   "integration_id": "pgbouncer",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -36,6 +39,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "pgbouncer"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

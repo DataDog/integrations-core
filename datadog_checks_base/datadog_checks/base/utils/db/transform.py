@@ -10,7 +10,8 @@ from ... import is_affirmative
 from ...constants import ServiceCheck
 from .. import constants
 from ..common import compute_percent, total_time_to_temporal_percent
-from .utils import create_extra_transformer, normalize_datetime
+from ..time import ensure_aware_datetime
+from .utils import create_extra_transformer
 
 # Used for the user-defined `expression`s
 ALLOWED_GLOBALS = {
@@ -46,6 +47,27 @@ def get_tag(transformers, column_name, **modifiers):
         return template.format(value)
 
     return tag
+
+
+def get_tag_list(transformers, column_name, **modifiers):
+    """
+    Convert a column to a list of tags that will be used in every submission.
+
+    Tag name is determined by `column_name`. The column value represents a list of values. It is expected to be either
+    a list of strings, or a comma-separated string.
+
+    For example, if the column is named `server_tag` and the column returned the value `'us,primary'`, then all
+    submissions for that row will be tagged by `server_tag:us` and `server_tag:primary`.
+    """
+    template = '%s:{}' % column_name
+
+    def tag_list(_, value, **kwargs):
+        if isinstance(value, str):
+            value = [v.strip() for v in value.split(',')]
+
+        return [template.format(v) for v in value]
+
+    return tag_list
 
 
 def get_monotonic_gauge(transformers, column_name, **modifiers):
@@ -237,13 +259,13 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     if time_format == 'native':
 
         def time_elapsed(_, value, **kwargs):
-            value = normalize_datetime(value)
+            value = ensure_aware_datetime(value)
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
     else:
 
         def time_elapsed(_, value, **kwargs):
-            value = normalize_datetime(datetime.strptime(value, time_format))
+            value = ensure_aware_datetime(datetime.strptime(value, time_format))
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
     return time_elapsed
@@ -410,6 +432,7 @@ COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
+    'tag_list': get_tag_list,
     'match': get_match,
     'service_check': get_service_check,
     'time_elapsed': get_time_elapsed,

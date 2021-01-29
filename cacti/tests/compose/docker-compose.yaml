@@ -9,3 +9,4 @@ services:
       - "8080:80"
     volumes:
       - ${RRD_PATH}:/var/www/html/cacti/rra
+      - ${DD_LOG_1}:/opt/cacti/log/cacti.log

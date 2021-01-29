@@ -21,6 +21,9 @@ files:
           - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
 
         If the port number is not specified, the default port 27017 is used.
+
+        Even if the host is an arbiter node, you still need to provide authentication credentials
+        as the check will create an additional connection to the primary in this specific case.
       value:
         example:
         - <HOST_1>
@@ -113,12 +116,13 @@ files:
           * `tcmalloc` -  TCMalloc memory allocator
           * `top` - Usage statistics for each collection
           * `collection` - Metrics of the specified collections
+          * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
       value:
         type: array
         items:
           type: string
         example:
-          [metrics.commands, tcmalloc, top, collection]
+          [metrics.commands, tcmalloc, top, collection, jumbo_chunks]
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
@@ -143,6 +147,8 @@ files:
     - name: custom_queries
       description: |
         Define custom queries to collect custom metrics on your Mongo
+        Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
+        You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
         See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
       value:
         type: array
@@ -150,6 +156,8 @@ files:
           type: object
           properties:
             - name: metric_prefix
+              type: string
+            - name: database
               type: string
             - name: query
               type: string
@@ -169,6 +177,7 @@ files:
         example:
           - metric_prefix: mongo
             query: <MONGO_COMMAND_QUERY>
+            database: <MONGO_DATABASE>
             fields:
               - field_name: <FIELD_NAME>
                 name: <METRIC_SUFFIX>

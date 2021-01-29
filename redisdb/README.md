@@ -12,9 +12,12 @@ The Redis check is included in the [Datadog Agent][2] package, so you don't need
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -77,6 +80,9 @@ Datadog APM integrates with Redis to see the traces across your distributed syst
 2. [Instrument your application that makes requests to Redis][7].
 
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
@@ -115,6 +121,8 @@ See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] 
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

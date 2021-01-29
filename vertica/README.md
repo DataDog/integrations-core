@@ -14,6 +14,12 @@ The Vertica check is included in the [Datadog Agent][2] package. No additional i
 
 Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vertica performance data. See the example [vertica.d/conf.yaml][6] for all available configuration options.
 
+#### Enabling SSL
+
+The Vertica integration supports connecting to Vertica via SSL. To enable this, set `use_tls` in `conf.yaml` to `true`. 
+
+Note: For Vertica integration versions <=1.9.0, set `tls_verify` to `true` instead. For legacy support, if `tls_verify` is explicitly set to `true`, `use_tls` will be set to `true`.
+
 #### Prepare Vertica
 
 Create a database user for the Datadog Agent. From [vsql][11], connect to the database as a superuser. Then run the `CREATE USER` statement.
@@ -66,8 +72,11 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-- `vertica.can_connect` returns `OK` if the Agent is able to connect to the monitored Vertica database, or `CRITICAL` otherwise.
-- `vertica.node_state` returns `OK` for each node that is UP, `WARNING` for nodes that are on a possible path to UP, or `CRITICAL` otherwise.
+**vertica.can_connect**:<br> 
+Returns `OK` if the Agent is able to connect to the monitored Vertica database, or `CRITICAL` otherwise.
+
+**vertica.node_state**:<br>
+Returns `OK` for each node that is UP, `WARNING` for nodes that are on a possible path to UP, or `CRITICAL` otherwise.
 
 ### Events
 

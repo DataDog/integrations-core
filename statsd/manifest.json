@@ -23,9 +23,15 @@
   "type": "check",
   "integration_id": "statsd",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "statsd"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }
