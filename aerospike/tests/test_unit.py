@@ -127,7 +127,7 @@ def test_collect_latencies_parser(aggregator):
     )
     check.collect_latencies(None)
 
-    for metric in common.LAZY_METRICS:
+    for metric in common.LATENCIES_METRICS:
         if "batch_index" in metric:
             aggregator.assert_metric(metric, tags=['tag:value'])
         else:

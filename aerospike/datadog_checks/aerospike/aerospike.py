@@ -144,7 +144,6 @@ class AerospikeCheck(AgentCheck):
                 set_tags.extend(namespace_tags)
                 self.collect_info('sets/{}/{}'.format(ns, s), SET_METRIC_TYPE, separator=':', tags=set_tags)
 
-
         version = self.collect_version()
         if version is None:
             self.log.warning("Could not determine version, assuming greater than Aerospike V5.3")
@@ -253,7 +252,7 @@ class AerospikeCheck(AgentCheck):
                 data,
             )
         except Exception as e:
-            self.log.warning("Command `%s` was unsuccessful")
+            self.log.warning("Command `{}` was unsuccessful: {}".format(command, str(e)))
             return
         finally:
             # Get rid of command and whitespace
@@ -338,7 +337,7 @@ class AerospikeCheck(AgentCheck):
                     latencies = bucket_vals.split(',')
                     if latencies and len(latencies) == 17:
                         for i in range(len(latencies)):
-                            latency_name = metric_name + '_over_' + str(i)
+                            latency_name = metric_name + '_over_{}ms'.format(str(2 ** i))
                             self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], namespace_tags)
                     else:
                         self.log.debug("Got unexpected latency buckets: %s", latencies)
