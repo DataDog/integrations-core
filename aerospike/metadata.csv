@@ -671,7 +671,6 @@ aerospike.system_total_cpu_pct,gauge,,percent,,The percentage of CPU usage by al
 aerospike.system_user_cpu_pct,gauge,,percent,,The percentage of CPU usage by processes running in user mode.,0,aerospike,
 aerospike.time_since_rebalance,gauge,,second,,"The number of seconds since the last reclustering event, either triggered via the recluster info command or by a cluster disruption (such as a node being add/removed or a network disruption).",0,aerospike,
 aerospike.xdr_ship_destination_permanent_error,gauge,,error,,The number of permanent errors from the remote cluster(s) while shipping records.,0,aerospike,
-aerospike.xdr_ship_destination_permanent_error,gauge,,error,,The number of permanent errors from the remote cluster(s) while shipping records.,0,aerospike,
 aerospike.datacenter.dc_as_open_conn,gauge,,connection,,The number of open connection to the Aerospike DC.,0,aerospike,
 aerospike.datacenter.dc_as_size,gauge,,,,The cluster size of the destination Aerospike DC.,0,aerospike,
 aerospike.datacenter.dc_http_good_locations,gauge,,,,The number of URLs that are considered healthy and being used by the change notification system.,0,aerospike,
