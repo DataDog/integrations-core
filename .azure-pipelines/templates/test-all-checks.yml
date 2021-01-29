@@ -292,8 +292,11 @@ jobs:
       displayName: Nagios
       os: linux
     - checkName: network
-      displayName: Network
+      displayName: Network (Linux)
       os: linux
+    - checkName: network
+      displayName: Network (Windows)
+      os: windows
     - checkName: nfsstat
       displayName: NFSstat
       os: linux

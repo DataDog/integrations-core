@@ -410,11 +410,11 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
     QUERY_BASE = "select * from {table}".format(table=TABLE)
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
-    _DATABASES = []
+    _DATABASES = set()
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
         super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
-        self._DATABASES.append(self.instance)
+        self._DATABASES.add(self.instance)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -422,7 +422,8 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         rows = []
         columns = []
 
-        data = cursor.execute('select DB_NAME()').fetchall()
+        cursor.execute('select DB_NAME()')
+        data = cursor.fetchall()
         current_db = data[0][0]
         logger.debug("%s: current db is %s", cls.__name__, current_db)
 

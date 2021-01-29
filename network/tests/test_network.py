@@ -386,6 +386,7 @@ def send_ethtool_ioctl_mock(iface, sckt, data):
     raise ValueError("Couldn't match any iface/data combination in the test data")
 
 
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
 def test_collect_ena(send_ethtool_ioctl, check):
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
@@ -398,6 +399,7 @@ def test_collect_ena(send_ethtool_ioctl, check):
     }
 
 
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
 def test_submit_ena(send_ethtool_ioctl, check, aggregator):
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
@@ -418,12 +420,14 @@ def test_submit_ena(send_ethtool_ioctl, check, aggregator):
         aggregator.assert_metric(m, count=1, value=0, tags=['device:eth0'])
 
 
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
 def test_collect_ena_values_not_present(send_ethtool_ioctl, check):
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     assert check._collect_ena('enp0s3') == {}
 
 
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('fcntl.ioctl')
 def test_collect_ena_unsupported_on_iface(ioctl_mock, check, caplog):
     caplog.set_level(logging.DEBUG)

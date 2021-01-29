@@ -16,7 +16,7 @@
       "layout": { "x": 1, "y": 1, "width": 30, "height": 11 },
       "definition": {
         "type": "image",
-        "url": "/static/images/saas_logos/bot/azure_iot_edge.png",
+        "url": "/static/images/logos/azure-iot-edge_large.svg",
         "sizing": "center"
       }
     },
