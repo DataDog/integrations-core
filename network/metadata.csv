@@ -47,6 +47,8 @@ system.net.packets_in.count,gauge,,packet,second,The number of packets of data r
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
 system.net.packets_out.error,gauge,,error,second,The number of packet transmit errors detected by the device driver.,-1,system,pkts out err
+system.net.tcp.failed_retransmits,gauge,,Number of TCP packets that failed to be retransmitted,0, system
+system.net.tcp.failed_retransmits.count,count,packet,Number of TCP packets that failed to be retransmitted,0,system
 system.net.tcp.in_segs,gauge,,segment,second,The number of TCP segments received (Linux or Solaris only).,0,system,segs in
 system.net.tcp.in_segs.count,count,,segment,,Total number of received TCP segments (Linux or Solaris only).,0,system,segs in
 system.net.tcp.out_segs,gauge,,segment,second,The number of TCP segments transmitted (Linux or Solaris only).,0,system,segs out
