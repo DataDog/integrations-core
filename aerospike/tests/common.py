@@ -51,6 +51,8 @@ LAZY_METRICS = [
     'aerospike.namespace.latency.batch_index_ops_sec',
 ]
 
+LATENCIES_METRICS = []
+
 INSTANCE = {
     'host': HOST,
     'port': PORT,

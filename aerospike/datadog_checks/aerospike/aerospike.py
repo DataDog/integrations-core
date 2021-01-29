@@ -309,6 +309,7 @@ class AerospikeCheck(AgentCheck):
 
         while data:
             line = data.pop(0)
+
             if not data:
                 break
 
@@ -318,18 +319,22 @@ class AerospikeCheck(AgentCheck):
 
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []
 
-            ops_per_sec = re.search(r'\:\w+\,(\d*\.?\d*)', line)
-            if ops_per_sec:
-                ops_per_sec_val = ops_per_sec.groups()[0]
+            values = re.search(r'\:\w+\,(\d*\.?\d*),([,\d+.\d+]*)', line)
+            if values:
+                ops_per_sec_val = values.groups()[0]
                 # For backwards compatibility, the ops/sec value is `latencies` is already calculated
                 ops_per_sec_name = metric_name + "_" + "ops_sec"
-                self.send(NAMESPACE_LATENCY_METRIC_TYPE, ops_per_sec_name, ops_per_sec_val, namespace_tags)
+                self.send(NAMESPACE_LATENCY_METRIC_TYPE, ops_per_sec_name, float(ops_per_sec_val), namespace_tags)
 
-            latencies = re.search(r'', line)
-            if latencies and len(latencies) == 17:
-                for i in range(len(latencies)):
-                    latency_name = metric_name + '_over_' + str(i)
-                    self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], namespace_tags)
+                bucket_vals = values.groups()[1]
+                if bucket_vals:
+                    latencies = bucket_vals.split(',')
+                    if latencies and len(latencies) == 17:
+                        for i in range(len(latencies)):
+                            latency_name = metric_name + '_over_' + str(i)
+                            self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], namespace_tags)
+                    else:
+                        self.log.debug("Got unexpected latency buckets: %s", latencies)
 
     def collect_latency(self, namespaces):
         data = self.get_info('latency:')
