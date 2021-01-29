@@ -1,5 +1,4 @@
 {
-	"id": 29518289,
 	"name": "[Redis] High memory consumption",
 	"type": "query alert",
 	"query": "avg(last_5m):100 * avg:redis.mem.used{*} / avg:redis.mem.maxmemory{*} > 90",
@@ -14,7 +13,7 @@
 		"new_host_delay": 300,
 		"require_full_window": true,
 		"notify_no_data": false,
-		"renotify_interval": "0",
+		"renotify_interval": 0,
 		"escalation_message": "",
 		"no_data_timeframe": null,
 		"include_tags": true,
