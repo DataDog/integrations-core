@@ -288,17 +288,15 @@ class AerospikeCheck(AgentCheck):
         # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
         ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
         if ns_metric_name_match:
-            ns = ns_metric_name_match.groups()[0]
-            return ns_metric_name_match.groups()[1]
+            return ns_metric_name_match.groups()[0], ns_metric_name_match.groups()[1]
         elif line.startswith("batch-index"):
             # https://www.aerospike.com/docs/operations/monitor/latency/#batch-index
-            ns = None
-            return "batch-index"
+            return None, "batch-index"
         else:
             self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
             # Since the data come by pair and the order matters it's safer to return right away than submitting
             # possibly wrong metrics.
-            return
+            return None, None
 
     def collect_latencies(self, namespaces):
         """
@@ -309,8 +307,6 @@ class AerospikeCheck(AgentCheck):
         Throughput is calculated by threshOld / ops/sec value.
         """
         data = self.get_info('latencies:')
-
-        ns = None
         ns_latencies = defaultdict(dict)
 
         while data:
@@ -319,7 +315,12 @@ class AerospikeCheck(AgentCheck):
 
             if not data:
                 break
-            metric_name = self.get_metric_name(line)
+
+            ns, metric_name = self.get_metric_name(line)
+            if metric_name is None:
+                return
+
+
             ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
 
 
@@ -346,7 +347,9 @@ class AerospikeCheck(AgentCheck):
                 ns_latencies[ns].setdefault("metric_values", []).extend(metric_values)
                 continue
 
-            metric_name = self.get_metric_name(line)
+            ns, metric_name = self.get_metric_name(line)
+            if metric_name is None:
+                return
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
