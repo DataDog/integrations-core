@@ -183,7 +183,6 @@ class AerospikeCheck(AgentCheck):
         self.log.debug("Found Aerospike version: %s", version)
         return version
 
-
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, version):
         self.set_metadata('version', version)
@@ -307,12 +306,9 @@ class AerospikeCheck(AgentCheck):
         Throughput is calculated by threshOld / ops/sec value.
         """
         data = self.get_info('latencies:')
-        ns_latencies = defaultdict(dict)
 
         while data:
             line = data.pop(0)
-            metric_names = []
-
             if not data:
                 break
 
@@ -320,9 +316,20 @@ class AerospikeCheck(AgentCheck):
             if metric_name is None:
                 return
 
+            namespace_tags = ['namespace:{}'.format(ns)] if ns else []
 
-            ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
+            ops_per_sec = re.search(r'\:\w+\,(\d*\.?\d*)', line)
+            if ops_per_sec:
+                ops_per_sec_val = ops_per_sec.groups()[0]
+                # For backwards compatibility, the ops/sec value is `latencies` is already calculated
+                ops_per_sec_name = metric_name + "_" + "ops_sec"
+                self.send(NAMESPACE_LATENCY_METRIC_TYPE, ops_per_sec_name, ops_per_sec_val, namespace_tags)
 
+            latencies = re.search(r'', line)
+            if latencies and len(latencies) == 17:
+                for i in range(len(latencies)):
+                    latency_name = metric_name + '_over_' + str(i)
+                    self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], namespace_tags)
 
     def collect_latency(self, namespaces):
         data = self.get_info('latency:')

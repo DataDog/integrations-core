@@ -112,3 +112,25 @@ def test_collect_empty_data(aggregator):
     check._client.info_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
     check.log = mock.MagicMock()
     assert [] == check.get_info('sets/test/ci')
+
+
+def test_collect_latencies_parser(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check.get_info = mock.MagicMock(
+        return_value=[
+            'batch-index:',
+            '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
+            '{test}-write:',
+            '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
+            '{test}-query:',
+        ]
+    )
+    check.collect_latencies(None)
+
+    for metric in common.LAZY_METRICS:
+        if "batch_index" in metric:
+            aggregator.assert_metric(metric, tags=['tag:value'])
+        else:
+            aggregator.assert_metric(metric, tags=['namespace:{}'.format('test'), 'tag:value'])
+
+    aggregator.assert_all_metrics_covered()
