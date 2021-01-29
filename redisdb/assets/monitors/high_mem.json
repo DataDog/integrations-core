@@ -1,0 +1,28 @@
+{
+	"id": 29518289,
+	"name": "[Redis] High memory consumption",
+	"type": "query alert",
+	"query": "avg(last_5m):100 * avg:redis.mem.used{*} / avg:redis.mem.maxmemory{*} > 90",
+	"message": "{{#is_alert}}\n\nALERT: Redis is consuming {{value}}% of total memory allocated.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: Redis is consuming {{value}}% of total memory allocated.\n\n{{/is_warning}} \n\n",
+	"tags": [
+		"integration:redisdb"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 90,
+			"warning": 70
+		}
+	},
+	"priority": null,
+	"restricted_roles": null
+}
