@@ -41,6 +41,7 @@ ENABLED_VALUES = {'true', 'on', 'enable', 'enabled'}
 DISABLED_VALUES = {'false', 'off', 'disable', 'disabled'}
 
 V5_1 = [5, 1, 0, 0]
+V5_0 = [5, 0, 0, 0]
 
 
 def parse_namespace(data, namespace, secondary):
@@ -143,15 +144,6 @@ class AerospikeCheck(AgentCheck):
                 set_tags.extend(namespace_tags)
                 self.collect_info('sets/{}/{}'.format(ns, s), SET_METRIC_TYPE, separator=':', tags=set_tags)
 
-        # https://www.aerospike.com/docs/reference/info/#dcs
-        try:
-            datacenters = self.get_datacenters()
-
-            for dc in datacenters:
-                self.collect_datacenter(dc)
-
-        except Exception as e:
-            self.log.debug("There were no datacenters found: %s", e)
 
         version = self.collect_version()
         if version is None:
@@ -163,6 +155,17 @@ class AerospikeCheck(AgentCheck):
             self.collect_throughput(namespaces)
             # https://www.aerospike.com/docs/reference/info/#latency
             self.collect_latency(namespaces)
+
+            if version < V5_0:
+                # https://www.aerospike.com/docs/reference/info/#dcs
+                try:
+                    datacenters = self.get_datacenters()
+
+                    for dc in datacenters:
+                        self.collect_datacenter(dc)
+
+                except Exception as e:
+                    self.log.debug("There were no datacenters found: %s", e)
         else:
             # https://www.aerospike.com/docs/reference/info/#latencies
             self.collect_latencies(namespaces)
@@ -240,24 +243,28 @@ class AerospikeCheck(AgentCheck):
     def get_info(self, command, separator=';'):
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
-        data = self._client.info_node(command, self._host, self._info_policies)
-        self.log.debug(
-            "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
-            command,
-            self._host,
-            self._info_policies,
-            data,
-        )
+        try:
+            data = self._client.info_node(command, self._host, self._info_policies)
+            self.log.debug(
+                "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
+                command,
+                self._host,
+                self._info_policies,
+                data,
+            )
+        except Exception as e:
+            self.log.warning("Command `%s` was unsuccessful")
+            return
+        finally:
+            # Get rid of command and whitespace
+            data = data[len(command) :].strip()
 
-        # Get rid of command and whitespace
-        data = data[len(command) :].strip()
+            if not separator:
+                return data
+            if not data:
+                return []
 
-        if not separator:
-            return data
-        if not data:
-            return []
-
-        return data.split(separator)
+            return data.split(separator)
 
     def collect_datacenter(self, datacenter):
         # returned information from dc/<DATACENTER> endpoint includes a service check:
