@@ -40,7 +40,7 @@ AEROSPIKE_CAP_CONFIG_KEY_MAP = {SINDEX_METRIC_TYPE: "max_sindexs", SET_METRIC_TY
 ENABLED_VALUES = {'true', 'on', 'enable', 'enabled'}
 DISABLED_VALUES = {'false', 'off', 'disable', 'disabled'}
 
-V5_3 = [5, 3, 0, 0]
+V5_1 = [5, 1, 0, 0]
 
 
 def parse_namespace(data, namespace, secondary):
@@ -156,13 +156,16 @@ class AerospikeCheck(AgentCheck):
         version = self.collect_version()
         if version is None:
             self.log.warning("Could not determine version, assuming greater than Aerospike V5.3")
-            version = V5_3
+            version = V5_1
 
-        # https://www.aerospike.com/docs/reference/info/#throughput
-        self.collect_throughput(namespaces, version)
-
-        # https://www.aerospike.com/docs/reference/info/#latency
-        self.collect_latency(namespaces, version)
+        if version < V5_1:
+            # https://www.aerospike.com/docs/reference/info/#throughput
+            self.collect_throughput(namespaces)
+            # https://www.aerospike.com/docs/reference/info/#latency
+            self.collect_latency(namespaces)
+        else:
+            # https://www.aerospike.com/docs/reference/info/#latencies
+            self.collect_latencies(namespaces)
 
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
@@ -177,6 +180,7 @@ class AerospikeCheck(AgentCheck):
             self.log.debug("Unable to parse version: %s", str(e))
             return None
 
+        self.log.debug("Found Aerospike version: %s", version)
         return version
 
 
@@ -279,11 +283,48 @@ class AerospikeCheck(AgentCheck):
                     continue
             self.send(DATACENTER_METRIC_TYPE, key, value, datacenter_tags)
 
-    def collect_latency(self, namespaces, version):
-        if version >= V5_3:
-            data = self.get_info('latencies:')
+    def get_metric_name(self, line):
+        # match only works at the beginning
+        # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
+        ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
+        if ns_metric_name_match:
+            ns = ns_metric_name_match.groups()[0]
+            return ns_metric_name_match.groups()[1]
+        elif line.startswith("batch-index"):
+            # https://www.aerospike.com/docs/operations/monitor/latency/#batch-index
+            ns = None
+            return "batch-index"
         else:
-            data = self.get_info('latency:')
+            self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
+            # Since the data come by pair and the order matters it's safer to return right away than submitting
+            # possibly wrong metrics.
+            return
+
+    def collect_latencies(self, namespaces):
+        """
+        In Aerospike 5.1+, the `latencies` command is used gives the output of latencies like so:
+
+            histogramName_0:timeUnit,ops/sec,threshOld_0,threshOld_1,...;histogramName_1:...
+
+        Throughput is calculated by threshOld / ops/sec value.
+        """
+        data = self.get_info('latencies:')
+
+        ns = None
+        ns_latencies = defaultdict(dict)
+
+        while data:
+            line = data.pop(0)
+            metric_names = []
+
+            if not data:
+                break
+            metric_name = self.get_metric_name(line)
+            ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
+
+
+    def collect_latency(self, namespaces):
+        data = self.get_info('latency:')
 
         ns = None
 
@@ -305,21 +346,7 @@ class AerospikeCheck(AgentCheck):
                 ns_latencies[ns].setdefault("metric_values", []).extend(metric_values)
                 continue
 
-            # match only works at the beginning
-            # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
-            ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
-            if ns_metric_name_match:
-                ns = ns_metric_name_match.groups()[0]
-                metric_name = ns_metric_name_match.groups()[1]
-            elif line.startswith("batch-index"):
-                # https://www.aerospike.com/docs/operations/monitor/latency/#batch-index
-                ns = None
-                metric_name = "batch-index"
-            else:
-                self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
-                # Since the data come by pair and the order matters it's safer to return right away than submitting
-                # possibly wrong metrics.
-                return
+            metric_name = self.get_metric_name(line)
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
@@ -345,11 +372,7 @@ class AerospikeCheck(AgentCheck):
                 for i in range(len(metric_names)):
                     self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
 
-    def collect_throughput(self, namespaces, version):
-        if version >= V5_3:
-            self.log.debug("`throughput` is deprecated for Aerospike > v5.3, skipping metrics")
-            return
-
+    def collect_throughput(self, namespaces):
         data = self.get_info('throughput:')
 
         while data:
