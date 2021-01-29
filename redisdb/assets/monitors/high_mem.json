@@ -23,5 +23,8 @@
 		}
 	},
 	"priority": null,
-	"restricted_roles": null
+	"restricted_roles": null,
+	"recommended_monitor_metadata": {
+		"description": "Notify if Redis is consuming a high amount of memory."
+	}
 }
