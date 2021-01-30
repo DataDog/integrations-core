@@ -9,41 +9,135 @@ pytestmark = pytest.mark.conf
 
 
 def test_cache():
-    spec = get_doc('')
-    spec.data = 'test'
-    spec.load()
-    spec.load()
+    doc = get_doc('')
+    doc.data = 'test'
+    doc.load()
+    doc.load()
 
-    assert spec.data == 'test'
+    assert doc.data == 'test'
 
 
 def test_invalid_yaml():
-    spec = get_doc(
+    doc = get_doc(
         """
         foo:
           - bar
           baz: oops
         """
     )
-    spec.load()
+    doc.load()
 
-    assert spec.errors[0].startswith('test: Unable to parse the configuration specification')
+    assert doc.errors[0].startswith('test: Unable to parse the configuration specification')
 
 
 def test_not_map():
-    spec = get_doc('- foo')
-    spec.load()
+    doc = get_doc('- foo')
+    doc.load()
 
-    assert 'test: Docs specifications must be a mapping object' in spec.errors
+    assert 'test: Docs specifications must be a mapping object' in doc.errors
 
 
 def test_no_name():
-    spec = get_doc(
+    doc = get_doc(
         """
         foo:
         - bar
         """
     )
-    spec.load()
+    doc.load()
 
-    assert 'test: Docs specifications must contain a top-level `name` attribute' in spec.errors
+    assert 'test: Docs specifications must include a top-level `name` attribute' in doc.errors
+
+
+def test_name_not_string():
+    doc = get_doc(
+        """
+        name: 123
+        """
+    )
+    doc.load()
+
+    assert 'test: The top-level `name` attribute must be a str' in doc.errors
+
+
+def test_no_files():
+    doc = get_doc(
+        """
+        name: foo
+        """
+    )
+    doc.load()
+
+    assert 'test: Docs specifications must include a top-level `files` attribute' in doc.errors
+
+
+def test_files_not_array():
+    doc = get_doc(
+        """
+        name: foo
+        files:
+            foo: bar
+        """
+    )
+    doc.load()
+
+    assert 'test: The top-level `files` attribute must be a list' in doc.errors
+
+
+def test_file_not_map():
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - 5
+        - baz
+        """
+    )
+    doc.load()
+
+    assert 'test, file #1: File attribute must be a mapping object' in doc.errors
+    assert 'test, file #2: File attribute must be a mapping object' in doc.errors
+
+
+def test_file_no_name():
+    doc = get_doc(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - foo: bar
+        """
+    )
+    doc.load()
+
+    assert 'test: Docs file #1: Must include a `name` attribute.' in doc.errors
+
+
+def test_file_no_section():
+    doc = get_doc(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+        """
+    )
+    doc.load()
+
+    assert 'test: Docs file #1: Must include a `sections` attribute.' in doc.errors
+
+
+def test_file_name_duplicate():
+    doc = get_doc(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          sections:
+          - name: foo
+        """
+    )
+    doc.load()
+
+    assert 'test: Docs file #1: Must include a `sections` attribute.' in doc.errors
