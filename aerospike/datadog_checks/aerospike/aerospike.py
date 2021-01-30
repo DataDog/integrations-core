@@ -252,7 +252,7 @@ class AerospikeCheck(AgentCheck):
                 data,
             )
         except Exception as e:
-            self.log.warning("Command `{}` was unsuccessful: {}".format(command, str(e)))
+            self.log.warning("Command `%s` was unsuccessful: %s" (command, str(e))
             return
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
