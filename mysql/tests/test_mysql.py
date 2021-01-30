@@ -328,6 +328,31 @@ def test_parse_get_version():
         assert v.build == 'log'
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'slave_io_running, slave_sql_running, check_status',
+    [
+        pytest.param({}, {}, MySql.CRITICAL),
+        pytest.param({'stuff': 'yes'}, {}, MySql.WARNING),
+        pytest.param({}, {'stuff': 'yes'}, MySql.WARNING),
+        pytest.param({'stuff': 'yes'}, {'stuff': 'yes'}, MySql.OK),
+    ],
+)
+def test_replication_check_status(slave_io_running, slave_sql_running, check_status, instance_basic, aggregator):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+    mysql_check.service_check_tags = ['foo:bar']
+    mocked_results = {
+        'Slaves_connected': 1,
+        'Binlog_enabled': True,
+        'Slave_IO_Running': slave_io_running,
+        'Slave_SQL_Running': slave_sql_running,
+    }
+
+    mysql_check._check_replication_status(mocked_results)
+
+    aggregator.assert_service_check('mysql.replication.slave_running', check_status, tags=['foo:bar'], count=1)
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(instance_basic, datadog_agent, version_metadata):

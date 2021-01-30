@@ -110,3 +110,41 @@ def test_no_quantiles(aggregator, dd_run_check, mock_http_response):
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_quantiles_remapped_metric_name(aggregator, dd_run_check, mock_http_response):
+    payload = """
+        # HELP prometheus_target_interval_length_seconds Actual intervals between scrapes.
+        # TYPE prometheus_target_interval_length_seconds summary
+        prometheus_target_interval_length_seconds{interval="1s",quantile="0.01"} 0.9950473
+        prometheus_target_interval_length_seconds{interval="1s",quantile="0.05"} 0.9970795
+        prometheus_target_interval_length_seconds{interval="1s",quantile="0.5"} 0.9999885
+        prometheus_target_interval_length_seconds{interval="1s",quantile="0.9"} 1.0020113
+        prometheus_target_interval_length_seconds{interval="1s",quantile="0.99"} 1.0046735
+        prometheus_target_interval_length_seconds_sum{interval="1s"} 26649.83516454906
+        prometheus_target_interval_length_seconds_count{interval="1s"} 26032
+        """
+    mock_http_response(payload)
+    check = get_check({'metrics': [{'prometheus_target_interval_length_seconds': 'target_interval_seconds'}]})
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.target_interval_seconds.sum',
+        26649.83516454906,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'interval:1s'],
+    )
+    aggregator.assert_metric(
+        'test.target_interval_seconds.count',
+        26032,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'interval:1s'],
+    )
+
+    aggregator.assert_metric(
+        'test.target_interval_seconds.quantile',
+        metric_type=aggregator.GAUGE,
+        count=5,
+    )
+
+    aggregator.assert_all_metrics_covered()
