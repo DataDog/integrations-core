@@ -23,13 +23,14 @@ Validation = namedtuple('Validation', 'key, type, required, default, children', 
 
 def _validate(obj, items, loader, MISSING, INVALID):
     for v in items:
+        type_name = v.type.__name__
         if v.required and v.key not in obj:
-            loader.errors.append(MISSING.format(loader=loader, key=v.key, type=v.type))
+            loader.errors.append(MISSING.format(loader=loader, key=v.key, type=type_name))
             return
 
         if v.key in obj:
             if not isinstance(obj[v.key], v.type):
-                loader.errors.append(INVALID.format(loader=loader, key=v.key, type=v.type))
+                loader.errors.append(INVALID.format(loader=loader, key=v.key, type=type_name))
         else:
             if v.default is not None:
                 obj[v.key] = v.default
@@ -51,13 +52,7 @@ def spec_validator(spec, loader):
         loader.errors.append(f'{loader.source}: {loader.spec_type} specifications must be a mapping object')
         return
 
-    # if 'name' not in spec:
-    #     loader.errors.append(
-    #         f'{loader.source}: {loader.spec_type} specifications must contain a top-level `name` attribute'
-    #     )
-    #     return
-
-    MISSING = '{loader.source}: {loader.spec_type} specifications must include a top-level `{key}` attribute.'
+    MISSING = '{loader.source}: {loader.spec_type} specifications must include a top-level `{key}` attribute'
     INVALID = '{loader.source}: The top-level `{key}` attribute must be a {type}'
 
     valid_options = [Validation(key='autodiscovery', type=bool, required=False)]
@@ -96,6 +91,9 @@ def files_validator(files, loader):
             continue
 
         _validate(doc_file, validations, loader, MISSING, INVALID)
+
+        if loader.errors:
+            continue
 
         # Check for duplicate names
         file_name = doc_file['name']

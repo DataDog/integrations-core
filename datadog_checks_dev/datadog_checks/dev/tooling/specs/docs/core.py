@@ -30,7 +30,9 @@ class DocsSpec(BaseSpec):
 
     def validate(self):
         spec_validator(self.data, self)
-        # self.normalize_links()
+        if self.errors:
+            return
+        self.normalize_links()
 
     def normalize_links(self):
         """Translate all reference-style links to inline links."""
