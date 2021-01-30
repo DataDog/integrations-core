@@ -51,6 +51,12 @@ def spec_validator(spec, loader):
         loader.errors.append(f'{loader.source}: {loader.spec_type} specifications must be a mapping object')
         return
 
+    # if 'name' not in spec:
+    #     loader.errors.append(
+    #         f'{loader.source}: {loader.spec_type} specifications must contain a top-level `name` attribute'
+    #     )
+    #     return
+
     MISSING = '{loader.source}: {loader.spec_type} specifications must include a top-level `{key}` attribute.'
     INVALID = '{loader.source}: The top-level `{key}` attribute must be a {type}'
 
