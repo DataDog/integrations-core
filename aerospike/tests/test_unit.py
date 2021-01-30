@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import os
 
 import mock
 import pytest
@@ -13,6 +14,7 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.skipif(os.getenv('AEROSPIKE_VERSION') == '5.3.0.6', reason="Datacenter metrics not supported")
 def test_datacenter_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
@@ -127,10 +129,11 @@ def test_collect_latencies_parser(aggregator):
     )
     check.collect_latencies(None)
 
-    for metric in common.LATENCIES_METRICS:
-        if "batch_index" in metric:
-            aggregator.assert_metric(metric, tags=['tag:value'])
-        else:
-            aggregator.assert_metric(metric, tags=['namespace:{}'.format('test'), 'tag:value'])
+    for type in ['read', 'udf']:
+        for i in range(17):
+            aggregator.assert_metric(
+                'aerospike.namespace.latency.{}_over_{}ms'.format(type, str(2 ** i)),
+                tags=['namespace:{}'.format('test')],
+            )
 
     aggregator.assert_all_metrics_covered()

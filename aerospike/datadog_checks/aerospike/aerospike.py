@@ -146,7 +146,7 @@ class AerospikeCheck(AgentCheck):
 
         version = self.collect_version()
         if version is None:
-            self.log.warning("Could not determine version, assuming greater than Aerospike V5.3")
+            self.log.warning("Could not determine version, using Aerospike v5.1")
             version = V5_1
 
         if version < V5_1:
@@ -254,16 +254,15 @@ class AerospikeCheck(AgentCheck):
         except Exception as e:
             self.log.warning("Command `{}` was unsuccessful: {}".format(command, str(e)))
             return
-        finally:
-            # Get rid of command and whitespace
-            data = data[len(command) :].strip()
+        # Get rid of command and whitespace
+        data = data[len(command) :].strip()
 
-            if not separator:
-                return data
-            if not data:
-                return []
+        if not separator:
+            return data
+        if not data:
+            return []
 
-            return data.split(separator)
+        return data.split(separator)
 
     def collect_datacenter(self, datacenter):
         # returned information from dc/<DATACENTER> endpoint includes a service check:
