@@ -10,6 +10,7 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 HOST = get_docker_hostname()
 PORT = 3000
+VERSION = os.environ.get('AEROSPIKE_VERSION')
 
 NAMESPACE_METRICS = [
     'objects',

@@ -14,7 +14,7 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.skipif(os.getenv('AEROSPIKE_VERSION') == '5.3.0.6', reason="Datacenter metrics not supported")
+@pytest.mark.skipif(common.VERSION == '5.3.0.6', reason="Datacenter metrics not supported")
 def test_datacenter_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
@@ -33,7 +33,10 @@ def test_datacenter_metrics(aggregator):
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
     check.collect_latency = mock.MagicMock()
-    check.collect_version = mock.MagicMock()
+    if common.VERSION == '5.3.0.6':
+        check.collect_version = common.VERSION.split('.')
+    else:
+        check.collect_version = mock.MagicMock()
     check.check(None)
     for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
@@ -129,14 +132,14 @@ def test_collect_latencies_parser(aggregator):
     )
     check.collect_latencies(None)
 
-    for type in ['read', 'udf']:
+    for metric_type in ['read', 'udf']:
         for i in range(17):
             aggregator.assert_metric(
-                'aerospike.namespace.latency.{}_over_{}ms'.format(type, str(2 ** i)),
+                'aerospike.namespace.latency.{}_over_{}ms'.format(metric_type, str(2 ** i)),
                 tags=['namespace:{}'.format('test')],
             )
 
         aggregator.assert_metric(
-            'aerospike.namespace.latency.{}_ops_sec'.format(type), tags=['namespace:{}'.format('test')]
+            'aerospike.namespace.latency.{}_ops_sec'.format(metric_type), tags=['namespace:{}'.format('test')]
         )
     aggregator.assert_all_metrics_covered()
