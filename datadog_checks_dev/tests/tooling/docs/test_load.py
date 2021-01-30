@@ -136,8 +136,11 @@ def test_file_name_duplicate():
         - name: test.yaml
           sections:
           - name: foo
+        - name: test.yaml
+          sections:
+          - name: bar
         """
     )
     doc.load()
 
-    assert 'test: Docs file #1: Must include a `sections` attribute.' in doc.errors
+    assert 'test, file #2: Example file name `test.yaml.example` already used by file #1' in doc.errors
