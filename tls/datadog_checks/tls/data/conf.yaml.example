@@ -41,8 +41,7 @@ instances:
     ## @param local_cert_path - string - optional
     ## The path to a local certificate in lieu of a server/port. In this mode, the
     ## service checks `tls.can_connect` and `tls.version` are unavailable. The
-    ## certificate can be in PEM or DER format. If in DER format, the file
-    ## extension must be either `.cer`, `.crt`, or `.der`.
+    ## certificate can be in PEM or DER format.
     #
     # local_cert_path: <LOCAL_CERT_PATH>
 
