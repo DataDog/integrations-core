@@ -28,6 +28,22 @@
             "channel"
         ],
         "name": "Replication Running",
+        "description": "Deprecated. Returns CRITICAL for a replica that's not running Slave_IO_Running or Slave_SQL_Running, WARNING if one of the two is not running. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.26.0",
+        "integration": "MySQL",
+        "check": "mysql.replication.replica_running",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "channel"
+        ],
+        "name": "Replication Running",
         "description": "Returns CRITICAL for a replica that's not running Replica_IO_Running or Replica_SQL_Running, WARNING if one of the two is not running. Returns `OK` otherwise."
     }
 ]
