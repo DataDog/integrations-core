@@ -31,7 +31,6 @@ def test_datacenter_metrics(aggregator):
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
     check.collect_latency = mock.MagicMock()
-    check.collect_version = common.VERSION.split('.')
     check.check(None)
     for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
