@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import fnmatch
 import inspect
 import re
+from copy import deepcopy
 from itertools import chain
 from math import isinf, isnan
 
@@ -346,3 +348,77 @@ class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
     """
 
     SERVICE_CHECK_HEALTH = 'prometheus.health'
+
+    def __init__(self, check, config):
+        new_config = deepcopy(config)
+        new_config.setdefault('enable_health_service_check', new_config.pop('health_service_check', True))
+        new_config.setdefault('collect_histogram_buckets', new_config.pop('send_histograms_buckets', True))
+        new_config.setdefault('non_cumulative_histogram_buckets', new_config.pop('non_cumulative_buckets', False))
+        new_config.setdefault('histogram_buckets_as_distributions', new_config.pop('send_distribution_buckets', False))
+        new_config.setdefault('raw_metric_prefix', new_config.pop('prometheus_metrics_prefix', ''))
+        new_config.setdefault('hostname_label', new_config.pop('label_to_hostname', ''))
+        new_config.setdefault('rename_labels', new_config.pop('labels_mapper', {}))
+        new_config.setdefault(
+            'exclude_metrics', [fnmatch.translate(metric) for metric in new_config.pop('ignore_metrics', [])]
+        )
+
+        if 'label_to_hostname_suffix' in new_config:
+            suffix = new_config.pop('label_to_hostname_suffix')
+            new_config.setdefault('hostname_format', f'<HOSTNAME>{suffix}')
+
+        exclude_metrics_by_labels = new_config.setdefault('exclude_metrics_by_labels', {})
+        for metric, labels in new_config.pop('ignore_metrics_by_labels', {}).items():
+            if '*' in labels:
+                exclude_metrics_by_labels[metric] = True
+            else:
+                exclude_metrics_by_labels[metric] = labels
+
+        share_labels = new_config.setdefault('share_labels', {})
+        for metric, data in new_config.pop('label_joins', {}).items():
+            share_labels[metric] = {
+                'match': data.get('labels_to_match', []),
+                'labels': data.get('labels_to_get', []),
+                'values': [1],
+            }
+
+        old_metrics = new_config.pop('metrics', [])
+        type_overrides = new_config.pop('type_overrides', {})
+        metrics = new_config.setdefault('metrics', [])
+        for metric in old_metrics:
+            data = {}
+
+            if isinstance(metric, str):
+                key = fnmatch.translate(metric)
+                data[key] = {'name': metric}
+                if metric in type_overrides:
+                    data[key]['type'] = type_overrides.pop(metric)
+            else:
+                for name, new_name in metric.items():
+                    key = fnmatch.translate(name)
+                    data[key] = {'name': new_name}
+                    if name in type_overrides:
+                        data[key]['type'] = type_overrides.pop(name)
+
+            metrics.append(data)
+
+        for metric, metric_type in type_overrides.items():
+            metrics.append({fnmatch.translate(metric): {'type': metric_type}})
+
+        metadata_metric_name = new_config.pop('metadata_metric_name', '')
+        metadata_label_map = new_config.pop('metadata_label_map', {})
+        if metadata_metric_name and metadata_label_map:
+            metadata_name, label_name = metadata_label_map.popitem()
+            metrics.append({metadata_metric_name: {'name': metadata_name, 'type': 'metadata', 'label': label_name}})
+
+        bearer_token_auth = new_config.pop('bearer_token_auth', False)
+        bearer_token_path = new_config.pop('bearer_token_path', '/var/run/secrets/kubernetes.io/serviceaccount/token')
+        if bearer_token_auth:
+            new_config.setdefault(
+                'auth_token',
+                {
+                    'reader': {'type': 'file', 'path': bearer_token_path},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                },
+            )
+
+        super(OpenMetricsCompatibilityScraper, self).__init__(check, new_config)

@@ -7,7 +7,7 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 from ..utils import requires_py3
-from .utils import get_check
+from .utils import get_check, get_legacy_check
 
 pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_interface]
 
@@ -82,15 +82,6 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
 
 
 def test_scraper_override(aggregator, dd_run_check, mock_http_response):
-    # TODO: when we drop Python 2 move this up top
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
-
-    class Check(OpenMetricsBaseCheckV2):
-        __NAMESPACE__ = 'test'
-
-        def create_scraper(self, config):
-            return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
-
     mock_http_response(
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
@@ -98,7 +89,7 @@ def test_scraper_override(aggregator, dd_run_check, mock_http_response):
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
         """
     )
-    check = Check('test', {}, [{'openmetrics_endpoint': 'test', 'metrics': ['.+']}])
+    check = get_legacy_check()
     dd_run_check(check)
 
     aggregator.assert_service_check('test.prometheus.health', ServiceCheck.OK, tags=['endpoint:test'])
