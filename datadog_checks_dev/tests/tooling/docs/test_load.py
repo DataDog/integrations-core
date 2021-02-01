@@ -128,21 +128,27 @@ def test_file_no_section():
     assert 'test: Docs file #1: Must include a `sections` attribute.' in doc.errors
 
 
-@mock.patch('datadog_checks.dev.tooling.utils.load_manifest', return_value=MOCK_RESPONSE)
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
 def test_file_name_duplicate(_):
-
     doc = get_doc(
         """
         name: foo
         files:
         - name: README.md
           sections:
-          - name: README.md
+            - name: foo
+              header_level: 1
+              description: words
+        - name: README.md
+          sections:
+            - name: bar
+              header_level: 1
+              description: word
         """
     )
     doc.load()
 
-    assert 'test, file #2: Example file name `README.md` already used by file #1' in doc.errors
+    assert 'test, file #2: File name `README.md` already used by file #1' in doc.errors
 
 
 def test_file_name_not_string():
@@ -174,7 +180,7 @@ def test_section_not_array():
     assert 'test: Docs file #1: Attribute `sections` must be a list' in doc.errors
 
 
-@mock.patch('datadog_checks.dev.tooling.utils.load_manifest', return_value=MOCK_RESPONSE)
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
 def test_section_not_map(_):
     doc = get_doc(
         """
@@ -188,26 +194,28 @@ def test_section_not_map(_):
     )
     doc.load()
 
-    assert 'test, README.md, option #1: Option attribute must be a mapping object' in doc.errors
-    assert 'test, README.md, option #2: Option attribute must be a mapping object' in doc.errors
+    assert 'test, README.md, section #1: section attribute must be a mapping object' in doc.errors
+    assert 'test, README.md, section #2: section attribute must be a mapping object' in doc.errors
 
 
-def test_section_name_not_string():
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_name_not_string(_):
     doc = get_doc(
         """
         name: foo
         files:
         - name: README.md
           sections:
-            - name: 123
+          - name: 123
         """
     )
     doc.load()
 
-    assert 'test: Docs file #1: Attribute `name` must be a str' in doc.errors
+    assert 'test, README.md, section #1: Attribute `name` must be a str' in doc.errors
 
 
-def test_section_name_duplicate():
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_name_duplicate(_):
     doc = get_doc(
         """
         name: foo
@@ -215,9 +223,13 @@ def test_section_name_duplicate():
         - name: README.md
           sections:
           - name: instances
+            header_level: 1
+            description: words
           - name: instances
+            header_level: 1
+            description: words
         """
     )
     doc.load()
 
-    assert 'test, README.md, option #2: Option name `instances` already used by option #1' in doc0.errors
+    assert 'test, README.md, section #2: section name `instances` already used by section #1' in doc.errors
