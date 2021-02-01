@@ -70,7 +70,9 @@ class Ceph(AgentCheck):
             name = cmd.replace(' ', '_')
             raw[name] = res
 
-        mon_map = raw['status']['monmap']
+        mon_map = raw.get('status', {}).get('monmap')
+        if mon_map is None:
+            raise RuntimeError("Could not detect Ceph release series")
         if 'min_mon_release_name' in mon_map and mon_map['min_mon_release_name'] == 'octopus':
             self.log.debug("Detected octopus version of ceph...")
             self._octopus = True
