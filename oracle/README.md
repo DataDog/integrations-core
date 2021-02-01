@@ -46,7 +46,7 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 The following runtimes are required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver:
 
 - Java 8 or higher 
-- [Microsoft Visual C++ Runtime 2015][13]
+- [Microsoft Visual C++ Runtime 2015][13] on windows.
 
 Once these are installed, follow the following steps: 
 
