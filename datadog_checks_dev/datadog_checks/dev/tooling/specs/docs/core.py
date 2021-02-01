@@ -30,6 +30,8 @@ class DocsSpec(BaseSpec):
 
     def validate(self):
         spec_validator(self.data, self)
+        if self.errors:
+            return
         self.normalize_links()
 
     def normalize_links(self):
