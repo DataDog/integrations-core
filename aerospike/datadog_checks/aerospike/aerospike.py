@@ -173,7 +173,7 @@ class AerospikeCheck(AgentCheck):
 
         try:
             parse_version = raw_version.split('.')
-            version = (int(p) for p in parse_version)
+            version = tuple(int(p) for p in parse_version)
         except Exception as e:
             self.log.debug("Unable to parse version: %s", str(e))
             return None
