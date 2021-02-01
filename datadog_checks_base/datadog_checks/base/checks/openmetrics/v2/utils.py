@@ -18,7 +18,7 @@ def decumulate_histogram_buckets(sample_data):
             context_key = compute_bucket_hash(sample.labels)
             if context_key not in bucket_values_by_context_upper_bound:
                 bucket_values_by_context_upper_bound[context_key] = {}
-            bucket_values_by_context_upper_bound[context_key][float(sample.labels['le'])] = sample.value
+            bucket_values_by_context_upper_bound[context_key][float(sample.labels['upper_bound'])] = sample.value
 
         new_sample_data.append([sample, tags, hostname])
 
@@ -64,7 +64,9 @@ def decumulate_histogram_buckets(sample_data):
             yield sample, tags, hostname
         else:
             context_key = compute_bucket_hash(sample.labels)
-            matching_bucket_tuple = bucket_tuples_by_context_upper_bound[context_key][float(sample.labels['le'])]
+            matching_bucket_tuple = bucket_tuples_by_context_upper_bound[context_key][
+                float(sample.labels['upper_bound'])
+            ]
 
             # Prevent 0.0
             lower_bound = str(matching_bucket_tuple[0] or 0)
@@ -76,5 +78,5 @@ def decumulate_histogram_buckets(sample_data):
 
 def compute_bucket_hash(labels):
     # we need the unique context for all the buckets
-    # hence we remove the `le` label
-    return hash(frozenset(sorted((k, v) for k, v in labels.items() if k != 'le')))
+    # hence we remove the `upper_bound` label
+    return hash(frozenset(sorted((k, v) for k, v in labels.items() if k != 'upper_bound')))

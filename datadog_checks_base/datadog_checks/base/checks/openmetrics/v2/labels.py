@@ -162,9 +162,9 @@ def canonicalize_numeric_label(label):
 
 
 def normalize_labels_histogram(labels):
-    upper_bound = labels.get('le')
+    upper_bound = labels.pop('le', None)
     if upper_bound is not None:
-        labels['le'] = str(canonicalize_numeric_label(upper_bound))
+        labels['upper_bound'] = str(canonicalize_numeric_label(upper_bound))
 
 
 def normalize_labels_summary(labels):

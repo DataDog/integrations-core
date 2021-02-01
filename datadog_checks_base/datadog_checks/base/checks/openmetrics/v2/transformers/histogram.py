@@ -21,7 +21,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                         continue
 
                     lower_bound = canonicalize_numeric_label(sample.labels['lower_bound'])
-                    upper_bound = canonicalize_numeric_label(sample.labels['le'])
+                    upper_bound = canonicalize_numeric_label(sample.labels['upper_bound'])
 
                     if lower_bound == upper_bound:
                         # this can happen for -inf/-inf bucket that we don't want to send (always 0)
@@ -65,7 +65,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             )
                         # Skip infinity upper bound as that is otherwise the
                         # same context as the sample suffixed by `_count`
-                        elif sample_name.endswith('_bucket') and not sample.labels['le'].endswith('inf'):
+                        elif sample_name.endswith('_bucket') and not sample.labels['upper_bound'].endswith('inf'):
                             monotonic_count_method(
                                 bucket_metric,
                                 sample.value,
@@ -100,7 +100,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             )
                         # Skip infinity upper bound as that is otherwise the
                         # same context as the sample suffixed by `_count`
-                        elif sample_name.endswith('_bucket') and not sample.labels['le'].endswith('inf'):
+                        elif sample_name.endswith('_bucket') and not sample.labels['upper_bound'].endswith('inf'):
                             monotonic_count_method(
                                 bucket_metric,
                                 sample.value,
