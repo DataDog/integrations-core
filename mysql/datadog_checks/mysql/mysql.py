@@ -211,7 +211,7 @@ class MySql(AgentCheck):
             if db:
                 db.close()
 
-    def _collect_metrics(self, db):
+    def _collect_metrics(self, db, tags):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
@@ -305,13 +305,13 @@ class MySql(AgentCheck):
             if src in results:
                 results[dst] = results[src]
 
-        self._submit_metrics(metrics, results, self._config.tags)
+        self._submit_metrics(metrics, results, tags)
 
         # Collect custom query metrics
         # Max of 20 queries allowed
         if isinstance(self._config.queries, list):
             for check in self._config.queries[: self._config.max_custom_queries]:
-                total_tags = self._config.tags + check.get('tags', [])
+                total_tags = tags + check.get('tags', [])
                 self._collect_dict(
                     check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags
                 )
