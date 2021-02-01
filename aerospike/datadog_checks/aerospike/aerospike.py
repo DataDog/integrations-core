@@ -150,13 +150,10 @@ class AerospikeCheck(AgentCheck):
             version = V5_1
 
         if version < V5_1:
-            # https://www.aerospike.com/docs/reference/info/#throughput
             self.collect_throughput(namespaces)
-            # https://www.aerospike.com/docs/reference/info/#latency
             self.collect_latency(namespaces)
 
             if version < V5_0:
-                # https://www.aerospike.com/docs/reference/info/#dcs
                 try:
                     datacenters = self.get_datacenters()
 
@@ -166,7 +163,6 @@ class AerospikeCheck(AgentCheck):
                 except Exception as e:
                     self.log.debug("There were no datacenters found: %s", e)
         else:
-            # https://www.aerospike.com/docs/reference/info/#latencies
             self.collect_latencies(namespaces)
 
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
@@ -219,6 +215,11 @@ class AerospikeCheck(AgentCheck):
         return namespaces
 
     def get_datacenters(self):
+        """
+        https://www.aerospike.com/docs/reference/info/#dcs
+
+        Note: Deprecated in Aerospike 5.0.0
+        """
         datacenters = self.get_info('dcs')
 
         if self._required_datacenters:
@@ -304,9 +305,9 @@ class AerospikeCheck(AgentCheck):
 
     def collect_latencies(self, namespaces):
         """
-        In Aerospike 5.1+, the `latencies` command is used gives the output of latencies like so:
+        The `latencies` command is introduced in Aerospike 5.1+ and replaces latency and throughput
 
-            histogramName_0:timeUnit,ops/sec,threshOld_0,threshOld_1,...;histogramName_1:...
+        https://www.aerospike.com/docs/reference/info/#latencies
         """
         data = self.get_info('latencies:')
 
@@ -348,6 +349,11 @@ class AerospikeCheck(AgentCheck):
                         self.log.debug("Got unexpected latency buckets: %s", latencies)
 
     def collect_latency(self, namespaces):
+        """
+        https://www.aerospike.com/docs/reference/info/#latency
+
+        Note: Deprecated in Aerospike 5.2
+        """
         data = self.get_info('latency:')
 
         ns = None
@@ -399,6 +405,11 @@ class AerospikeCheck(AgentCheck):
                     self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
 
     def collect_throughput(self, namespaces):
+        """
+        https://www.aerospike.com/docs/reference/info/#throughput
+
+        Note: Deprecated in Aerospike 5.1
+        """
         data = self.get_info('throughput:')
 
         while data:
