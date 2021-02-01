@@ -270,3 +270,23 @@ def test_section_name_duplicate(_):
     doc.load()
 
     assert 'test, README.md, section #2: section name `bar` already used by section #1' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_not_array(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+              foo: bar
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #1: Attribute `sections` must be a list' in doc.errors
