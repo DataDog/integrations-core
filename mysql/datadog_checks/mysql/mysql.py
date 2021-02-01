@@ -118,7 +118,7 @@ class MySql(AgentCheck):
                 self._send_metadata()
 
                 # Metric collection
-                self._collect_metrics(db, tags)
+                self._collect_metrics(db, tags=tags)
                 self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.deep_database_monitoring:
                     self._collect_statement_metrics(db, tags)
