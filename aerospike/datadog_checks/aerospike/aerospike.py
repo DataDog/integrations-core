@@ -40,8 +40,8 @@ AEROSPIKE_CAP_CONFIG_KEY_MAP = {SINDEX_METRIC_TYPE: "max_sindexs", SET_METRIC_TY
 ENABLED_VALUES = {'true', 'on', 'enable', 'enabled'}
 DISABLED_VALUES = {'false', 'off', 'disable', 'disabled'}
 
-V5_1 = [5, 1, 0, 0]
-V5_0 = [5, 0, 0, 0]
+V5_1 = (5, 1, 0, 0)
+V5_0 = (5, 0, 0, 0)
 
 
 def parse_namespace(data, namespace, secondary):
