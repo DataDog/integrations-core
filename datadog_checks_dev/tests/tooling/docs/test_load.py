@@ -233,3 +233,40 @@ def test_section_name_duplicate(_):
     doc.load()
 
     assert 'test, README.md, section #2: section name `instances` already used by section #1' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_name_no_name(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - foo: bar
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #1: Every section must contain a `name` attribute' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_name_duplicate(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: bar
+            header_level: 1
+            description: words
+          - name: bar
+            header_level: 1
+            description: words
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #2: section name `bar` already used by section #1' in doc.errors

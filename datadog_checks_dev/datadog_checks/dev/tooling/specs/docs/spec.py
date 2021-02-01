@@ -227,6 +227,9 @@ def section_validator(sections, loader, file_name, *prev_sections):
         # now validate the expanded section object
         _validate(section, validations, loader, MISSING, INVALID)
 
+        if loader.errors:
+            return
+
         section_name = section['name']
         if section_name in section_names_origin:
             loader.errors.append(
