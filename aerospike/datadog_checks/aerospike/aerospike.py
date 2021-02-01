@@ -146,7 +146,7 @@ class AerospikeCheck(AgentCheck):
 
         version = self.collect_version()
         if version is None:
-            self.log.debug("Could not determine version, using Aerospike v5.1")
+            self.log.debug("Could not determine version, assuming Aerospike v5.1")
             version = V5_1
 
         if version < V5_1:
