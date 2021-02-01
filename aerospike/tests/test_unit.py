@@ -135,6 +135,6 @@ def test_collect_latencies_parser(aggregator):
 
         aggregator.assert_metric(
             'aerospike.namespace.latency.{}_ops_sec'.format(metric_type),
-            tags=['namespace:{}'.format('test'), 'tag:value']
+            tags=['namespace:{}'.format('test'), 'tag:value'],
         )
     aggregator.assert_all_metrics_covered()
