@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import os
 
 import mock
 import pytest
@@ -14,7 +13,6 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.skipif(common.VERSION == '5.3.0.6', reason="Datacenter metrics not supported")
 def test_datacenter_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
@@ -33,10 +31,7 @@ def test_datacenter_metrics(aggregator):
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
     check.collect_latency = mock.MagicMock()
-    if common.VERSION == '5.3.0.6':
-        check.collect_version = common.VERSION.split('.')
-    else:
-        check.collect_version = mock.MagicMock()
+    check.collect_version = common.VERSION.split('.')
     check.check(None)
     for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
