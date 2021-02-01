@@ -242,6 +242,8 @@ def section_validator(sections, loader, file_name, *prev_sections):
         else:
             section_names_origin[section_name] = section_index
 
+        if loader.errors:
+            return
         # perform parameter expansion on the description text
         # first check if there are any fields to be replaced
         description = section['description']
