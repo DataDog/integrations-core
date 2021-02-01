@@ -339,7 +339,7 @@
             "id": 10,
             "definition": {
                 "type": "image",
-                "url": "https://static.datadoghq.com/static/images/saas_logos/bot/exchange_server@2x.png",
+                "url": "/static/images/logos/exchange-server_large.svg",
                 "sizing": "zoom"
             },
             "layout": {

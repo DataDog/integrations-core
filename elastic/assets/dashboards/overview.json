@@ -18,9 +18,9 @@
     "widgets": [
         {
             "definition": {
-                "sizing": "center",
+                "sizing": "zoom",
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/elasticsearch.png"
+                "url": "/static/images/logos/elasticsearch_large.svg"
             },
             "id": 6165517815387258,
             "layout": {

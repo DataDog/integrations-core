@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 2.8.2 / 2021-01-25
+
+* [Fixed] Make 'Context limit reached' message a warning. See [#8254](https://github.com/DataDog/integrations-core/pull/8254).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 2.8.1 / 2020-12-15 / Agent 7.25.0
 
 * [Fixed] Use spec template. See [#8192](https://github.com/DataDog/integrations-core/pull/8192).

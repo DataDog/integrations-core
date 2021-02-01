@@ -1,5 +1,19 @@
 # CHANGELOG - mysql
 
+## 2.2.1 / 2021-01-29
+
+* [Fixed] Fix condition for replication status. See [#8475](https://github.com/DataDog/integrations-core/pull/8475).
+
+## 2.2.0 / 2021-01-28
+
+* [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
+
+## 2.1.3 / 2021-01-25
+
+* [Fixed] Simplify replication status check. See [#8401](https://github.com/DataDog/integrations-core/pull/8401).
+* [Fixed] Refactor replica metrics and add some debug lines. See [#8380](https://github.com/DataDog/integrations-core/pull/8380).
+* [Fixed] Tighten condition for mysql.replication.slave_running. See [#8381](https://github.com/DataDog/integrations-core/pull/8381).
+
 ## 2.1.2 / 2020-11-17 / Agent 7.25.0
 
 * [Fixed] Add debug log line for replication status. See [#8040](https://github.com/DataDog/integrations-core/pull/8040).

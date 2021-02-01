@@ -1,5 +1,9 @@
 # CHANGELOG - windows_service
 
+## 3.0.0 / 2021-01-25
+
+* [Changed] Report UNKNOWN instead of CRITICAL if no Windows service matches the query. See [#8171](https://github.com/DataDog/integrations-core/pull/8171).
+
 ## 2.8.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] windows service config specs. See [#7974](https://github.com/DataDog/integrations-core/pull/7974).

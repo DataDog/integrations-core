@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.16.1 / 2021-01-25
+
+* [Fixed] Fix error log message. See [#8271](https://github.com/DataDog/integrations-core/pull/8271).
+
 ## 1.16.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

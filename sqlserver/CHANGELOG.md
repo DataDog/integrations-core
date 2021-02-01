@@ -1,5 +1,17 @@
 # CHANGELOG - sqlserver
 
+## 2.3.6 / 2021-01-27
+
+* [Fixed] Fix cursor execution returning None. See [#8481](https://github.com/DataDog/integrations-core/pull/8481).
+
+## 2.3.5 / 2021-01-26
+
+* [Fixed] Avoid redundant queries. See [#8447](https://github.com/DataDog/integrations-core/pull/8447).
+
+## 2.3.4 / 2021-01-25
+
+* [Fixed] Clarify authentication in SQL Server. See [#8396](https://github.com/DataDog/integrations-core/pull/8396).
+
 ## 2.3.3 / 2021-01-15
 
 * [Fixed] Handle offline databases for existence check. See [#8374](https://github.com/DataDog/integrations-core/pull/8374).

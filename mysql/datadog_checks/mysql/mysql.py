@@ -61,7 +61,8 @@ if PY3:
 
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
-    REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
+    SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
+    REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
     def __init__(self, name, init_config, instances):
@@ -338,12 +339,12 @@ class MySql(AgentCheck):
             if not replica_io_running and not replica_sql_running:
                 self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
                 replica_running_status = AgentCheck.CRITICAL
-            if not replica_io_running or not replica_sql_running:
+            elif not replica_io_running or not replica_sql_running:
                 self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
                 replica_running_status = AgentCheck.WARNING
 
         if replica_running_status == AgentCheck.UNKNOWN:
-            if self._is_master(replicas, results):  # master
+            if self._is_source_host(replicas, results):  # master
                 if replicas > 0 and binlog_running:
                     self.log.debug("Host is master, there are replicas and binlog is running")
                     replica_running_status = AgentCheck.OK
@@ -357,9 +358,12 @@ class MySql(AgentCheck):
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
-            self.REPLICA_SERVICE_CHECK_NAME, 1 if replica_running_status == AgentCheck.OK else 0, tags=self.config.tags
+            self.SLAVE_SERVICE_CHECK_NAME, 1 if replica_running_status == AgentCheck.OK else 0, tags=self.config.tags
         )
+        # deprecated in favor of service_check("mysql.replication.replica_running")
+        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
         self.service_check(self.REPLICA_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
+
 
     def _collect_statement_metrics(self, db, tags):
         tags = self.service_check_tags + tags
@@ -367,7 +371,7 @@ class MySql(AgentCheck):
         for metric_name, metric_value, metric_tags in metrics:
             self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
 
-    def _is_master(self, replicas, results):
+    def _is_source_host(self, replicas, results):
         # master uuid only collected in replicas
         source_host = collect_string('Master_Host', results) or collect_string('Source_Host', results)
         if replicas > 0 or not source_host:

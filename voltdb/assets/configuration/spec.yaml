@@ -49,3 +49,9 @@ files:
               aws_service.hidden: true
           - template: instances/db
           - template: instances/default
+
+      - template: logs
+        example:
+        - type: file
+          path: /var/log/voltdb.log
+          source: voltdb

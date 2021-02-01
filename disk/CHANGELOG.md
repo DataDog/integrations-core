@@ -1,5 +1,15 @@
 # CHANGELOG - disk
 
+## 4.1.1 / 2021-01-28
+
+* [Fixed] Fix example config for `create_mounts`. See [#8480](https://github.com/DataDog/integrations-core/pull/8480).
+
+## 4.1.0 / 2021-01-25
+
+* [Added] Support network drives on Windows. See [#8273](https://github.com/DataDog/integrations-core/pull/8273).
+* [Added] Add device_label tag in addition to label tag. See [#8306](https://github.com/DataDog/integrations-core/pull/8306).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 4.0.0 / 2020-10-31 / Agent 7.24.0
 
 * [Changed] Rename whitelist/blacklist to include/exclude. See [#7627](https://github.com/DataDog/integrations-core/pull/7627).

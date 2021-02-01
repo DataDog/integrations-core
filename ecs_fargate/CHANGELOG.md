@@ -1,5 +1,10 @@
 # CHANGELOG - ECS Fargate
 
+## 2.12.0 / 2021-01-25
+
+* [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 2.11.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Amazon fargate config specs. See [#8003](https://github.com/DataDog/integrations-core/pull/8003).

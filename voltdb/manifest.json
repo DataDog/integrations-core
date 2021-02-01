@@ -16,13 +16,14 @@
   ],
   "public_title": "VoltDB",
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "process_signatures": [
     "voltdb"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "voltdb",
   "assets": {
     "configuration": {
@@ -34,7 +35,9 @@
     },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "voltdb"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

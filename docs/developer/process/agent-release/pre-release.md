@@ -22,6 +22,7 @@ Ensure that you have configured the following:
 ## Before Freeze
 
 1. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
+2. Check that the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38) and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green.
 
 ## Freeze
 
@@ -32,6 +33,8 @@ all integrations with pending changes then branch off.
 
 1. Make a pull request to release [any new integrations](../integration-release.md#new-integrations), then merge it and pull `master`
 1. Make a pull request to release [all changed integrations](../integration-release.md#bulk-releases), then merge it and pull `master`
+    * Get 2+ thorough reviews on the changelogs. Entries should have appropriate SemVer levels (e.g. `Changed` entries must refer to breaking changes only). See also [PR guidelines](../../guidelines/pr.md).
+    * Consider x-posting the PR to Agent teams that have integrations in `integrations-core`, so they can check relevant changelogs too.
 
 !!! important
     [Update PyPI](../integration-release.md#pypi) if you released `datadog_checks_base` or `datadog_checks_dev`.

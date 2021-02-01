@@ -1,5 +1,9 @@
 # CHANGELOG - eks_fargate
 
+## 1.3.0 / 2021-01-25
+
+* [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
+
 ## 1.2.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add config specs. See [#8004](https://github.com/DataDog/integrations-core/pull/8004).

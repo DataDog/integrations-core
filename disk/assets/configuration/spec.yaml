@@ -217,3 +217,40 @@ files:
               example: 5
               default: 5
               type: integer
+          - name: create_mounts
+            description: |
+              On Windows, instruct the check to create one or more network
+              mounts, and have the check collect metrics for the mounted devices.
+
+              Uses the provided username and password (if provided and necessary)
+              to create an SMB or NFS mount. If `type` is not specified, then
+              the operating system will choose the best available network filesystem
+              based on the other parameters. If `type` is specified, then any type
+              other than `nfs` will default to an SMB file share.
+            value:
+              example:
+              - mountpoint: "s:"
+                user: auser
+                password: "somepassword"
+                host: smbserver
+                share: space
+              - mountpoint: "n:"
+                host: nfsserver
+                share: /mnt/nfs_share
+                type: nfs
+              type: array
+              items:
+                type: object
+                properties:
+                - name: mountpoint
+                  type: string
+                - name: user
+                  type: string
+                - name: password
+                  type: string
+                - name: host
+                  type: string
+                - name: share
+                  type: string
+                - name: type
+                  type: string

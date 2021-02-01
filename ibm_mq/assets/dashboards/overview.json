@@ -280,7 +280,7 @@
       "id": 10,
       "definition": {
         "type": "image",
-        "url": "https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_mq/images/ibm_mq.png",
+        "url": "/static/images/logos/ibm-mq_large.svg",
         "sizing": "zoom"
       },
       "layout": {
