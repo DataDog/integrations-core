@@ -323,7 +323,7 @@ class AerospikeCheck(AgentCheck):
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []
             namespace_tags.extend(self._tags)
 
-            values = re.search(r'\:\w+\,(\d*\.?\d*),([,\d+.\d+]*)', line)
+            values = re.search(r':\w+,(\d*\.?\d*),([,\d+.\d+]*)', line)
             if values:
                 ops_per_sec_val = values.groups()[0]
                 # For backwards compatibility, the ops/sec value is `latencies` is already calculated
