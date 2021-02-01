@@ -191,6 +191,6 @@ ignite.cache.rebalancing_partitions,gauge,10,,,Number of currently rebalancing p
 ignite.cache.rebalanced_keys,gauge,10,key,,Number of already rebalanced keys.,0,ignite,
 ignite.cache.estimated_rebalancing_keys,gauge,10,key,,Number estimated to rebalance keys.,0,ignite,
 ignite.cache.keys_to_rebalance,gauge,10,key,,Estimated number of keys to be rebalanced on current node.,0,ignite,
-ignite.cache.rebalancing_keys_rate,gauge,10,entry,second,Estimated rebalancing speed in keys.,0,ignite,
+ignite.cache.rebalancing_keys_rate,gauge,10,operation,second,Estimated rebalancing speed in keys.,0,ignite,
 ignite.cache.rebalancing_bytes_rate,gauge,10,byte,second,Estimated rebalancing speed in bytes.,0,ignite,
 ignite.cache.rebalance_clearing_partitions,gauge,10,,,Number of partitions need to be cleared before actual rebalance start.,0,ignite,
