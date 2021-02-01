@@ -335,8 +335,15 @@ class AerospikeCheck(AgentCheck):
                     latencies = bucket_vals.split(',')
                     if latencies and len(latencies) == 17:
                         for i in range(len(latencies)):
-                            latency_name = metric_name + '_over_{}ms'.format(str(2 ** i))
-                            self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], namespace_tags)
+                            bucket = 2 ** i
+                            tags = namespace_tags + ['bucket:{}'.format(bucket)]
+                            latency_name = metric_name
+                            self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], tags)
+
+                            # Also submit old latency names like `aerospike.namespace.latency.read_over_64ms`
+                            if bucket in [1, 8, 64]:
+                                latency_name = metric_name + '_over_{}ms'.format(str(bucket))
+                                self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], tags)
                     else:
                         self.log.debug("Got unexpected latency buckets: %s", latencies)
 

@@ -128,9 +128,16 @@ def test_collect_latencies_parser(aggregator):
 
     for metric_type in ['read', 'udf']:
         for i in range(17):
+            bucket = 2 ** i
             aggregator.assert_metric(
-                'aerospike.namespace.latency.{}_over_{}ms'.format(metric_type, str(2 ** i)),
-                tags=['namespace:{}'.format('test'), 'tag:value'],
+                'aerospike.namespace.latency.{}'.format(metric_type),
+                tags=['namespace:{}'.format('test'), 'tag:value', 'bucket:{}'.format(str(bucket))],
+            )
+
+        for n in [1, 8, 64]:
+            aggregator.assert_metric(
+                'aerospike.namespace.latency.{}_over_{}ms'.format(metric_type, str(n)),
+                tags=['namespace:{}'.format('test'), 'tag:value', 'bucket:{}'.format(str(n))],
             )
 
         aggregator.assert_metric(
