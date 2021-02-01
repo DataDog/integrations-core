@@ -307,8 +307,6 @@ class AerospikeCheck(AgentCheck):
         In Aerospike 5.1+, the `latencies` command is used gives the output of latencies like so:
 
             histogramName_0:timeUnit,ops/sec,threshOld_0,threshOld_1,...;histogramName_1:...
-
-        Throughput is calculated by threshOld / ops/sec value.
         """
         data = self.get_info('latencies:')
 
@@ -323,6 +321,7 @@ class AerospikeCheck(AgentCheck):
                 return
 
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []
+            namespace_tags.extend(self._tags)
 
             values = re.search(r'\:\w+\,(\d*\.?\d*),([,\d+.\d+]*)', line)
             if values:
