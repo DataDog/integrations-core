@@ -553,7 +553,9 @@ EXPECTED_METRICS_V2_E2E = {
 EXPECTED_METRICS_V2_NEW = {}
 
 for metric_name, metric_type in list(EXPECTED_METRICS_V2.items()):
-    if metric_name.endswith('_total'):
+    if metric_name == 'linkerd.prometheus.health':
+        EXPECTED_METRICS_V2_NEW['linkerd.openmetrics.health'] = metric_type
+    elif metric_name.endswith('_total'):
         EXPECTED_METRICS_V2_NEW['{}.count'.format(metric_name[:-6])] = aggregator.MONOTONIC_COUNT
     elif metric_name.endswith('.sum'):
         EXPECTED_METRICS_V2_NEW[metric_name] = aggregator.MONOTONIC_COUNT
