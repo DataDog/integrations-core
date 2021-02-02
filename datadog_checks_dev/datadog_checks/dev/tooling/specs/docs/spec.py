@@ -38,6 +38,14 @@ def _validate(obj, items, loader, MISSING, INVALID):
                 # initialize as empty builtin type
                 obj[v.key] = v.type()
 
+        if v.children and obj[v.key]:
+            # handle recursive elements which may be passed as strings
+            if v.children == 'self':
+                children = items
+            else:
+                children = v.children
+            _validate(obj[v.key], children, loader, MISSING, INVALID)
+
 
 def spec_validator(spec, loader):
     if not isinstance(spec, dict):
