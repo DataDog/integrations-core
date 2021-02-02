@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from typing import Any, Callable, Dict, List
 
 from six import raise_from
 
@@ -19,14 +20,21 @@ class Query(object):
     """
 
     def __init__(self, query_data):
-        self.query_data = deepcopy(query_data or {})
-        self.name = None
-        self.query = None
-        self.columns = None
-        self.extras = None
-        self.tags = None
+        # type: (Dict[str, Any]) -> Query
+        self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
+        self.name = None  # type: str
+        self.query = None  # type: str
+        self.columns = None  # type: List[str]
+        self.extras = None  # type: List[Dict[str, str]]
+        self.tags = None  # type: List[str]
 
-    def compile(self, column_transformers, extra_transformers):
+    def compile(
+        self,
+        column_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
+        extra_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
+    ):
+        # type: (...) -> None
+
         """
         This idempotent method will be called by `QueryManager.compile_queries` so you
         should never need to call it directly.
