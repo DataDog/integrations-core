@@ -6,7 +6,7 @@
         "id": 0,
         "definition": {
           "type": "image",
-          "url": "/static/images/saas_logos/bot/vertica@2x.png",
+          "url": "/static/images/logos/vertica_large.svg",
           "sizing": "fit"
         },
         "layout": {

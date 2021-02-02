@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
+from typing import Callable, Iterable, List, Sequence, Union
+
+from datadog_checks.base import AgentCheck
 
 from ...config import is_affirmative
 from ..containers import iter_unique
@@ -34,7 +37,14 @@ class QueryManager(object):
     ```
     """
 
-    def __init__(self, check, executor, queries=None, tags=None, error_handler=None):
+    def __init__(
+        self,
+        check,  # type: AgentCheck
+        executor,  # type:  Callable[[str], Union[Sequence, Iterable]]
+        queries=None,  # type: List[str]
+        tags=None,  # type: List[str]
+        error_handler=None,  # type: Callable[[str], str]
+    ):  # type: (...) -> QueryManager
         """
         - **check** (_AgentCheck_) - an instance of a Check
         - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
@@ -44,13 +54,13 @@ class QueryManager(object):
         - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
           a sanitized string, useful for scrubbing potentially sensitive information libraries emit
         """
-        self.check = check
-        self.executor = executor
+        self.check = check  # type: AgentCheck
+        self.executor = executor  # type:  Callable[[str], Union[Sequence, Iterable]]
         self.tags = tags or []
         self.error_handler = error_handler
-        self.queries = [Query(payload) for payload in queries or []]
-        custom_queries = list(self.check.instance.get('custom_queries', []))
-        use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)
+        self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
+        custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
+        use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
 
         # Handle overrides
         if use_global_custom_queries == 'extend':

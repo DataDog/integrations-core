@@ -1,5 +1,9 @@
 # CHANGELOG - TLS
 
+## 2.1.0 / 2021-01-28
+
+* [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
+
 ## 2.0.0 / 2021-01-25
 
 * [Changed] Update TLS check to use TLS context wrapper. See [#8230](https://github.com/DataDog/integrations-core/pull/8230).

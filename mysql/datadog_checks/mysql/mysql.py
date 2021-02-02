@@ -332,7 +332,7 @@ class MySql(AgentCheck):
             if not slave_io_running and not slave_sql_running:
                 self.log.debug("Slave_IO_Running and Slave_SQL_Running are not ok")
                 slave_running_status = AgentCheck.CRITICAL
-            if not slave_io_running or not slave_sql_running:
+            elif not slave_io_running or not slave_sql_running:
                 self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
                 slave_running_status = AgentCheck.WARNING
 

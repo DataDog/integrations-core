@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 5.3.2 / 2021-02-01
+
+* [Fixed] Fix Postgres statements to remove information_schema query. See [#8498](https://github.com/DataDog/integrations-core/pull/8498).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Do not run replication metrics on newer aurora versions. See [#8492](https://github.com/DataDog/integrations-core/pull/8492).
+
 ## 5.3.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Removed duplicated metrics. See [#8116](https://github.com/DataDog/integrations-core/pull/8116).

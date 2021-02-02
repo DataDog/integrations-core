@@ -6,7 +6,7 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "https://s3.amazonaws.com/dd-integrations/ibm-db2/configuration/tile/logo.png",
+                "url": "/static/images/logos/ibm-db2_large.svg",
                 "sizing": "fit"
             },
             "layout": {

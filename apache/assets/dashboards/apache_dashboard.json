@@ -18,9 +18,9 @@
     "widgets": [
         {
             "definition": {
-                "sizing": "fit",
+                "sizing": "zoom",
                 "type": "image",
-                "url": "/static/images/saas_logos/small/apache@2x.png"
+                "url": "/static/images/logos/apache_large.svg"
             },
             "id": 0,
             "layout": {
