@@ -159,7 +159,7 @@ instances:
     ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
     ## success manager or Datadog support.
     #
-    # deep_database_monitoring: true
+    # deep_database_monitoring: false
 
     ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
