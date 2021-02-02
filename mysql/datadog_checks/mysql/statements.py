@@ -42,10 +42,7 @@ STATEMENT_METRICS = {
 
 DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
 
-
-# Metric indicating the number of queries dropped due to reaching the max size of
-# performance_schema.events_statements_summary_by_digest
-DROPPED_QUERIES_METRIC = 'mysql.queries.untracked'
+TAG_VALUE_UNAVAILABLE = 'unavailable'
 
 
 class MySQLStatementMetrics(object):
@@ -89,25 +86,39 @@ class MySQLStatementMetrics(object):
             tags = []
 
             # A NULL digest indicates that some queries are not captured in metrics because
-            # the performance_schema query limit was hit. This metric will enable customers
-            # to monitor the number of queries dropped from tracking.
+            # the performance_schema query limit was hit. It is important to treat this row
+            # as a real query so that % time metrics calculations are still valid for all
+            # queries, not just tracked queries.
             # See: https://dev.mysql.com/doc/refman/5.7/en/statement-summary-tables.html
             if row['digest'] is None:
-                metrics.append((DROPPED_QUERIES_METRIC, row['count'], tags))
-                continue
+                tags.extend(
+                    [
+                        'digest:' + TAG_VALUE_UNAVAILABLE,
+                        'schema:' + TAG_VALUE_UNAVAILABLE,
+                        'query:' + TAG_VALUE_UNAVAILABLE,
+                        'query_signature:' + TAG_VALUE_UNAVAILABLE,
+                    ]
+                )
+                self.log.warning(
+                    'Encountered a null digest row in performance_schema.events_statements_summary_by_digest. '
+                    'This indicates that not all queries could be tracked. You may wish to raise the system '
+                    'variable `performance-schema-digests-size` or truncate this table periodically.'
+                )
+            else:
+                tags.append('digest:' + row['digest'])
 
-            tags.append('digest:' + row['digest'])
+                if row['schema'] is not None:
+                    tags.append('schema:' + row['schema'])
 
-            if row['schema'] is not None:
-                tags.append('schema:' + row['schema'])
+                try:
+                    obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+                except Exception as e:
+                    obfuscated_statement = TAG_VALUE_UNAVAILABLE
+                    # Note: the original query is safe to log because the digest text is already obfuscated
+                    self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
 
-            try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-            except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
-                continue
-            tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
-            tags.append('query:' + normalize_query_tag(obfuscated_statement).strip())
+                tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
+                tags.append('query:' + normalize_query_tag(obfuscated_statement).strip())
 
             for col, name in STATEMENT_METRICS.items():
                 value = row[col]
