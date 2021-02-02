@@ -207,7 +207,7 @@ class ESCheck(AgentCheck):
             if version < [5, 0, 0]:
                 # version 5 errors out if the `all` parameter is set
                 stats_url += "?all=true"
-            if version >= [7, 4, 0]:
+            if version >= [7, 4, 0] and self.config.slm_stats:
                 slm_url = "/_slm/policy"
         else:
             # legacy

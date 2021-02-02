@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from copy import deepcopy
 
 import pytest
 import requests
@@ -45,7 +46,7 @@ def test__join_url():
     'instance, url_fix',
     [
         pytest.param({'url': URL}, '_local/'),
-        pytest.param({'url': URL, "cluster_stats": True}, ''),
+        pytest.param({'url': URL, "cluster_stats": True, "slm_stats": True}, ''),
     ],
 )
 @pytest.mark.unit
@@ -78,27 +79,42 @@ def test__get_urls(instance, url_fix):
     assert stats_url == '/_nodes/' + url_fix + 'stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
-    assert slm_url == '/_slm/policy'
+    assert slm_url == ('/_slm/policy' if instance.get('slm_stats') is True else None)
 
 
 @pytest.mark.integration
-def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags):
+def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
-    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
 
 @pytest.mark.integration
-def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
+def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
+    slm_instance = deepcopy(instance)
+    slm_instance['slm_stats'] = True
+    elastic_check = ESCheck('elastic', {}, instances=[slm_instance])
+    elastic_check.check(None)
+
+    _test_check(elastic_check, slm_instance, aggregator, cluster_tags, node_tags)
+
+    # SLM stats
+    slm_metrics = slm_stats_for_version(elastic_check._get_es_version())
+    for m_name in slm_metrics:
+        aggregator.assert_metric(m_name, at_least=1, tags=slm_tags)
+
+
+@pytest.mark.integration
+def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags, node_tags):
     instance['gc_collectors_as_rate'] = True
     check = ESCheck('elastic', {}, instances=[instance])
     check.check(instance)
     for metric in JVM_RATES:
         aggregator.assert_metric(metric, at_least=1, tags=node_tags)
 
-    _test_check(check, instance, aggregator, cluster_tags, node_tags, slm_tags)
+    _test_check(check, instance, aggregator, cluster_tags, node_tags)
 
 
-def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags):
+def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
     config = from_instance(instance)
     es_version = elastic_check._get_es_version()
 
@@ -115,11 +131,6 @@ def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, sl
     expected_metrics.update(CLUSTER_PENDING_TASKS)
     for m_name in expected_metrics:
         aggregator.assert_metric(m_name, at_least=1, tags=cluster_tags)
-
-    # SLM stats
-    slm_metrics = slm_stats_for_version(es_version)
-    for m_name in slm_metrics:
-        aggregator.assert_metric(m_name, at_least=1, tags=slm_tags)
 
     aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=config.service_check_tags)
 
@@ -256,6 +267,6 @@ def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags, slm_tags):
+def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
     aggregator = dd_agent_check(instance, rate=True)
-    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags, slm_tags)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
