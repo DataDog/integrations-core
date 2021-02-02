@@ -339,7 +339,7 @@ def test_nested_section_not_array(_):
     )
     doc.load()
     # nested section names don't get carried on to the validator
-    assert 'test, README.md, instances, section #1: Attribute `sections` must be a list' in doc.errors
+    assert 'test, README.md, instances: Attribute `sections` must be a list' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -363,8 +363,8 @@ def test_nested_section_not_map(_):
     )
     doc.load()
 
-    assert 'test, test.yaml, instances, option #1: Option attribute must be a mapping object' in doc.errors
-    assert 'test, test.yaml, instances, option #2: Option attribute must be a mapping object' in doc.errors
+    assert 'test, README.md, instances, section #1: section attribute must be a mapping object' in doc.errors
+    assert 'test, README.md, instances, section #2: section attribute must be a mapping object' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -386,7 +386,6 @@ def test_nested_section_no_name(_):
     doc.load()
 
     assert 'test, README.md, instances, section #1: Every section must contain a `name` attribute' in doc.errors
-    assert 'test, README.md, instances, section #2: Every section must contain a `name` attribute' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -407,4 +406,4 @@ def test_nested_section_name_not_string(_):
     )
     doc.load()
 
-    assert 'test, README.md, instances, section #1: Every section must contain a `name` attribute' in doc.errors
+    assert 'test, README.md, instances, section #1: Attribute `name` must be a str' in doc.errors
