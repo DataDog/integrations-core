@@ -44,6 +44,7 @@ DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.
 
 TAG_VALUE_UNAVAILABLE = 'unavailable'
 
+
 class MySQLStatementMetrics(object):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
@@ -82,44 +83,49 @@ class MySQLStatementMetrics(object):
         )
 
         for row in rows:
-            tags = []
-
-            # A NULL digest indicates that some queries are not captured in metrics because
-            # the performance_schema query limit was hit. It is important to treat this row
-            # as a real query so that % time metrics calculations are still valid for all
-            # queries, not just tracked queries.
-            # See: https://dev.mysql.com/doc/refman/5.7/en/statement-summary-tables.html
-            if row['digest'] is None:
-                tags.extend(
-                    [
-                        'digest:' + TAG_VALUE_UNAVAILABLE,
-                        'schema:' + TAG_VALUE_UNAVAILABLE,
-                        'query:' + TAG_VALUE_UNAVAILABLE,
-                        'query_signature:' + TAG_VALUE_UNAVAILABLE,
-                    ]
-                )
-
-            else:
-                tags.append('digest:' + row['digest'])
-
-                if row['schema'] is not None:
-                    tags.append('schema:' + row['schema'])
-
-                try:
-                    obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-                except Exception as e:
-                    obfuscated_statement = 'obfuscation-error'
-                    # Note: the original query is safe to log because the digest text is already obfuscated
-                    self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
-
-                tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
-                tags.append('query:' + normalize_query_tag(obfuscated_statement).strip())
+            tags = self.get_row_tags(row)
 
             for col, name in STATEMENT_METRICS.items():
                 value = row[col]
                 metrics.append((name, value, tags))
 
         return metrics
+
+    def get_row_tags(self, row):
+        tags = []
+
+        # A NULL digest indicates that some queries are not captured in metrics because
+        # the performance_schema query limit was hit. It is important to treat this row
+        # as a real query so that % time metrics calculations are still valid for all
+        # queries, not just tracked queries.
+        # See: https://dev.mysql.com/doc/refman/5.7/en/statement-summary-tables.html
+        if row['digest'] is None:
+            tags.extend(
+                [
+                    'digest:' + TAG_VALUE_UNAVAILABLE,
+                    'schema:' + TAG_VALUE_UNAVAILABLE,
+                    'query:' + TAG_VALUE_UNAVAILABLE,
+                    'query_signature:' + TAG_VALUE_UNAVAILABLE,
+                ]
+            )
+
+        else:
+            tags.append('digest:' + row['digest'])
+
+            if row['schema'] is not None:
+                tags.append('schema:' + row['schema'])
+
+            try:
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            except Exception as e:
+                obfuscated_statement = 'obfuscation-error'
+                # Note: the original query is safe to log because the digest text is already obfuscated
+                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+
+            tags.append('query:' + normalize_query_tag(obfuscated_statement).strip())
+            tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
+
+        return tags
 
     @staticmethod
     def _merge_duplicate_rows(rows, key):
