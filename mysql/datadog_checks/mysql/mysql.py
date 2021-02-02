@@ -320,13 +320,13 @@ class MySql(AgentCheck):
         replica_running_status = AgentCheck.UNKNOWN
         # Replica_IO_Running: Whether the I/O thread for reading the source's binary log is running.
         # You want this to be Yes unless you have not yet started replication or have explicitly stopped it.
-        replica_io_running = collect_type('Slave_IO_Running', results, dict) or collect_type(
-            'Replica_IO_Running', results, dict
-        )
+        replica_io_running = collect_type('Slave_IO_Running', results, dict)
+        if replica_io_running is None:
+            replica_io_running = collect_type('Replica_IO_Running', results, dict)
         # Replica_SQL_Running: Whether the SQL thread for executing events in the relay log is running.
-        replica_sql_running = collect_type('Slave_SQL_Running', results, dict) or collect_type(
-            'Replica_SQL_Running', results, dict
-        )
+        replica_sql_running = collect_type('Slave_SQL_Running', results, dict)
+        if replica_sql_running is None:
+            replica_sql_running = collect_type('Replica_SQL_Running', results, dict)
         if replica_io_running:
             replica_io_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_io_running))
         if replica_sql_running:
