@@ -59,7 +59,7 @@ def test_name_not_string():
     )
     doc.load()
 
-    assert 'test: The top-level `name` attribute must be a str' in doc.errors
+    assert 'test: The top-level `name` attribute must be a string' in doc.errors
 
 
 def test_no_files():
@@ -83,7 +83,7 @@ def test_files_not_array():
     )
     doc.load()
 
-    assert 'test: The top-level `files` attribute must be a list' in doc.errors
+    assert 'test: The top-level `files` attribute must be an array' in doc.errors
 
 
 def test_file_not_map():
@@ -162,7 +162,7 @@ def test_file_name_not_string():
     )
     doc.load()
 
-    assert 'test: Docs file #1: Attribute `name` must be a str' in doc.errors
+    assert 'test: Docs file #1: Attribute `name` must be a string' in doc.errors
 
 
 def test_section_not_array():
@@ -177,7 +177,7 @@ def test_section_not_array():
     )
     doc.load()
 
-    assert 'test: Docs file #1: Attribute `sections` must be a list' in doc.errors
+    assert 'test: Docs file #1: Attribute `sections` must be an array' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -211,7 +211,7 @@ def test_section_name_not_string(_):
     )
     doc.load()
 
-    assert 'test, README.md, section #1: Attribute `name` must be a str' in doc.errors
+    assert 'test, README.md, section #1: Attribute `name` must be a string' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -281,7 +281,7 @@ def test_section_header_level_not_int(_):
     )
     doc.load()
 
-    assert 'test, README.md, section #1: Attribute `header_level` must be a int' in doc.errors
+    assert 'test, README.md, section #1: Attribute `header_level` must be an int' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -318,7 +318,7 @@ def test_nested_section_not_array(_):
     )
     doc.load()
     # nested section names don't get carried on to the validator
-    assert 'test, README.md, instances: Attribute `sections` must be a list' in doc.errors
+    assert 'test, README.md, instances: Attribute `sections` must be an array' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -382,7 +382,7 @@ def test_nested_section_name_not_string(_):
     )
     doc.load()
 
-    assert 'test, README.md, instances, section #1: Attribute `name` must be a str' in doc.errors
+    assert 'test, README.md, instances, section #1: Attribute `name` must be a string' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -453,7 +453,7 @@ def test_nested_section_header_level_not_int(_):
     )
     doc.load()
 
-    assert 'test, README.md, instances, section #1: Attribute `header_level` must be a int' in doc.errors
+    assert 'test, README.md, instances, section #1: Attribute `header_level` must be an int' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
