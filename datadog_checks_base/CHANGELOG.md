@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.3.2 / 2021-02-01
+
+* [Fixed] Fix histogram upper bound label name for new OpenMetrics implementation. See [#8505](https://github.com/DataDog/integrations-core/pull/8505).
+* [Fixed] Provide error message on subprocess output. See [#8455](https://github.com/DataDog/integrations-core/pull/8455).
+
 ## 16.3.1 / 2021-01-29
 
 * [Fixed] Fix Prometheus summary quantile metrics. See [#8488](https://github.com/DataDog/integrations-core/pull/8488).
