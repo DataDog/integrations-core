@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.23.1 / 2021-02-02
+
+* [Fixed] Disable SLM metrics by default. See [#8511](https://github.com/DataDog/integrations-core/pull/8511).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.23.0 / 2021-01-15
 
 * [Added] Add SLM metrics. See [#8335](https://github.com/DataDog/integrations-core/pull/8335).
