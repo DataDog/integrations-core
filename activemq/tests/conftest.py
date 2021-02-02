@@ -15,6 +15,9 @@ from datadog_checks.dev.utils import load_jmx_config
 from .common import BASE_URL, HERE, HOST, JMX_PORT, TEST_AUTH, TEST_MESSAGE, TEST_PORT, TEST_QUEUES, TEST_TOPICS
 
 
+COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+
+
 def populate_server():
     """Add some queues and topics to ensure more metrics are available."""
     time.sleep(3)
@@ -31,10 +34,14 @@ def populate_server():
 @pytest.fixture(scope="session")
 def dd_environment():
     envs = {'JMX_PORT': str(JMX_PORT)}
-    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
+
+    log_pattern = 'ActiveMQ Jolokia REST API available'
+    if COMPOSE_FILE == 'artemis.yaml':
+        log_pattern = 'HTTP Server started at http://0.0.0.0:8161'
+
     with docker_run(
-        compose_file,
-        log_patterns=['ActiveMQ Jolokia REST API available'],
+        os.path.join(HERE, 'compose', COMPOSE_FILE),
+        log_patterns=[log_pattern],
         conditions=[WaitForPortListening(HOST, TEST_PORT), populate_server],
         env_vars=envs,
     ):
