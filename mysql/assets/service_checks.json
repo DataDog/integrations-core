@@ -27,7 +27,7 @@
             "host",
             "channel"
         ],
-        "name": "Replication Running",
+        "name": "Replication Running (Deprecated)",
         "description": "Deprecated. Returns CRITICAL for a replica that's not running Slave_IO_Running or Slave_SQL_Running, WARNING if one of the two is not running. Returns `OK` otherwise."
     },
     {
