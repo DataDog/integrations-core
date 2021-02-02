@@ -43,8 +43,6 @@ STATEMENT_METRICS = {
 DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
 
 TAG_VALUE_UNAVAILABLE = 'unavailable'
-TAG_VALUE_ERROR = 'error'
-
 
 class MySQLStatementMetrics(object):
     """
@@ -110,7 +108,7 @@ class MySQLStatementMetrics(object):
                 try:
                     obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
                 except Exception as e:
-                    obfuscated_statement = TAG_VALUE_ERROR
+                    obfuscated_statement = 'obfuscation-error'
                     # Note: the original query is safe to log because the digest text is already obfuscated
                     self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
 
