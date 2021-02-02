@@ -15,6 +15,7 @@ ESInstanceConfig = namedtuple(
         'pshard_graceful_to',
         'node_name_as_host',
         'cluster_stats',
+        'slm_stats',
         'index_stats',
         'service_check_tags',
         'tags',
@@ -37,6 +38,7 @@ def from_instance(instance):
     node_name_as_host = is_affirmative(instance.get('node_name_as_host', False))
     index_stats = is_affirmative(instance.get('index_stats', False))
     cluster_stats = is_affirmative(instance.get('cluster_stats', False))
+    slm_stats = is_affirmative(instance.get('slm_stats', False))
     if 'is_external' in instance:
         cluster_stats = is_affirmative(instance.get('is_external', False))
     pending_task_stats = is_affirmative(instance.get('pending_task_stats', True))
@@ -65,6 +67,7 @@ def from_instance(instance):
         pshard_graceful_to=pshard_graceful_to,
         node_name_as_host=node_name_as_host,
         cluster_stats=cluster_stats,
+        slm_stats=slm_stats,
         index_stats=index_stats,
         service_check_tags=service_check_tags,
         tags=tags,
