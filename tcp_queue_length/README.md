@@ -8,7 +8,7 @@ This check monitors the usage of the Linux TCP receive and send queues, and can 
 
 ### Installation
 
-`tcp_queue_length` is a core Agent 6/7 check that relies on an eBPF part implemented in `system-probe`.
+`tcp_queue_length` is a core Agent 6/7 check that relies on an eBPF part implemented in `system-probe`. Agent version 7.24.1/6.24.1 or above is required.
 
 The eBPF program used by `system-probe` is compiled at runtime and requires you to have access to the proper kernel headers.
 
@@ -32,7 +32,6 @@ Enabling the `tcp_queue_length` integration requires both the `system-probe` and
 Inside the `system-probe.yaml` configuration file, the following parameters must be set:
 ```yaml
 system_probe_config:
-  enabled: true
   enable_tcp_queue_length: true
 ```
 
