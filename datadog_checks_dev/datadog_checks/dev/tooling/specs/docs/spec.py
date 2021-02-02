@@ -38,14 +38,6 @@ def _validate(obj, items, loader, MISSING, INVALID):
                 # initialize as empty builtin type
                 obj[v.key] = v.type()
 
-        if v.children and obj[v.key]:
-            # handle recursive elements which may be passed as strings
-            if v.children == 'self':
-                children = items
-            else:
-                children = v.children
-            _validate(obj[v.key], children, loader, MISSING, INVALID)
-
 
 def spec_validator(spec, loader):
     if not isinstance(spec, dict):
@@ -135,7 +127,6 @@ def section_validator(sections, loader, file_name, *prev_sections):
         Validation(key='append_text', type=str, required=False),
         Validation(key='processor', type=str, required=False),
         Validation(key='hidden', type=bool, required=False),
-        Validation(key='sections', type=list, required=False, children='self'),
         Validation(key='overrides', type=list, required=False),
     ]
 
@@ -227,6 +218,9 @@ def section_validator(sections, loader, file_name, *prev_sections):
         # now validate the expanded section object
         _validate(section, validations, loader, MISSING, INVALID)
 
+        if loader.errors:
+            return
+
         section_name = section['name']
         if section_name in section_names_origin:
             loader.errors.append(
@@ -278,7 +272,7 @@ def section_validator(sections, loader, file_name, *prev_sections):
             nested_sections = section['sections']
             if not isinstance(nested_sections, list):
                 loader.errors.append(
-                    '{}, {}, {}{}: The `sections` attribute must be an array'.format(
+                    '{}, {}, {}{}: Attribute `sections` must be a list'.format(
                         loader.source, file_name, sections_display, section_name
                     )
                 )

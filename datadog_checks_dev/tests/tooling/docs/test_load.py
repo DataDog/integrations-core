@@ -233,3 +233,316 @@ def test_section_name_duplicate(_):
     doc.load()
 
     assert 'test, README.md, section #2: section name `instances` already used by section #1' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_name_no_name(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - foo: bar
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #1: Every section must contain a `name` attribute' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_no_header_level(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #1: Every section must contain a `header_level` attribute' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_header_level_not_int(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: word
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #1: Attribute `header_level` must be a int' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_section_no_description(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, section #1: Every section must contain a `description` attribute' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_not_array(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+              foo: bar
+        """
+    )
+    doc.load()
+    # nested section names don't get carried on to the validator
+    assert 'test, README.md, instances: Attribute `sections` must be a list' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_not_map(_):
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+            - 5
+            - baz
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, instances, section #1: section attribute must be a mapping object' in doc.errors
+    assert 'test, README.md, instances, section #2: section attribute must be a mapping object' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_no_name(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+            - foo: bar
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, instances, section #1: Every section must contain a `name` attribute' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_name_not_string(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+            - name: 123
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, instances, section #1: Attribute `name` must be a str' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_duplicate(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+            - name: bar
+              header_level: 1
+              description: words
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, instances, section #2: section name `bar` already used by section #1' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_no_description(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, instances, section #1: Every section must contain a `description` attribute' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_header_level_not_int(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: instances
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: wow
+              description: words
+        """
+    )
+    doc.load()
+
+    assert 'test, README.md, instances, section #1: Attribute `header_level` must be a int' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_valid_doc(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_valid_nested_doc(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_valid_duplicate(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+          - name: baz
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_bar_valid(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            tab: bar
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
