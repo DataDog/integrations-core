@@ -29,14 +29,16 @@ theme:
   logo: assets/images/logo.svg
 
 nav:
-  - Home: index.md
-  - Setup: setup.md
-  - Testing: testing.md
-  - E2E: e2e.md
+  - Home:
+    - About: index.md
+    - Setup: setup.md
+    - Testing: testing.md
+    - E2E: e2e.md
   - Base Package:
     - About: base/about.md
     - Basics: base/basics.md
     - HTTP: base/http.md
+    - TLS/SSL: base/tls.md
     - Databases: base/databases.md
     - Prometheus: base/prometheus.md
     - Metadata: base/metadata.md
@@ -57,6 +59,7 @@ nav:
     - CD: meta/cd.md
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md
+    - Docs specs: meta/docs-specs.md
     - Status: meta/status.md
   - Tutorials:
     - JMX:

@@ -8,9 +8,9 @@ boto3==1.10.27
 boto==2.46.1
 botocore==1.13.42
 clickhouse-cityhash==1.0.2.3
-clickhouse-driver==0.1.2
+clickhouse-driver==0.1.5
 contextlib2==0.6.0; python_version < "3.0"
-cryptography==3.2.1
+cryptography==3.3.1
 cx-oracle==7.2.0
 ddtrace==0.32.2
 dnspython==1.16.0
@@ -28,7 +28,7 @@ kafka-python==2.0.2
 kazoo==2.6.1
 kubernetes==8.0.1
 ldap3==2.5
-lxml==4.5.0
+lxml==4.6.2
 lz4==2.2.1
 meld3==1.0.2
 mmh3==2.5.1
@@ -36,7 +36,7 @@ openstacksdk==0.24.0
 orjson==2.6.1; python_version > "3.0"
 paramiko==2.6.0
 ply==3.10
-prometheus-client==0.7.1
+prometheus-client==0.9.0
 protobuf==3.7.0
 psutil==5.7.2
 psycopg2-binary==2.8.4
@@ -56,11 +56,10 @@ pysocks==1.7.0
 python-binary-memcached==0.26.1; sys_platform != "win32"
 python-dateutil==2.8.0
 python3-gearman==0.1.0; sys_platform != "win32" and python_version > "3.0"
-pytz==2019.3
 pyvmomi==v6.5.0.2017.5-1
 pywin32==228; sys_platform == "win32"
 pyyaml==5.3.1
-redis==3.5.2
+redis==3.5.3
 requests-kerberos==0.12.0
 requests-unixsocket==0.2.0
 requests==2.22.0

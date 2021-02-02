@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from copy import deepcopy
 
 import pytest
 import requests
@@ -17,6 +18,7 @@ from datadog_checks.elastic.metrics import (
     health_stats_for_version,
     index_stats_for_version,
     pshard_stats_for_version,
+    slm_stats_for_version,
     stats_for_version,
 )
 
@@ -40,54 +42,65 @@ def test__join_url():
     assert joined_url == "https://localhost:9444/stats"
 
 
+@pytest.mark.parametrize(
+    'instance, url_fix',
+    [
+        pytest.param({'url': URL}, '_local/'),
+        pytest.param({'url': URL, "cluster_stats": True, "slm_stats": True}, ''),
+    ],
+)
 @pytest.mark.unit
-def test__get_urls():
-    instance = {'url': URL}
+def test__get_urls(instance, url_fix):
     elastic_check = ESCheck('elastic', {}, instances=[instance])
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([])
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_cluster/nodes/_local/stats?all=true'
+    assert stats_url == '/_cluster/nodes/' + url_fix + 'stats?all=true'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url is None
+    assert slm_url is None
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0])
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([1, 0, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/_local/stats?all=true'
+    assert stats_url == '/_nodes/' + url_fix + 'stats?all=true'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
+    assert slm_url is None
 
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0])
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([6, 0, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/_local/stats'
+    assert stats_url == '/_nodes/' + url_fix + 'stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
+    assert slm_url is None
 
-    instance["cluster_stats"] = True
-    elastic_check = ESCheck('elastic', {}, instances=[instance])
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([])
+    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([7, 4, 0])
     assert health_url == '/_cluster/health'
-    assert stats_url == '/_cluster/nodes/stats?all=true'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url is None
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([1, 0, 0])
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/stats?all=true'
+    assert stats_url == '/_nodes/' + url_fix + 'stats'
     assert pshard_stats_url == '/_stats'
     assert pending_tasks_url == '/_cluster/pending_tasks'
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([6, 0, 0])
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/stats'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url == '/_cluster/pending_tasks'
+    assert slm_url == ('/_slm/policy' if instance.get('slm_stats') is True else None)
 
 
 @pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+
+
+@pytest.mark.integration
+def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
+    slm_instance = deepcopy(instance)
+    slm_instance['slm_stats'] = True
+    elastic_check = ESCheck('elastic', {}, instances=[slm_instance])
+    elastic_check.check(None)
+
+    _test_check(elastic_check, slm_instance, aggregator, cluster_tags, node_tags)
+
+    # SLM stats
+    slm_metrics = slm_stats_for_version(elastic_check._get_es_version())
+    for m_name in slm_metrics:
+        aggregator.assert_metric(m_name, at_least=1, tags=slm_tags)
 
 
 @pytest.mark.integration

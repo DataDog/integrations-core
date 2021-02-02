@@ -52,6 +52,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: slm_stats
+      description: | 
+        Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
+        The user must have `manage_slm` cluster privilege to get these metrics.
+      value:
+        type: boolean
+        example: false
     - name: pshard_graceful_timeout
       description: Continue gracefully if pshard stats TO
       value:

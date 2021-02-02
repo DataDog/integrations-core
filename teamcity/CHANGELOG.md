@@ -1,5 +1,9 @@
 # CHANGELOG - teamcity
 
+## 1.12.0 / 2021-01-25
+
+* [Added] Document logs support. See [#7702](https://github.com/DataDog/integrations-core/pull/7702).
+
 ## 1.11.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

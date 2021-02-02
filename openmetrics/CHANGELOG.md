@@ -1,5 +1,10 @@
 # CHANGELOG - OpenMetrics
 
+## 1.12.0 / 2021-01-25
+
+* [Added] Allow the use of the new OpenMetrics implementation. See [#8440](https://github.com/DataDog/integrations-core/pull/8440).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 1.11.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

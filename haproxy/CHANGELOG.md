@@ -1,6 +1,21 @@
 # CHANGELOG - haproxy
 
-## 2.14.1 / 2020-11-24
+## 2.16.0 / 2021-01-24
+
+* [Added] Revert "Update base package pin (#8426)". See [#8436](https://github.com/DataDog/integrations-core/pull/8436).
+* [Fixed] Remove class substitution logic for new OpenMetrics base class. See [#8435](https://github.com/DataDog/integrations-core/pull/8435).
+
+## 2.15.0 / 2021-01-22
+
+* [Added] Update base package pin. See [#8426](https://github.com/DataDog/integrations-core/pull/8426).
+* [Fixed] Adding support for v2.3. See [#8325](https://github.com/DataDog/integrations-core/pull/8325). Thanks [wdauchy](https://github.com/wdauchy).
+
+## 2.14.2 / 2021-01-11
+
+* [Fixed] Fix typo for ssl reuse metric. See [#8203](https://github.com/DataDog/integrations-core/pull/8203). Thanks [wdauchy](https://github.com/wdauchy).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
+## 2.14.1 / 2020-11-24 / Agent 7.25.0
 
 * [Fixed] Increase robustness of parsing of Unix socket responses in legacy implementation. See [#8080](https://github.com/DataDog/integrations-core/pull/8080).
 

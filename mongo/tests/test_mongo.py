@@ -4,6 +4,7 @@
 import logging
 
 import pytest
+from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
@@ -90,6 +91,38 @@ def test_mongo2(aggregator, check, instance_user):
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+def test_mongo_arbiter(aggregator, check, instance_arbiter):
+    check = check(instance_arbiter)
+    check.check(instance_arbiter)
+
+    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT_ARBITER), 'db:admin']
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
+
+    metric_names = aggregator.metric_names
+    assert metric_names
+
+    for metric_name in metric_names:
+        if metric_name in METRIC_VAL_CHECKS:
+            metric = aggregator.metrics(metric_name)[0]
+            assert METRIC_VAL_CHECKS[metric_name](metric.value)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+    expected_metrics = {
+        'mongodb.replset.health': 1.0,
+        'mongodb.replset.votefraction': None,
+        'mongodb.replset.votes': 1,
+        'mongodb.replset.state': 7,
+    }
+    expected_tags = [
+        'server:mongodb://testUser:*****@localhost:27020/',
+        'replset_name:shard01',
+        'replset_state:arbiter',
+        'sharding_cluster_role:shardsvr',
+    ]
+    for metric, value in iteritems(expected_metrics):
+        aggregator.assert_metric(metric, value, expected_tags, count=1)
 
 
 def test_mongo_old_config(aggregator, check, instance):
@@ -212,7 +245,7 @@ def test_mongo_replset(instance_shard, aggregator, check):
         'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:primary', 'member:shard01a:27018']
     )
     aggregator.assert_metric(
-        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27018']
+        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27019']
     )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 

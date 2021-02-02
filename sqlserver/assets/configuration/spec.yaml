@@ -18,6 +18,7 @@ files:
           - name: sqlserver.clr.execution
             counter_name: CLR Execution
     - template: init_config/db
+    - template: init_config/default
   - template: instances
     description: |
       Every instance is scheduled independent of the others.
@@ -31,11 +32,11 @@ files:
         type: string
         example: <HOST>,<PORT>
     - name: username
-      description: Username for the Datadog-SQL server check user
+      description: Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
     - name: password
-      description: Password for the Datadog-SQL server check user
+      description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
     - name: database
@@ -213,7 +214,7 @@ files:
       value:
         type: boolean
         example: false
-    - template: instances/tags
+    - template: instances/default
 
   - template: logs
     example:

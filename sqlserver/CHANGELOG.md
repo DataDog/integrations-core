@@ -1,6 +1,33 @@
 # CHANGELOG - sqlserver
 
-## 2.3.0 / 2020-12-04
+## 2.3.6 / 2021-01-27
+
+* [Fixed] Fix cursor execution returning None. See [#8481](https://github.com/DataDog/integrations-core/pull/8481).
+
+## 2.3.5 / 2021-01-26
+
+* [Fixed] Avoid redundant queries. See [#8447](https://github.com/DataDog/integrations-core/pull/8447).
+
+## 2.3.4 / 2021-01-25
+
+* [Fixed] Clarify authentication in SQL Server. See [#8396](https://github.com/DataDog/integrations-core/pull/8396).
+
+## 2.3.3 / 2021-01-15
+
+* [Fixed] Handle offline databases for existence check. See [#8374](https://github.com/DataDog/integrations-core/pull/8374).
+* [Fixed] Handle overflow error for certain sql queries. See [#8366](https://github.com/DataDog/integrations-core/pull/8366).
+
+## 2.3.2 / 2021-01-13
+
+* [Fixed] Handle database specific queries for autodiscovery. See [#8329](https://github.com/DataDog/integrations-core/pull/8329).
+* [Fixed] Small refactor of consts, init and tests. See [#8221](https://github.com/DataDog/integrations-core/pull/8221).
+
+## 2.3.1 / 2021-01-05
+
+* [Fixed] Add debug messages to SQLServer. See [#8278](https://github.com/DataDog/integrations-core/pull/8278).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
+## 2.3.0 / 2020-12-04 / Agent 7.25.0
 
 * [Added] Add support for database autodiscovery. See [#8115](https://github.com/DataDog/integrations-core/pull/8115).
 * [Added] Add FCI metrics for SQLServer. See [#8056](https://github.com/DataDog/integrations-core/pull/8056).

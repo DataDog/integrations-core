@@ -25,7 +25,7 @@
         "id": 1,
         "definition": {
           "type": "image",
-          "url": "/static/images/saas_logos/bot/sap_hana.png",
+          "url": "/static/images/logos/sap-hana_large.svg",
           "sizing": "fit"
         },
         "layout": {

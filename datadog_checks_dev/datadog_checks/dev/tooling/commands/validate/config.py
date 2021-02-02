@@ -6,8 +6,8 @@ import yaml
 
 from datadog_checks.dev.tooling.config_validator.validator import validate_config
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
-from datadog_checks.dev.tooling.configuration import ConfigSpec
-from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
+from datadog_checks.dev.tooling.specs.configuration import ConfigSpec
+from datadog_checks.dev.tooling.specs.configuration.consumers import ExampleConsumer
 
 from ....utils import basepath, file_exists, path_join, read_file, write_file
 from ...utils import (
@@ -72,8 +72,15 @@ def config(ctx, check, sync, verbose):
             source = check
             version = get_version_string(check)
 
-        spec = ConfigSpec(read_file(spec_path), source=source, version=version)
+        spec_file = read_file(spec_path)
+        default_temp = validate_default_template(spec_file)
+        spec = ConfigSpec(spec_file, source=source, version=version)
         spec.load()
+
+        if not default_temp:
+            check_display_queue.append(
+                lambda **kwargs: echo_failure("Missing default template in init_config or instances section")
+            )
 
         if spec.errors:
             files_failed[spec_path] = True
@@ -139,6 +146,27 @@ def config(ctx, check, sync, verbose):
 
     if files_failed:
         abort()
+
+
+def validate_default_template(spec_file):
+    init_config_default = False
+    instances_default = False
+    if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
+        # This config spec does not have init_config or instances
+        return True
+
+    for line in spec_file.split('\n'):
+        if any(
+            template in line
+            for template in ['init_config/default', 'init_config/openmetrics_legacy', 'init_config/jmx']
+        ):
+            init_config_default = True
+        if any(template in line for template in ['instances/default', 'instances/openmetrics_legacy', 'instances/jmx']):
+            instances_default = True
+
+        if instances_default and init_config_default:
+            return True
+    return False
 
 
 def validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter):

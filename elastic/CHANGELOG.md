@@ -1,5 +1,15 @@
 # CHANGELOG - elastic
 
+## 1.23.0 / 2021-01-15
+
+* [Added] Add SLM metrics. See [#8335](https://github.com/DataDog/integrations-core/pull/8335).
+* [Added] Add index.health.reverse metric. See [#8362](https://github.com/DataDog/integrations-core/pull/8362).
+* [Added] Add additional node metrics to monitor cpu throttling. See [#8290](https://github.com/DataDog/integrations-core/pull/8290). Thanks [onurdialpad](https://github.com/onurdialpad).
+
+## 1.22.1 / 2020-12-17 / Agent 7.25.0
+
+* [Fixed] Fix tags memory leak. See [#8213](https://github.com/DataDog/integrations-core/pull/8213).
+
 ## 1.22.0 / 2020-12-11
 
 * [Added] Submit jvm.gc.collectors metrics as rate. See [#7924](https://github.com/DataDog/integrations-core/pull/7924).

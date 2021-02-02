@@ -17,6 +17,7 @@ from .metrics import (
     index_stats_for_version,
     node_system_stats_for_version,
     pshard_stats_for_version,
+    slm_stats_for_version,
     stats_for_version,
 )
 
@@ -53,6 +54,8 @@ class ESCheck(AgentCheck):
     def check(self, _):
         admin_forwarder = self.config.admin_forwarder
         jvm_rate = self.instance.get('gc_collectors_as_rate', False)
+        base_tags = list(self.config.tags)
+        service_check_tags = list(self.config.service_check_tags)
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
@@ -62,7 +65,7 @@ class ESCheck(AgentCheck):
             self.log.exception("The ElasticSearch credentials are incorrect")
             raise
 
-        health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version)
+        health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = self._get_urls(version)
         stats_metrics = stats_for_version(version, jvm_rate)
         if self.config.cluster_stats:
             # Include Node System metrics
@@ -78,9 +81,9 @@ class ESCheck(AgentCheck):
             # retrieve the cluster name from the data, and append it to the
             # master tag list.
             cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
-            self.config.tags.append(cluster_name_tag)
-            self.config.health_tags.append(cluster_name_tag)
-        self._process_stats_data(stats_data, stats_metrics)
+            base_tags.append(cluster_name_tag)
+            service_check_tags.append(cluster_name_tag)
+        self._process_stats_data(stats_data, stats_metrics, base_tags)
 
         # Load cluster-wise data
         # Note: this is a cluster-wide query, might TO.
@@ -89,26 +92,32 @@ class ESCheck(AgentCheck):
             pshard_stats_url = self._join_url(pshard_stats_url, admin_forwarder)
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
-                self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics)
+                self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics, base_tags)
             except requests.ReadTimeout as e:
                 if bubble_ex:
                     raise
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
 
+        # Get Snapshot Lifecycle Management (SLM) policies
+        if slm_url is not None:
+            slm_url = self._join_url(slm_url, admin_forwarder)
+            policy_data = self._get_data(slm_url)
+            self._process_policy_data(policy_data, version, base_tags)
+
         # Load the health data.
         health_url = self._join_url(health_url, admin_forwarder)
         health_data = self._get_data(health_url)
-        self._process_health_data(health_data, version)
+        self._process_health_data(health_data, version, base_tags, service_check_tags)
 
         if self.config.pending_task_stats:
             # Load the pending_tasks data.
             pending_tasks_url = self._join_url(pending_tasks_url, admin_forwarder)
             pending_tasks_data = self._get_data(pending_tasks_url)
-            self._process_pending_tasks_data(pending_tasks_data)
+            self._process_pending_tasks_data(pending_tasks_data, base_tags)
 
         if self.config.index_stats and version >= [1, 0, 0]:
             try:
-                self._get_index_metrics(admin_forwarder, version)
+                self._get_index_metrics(admin_forwarder, version, base_tags)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
@@ -146,14 +155,15 @@ class ESCheck(AgentCheck):
         else:
             return urljoin(self.config.url, url)
 
-    def _get_index_metrics(self, admin_forwarder, version):
+    def _get_index_metrics(self, admin_forwarder, version, base_tags):
         cat_url = '/_cat/indices?format=json&bytes=b'
         index_url = self._join_url(cat_url, admin_forwarder)
         index_resp = self._get_data(index_url)
         index_stats_metrics = index_stats_for_version(version)
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
+        reversed_health_stat = {'red': 0, 'yellow': 1, 'green': 2}
         for idx in index_resp:
-            tags = self.config.tags + ['index_name:' + idx['index']]
+            tags = base_tags + ['index_name:' + idx['index']]
             # we need to remap metric names because the ones from elastic
             # contain dots and that would confuse `_process_metric()` (sic)
             index_data = {
@@ -168,7 +178,9 @@ class ESCheck(AgentCheck):
 
             # Convert the health status value
             if index_data['health'] is not None:
-                index_data['health'] = health_stat[index_data['health'].lower()]
+                status = index_data['health'].lower()
+                index_data['health'] = health_stat[status]
+                index_data['health_reverse'] = reversed_health_stat[status]
 
             # Ensure that index_data does not contain None values
             for key, value in list(iteritems(index_data)):
@@ -187,6 +199,7 @@ class ESCheck(AgentCheck):
         """
         pshard_stats_url = "/_stats"
         health_url = "/_cluster/health"
+        slm_url = None
 
         if version >= [0, 90, 10]:
             pending_tasks_url = "/_cluster/pending_tasks"
@@ -194,6 +207,8 @@ class ESCheck(AgentCheck):
             if version < [5, 0, 0]:
                 # version 5 errors out if the `all` parameter is set
                 stats_url += "?all=true"
+            if version >= [7, 4, 0] and self.config.slm_stats:
+                slm_url = "/_slm/policy"
         else:
             # legacy
             pending_tasks_url = None
@@ -203,7 +218,7 @@ class ESCheck(AgentCheck):
                 else "/_cluster/nodes/_local/stats?all=true"
             )
 
-        return health_url, stats_url, pshard_stats_url, pending_tasks_url
+        return health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url
 
     def _get_data(self, url, send_sc=True):
         """
@@ -231,7 +246,7 @@ class ESCheck(AgentCheck):
 
         return resp.json()
 
-    def _process_pending_tasks_data(self, data):
+    def _process_pending_tasks_data(self, data, base_tags):
         p_tasks = defaultdict(int)
         average_time_in_queue = 0
 
@@ -251,12 +266,12 @@ class ESCheck(AgentCheck):
         for metric in CLUSTER_PENDING_TASKS:
             # metric description
             desc = CLUSTER_PENDING_TASKS[metric]
-            self._process_metric(node_data, metric, *desc, tags=self.config.tags)
+            self._process_metric(node_data, metric, *desc, tags=base_tags)
 
-    def _process_stats_data(self, data, stats_metrics):
+    def _process_stats_data(self, data, stats_metrics, base_tags):
         for node_data in itervalues(data.get('nodes', {})):
             metric_hostname = None
-            metrics_tags = list(self.config.tags)
+            metrics_tags = list(base_tags)
 
             # Resolve the node's name
             node_name = node_data.get('name')
@@ -276,9 +291,9 @@ class ESCheck(AgentCheck):
             for metric, desc in iteritems(stats_metrics):
                 self._process_metric(node_data, metric, *desc, tags=metrics_tags, hostname=metric_hostname)
 
-    def _process_pshard_stats_data(self, data, pshard_stats_metrics):
+    def _process_pshard_stats_data(self, data, pshard_stats_metrics, base_tags):
         for metric, desc in iteritems(pshard_stats_metrics):
-            self._process_metric(data, metric, *desc, tags=self.config.tags)
+            self._process_metric(data, metric, *desc, tags=base_tags)
 
     def _process_metric(self, data, metric, xtype, path, xform=None, tags=None, hostname=None):
         """
@@ -306,23 +321,23 @@ class ESCheck(AgentCheck):
         else:
             self.log.debug("Metric not found: %s -> %s", path, metric)
 
-    def _process_health_data(self, data, version):
+    def _process_health_data(self, data, version, base_tags, service_check_tags):
         cluster_status = data.get('status')
         if not self.cluster_status.get(self.config.url):
             self.cluster_status[self.config.url] = cluster_status
             if cluster_status in ["yellow", "red"]:
-                event = self._create_event(cluster_status, tags=self.config.tags)
+                event = self._create_event(cluster_status, tags=base_tags)
                 self.event(event)
 
         if cluster_status != self.cluster_status.get(self.config.url):
             self.cluster_status[self.config.url] = cluster_status
-            event = self._create_event(cluster_status, tags=self.config.tags)
+            event = self._create_event(cluster_status, tags=base_tags)
             self.event(event)
 
         cluster_health_metrics = health_stats_for_version(version)
 
         for metric, desc in iteritems(cluster_health_metrics):
-            self._process_metric(data, metric, *desc, tags=self.config.tags)
+            self._process_metric(data, metric, *desc, tags=base_tags)
 
         # Process the service check
         if cluster_status == 'green':
@@ -352,12 +367,16 @@ class ESCheck(AgentCheck):
             )
         )
 
-        self.service_check(
-            self.SERVICE_CHECK_CLUSTER_STATUS,
-            status,
-            message=msg,
-            tags=self.config.service_check_tags + self.config.health_tags,
-        )
+        self.service_check(self.SERVICE_CHECK_CLUSTER_STATUS, status, message=msg, tags=service_check_tags)
+
+    def _process_policy_data(self, data, version, base_tags):
+        for policy, policy_data in iteritems(data):
+            repo = policy_data.get('policy', {}).get('repository', 'unknown')
+            tags = base_tags + ['policy:{}'.format(policy), 'repository:{}'.format(repo)]
+
+            slm_stats = slm_stats_for_version(version)
+            for metric, desc in iteritems(slm_stats):
+                self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

@@ -1,6 +1,11 @@
 # CHANGELOG - Aerospike
 
-## 1.9.0 / 2020-12-11
+## 1.10.0 / 2021-02-01
+
+* [Added] Support Aerospike 5.3. See [#8430](https://github.com/DataDog/integrations-core/pull/8430).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.9.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add log pipeline. See [#8068](https://github.com/DataDog/integrations-core/pull/8068).
 * [Added] Update aerospike dependency. See [#8044](https://github.com/DataDog/integrations-core/pull/8044).

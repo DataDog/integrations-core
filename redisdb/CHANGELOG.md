@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 3.3.0 / 2021-01-06 / Agent 7.25.0
+
+* [Added] Update redis dependency. See [#8301](https://github.com/DataDog/integrations-core/pull/8301).
+
 ## 3.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

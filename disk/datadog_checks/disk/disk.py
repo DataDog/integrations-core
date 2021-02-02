@@ -17,6 +17,8 @@ from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyErr
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
 if platform.system() == 'Windows':
+    import win32wnet
+
     # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
     IGNORE_CASE = re.I
 
@@ -64,6 +66,10 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        if platform.system() == 'Windows':
+            self._manual_mounts = instance.get('create_mounts', [])
+            self._create_manual_mounts()
 
         deprecations_init_conf = {
             'file_system_global_blacklist': 'file_system_global_exclude',
@@ -152,7 +158,7 @@ class Disk(AgentCheck):
                     tags.extend(device_tags)
 
             if self.devices_label.get(device_name):
-                tags.append(self.devices_label.get(device_name))
+                tags.extend(self.devices_label.get(device_name))
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -316,7 +322,7 @@ class Disk(AgentCheck):
                 metric_tags.append('device:{}'.format(disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
-                    metric_tags.append(self.devices_label.get(disk_name))
+                    metric_tags.extend(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
@@ -422,7 +428,7 @@ class Disk(AgentCheck):
                 # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
                 labels = self._blkid_label_re.findall(d[1])
                 if labels:
-                    devices_label[d[0]] = 'label:{}'.format(labels[0])
+                    devices_label[d[0]] = ['label:{}'.format(labels[0]), 'device_label:{}'.format(labels[0])]
 
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use blkid to have device labels")
@@ -446,13 +452,52 @@ class Disk(AgentCheck):
                 device = root.text
                 label = root.attrib.get('LABEL')
                 if label and device:
-                    devices_label[device] = 'label:{}'.format(label)
+                    devices_label[device] = ['label:{}'.format(label), 'device_label:{}'.format(label)]
             except ET.ParseError as e:
                 self.log.warning(
                     'Failed to parse line %s because of %s - skipping the line (some labels might be missing)', line, e
                 )
 
         return devices_label
+
+    def _create_manual_mounts(self):
+        """
+        on Windows, in order to collect statistics on remote (SMB/NFS) drives, the drive must be mounted
+        as the agent user in the agent context, otherwise the agent can't 'see' the drive.  If so configured,
+        attempt to mount desired drives
+        """
+        if not self._manual_mounts:
+            self.log.debug("No manual mounts")
+        else:
+            self.log.debug("Attempting to create %d mounts: ", len(self._manual_mounts))
+            for manual_mount in self._manual_mounts:
+                remote_machine = manual_mount.get('host')
+                share = manual_mount.get('share')
+                uname = manual_mount.get('user')
+                pword = manual_mount.get('password')
+                mtype = manual_mount.get('type')
+                mountpoint = manual_mount.get('mountpoint')
+
+                nr = win32wnet.NETRESOURCE()
+                if not remote_machine or not share:
+                    self.log.error("Invalid configuration.  Drive mount requires remote machine and share point")
+                    continue
+
+                if mtype and mtype.lower() == "nfs":
+                    nr.lpRemoteName = r"{}:{}".format(remote_machine, share)
+                    self.log.debug("Attempting NFS mount: %s", nr.lpRemoteName)
+                else:
+                    nr.lpRemoteName = r"\\{}\{}".format(remote_machine, share).rstrip('\\')
+                    self.log.debug("Attempting SMB mount: %s", nr.lpRemoteName)
+
+                nr.dwType = 0
+                nr.lpLocalName = mountpoint
+                try:
+                    win32wnet.WNetAddConnection2(nr, pword, uname, 0)
+                    self.log.debug("Successfully mounted %s as %s", mountpoint, nr.lpRemoteName)
+                except Exception as e:
+                    self.log.error("Failed to mount %s %s", nr.lpRemoteName, str(e))
+                    pass
 
     @staticmethod
     def get_default_file_system_exclude():

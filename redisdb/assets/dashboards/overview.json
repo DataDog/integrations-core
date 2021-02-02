@@ -433,7 +433,7 @@
       "id": 13,
       "definition": {
         "type": "image",
-        "url": "/static/images/saas_logos/bot/redis.png",
+        "url": "/static/images/logos/redis_large.svg",
         "sizing": "center"
       },
       "layout": {

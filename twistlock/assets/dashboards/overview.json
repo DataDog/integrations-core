@@ -1,12 +1,12 @@
 {
-  "title": "Twistlock - Overview",
+  "title": "Prisma Cloud Compute Edition - Overview",
   "description": "",
   "widgets": [
     {
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "/static/images/screenboard/integrations/twistlock.svg",
+        "url": "/static/images/logos/twistlock_large.svg",
         "sizing": "fit"
       },
       "layout": {

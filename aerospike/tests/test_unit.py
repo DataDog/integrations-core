@@ -31,7 +31,6 @@ def test_datacenter_metrics(aggregator):
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
     check.collect_latency = mock.MagicMock()
-    check.collect_version = mock.MagicMock()
     check.check(None)
     for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
@@ -112,3 +111,37 @@ def test_collect_empty_data(aggregator):
     check._client.info_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
     check.log = mock.MagicMock()
     assert [] == check.get_info('sets/test/ci')
+
+
+def test_collect_latencies_parser(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check.get_info = mock.MagicMock(
+        return_value=[
+            'batch-index:',
+            '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
+            '{test}-write:',
+            '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
+            '{test}-query:',
+        ]
+    )
+    check.collect_latencies(None)
+
+    for metric_type in ['read', 'udf']:
+        for i in range(17):
+            bucket = 2 ** i
+            aggregator.assert_metric(
+                'aerospike.namespace.latency.{}'.format(metric_type),
+                tags=['namespace:{}'.format('test'), 'tag:value', 'bucket:{}'.format(str(bucket))],
+            )
+
+        for n in [1, 8, 64]:
+            aggregator.assert_metric(
+                'aerospike.namespace.latency.{}_over_{}ms'.format(metric_type, str(n)),
+                tags=['namespace:{}'.format('test'), 'tag:value', 'bucket:{}'.format(str(n))],
+            )
+
+        aggregator.assert_metric(
+            'aerospike.namespace.latency.{}_ops_sec'.format(metric_type),
+            tags=['namespace:{}'.format('test'), 'tag:value'],
+        )
+    aggregator.assert_all_metrics_covered()

@@ -6,7 +6,7 @@ from contextlib import closing, contextmanager
 import pymysql
 import pymysql.cursors
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from .queries import (
@@ -18,7 +18,7 @@ from .queries import (
     STATS_MYSQL_USERS,
     VERSION_METADATA,
 )
-from .ssl_utils import make_insecure_ssl_client_context, make_secure_ssl_client_context
+from .ssl_utils import make_insecure_ssl_client_context
 
 ADDITIONAL_METRICS_MAPPING = {
     'command_counters_metrics': STATS_COMMAND_COUNTERS,
@@ -34,6 +34,11 @@ class ProxysqlCheck(AgentCheck):
     SERVICE_CHECK_NAME = "can_connect"
     __NAMESPACE__ = "proxysql"
 
+    # This remapper is used to support legacy Proxysql integration config values
+    TLS_CONFIG_REMAPPER = {
+        'validate_hostname': {'name': 'tls_validate_hostname'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(ProxysqlCheck, self).__init__(name, init_config, instances)
         self.host = self.instance.get("host", "")
@@ -44,9 +49,8 @@ class ProxysqlCheck(AgentCheck):
         if not all((self.host, self.port, self.user, self.password)):
             raise ConfigurationError("ProxySQL host, port, username and password are needed")
 
-        self.tls_verify = self.instance.get("tls_verify", False)
-        self.validate_hostname = self.instance.get("validate_hostname", True)
-        self.tls_ca_cert = self.instance.get("tls_ca_cert")
+        self.tls_verify = is_affirmative(self.instance.get('tls_verify', False))
+
         self.connect_timeout = self.instance.get("connect_timeout", 10)
         self.read_timeout = self.instance.get("read_timeout")
 
@@ -91,11 +95,11 @@ class ProxysqlCheck(AgentCheck):
     @contextmanager
     def connect(self):
         if self.tls_verify:
+            self.log.debug("Connecting to ProxySQL via SSL/TLS")
             # If ca_cert is None, will load the default certificates
-            ssl_context = make_secure_ssl_client_context(
-                ca_cert=self.tls_ca_cert, check_hostname=self.validate_hostname
-            )
+            ssl_context = self.get_tls_context()
         else:
+            self.log.debug("Connecting to ProxySQL without SSL/TLS")
             ssl_context = make_insecure_ssl_client_context()
 
         db = None
