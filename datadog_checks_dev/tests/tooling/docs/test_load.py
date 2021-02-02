@@ -344,9 +344,6 @@ def test_nested_section_not_array(_):
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
 def test_nested_section_not_map(_):
-    # has nit: we check nested sections differently than top level sections
-    # we check top level sections are dicts, then call _validate on the section object
-    # so the behavior is different than expected in comaprison to test_section_not_map()
     doc = get_doc(
         """
         name: foo
@@ -504,3 +501,95 @@ def test_nested_section_header_level_not_int(_):
     doc.load()
 
     assert 'test, README.md, instances, section #1: Attribute `header_level` must be a int' in doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_valid_doc(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_valid_nested_doc(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_section_valid_duplicate(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+          - name: baz
+            header_level: 1
+            description: words
+            sections:
+            - name: bar
+              header_level: 1
+              description: words
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_bar_valid(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            tab: bar
+        """
+    )
+    doc.load()
+
+    assert not doc.errors
