@@ -575,6 +575,7 @@ class MySql(AgentCheck):
                 "information may be unavailable: %s",
                 traceback.format_exc(),
             )
+            return False
 
         return self._is_aurora
 

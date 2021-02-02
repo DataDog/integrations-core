@@ -823,9 +823,9 @@ def test__get_is_aurora():
     assert False is check._is_aurora
 
     check = new_check()
-    assert None is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
+    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
     assert None is check._is_aurora
-    assert None is check._get_is_aurora(None)
+    assert False is check._get_is_aurora(None)
 
 
 @pytest.mark.unit
