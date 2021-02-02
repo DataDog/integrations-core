@@ -252,27 +252,6 @@ def test_section_name_no_name(_):
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
-def test_section_name_duplicate(_):
-    doc = get_doc(
-        """
-        name: foo
-        files:
-        - name: README.md
-          sections:
-          - name: bar
-            header_level: 1
-            description: words
-          - name: bar
-            header_level: 1
-            description: words
-        """
-    )
-    doc.load()
-
-    assert 'test, README.md, section #2: section name `bar` already used by section #1' in doc.errors
-
-
-@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
 def test_section_no_header_level(_):
     doc = get_doc(
         """
@@ -404,32 +383,6 @@ def test_nested_section_name_not_string(_):
     doc.load()
 
     assert 'test, README.md, instances, section #1: Attribute `name` must be a str' in doc.errors
-
-
-@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
-def test_nested_section_duplicate(_):
-
-    doc = get_doc(
-        """
-        name: foo
-        files:
-        - name: README.md
-          sections:
-          - name: instances
-            header_level: 1
-            description: words
-            sections:
-            - name: bar
-              header_level: 1
-              description: words
-            - name: bar
-              header_level: 1
-              description: words
-        """
-    )
-    doc.load()
-
-    assert 'test, README.md, instances, section #2: section name `bar` already used by section #1' in doc.errors
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
