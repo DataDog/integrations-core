@@ -43,6 +43,7 @@ STATEMENT_METRICS = {
 DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
 
 TAG_VALUE_UNAVAILABLE = 'unavailable'
+TAG_VALUE_ERROR = 'error'
 
 
 class MySQLStatementMetrics(object):
@@ -99,11 +100,7 @@ class MySQLStatementMetrics(object):
                         'query_signature:' + TAG_VALUE_UNAVAILABLE,
                     ]
                 )
-                self.log.warning(
-                    'Encountered a null digest row in performance_schema.events_statements_summary_by_digest. '
-                    'This indicates that not all queries could be tracked. You may wish to raise the system '
-                    'variable `performance-schema-digests-size` or truncate this table periodically.'
-                )
+
             else:
                 tags.append('digest:' + row['digest'])
 
@@ -113,7 +110,7 @@ class MySQLStatementMetrics(object):
                 try:
                     obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
                 except Exception as e:
-                    obfuscated_statement = TAG_VALUE_UNAVAILABLE
+                    obfuscated_statement = TAG_VALUE_ERROR
                     # Note: the original query is safe to log because the digest text is already obfuscated
                     self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
 
