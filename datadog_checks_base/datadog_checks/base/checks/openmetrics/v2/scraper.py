@@ -347,8 +347,6 @@ class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
         return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
     """
 
-    SERVICE_CHECK_HEALTH = 'prometheus.health'
-
     def __init__(self, check, config):
         new_config = deepcopy(config)
         new_config.setdefault('enable_health_service_check', new_config.pop('health_service_check', True))
