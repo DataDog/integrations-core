@@ -9,6 +9,8 @@ from collections import namedtuple
 
 from ...utils import load_manifest, load_service_checks
 
+CLASS_REMAP = {str: 'a string', list: 'an array', dict: 'a mapping object', int: 'an int'}
+
 # Simple validation tuple, with some interesting caveats:
 #
 # `key` - name of value in the object
@@ -23,7 +25,7 @@ Validation = namedtuple('Validation', 'key, type, required, default, children', 
 
 def _validate(obj, items, loader, MISSING, INVALID):
     for v in items:
-        type_name = v.type.__name__
+        type_name = CLASS_REMAP.get(v.type, v.type.__name__)
         if v.required and v.key not in obj:
             loader.errors.append(MISSING.format(loader=loader, key=v.key, type=type_name))
             return
@@ -49,11 +51,11 @@ def _validate(obj, items, loader, MISSING, INVALID):
 
 def spec_validator(spec, loader):
     if not isinstance(spec, dict):
-        loader.errors.append(f'{loader.source}: {loader.spec_type} specifications must be a mapping object')
+        loader.errors.append(f'{loader.source}: {loader.spec_type} specifications must be {CLASS_REMAP[dict]}')
         return
 
     MISSING = '{loader.source}: {loader.spec_type} specifications must include a top-level `{key}` attribute'
-    INVALID = '{loader.source}: The top-level `{key}` attribute must be a {type}'
+    INVALID = '{loader.source}: The top-level `{key}` attribute must be {type}'
 
     valid_options = [Validation(key='autodiscovery', type=bool, required=False)]
     validations = [
@@ -84,10 +86,10 @@ def files_validator(files, loader):
 
     for file_index, doc_file in enumerate(files, 1):
         MISSING = f'{loader.source}: {loader.spec_type} file #{file_index}: Must include a `{{key}}` attribute.'
-        INVALID = f'{loader.source}: {loader.spec_type} file #{file_index}: Attribute `{{key}}` must be a {{type}}'
+        INVALID = f'{loader.source}: {loader.spec_type} file #{file_index}: Attribute `{{key}}` must be {{type}}'
 
         if not isinstance(doc_file, dict):
-            loader.errors.append(f'{loader.source}, file #{file_index}: File attribute must be a mapping object')
+            loader.errors.append(f'{loader.source}, file #{file_index}: File attribute must be {CLASS_REMAP[dict]}')
             continue
 
         _validate(doc_file, validations, loader, MISSING, INVALID)
@@ -135,7 +137,6 @@ def section_validator(sections, loader, file_name, *prev_sections):
         Validation(key='append_text', type=str, required=False),
         Validation(key='processor', type=str, required=False),
         Validation(key='hidden', type=bool, required=False),
-        Validation(key='sections', type=list, required=False, children='self'),
         Validation(key='overrides', type=list, required=False),
     ]
 
@@ -151,8 +152,8 @@ def section_validator(sections, loader, file_name, *prev_sections):
     for section_index, section in enumerate(sections, 1):
         if not isinstance(section, dict):
             loader.errors.append(
-                '{}, {}, {}section #{}: section attribute must be a mapping object'.format(
-                    loader.source, file_name, sections_display, section_index
+                '{}, {}, {}section #{}: section attribute must be {}'.format(
+                    loader.source, file_name, sections_display, section_index, CLASS_REMAP[dict]
                 )
             )
             continue
@@ -188,8 +189,8 @@ def section_validator(sections, loader, file_name, *prev_sections):
                     # Perform this check once again
                     if not isinstance(section, dict):
                         loader.errors.append(
-                            '{}, {}, {}section #{}: Template section must be a mapping object'.format(
-                                loader.source, file_name, sections_display, section_index
+                            '{}, {}, {}section #{}: Template section must be {}'.format(
+                                loader.source, file_name, sections_display, section_index, CLASS_REMAP[dict]
                             )
                         )
                         break
@@ -221,11 +222,14 @@ def section_validator(sections, loader, file_name, *prev_sections):
         )
         INVALID = (
             f'{loader.source}, {file_name}, {sections_display}section #{section_index}: '
-            f'Attribute `{{key}}` must be a {{type}}'
+            f'Attribute `{{key}}` must be {{type}}'
         )
 
         # now validate the expanded section object
         _validate(section, validations, loader, MISSING, INVALID)
+
+        if loader.errors:
+            return
 
         section_name = section['name']
         if section_name in section_names_origin:
@@ -278,8 +282,8 @@ def section_validator(sections, loader, file_name, *prev_sections):
             nested_sections = section['sections']
             if not isinstance(nested_sections, list):
                 loader.errors.append(
-                    '{}, {}, {}{}: The `sections` attribute must be an array'.format(
-                        loader.source, file_name, sections_display, section_name
+                    '{}, {}, {}{}: Attribute `sections` must be {}'.format(
+                        loader.source, file_name, sections_display, section_name, CLASS_REMAP[list]
                     )
                 )
                 continue
