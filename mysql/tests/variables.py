@@ -92,6 +92,7 @@ OPTIONAL_REPLICATION_METRICS = [
     'mysql.replication.slave_running',
     'mysql.replication.seconds_behind_master',
     'mysql.replication.slaves_connected',
+    'mysql.replication.replicas_connected',
 ]
 
 # Additional Vars found in "SHOW STATUS;"

@@ -330,7 +330,7 @@ def test_parse_get_version():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'slave_io_running, slave_sql_running, check_status',
+    'replica_io_running, replica_sql_running, check_status',
     [
         pytest.param({}, {}, MySql.CRITICAL),
         pytest.param({'stuff': 'yes'}, {}, MySql.WARNING),
@@ -338,19 +338,20 @@ def test_parse_get_version():
         pytest.param({'stuff': 'yes'}, {'stuff': 'yes'}, MySql.OK),
     ],
 )
-def test_replication_check_status(slave_io_running, slave_sql_running, check_status, instance_basic, aggregator):
+def test_replication_check_status(replica_io_running, replica_sql_running, check_status, instance_basic, aggregator):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
     mocked_results = {
-        'Slaves_connected': 1,
+        'Replicas_connected': 1,
         'Binlog_enabled': True,
-        'Slave_IO_Running': slave_io_running,
-        'Slave_SQL_Running': slave_sql_running,
+        'Replicas_IO_Running': replica_io_running,
+        'Replicas_SQL_Running': replica_sql_running,
     }
 
     mysql_check._check_replication_status(mocked_results)
 
     aggregator.assert_service_check('mysql.replication.slave_running', check_status, tags=['foo:bar'], count=1)
+    aggregator.assert_service_check('mysql.replication.replica_running', check_status, tags=['foo:bar'], count=1)
 
 
 @pytest.mark.integration

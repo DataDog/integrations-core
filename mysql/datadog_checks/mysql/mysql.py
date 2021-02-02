@@ -7,6 +7,7 @@ from __future__ import division
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
+from typing import Dict, Any
 
 import pymysql
 from six import PY3, iteritems, itervalues
@@ -333,7 +334,7 @@ class MySql(AgentCheck):
         binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected iff user has PROCESS privileges.
-        replicas = collect_scalar('Replicas_connected', results)
+        replicas = collect_scalar('Slaves_connected', results) or collect_scalar('Replicas_connected', results)
 
         if not (replica_io_running is None and replica_sql_running is None):
             if not replica_io_running and not replica_sql_running:
@@ -358,12 +359,11 @@ class MySql(AgentCheck):
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
-            self.SLAVE_SERVICE_CHECK_NAME, 1 if replica_running_status == AgentCheck.OK else 0, tags=self.config.tags
+            name=self.SLAVE_SERVICE_CHECK_NAME, value=1 if replica_running_status == AgentCheck.OK else 0, tags=self.config.tags
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
         self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
         self.service_check(self.REPLICA_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
-
 
     def _collect_statement_metrics(self, db, tags):
         tags = self.service_check_tags + tags
@@ -372,6 +372,7 @@ class MySql(AgentCheck):
             self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
 
     def _is_source_host(self, replicas, results):
+        # type: (float, Dict[str, Any]) -> bool
         # master uuid only collected in replicas
         source_host = collect_string('Master_Host', results) or collect_string('Source_Host', results)
         if replicas > 0 or not source_host:
@@ -381,20 +382,28 @@ class MySql(AgentCheck):
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
-            metric_name, metric_type = metric
-            for tag, value in collect_all_scalars(variable, db_results):
-                metric_tags = list(tags)
-                if tag:
-                    metric_tags.append(tag)
-                if value is not None:
-                    if metric_type == RATE:
-                        self.rate(metric_name, value, tags=metric_tags)
-                    elif metric_type == GAUGE:
-                        self.gauge(metric_name, value, tags=metric_tags)
-                    elif metric_type == COUNT:
-                        self.count(metric_name, value, tags=metric_tags)
-                    elif metric_type == MONOTONIC:
-                        self.monotonic_count(metric_name, value, tags=metric_tags)
+            if isinstance(metric, list):
+                for m in metric:
+                    metric_name, metric_type = m
+                    self.__submit_metric(metric_name, metric_type, variable, db_results, tags)
+            else:
+                metric_name, metric_type = metric
+                self.__submit_metric(metric_name, metric_type, variable, db_results, tags)
+
+    def __submit_metric(self, metric_name, metric_type, variable, db_results, tags):
+        for tag, value in collect_all_scalars(variable, db_results):
+            metric_tags = list(tags)
+            if tag:
+                metric_tags.append(tag)
+            if value is not None:
+                if metric_type == RATE:
+                    self.rate(metric_name, value, tags=metric_tags)
+                elif metric_type == GAUGE:
+                    self.gauge(metric_name, value, tags=metric_tags)
+                elif metric_type == COUNT:
+                    self.count(metric_name, value, tags=metric_tags)
+                elif metric_type == MONOTONIC:
+                    self.monotonic_count(metric_name, value, tags=metric_tags)
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
