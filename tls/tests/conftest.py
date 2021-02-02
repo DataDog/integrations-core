@@ -146,7 +146,12 @@ def instance_remote_ok():
 
 @pytest.fixture(scope='session')
 def instance_e2e():
-    return {'server': 'https://localhost', 'port': 4443, 'server_hostname': 'valid.mock', 'tls_ca_cert': CA_CERT_MOUNT_PATH}
+    return {
+        'server': 'https://localhost',
+        'port': 4443,
+        'server_hostname': 'valid.mock',
+        'tls_ca_cert': CA_CERT_MOUNT_PATH,
+    }
 
 
 @pytest.fixture
