@@ -16,6 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 CA_CERT = os.path.join(HERE, 'compose', 'ca.crt')
 PRIVATE_KEY = os.path.join(HERE, 'compose', 'ca.key')
+CA_CERT_MOUNT_PATH = '/tmp/ca.crt'
 
 
 HOSTNAME_TO_PORT_MAPPING = {
@@ -32,7 +33,7 @@ HOSTNAME_TO_PORT_MAPPING = {
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment(instance_e2e, mock_local_tls_dns):
     with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
-        e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT)]}
+        e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
         yield instance_e2e, e2e_metadata
 
 
@@ -145,7 +146,12 @@ def instance_remote_ok():
 
 @pytest.fixture(scope='session')
 def instance_e2e():
-    return {'server': 'https://localhost', 'port': 4443, 'server_hostname': 'valid.mock', 'tls_ca_cert': CA_CERT}
+    return {
+        'server': 'https://localhost',
+        'port': 4443,
+        'server_hostname': 'valid.mock',
+        'tls_ca_cert': CA_CERT_MOUNT_PATH,
+    }
 
 
 @pytest.fixture
