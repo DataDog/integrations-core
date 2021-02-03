@@ -10,6 +10,7 @@ jobs:
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
     force_base_package: ${{ parameters.force_base_package }}
+    test_e2e: ${{ parameters.test_e2e }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
@@ -291,8 +292,11 @@ jobs:
       displayName: Nagios
       os: linux
     - checkName: network
-      displayName: Network
+      displayName: Network (Linux)
       os: linux
+    - checkName: network
+      displayName: Network (Windows)
+      os: windows
     - checkName: nfsstat
       displayName: NFSstat
       os: linux

@@ -266,7 +266,7 @@
             "id": 10,
             "definition": {
                 "type": "image",
-                "url": "https://s3.amazonaws.com/dd-integrations/istio/configuration/tile/logo.png",
+                "url": "/static/images/logos/istio_large.svg",
                 "sizing": "fit"
             },
             "layout": {

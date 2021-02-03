@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+## 2.2.1 / 2021-01-29
+
+* [Fixed] Fix condition for replication status. See [#8475](https://github.com/DataDog/integrations-core/pull/8475).
+
+## 2.2.0 / 2021-01-28
+
+* [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
+
 ## 2.1.3 / 2021-01-25
 
 * [Fixed] Simplify replication status check. See [#8401](https://github.com/DataDog/integrations-core/pull/8401).

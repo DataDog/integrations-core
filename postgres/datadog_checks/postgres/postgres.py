@@ -126,10 +126,10 @@ class PostgreSql(AgentCheck):
             if is_relations:
                 schema_field = get_schema_field(descriptors)
                 relations_filter = build_relations_filter(relations_config, schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
+                self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
                 cursor.execute(query.format(relations=relations_filter))
             else:
-                self.log.debug("Running query: %s", query)
+                self.log.debug("Running query: %s", str(query))
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
@@ -431,7 +431,7 @@ class PostgreSql(AgentCheck):
             self._connect()
             if self.config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s", str(self.version))
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self._is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self.config.deep_database_monitoring:

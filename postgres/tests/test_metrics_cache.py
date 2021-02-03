@@ -14,7 +14,7 @@ from datadog_checks.postgres.version_utils import V9_1, V9_2, V10
     'version, is_aurora, expected_metrics',
     [
         pytest.param(V10, False, REPLICATION_METRICS_10),
-        pytest.param(V10, True, REPLICATION_METRICS_10),
+        pytest.param(V10, True, {}),
         pytest.param(V9_1, False, REPLICATION_METRICS_9_1),
         pytest.param(V9_2, True, {}),
     ],

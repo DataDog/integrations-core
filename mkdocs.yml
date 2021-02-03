@@ -29,10 +29,11 @@ theme:
   logo: assets/images/logo.svg
 
 nav:
-  - Home: index.md
-  - Setup: setup.md
-  - Testing: testing.md
-  - E2E: e2e.md
+  - Home:
+    - About: index.md
+    - Setup: setup.md
+    - Testing: testing.md
+    - E2E: e2e.md
   - Base Package:
     - About: base/about.md
     - Basics: base/basics.md

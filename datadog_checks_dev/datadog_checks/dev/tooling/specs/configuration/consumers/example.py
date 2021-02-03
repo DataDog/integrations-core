@@ -44,13 +44,17 @@ def value_type_string(value):
         if value_type == 'object':
             return 'mapping'
         elif value_type == 'array':
-            item_type = value['items']['type']
-            if item_type == 'object':
-                return 'list of mappings'
-            elif item_type == 'array':
-                return 'list of lists'
+            items = value['items']
+            if 'oneOf' in items:
+                return f'(list of {value_type_string(items)})'
             else:
-                return f'list of {item_type}s'
+                item_type = items['type']
+                if item_type == 'object':
+                    return 'list of mappings'
+                elif item_type == 'array':
+                    return 'list of lists'
+                else:
+                    return f'list of {item_type}s'
         else:
             return value_type
 

@@ -27,7 +27,10 @@ SELECT {cols}
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE pg_database.datname = %s
   AND query != '<insufficient privilege>'
+  LIMIT {limit}
 """
+
+DEFAULT_STATEMENTS_LIMIT = 10000
 
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'total_time', 'rows'})
@@ -83,14 +86,16 @@ class PostgresStatementMetrics(object):
         version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
         be upgraded without upgrading extensions, even when the extension is included by default.
         """
-        query = """
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_schema = 'public'
-            AND table_name = 'pg_stat_statements';
-            """
-        columns = self._execute_query(db.cursor(), query)
-        return [column[0] for column in columns]
+        # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
+        query = STATEMENTS_QUERY.format(
+            cols='*',
+            pg_stat_statements_view=self.config.pg_stat_statements_view,
+            limit=0,
+        )
+        cursor = db.cursor()
+        self._execute_query(cursor, query, params=(self.config.dbname,))
+        colnames = [desc[0] for desc in cursor.description]
+        return colnames
 
     def collect_per_statement_metrics(self, db):
         try:
@@ -123,6 +128,7 @@ class PostgresStatementMetrics(object):
             STATEMENTS_QUERY.format(
                 cols=', '.join(query_columns),
                 pg_stat_statements_view=self.config.pg_stat_statements_view,
+                limit=DEFAULT_STATEMENTS_LIMIT,
             ),
             params=(self.config.dbname,),
         )

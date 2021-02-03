@@ -8,8 +8,8 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
-from .common import CHECK_NAME, CUSTOM_QUERY_A, CUSTOM_QUERY_B, assert_metrics
-from .utils import not_windows_ci
+from .common import CHECK_NAME, CUSTOM_METRICS, CUSTOM_QUERY_A, CUSTOM_QUERY_B, EXPECTED_DEFAULT_METRICS, assert_metrics
+from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -17,9 +17,9 @@ except ImportError:
     pyodbc = None
 
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment"), not_windows_ci]
-
-
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
 
     instance_docker['password'] = 'FOO'
@@ -36,6 +36,9 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     )
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
@@ -43,6 +46,9 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     assert_metrics(aggregator, expected_tags)
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def load_stored_procedure(instance, proc_name, sp_tags):
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
@@ -105,6 +111,9 @@ def load_stored_procedure(instance, proc_name, sp_tags):
     cursor.close()
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_docker):
     instance_pass = deepcopy(instance_docker)
 
@@ -122,6 +131,9 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, instance_docker):
     instance_fail = deepcopy(instance_docker)
     proc = 'pyStoredProc'
@@ -140,6 +152,9 @@ def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, i
     assert len(aggregator._metrics) == 0
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
@@ -149,6 +164,9 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tables, instance_docker):
     instance = deepcopy(instance_docker)
     instance['include_task_scheduler_metrics'] = False
@@ -172,6 +190,7 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
     aggregator.assert_metric('sqlserver.io_file_stats.num_of_writes')
 
 
+@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autodiscovery):
@@ -201,6 +220,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     aggregator.assert_metric('sqlserver.database.files.state', tags=msdb_tags)
 
 
+@not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, dd_run_check, instance_docker):
@@ -220,3 +240,18 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker):
 
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:custom'])
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
+
+
+@windows_ci
+@pytest.mark.integration
+def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_sql2017_defaults):
+    check = SQLServer(CHECK_NAME, init_config, [instance_sql2017_defaults])
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+
+    for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
+        aggregator.assert_metric(mname)
+
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
+    aggregator.assert_all_metrics_covered()

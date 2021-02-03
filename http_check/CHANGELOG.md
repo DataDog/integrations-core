@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 5.1.0 / 2021-01-28
+
+* [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
+
 ## 5.0.0 / 2021-01-21
 
 * [Added] Support combined client cert files. See [#8298](https://github.com/DataDog/integrations-core/pull/8298).

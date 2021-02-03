@@ -6,7 +6,7 @@
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "https://static.datadoghq.com/static/images/saas_logos/bot/twistlock@2x.png",
+        "url": "/static/images/logos/twistlock_large.svg",
         "sizing": "fit"
       },
       "layout": {
