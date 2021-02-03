@@ -2,17 +2,11 @@
 
 ## Overview
 
-Use the Datadog Agent to monitor how well Istio is performing. Datadog monitors every aspect of your Istio setup:
-
-- Metrics and logs (using this Agent Check)
-- [Container and pod-level flow data][19] (using Network Performance Monitoring)
-- [Application distributed traces][20] (using APM)
-
-Once you set up this integration, the Datadog Agent allows you to:
-
-- Collect metrics on what apps are making what kinds of requests
-- Look at how applications are using bandwidth
-- Understand Istio's resource consumption
+Datadog monitors every aspect of your Istio environment, so you can
+- Assess the health of Envoy and Istio control plane with logs ([see below][22])
+- Break down the performance of your service mesh with request, bandwidth, and resource consumption metrics ([see below][21])
+- Map network communication between containers, pods, and services over the mesh with [Network Performance Monitoring][19] 
+- Drill into distributed traces for applications transacting over the mesh with [APM][20]
 
 To learn more about monitoring your Istio environment with Datadog, [see the Istio blog][21].
 
@@ -163,3 +157,5 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [20]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [21]: https://www.datadoghq.com/blog/istio-datadog/
+[21]: https://docs.datadoghq.com/integrations/istio/#metrics
+[22]: https://docs.datadoghq.com/integrations/istio/#log-collection
