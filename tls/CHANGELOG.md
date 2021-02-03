@@ -1,5 +1,11 @@
 # CHANGELOG - TLS
 
+## 2.2.0 / 2021-02-03
+
+* [Added] Implement AIA chasing. See [#8521](https://github.com/DataDog/integrations-core/pull/8521).
+* [Fixed] Remove outdated description of `local_cert_path` option. See [#8500](https://github.com/DataDog/integrations-core/pull/8500).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.1.0 / 2021-01-28
 
 * [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
