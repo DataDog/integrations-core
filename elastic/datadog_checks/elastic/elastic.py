@@ -81,7 +81,7 @@ class ESCheck(AgentCheck):
             # retrieve the cluster name from the data, and append it to the
             # master tag list.
             cluster_tags = ["elastic_cluster:{}".format(stats_data['cluster_name'])]
-            if is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+            if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
                 cluster_tags.append("cluster_name:{}".format(stats_data['cluster_name']))
             base_tags.extend(cluster_tags)
             service_check_tags.extend(cluster_tags)
