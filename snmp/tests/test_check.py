@@ -786,7 +786,7 @@ def test_discovery(aggregator):
     try:
         for _ in range(30):
             check.check(instance)
-            if len(aggregator.metric_names) > 1:
+            if 'snmp.IAmAGauge32' in aggregator.metric_names:
                 break
             time.sleep(1)
             aggregator.reset()
