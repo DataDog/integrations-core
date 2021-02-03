@@ -7,7 +7,7 @@ from __future__ import division
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pymysql
 from six import PY3, iteritems, itervalues
@@ -359,7 +359,9 @@ class MySql(AgentCheck):
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
-            name=self.SLAVE_SERVICE_CHECK_NAME, value=1 if replica_running_status == AgentCheck.OK else 0, tags=self.config.tags
+            name=self.SLAVE_SERVICE_CHECK_NAME,
+            value=1 if replica_running_status == AgentCheck.OK else 0,
+            tags=self.config.tags,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
         self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
