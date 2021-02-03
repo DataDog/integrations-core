@@ -185,7 +185,7 @@ files:
         success manager or Datadog support.
       value:
         type: boolean
-        example: true
+        example: false
         default: false
     - name: pg_stat_statements_view
       description: |
