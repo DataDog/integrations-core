@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from collections import deque
 from io import StringIO
 
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
@@ -92,9 +93,10 @@ class ReadmeConsumer(object):
                 writer.write('# Agent Check: {}'.format(self.spec['name']))
                 writer.write('\n\n')
 
-                sections = file['sections']
+                sections = deque(file['sections'])
                 tab = None
-                for section in sections:
+                while sections:
+                    section = sections.popleft()
                     if section['hidden']:
                         continue
 
@@ -117,6 +119,12 @@ class ReadmeConsumer(object):
                     write_section(section, writer)
 
                     writer.write('\n')
+
+                    if 'sections' in section:
+                        # extend left backwards for correct order of sections
+                        # eg sections.extendleft([s2.1, s2.2]) updates section to [s2.2, s2.1, s3]
+                        # so we need to reverse it for correctness
+                        sections.extendleft(section['sections'][::-1])
 
                 # add link references to the end of document
                 refs = get_references(links)
