@@ -10,7 +10,8 @@ USER = "elastic"
 PASSWORD = "changeme"
 HOST = get_docker_hostname()
 PORT = '9200'
-CLUSTER_TAG = ["cluster_name:test-cluster", "elastic_cluster:test-cluster"]
+CLUSTER_TAG = ["cluster_name:test-cluster"]
+ELASTIC_CLUSTER_TAG = ["elastic_cluster:test-cluster"]
 URL = 'http://{}:{}'.format(HOST, PORT)
 ELASTIC_VERSION = os.getenv('ELASTIC_VERSION', os.environ['ELASTIC_IMAGE'])
 

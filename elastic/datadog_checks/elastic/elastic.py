@@ -83,8 +83,8 @@ class ESCheck(AgentCheck):
             cluster_tags = ["elastic_cluster:{}".format(stats_data['cluster_name'])]
             if is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
                 cluster_tags.append("cluster_name:{}".format(stats_data['cluster_name']))
-            base_tags.append(cluster_tags)
-            service_check_tags.append(cluster_tags)
+            base_tags.extend(cluster_tags)
+            service_check_tags.extend(cluster_tags)
         self._process_stats_data(stats_data, stats_metrics, base_tags)
 
         # Load cluster-wise data
