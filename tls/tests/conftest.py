@@ -210,6 +210,11 @@ def instance_remote_cert_expired():
 
 
 @pytest.fixture
+def instance_remote_fetch_intermediate_certs():
+    return {'server': 'incomplete-chain.badssl.com', 'fetch_intermediate_certs': True}
+
+
+@pytest.fixture
 def instance_remote_cert_critical_days():
     return {'server': 'https://valid.mock', 'days_critical': 200, 'tls_ca_cert': CA_CERT}
 

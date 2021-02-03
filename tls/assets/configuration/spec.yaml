@@ -16,6 +16,12 @@ files:
         example:
           - 'TLSv1.2'
           - 'TLSv1.3'
+    - name: fetch_intermediate_certs
+      description: |
+        Whether or not to perform AIA chasing in order to load the full certificate chain.
+      value:
+        example: false
+        type: boolean
     - template: init_config/default
   - template: instances
     options:
@@ -71,6 +77,21 @@ files:
         example:
           - 'TLSv1.2'
           - 'TLSv1.3'
+    - name: fetch_intermediate_certs
+      description: |
+        Whether or not to perform AIA chasing in order to load the full certificate chain.
+
+        This overrides `fetch_intermediate_certs` defined in `init_config`.
+      value:
+        example: false
+        type: boolean
+    - name: intermediate_cert_refresh_interval
+      description: |
+        When `fetch_intermediate_certs` is set to `true`, this indicates how often to
+        refresh the intermediate certificate cache in minutes.
+      value:
+        example: 60
+        type: number
     - name: days_warning
       description: |
         Number of days before certificate expiration from which the service check

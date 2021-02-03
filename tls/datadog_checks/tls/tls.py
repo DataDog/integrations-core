@@ -4,14 +4,18 @@
 import socket
 import ssl
 from datetime import datetime
+from hashlib import sha256
 
 import service_identity
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
+from cryptography.x509.extensions import ExtensionNotFound
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.time import get_timestamp
 
 from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
 
@@ -77,6 +81,15 @@ class TLSCheck(AgentCheck):
         if not self._tls_validate_hostname or not self._validate_hostname:
             self._tls_validate_hostname = False
 
+        self._fetch_intermediate_certs = is_affirmative(
+            self.instance.get('fetch_intermediate_certs', self.init_config.get('fetch_intermediate_certs', False))
+        )
+        self._intermediate_cert_refresh_interval = (
+            # Convert minutes to seconds
+            float(self.instance.get('intermediate_cert_refresh_interval', 60))
+            * 60
+        )
+
         # Thresholds expressed in seconds take precedence over those expressed in days
         self._seconds_warning = (
             int(self.instance.get('seconds_warning', 0))
@@ -116,9 +129,18 @@ class TLSCheck(AgentCheck):
         self._validation_data = None
         self._tls_context = None
 
+        # Only fetch intermediate certs from the indicated URIs occasionally
+        self._intermediate_cert_uri_cache = {}
+
+        # Only load intermediate certs once
+        self._intermediate_cert_id_cache = set()
+
     def check_remote(self, _):
         if not self._server:
             raise ConfigurationError('You must specify `server` in your configuration file.')
+
+        if self._fetch_intermediate_certs:
+            self.fetch_intermediate_certs()
 
         try:
             self.log.debug('Checking that TLS service check can connect')
@@ -314,6 +336,76 @@ class TLSCheck(AgentCheck):
                 raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
 
             raise
+
+    def fetch_intermediate_certs(self):
+        # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
+        try:
+            sock = self.create_connection()
+        except Exception as e:
+            self.log.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            return
+
+        with closing(sock):
+            try:
+                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                context.verify_mode = ssl.CERT_NONE
+
+                with closing(context.wrap_socket(sock, server_hostname=self._server_hostname)) as secure_sock:
+                    der_cert = secure_sock.getpeercert(binary_form=True)
+            except Exception as e:
+                self.log.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
+                return
+
+        self.load_intermediate_certs(der_cert)
+
+    def load_intermediate_certs(self, der_cert):
+        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        try:
+            cert = load_der_x509_certificate(der_cert, default_backend())
+        except Exception as e:
+            self.log.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
+            return
+
+        try:
+            authority_information_access = cert.extensions.get_extension_for_oid(
+                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+            )
+        except ExtensionNotFound:
+            self.log.debug(
+                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
+            )
+            return
+
+        for access_description in authority_information_access.value:
+            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
+                continue
+
+            uri = access_description.access_location.value
+            if (
+                uri in self._intermediate_cert_uri_cache
+                and get_timestamp() - self._intermediate_cert_uri_cache[uri] < self._intermediate_cert_refresh_interval
+            ):
+                continue
+
+            # Assume HTTP for now
+            try:
+                response = self.http.get(uri)  # SKIP_HTTP_VALIDATION
+                response.raise_for_status()
+            except Exception as e:
+                self.log.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                continue
+            else:
+                access_time = get_timestamp()
+                intermediate_cert = response.content
+
+            cert_id = sha256(intermediate_cert).digest()
+            if cert_id not in self._intermediate_cert_id_cache:
+                self.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+                self._intermediate_cert_id_cache.add(cert_id)
+
+            self._intermediate_cert_uri_cache[uri] = access_time
+            self.load_intermediate_certs(intermediate_cert)
 
     @property
     def validation_data(self):

@@ -11,6 +11,11 @@ init_config:
     #   - TLSv1.2
     #   - TLSv1.3
 
+    ## @param fetch_intermediate_certs - boolean - optional - default: false
+    ## Whether or not to perform AIA chasing in order to load the full certificate chain.
+    #
+    # fetch_intermediate_certs: false
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -69,6 +74,19 @@ instances:
     # allowed_versions:
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param fetch_intermediate_certs - boolean - optional - default: false
+    ## Whether or not to perform AIA chasing in order to load the full certificate chain.
+    ##
+    ## This overrides `fetch_intermediate_certs` defined in `init_config`.
+    #
+    # fetch_intermediate_certs: false
+
+    ## @param intermediate_cert_refresh_interval - number - optional - default: 60
+    ## When `fetch_intermediate_certs` is set to `true`, this indicates how often to
+    ## refresh the intermediate certificate cache in minutes.
+    #
+    # intermediate_cert_refresh_interval: 60
 
     ## @param days_warning - number - optional - default: 14.0
     ## Number of days before certificate expiration from which the service check
