@@ -651,6 +651,19 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
                     loader.source, file_name, sections_display, option_name, value_type
                 )
             )
+
+        if 'additionalProperties' in value:
+            additional_properties = value['additionalProperties']
+            if additional_properties is True:
+                return
+            elif not isinstance(additional_properties, dict):
+                loader.errors.append(
+                    '{}, {}, {}{}: Attribute `additionalProperties` for `type` {} must be a mapping or set '
+                    'to `true`'.format(loader.source, file_name, sections_display, option_name, value_type)
+                )
+                return
+
+            value_validator(additional_properties, loader, file_name, sections_display, option_name, depth=new_depth)
     else:
         loader.errors.append(
             '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
