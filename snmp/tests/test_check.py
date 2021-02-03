@@ -139,7 +139,9 @@ def test_scalar(aggregator):
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
-    aggregator.assert_metric('datadog.snmp.submitted_metrics', value=99, metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS)
+    aggregator.assert_metric(
+        'datadog.snmp.submitted_metrics', value=99, metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
+    )
 
     common.assert_common_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
@@ -155,9 +157,15 @@ def test_submitted_metrics_count(aggregator):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
-    aggregator.assert_metric('datadog.snmp.submitted_metrics', value=5.0, metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS)
-    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS)
-    aggregator.assert_metric('datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=common.CHECK_TAGS)
+    aggregator.assert_metric(
+        'datadog.snmp.submitted_metrics', value=5.0, metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
+    )
+    aggregator.assert_metric(
+        'datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
+    )
+    aggregator.assert_metric(
+        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=common.CHECK_TAGS
+    )
     common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
 
