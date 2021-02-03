@@ -121,6 +121,7 @@ class ReadmeConsumer(object):
                     writer.write('\n')
 
                     if 'sections' in section:
+                        # extend left backwards for correct order of sections
                         sections.extendleft(section['sections'][::-1])
 
                 # add link references to the end of document
