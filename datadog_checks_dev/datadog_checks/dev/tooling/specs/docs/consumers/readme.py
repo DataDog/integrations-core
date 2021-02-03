@@ -122,6 +122,8 @@ class ReadmeConsumer(object):
 
                     if 'sections' in section:
                         # extend left backwards for correct order of sections
+                        # eg sections.extendleft([s2.1, s2.2]) updates section to [s2.2, s2.1, s3]
+                        # so we need to reverse it for correctness
                         sections.extendleft(section['sections'][::-1])
 
                 # add link references to the end of document
