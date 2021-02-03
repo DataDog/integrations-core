@@ -14,6 +14,7 @@ import yaml
 
 from datadog_checks.base import ConfigurationError, to_native_string
 from datadog_checks.dev import temp_dir
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -139,9 +140,6 @@ def test_scalar(aggregator):
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
-    aggregator.assert_metric(
-        'datadog.snmp.submitted_metrics', value=99, metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
-    )
 
     common.assert_common_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
@@ -168,6 +166,11 @@ def test_submitted_metrics_count(aggregator):
     )
     common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        exclude=['snmp.snmpEngineTime', 'snmp.tcpInSegs', 'snmp.udpDatagrams'],
+    )
 
 
 def test_enforce_constraint(aggregator):
