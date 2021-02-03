@@ -23,7 +23,7 @@ in-toto==0.5.0
 ipaddress==1.0.22; python_version < "3.0"
 jaydebeapi==1.2.3
 jpype1==0.7.1; python_version <= "2.7"
-jpype1==1.0.2; python_version > "3"
+jpype1==1.2.1; python_version > "3"
 kafka-python==2.0.2
 kazoo==2.6.1
 kubernetes==8.0.1
