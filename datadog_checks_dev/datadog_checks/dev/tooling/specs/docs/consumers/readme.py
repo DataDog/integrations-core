@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from io import StringIO
+from collections import deque
 
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
@@ -92,9 +93,10 @@ class ReadmeConsumer(object):
                 writer.write('# Agent Check: {}'.format(self.spec['name']))
                 writer.write('\n\n')
 
-                sections = file['sections']
+                sections = deque(file['sections'])
                 tab = None
-                for section in sections:
+                while sections:
+                    section = sections.popleft()
                     if section['hidden']:
                         continue
 
@@ -117,6 +119,9 @@ class ReadmeConsumer(object):
                     write_section(section, writer)
 
                     writer.write('\n')
+
+                    if 'sections' in section:
+                        sections.extendleft(section['sections'][::-1])
 
                 # add link references to the end of document
                 refs = get_references(links)
