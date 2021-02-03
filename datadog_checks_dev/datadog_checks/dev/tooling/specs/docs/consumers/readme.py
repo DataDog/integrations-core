@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from io import StringIO
 from collections import deque
+from io import StringIO
 
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
