@@ -1,6 +1,6 @@
 {
 	"name": "[Scylla] Server is shutting down",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "avg(last_1m):max:scylla.node.operation_mode{*} by {server} > 3",
 	"message": "{{server.name}} is shutting down. Current value of {{value}} \n\nThe operation mode of the current nodes can have values of UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8",
 	"tags": [
