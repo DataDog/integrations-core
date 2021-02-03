@@ -154,9 +154,15 @@ def test_submitted_metrics_count(aggregator):
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
 
+    total_snmp_submitted_metrics = len(common.SCALAR_OBJECTS) + 1  # +1 for snmp.sysUpTimeInstance
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_metric(
-        'datadog.snmp.submitted_metrics', value=5.0, metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
+        'datadog.snmp.submitted_metrics',
+        value=total_snmp_submitted_metrics,
+        metric_type=aggregator.GAUGE,
+        count=1,
+        tags=common.CHECK_TAGS,
     )
     aggregator.assert_metric(
         'datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
