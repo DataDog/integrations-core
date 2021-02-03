@@ -119,6 +119,14 @@ def _cluster_tags():
 
 
 @pytest.fixture
+def new_cluster_tags():
+    tags = ['url:{}'.format(URL)] + ELASTIC_CLUSTER_TAG
+    tags.extend(CUSTOM_TAGS)
+
+    return tags
+
+
+@pytest.fixture
 def cluster_tags():
     return _cluster_tags()
 
