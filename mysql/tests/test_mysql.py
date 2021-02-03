@@ -335,7 +335,7 @@ def test_parse_get_version():
         pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), MySql.CRITICAL),
         pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), MySql.CRITICAL),
         pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), MySql.OK),
-        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
+        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {}), MySql.WARNING),
         pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {}), MySql.WARNING),
         pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.OK),
         pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.OK),
@@ -347,9 +347,11 @@ def test_replication_check_status(replica_io_running, replica_sql_running, check
     mocked_results = {
         'Slaves_connected': 1,
         'Binlog_enabled': True,
-        replica_io_running[0]: replica_io_running[1],
-        replica_sql_running[0]: replica_sql_running[1],
     }
+    if replica_io_running[1] is not None:
+        mocked_results[replica_io_running[0]] = replica_io_running[1]
+    if replica_sql_running[1] is not None:
+        mocked_results[replica_sql_running[0]] = replica_sql_running[1]
 
     mysql_check._check_replication_status(mocked_results)
 
