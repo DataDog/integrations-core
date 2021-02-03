@@ -639,7 +639,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
         aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
         aggregator.assert_metric('snmp.devices_monitored', tags=tags, count=1, value=1)
-
+        common.assert_common_metrics(aggregator, tags)
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
@@ -656,7 +656,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
         aggregator.assert_metric('snmp.devices_monitored', tags=common.CHECK_TAGS, count=1, value=1)
-
+        common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
@@ -766,6 +766,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+    network_tags = ['network:{}'.format(network)]
 
     instance = {
         'name': 'snmp_conf',
@@ -798,9 +799,10 @@ def test_discovery(aggregator):
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance')
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
     aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=check_tags)
+    common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -813,6 +815,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+    network_tags = ['network:{}'.format(network)]
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
@@ -831,11 +834,13 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check.check(instance)
     check._running = False
 
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
     for device_ip in ['192.168.0.1', '192.168.0.2']:
         tags = check_tags + ['snmp_device:{}'.format(device_ip)]
         aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, value=1, count=1, tags=tags)
+
+    common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
 
