@@ -2513,6 +2513,124 @@ def test_value_type_object_properties_required_not_met():
     ) in spec.errors
 
 
+def test_value_type_object_additional_properties_invalid_type():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties: 9000
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `additionalProperties` '
+        'for `type` object must be a mapping or set to `true`'
+    ) in spec.errors
+
+
+def test_value_type_object_additional_properties_nested_error():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                  - name: bar
+                    type: string
+                  required:
+                  - foo
+                  - bar
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: All entries in attribute `required` '
+        'for `type` object must be defined in the `properties` attribute'
+    ) in spec.errors
+
+
+def test_value_type_object_additional_properties_nested_ok():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                  - name: foo
+                    type: string
+                  - name: bar
+                    type: string
+                  required:
+                  - foo
+                  - bar
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_value_type_object_additional_properties_true_ok():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
 def test_value_type_unknown():
     spec = get_spec(
         """
