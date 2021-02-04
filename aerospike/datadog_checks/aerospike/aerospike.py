@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import re
 from collections import defaultdict
+from typing import List
 
 from six import iteritems
 
@@ -241,6 +242,7 @@ class AerospikeCheck(AgentCheck):
             return client
 
     def get_info(self, command, separator=';'):
+        # type: (str, str) -> List[str]
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         try:
@@ -254,9 +256,9 @@ class AerospikeCheck(AgentCheck):
             )
         except Exception as e:
             self.log.warning("Command `%s` was unsuccessful: %s", command, str(e))
-            return
+            return []
         # Get rid of command and whitespace
-        data = data[len(command) :].strip()
+        data = data[len(command):].strip()
 
         if not separator:
             return data
