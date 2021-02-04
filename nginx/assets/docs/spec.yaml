@@ -104,6 +104,9 @@ files:
                 ```shell
                 sudo nginx -t && sudo nginx -s reload
                 ```
+
+
+                [5]: https://nginx.org/en/docs/http/ngx_http_api_module.html
       - template: setup/configuration
         overrides:
           description: |
@@ -135,6 +138,7 @@ files:
 
                   3. [Restart the Agent][7] to start sending NGINX metrics to Datadog.
 
+                  [6]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
                   [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
               - template: setup/configuration/log_collection
                 overrides:
@@ -197,6 +201,31 @@ files:
       - template: setup/validation
       - template: data_collected
       - template: data_collected/metrics
+        overrides:
+          append_text: |
+            Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
+
+            A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
+
+            | NGINX                          | NGINX Plus                   |
+            | ------------------------------ | ---------------------------- |
+            | `nginx.net.connections`        | `nginx.connections.active`   |
+            | `nginx.net.conn_opened_per_s`  | `nginx.connections.accepted` |
+            | `nginx.net.conn_dropped_per_s` | `nginx.connections.dropped`  |
+            | `nginx.net.request_per_s`      | `nginx.requests.total`       |
+
+            These metrics don't refer exactly to the same metric, but they are somewhat related:
+
+            | NGINX               | NGINX Plus               |
+            | ------------------- | ------------------------ |
+            | `nginx.net.waiting` | `nginx.connections.idle` |
+
+            Finally, these metrics have no good equivalent:
+
+            | Metric              | Description                                                                               |
+            | ------------------- | ----------------------------------------------------------------------------------------- |
+            | `nginx.net.reading` | The current number of connections where nginx is reading the request header.              |
+            | `nginx.net.writing` | The current number of connections where nginx is writing the response back to the client. |
       - template: data_collected/events
       - template: data_collected/service_checks
         overrides:
