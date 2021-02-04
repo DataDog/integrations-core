@@ -157,5 +157,3 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [20]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [21]: https://www.datadoghq.com/blog/istio-datadog/
-[21]: https://docs.datadoghq.com/integrations/istio/#metrics
-[22]: https://docs.datadoghq.com/integrations/istio/#log-collection
