@@ -546,3 +546,56 @@ def test_bar_valid(_):
     doc.load()
 
     assert not doc.errors
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_link(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: |
+                [link][1]
+
+                [1]: datadoghq.com
+        """
+    )
+    doc.load()
+    expected_description = '[link](datadoghq.com)'
+    assert doc.data['files'][0]['sections'][0]['description'] == expected_description
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_nested_sections_link(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: |
+                [link][1]
+
+                [1]: datadoghq.com
+            sections:
+            - name: bar
+              header_level: 1
+              description: |
+                [foo][1]
+
+                [1]: foo.bar
+        """
+    )
+    doc.load()
+    expected_description = '[link](datadoghq.com)'
+    expected_nested_description = '[foo](foo.bar)'
+    assert doc.data['files'][0]['sections'][0]['description'] == expected_description
+    assert doc.data['files'][0]['sections'][0]['sections'][0]['description'] == expected_nested_description
