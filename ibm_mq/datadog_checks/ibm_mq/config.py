@@ -102,14 +102,17 @@ class IBMMQConfig:
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 
+        # SSL options
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
-
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
-
         self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
+        if not self.ssl and (
+            instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
+        ):
+            raise ConfigurationError("You have provided ssl connection options but ssl authentication is disabled")
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
