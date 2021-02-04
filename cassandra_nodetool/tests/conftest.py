@@ -29,7 +29,9 @@ def dd_environment():
     env['CONTAINER_PORT'] = common.PORT
 
     with docker_run(
-        compose_file, service_name=common.CASSANDRA_CONTAINER_NAME, log_patterns=['Listening for thrift clients']
+            compose_file,
+            service_name=common.CASSANDRA_CONTAINER_NAME,
+            log_patterns=['Listening for thrift clients', 'Handshaking version', 'All sessions completed']
     ):
         cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
         env['CASSANDRA_SEEDS'] = cassandra_seed
