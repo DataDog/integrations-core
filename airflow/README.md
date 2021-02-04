@@ -337,7 +337,7 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.datadoghq.com/developers/dogstatsd/
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
+[11]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/_modules/airflow/providers/datadog/hooks/datadog.html
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
