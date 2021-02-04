@@ -2221,7 +2221,7 @@ def test_cisco_catalyst(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
-    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -2236,7 +2236,7 @@ def test_juniper_ex(aggregator):
     _check_juniper_dcu(aggregator, common_tags)
     _check_juniper_cos(aggregator, common_tags)
     _check_juniper_firewall(aggregator, common_tags)
-    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
@@ -2250,7 +2250,7 @@ def test_juniper_mx(aggregator):
     ]
     _check_juniper_virtual_chassis(aggregator, common_tags)
     _check_juniper_firewall(aggregator, common_tags)
-    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
@@ -2265,7 +2265,7 @@ def test_juniper_srx(aggregator):
     _check_juniper_userfirewall(aggregator, common_tags)
     _check_juniper_dcu(aggregator, common_tags)
     _check_juniper_scu(aggregator, common_tags)
-    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 

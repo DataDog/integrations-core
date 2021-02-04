@@ -47,7 +47,7 @@ def test_e2e_python(dd_agent_check):
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
-    common.assert_common_metrics(aggregator)
+    common.assert_common_metrics(aggregator, is_e2e=True)
     aggregator.all_metrics_asserted()
 
 
@@ -70,7 +70,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'autodiscovery_subnet:{}.0/29'.format(subnet_prefix),
     ]
 
-    common.assert_common_metrics(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
     interfaces = [
         ('eth0', 'kept'),
         ('eth1', 'their forward oxen'),
@@ -126,7 +126,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'upsAdvTestDiagnosticsResults',
     ]
 
-    common.assert_common_metrics(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
 
     for metric in metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
@@ -155,7 +155,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
     ]
 
-    common.assert_common_metrics(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
 
     # test ignored IPs
     tags = [

@@ -14,6 +14,7 @@ import yaml
 
 from datadog_checks.base import ConfigurationError, to_native_string
 from datadog_checks.dev import temp_dir
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -140,8 +141,42 @@ def test_scalar(aggregator):
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
-    common.assert_common_metrics(aggregator)
+    common.assert_common_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
+
+
+def test_submitted_metrics_count(aggregator):
+    instance = common.generate_instance_config(common.SCALAR_OBJECTS)
+    check = common.create_check(instance)
+    check.check(instance)
+
+    for metric in common.SCALAR_OBJECTS:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+
+    total_snmp_submitted_metrics = len(common.SCALAR_OBJECTS) + 1  # +1 for snmp.sysUpTimeInstance
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric(
+        'datadog.snmp.submitted_metrics',
+        value=total_snmp_submitted_metrics,
+        metric_type=aggregator.GAUGE,
+        count=1,
+        tags=common.CHECK_TAGS,
+    )
+    aggregator.assert_metric(
+        'datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
+    )
+    aggregator.assert_metric(
+        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=common.CHECK_TAGS
+    )
+    common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS)
+    aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        exclude=['snmp.snmpEngineTime', 'snmp.tcpInSegs', 'snmp.udpDatagrams'],
+    )
 
 
 def test_enforce_constraint(aggregator):
@@ -639,7 +674,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
         aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
         aggregator.assert_metric('snmp.devices_monitored', tags=tags, count=1, value=1)
-
+        common.assert_common_metrics(aggregator, tags)
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
@@ -656,7 +691,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
         aggregator.assert_metric('snmp.devices_monitored', tags=common.CHECK_TAGS, count=1, value=1)
-
+        common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
@@ -766,6 +801,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+    network_tags = ['network:{}'.format(network)]
 
     instance = {
         'name': 'snmp_conf',
@@ -785,7 +821,7 @@ def test_discovery(aggregator):
     try:
         for _ in range(30):
             check.check(instance)
-            if len(aggregator.metric_names) > 1:
+            if 'snmp.IAmAGauge32' in aggregator.metric_names:
                 break
             time.sleep(1)
             aggregator.reset()
@@ -798,9 +834,10 @@ def test_discovery(aggregator):
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance')
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
     aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=check_tags)
+    common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -813,6 +850,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
+    network_tags = ['network:{}'.format(network)]
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
@@ -831,11 +869,13 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check.check(instance)
     check._running = False
 
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
     for device_ip in ['192.168.0.1', '192.168.0.2']:
         tags = check_tags + ['snmp_device:{}'.format(device_ip)]
         aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, value=1, count=1, tags=tags)
+
+    common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
 

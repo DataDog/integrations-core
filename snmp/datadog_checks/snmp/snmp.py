@@ -8,6 +8,7 @@ import ipaddress
 import json
 import re
 import threading
+import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
@@ -81,6 +82,8 @@ class SnmpCheck(AgentCheck):
         self._config = self._build_config(self.instance)
 
         self._last_fetch_number = 0
+
+        self._submitted_metrics = 0
 
     def _get_next_fetch_id(self):
         # type: () -> str
@@ -362,7 +365,10 @@ class SnmpCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
+        start_time = time.time()
+        self._submitted_metrics = 0
         config = self._config
+
         if config.ip_network:
             if self._thread is None:
                 self._start_discovery()
@@ -382,12 +388,21 @@ class SnmpCheck(AgentCheck):
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            self._check_device(config)
+            _, tags = self._check_device(config)
+
+        # Performance Metrics
+        # - for single device, tags contain device specific tags
+        # - for network, tags contain network tags, but won't contain individual device tags
+        check_duration = time.time() - start_time
+        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=tags)
+        self.gauge('datadog.snmp.check_duration', check_duration, tags=tags)
+        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
         config = self._config
-        if future.result():
+        error, _ = future.result()
+        if error:
             config.failing_instances[host] += 1
             if config.failing_instances[host] >= config.allowed_failures:
                 # Remove it from discovered instances, we'll re-discover it later if it reappears
@@ -399,7 +414,7 @@ class SnmpCheck(AgentCheck):
             config.failing_instances.pop(host, None)
 
     def _check_device(self, config):
-        # type: (InstanceConfig) -> Optional[str]
+        # type: (InstanceConfig) -> Tuple[Optional[str], List[str]]
         # Reset errors
         if config.device is None:
             raise RuntimeError('No device set')  # pragma: no cover
@@ -446,7 +461,7 @@ class SnmpCheck(AgentCheck):
                 if results:
                     status = self.WARNING
             self.service_check(self.SC_STATUS, status, tags=tags, message=error)
-        return error
+        return error, tags
 
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
@@ -602,6 +617,7 @@ class SnmpCheck(AgentCheck):
             bandwidth_usage_value,
             tags,
         )
+        self._submitted_metrics += 1
 
     def get_index_tags(
         self,
@@ -706,3 +722,7 @@ class SnmpCheck(AgentCheck):
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
+
+        if metric['type'] == 'monotonic_count_and_rate':
+            self._submitted_metrics += 1
+        self._submitted_metrics += 1
