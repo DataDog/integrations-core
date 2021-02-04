@@ -62,12 +62,19 @@ def process_links(section, links):
 
 def write_section(section, writer):
     header = '{} {}'.format('#' * section['header_level'], section['name'])
-
+    prepend_text = section['prepend_text']
     description = section['description']
+    append_text = section['append_text']
 
     writer.write(header)
     writer.write('\n\n')
+    if prepend_text:
+        writer.write(prepend_text)
+        writer.write('\n\n')
     writer.write(description)
+    if append_text:
+        writer.write('\n\n')
+        writer.write(append_text)
     writer.write('\n')
 
 
