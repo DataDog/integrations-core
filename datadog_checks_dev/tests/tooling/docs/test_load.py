@@ -599,3 +599,41 @@ def test_nested_sections_link(_):
     expected_nested_description = '[foo](foo.bar)'
     assert doc.data['files'][0]['sections'][0]['description'] == expected_description
     assert doc.data['files'][0]['sections'][0]['sections'][0]['description'] == expected_nested_description
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_append(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            append_text: append
+        """
+    )
+    doc.load()
+    assert doc.data['files'][0]['sections'][0]['append_text'] == "append"
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_prepend(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            prepend_text: prepend
+            description: words
+        """
+    )
+    doc.load()
+    assert doc.data['files'][0]['sections'][0]['prepend_text'] == "prepend"
