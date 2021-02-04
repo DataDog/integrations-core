@@ -169,18 +169,16 @@ class AerospikeCheck(AgentCheck):
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
     def collect_version(self):
-        raw_version = self.get_info("build")[0]
-        self.submit_version_metadata(raw_version)
-
         try:
+            raw_version = self.get_info("build")[0]
+            self.submit_version_metadata(raw_version)
             parse_version = raw_version.split('.')
             version = tuple(int(p) for p in parse_version)
+            self.log.debug("Found Aerospike version: %s", version)
+            return version
         except Exception as e:
             self.log.debug("Unable to parse version: %s", str(e))
             return None
-
-        self.log.debug("Found Aerospike version: %s", version)
-        return version
 
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, version):
