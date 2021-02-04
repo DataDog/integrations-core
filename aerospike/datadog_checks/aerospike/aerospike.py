@@ -258,7 +258,7 @@ class AerospikeCheck(AgentCheck):
             self.log.warning("Command `%s` was unsuccessful: %s", command, str(e))
             return []
         # Get rid of command and whitespace
-        data = data[len(command):].strip()
+        data = data[len(command) :].strip()
 
         if not separator:
             return data
