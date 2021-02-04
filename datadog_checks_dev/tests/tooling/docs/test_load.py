@@ -562,12 +562,12 @@ def test_sections_link(_):
             description: |
                 [link][1]
 
-                [1]: google.com
+                [1]: datadoghq.com
         """
     )
     doc.load()
-    expected_description = '[link](google.com)'
-    assert doc.data['files'][0]['sections'][0]['description'] == '[link](google.com)'
+    expected_description = '[link](datadoghq.com)'
+    assert doc.data['files'][0]['sections'][0]['description'] == expected_description
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
@@ -584,16 +584,16 @@ def test_nested_sections_link(_):
             description: |
                 [link][1]
 
-                [1]: google.com
+                [1]: datadoghq.com
             sections:
             - name: bar
               header_level: 1
               description: |
                 [link][1]
 
-                [1]: google.com
+                [1]: datadoghq.com
         """
     )
     doc.load()
-    expected_description = '[link](google.com)'
-    assert doc.data['files'][0]['sections'][0]['sections'][0]['description'] == '[link](google.com)'
+    expected_description = '[link](datadoghq.com)'
+    assert doc.data['files'][0]['sections'][0]['sections'][0]['description'] == expected_description
