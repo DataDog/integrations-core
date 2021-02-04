@@ -89,7 +89,7 @@ files:
         type: boolean
         example: false
     - name: disable_legacy_cluster_tag
-      description: Enable to stop submitting the tag `cluster_name` that has been renamed to `elastic_cluster`.
+      description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
       value:
         type: boolean
         example: false
