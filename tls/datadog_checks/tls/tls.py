@@ -40,6 +40,7 @@ class TLSCheck(AgentCheck):
         'private_key': {'name': 'tls_private_key'},
         'ca_cert': {'name': 'tls_ca_cert'},
         'validate_hostname': {'name': 'tls_validate_hostname'},
+        'validate_cert': {'name': 'tls_verify'},
     }
 
     def __init__(self, name, init_config, instances):
