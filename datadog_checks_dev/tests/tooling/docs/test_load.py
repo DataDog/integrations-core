@@ -589,11 +589,13 @@ def test_nested_sections_link(_):
             - name: bar
               header_level: 1
               description: |
-                [link][1]
+                [foo][1]
 
-                [1]: datadoghq.com
+                [1]: foo.bar
         """
     )
     doc.load()
     expected_description = '[link](datadoghq.com)'
-    assert doc.data['files'][0]['sections'][0]['sections'][0]['description'] == expected_description
+    expected_nested_description = '[foo](foo.bar)'
+    assert doc.data['files'][0]['sections'][0]['description'] == expected_description
+    assert doc.data['files'][0]['sections'][0]['sections'][0]['description'] == expected_nested_description
