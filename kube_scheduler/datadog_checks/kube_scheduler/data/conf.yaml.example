@@ -51,9 +51,18 @@ instances:
   - prometheus_url: http://localhost:10251/metrics
 
     ## @param leader_election - boolean - optional - default: true
-    ## Monitor the leader-election process on the kube-system:kube-scheduler endpoints.
+    ## Monitor the leader-election process on the kube-system:kube-scheduler.
     #
     # leader_election: true
+
+    ## @param leader_election_kind - string - optional - default: endpoints
+    ## Kind of object to look at for the leader election.
+    ## Can be:
+    ##   * lease
+    ##   * endpoints
+    ##   * configmap
+    #
+    # leader_election_kind: endpoints
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.

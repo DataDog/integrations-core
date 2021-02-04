@@ -8,7 +8,7 @@ except ImportError:
     from ...stubs import datadog_agent
 
 from .. import AgentCheck
-from .record import ElectionRecord
+from .record import ElectionRecordAnnotation, ElectionRecordLease
 
 # Import lazily to reduce memory footprint
 client = config = None
@@ -34,7 +34,7 @@ class KubeLeaderElectionMixin(object):
 
         The config objet requires the following fields:
             namespace (prefix for the metrics and check)
-            record_kind (endpoints or configmap)
+            record_kind (leases, endpoints or configmap)
             record_name
             record_namespace
             tags (optional)
@@ -61,30 +61,38 @@ class KubeLeaderElectionMixin(object):
             config.load_kube_config(config_file=kubeconfig_path)
         else:
             config.load_incluster_config()
-        v1 = client.CoreV1Api()
 
         obj = None
-        if kind.lower() in ["endpoints", "endpoint", "ep"]:
-            obj = v1.read_namespaced_endpoints(name, namespace)
-        elif kind.lower() in ["configmap", "cm"]:
-            obj = v1.read_namespaced_config_map(name, namespace)
+        if kind.lower() in ["leases", "lease"]:
+            coordination_v1 = client.CoordinationV1Api()
+            obj = coordination_v1.read_namespaced_lease(name, namespace)
+
+            return ElectionRecordLease(obj)
+
         else:
-            raise ValueError("Unknown kind {}".format(kind))
+            v1 = client.CoreV1Api()
 
-        if not obj:
-            raise ValueError("Empty input object")
+            if kind.lower() in ["endpoints", "endpoint", "ep"]:
+                obj = v1.read_namespaced_endpoints(name, namespace)
+            elif kind.lower() in ["configmap", "cm"]:
+                obj = v1.read_namespaced_config_map(name, namespace)
+            else:
+                raise ValueError("Unknown kind {}".format(kind))
 
-        try:
-            annotations = obj.metadata.annotations
-        except AttributeError:
-            raise ValueError("Invalid input object type")
+            if not obj:
+                raise ValueError("Empty input object")
 
-        for name in ELECTION_ANNOTATION_NAMES:
-            if name in annotations:
-                return ElectionRecord(annotations[name])
+            try:
+                annotations = obj.metadata.annotations
+            except AttributeError:
+                raise ValueError("Invalid input object type")
 
-        # Could not find annotation
-        raise ValueError("Object has no leader election annotation")
+            for name in ELECTION_ANNOTATION_NAMES:
+                if name in annotations:
+                    return ElectionRecordAnnotation(annotations[name])
+
+            # Could not find annotation
+            raise ValueError("Object has no leader election annotation")
 
     def _report_status(self, config, record):
         # Compute prefix for gauges and service check

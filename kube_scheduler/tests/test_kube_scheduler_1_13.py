@@ -7,7 +7,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base.checks.kube_leader import ElectionRecord
+from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 instance = {'prometheus_url': 'http://localhost:10251/metrics', 'send_histograms_buckets': True}
@@ -37,7 +37,7 @@ def mock_leader():
     # don't forget to update the [testenv] in tox.ini with the 'kube' dependency
     with mock.patch(
         'datadog_checks.kube_scheduler.KubeSchedulerCheck._get_record',
-        return_value=ElectionRecord(
+        return_value=ElectionRecordAnnotation(
             '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,'
             + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
         ),

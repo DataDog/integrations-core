@@ -9,10 +9,20 @@ files:
     options:
     - name: leader_election
       description: |
-        Monitor the leader-election process on the kube-system:kube-scheduler endpoints.
+        Monitor the leader-election process on the kube-system:kube-scheduler.
       value:
         type: boolean
         example: true
+    - name: leader_election_kind
+      description: |
+        Kind of object to look at for the leader election.
+        Can be:
+          * lease
+          * endpoints
+          * configmap
+      value:
+        type: string
+        example: endpoints
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:10251/metrics
