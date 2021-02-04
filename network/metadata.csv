@@ -64,7 +64,6 @@ system.net.tcp.listen_drops,gauge,,,,The number of times connections have droppe
 system.net.tcp.listen_drops.count,count,,,,Total number of times connections have dropped out of listen (Linux only).,-1,system,tcp listen drops
 system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog (Linux only). Available since Agent v5.14.0.,-1,system,tcp backlog drops
 system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog (Linux only).,-1,system,tcp backlog drops
-system.net.tcp.failed_retransmits.count,count,,packet,,Total number of packets that failed to be retransmitted (Linux only).,-1,system,tcp failed retrans
 system.net.tcp.recv_q.95percentile,gauge,,byte,,The 95th percentile of the size of the TCP receive queue.,0,system,recv-q 95th
 system.net.tcp.recv_q.avg,gauge,,byte,,The average TCP receive queue size.,0,system,recv-q avg
 system.net.tcp.recv_q.count,rate,,connection,second,The rate of connections.,0,system,recv-q count
