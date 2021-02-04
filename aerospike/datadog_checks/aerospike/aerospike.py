@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import re
 from collections import defaultdict
+from typing import List
 
 from six import iteritems
 
@@ -168,18 +169,16 @@ class AerospikeCheck(AgentCheck):
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
     def collect_version(self):
-        raw_version = self.get_info("build")[0]
-        self.submit_version_metadata(raw_version)
-
         try:
+            raw_version = self.get_info("build")[0]
+            self.submit_version_metadata(raw_version)
             parse_version = raw_version.split('.')
             version = tuple(int(p) for p in parse_version)
+            self.log.debug("Found Aerospike version: %s", version)
+            return version
         except Exception as e:
             self.log.debug("Unable to parse version: %s", str(e))
             return None
-
-        self.log.debug("Found Aerospike version: %s", version)
-        return version
 
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, version):
@@ -241,6 +240,7 @@ class AerospikeCheck(AgentCheck):
             return client
 
     def get_info(self, command, separator=';'):
+        # type: (str, str) -> List[str]
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         try:
@@ -254,7 +254,7 @@ class AerospikeCheck(AgentCheck):
             )
         except Exception as e:
             self.log.warning("Command `%s` was unsuccessful: %s", command, str(e))
-            return
+            return []
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
