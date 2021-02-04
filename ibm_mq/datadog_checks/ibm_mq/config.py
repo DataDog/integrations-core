@@ -112,7 +112,7 @@ class IBMMQConfig:
         if not self.ssl and (
             instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
         ):
-            raise ConfigurationError("You have provided ssl connection options but ssl authentication is disabled")
+            raise ConfigurationError("You have provided ssl connection options but ssl_auth is disabled. Please enable it or comment/remove the other ssl options")
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
