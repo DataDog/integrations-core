@@ -6,6 +6,7 @@ import datetime as dt
 import logging
 import re
 
+from datadog_checks.base.log import get_check_logger
 from dateutil.tz import UTC
 from six import iteritems
 
@@ -22,9 +23,6 @@ try:
 except ImportError as e:
     pymqiException = e
     pymqi = None
-
-
-log = logging.getLogger(__file__)
 
 
 class IBMMQConfig:
@@ -44,6 +42,7 @@ class IBMMQConfig:
     ]
 
     def __init__(self, instance):
+        self.log = get_check_logger()
         self.channel = instance.get('channel')  # type: str
         self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
 
@@ -79,7 +78,7 @@ class IBMMQConfig:
         )  # type: bool
 
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
-            log.warning(
+            self.log.warning(
                 "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
                 "together."
             )
@@ -112,10 +111,9 @@ class IBMMQConfig:
         if not self.ssl and (
             instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
         ):
-            raise ConfigurationError(
-                "You have provided ssl connection options but ssl_auth is disabled. "
-                "Please enable it or comment/remove the other ssl options"
-            )
+            self.log.info("ssl_auth has not been explictly enabled but other SSL options have been provided. "
+                          "SSL will be used for connecting")
+            self.ssl = True
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
@@ -145,7 +143,7 @@ class IBMMQConfig:
             try:
                 queue_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(',')]])
             except TypeError:
-                log.warning('%s is not a valid regular expression and will be ignored', regex_str)
+                self.log.warning('%s is not a valid regular expression and will be ignored', regex_str)
         return queue_tag_list
 
     @staticmethod
