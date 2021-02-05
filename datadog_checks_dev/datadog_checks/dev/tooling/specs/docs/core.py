@@ -43,7 +43,9 @@ class DocsSpec(BaseSpec):
             sections = deque(enumerate(file['sections'], 1))
             while sections:
                 sidx, section = sections.popleft()
+                section['prepend_text'] = self._normalize(section['prepend_text'], fidx, sidx)
                 section['description'] = self._normalize(section['description'], fidx, sidx)
+                section['append_text'] = self._normalize(section['append_text'], fidx, sidx)
                 if 'sections' in section:
                     nested_sections = [
                         (f'{sidx}.{subidx}', subsection) for subidx, subsection in enumerate(section['sections'], 1)
