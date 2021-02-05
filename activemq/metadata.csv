@@ -14,3 +14,17 @@ activemq.queue.in_flight_count,gauge,10,message,,The amount of messages that hav
 activemq.broker.store_pct,gauge,10,percent,,The percentage of store in use.,0,activemq,str pct
 activemq.broker.temp_pct,gauge,10,percent,,The percentage of temporary in use.,0,activemq,temp pct
 activemq.broker.memory_pct,gauge,10,percent,,The percentage of memory in use.,0,activemq,mem pct
+activemq.artemis.max_disk_usage,gauge,,,,(Artemis only) Maximum limit for disk use, in percentage,0,activemq,art max disk
+activemq.artemis.connection_count,gauge,,,,(Artemis only) Number of clients connected to this server,0,activemq,art conn count
+activemq.artemis.total_connection_count,gauge,,,,(Artemis only) Number of clients which have connected to this server since it was started,0,activemq,art total conns
+activemq.artemis.total_message_count,gauge,,,,(Artemis only) Number of messages in all queues on the server,0,activemq,art total messages
+activemq.artemis.total_messages_added,gauge,,,,(Artemis only) Number of messages sent to this server since it was started,0,activemq,art total mess added
+activemq.artemis.total_messages_acknowledged,gauge,,,,(Artemis only) Number of messages acknowledged from all the queues on this server since it was started,0,activemq,art total mess acked
+activemq.artemis.total_consumer_count,gauge,,,,(Artemis only) Number of consumers consuming messages from all the queues on this server,0,activemq,art total consumers
+activemq.artemis.queue.message_count,gauge,,,,(Artemis only) Number of messages currently in this queue (includes scheduled,paged, and in-delivery messages),0,activemq,art q mess count
+activemq.artemis.queue.consumer_count,gauge,,,,(Artemis only) Number of consumers consuming messages from this queue,0,activemq,art q consumers
+activemq.artemis.queue.max_consumers,gauge,,,,(Artemis only) Maximum number of consumers allowed on this queue at any one time,0,activemq,art q max consumers
+activemq.artemis.queue.messages_added,gauge,,,,(Artemis only) Number of messages added to this queue since it was created,0,activemq,art q mess added
+activemq.artemis.queue.messages_expired,gauge,,,,(Artemis only) Number of messages expired from this queue since it was created,0,activemq,art q mess exp
+activemq.artemis.queue.messages_acknowledged,gauge,,,,(Artemis only) Number of messages acknowledged from this queue since it was created,0,activemq,art q mess acked
+activemq.artemis.queue.messages_killed,gauge,,,,(Artemis only) Number of messages removed from this queue since it was created due to exceeding the max delivery attempts,0,activemq,art q mess killed
