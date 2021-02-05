@@ -662,7 +662,7 @@ def test_sections_append_link(_):
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
-def test_sections_append_link(_):
+def test_sections_prepend_link(_):
 
     doc = get_doc(
         """
