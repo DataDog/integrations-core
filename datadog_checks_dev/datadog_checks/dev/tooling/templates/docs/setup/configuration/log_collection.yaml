@@ -12,7 +12,7 @@ description: |
 
   {check_log_conf_snippet:4i}
 
-      Change the `path` parameter value based on your environment. See the [sample conf.yaml]({check_conf_link}) for all available configuration options.
+      Change the {param_value} parameter value based on your environment. See the [sample conf.yaml]({check_conf_link}) for all available configuration options.
 
   3. [Restart the Agent][1].
 
@@ -25,3 +25,4 @@ parameters:
   check_conf_path: "{integration_id}.d/conf.yaml"
   check_log_conf_snippet:
   check_conf_link: "https://github.com/DataDog/integrations-core/blob/master/{integration_id}/datadog_checks/{integration_id}/data/conf.yaml.example"
+  param_value: "`service` and `path`"
