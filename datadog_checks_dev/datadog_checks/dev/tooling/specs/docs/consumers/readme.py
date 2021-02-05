@@ -104,7 +104,6 @@ class ReadmeConsumer(object):
                 writer.write('\n\n')
 
                 sections = deque(file['sections'])
-                tab = None
                 tab_section_end = None
                 while sections:
                     section = sections.popleft()
@@ -119,6 +118,10 @@ class ReadmeConsumer(object):
                                 if not s['tab']:
                                     tab_section_end = s
                                     break
+                            else:
+                                # tabs continue until end of sections
+                                # add a flag to close at end of all sections
+                                tab_section_end = 'EOL'
                             writer.write(TAB_SECTION_START + '\n')
                         else:
                             writer.write(TAB_END + '\n')
@@ -141,6 +144,13 @@ class ReadmeConsumer(object):
                         # eg sections.extendleft([s2.1, s2.2]) updates section to [s2.2, s2.1, s3]
                         # so we need to reverse it for correctness
                         sections.extendleft(section['sections'][::-1])
+
+                # close tabs section if never got closed
+                if tab_section_end:
+                    writer.write(TAB_END + '\n')
+                    writer.write(TAB_SECTION_END + '\n')
+                    writer.write('\n')
+                    tab_section_end = None
 
                 # add link references to the end of document
                 refs = get_references(links)
