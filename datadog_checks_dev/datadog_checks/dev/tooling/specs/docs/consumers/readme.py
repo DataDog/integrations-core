@@ -105,25 +105,31 @@ class ReadmeConsumer(object):
 
                 sections = deque(file['sections'])
                 tab = None
+                tab_section_end = None
                 while sections:
                     section = sections.popleft()
                     if section['hidden']:
                         continue
 
                     if section['tab']:
-                        if tab is None:
-                            tab = section['tab']
+                        tab = section['tab']
+                        if tab_section_end is None:
+                            # find which section stops having 'tab'
+                            for s in sections:
+                                if not s['tab']:
+                                    tab_section_end = s
+                                    break
                             writer.write(TAB_SECTION_START + '\n')
                         else:
                             writer.write(TAB_END + '\n')
                         writer.write(TAB_START.format(tab) + '\n')
                         writer.write('\n')
 
-                    elif tab is not None:
+                    elif section == tab_section_end:
                         writer.write(TAB_END + '\n')
                         writer.write(TAB_SECTION_END + '\n')
                         writer.write('\n')
-                        tab = None
+                        tab_section_end = None
 
                     process_links(section, links)
                     write_section(section, writer)
