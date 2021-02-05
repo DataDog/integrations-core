@@ -11,7 +11,7 @@ MOCK_RESPONSE = {'integration_id': 'foo'}
 
 def get_doc(text, **kwargs):
     kwargs.setdefault('source', 'test')
-    return DocsSpec(normalize_yaml(text), **kwargs)
+    return DocsSpec(normalize_readme(text), **kwargs)
 
 
 def get_readme_consumer(text, **kwargs):
@@ -20,5 +20,5 @@ def get_readme_consumer(text, **kwargs):
     return ReadmeConsumer(doc.data)
 
 
-def normalize_yaml(text):
+def normalize_readme(text):
     return dedent(text).lstrip()

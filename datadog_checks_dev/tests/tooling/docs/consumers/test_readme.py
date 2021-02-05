@@ -4,7 +4,7 @@
 import mock
 import pytest
 
-from ..utils import get_readme_consumer, normalize_yaml, MOCK_RESPONSE
+from ..utils import get_readme_consumer, normalize_readme, MOCK_RESPONSE
 
 pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer]
 
@@ -27,7 +27,7 @@ def test_tab_valid(_):
     files = consumer.render()
     contents, errors = files['README.md']
     assert not errors
-    assert contents == normalize_yaml(
+    assert contents == normalize_readme(
         """
         # Agent Check: foo
 
@@ -67,7 +67,7 @@ def test_tab_multiple(_):
     files = consumer.render()
     contents, errors = files['README.md']
     assert not errors
-    assert contents == normalize_yaml(
+    assert contents == normalize_readme(
         """
         # Agent Check: foo
 
@@ -122,7 +122,7 @@ def test_tab_multiple_nested(_):
     files = consumer.render()
     contents, errors = files['README.md']
     assert not errors
-    assert contents == normalize_yaml(
+    assert contents == normalize_readme(
         """
         # Agent Check: foo
 
