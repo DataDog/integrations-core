@@ -167,7 +167,7 @@ _Available for Agent versions >6.0_
       ```
 
 
-    Change the `path` parameter value based on your environment. See the [sample conf.yaml][8] for all available configuration options.
+    Change the `service` and `path` parameter value based on your environment. See the [sample conf.yaml][8] for all available configuration options.
 
 3. [Restart the Agent][9].
 
