@@ -4,7 +4,7 @@
 import mock
 import pytest
 
-from ..utils import get_readme_consumer, normalize_readme, MOCK_RESPONSE
+from ..utils import MOCK_RESPONSE, get_readme_consumer, normalize_readme
 
 pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer]
 

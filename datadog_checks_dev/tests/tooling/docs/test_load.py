@@ -4,7 +4,7 @@
 import mock
 import pytest
 
-from .utils import get_doc, MOCK_RESPONSE
+from .utils import MOCK_RESPONSE, get_doc
 
 pytestmark = pytest.mark.conf
 
