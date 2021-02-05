@@ -529,7 +529,7 @@ def test_nested_section_valid_duplicate(_):
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
-def test_bar_valid(_):
+def test_tab_valid(_):
 
     doc = get_doc(
         """
