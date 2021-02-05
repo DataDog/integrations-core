@@ -157,6 +157,7 @@ files:
                               service: nginx
                               source: nginx
                         ```
+                  parameters.param_value: "`service` and `path`"
                   append_text: |
                     **Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`):
 
