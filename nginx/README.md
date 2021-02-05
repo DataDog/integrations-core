@@ -230,7 +230,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this check.
 
-Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](https://nginx.org/en/docs/http/ngx_http_stub_status_module.html) (open source NGINX) and [http status](https://nginx.org/en/docs/http/ngx_http_status_module.html) (NGINX Plus) to understand which metrics are provided by each module.
+Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
 
 A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
 
@@ -266,17 +266,17 @@ Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, othe
 
 ## Troubleshooting
 
-- [Why do my logs not have the expected timestamp?](https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/)
+- [Why do my logs not have the expected timestamp?][13]
 
-Need help? Contact [Datadog support][13].
+Need help? Contact [Datadog support][14].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [How to monitor NGINX][14]
-- [How to collect NGINX metrics][15]
-- [How to monitor NGINX with Datadog][16]
+- [How to monitor NGINX][15]
+- [How to collect NGINX metrics][16]
+- [How to monitor NGINX with Datadog][17]
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
@@ -290,7 +290,8 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[13]: https://docs.datadoghq.com/help/
-[14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
-[15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[13]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
+[14]: https://docs.datadoghq.com/help/
+[15]: https://www.datadoghq.com/blog/how-to-monitor-nginx
+[16]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
+[17]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
