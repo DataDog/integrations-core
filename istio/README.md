@@ -56,7 +56,7 @@ Each of the endpoints is optional, but at least one must be configured. See the 
 
 Note: `connectionID` Prometheus label is excluded.
 
-##### Disable sidecar injection
+##### Disable sidecar injection for Datadog Agent pods
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
