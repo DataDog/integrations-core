@@ -16,8 +16,10 @@ from .common import (
     ACTIVEMQ_URL,
     ARTEMIS_URL,
     BASE_URL,
+    COMPOSE_FILE,
     HERE,
     HOST,
+    IS_ARTEMIS,
     JMX_PORT,
     TEST_AUTH,
     TEST_MESSAGE,
@@ -25,9 +27,6 @@ from .common import (
     TEST_QUEUES,
     TEST_TOPICS,
 )
-
-COMPOSE_FILE = os.getenv('COMPOSE_FILE')
-IS_ARTEMIS = COMPOSE_FILE == 'artemis.yaml'
 
 
 def populate_server():

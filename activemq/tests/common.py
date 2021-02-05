@@ -1,9 +1,19 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+import pytest
+
 from datadog_checks.dev import get_docker_hostname, get_here
 
 CHECK_NAME = 'activemq'
+
+COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+IS_ARTEMIS = COMPOSE_FILE == 'artemis.yaml'
+
+artemis = pytest.mark.skipif(not IS_ARTEMIS, reason='Test only valid for ActiveMQ Artemis versions')
+not_artemis = pytest.mark.skipif(IS_ARTEMIS, reason='Test only valid for non-Artemis versions')
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -38,4 +48,21 @@ ACTIVEMQ_E2E_METRICS = [
     "activemq.broker.store_pct",
     "activemq.broker.temp_pct",
     "activemq.broker.memory_pct",
+]
+
+ARTEMIS_E2E_METRICS = [
+    "activemq.artemis.connection_count",
+    "activemq.artemis.max_disk_usage",
+    "activemq.artemis.queue.consumer_count",
+    "activemq.artemis.queue.max_consumers",
+    "activemq.artemis.queue.message_count",
+    "activemq.artemis.queue.messages_acknowledged",
+    "activemq.artemis.queue.messages_added",
+    "activemq.artemis.queue.messages_expired",
+    "activemq.artemis.queue.messages_killed",
+    "activemq.artemis.total_connection_count",
+    "activemq.artemis.total_consumer_count",
+    "activemq.artemis.total_message_count",
+    "activemq.artemis.total_messages_acknowledged",
+    "activemq.artemis.total_messages_added",
 ]
