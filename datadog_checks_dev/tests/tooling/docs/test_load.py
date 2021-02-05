@@ -640,6 +640,82 @@ def test_sections_prepend(_):
 
 
 @mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_append_link(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            append_text: |
+                [link][1]
+
+                [1]: datadoghq.com
+        """
+    )
+    doc.load()
+    assert doc.data['files'][0]['sections'][0]['append_text'] == '[link](datadoghq.com)'
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_append_link(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+            prepend_text: |
+                [link][1]
+
+                [1]: datadoghq.com
+        """
+    )
+    doc.load()
+    assert doc.data['files'][0]['sections'][0]['prepend_text'] == '[link](datadoghq.com)'
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_append_prepend_links(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: |
+                [description][1]
+
+                [1]: foo.com
+            prepend_text: |
+                [prepend][1]
+
+                [1]: bar.com
+            append_text: |
+                [append][1]
+
+                [1]: baz.com
+
+        """
+    )
+    doc.load()
+    assert doc.data['files'][0]['sections'][0]['prepend_text'] == '[prepend](bar.com)'
+    assert doc.data['files'][0]['sections'][0]['description'] == '[description](foo.com)'
+    assert doc.data['files'][0]['sections'][0]['append_text'] == '[append](baz.com)'
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
 def test_sections_prepend_append_empty(_):
 
     doc = get_doc(
