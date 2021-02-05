@@ -226,6 +226,9 @@ files:
             | ------------------- | ----------------------------------------------------------------------------------------- |
             | `nginx.net.reading` | The current number of connections where nginx is reading the request header.              |
             | `nginx.net.writing` | The current number of connections where nginx is writing the response back to the client. |
+
+            [2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
+            [3]: https://nginx.org/en/docs/http/ngx_http_status_module.html
       - template: data_collected/events
       - template: data_collected/service_checks
         overrides:

@@ -141,6 +141,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 #### Log collection
 
+_Available for Agent versions >6.0_
+
+
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -169,6 +172,20 @@ Follow the instructions below to configure this check for an Agent running on a 
 3. [Restart the Agent][9].
 
 See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
+**Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`):
+
+```conf
+http {
+  #recommended log format
+  log_format nginx '\$remote_addr - \$remote_user [\$time_local] '
+                  '"\$request" \$status \$body_bytes_sent \$request_time '
+                  '"\$http_referer" "\$http_user_agent"';
+
+  access_log /var/log/nginx/access.log;
+}
+```
+
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -213,6 +230,30 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this check.
 
+Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](https://nginx.org/en/docs/http/ngx_http_stub_status_module.html) (open source NGINX) and [http status](https://nginx.org/en/docs/http/ngx_http_status_module.html) (NGINX Plus) to understand which metrics are provided by each module.
+
+A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
+
+| NGINX                          | NGINX Plus                   |
+| ------------------------------ | ---------------------------- |
+| `nginx.net.connections`        | `nginx.connections.active`   |
+| `nginx.net.conn_opened_per_s`  | `nginx.connections.accepted` |
+| `nginx.net.conn_dropped_per_s` | `nginx.connections.dropped`  |
+| `nginx.net.request_per_s`      | `nginx.requests.total`       |
+
+These metrics don't refer exactly to the same metric, but they are somewhat related:
+
+| NGINX               | NGINX Plus               |
+| ------------------- | ------------------------ |
+| `nginx.net.waiting` | `nginx.connections.idle` |
+
+Finally, these metrics have no good equivalent:
+
+| Metric              | Description                                                                               |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `nginx.net.reading` | The current number of connections where nginx is reading the request header.              |
+| `nginx.net.writing` | The current number of connections where nginx is writing the response back to the client. |
+
 ### Events
 
 Nginx does not include any events.
@@ -224,6 +265,8 @@ Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, othe
 
 
 ## Troubleshooting
+
+- [Why do my logs not have the expected timestamp?](https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/)
 
 Need help? Contact [Datadog support][13].
 
