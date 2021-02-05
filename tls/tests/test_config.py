@@ -74,6 +74,7 @@ def test_validation_data():
         pytest.param(
             {'validate_hostname': False}, {'tls_validate_hostname': False}, id='legacy validate_hostname param'
         ),
+        pytest.param({'validate_cert': False}, {'tls_verify': False}, id='legacy validate_cert param'),
     ],
 )
 def test_config(extra_config, expected_http_kwargs):
