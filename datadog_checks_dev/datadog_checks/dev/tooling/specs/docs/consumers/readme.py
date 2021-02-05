@@ -45,19 +45,22 @@ def update_links(link, links):
 
 def process_links(section, links):
     """Extract inline links and replace with references."""
+    # these are the attributes in each section that can contain links
+    text_attributes = ['prepend_text', 'description', 'append_text']
 
-    text = section['description']
+    for attribute in text_attributes:
+        text = section[attribute]
 
-    matches = INLINE_REF.findall(text)
+        matches = INLINE_REF.findall(text)
 
-    for m in matches:
-        lnk = m[1]
-        if lnk not in links:
-            update_links(lnk, links)
+        for m in matches:
+            lnk = m[1]
+            if lnk not in links:
+                update_links(lnk, links)
 
-    # replace (link) with [ref]
-    newtext = INLINE_REF.sub(lambda x: '{}[{}]'.format(x.group(1), links[x.group(2)]), text)
-    section['description'] = newtext
+        # replace (link) with [ref]
+        newtext = INLINE_REF.sub(lambda x: '{}[{}]'.format(x.group(1), links[x.group(2)]), text)
+        section[attribute] = newtext
 
 
 def write_section(section, writer):
