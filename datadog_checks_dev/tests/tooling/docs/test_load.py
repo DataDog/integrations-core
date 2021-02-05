@@ -637,3 +637,22 @@ def test_sections_prepend(_):
     )
     doc.load()
     assert doc.data['files'][0]['sections'][0]['prepend_text'] == "prepend"
+
+
+@mock.patch('datadog_checks.dev.tooling.specs.docs.spec.load_manifest', return_value=MOCK_RESPONSE)
+def test_sections_prepend_append_empty(_):
+
+    doc = get_doc(
+        """
+        name: foo
+        files:
+        - name: README.md
+          sections:
+          - name: foo
+            header_level: 1
+            description: words
+        """
+    )
+    doc.load()
+    assert doc.data['files'][0]['sections'][0]['prepend_text'] == ""
+    assert doc.data['files'][0]['sections'][0]['append_text'] == ""
