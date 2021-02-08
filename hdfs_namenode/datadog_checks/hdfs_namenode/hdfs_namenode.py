@@ -119,7 +119,7 @@ class HDFSNameNode(AgentCheck):
             if metric_value is not None:
                 self._set_metric(metric_name, metric_type, metric_value, tags)
 
-        if 'CapacityUsed' in bean and 'CapacityTotal' in bean:
+        if 'CapacityUsed' in bean and 'CapacityTotal' in bean and float(bean['CapacityTotal']) > 0:
             self._set_metric(
                 'hdfs.namenode.capacity_in_use',
                 self.GAUGE,
