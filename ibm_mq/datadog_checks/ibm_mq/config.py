@@ -3,15 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import datetime as dt
-import logging
 import re
 
-from datadog_checks.base.log import get_check_logger
 from dateutil.tz import UTC
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.log import get_check_logger
 
 try:
     from typing import Dict, List, Pattern
@@ -111,8 +110,10 @@ class IBMMQConfig:
         if not self.ssl and (
             instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
         ):
-            self.log.info("ssl_auth has not been explictly enabled but other SSL options have been provided. "
-                          "SSL will be used for connecting")
+            self.log.info(
+                "ssl_auth has not been explictly enabled but other SSL options have been provided. "
+                "SSL will be used for connecting"
+            )
             self.ssl = True
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
