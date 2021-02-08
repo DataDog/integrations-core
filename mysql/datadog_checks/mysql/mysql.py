@@ -7,6 +7,7 @@ from __future__ import division
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
+from typing import Any, Dict
 
 import pymysql
 from six import PY3, iteritems, itervalues
@@ -42,6 +43,7 @@ from .queries import (
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
     SQL_WORKER_THREADS,
+    show_replica_status_query,
 )
 from .statements import MySQLStatementMetrics
 from .version_utils import get_version
@@ -61,6 +63,7 @@ if PY3:
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
+    REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
     def __init__(self, name, init_config, instances):
@@ -309,51 +312,60 @@ class MySql(AgentCheck):
         replication_channel = self.config.options.get('replication_channel')
         results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
         nonblocking = is_affirmative(self.config.options.get('replication_non_blocking_status', False))
-        results.update(self._get_slave_status(db, above_560, nonblocking))
+        results.update(self._get_replica_status(db, above_560, nonblocking))
         return REPLICA_VARS
 
     def _check_replication_status(self, results):
-        # get slave running form global status page
-        slave_running_status = AgentCheck.UNKNOWN
-        # Slave_IO_Running: Whether the I/O thread for reading the source's binary log is running.
+        # get replica running form global status page
+        replica_running_status = AgentCheck.UNKNOWN
+        # Replica_IO_Running: Whether the I/O thread for reading the source's binary log is running.
         # You want this to be Yes unless you have not yet started replication or have explicitly stopped it.
-        slave_io_running = collect_type('Slave_IO_Running', results, dict)
-        # Slave_SQL_Running: Whether the SQL thread for executing events in the relay log is running.
-        slave_sql_running = collect_type('Slave_SQL_Running', results, dict)
-        if slave_io_running:
-            slave_io_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_io_running))
-        if slave_sql_running:
-            slave_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_sql_running))
+        replica_io_running = collect_type('Slave_IO_Running', results, dict)
+        if replica_io_running is None:
+            replica_io_running = collect_type('Replica_IO_Running', results, dict)
+        # Replica_SQL_Running: Whether the SQL thread for executing events in the relay log is running.
+        replica_sql_running = collect_type('Slave_SQL_Running', results, dict)
+        if replica_sql_running is None:
+            replica_sql_running = collect_type('Replica_SQL_Running', results, dict)
+        if replica_io_running:
+            replica_io_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_io_running))
+        if replica_sql_running:
+            replica_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_sql_running))
         binlog_running = results.get('Binlog_enabled', False)
-        # slaves will only be collected iff user has PROCESS privileges.
-        slaves = collect_scalar('Slaves_connected', results)
 
-        if not (slave_io_running is None and slave_sql_running is None):
-            if not slave_io_running and not slave_sql_running:
-                self.log.debug("Slave_IO_Running and Slave_SQL_Running are not ok")
-                slave_running_status = AgentCheck.CRITICAL
-            elif not slave_io_running or not slave_sql_running:
-                self.log.debug("Either Slave_IO_Running or Slave_SQL_Running are not ok")
-                slave_running_status = AgentCheck.WARNING
+        # replicas will only be collected if user has PROCESS privileges.
+        replicas = collect_scalar('Slaves_connected', results) or collect_scalar('Replicas_connected', results)
 
-        if slave_running_status == AgentCheck.UNKNOWN:
-            if self._is_master(slaves, results):  # master
-                if slaves > 0 and binlog_running:
+        if not (replica_io_running is None and replica_sql_running is None):
+            if not replica_io_running and not replica_sql_running:
+                self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
+                replica_running_status = AgentCheck.CRITICAL
+            elif not replica_io_running or not replica_sql_running:
+                self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
+                replica_running_status = AgentCheck.WARNING
+
+        if replica_running_status == AgentCheck.UNKNOWN:
+            if self._is_source_host(replicas, results):  # master
+                if replicas > 0 and binlog_running:
                     self.log.debug("Host is master, there are replicas and binlog is running")
-                    slave_running_status = AgentCheck.OK
+                    replica_running_status = AgentCheck.OK
                 else:
-                    slave_running_status = AgentCheck.WARNING
+                    replica_running_status = AgentCheck.WARNING
             else:  # replica (or standalone)
-                if not (slave_io_running is None and slave_sql_running is None):
-                    if slave_io_running and slave_sql_running:
-                        self.log.debug("Slave_IO_Running and Slave_SQL_Running are ok")
-                        slave_running_status = AgentCheck.OK
+                if not (replica_io_running is None and replica_sql_running is None):
+                    if replica_io_running and replica_sql_running:
+                        self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
+                        replica_running_status = AgentCheck.OK
 
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
-            self.SLAVE_SERVICE_CHECK_NAME, 1 if slave_running_status == AgentCheck.OK else 0, tags=self.config.tags
+            name=self.SLAVE_SERVICE_CHECK_NAME,
+            value=1 if replica_running_status == AgentCheck.OK else 0,
+            tags=self.config.tags,
         )
-        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, slave_running_status, tags=self.service_check_tags)
+        # deprecated in favor of service_check("mysql.replication.replica_running")
+        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
+        self.service_check(self.REPLICA_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
 
     def _collect_statement_metrics(self, db, tags):
         tags = self.service_check_tags + tags
@@ -361,30 +373,39 @@ class MySql(AgentCheck):
         for metric_name, metric_value, metric_tags in metrics:
             self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
 
-    def _is_master(self, slaves, results):
-        # master uuid only collected in slaves
-        master_host = collect_string('Master_Host', results)
-        if slaves > 0 or not master_host:
+    def _is_source_host(self, replicas, results):
+        # type: (float, Dict[str, Any]) -> bool
+        # master uuid only collected in replicas
+        source_host = collect_string('Master_Host', results) or collect_string('Source_Host', results)
+        if replicas > 0 or not source_host:
             return True
 
         return False
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
-            metric_name, metric_type = metric
-            for tag, value in collect_all_scalars(variable, db_results):
-                metric_tags = list(tags)
-                if tag:
-                    metric_tags.append(tag)
-                if value is not None:
-                    if metric_type == RATE:
-                        self.rate(metric_name, value, tags=metric_tags)
-                    elif metric_type == GAUGE:
-                        self.gauge(metric_name, value, tags=metric_tags)
-                    elif metric_type == COUNT:
-                        self.count(metric_name, value, tags=metric_tags)
-                    elif metric_type == MONOTONIC:
-                        self.monotonic_count(metric_name, value, tags=metric_tags)
+            if isinstance(metric, list):
+                for m in metric:
+                    metric_name, metric_type = m
+                    self.__submit_metric(metric_name, metric_type, variable, db_results, tags)
+            else:
+                metric_name, metric_type = metric
+                self.__submit_metric(metric_name, metric_type, variable, db_results, tags)
+
+    def __submit_metric(self, metric_name, metric_type, variable, db_results, tags):
+        for tag, value in collect_all_scalars(variable, db_results):
+            metric_tags = list(tags)
+            if tag:
+                metric_tags.append(tag)
+            if value is not None:
+                if metric_type == RATE:
+                    self.rate(metric_name, value, tags=metric_tags)
+                elif metric_type == GAUGE:
+                    self.gauge(metric_name, value, tags=metric_tags)
+                elif metric_type == COUNT:
+                    self.count(metric_name, value, tags=metric_tags)
+                elif metric_type == MONOTONIC:
+                    self.monotonic_count(metric_name, value, tags=metric_tags)
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
@@ -541,25 +562,21 @@ class MySql(AgentCheck):
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 if is_mariadb and replication_channel:
                     cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
-                    cursor.execute("SHOW SLAVE STATUS;")
-                elif replication_channel:
-                    cursor.execute("SHOW SLAVE STATUS FOR CHANNEL '{0}';".format(replication_channel))
-                else:
-                    cursor.execute("SHOW SLAVE STATUS;")
+                cursor.execute(show_replica_status_query(self.version, is_mariadb, replication_channel))
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)
-                for slave_result in results:
+                for replica_result in results:
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = replication_channel or slave_result.get('Channel_Name') or 'default'
-                    for key, value in iteritems(slave_result):
+                    channel = replication_channel or replica_result.get('Channel_Name') or 'default'
+                    for key, value in iteritems(replica_result):
                         if value is not None:
                             replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
-                # MariaDB complains when you try to get slave status with a
+                # MariaDB complains when you try to get replica status with a
                 # connection name on the master, without connection name it
                 # responds an empty string as expected.
                 # Mysql behaves the same with or without connection name.
@@ -578,9 +595,9 @@ class MySql(AgentCheck):
 
         return replica_results
 
-    def _get_slave_status(self, db, above_560, nonblocking):
+    def _get_replica_status(self, db, above_560, nonblocking):
         """
-        Retrieve the slaves' statuses using:
+        Retrieve the replicas statuses using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
         2. The `information_schema.processlist` table. Blocking
         """
@@ -592,12 +609,12 @@ class MySql(AgentCheck):
                     cursor.execute(SQL_WORKER_THREADS)
                 else:
                     cursor.execute(SQL_PROCESS_LIST)
-                slave_results = cursor.fetchall()
-                slaves = 0
-                for _ in slave_results:
-                    slaves += 1
+                replica_results = cursor.fetchall()
+                replicas = 0
+                for _ in replica_results:
+                    replicas += 1
 
-                return {'Slaves_connected': slaves}
+                return {'Replicas_connected': replicas}
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Privileges error accessing the process tables (must grant PROCESS): %s", e)

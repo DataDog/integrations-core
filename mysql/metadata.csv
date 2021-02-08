@@ -40,8 +40,9 @@ mysql.performance.threads_connected,gauge,,connection,,The number of currently o
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user
 mysql.replication.seconds_behind_master,gauge,,second,,The lag in seconds between the master and the slave.,-1,mysql,replication lag
-mysql.replication.slave_running,gauge,,,,A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running
-mysql.replication.slaves_connected,gauge,,,,Number of slaves connected to a replication master.,0,mysql,slaves connected
+mysql.replication.slave_running,gauge,,,,Deprecated. Use service check mysql.replication.replica_running instead. A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running
+mysql.replication.slaves_connected,gauge,,,,Deprecated. Use mysql.replication.replicas_connected instead. Number of slaves connected to a replication master.,0,mysql,slaves connected
+mysql.replication.replicas_connected,gauge,,,,Number of replicas connected to a replication source.,0,mysql,replicas connected
 mysql.performance.queries,gauge,,query,second,The rate of queries.,0,mysql,queries
 mysql.performance.com_replace,gauge,,query,second,The rate of replace statements.,0,mysql,mysql performance com_replace
 mysql.performance.com_load,gauge,,query,second,The rate of load statements.,0,mysql,mysql performance com_load

@@ -330,27 +330,35 @@ def test_parse_get_version():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'slave_io_running, slave_sql_running, check_status',
+    'replica_io_running, replica_sql_running, check_status',
     [
-        pytest.param({}, {}, MySql.CRITICAL),
-        pytest.param({'stuff': 'yes'}, {}, MySql.WARNING),
-        pytest.param({}, {'stuff': 'yes'}, MySql.WARNING),
-        pytest.param({'stuff': 'yes'}, {'stuff': 'yes'}, MySql.OK),
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), MySql.CRITICAL),
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), MySql.CRITICAL),
+        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), MySql.OK),
+        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {}), MySql.WARNING),
+        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {}), MySql.WARNING),
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
+        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.OK),
+        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.OK),
     ],
 )
-def test_replication_check_status(slave_io_running, slave_sql_running, check_status, instance_basic, aggregator):
+def test_replication_check_status(replica_io_running, replica_sql_running, check_status, instance_basic, aggregator):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
     mocked_results = {
         'Slaves_connected': 1,
         'Binlog_enabled': True,
-        'Slave_IO_Running': slave_io_running,
-        'Slave_SQL_Running': slave_sql_running,
     }
+    if replica_io_running[1] is not None:
+        mocked_results[replica_io_running[0]] = replica_io_running[1]
+    if replica_sql_running[1] is not None:
+        mocked_results[replica_sql_running[0]] = replica_sql_running[1]
 
     mysql_check._check_replication_status(mocked_results)
 
     aggregator.assert_service_check('mysql.replication.slave_running', check_status, tags=['foo:bar'], count=1)
+    aggregator.assert_service_check('mysql.replication.replica_running', check_status, tags=['foo:bar'], count=1)
 
 
 @pytest.mark.integration
