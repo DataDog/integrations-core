@@ -12,7 +12,8 @@ Follow the instructions below to install and configure this check for an Agent r
 
 1. [Create a client machine][3] if one does not already exist
 2. Ensure the client machine has been [granted][4] the permission policy [arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess][5] or equivalent [credentials][6] are available
-3. Install the [Datadog Agent][7]
+3. Enable [open monitoring with Prometheus][13] on the MSK side to enable the JmxExporter and the NodeExporter.
+4. Install the [Datadog Agent][7]
 
 ### Configuration
 
@@ -58,3 +59,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
 [12]: https://docs.datadoghq.com/help/
+[13]: https://docs.aws.amazon.com/msk/latest/developerguide/open-monitoring.html
