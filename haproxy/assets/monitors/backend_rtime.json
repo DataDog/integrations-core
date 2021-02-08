@@ -1,6 +1,6 @@
 {
   "name": "[HAProxy] Backend response time is above 500ms for host: {{host.name}}",
-  "type": "metric alert",
+  "type": "query alert",
   "query": "avg(last_5m):avg:haproxy.backend.response.time{*} by {host} > 500",
   "message": "The average backend response time for host: {{host.name}} is on average at: {{value}} over the last 5min.\n",
   "tags": ["integration:haproxy"],

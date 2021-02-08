@@ -1,6 +1,6 @@
 {
   "name": "[HAProxy] High amount of frontend session usage for host: {{host.name}}",
-  "type": "metric alert",
+  "type": "query alert",
   "query": "avg(last_5m):avg:haproxy.frontend.session.pct{*} by {host} > 80",
   "message": "{{#is_alert}}\n\nALERT: The amount of frontend sessions in use for host: {{host.name}} reached {{value}} for a detection threshold of {{threshold}} %\n\nWhen reaching the session limit HAProxy will deny additional clients until resource consumption drops. It could be time to either modify HAProxy’s configuration to allow more sessions, or migrate your HAProxy server to a bigger box.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The amount of frontend sessions in use for host: {{host.name}} reached {{value}} for a detection threshold of {{threshold}} %\n\n{{/is_warning}} ",
   "tags": ["integration:haproxy"],

@@ -1,6 +1,6 @@
 {
   "name": "[HAProxy] Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}",
-  "type": "metric alert",
+  "type": "query alert",
   "query": "avg(last_4h):anomalies(avg:haproxy.frontend.response.4xx{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
   "message": "An anomalous number of HAProxy frontend 4xx HTTP responses for host: {{host.name}}  has been detected over the last 15mins.",
   "tags": ["integration:haproxy"],

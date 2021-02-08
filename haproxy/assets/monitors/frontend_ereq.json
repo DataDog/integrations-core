@@ -1,6 +1,6 @@
 {
   "name": "[HAProxy] Number of client-side request error for {{host.name}} is above normal.",
-  "type": "metric alert",
+  "type": "query alert",
   "query": "avg(last_4h):anomalies(avg:haproxy.frontend.errors.req_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
   "message": "There is a higher number of client-side request error for host: {{host.name}}\n\nClient-side request errors could have a number of causes:\n\n- Client terminates before sending request\n- Read error from client\n- Client timeout\n- Client terminated connection\n- Request was tarpitted/subject to ACL",
   "tags": ["integration:haproxy"],

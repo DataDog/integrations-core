@@ -1,6 +1,6 @@
 {
   "name": "[HAProxy] Number of backend connection failures for host: {{host.name}} is above normal.",
-  "type": "metric alert",
+  "type": "query alert",
   "query": "avg(last_4h):anomalies(avg:haproxy.backend.errors.con_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
   "message": "There is a higher number of backend connection failures for host: {{host.name}}\n\nNote: This monitored metric doesn't only includes failed backend requests but additionally includes general backend errors, like a backend without an active frontend. Correlating this metric with `haproxy.backend.errors.resp_rate` and response codes from both your frontend and backend servers will give you a better idea of the causes of an increase in backend connection errors.",
   "tags": ["integration:haproxy"],
