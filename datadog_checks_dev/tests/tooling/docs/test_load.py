@@ -4,10 +4,9 @@
 import mock
 import pytest
 
-from .utils import get_doc
+from .utils import MOCK_RESPONSE, get_doc
 
 pytestmark = pytest.mark.conf
-MOCK_RESPONSE = {'integration_id': 'foo'}
 
 
 def test_cache():
