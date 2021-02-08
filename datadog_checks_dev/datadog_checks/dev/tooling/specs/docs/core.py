@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from collections import deque
 
 import markdown
 from markdown.blockprocessors import ReferenceProcessor
@@ -39,8 +40,18 @@ class DocsSpec(BaseSpec):
         # Markdown doc reference: https://www.markdownguide.org/basic-syntax/#links
 
         for fidx, file in enumerate(self.data['files'], 1):
-            for sidx, section in enumerate(file['sections'], 1):
+            sections = deque(enumerate(file['sections'], 1))
+            while sections:
+                sidx, section = sections.popleft()
+                section['prepend_text'] = self._normalize(section['prepend_text'], fidx, sidx)
                 section['description'] = self._normalize(section['description'], fidx, sidx)
+                section['append_text'] = self._normalize(section['append_text'], fidx, sidx)
+                if 'sections' in section:
+                    nested_sections = [
+                        (f'{sidx}.{subidx}', subsection) for subidx, subsection in enumerate(section['sections'], 1)
+                    ]
+                    # extend left backwards for correct order of sections
+                    sections.extendleft(nested_sections[::-1])
 
     def _normalize(self, text, fidx, sidx):
         # use the markdown internal processor class to extract all references into a dict

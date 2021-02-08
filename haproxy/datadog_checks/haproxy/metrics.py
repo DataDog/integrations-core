@@ -75,6 +75,7 @@ METRIC_MAP = {
     'haproxy_frontend_sessions_total': 'frontend.sessions.total',
     'haproxy_frontend_status': 'frontend.status',
     'haproxy_process_active_peers': 'process.active.peers',
+    'haproxy_process_build_info': 'process.build_info',
     'haproxy_process_busy_polling_enabled': 'process.busy.polling.enabled',
     'haproxy_process_connected_peers': 'process.connected.peers',
     'haproxy_process_connections_total': 'process.connections.total',
