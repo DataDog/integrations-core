@@ -230,20 +230,19 @@ class YarnCheck(AgentCheck):
         """
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
-        if metrics_json and metrics_json.get('apps'):
-            if metrics_json['apps'].get('app') is not None:
-                for app_json in metrics_json['apps']['app']:
-                    tags = self._get_app_tags(app_json, app_tags) + addl_tags
+        if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
+            for app_json in metrics_json['apps']['app']:
+                tags = self._get_app_tags(app_json, app_tags) + addl_tags
 
-                    if app_json['state'] == YARN_APPLICATION_RUNNING:
-                        self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
-                        self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
+                if app_json['state'] == YARN_APPLICATION_RUNNING:
+                    self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
+                    self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
-                    self.service_check(
-                        APPLICATION_STATUS_SERVICE_CHECK,
-                        self.application_status_mapping.get(app_json['state'], AgentCheck.UNKNOWN),
-                        tags=tags,
-                    )
+                self.service_check(
+                    APPLICATION_STATUS_SERVICE_CHECK,
+                    self.application_status_mapping.get(app_json['state'], AgentCheck.UNKNOWN),
+                    tags=tags,
+                )
 
     def _get_app_tags(self, app_json, app_tags):
         split_app_tags = self.instance.get('split_yarn_application_tags', DEFAULT_SPLIT_YARN_APPLICATION_TAGS)
@@ -285,19 +284,18 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
         version_set = False
 
-        if metrics_json and metrics_json.get('nodes'):
-            if metrics_json['nodes'].get('node') is not None:
-                for node_json in metrics_json['nodes']['node']:
-                    node_id = node_json['id']
+        if metrics_json and metrics_json.get('nodes') and metrics_json['nodes'].get('node') is not None:
+            for node_json in metrics_json['nodes']['node']:
+                node_id = node_json['id']
 
-                    tags = ['node_id:{}'.format(str(node_id))]
-                    tags.extend(addl_tags)
+                tags = ['node_id:{}'.format(str(node_id))]
+                tags.extend(addl_tags)
 
-                    self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
-                    version = node_json.get('version')
-                    if not version_set and version:
-                        self.set_metadata('version', version)
-                        version_set = True
+                self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
+                version = node_json.get('version')
+                if not version_set and version:
+                    self.set_metadata('version', version)
+                    version_set = True
 
     def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
         """
@@ -323,28 +321,27 @@ class YarnCheck(AgentCheck):
 
         self._set_yarn_metrics_from_json(tags, metrics_json, YARN_ROOT_QUEUE_METRICS)
 
-        if metrics_json and metrics_json.get('queues'):
-            if metrics_json['queues'].get('queue') is not None:
-                queues_count = 0
-                for queue_json in metrics_json['queues']['queue']:
-                    queue_name = queue_json['queueName']
+        if metrics_json and metrics_json.get('queues') and metrics_json['queues'].get('queue') is not None:
+            queues_count = 0
+            for queue_json in metrics_json['queues']['queue']:
+                queue_name = queue_json['queueName']
 
-                    if queue_name in queue_blacklist:
-                        self.log.debug('Queue "%s" is blacklisted. Ignoring it', queue_name)
-                        continue
+                if queue_name in queue_blacklist:
+                    self.log.debug('Queue "%s" is blacklisted. Ignoring it', queue_name)
+                    continue
 
-                    queues_count += 1
-                    if queues_count > MAX_DETAILED_QUEUES:
-                        self.warning(
-                            "Found more than 100 queues, will only send metrics on first 100 queues. "
-                            "Please filter the queues with the check's `queue_blacklist` parameter"
-                        )
-                        break
+                queues_count += 1
+                if queues_count > MAX_DETAILED_QUEUES:
+                    self.warning(
+                        "Found more than 100 queues, will only send metrics on first 100 queues. "
+                        "Please filter the queues with the check's `queue_blacklist` parameter"
+                    )
+                    break
 
-                    tags = ['queue_name:{}'.format(str(queue_name))]
-                    tags.extend(addl_tags)
+                tags = ['queue_name:{}'.format(str(queue_name))]
+                tags.extend(addl_tags)
 
-                    self._set_yarn_metrics_from_json(tags, queue_json, YARN_QUEUE_METRICS)
+                self._set_yarn_metrics_from_json(tags, queue_json, YARN_QUEUE_METRICS)
 
     def _set_yarn_metrics_from_json(self, tags, metrics_json, yarn_metrics):
         """
