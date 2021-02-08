@@ -70,6 +70,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.job.end"
            tags:
              job_name: "$1"
+         - match: "aiflow.*_<job_name>_heartbeat_failure"
+           name: airflow.job.heartbeat.failure
+           tags:
+             job_name: "$1"
          - match: "airflow.operator_failures_*"
            name: "airflow.operator_failures"
            tags:
@@ -93,6 +97,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.dag.loading_duration"
            tags:
              dag_file: "$1"
+         - match: "airflow.dagrun.*.first_task_scheduling_delay"
+           name: "airflow.dagrun.first_task_scheduling_delay"
+           tags:
+             dag_id: "$1"
          - match: "airflow.pool.open_slots.*"
            name: "airflow.pool.open_slots"
            tags:
