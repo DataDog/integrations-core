@@ -4,6 +4,8 @@
 
 The ActiveMQ check collects metrics for brokers and queues, producers and consumers, and more.
 
+**Note:** This check also supports ActiveMQ Artemis, future ActiveMQ version `6`, though different metrics will be reported. See [metrics][#metrics] for more details.
+
 **Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][1].
 
 ## Setup
@@ -103,7 +105,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.  Metrics associated with ActiveMQ Artemis flavor have `artemis` in their metric name, all others are reported for ActiveMQ "classic".
 
 ### Events
 
