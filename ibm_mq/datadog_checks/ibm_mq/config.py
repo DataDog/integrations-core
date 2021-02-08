@@ -107,7 +107,7 @@ class IBMMQConfig:
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
         self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
-        if not self.ssl and (
+        if instance.get('ssl_auth') is None and (
             instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
         ):
             self.log.info(
