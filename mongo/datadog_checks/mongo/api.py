@@ -105,8 +105,7 @@ class MongoApi(object):
             options = self['admin'].command("getCmdLineOpts")['parsed']
         except Exception as e:
             self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.",
-                str(e)
+                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.", str(e)
             )
             # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
             return self._get_alibaba_deployment_type()
