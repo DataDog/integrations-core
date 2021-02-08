@@ -105,10 +105,10 @@ class MongoApi(object):
             options = self['admin'].command("getCmdLineOpts")['parsed']
         except Exception as e:
             self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba AsparaDB instance.",
+                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.",
                 str(e)
             )
-            # `getCmdLineOpts` is forbidden on Alibaba AsparaDB
+            # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
             return self._get_alibaba_deployment_type()
         cluster_role = None
         if 'sharding' in options:
