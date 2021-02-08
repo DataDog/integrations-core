@@ -30,3 +30,18 @@ kube_apiserver.admission_step_admission_latencies_seconds_summary.count,count,,,
 kube_apiserver.admission_step_admission_latencies_seconds_summary.quantile,gauge,,second,,Admission sub-step latency summary broken out for each operation and API resource and step type (validate or admit) quantile,0,kube_apiserver,admission step admission latencies summary
 kube_apiserver.admission_controller_admission_duration_seconds.sum,gauge,,second,,Admission controller latency histogram in seconds identified by name and broken out for each operation and API resource and type (validate or admit),0,kube_apiserver,duration of admission controller admission
 kube_apiserver.admission_controller_admission_duration_seconds.count,count,,,,Admission controller latency histogram in seconds identified by name and broken out for each operation and API resource and type (validate or admit) count,0,kube_apiserver,duration of admission controller admission
+kube_apiserver.etcd_request_duration_seconds.sum,gauge,,second,,Etcd request latencies for each operation and object type,0,kube_apiserver,etcd latency
+kube_apiserver.etcd_request_duration_seconds.count,count,,,,Etcd request latencies count for each operation and object type,0,kube_apiserver,etcd latency
+kube_apiserver.registered_watchers,gauge,,object,,Number of currently registered for a given resource,0,kube_apiserver,watchers
+kube_apiserver.request_duration_seconds.sum,gauge,,second,,Response latency distribution for each verb/group/version/resource/subresource/scope/component and dry run value,0,kube_apiserver,response latency
+kube_apiserver.request_duration_seconds.count,count,,,,Response latency distribution for each verb/group/version/resource/subresource/scope/component and dry run value,0,kube_apiserver,response latency
+kube_apiserver.watch_events_sizes.sum,gauge,,byte,,Watch event size distribution (Kubernetes 1.16+),0,kube_apiserver,distribution of watch event sizes
+kube_apiserver.watch_events_sizes.count,count,,,,Watch event size distribution (Kubernetes 1.16+),0,kube_apiserver,distribution of watch event sizes
+kube_apiserver.authentication_duration_seconds.sum,gauge,,second,,Authentication duration histogram broken out by result (Kubernetes 1.17+),0,kube_apiserver,authentication latencies
+kube_apiserver.authentication_duration_seconds.count,count,,,,Authentication duration histogram broken out by result (Kubernetes 1.17+),0,kube_apiserver,authentication latencies
+kube_apiserver.authentication_attempts.count,count,,request,,Counter of authenticated attempts (Kubernetes 1.16+),0,kube_apiserver,count of authenticated attempts
+kube_apiserver.apiserver_request_terminations_total.count,count,,request,,Number of requests which apiserver terminated in self-defense (Kubernetes 1.17+),0,kube_apiserver,count of requests dropped in self-defense
+kube_apiserver.grpc_client_handled_total,count,,request,,Total number of RPCs completed by the client regardless of success or failure,1,kube_apiserver,gRPC client requests completed
+kube_apiserver.grpc_client_msg_received_total,count,,message,,Total number of gRPC stream messages received by the client,1,kube_apiserver,gRPC client messages received
+kube_apiserver.grpc_client_msg_sent_total,count,,message,, Total number of gRPC stream messages sent by the client,1,kube_apiserver,gRPC client messages sent
+kube_apiserver.grpc_client_started_total,count,,request,,Total number of RPCs started on the client,1,kube_apiserver,gRPC client requests started
