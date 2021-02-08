@@ -33,7 +33,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[Redis] High memory consumption": "assets/monitors/high_mem.json"
+    },
     "dashboards": {
       "redis": "assets/dashboards/overview.json"
     },
