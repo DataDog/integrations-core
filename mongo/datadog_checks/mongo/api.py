@@ -92,10 +92,24 @@ class MongoApi(object):
 
         return authenticated
 
+    @staticmethod
+    def _get_rs_deployment_from_status_payload(repl_set_payload, cluster_role):
+        replset_name = repl_set_payload["set"]
+        replset_state = repl_set_payload["myState"]
+        return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
+
     def _get_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
-        options = self['admin'].command("getCmdLineOpts")['parsed']
+        try:
+            options = self['admin'].command("getCmdLineOpts")['parsed']
+        except Exception as e:
+            self._log.debug(
+                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.",
+                str(e)
+            )
+            # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
+            return self._get_alibaba_deployment_type()
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
@@ -106,8 +120,24 @@ class MongoApi(object):
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            replset_name = repl_set_payload["set"]
-            replset_state = repl_set_payload["myState"]
-            return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
+            return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
 
         return StandaloneDeployment()
+
+    def _get_alibaba_deployment_type(self):
+        is_master_payload = self['admin'].command('isMaster')
+        if is_master_payload.get('msg') == 'isdbgrid':
+            return MongosDeployment()
+
+        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
+        repl_set_payload = self['admin'].command("replSetGetStatus")
+        if repl_set_payload.get('configsvr') is True:
+            cluster_role = 'configsvr'
+        elif self['admin'].command('shardingState').get('enabled') is True:
+            # Use `shardingState` command to know whether or not the replicaset
+            # is a shard or not.
+            cluster_role = 'shardsvr'
+        else:
+            cluster_role = None
+
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)

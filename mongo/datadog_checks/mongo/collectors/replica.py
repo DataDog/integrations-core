@@ -93,23 +93,23 @@ class ReplicaCollector(MongoCollector):
                 event_payload['host'] = self.hostname
             self.check.event(event_payload)
 
-    def get_replset_config(self, api):
-        """On most nodes, simply runs `replSetGetConfig`.
-        Unfortunately when the agent is connected to an arbiter, running the `replSetGetConfig`
-        raises authentication errors. And because authenticating on an arbiter is not allowed, the workaround
+    def get_votes_config(self, api):
+        """On most nodes, simply collects the replset config from the system.replset collection in the local db.
+        Unfortunately when the agent is connected to an arbiter, this can't be run without
+        raising authentication errors. And because authenticating on an arbiter is not allowed, the workaround
         in that case is to run the command directly on the primary."""
+
         if api.deployment_type.is_arbiter:
             try:
-                api_primary = MongoApi(self.check.config, self.log, replicaset=api.deployment_type.replset_name)
+                api = MongoApi(self.check.config, self.log, replicaset=api.deployment_type.replset_name)
             except Exception:
                 self.log.warning(
                     "Current node is an arbiter, the extra connection to the primary was unsuccessful."
                     " Votes metrics won't be reported."
                 )
                 return None
-            return api_primary['admin'].command('replSetGetConfig')
 
-        return api['admin'].command('replSetGetConfig')
+        return api['local']['system.replset'].find_one()
 
     def collect(self, api):
         db = api["admin"]
@@ -137,10 +137,10 @@ class ReplicaCollector(MongoCollector):
             result['health'] = current['health']
 
         # Collect the number of votes
-        config = self.get_replset_config(api)
+        config = self.get_votes_config(api)
         votes = 0
         total = 0.0
-        for member in config['config']['members']:
+        for member in config.get('members', []):
             total += member.get('votes', 1)
             if member['_id'] == current['_id']:
                 votes = member.get('votes', 1)
