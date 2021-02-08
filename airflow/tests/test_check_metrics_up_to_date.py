@@ -66,7 +66,7 @@ EXPECTED_METRICS = [
     'dagrun.schedule_delay.<dag_id>',
     'scheduler.critical_section_duration',
     'dagrun.<dag_id>.first_task_scheduling_delay',
-    'collect_db_dags'
+    'collect_db_dags',
 ]
 
 METRIC_PATTERN = re.compile(r'^``([^`]+)``\s+(.*)', re.MULTILINE)
