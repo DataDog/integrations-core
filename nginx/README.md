@@ -119,9 +119,6 @@ To configure this check for an Agent running on a host:
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section][7].
 
 
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
 #### Metric collection
 
 1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics][8]. See the [sample nginx.d/conf.yaml][9] for all available configuration options.
@@ -185,15 +182,12 @@ http {
 ```
 
 
-<!-- xxx tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 #### Metric collection
 
@@ -215,6 +209,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                     |
 | -------------- | ----------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "nginx", "service": "nginx"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
