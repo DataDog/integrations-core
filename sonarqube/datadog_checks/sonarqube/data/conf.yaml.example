@@ -87,15 +87,7 @@ instances:
 
   -
     ## @param web_endpoint - string - optional
-<<<<<<< HEAD
-<<<<<<< HEAD
     ## The SonarQube web endpoint which should expose its API at `/api`. For example:
-=======
-    ## The SonarQube web endpoint which should expose its API at `/api`. example:
->>>>>>> b3e744f1f... editing the conf.yaml.example properly by generating via spec.yaml and ddev
-=======
-    ## The SonarQube web endpoint which should expose its API at `/api`. For example:
->>>>>>> da7fa8be3... making requested changes
     ##
     ##   web_endpoint: http://<WEB_ENDPOINT>:<PORT>
     ##

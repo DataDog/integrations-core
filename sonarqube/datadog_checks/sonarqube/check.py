@@ -198,38 +198,9 @@ class SonarqubeCheck(AgentCheck):
 
     @staticmethod
     def is_valid_metric(metric):
-<<<<<<< HEAD
-<<<<<<< HEAD
         return (
             not metric['hidden']
             and metric['type'] in NUMERIC_TYPES
             # https://github.com/DataDog/integrations-core/pull/8552
             and not metric['key'].startswith('new_')
         )
-=======
-        metric_re = '^(% s)' % '|'.join(BLOCKED_METRICS)
-<<<<<<< HEAD
-        
-        return not metric['hidden'] and metric['type'] in NUMERIC_TYPES and not re.match(metric_re, metric['key'])
->>>>>>> da7fa8be3... making requested changes
-=======
-
-<<<<<<< HEAD
-            return (
-                not metric['hidden']
-                and metric['type'] in NUMERIC_TYPES
-                # https://github.com/DataDog/integrations-core/pull/8552
-                and not metric['key'].startswith('new_')
-            )
-            
->>>>>>> 57df81d5f... restructuring return staticmethod
-=======
-=======
->>>>>>> 3926bda10... removing regex list match for performance, may include later if required
-        return (
-            not metric['hidden']
-            and metric['type'] in NUMERIC_TYPES
-            # https://github.com/DataDog/integrations-core/pull/8552
-            and not metric['key'].startswith('new_')
-        )
->>>>>>> e934e2df2... making requested changes
