@@ -30,3 +30,10 @@ kube_apiserver.admission_step_admission_latencies_seconds_summary.count,count,,,
 kube_apiserver.admission_step_admission_latencies_seconds_summary.quantile,gauge,,second,,Admission sub-step latency summary broken out for each operation and API resource and step type (validate or admit) quantile,0,kube_apiserver,admission step admission latencies summary
 kube_apiserver.admission_controller_admission_duration_seconds.sum,gauge,,second,,Admission controller latency histogram in seconds identified by name and broken out for each operation and API resource and type (validate or admit),0,kube_apiserver,duration of admission controller admission
 kube_apiserver.admission_controller_admission_duration_seconds.count,count,,,,Admission controller latency histogram in seconds identified by name and broken out for each operation and API resource and type (validate or admit) count,0,kube_apiserver,duration of admission controller admission
+kube_apiserver.request_latencies.sum,gauge,,microsecond,,Response latency distribution in microseconds for each verb, resource and subresource,0,kube_apiserver,response latency
+kube_apiserver.request_latencies.count,count,,,,Response latency distribution in microseconds for each verb, resource and subresource count,0,kube_apiserver,response latency
+kube_apiserver.request_duration_seconds.sum,gauge,,second,,"Response latency distribution in seconds for each verb, dry run value, group, version, resource, subresource, scope and component",0,kube_apiserver,duration of request
+kube_apiserver.request_duration_seconds.count,count,,,,"Response latency distribution in seconds for each verb, dry run value, group, version, resource, subresource, scope and component count",0,kube_apiserver,duration of request
+kube_apiserver.registered_watchers,gauge,,,,Number of currently registered watchers for a given resources,0,kube_apiserver,number of watchers
+kube_apiserver.process_resident_memory_bytes,,byte,,Resident memory size in bytes,0,kube_apiserver,process rss
+kube_apiserver.process_virtual_memory_bytes,,byte,,Virtual memory size in bytes,0,kube_apiserver,process virtual memory

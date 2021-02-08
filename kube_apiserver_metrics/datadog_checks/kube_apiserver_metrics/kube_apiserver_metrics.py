@@ -35,6 +35,11 @@ METRICS = {
     'apiserver_admission_step_admission_duration_seconds_summary':
         'admission_step_admission_latencies_seconds_summary',
     # fmt: on
+    'apiserver_request_latencies': 'request_latencies',
+    'apiserver_request_duration_seconds': 'request_duration_seconds',
+    'apiserver_registered_watchers': 'registered_watchers',
+    'process_resident_memory_bytes': 'process_resident_memory_bytes',
+    'process_virtual_memory_bytes': 'process_virtual_memory_bytes',
 }
 
 

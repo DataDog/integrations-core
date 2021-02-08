@@ -63,6 +63,11 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
         NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
         NAMESPACE + '.admission_controller_admission_duration_seconds.count',
+        NAMESPACE + '.request_latencies',
+        NAMESPACE + '.request_duration_seconds',
+        NAMESPACE + '.registered_watchers',
+        NAMESPACE + '.process_resident_memory_bytes',
+        NAMESPACE + '.process_virtual_memory_bytes',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
