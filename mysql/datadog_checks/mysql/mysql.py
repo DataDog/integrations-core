@@ -333,7 +333,7 @@ class MySql(AgentCheck):
             replica_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_sql_running))
         binlog_running = results.get('Binlog_enabled', False)
 
-        # replicas will only be collected iff user has PROCESS privileges.
+        # replicas will only be collected if user has PROCESS privileges.
         replicas = collect_scalar('Slaves_connected', results) or collect_scalar('Replicas_connected', results)
 
         if not (replica_io_running is None and replica_sql_running is None):
