@@ -66,9 +66,6 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.runtime.memory.rss',
     'kubernetes.kubelet.cpu.usage',
     'kubernetes.kubelet.memory.rss',
-    'kubernetes.kubelet.pod.start.duration',
-    'kubernetes.kubelet.pod.worker.duration',
-    'kubernetes.kubelet.pod.worker.start.duration',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -102,14 +99,22 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.volume.stats.inodes_free',
     'kubernetes.kubelet.volume.stats.inodes_used',
     'kubernetes.kubelet.evictions',
+    'kubernetes.kubelet.pod.start.duration.sum',
+    'kubernetes.kubelet.pod.start.duration.count',
+    'kubernetes.kubelet.pod.worker.start.duration.sum',
+    'kubernetes.kubelet.pod.worker.start.duration.count',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [
-    'kubernetes.kubelet.container.log_filesystem.used_bytes'
+    'kubernetes.kubelet.container.log_filesystem.used_bytes',
+    'kubernetes.kubelet.pod.worker.duration.sum',
+    'kubernetes.kubelet.pod.worker.duration.count',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
-    'kubernetes.kubelet.network_plugin.latency.quantile'
+    'kubernetes.kubelet.network_plugin.latency.quantile',
+    'kubernetes.kubelet.pod.start.duration.quantile',
+    'kubernetes.kubelet.pod.worker.start.duration.quantile',
 ]
 
 COMMON_TAGS = {
