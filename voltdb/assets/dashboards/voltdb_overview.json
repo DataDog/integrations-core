@@ -1,0 +1,913 @@
+{
+    "author_name": "Datadog",
+    "description": "Using this dashboard, you can get a high-level view of your VoltDB metrics related to performance, availability and resource utilization.\n\nTo learn more about our VoltDB integration, see:\n\n* [Our official integration documentation](https://docs.datadoghq.com/integrations/voltdb/)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "voltdb_hostname",
+            "prefix": "voltdb_hostname"
+        },
+        {
+            "default": "*",
+            "name": "site_id",
+            "prefix": "site_id"
+        },
+        {
+            "default": "*",
+            "name": "table",
+            "prefix": "table"
+        },
+        {
+            "default": "*",
+            "name": "partition_id",
+            "prefix": "partition_id"
+        },
+        {
+            "default": "*",
+            "name": "index",
+            "prefix": "index"
+        }
+    ],
+    "title": "VoltDB - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "sizing": "center",
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/voltdb.png"
+            },
+            "id": 4831351939071384,
+            "layout": {
+                "height": 12,
+                "width": 27,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Garbage Collection",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2292666261772854,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 82,
+                "y": 59
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.cpu.percent_used{$voltdb_hostname}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU Usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3095098279346770,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 29,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "System Resource Utilization",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3670892466161284,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 29,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.memory.rss{$voltdb_hostname}, avg:voltdb.memory.index{$voltdb_hostname}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.memory.physical{*}",
+                        "style": {
+                            "line_type": "dashed",
+                            "line_width": "normal",
+                            "palette": "grey"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Memory Usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8396329872456020,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 55,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.latency.p50{$voltdb_hostname}, avg:voltdb.latency.p95{$voltdb_hostname}, avg:voltdb.latency.p99{$voltdb_hostname}, avg:voltdb.latency.p999{$voltdb_hostname}, avg:voltdb.latency.p9999{$voltdb_hostname}, avg:voltdb.latency.p99999{$voltdb_hostname}, avg:voltdb.latency.max{$voltdb_hostname}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Latency",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8331257182134892,
+            "layout": {
+                "height": 14,
+                "width": 33,
+                "x": 47,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.table.tuple_allocated_memory{$voltdb_hostname,$table,$partition_id}, avg:voltdb.table.tuple_data_memory{$voltdb_hostname,$table,$partition_id}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Table Memory",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1875219674751442,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 82,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.gc.newgen_gc_count{$voltdb_hostname}.as_count(), avg:voltdb.gc.oldgen_gc_count{$voltdb_hostname}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "GC Execution Count",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 6783121220250250,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 82,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.gc.newgen_avg_gc_time{$voltdb_hostname}, avg:voltdb.gc.oldgen_avg_gc_time{$voltdb_hostname}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "GC Avg Execution Time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 2642142976721914,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 108,
+                "y": 65
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.io.bytes_read{$voltdb_hostname}.as_count(), avg:voltdb.io.bytes_written{$voltdb_hostname}.as_count()",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Network I/O",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8215145325748492,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 29,
+                "y": 58
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Stored Procedures",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 409168266362184,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 82,
+                "y": 37
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.procedure.avg_execution_time{$site_id,$partition_id}, avg:voltdb.procedure.max_execution_time{$site_id,$partition_id}, avg:voltdb.procedure.min_execution_time{$site_id,$partition_id}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Procedure Execution Time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 3595931979848800,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 108,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "monotonic_diff(avg:voltdb.procedure.successes{$site_id,$partition_id,$voltdb_hostname}.as_count())",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "display_type": "bars",
+                        "on_right_yaxis": false,
+                        "q": "monotonic_diff(avg:voltdb.procedure.failures{$site_id,$partition_id,$voltdb_hostname}.as_count()), monotonic_diff(avg:voltdb.procedure.aborts{$site_id,$partition_id,$voltdb_hostname}.as_count())",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "time": {},
+                "title": "Procedure Runs",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 7283924732178930,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 82,
+                "y": 43
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "area",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.memory.java.unused{$voltdb_hostname}, avg:voltdb.memory.java.used{$voltdb_hostname}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:voltdb.memory.java.max_heap{*}",
+                        "style": {
+                            "line_type": "dashed",
+                            "line_width": "normal",
+                            "palette": "grey"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Memory Usage (Java)",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5704801127613230,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 55,
+                "y": 58
+            }
+        },
+        {
+            "definition": {
+                "check": "voltdb.can_connect",
+                "group_by": [],
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "title": "Can Connect",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "check_status"
+            },
+            "id": 7922415272650192,
+            "layout": {
+                "height": 10,
+                "width": 17,
+                "x": 29,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:voltdb",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "Log Events",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 3316470916288960,
+            "layout": {
+                "height": 73,
+                "width": 47,
+                "x": 135,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Logs",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2031649197607040,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 135,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Using this dashboard, you can get a high-level view of your VoltDB metrics related to performance, availability and resource utilization.\n\nTo learn more about our VoltDB integration, see:\n\n* [Our official integration documentation](https://docs.datadoghq.com/integrations/voltdb/)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3964920340371790,
+            "layout": {
+                "height": 27,
+                "width": 27,
+                "x": 0,
+                "y": 13
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Status",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1302824832163824,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 29,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.snapshot_status.throughput{$voltdb_hostname,$table}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Snapshot throughput",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5592127639404418,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 29,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "In-Memory Data",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 205239468748692,
+            "layout": {
+                "height": 5,
+                "width": 51,
+                "x": 82,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.table.tuple_count{$voltdb_hostname,$table,$site_id,$partition_id}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Table Tuple Count",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1323627657397028,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 82,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.index.entry_count{$voltdb_hostname,$site_id,$table,$partition_id,$index}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Index Entry Count",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5551051396316738,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 108,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.index.memory_estimate{$voltdb_hostname,$table,$partition_id,$site_id,$index}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Index Memory",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5280128005550452,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 108,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "vertical",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:voltdb.commandlog.outstanding_transactions{$voltdb_hostname}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Commandlog transaction queue",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1791847483030916,
+            "layout": {
+                "height": 14,
+                "width": 25,
+                "x": 55,
+                "y": 21
+            }
+        }
+    ]
+}
