@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 2.3.0-rc.1 / 2021-02-08
+
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.2.0 / 2021-01-25
 
 * [Added] Better arbiter support. See [#8294](https://github.com/DataDog/integrations-core/pull/8294).
