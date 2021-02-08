@@ -1,0 +1,31 @@
+{
+  "name": "[HAProxy] Anomalous frontend request rate for host {{host.name}}",
+  "type": "metric alert",
+  "query": "avg(last_4h):anomalies(avg:haproxy.frontend.requests.rate{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+  "message": "There is an anomaly in the amount of frontend requests handled by HAProxy on host: {{host.name}} ",
+  "tags": ["integration:haproxy"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": true,
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "escalation_message": "",
+    "no_data_timeframe": null,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 1,
+      "critical_recovery": 0
+    },
+    "threshold_windows": {
+      "trigger_window": "last_15m",
+      "recovery_window": "last_15m"
+    }
+  },
+
+  "recommended_monitor_metadata": {
+    "description": "Notifies when HAProxy experiences an anomalous number of frontend request rate for a specific host."
+  }
+}

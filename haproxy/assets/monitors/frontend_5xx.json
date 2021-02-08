@@ -1,0 +1,30 @@
+{
+  "name": "[HAProxy] Anomalous number of frontend 5xx HTTP responses for host: {{host.name}}",
+  "type": "metric alert",
+  "query": "avg(last_4h):anomalies(avg:haproxy.frontend.response.5xx{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+  "message": "An anomalous number of HAProxy frontend 5xx HTTP responses for host: {{host.name}}  has been detected over the last 15mins.",
+  "tags": ["integration:haproxy"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": false,
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "escalation_message": "",
+    "no_data_timeframe": null,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 1,
+      "critical_recovery": 0
+    },
+    "threshold_windows": {
+      "trigger_window": "last_15m",
+      "recovery_window": "last_15m"
+    }
+  },
+  "recommended_monitor_metadata": {
+    "description": "Notifies when HAProxy frontend 5xx errors are higher than usual for a specific host."
+  }
+}

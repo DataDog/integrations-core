@@ -1,0 +1,25 @@
+{
+  "name": "[HAProxy] Backend queue time went above 500ms for host: {{host.name}}",
+  "type": "metric alert",
+  "query": "max(last_5m):avg:haproxy.backend.queue.time{*} by {host} > 500",
+  "message": "The average queue time for host: {{host.name}} just reached: {{value}}.\n",
+  "tags": ["integration:haproxy"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": true,
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "escalation_message": "",
+    "no_data_timeframe": null,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 500
+    }
+  },
+  "recommended_monitor_metadata": {
+    "description": "Notifies when the HAProxy backend queue time went above 500ms for a specific host."
+  }
+}
