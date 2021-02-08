@@ -5,98 +5,98 @@ parameters:
 
 steps:
 - ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
-  - script:
-      - echo "ddev validate ci"
-      - ddev validate ci
+  - script: |
+      echo "ddev validate ci"
+      ddev validate ci
     displayName: 'Validate CI configuration'
 
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script:
-      - echo "ddev validate agent-reqs"
-      - ddev validate agent-reqs
+  - script: |
+      echo "ddev validate agent-reqs"
+      ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
 
 - ${{ if eq(parameters.repo, 'extras') }}:
-  - script:
-      - echo "ddev validate codeowners"
-      - ddev validate codeowners
+  - script: |
+      echo "ddev validate codeowners"
+      ddev validate codeowners
     displayName: 'Validate codeowners'
 
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script:
-      - echo "ddev validate http"
-      - ddev validate http
+  - script: |
+      echo "ddev validate http"
+      ddev validate http
     displayName: 'Validate use of http wrapper'
 
-- script:
-    - echo "ddev validate config"
-    - ddev validate config
+- script: |
+    echo "ddev validate config"
+    ddev validate config
   displayName: 'Validate default configuration files'
 
-- script:
-    - echo "ddev validate dashboards"
-    - ddev validate dashboards
+- script: |
+    echo "ddev validate dashboards"
+    ddev validate dashboards
   displayName: 'Validate dashboard definition files'
 
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'true')) }}:
-  - script:
-      - echo "validate dep --require-base-check-version ${{ parameters.check }}"
-      - ddev validate dep --require-base-check-version ${{ parameters.check }}
+  - script: |
+      echo "validate dep --require-base-check-version ${{ parameters.check }}"
+      ddev validate dep --require-base-check-version ${{ parameters.check }}
     displayName: 'Validate dependencies'
 
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'false')) }}:
-    - script:
-        - echo "ddev validate dep"
-        - ddev validate dep
+    - script: |
+        echo "ddev validate dep"
+        ddev validate dep
       displayName: 'Validate dependencies'
 
-- script:
-    - echo "ddev validate manifest"
-    - ddev validate manifest
+- script: |
+    echo "ddev validate manifest"
+    ddev validate manifest
   displayName: 'Validate manifest files'
 
-- script:
-    - echo "ddev validate metadata"
-    - ddev validate metadata
+- script: |
+    echo "ddev validate metadata"
+    ddev validate metadata
   displayName: 'Validate metric data'
 
-- script:
-    - echo "ddev validate readmes"
-    - ddev validate readmes
+- script: |
+    echo "ddev validate readmes"
+    ddev validate readmes
   displayName: 'Validate README files'
 
-- script:
-    - echo "ddev validate recommended-monitors"
-    - ddev validate recommended-monitors
+- script: |
+    echo "ddev validate recommended-monitors"
+    ddev validate recommended-monitors
   displayName: 'Validate monitors files'
 
-- script:
-    - echo "ddev validate saved-views"
-    - ddev validate saved-views
+- script: |
+    echo "ddev validate saved-views"
+    ddev validate saved-views
   displayName: 'Validate saved views data'
 
-- script:
-    - echo "ddev validate service-checks"
-    - ddev validate service-checks
+- script: |
+    echo "ddev validate service-checks"
+    ddev validate service-checks
   displayName: 'Validate service check data'
 
-- script:
-    - echo "ddev validate imports"
-    - ddev validate imports
+- script: |
+    echo "ddev validate imports"
+    ddev validate imports
   displayName: 'Validate imports'
 
-- script:
-    - echo "ddev validate package"
-    - ddev validate package
+- script: |
+    echo "ddev validate package"
+    ddev validate package
   displayName: 'Validate package'
 
-- script:
-    - echo "ddev validate jmx-metrics"
-    - ddev validate jmx-metrics
+- script: |
+    echo "ddev validate jmx-metrics"
+    ddev validate jmx-metrics
   displayName: 'Validate JMX integrations metrics.yaml'
 
 - ${{ if eq(parameters.repo, 'marketplace') }}:
-  - script:
-    - echo "ddev validate eula"
-    - ddev validate eula
+  - script: |
+      echo "ddev validate eula"
+      ddev validate eula
     displayName: 'Validate EULA files'
