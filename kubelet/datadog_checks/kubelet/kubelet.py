@@ -97,12 +97,18 @@ DEFAULT_SUMMARIES = {}
 
 DEPRECATED_SUMMARIES = {
     'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+    'kubelet_pod_start_latency_microseconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_worker_latency_microseconds': 'kubelet.pod.worker.duration',
+    'kubelet_pod_worker_start_latency_microseconds': 'kubelet.pod.worker.start.duration',
 }
 
 NEW_1_14_SUMMARIES = {}
 
 TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
+    'kubelet_pod_start_duration_seconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_worker_duration_seconds': 'kubelet.pod.worker.duration',
+    'kubelet_pod_worker_start_duration_seconds': 'kubelet.pod.worker.start.duration',
 }
 
 log = logging.getLogger('collector')

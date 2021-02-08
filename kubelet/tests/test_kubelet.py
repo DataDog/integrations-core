@@ -66,6 +66,9 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.runtime.memory.rss',
     'kubernetes.kubelet.cpu.usage',
     'kubernetes.kubelet.memory.rss',
+    'kubernetes.kubelet.pod.start.duration',
+    'kubernetes.kubelet.pod.worker.duration',
+    'kubernetes.kubelet.pod.worker.start.duration',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
