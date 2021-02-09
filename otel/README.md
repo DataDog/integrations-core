@@ -3,9 +3,9 @@
 ## Overview
 
 The OpenTelemetry Collector is a vendor-agnostic agent process that, via the Datadog exporter, exports telemetry data directly to Datadog servers. 
-It reports metrics and traces from instrumented applications and general system metrics.
+It reports metrics and traces from instrumented applications as well as general system metrics.
 
-Host metrics will be shown in the default dashboard, but you can send arbitrary metrics to Datadog using the OpenTelemetry Collector. All metrics reported by the Collector will be namespaced under `otel.` to prevent collisions with metrics from other Datadog integrations.
+Host metrics will be shown in the default dashboard, but you can send arbitrary metrics to Datadog using the OpenTelemetry Collector. Host metrics will be namespaced under `otel.` to prevent collisions with metrics from other Datadog integrations.
 
 ## Setup
 
