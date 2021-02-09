@@ -83,6 +83,7 @@ NEW_1_14_GAUGES = {
 
 DEFAULT_HISTOGRAMS = {
     'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+    'storage_operation_duration_seconds': 'storage.operation.duration',
 }
 
 DEPRECATED_HISTOGRAMS = {

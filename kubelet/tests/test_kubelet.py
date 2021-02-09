@@ -103,6 +103,8 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.pod.start.duration.count',
     'kubernetes.kubelet.pod.worker.start.duration.sum',
     'kubernetes.kubelet.pod.worker.start.duration.count',
+    'kubernetes.storage.operation.duration.sum',
+    'kubernetes.storage.operation.duration.count',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [

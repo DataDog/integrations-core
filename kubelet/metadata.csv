@@ -66,3 +66,4 @@ kubernetes.kubelet.container.log_filesystem.used_bytes,gauge,,byte,,Bytes used b
 kubernetes.kubelet.pod.start.duration,gauge,,microsecond,,Duration in microseconds for a single pod to go from pending to running,0,kubernetes,k8s.kubelet.pod.start.duration
 kubernetes.kubelet.pod.worker.duration,gauge,,microsecond,,"Duration in microseconds to sync a single pod. Broken down by operation type: create, update, or sync",0,kubernetes,k8s.kubelet.pod.worker.duration
 kubernetes.kubelet.pod.worker.start.duration,gauge,,microsecond,,Duration in microseconds from seeing a pod to starting a worker,0,kubernetes,k8s.kubelet.pod.worker.start.duration
+kubernetes.storage.operation.duration,gauge,,second,,Storage operation duration,0,kubernetes,k8s.storage.operation.duration
