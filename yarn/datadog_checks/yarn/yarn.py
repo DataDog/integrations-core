@@ -163,6 +163,7 @@ class YarnCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super(YarnCheck, self).__init__(*args, **kwargs)
         application_status_mapping = self.instance.get('application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING)
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         try:
             self.application_status_mapping = {
                 k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()
@@ -203,7 +204,9 @@ class YarnCheck(AgentCheck):
             )
             cluster_name = DEFAULT_CLUSTER_NAME
 
-        tags.append('cluster_name:{}'.format(cluster_name))
+        tags.append('yarn_cluster:{}'.format(cluster_name))
+        if not self._disable_legacy_cluster_tag:
+            tags.append('cluster_name:{}'.format(cluster_name))
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
