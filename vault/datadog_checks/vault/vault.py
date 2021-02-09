@@ -66,6 +66,7 @@ class Vault(OpenMetricsBaseCheck):
         self._no_token = is_affirmative(self.instance.get('no_token', False))
         self._tags = list(self.instance.get('tags', []))
         self._tags.append('api_url:{}'.format(self._api_url))
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
 
         # Keep track of the previous cluster leader to detect changes
         self._previous_leader = None
@@ -196,7 +197,9 @@ class Vault(OpenMetricsBaseCheck):
         health_data = self.access_api(url, ignore_status_codes=self.SYS_HEALTH_DEFAULT_CODES)
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
-            dynamic_tags.append('cluster_name:{}'.format(cluster_name))
+            dynamic_tags.append('vault_cluster:{}'.format(cluster_name))
+            if not self._disable_legacy_cluster_tag:
+                dynamic_tags.append('cluster_name:{}'.format(cluster_name))
 
         replication_mode = health_data.get('replication_dr_mode', '').lower()
         if replication_mode == 'secondary':
