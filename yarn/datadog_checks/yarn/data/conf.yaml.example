@@ -119,6 +119,11 @@ instances:
     #
     # split_yarn_application_tags: false
 
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `yarn_cluster`.
+    #
+    # disable_legacy_cluster_tag: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
