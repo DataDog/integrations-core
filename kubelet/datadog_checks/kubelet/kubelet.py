@@ -101,6 +101,7 @@ DEPRECATED_SUMMARIES = {
     'kubelet_pod_start_latency_microseconds': 'kubelet.pod.start.duration',
     'kubelet_pod_worker_latency_microseconds': 'kubelet.pod.worker.duration',
     'kubelet_pod_worker_start_latency_microseconds': 'kubelet.pod.worker.start.duration',
+    'kubelet_runtime_operations_latency_microseconds': 'kubelet.runtime.operations.duration',
 }
 
 NEW_1_14_SUMMARIES = {}
@@ -110,6 +111,7 @@ TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_pod_start_duration_seconds': 'kubelet.pod.start.duration',
     'kubelet_pod_worker_duration_seconds': 'kubelet.pod.worker.duration',
     'kubelet_pod_worker_start_duration_seconds': 'kubelet.pod.worker.start.duration',
+    'kubelet_runtime_operations_duration_seconds': 'kubelet.runtime.operations.duration',
 }
 
 log = logging.getLogger('collector')
