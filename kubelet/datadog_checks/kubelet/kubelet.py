@@ -73,6 +73,8 @@ DEFAULT_GAUGES = {
 DEPRECATED_GAUGES = {
     'kubelet_runtime_operations': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+    'kubelet_docker_operations': 'kubelet.docker.operations',
+    'kubelet_docker_operations_errors': 'kubelet.docker.errors',
 }
 
 NEW_1_14_GAUGES = {
@@ -102,6 +104,7 @@ DEPRECATED_SUMMARIES = {
     'kubelet_pod_worker_latency_microseconds': 'kubelet.pod.worker.duration',
     'kubelet_pod_worker_start_latency_microseconds': 'kubelet.pod.worker.start.duration',
     'kubelet_runtime_operations_latency_microseconds': 'kubelet.runtime.operations.duration',
+    'kubelet_docker_operations_latency_microseconds': 'kubelet.docker.operations.duration',
 }
 
 NEW_1_14_SUMMARIES = {}
