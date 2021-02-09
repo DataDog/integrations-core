@@ -79,10 +79,12 @@ assets/               @DataDog/agent-integrations
 /openstack/                               @DataDog/infrastructure-integrations @DataDog/agent-integrations               
 /openstack/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation  
 
-# System (and Process) checks
+# Agent Platform
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
 /network/                                 @DataDog/agent-integrations @DataDog/agent-platform
 /process/                                 @DataDog/agent-integrations @DataDog/agent-platform
+/otel/                                    @DataDog/agent-integrations @DataDog/agent-platform
+/nvidia_jetson/                           @DataDog/agent-integrations @DataDog/agent-platform
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
