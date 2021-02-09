@@ -1,5 +1,10 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.15.1 / 2021-02-09
+
+* [Fixed] Avoid ZeroDivisionError for hdfs.namenode.capacity_in_use . See [#8567](https://github.com/DataDog/integrations-core/pull/8567).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.15.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
