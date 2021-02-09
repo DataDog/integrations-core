@@ -1,5 +1,10 @@
 # CHANGELOG - yarn
 
+## 1.17.1 / 2021-02-09
+
+* [Fixed] Avoid failing on KeyError. See [#8563](https://github.com/DataDog/integrations-core/pull/8563).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.17.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
