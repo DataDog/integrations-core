@@ -4,7 +4,7 @@
 
 * [Added] Rename cluster_name tag to elastic_cluster. See [#8526](https://github.com/DataDog/integrations-core/pull/8526).
 * [Fixed] Disable SLM metrics by default. See [#8511](https://github.com/DataDog/integrations-core/pull/8511).
-* [Fixed] Bump minimum package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
 ## 1.23.0 / 2021-01-15
 
