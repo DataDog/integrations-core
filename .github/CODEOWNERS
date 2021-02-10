@@ -79,6 +79,7 @@ assets/               @DataDog/agent-integrations
 /openstack/                               @DataDog/infrastructure-integrations @DataDog/agent-integrations
 /openstack/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/                    @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/openstack_controller/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 
 
 # Agent Platform
