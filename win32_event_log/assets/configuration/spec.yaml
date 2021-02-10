@@ -44,6 +44,10 @@ files:
         example: normal
     - template: init_config/default
   - template: instances
+    overrides:
+      description: |
+        Every instance is scheduled independent of the other.
+        Everything under this section is sent as events.
     options:
     - name: path
       description: |
