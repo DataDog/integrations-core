@@ -219,7 +219,6 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH, addl_tags)
 
         if metrics_json:
-
             yarn_metrics = metrics_json[YARN_CLUSTER_METRICS_ELEMENT]
 
             if yarn_metrics is not None:
@@ -231,7 +230,7 @@ class YarnCheck(AgentCheck):
         """
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
-        if metrics_json and metrics_json['apps'] is not None and metrics_json['apps']['app'] is not None:
+        if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
                 tags = self._get_app_tags(app_json, app_tags) + addl_tags
 
@@ -285,8 +284,7 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
         version_set = False
 
-        if metrics_json and metrics_json['nodes'] is not None and metrics_json['nodes']['node'] is not None:
-
+        if metrics_json and metrics_json.get('nodes') and metrics_json['nodes'].get('node') is not None:
             for node_json in metrics_json['nodes']['node']:
                 node_id = node_json['id']
 
@@ -323,8 +321,7 @@ class YarnCheck(AgentCheck):
 
         self._set_yarn_metrics_from_json(tags, metrics_json, YARN_ROOT_QUEUE_METRICS)
 
-        if metrics_json['queues'] is not None and metrics_json['queues']['queue'] is not None:
-
+        if metrics_json and metrics_json.get('queues') and metrics_json['queues'].get('queue') is not None:
             queues_count = 0
             for queue_json in metrics_json['queues']['queue']:
                 queue_name = queue_json['queueName']
