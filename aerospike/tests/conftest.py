@@ -55,9 +55,9 @@ def warmup():
         return
 
     import aerospike
-    client = aerospike.client({'hosts': [(HOST, PORT)]}).connect()
+    client = aerospike.client({'hosts': [("127.0.0.1", PORT)]}).connect()
 
-    data = client.info_node("statistics", (HOST, PORT), {'timeout': 10})
+    data = client.info_node("statistics", ("127.0.0.1", PORT), {'timeout': 10})
     print(data)
 
 
