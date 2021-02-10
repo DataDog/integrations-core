@@ -1,0 +1,784 @@
+{
+    "title": "ActiveMQ - Overview",
+    "description": "This dashboard shows trends in the number of messages enqueued, dequeued, and dispatched so you can understand the status and throughput of your message brokers. For more information about ActiveMQ:\n\n- [ActiveMQ architecture and key metrics](https://www.datadoghq.com/blog/activemq-architecture-and-metrics/)\n\n- [Built-in and open source tools for collecting ActiveMQ metrics](https://www.datadoghq.com/blog/collecting-activemq-metrics/)\n\n- [Monitoring ActiveMQ with Datadog](https://www.datadoghq.com/blog/monitoring-activemq-with-datadog/)\n\n- [ActiveMQ integration documentation](https://docs.datadoghq.com/integrations/activemq/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/saas_logos/bot/activemq.png",
+                "sizing": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 1,
+                "width": 20,
+                "height": 12
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "note",
+                "content": "Broker",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 22,
+                "y": 1,
+                "width": 12,
+                "height": 23
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "note",
+                "content": "Queue",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 12,
+                "height": 59
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:activemq.queue.producer_count{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [{}]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Producers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 35,
+                "y": 1,
+                "width": 20,
+                "height": 11
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "max:activemq.queue.consumer_count{*}",
+                        "aggregator": "max"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Consumers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 35,
+                "y": 13,
+                "width": 20,
+                "height": 11
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.broker.memory_pct{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "avg:activemq.broker.store_pct{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "avg:activemq.broker.temp_pct{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "ActiveMQ broker: store, memory and temp usage (in %)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 56,
+                "y": 1,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.queue.avg_enqueue_time{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:activemq.queue.max_enqueue_time{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:activemq.queue.min_enqueue_time{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Enqueue time",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 13,
+                "y": 56,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.queue.dequeue_count{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Dequeue count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 56,
+                "y": 41,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.queue.dispatch_count{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Dispatch count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 56,
+                "y": 56,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.queue.enqueue_count{type:broker}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Enqueue count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 13,
+                "y": 41,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.queue.in_flight_count{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "In flight count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 56,
+                "y": 71,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.queue.size{*} by {queue}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "orange"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Queue size",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 13,
+                "y": 26,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "per_second(sum:activemq.queue.memory_pct{*} by {instance})",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "% Queue memory used/s",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 56,
+                "y": 26,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.queue.expired_count{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Expired count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 13,
+                "y": 71,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "check_status",
+                "title": "Queue Status",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "activemq.can_connect",
+                "grouping": "cluster",
+                "group_by": [],
+                "tags": ["*"],
+                "time": {
+                    "live_span": "10m"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 20,
+                "height": 9
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:activemq.topic.consumer_count{*} by {topic}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "grey"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Consumer count by topic",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 156,
+                "y": 1,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.topic.dequeue_count{*} by {topic}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Avg dequeue count by topic",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 156,
+                "y": 26,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.topic.enqueue_count{*} by {topic}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Avg enqueue count by topic",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 113,
+                "y": 26,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:activemq.topic.count{*} by {host}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Number of topics",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 113,
+                "y": 0,
+                "width": 20,
+                "height": 24
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:activemq.topic.consumer_count{*} by {topic}",
+                        "aggregator": "sum"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Avg consumers per topic",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 135,
+                "y": 0,
+                "width": 20,
+                "height": 24
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "note",
+                "content": "Topics",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 100,
+                "y": 0,
+                "width": 12,
+                "height": 40
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "note",
+                "content": "Topic subscribers",
+                "background_color": "blue",
+                "font_size": "16",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 100,
+                "y": 41,
+                "width": 12,
+                "height": 44
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.subscriber.pending_queue_size{*} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Subscriber pending queue size",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 113,
+                "y": 56,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.subscriber.dequeue_counter{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Subscriber dequeue count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 156,
+                "y": 56,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 24,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.subscriber.dispatched_queue_size{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Subscriber dispatched queue size",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 113,
+                "y": 71,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 25,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.subscriber.enqueue_counter{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Subscriber enqueue count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 156,
+                "y": 41,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 26,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:activemq.subscriber.dispatched_counter{*}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Subscriber dispatched count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 156,
+                "y": 71,
+                "width": 42,
+                "height": 14
+            }
+        },
+        {
+            "id": 27,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:activemq.subscriber.count{*} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Subscriber count",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 113,
+                "y": 41,
+                "width": 42,
+                "height": 14
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 29
+}
