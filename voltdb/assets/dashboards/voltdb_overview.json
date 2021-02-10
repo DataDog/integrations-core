@@ -33,9 +33,9 @@
     "widgets": [
         {
             "definition": {
-                "sizing": "center",
+                "sizing": "zoom",
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/voltdb.png"
+                "url": "/static/images/logos/voltdb_large.svg"
             },
             "id": 4831351939071384,
             "layout": {
