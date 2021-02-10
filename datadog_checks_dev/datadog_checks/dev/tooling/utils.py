@@ -7,6 +7,7 @@ import json
 import os
 import re
 from ast import literal_eval
+from datetime import datetime, timezone
 from json.decoder import JSONDecodeError
 
 import requests
@@ -52,6 +53,14 @@ INTEGRATION_LOGS_NOT_POSSIBLE = (
     'windows_service',  # OS
     'wmi_check',  # base class
 )
+
+
+def get_license_header():
+    return (
+        '# (C) Datadog, Inc. {year}-present\n'
+        '# All rights reserved\n'
+        '# Licensed under a 3-clause BSD style license (see LICENSE)'.format(year=str(datetime.now(timezone.utc).year))
+    )
 
 
 def format_commit_id(commit_id):
@@ -305,6 +314,10 @@ def get_data_directory(check_name):
         return os.path.join(get_root(), 'pkg', 'config')
     else:
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data')
+
+
+def get_models_location(check_name):
+    return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'config_models')
 
 
 def get_check_directory(check_name):
@@ -605,6 +618,10 @@ def has_dashboard(check):
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
+
+
+def has_config_models(check):
+    return dir_exists(get_models_location(check))
 
 
 def has_logs(check):

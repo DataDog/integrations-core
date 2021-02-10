@@ -15,6 +15,7 @@
 [click-github]: https://github.com/pallets/click
 [codecov-home]: https://codecov.io
 [config-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/consumers/example.py
+[config-spec-model-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/consumers/model.py
 [config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/core.py
 [config-spec-template-init-config-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml
 [config-spec-template-instances-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml
