@@ -54,6 +54,10 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.http_requests_total',
         NAMESPACE + '.authenticated_user_requests',
         NAMESPACE + '.apiserver_request_total',
+        NAMESPACE + '.grpc_client_handled_total',
+        NAMESPACE + '.grpc_client_msg_received_total',
+        NAMESPACE + '.grpc_client_msg_sent_total',
+        NAMESPACE + '.grpc_client_started_total',
         NAMESPACE + '.rest_client_request_latency_seconds.sum',
         NAMESPACE + '.rest_client_request_latency_seconds.count',
         NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
@@ -70,6 +74,16 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.registered_watchers',
         NAMESPACE + '.process_resident_memory_bytes',
         NAMESPACE + '.process_virtual_memory_bytes',
+        NAMESPACE + '.etcd_request_duration_seconds.sum',
+        NAMESPACE + '.etcd_request_duration_seconds.count',
+        # v1.16+
+        # https://v1-16.docs.kubernetes.io/docs/setup/release/#added-metrics
+        # NAMESPACE + '.watch_events_sizes.sum',
+        # NAMESPACE + '.watch_events_sizes.count',
+        # v1.17+
+        # https://github.com/kubernetes/kubernetes/pull/82409
+        # NAMESPACE + '.authentication_duration_seconds.sum',
+        # NAMESPACE + '.authentication_duration_seconds.count',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -79,6 +93,12 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.http_requests_total.count',
         NAMESPACE + '.authenticated_user_requests.count',
         NAMESPACE + '.apiserver_request_total.count',
+        # v1.16+
+        # https://v1-16.docs.kubernetes.io/docs/setup/release/#added-metrics
+        # NAMESPACE + '.authentication_attempts.count',
+        # v1.17+
+        # https://github.com/kubernetes/kubernetes/pull/83427
+        # NAMESPACE + '.apiserver_request_terminations_total.count',
     ]
 
     def test_check(self, aggregator, mock_get):
