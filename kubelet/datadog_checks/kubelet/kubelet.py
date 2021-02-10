@@ -68,8 +68,8 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
-    'go_threads': 'go.threads',
-    'go_goroutines': 'go.goroutines',
+    'go_threads': 'go_threads',
+    'go_goroutines': 'go_goroutines',
 }
 
 DEPRECATED_GAUGES = {
