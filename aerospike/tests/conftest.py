@@ -50,11 +50,22 @@ def init_db():
     client.close()
 
 
+def warmup():
+    if not Platform.is_linux():
+        return
+
+    import aerospike
+    client = aerospike.client({'hosts': [(HOST, PORT)]}).connect()
+
+    data = client.info_node("statistics", (HOST, PORT), {'timeout': 10})
+    print(data)
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
         COMPOSE_FILE,
-        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
+        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db), WaitFor(warmup, attempts=3)],
     ):
         yield INSTANCE
 
