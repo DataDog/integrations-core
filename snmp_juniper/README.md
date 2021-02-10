@@ -8,7 +8,7 @@ Juniper Networks develops and markets networking products, including routers, sw
 - Juniper MX Routers
 - Juniper SRX Firewalls
 
-For details of monitored metrics see the [SNMP Data Collected][3] section.
+For details of monitored metrics see the [NDM Data Collected][3] section.
 
 ## Setup
 
@@ -18,7 +18,7 @@ To install and configure the SNMP integration, see the [Network Device Monitorin
 
 ### Metrics
 
-For details of monitored metrics see the [SNMP Data Collected][3] section.
+For details of monitored metrics see the [NDM Data Collected][3] section.
 
 ### Service Checks
 
