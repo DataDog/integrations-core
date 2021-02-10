@@ -70,14 +70,16 @@ assets/               @DataDog/agent-integrations
 /tenable/                                 @anshumgargdd @DataDog/agent-integrations
 
 # Infrastructure integrations
-/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations               
-/snmp/*.md                                @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation    
+/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/snmp/*.md                                @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                  @DataDog/infrastructure-integrations @DataDog/agent-integrations
 /snmp_*/*.md                              @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/vsphere/                                 @DataDog/infrastructure-integrations @DataDog/agent-integrations               
-/vsphere/*.md                             @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation  
-/openstack/                               @DataDog/infrastructure-integrations @DataDog/agent-integrations               
-/openstack/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation  
+/vsphere/                                 @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/vsphere/*.md                             @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack/                               @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/openstack/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack_controller/                    @DataDog/infrastructure-integrations @DataDog/agent-integrations
+
 
 # Agent Platform
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
