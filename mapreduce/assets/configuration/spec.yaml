@@ -81,6 +81,11 @@ files:
             value:
               example: "<MAPREDUCE_CLUSTER_NAME>"
               type: string
+          - name: disable_legacy_cluster_tag
+            description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `mapreduce_cluster`.
+            value:
+              type: boolean
+              example: false
           - template: instances/http
           - template: instances/default
 
