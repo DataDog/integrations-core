@@ -307,26 +307,23 @@ class Connection(object):
         }
 
         if self.connector == 'adodbapi':
-            for key, value in adodbapi_options.items():
-                if key in cs:
-                    raise ConfigurationError("%s has been provided both in the connection string and as a "
-                                             "configuration option, please specify it only one".format(key))
-            for key, value in odbc_options.items():
-                if key in cs or value is not None:
-                    raise ConfigurationError("%s has been provided in the connection string. "
-                                             "This option is only available for odbc connections,"
-                                             " however adodbapi has been selected" % key)
+            other_connector = 'odbc'
+            connector_options = adodbapi_options
+            other_connector_options = odbc_options
         else:
-            for key, value in odbc_options.items():
-                if key in cs:
-                    raise ConfigurationError("%s has been provided both in the connection string and as a "
-                                             "configuration option, please specify it only one".format(key))
-            for key, value in adodbapi_options.items():
-                if key in cs or value is not None:
-                    raise ConfigurationError("%s has been provided in the connection string. "
-                                             "This option is only available for adodbapi connections,"
-                                             " however odbc has been selected" % key)
+            other_connector = 'adodbapi'
+            connector_options = odbc_options
+            other_connector_options = adodbapi_options
 
+        for key, value in connector_options.items():
+            if key in cs:
+                raise ConfigurationError("%s has been provided both in the connection string and as a "
+                                         "configuration option, please specify it only one".format(key))
+        for key, value in other_connector_options.items():
+            if key in cs or value is not None:
+                raise ConfigurationError("%s has been provided in the connection string. "
+                                         "This option is only available for %s connections,"
+                                         " however %s has been selected" % (key, other_connector, self.connector))
 
     def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
         """Return a connection string to use with odbc"""
