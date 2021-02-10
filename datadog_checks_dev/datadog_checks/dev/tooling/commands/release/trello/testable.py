@@ -365,7 +365,10 @@ def testable(
 
         pr_milestone = get_pr_milestone(pr_data)
         if milestone and pr_milestone != milestone:
-            echo_info(f'Looking for milestone {milestone}, skipping {format_commit_id(commit_id)}.')
+            echo_info(
+                f'Looking for milestone {milestone}, skipping {format_commit_id(commit_id)}'
+                + f' with milestone {pr_milestone}.'
+            )
             continue
 
         pr_url = pr_data.get('html_url', f'https://github.com/DataDog/{repo}/pull/{commit_id}')
