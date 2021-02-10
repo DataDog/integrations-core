@@ -7,6 +7,7 @@ import json
 import os
 import re
 from ast import literal_eval
+from datetime import datetime, timezone
 from json.decoder import JSONDecodeError
 
 import requests
@@ -89,6 +90,14 @@ INTEGRATION_LOGS_NOT_POSSIBLE = (
     'windows_service',  # OS
     'wmi_check',  # base class
 )
+
+
+def get_license_header():
+    return (
+        '# (C) Datadog, Inc. {year}-present\n'
+        '# All rights reserved\n'
+        '# Licensed under a 3-clause BSD style license (see LICENSE)'.format(year=str(datetime.now(timezone.utc).year))
+    )
 
 
 def format_commit_id(commit_id):

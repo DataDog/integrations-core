@@ -19,6 +19,7 @@ flup-py3==1.0.3; python_version > "3.0"
 flup==1.0.3.dev-20110405; python_version < "3.0"
 futures==3.3.0; python_version < "3.0"
 gearman==2.0.2; sys_platform != "win32" and python_version < "3.0"
+immutables==0.15; python_version > "3.0"
 in-toto==0.5.0
 ipaddress==1.0.22; python_version < "3.0"
 jaydebeapi==1.2.3
@@ -42,6 +43,7 @@ psutil==5.7.2
 psycopg2-binary==2.8.4
 pyasn1==0.4.6
 pycryptodomex==3.9.4
+pydantic==1.8; python_version > "3.0"
 pyhdb==0.3.4
 pyjwt==1.7.1
 pymongo==3.8.0
