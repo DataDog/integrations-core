@@ -8,7 +8,7 @@ from datadog_checks.dev import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-HOST = "127.0.0.1"
+HOST = "::1"
 PORT = 3000
 VERSION = os.environ.get('AEROSPIKE_VERSION')
 
