@@ -259,7 +259,10 @@ class SparkCheck(AgentCheck):
         Determine what mode was specified
         """
         tags = list(self.tags)
-        tags.append('cluster_name:%s' % self.cluster_name)
+
+        tags.append('spark_cluster:%s' % self.cluster_name)
+        if is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+            tags.append('cluster_name:%s' % self.cluster_name)
 
         if self.cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
