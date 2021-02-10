@@ -15,7 +15,7 @@ from prometheus_client.parser import text_fd_to_metric_families as parse_metric_
 from ....config import is_affirmative
 from ....constants import ServiceCheck
 from ....errors import ConfigurationError
-from ....utils.common import no_op
+from ....utils.functions import no_op, return_true
 from ....utils.http import RequestsWrapper
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
@@ -118,7 +118,7 @@ class OpenMetricsScraper:
         elif exclude_metrics_by_labels:
             for label, values in exclude_metrics_by_labels.items():
                 if values is True:
-                    self.exclude_metrics_by_labels[label] = lambda label_value: True
+                    self.exclude_metrics_by_labels[label] = return_true
                 elif isinstance(values, list):
                     for i, value in enumerate(values, 1):
                         if not isinstance(value, str):

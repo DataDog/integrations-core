@@ -38,10 +38,6 @@ else:
 to_string = to_native_string
 
 
-def no_op(*args, **kwargs):
-    pass
-
-
 def compute_percent(part, total):
     if total:
         return part / total * 100
