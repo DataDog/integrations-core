@@ -1144,6 +1144,23 @@ def test_metadata(aggregator, datadog_agent):
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
+@pytest.mark.unit
+def test_disable_legacy_cluster_tags(aggregator):
+    instance = MESOS_FILTERED_CONFIG
+    instance['disable_legacy_cluster_tag'] = True
+
+    with mock.patch('requests.get', mesos_requests_get_mock):
+        c = SparkCheck('spark', {}, [instance])
+        c.check(instance)
+
+        for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            # Only spark_cluster tag is present
+            assert sc.tags == ['url:http://localhost:5050', 'spark_cluster:{}'.format(CLUSTER_NAME)]
+
+        assert aggregator.metrics_asserted_pct == 100.0
+
+
 def test_do_not_crash_on_version_collection_failure():
     running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
     rest_requests_to_json = mock.MagicMock(side_effect=[RequestException, []])
