@@ -13,6 +13,7 @@ DEFAULT_RM_URI = 'http://localhost:8088'
 DEFAULT_TIMEOUT = 5
 DEFAULT_CLUSTER_NAME = 'default_cluster'
 DEFAULT_COLLECT_APP_METRICS = True
+DEFAULT_COLLECT_NODE_METRICS = True
 MAX_DETAILED_QUEUES = 100
 DEFAULT_SPLIT_YARN_APPLICATION_TAGS = False
 
@@ -209,7 +210,8 @@ class YarnCheck(AgentCheck):
         self._yarn_cluster_metrics(rm_address, tags)
         if is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
             self._yarn_app_metrics(rm_address, app_tags, tags)
-        self._yarn_node_metrics(rm_address, tags)
+        if is_affirmative(instance.get('collect_node_metrics', DEFAULT_COLLECT_NODE_METRICS)):
+            self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
 
     def _yarn_cluster_metrics(self, rm_address, addl_tags):
