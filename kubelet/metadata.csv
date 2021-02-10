@@ -73,3 +73,5 @@ kubernetes.kubelet.docker.operations,count,,operation,,The number of docker oper
 kubernetes.kubelet.docker.errors,count,,operation,,The number of docker operations errors,-1,kubernetes,k8s.docker.err
 kubernetes.kubelet.docker.operations.duration.sum,gauge,,operation,,The sum of duration of docker operations,0,kubernetes,k8s.docker.duration
 kubernetes.kubelet.docker.operations.duration.count,gauge,,,,The count of docker operations,0,kubernetes,k8s.docker.duration
+kubernetes.go.threads,gauge,,,,Number of OS threads created,0,kubernetes,k8s.go.threads
+kubernetes.go.goroutines,gauge,,,,Number of goroutines that currently exist,0,kubernetes,k8s.go.goroutines
