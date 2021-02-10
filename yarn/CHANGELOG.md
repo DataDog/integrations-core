@@ -1,9 +1,5 @@
 # CHANGELOG - yarn
 
-## 1.17.2 / 2021-02-10
-
-* [Added] Add config option to disable node metric collection
-
 ## 1.17.1 / 2021-02-09
 
 * [Fixed] Avoid failing on KeyError. See [#8563](https://github.com/DataDog/integrations-core/pull/8563).
