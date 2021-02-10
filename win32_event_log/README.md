@@ -19,7 +19,7 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 2. [Restart the Agent][4] to start sending Windows events to Datadog.
 
-**Note**: Events and logs are configured separately. See [log collection](#log-collection), below, for configuring log collection.
+**Note**: Events and logs are configured separately. Logs are not configured within each instance. See [log collection](#log-collection), below, for configuring log collection.
 
 ### Log collection
 
