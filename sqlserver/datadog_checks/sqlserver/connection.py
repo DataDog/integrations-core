@@ -310,10 +310,17 @@ class Connection(object):
             other_connector = 'odbc'
             connector_options = adodbapi_options
             other_connector_options = odbc_options
+            if provider:
+                self.log.warning("Provider option will be ignored since adodbapi connection is used")
+
         else:
             other_connector = 'adodbapi'
             connector_options = odbc_options
             other_connector_options = adodbapi_options
+            if dsn:
+                self.log.warning("DSN option will be ignored since odbc connection is used")
+            if driver:
+                self.log.warning("Driver option will be ignored since odbc connection is used")
 
         for key, value in connector_options.items():
             if key in cs:
