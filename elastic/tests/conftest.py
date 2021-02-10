@@ -13,7 +13,7 @@ from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.elastic import ESCheck
 
-from .common import ELASTIC_VERSION, HERE, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, ELASTIC_CLUSTER_TAG, ELASTIC_VERSION, HERE, PASSWORD, URL, USER
 
 CUSTOM_TAGS = ['foo:bar', 'baz']
 COMPOSE_FILES_MAP = {
@@ -112,7 +112,15 @@ def version_metadata():
 
 
 def _cluster_tags():
-    tags = ['url:{}'.format(URL), 'cluster_name:test-cluster']
+    tags = ['url:{}'.format(URL)] + ELASTIC_CLUSTER_TAG + CLUSTER_TAG
+    tags.extend(CUSTOM_TAGS)
+
+    return tags
+
+
+@pytest.fixture
+def new_cluster_tags():
+    tags = ['url:{}'.format(URL)] + ELASTIC_CLUSTER_TAG
     tags.extend(CUSTOM_TAGS)
 
     return tags
