@@ -262,8 +262,6 @@ class SimpleApi(AbstractApi):
         self.nova_endpoint = None
         self.neutron_endpoint = None
         self.auth_token = None
-        # Cache for the `_make_request` method
-        self.cache = {}
 
     def connect(self, user):
         credentials = Authenticator.from_config(self.logger, self.keystone_endpoint, user, self.http)
@@ -280,12 +278,6 @@ class SimpleApi(AbstractApi):
         Raises specialized Exceptions for commonly encountered error codes
         """
         self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, self.http.options['headers'], params)
-
-        # Checking if request is in cache
-        cache_key = "|".join([url, json.dumps(self.http.options['headers']), json.dumps(params), str(self.timeout)])
-        if cache_key in self.cache:
-            self.logger.debug("Request found in cache. cache key %s", cache_key)
-            return self.cache.get(cache_key)
 
         try:
             resp = self.http.get(url, params=params)
@@ -305,8 +297,6 @@ class SimpleApi(AbstractApi):
         jresp = resp.json()
         self.logger.debug("url: %s || response: %s", url, jresp)
 
-        # Adding response to the cache
-        self.cache[cache_key] = jresp
         return jresp
 
     def get_keystone_endpoint(self):
