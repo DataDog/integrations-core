@@ -34,6 +34,6 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor SNMP with Datadog][2]
 
-[1]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
+[1]: https://docs.datadoghq.com/network_monitoring/devices/setup/
 [2]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
-[3]: https://docs.datadoghq.com/network_performance_monitoring/devices/data/
+[3]: https://docs.datadoghq.com/network_monitoring/devices/data/
