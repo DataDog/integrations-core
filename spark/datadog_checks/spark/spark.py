@@ -175,7 +175,7 @@ class SparkCheck(AgentCheck):
                 SPARK_YARN_MODE,
             )
             self.cluster_mode = SPARK_YARN_MODE
-
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
         # Get the cluster name from the instance configuration
@@ -187,7 +187,10 @@ class SparkCheck(AgentCheck):
 
     def check(self, _):
         tags = list(self.tags)
-        tags.append('cluster_name:%s' % self.cluster_name)
+
+        tags.append('spark_cluster:%s' % self.cluster_name)
+        if not self._disable_legacy_cluster_tag:
+            tags.append('cluster_name:%s' % self.cluster_name)
 
         spark_apps = self._get_running_apps()
 
@@ -261,7 +264,7 @@ class SparkCheck(AgentCheck):
         tags = list(self.tags)
 
         tags.append('spark_cluster:%s' % self.cluster_name)
-        if is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+        if not self._disable_legacy_cluster_tag:
             tags.append('cluster_name:%s' % self.cluster_name)
 
         if self.cluster_mode == SPARK_STANDALONE_MODE:
