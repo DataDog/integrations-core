@@ -35,6 +35,35 @@ resource "google_compute_instance" "devstack" {
   }
 }
 
+resource "google_container_cluster" "gke_cluster" {
+  name = replace("openstackcontroller-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
+  location = random_shuffle.az.result[0]
+
+  lifecycle {
+    ignore_changes = ["node_pool"]
+  }
+
+  initial_node_count = 3
+
+  master_auth {
+    username = "user"
+    password = random_id.password.hex
+  }
+
+  node_config {
+    disk_size_gb = 10
+    disk_type = "pd-standard"
+    machine_type = "n1-standard-2"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/compute",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+    tags = ["openstackcontroller", "lab"]
+  }
+}
+
 output "ip" {
   value = "${google_compute_instance.devstack.network_interface.0.access_config.0.nat_ip}"
 }
