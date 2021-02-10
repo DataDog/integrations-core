@@ -1,12 +1,6 @@
-# Reusable local variable
-locals {
-  # short version of username (to avoid hitting GCP 40 chars limit for cluster name)
-  short_user = substr("${var.user}", 0, 18)
-}
-
 # Shared common terraform config found in the templates/terraform folder in datadog_checks_dev
 resource "google_compute_instance" "devstack" {
-  name = replace("openstack-ctrl-${local.short_user}-${random_string.suffix.result}", ".", "-")
+  name = replace("devstack-${var.user}-${random_string.suffix.result}", ".", "-")
   machine_type = "n1-standard-4"
 
   tags = ["openstack", "lab"]
