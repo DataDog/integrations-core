@@ -29,6 +29,16 @@ RM_URI = 'http://{}:8088'.format(HOST)
 
 # Custom tags
 CUSTOM_TAGS = ['optional:tag1']
+MAPREDUCE_CLUSTER_TAG = 'mapreduce_cluster:{}'.format(CLUSTER_NAME)
+LEGACY_CLUSTER_TAG = 'cluster_name:{}'.format(CLUSTER_NAME)
+
+CLUSTER_TAGS = [MAPREDUCE_CLUSTER_TAG, LEGACY_CLUSTER_TAG]
+
+COMMON_TAGS = [
+    'app_name:{}'.format(APP_NAME),
+    'job_name:{}'.format(JOB_NAME),
+    'user_name:{}'.format(USER_NAME),
+] + CUSTOM_TAGS
 
 YARN_APPS_URL_BASE = '{}/{}'.format(RM_URI, MapReduceCheck.YARN_APPS_PATH)
 MR_JOBS_URL = '{}/proxy/{}/{}'.format(RM_URI, APP_ID, MapReduceCheck.MAPREDUCE_JOBS_PATH)
@@ -76,8 +86,6 @@ def mock_local_mapreduce_dns():
     with mock_local(mapping):
         yield
 
-
-CLUSTER_TAG = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
 MR_CONFIG = {
     'instances': [
@@ -194,30 +202,15 @@ MAPREDUCE_JOB_METRIC_VALUES = {
     'mapreduce.job.successful_map_attempts': 0,
 }
 
-MAPREDUCE_JOB_METRIC_TAGS = [
-    'cluster_name:{}'.format(CLUSTER_NAME),
-    'app_name:{}'.format(APP_NAME),
-    'job_name:{}'.format(JOB_NAME),
-    'user_name:{}'.format(USER_NAME),
-]
-
 MAPREDUCE_MAP_TASK_METRIC_VALUES = {'mapreduce.job.map.task.elapsed_time': 99869037}
 
 MAPREDUCE_MAP_TASK_METRIC_TAGS = [
-    'cluster_name:{}'.format(CLUSTER_NAME),
-    'app_name:{}'.format(APP_NAME),
-    'job_name:{}'.format(JOB_NAME),
-    'user_name:{}'.format(USER_NAME),
     'task_type:map',
 ]
 
 MAPREDUCE_REDUCE_TASK_METRIC_VALUES = {'mapreduce.job.reduce.task.elapsed_time': 123456}
 
 MAPREDUCE_REDUCE_TASK_METRIC_TAGS = [
-    'cluster_name:{}'.format(CLUSTER_NAME),
-    'app_name:{}'.format(APP_NAME),
-    'job_name:{}'.format(JOB_NAME),
-    'user_name:{}'.format(USER_NAME),
     'task_type:reduce',
 ]
 
@@ -238,10 +231,3 @@ MAPREDUCE_JOB_COUNTER_METRIC_VALUES_RECORDS = {
     'mapreduce.job.counter.map_counter_value': {'value': 10, 'tags': ['counter_name:map_output_records']},
     'mapreduce.job.counter.reduce_counter_value': {'value': 11, 'tags': ['counter_name:map_output_records']},
 }
-
-MAPREDUCE_JOB_COUNTER_METRIC_TAGS = [
-    'cluster_name:{}'.format(CLUSTER_NAME),
-    'app_name:{}'.format(APP_NAME),
-    'job_name:{}'.format(JOB_NAME),
-    'user_name:{}'.format(USER_NAME),
-]
