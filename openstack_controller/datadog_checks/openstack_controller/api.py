@@ -4,7 +4,6 @@
 from os import environ
 
 import requests
-import simplejson as json
 from openstack import connection
 from six.moves.urllib.parse import urljoin
 
