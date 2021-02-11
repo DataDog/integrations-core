@@ -251,7 +251,9 @@ class VSphereCheck(AgentCheck):
                 resource_tags,
             ):
                 # The resource does not match the specified whitelist/blacklist patterns.
-                self.log.debug("Skipping resource not matched by filters. resource=`%s` tags=`%s`", mor_name, resource_tags)
+                self.log.debug(
+                    "Skipping resource not matched by filters. resource=`%s` tags=`%s`", mor_name, resource_tags
+                )
                 continue
 
             mor_payload = {"tags": tags}  # type: Dict[str, Any]
