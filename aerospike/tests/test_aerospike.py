@@ -23,6 +23,7 @@ def test_check(aggregator, instance):
     _test_check(aggregator)
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(aggregator, instance, datadog_agent):
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'

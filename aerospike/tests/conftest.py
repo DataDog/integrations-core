@@ -62,13 +62,13 @@ def warm_up():
     # Aerospike has a socket error when using get_docker_hostname value on azure
     # The socket error disappear when using 127.0.0.1
     try:
-        check._client.info_node('statistics', check._host, check._info_policies)
+        check.get_client().info_node('statistics', check._host, check._info_policies)
     except Exception:
         INSTANCE['host'] = '127.0.0.1'
         check = AerospikeCheck('aerospike', {}, [INSTANCE])
 
     # Make sure we can now run the command
-    check._client.info_node('statistics', check._host, check._info_policies)
+    check.get_client().info_node('statistics', check._host, check._info_policies)
 
 
 @pytest.fixture(scope='session')
