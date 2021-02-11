@@ -2,19 +2,18 @@
 
 ## Overview
 
-The Datadog Terraform Provider allows you to interact with the Datadog API through terraform configuration.
-You can manage your Datadog resources such as Dashboards, Monitors, Logs Configuration, etc.  
+The Datadog Terraform provider allows you to interact with the Datadog API through a Terraform configuration. You can manage your Datadog resources, such as Dashboards, Monitors, Logs Configuration, etc., with this configuration.
 
 ## Setup
 
 ### Installation
 
-The datadog terraform provider is available through the [Terraform Registry][1].
+The Datadog Terraform provider is available through the [Terraform Registry][1].
 
 ### Configuration
 
 1. [Install Terraform][2]
-2. Create a directory that will contain the terraform configuration files, for example: `terraform_config`
+2. Create a directory to contain the Terraform configuration files, for example: `terraform_config`
 3. Create a `main.tf` file in `terraform_config` with the following content:
 ```
 terraform {
@@ -52,21 +51,21 @@ resource "datadog_monitor" "process_alert_example" {
 }
 ```
 
-6. Run `terraform apply` to create this monitor in your Datadog account! 
+6. Run `terraform apply` to create this monitor in your Datadog account!
 
 ## Data Collected
 
 ### Metrics
 
-terraform does not include any metrics.
+Terraform does not include any metrics.
 
 ### Service Checks
 
-terraform does not include any service checks.
+Terraform does not include any service checks.
 
 ### Events
 
-terraform does not include any events.
+Terraform does not include any events.
 
 ## Troubleshooting
 
