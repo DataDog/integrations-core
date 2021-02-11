@@ -2,18 +2,17 @@
 
 ## Overview
 
-This check monitors [Databricks][1].
+Monitor your [Databricks][1] clusters with the Datadog [Spark integration][6].
 
 ## Setup
 
 ### Installation
 
-The Databricks check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+Monitor Databricks Spark applications with the [Datadog Spark integration][2]. No additional installation is needed on your server.
 
 ### Configuration
 
-Use the [Spark Integration][2] to monitor your Apache Spark Cluster.
+Configure the [Spark integration][2] to monitor your Apache Spark Cluster.
 
 #### Standard cluster
 
@@ -29,9 +28,10 @@ instances:
 
 #### Job cluster
 
-For job clusters, please use the following script to monitor.
+For job clusters, use the following script to configure the Spark integration.
 
-The main differences is the use the `spark_driver_mode` in the Spark integration configuration and the port used is the Spark UI port.
+    Note: Job clusters are monitored in `spark_driver_mode` via the Spark UI port.
+
 
 ```shell script
 #!/bin/bash
@@ -107,3 +107,4 @@ Need help? Contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
+[6]: https://docs.datadoghq.com/integrations/spark/?tab=host
