@@ -335,7 +335,7 @@ def test_tags_filters_integration_tags(aggregator, dd_run_check, historical_inst
     check = VSphereCheck('vsphere', {}, [historical_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric('vsphere.cpu.usage.avg', count=2)
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
     aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter2', count=1)
     aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Dätacenter', count=0)
 
