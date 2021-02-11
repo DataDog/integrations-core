@@ -1,7 +1,7 @@
 name: vSphere
 files:
 - name: vsphere.yaml
-  options:  
+  options:
   - template: init_config
     options:
     - template: init_config/default
@@ -17,16 +17,16 @@ files:
       - name: username
         required: true
         display_priority: 1
-        description: | 
+        description: |
           The username of the read-only credentials to connect to vCenter
           see https://app.datadoghq.com/account/settings#integrations/vsphere
         value:
           type: string
           example: <USERNAME>
-      - name: password 
+      - name: password
         required: true
         display_priority: 1
-        description: | 
+        description: |
           The password of the read-only credentials to connect to vCenter.
           see https://app.datadoghq.com/account/settings#integrations/vsphere
         value:
@@ -35,8 +35,8 @@ files:
       - name: use_legacy_check_version
         required: true
         display_priority: 1
-        description: | 
-          For backward compatibility reasons, it is possible to use a deprecated version of the vSphere 
+        description: |
+          For backward compatibility reasons, it is possible to use a deprecated version of the vSphere
           integration by setting this field to "true".
         value:
             type: boolean
@@ -70,11 +70,11 @@ files:
           realtime and historical metrics), you usually want to collect events only once.
           By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
           `collection_type: historical`
-          If `collect_events_only: true`, this option has no effect and events will be collected. 
+          If `collect_events_only: true`, this option has no effect and events will be collected.
         value:
           type: boolean
-          default: depends on collection_type value
-          example: true 
+          display_default: depends on collection_type value
+          example: true
       - name: use_collect_events_fallback
         description: |
           Some events might contain invalid types.
@@ -95,7 +95,7 @@ files:
           example: true
       - name: ssl_capath
         description: |
-          Set to the absolute file path of a directory containing CA certificates 
+          Set to the absolute file path of a directory containing CA certificates
           in PEM format
         value:
           type: string
@@ -104,8 +104,8 @@ files:
         description: |
           If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
           Disable those by setting `tls_ignore_warning` to true.
-          
-          Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+
+          Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
           If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
           to true.
         value:
@@ -137,7 +137,7 @@ files:
                   historical metrics
 
         value:
-          default: no filter
+          display_default: no filter
           example:
             - resource: vm
               property: name
@@ -190,9 +190,9 @@ files:
           Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
                   resources do not have realtime metrics. They will work only with "collection_type: historical".
           Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
-                  have historical metrics. They will work only with "collection_type: realtime".     
+                  have historical metrics. They will work only with "collection_type: realtime".
         value:
-          default: all metrics
+          display_default: all metrics
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -227,7 +227,7 @@ files:
               items:
                 type: string
       - name: collect_per_instance_filters
-        description: | 
+        description: |
           Some vSphere metrics can be tagged with instance values.
           For each resource type (vm, host, datastore, cluster) to collect,
           you can choose which metrics you want to collect the instance value as tags using a list of regex.
@@ -237,7 +237,7 @@ files:
           Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
           /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
         value:
-          default: none
+          display_default: none
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -264,9 +264,9 @@ files:
             - name: cluster
               type: array
               items:
-                type: string            
+                type: string
       - name: collect_tags
-        description: | 
+        description: |
           If true, the vSphere Tags will be collected.
           The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
           vSphere tag name as value:
@@ -292,7 +292,7 @@ files:
         value:
           type: string
           example: ''
-      - name: collect_attributes 
+      - name: collect_attributes
         description: |
           If true, the vSphere attributes will be collected and submitted as Datadog tags.
           The final tag sent to Datadog is composed of 'attribute_prefix' + vSphere attribute category as key and
@@ -350,10 +350,10 @@ files:
           change often and it is usually helpful to be informed quickly of this change.
         value:
           type: array
-          items: 
+          items:
             type: string
-          default: []
-          example: 
+          display_default: []
+          example:
             - <HOST_TAG>
       - name: metrics_per_query
         description: |
@@ -363,7 +363,7 @@ files:
           A value <= 0 means unlimited: it makes one query for all the monitored objects
         value:
           type: integer
-          default: 500
+          display_default: 500
           example: 50
       - name: max_historical_metrics
         description: |

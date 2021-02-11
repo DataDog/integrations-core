@@ -8,7 +8,7 @@
     type: array
     items:
       type: object
-    default: null
+    display_default: null
     example:
       - query: <QUERY>
         columns: <COLUMNS>

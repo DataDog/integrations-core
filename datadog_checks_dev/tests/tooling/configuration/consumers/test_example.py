@@ -809,7 +809,7 @@ def test_option_string_type_not_default_example_default_value_none():
             value:
               type: string
               example: something
-              default: None
+              display_default: None
         """
     )
 
@@ -840,7 +840,7 @@ def test_option_string_type_not_default_example_default_value_null():
             value:
               type: string
               example: something
-              default: null
+              display_default: null
         """
     )
 
@@ -1294,7 +1294,7 @@ def test_option_default_example_override_null():
             value:
               type: string
               example: something
-              default: null
+              display_default: null
         """
     )
 
@@ -1325,7 +1325,7 @@ def test_option_default_example_override_string():
             value:
               type: string
               example: something
-              default: bar
+              display_default: bar
         """
     )
 
@@ -1356,7 +1356,7 @@ def test_option_default_example_override_non_string():
             value:
               type: string
               example: something
-              default:
+              display_default:
                 foo: [bar, baz]
         """
     )
