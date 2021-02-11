@@ -19,9 +19,7 @@
         "title": "Latency",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -49,9 +47,7 @@
         "title": "Used memory",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -83,9 +79,7 @@
         "title": "Fragmentation ratio",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -113,9 +107,7 @@
         "title": "Evictions",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -183,9 +175,7 @@
         "title": "Connected clients",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -248,9 +238,7 @@
         "title": "Keys",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -318,9 +306,7 @@
         "title": "Rejected connections",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -389,9 +375,7 @@
         "title": "Commands per second",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -416,9 +400,7 @@
         "title": "Slowlog",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -433,7 +415,7 @@
       "id": 13,
       "definition": {
         "type": "image",
-        "url": "/static/images/logos/redis_large.svg",
+        "url": "/static/images/saas_logos/bot/redis.png",
         "sizing": "center"
       },
       "layout": {
@@ -541,9 +523,7 @@
         "title": "Blocked clients",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -580,9 +560,7 @@
         "title": "Cache hit rate",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
@@ -607,9 +585,7 @@
         "title": "Connected slaves",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
+        "time": {},
         "show_legend": false,
         "legend_size": "0"
       },
