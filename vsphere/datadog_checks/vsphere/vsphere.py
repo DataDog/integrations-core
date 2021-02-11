@@ -243,13 +243,15 @@ class VSphereCheck(AgentCheck):
             # Attach tags from fetched attributes.
             tags.extend(properties.get('attributes', []))
 
+            resource_tags = self.infrastructure_cache.get_mor_tags(mor) + tags
             if not is_resource_collected_by_filters(
                 mor,
                 infrastructure_data,
                 self.config.resource_filters,
-                self.infrastructure_cache.get_mor_tags(mor) + tags,
+                resource_tags,
             ):
                 # The resource does not match the specified whitelist/blacklist patterns.
+                self.log.debug("Skipping resource not matched by filters. resource=`%s` tags=`%s`", mor_name, resource_tags)
                 continue
 
             mor_payload = {"tags": tags}  # type: Dict[str, Any]
