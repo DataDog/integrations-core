@@ -102,6 +102,11 @@ instances:
     #
     # collect_app_metrics: true
 
+    ## @param collect_node_metrics - boolean - optional - default: true
+    ## Set this parameter to false to remove yarn.node metrics from metric collection.
+    #
+    # collect_node_metrics: true
+
     ## @param queue_blacklist - list of strings - optional
     ## Do not emit metrics for certain yarn capacityScheduler queues.
     ## The check can send queue metrics on up to 100 queues.
