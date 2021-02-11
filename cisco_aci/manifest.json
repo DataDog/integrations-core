@@ -28,7 +28,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "cisco-aci": "assets/dashboards/cisco_aci_dashboard.json"
+      "cisco_aci": "assets/dashboards/cisco_aci_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},
