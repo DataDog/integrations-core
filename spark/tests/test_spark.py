@@ -19,12 +19,12 @@ from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.spark import SparkCheck
 
-from .common import INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
+from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
 
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
 SPARK_APP_ID = 'app_001'
-CLUSTER_NAME = 'SparkCluster'
+
 APP_NAME = 'PySparkShell'
 
 # URLs for cluster managers
@@ -57,11 +57,6 @@ TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
 CUSTOM_TAGS = ['optional:tag1']
-CLUSTER_TAGS = [
-    'spark_cluster:' + CLUSTER_NAME,
-    'cluster_name:' + CLUSTER_NAME,
-]
-
 COMMON_TAGS = [
     'app_name:' + APP_NAME,
 ] + CLUSTER_TAGS

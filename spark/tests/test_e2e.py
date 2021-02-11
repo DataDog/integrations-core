@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.spark import SparkCheck
 
-from . import common, conftest
+from . import common
 
 
 @pytest.mark.e2e
@@ -27,5 +27,5 @@ def test_e2e(dd_agent_check):
     aggregator.assert_service_check(
         'spark.standalone_master.can_connect',
         status=SparkCheck.OK,
-        tags=['url:http://spark-master:8080'] + conftest.CLUSTER_TAGS,
+        tags=['url:http://spark-master:8080'] + common.CLUSTER_TAGS,
     )
