@@ -9,11 +9,6 @@
 #
 # However, event viewer & the C api do not show the constants from above, but rather return these:
 # https://docs.microsoft.com/en-us/windows/win32/wes/eventmanifestschema-leveltype-complextype#remarks
-EVENT_TYPES = {
-    'success': 4,
-    'error': 2,
-    'warning': 3,
-    'information': 4,
-    'success audit': 4,
-    'failure audit': 2,
-}
+EVENT_TYPES_TO_LEVEL = {'success': 4, 'error': 2, 'warning': 3, 'information': 4}
+
+EVENT_TYPES_TO_KEYWORD = {'failure audit': '0x8010000000000000', 'success audit': '0x8020000000000000'}

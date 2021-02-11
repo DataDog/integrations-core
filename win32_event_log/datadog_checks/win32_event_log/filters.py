@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import ConfigurationError
 
-from .constants import EVENT_TYPES
+from .constants import EVENT_TYPES_TO_KEYWORD, EVENT_TYPES_TO_LEVEL
 
 
 def construct_xpath_query(filters):
@@ -42,19 +42,25 @@ def construct_sources(sources):
 
 
 def construct_types(types):
-    event_types = set()
+    event_levels = set()
+    event_keywords = set()
 
     for event_type in types:
         if not isinstance(event_type, str):
             raise ConfigurationError('Values for event filter `type` must be strings.')
 
         event_type = event_type.lower()
-        if event_type not in EVENT_TYPES:
+
+        if event_type in EVENT_TYPES_TO_LEVEL:
+            event_levels.add(EVENT_TYPES_TO_LEVEL[event_type])
+        elif event_type in EVENT_TYPES_TO_KEYWORD:
+            event_keywords.add(EVENT_TYPES_TO_KEYWORD[event_type])
+        else:
             raise ConfigurationError('Unknown value for event filter `type`: {}'.format(event_type))
 
-        event_types.add(EVENT_TYPES[event_type])
-
-    parts = ['Level={}'.format(value_to_xpath_string(value)) for value in sorted(event_types)]
+    parts = ['Level={}'.format(value_to_xpath_string(value)) for value in sorted(event_levels)] + [
+        'Keywords={}'.format(value_to_xpath_string(value)) for value in sorted(event_keywords)
+    ]
     return combine_value_parts(parts)
 
 
