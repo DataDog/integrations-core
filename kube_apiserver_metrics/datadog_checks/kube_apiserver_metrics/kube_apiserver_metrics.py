@@ -20,6 +20,7 @@ METRICS = {
     'apiserver_registered_watchers': 'registered_watchers',
     'apiserver_request_duration_seconds': 'request_duration_seconds',
     'apiserver_request_latencies': 'request_latencies',
+    'apiserver_request_latency_seconds': 'request_latencies',
     'process_resident_memory_bytes': 'process_resident_memory_bytes',
     'process_virtual_memory_bytes': 'process_virtual_memory_bytes',
     'grpc_client_started_total': 'grpc_client_started_total',
@@ -52,8 +53,6 @@ METRICS = {
     # For Kubernetes >= 1.17
     # https://github.com/kubernetes/kubernetes/pull/82409
     'authentication_duration_seconds': 'authentication_duration_seconds',
-    # https://github.com/kubernetes/kubernetes/pull/83427
-    'apiserver_request_terminations_total': 'request_terminations_total',
 }
 
 
@@ -171,4 +170,4 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         self.submit_as_gauge_and_monotonic_count('.apiserver_request_total', metric, scraper_config)
 
     def apiserver_request_terminations_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.request_terminations_total', metric, scraper_config)
+        self.submit_as_gauge_and_monotonic_count('.apiserver_request_terminations_total', metric, scraper_config)
