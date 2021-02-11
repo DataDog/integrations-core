@@ -2,7 +2,7 @@
 	"name": "[Kafka] High request rate on producer {{host.name}}",
 	"type": "query alert",
 	"query": "avg(last_1h):anomalies(avg:kafka.producer.request_rate{*}, 'basic', 2, direction='above', alert_window='last_5m', interval=20, count_default_zero='true') >= 1",
-	"message": "",
+	"message": "The request rate on a producer is abnormally high: {{value}} request/s.",
 	"tags": [
         "integration:kafka"
     ],
