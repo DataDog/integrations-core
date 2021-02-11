@@ -15,7 +15,7 @@ The datadog terraform provider is available through the [Terraform Registry][1].
 
 1. [Install Terraform][2]
 2. Create a directory that will contain the terraform configuration files, for example: `terraform_config`
-3. Create a `main.tf` file in `terraform_examples` with the following content:
+3. Create a `main.tf` file in `terraform_config` with the following content:
 ```
 terraform {
   required_providers {
