@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname
+# from datadog_checks.dev import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-HOST = get_docker_hostname()
+HOST = "127.0.0.1"  # get_docker_hostname()
 PORT = 3000
 VERSION = os.environ.get('AEROSPIKE_VERSION')
 

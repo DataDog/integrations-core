@@ -17,6 +17,8 @@ from .common import LATENCIES_METRICS, LAZY_METRICS, NAMESPACE_METRICS, SET_METR
 def test_check(aggregator, instance):
     check = AerospikeCheck('aerospike', {}, [instance])
 
+    # sleep to make sure client is available
+    time.sleep(30)
     for _ in range(10):
         check.check(None)
         time.sleep(1)
@@ -28,6 +30,8 @@ def test_version_metadata(aggregator, instance, datadog_agent):
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'
 
+    # sleep to make sure client is available
+    time.sleep(30)
     for _ in range(10):
         check.check(None)
         time.sleep(1)
