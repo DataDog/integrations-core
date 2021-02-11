@@ -313,6 +313,38 @@ def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_in
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_tags_filters_integration_tags(aggregator, dd_run_check, historical_instance):
+    historical_instance['collect_tags'] = True
+    historical_instance['resource_filters'] = [
+        {
+            'resource': 'cluster',
+            'property': 'tag',
+            'patterns': [
+                r'vsphere_datacenter:Datacenter2',
+            ],
+        },
+        {
+            'resource': 'datastore',
+            'property': 'tag',
+            'patterns': [
+                r'vsphere_datastore:Datastore 1',
+            ],
+        },
+    ]
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=2)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter2', count=1)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Dätacenter', count=0)
+
+    aggregator.assert_metric('vsphere.disk.used.latest', count=1)
+    aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 1', count=1)
+    aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 2', count=0)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_tags_filters_when_tags_are_not_yet_collected(aggregator, dd_run_check, realtime_instance):
     realtime_instance['collect_tags'] = True
     realtime_instance['resource_filters'] = [
