@@ -57,8 +57,6 @@ def warm_up():
     # sleep to make sure client is available
     time.sleep(30)
 
-    check.check(None)
-
     # Aerospike has a socket error when using get_docker_hostname value on azure
     # The socket error disappear when using 127.0.0.1
     try:
