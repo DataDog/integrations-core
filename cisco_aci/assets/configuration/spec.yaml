@@ -109,5 +109,5 @@ files:
         aws_service.hidden: true
     - template: instances/default
       overrides:
-        min_collection_interval.value.default: 15
+        min_collection_interval.value.display_default: 15
         min_collection_interval.value.example: 180

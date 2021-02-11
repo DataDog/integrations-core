@@ -37,7 +37,7 @@ files:
         Note: If omitted, the default system Postgres database is queried.
       value:
         type: string
-        default: postgres
+        display_default: postgres
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -57,7 +57,7 @@ files:
         Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
-        default: false
+        display_default: false
         example: "false"
     - name: query_timeout
       description: |
@@ -68,7 +68,7 @@ files:
       value:
         type: integer
         example: 1000
-        default: null
+        display_default: null
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table) metrics.
@@ -147,7 +147,7 @@ files:
       description: The maximum number of tables to collect metrics from.
       value:
         type: integer
-        default: 200
+        display_default: 200
         example: 200
     - name: custom_queries
       description: |
@@ -186,7 +186,7 @@ files:
       value:
         type: boolean
         example: false
-        default: false
+        display_default: false
     - name: pg_stat_statements_view
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the

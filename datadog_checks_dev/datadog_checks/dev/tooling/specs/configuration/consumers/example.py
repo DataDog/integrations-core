@@ -119,8 +119,8 @@ def write_option(option, writer, indent='', start_list=False):
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if 'default' in value:
-                default = value['default']
+            if 'display_default' in value:
+                default = value['display_default']
                 default_type = type(default)
                 if default is not None and str(default).lower() != 'none':
                     if default_type is str:

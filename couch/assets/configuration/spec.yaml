@@ -30,7 +30,7 @@ files:
         example:
           - <DATABASE_1>
           - <DATABASE_2>
-        default: all
+        display_default: all
     - name: db_exclude
       description: |
         The `db_exclude` should contain the names of any databases meant to be excluded
@@ -43,7 +43,7 @@ files:
         example:
           - <DATABASE_1>
           - <DATABASE_2>
-        default: None
+        display_default: None
     - name: max_dbs_per_check
       description: Number of databases to scan per check.
       value:
@@ -54,13 +54,13 @@ files:
       value:
         type: string
         example: <ERLANG_NAME>
-        default: None
+        display_default: None
     - name: max_nodes_per_check
       description: CouchDB 2.x only. How many nodes each check reports if no name is provided.
       value:
         type: integer
         example: 10
-        default: 20
+        display_default: 20
     - template: instances/default
     - template: instances/http
       overrides:

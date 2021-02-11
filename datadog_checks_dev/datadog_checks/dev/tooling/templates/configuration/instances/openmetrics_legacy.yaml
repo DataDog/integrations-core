@@ -29,7 +29,7 @@
   value:
     type: string
     example: <PREFIX>_
-    default: null
+    display_default: null
 - name: health_service_check
   description: |
     Send a service check reporting about the health of the Prometheus endpoint.

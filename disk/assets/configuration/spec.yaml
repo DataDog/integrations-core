@@ -190,7 +190,7 @@ files:
               Works on Linux only.
             value:
               example: /run/blkid/blkid.tab
-              default: null
+              display_default: null
               type: string
           - name: device_tag_re
             description: |
@@ -215,7 +215,7 @@ files:
             description: Timeout of the disk query in seconds
             value:
               example: 5
-              default: 5
+              display_default: 5
               type: integer
           - name: create_mounts
             description: |

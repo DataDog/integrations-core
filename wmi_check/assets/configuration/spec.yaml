@@ -102,7 +102,7 @@ files:
         Comma-separated list of property names
       value:
         type: string
-        default: null
+        display_default: null
         example: Name,Label
     - name: tag_queries
       description: |

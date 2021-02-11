@@ -21,21 +21,21 @@ files:
       value:
         type: integer
         example: 5
-      default: 5
+      display_default: 5
     - name: zk_timeout
       description: |
         DEPRECATED: Customizes the ZooKeeper connection timeout.
       value:
         type: integer
         example: 5
-      default: 5
+      display_default: 5
     - template: init_config/default
   - template: instances
     options:
       - name: kafka_connect_str
         description: |
           Kafka endpoints and port to connect to.
-          
+
           In a production environment, it's often useful to specify multiple
           Kafka nodes for a single check instance. This way you
           only generate a single check process, but if one host goes down,
@@ -46,12 +46,12 @@ files:
           type: array
           items:
             type: string
-          example: 
+          example:
             - localhost:9092
       - name: kafka_client_api_version
         description: |
           Specify the highest client protocol version supported by all brokers in the cluster.
-          
+
           This is a performance optimization. If this is not set, then the check automatically probes
           the cluster for broker version during the connection bootstrapping process. Explicitly setting
           this bypasses that probe, saving 3-5 network calls depending on the broker version. Note that
@@ -60,7 +60,7 @@ files:
         value:
           type: string
           example: "2.3.0"
-          default: null
+          display_default: null
       - name: consumer_groups
         description: |
           Each level is optional. Any empty values are fetched from the Kafka cluster.
@@ -69,7 +69,7 @@ files:
 
           Deprecation notice: Omitting various levels works for zookeeper-based consumers. However, all
           functionality related to fetching offsets from Zookeeper is deprecated.
-        value: 
+        value:
           type: object
           example:
             <CONSUMER_NAME_1>:
@@ -107,7 +107,7 @@ files:
           Protocol used to communicate with brokers.
           Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
           Default: PLAINTEXT.
-        default: PLAINTEXT
+        display_default: PLAINTEXT
         value:
           type: string
           example: PLAINTEXT
@@ -118,7 +118,7 @@ files:
         value:
           type: string
           example: PLAIN
-          default: null
+          display_default: null
       - name: sasl_plain_username
         description: Username for sasl PLAIN or SCRAM authentication.
         value:
@@ -139,7 +139,7 @@ files:
         value:
           type: string
           example: localhost
-          default: null
+          display_default: null
       - name: ssl_context
         description: |
           Pre-configured SSLContext for wrapping socket connections.
@@ -151,7 +151,7 @@ files:
         description: |
           Flag to configure whether SSL handshake should verify that the
           certificate matches the broker’s hostname.
-        default: true
+        display_default: true
         value:
           type: boolean
           example: true
@@ -172,7 +172,7 @@ files:
         value:
           type: string
           example: <KEY_FILE_PATH>
-      - name: ssl_password 
+      - name: ssl_password
         description: Password to be used when loading the certificate chain.
         value:
           type: string
@@ -188,17 +188,17 @@ files:
       - name: broker_requests_batch_size
         description: |
           The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
-          If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while 
+          If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while
           running the wakeup calls.
           If the batch size is too small, the check will take longer to run.
-        default: 30
+        display_default: 30
         value:
           type: integer
           example: 30
       - name: zk_connect_str
         description: |
-          DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
-          from Zookeeper and is deprecated.  
+          DEPRECATION NOTICE: This option is only used for fetching consumer offsets
+          from Zookeeper and is deprecated.
           Zookeeper endpoints and port to connect to.
           In a production environment, it's often useful to specify multiple
           Zookeeper nodes for a single check instance. This way you
@@ -214,8 +214,8 @@ files:
             - <ZOOKEEPER_ENDPOINT>:2181
       - name: zk_prefix
         description: |
-          DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
-          from Zookeeper and is deprecated. 
+          DEPRECATION NOTICE: This option is only used for fetching consumer offsets
+          from Zookeeper and is deprecated.
           Zookeeper chroot prefix under which kafka data is living in zookeeper.
           If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
         value:
@@ -223,12 +223,12 @@ files:
           example: <ZK_PREFIX>
       - name: kafka_consumer_offsets
         description: |
-          DEPRECATION NOTICE: This option is only used for fetching consumer offsets 
-          from Zookeeper and is deprecated. 
+          DEPRECATION NOTICE: This option is only used for fetching consumer offsets
+          from Zookeeper and is deprecated.
           This setting only applies if zk_connect_str is set
           Set to true to fetch consumer offsets from both Zookeeper and Kafka
           Set to false to fetch consumer offsets only from Zookeeper.
         value:
           type: boolean
           example: false
-        default: false
+        display_default: false

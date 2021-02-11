@@ -195,7 +195,7 @@ files:
         E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
       value:
         example: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
-        default: null
+        display_default: null
         type: string
     - template: instances/default
   - template: logs
