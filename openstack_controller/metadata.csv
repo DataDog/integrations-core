@@ -19,9 +19,9 @@ openstack.nova.limits.max_total_keypairs,gauge,,,,The maximum allowed keypairs a
 openstack.nova.limits.total_cores_used,gauge,,,,The total cores used by this tenant,-1,openstack_controller,total cores used
 openstack.nova.limits.total_floating_ips_used,gauge,,,,The total floating IPs used by this tenant,-1,openstack_controller,floating IPs used
 openstack.nova.limits.total_instances_used,gauge,,,,The total instances used by this tenant,-1,openstack_controller,total instances used
-openstack.nova.limits.total_ram_used,gauge,,gibibyte,,The current RAM used by this tenant,-1,openstack_controller,ram used
+openstack.nova.limits.total_ram_used,gauge,,mebibyte,,The current RAM used by this tenant in megabytes (MB),-1,openstack_controller,ram used
 openstack.nova.limits.total_security_groups_used,gauge,,,,The total number of security groups used by this tenant,-1,openstack_controller,total security groups used
-openstack.nova.limits.max_total_ram_size,gauge,,gibibyte,,The max allowed RAM size for this tenant,0,openstack_controller,max ram size
+openstack.nova.limits.max_total_ram_size,gauge,,mebibyte,,The max allowed RAM size for this tenant in megabytes (MB),0,openstack_controller,max ram size
 openstack.nova.local_gb,gauge,,gibibyte,,The size in GB of the ephemeral disk present on this hypervisor host,0,openstack_controller,local gb
 openstack.nova.local_gb_used,gauge,,gibibyte,,The size in GB of disk used on this hypervisor host,-1,openstack_controller,local gb used
 openstack.nova.memory_mb,gauge,,mebibyte,,The size in MB of RAM present on this hypervisor host,0,openstack_controller,memory mb
