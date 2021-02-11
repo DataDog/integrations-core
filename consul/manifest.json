@@ -36,7 +36,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "consul": "assets/dashboards/consul_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "consul"
