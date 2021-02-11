@@ -12,7 +12,7 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][2]. I
 
 ### Configuration
 
-Configure the [Spark integration][2] to monitor your Apache Spark Cluster.
+Follow the Databricks-Datadog [tutorial][2] to configure the Spark integration to monitor your Apache Spark Cluster.
 
 #### Standard cluster
 
@@ -30,7 +30,7 @@ instances:
 
 For job clusters, use the following script to configure the Spark integration.
 
-    Note: Job clusters are monitored in `spark_driver_mode` via the Spark UI port.
+   **Note**: Job clusters are monitored in `spark_driver_mode` via the Spark UI port.
 
 
 ```shell script
