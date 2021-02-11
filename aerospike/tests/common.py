@@ -3,12 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-HOST = get_docker_hostname()
+# from datadog_checks.dev import get_docker_hostname
+# HOST = get_docker_hostname()
+# get_docker_hostname value value causes socket error on azure CI, so we have
+# to hardcode the ip 127.0.0.1 to make it work.
+# get_docker_hostname is still useful to test locally.
+HOST = "127.0.0.1"
 PORT = 3000
 VERSION = os.environ.get('AEROSPIKE_VERSION')
 
