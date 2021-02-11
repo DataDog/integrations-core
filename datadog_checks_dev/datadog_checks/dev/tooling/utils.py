@@ -21,6 +21,7 @@ from .git import get_latest_tag
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DOGWEB_JSON_DASHBOARDS = (
+    'activemq',
     'btrfs',
     'ceph',
     'cisco_aci',
