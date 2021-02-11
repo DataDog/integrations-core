@@ -15,7 +15,7 @@ coredns.dnssec.cache_hits,count,,hit,,"Counter of cache hits.",0,coredns,dnssec 
 coredns.dnssec.cache_misses,count,,miss,,"Counter of cache misses.",0,coredns,dnssec cache miss
 coredns.request_count,count,,request,,total query count.,1,coredns,request count
 coredns.request_type_count,count,,,,counter of queries per zone and type,1,coredns,request type
-coredns.request_duration.seconds.sum,gauge,,second,,duration to process each query,-1,coredns,proxy request duration
+coredns.request_duration.seconds.sum,gauge,,second,,duration to process each query,-1,coredns,request duration
 coredns.request_duration.seconds.count,gauge,,second,,duration to process each query,-1,coredns,request duration
 coredns.proxy_request_duration.seconds.sum,gauge,,second,,duration per upstream interaction,-1,coredns,proxy request duration
 coredns.proxy_request_duration.seconds.count,gauge,,second,,duration per upstream interaction,-1,coredns,proxy request duration
