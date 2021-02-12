@@ -423,7 +423,7 @@ jobs:
     - checkName: tls
       displayName: TLS
       os: linux
-    ${{ if eq(parameters.run_py2_tests, 'true') }}:
+    - ${{ if eq(parameters.run_py2_tests, 'true') }}:
       - checkName: tokumx
         displayName: TokuMX
         os: linux
