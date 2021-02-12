@@ -91,13 +91,10 @@ files:
           properties:
             - name: relation_name
               type: string
-              required: false
             - name: relation_schema
               type: string
-              required: false
             - name: schemas
               type: array
-              required: false
               items:
                 type: string
         example:
