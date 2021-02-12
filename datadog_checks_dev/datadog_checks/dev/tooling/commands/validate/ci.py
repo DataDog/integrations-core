@@ -49,7 +49,7 @@ REPOS = {
 
 
 def sort_jobs(jobs):
-    return sorted(jobs, key=lambda job: (not job['checkName'].startswith('datadog_checks_'), job['checkName']))
+    return sorted(jobs, key=lambda job: (not job.get('checkName', '').startswith('datadog_checks_'), job.get('checkName') or list(job.values())[0][0]['checkName']))
 
 
 def sort_projects(projects):
@@ -75,7 +75,11 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
     fixed = False
 
     for job in jobs:
-        check_name = job['checkName']
+        check_name = job.get('checkName')
+        if not check_name:
+            job = list(job.values())[0][0]
+            check_name = job.get('checkName')
+
         defined_checks.add(check_name)
 
         if check_name not in testable_checks:
