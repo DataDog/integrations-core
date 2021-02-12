@@ -1192,7 +1192,7 @@ def test_ssl_cert():
 def test_do_not_crash_on_single_app_failure():
     running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
     results = []
-    rest_requests_to_json = mock.MagicMock(side_effect=[RequestException, results])
+    rest_requests_to_json = mock.MagicMock(side_effect=[Exception, results])
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
 
     with mock.patch.object(c, '_rest_request_to_json', rest_requests_to_json), mock.patch.object(c, '_collect_version'):
