@@ -4,10 +4,10 @@
 
 from contextlib import contextmanager
 
-from datadog_checks.base.log import get_check_logger
 from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.log import get_check_logger
 
 try:
     import adodbapi
@@ -292,7 +292,7 @@ class Connection(object):
             'Data Source': 'host',
             'Initial Catalog': db_name or db_key,
             'User ID': 'username',
-            'Password': 'password'
+            'Password': 'password',
         }
 
         if self.connector == 'adodbapi':
@@ -305,8 +305,11 @@ class Connection(object):
             connector_options = odbc_options
             other_connector_options = adodbapi_options
 
-        for option in {value for key, value in other_connector_options.items()
-                       if value not in connector_options.values() and self.instance.get(value) is not None}:
+        for option in {
+            value
+            for key, value in other_connector_options.items()
+            if value not in connector_options.values() and self.instance.get(value) is not None
+        }:
             self.log.warning("%s option will be ignored since %s connection is used", option, self.connector)
 
         if cs is None:
@@ -317,14 +320,18 @@ class Connection(object):
         cs = cs.upper()
 
         for key, value in connector_options.items():
-            if key in cs:
-                raise ConfigurationError("%s has been provided both in the connection string and as a "
-                                         "configuration option (%s), please specify it only once".format(key, value))
+            if key.upper() in cs and self.instance.get(value) is not None:
+                raise ConfigurationError(
+                    "%s has been provided both in the connection string and as a "
+                    "configuration option (%s), please specify it only once" % (key, value)
+                )
         for key, value in other_connector_options.items():
-            if key in cs or self.instance.get(value) is not None:
-                raise ConfigurationError("%s has been provided in the connection string. "
-                                         "This option is only available for %s connections,"
-                                         " however %s has been selected" % (key, other_connector, self.connector))
+            if key.upper() in cs:
+                raise ConfigurationError(
+                    "%s has been provided in the connection string. "
+                    "This option is only available for %s connections,"
+                    " however %s has been selected" % (key, other_connector, self.connector)
+                )
 
     def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
         """Return a connection string to use with odbc"""
