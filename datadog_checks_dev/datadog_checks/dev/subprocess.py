@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 
 import shlex
+import logging
 from collections import namedtuple
 from subprocess import Popen
 from tempfile import TemporaryFile
@@ -12,6 +13,8 @@ from six import string_types
 
 from .errors import SubprocessError
 from .utils import NEED_SHELL, ON_WINDOWS, mock_context_manager
+
+logger = logging.getLogger(__name__)
 
 SubprocessResult = namedtuple('SubprocessResult', ('stdout', 'stderr', 'code'))
 
@@ -58,6 +61,7 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
         stdout, stderr = mock_context_manager, mock_context_manager
 
     with stdout() as stdout, stderr() as stderr:
+        logger.debug("run_command: %s", " ".join(command))
         process = Popen(command, stdout=stdout, stderr=stderr, shell=shell, env=env)
         process.wait()
 

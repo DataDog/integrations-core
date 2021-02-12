@@ -4,6 +4,7 @@
 import re
 import socket
 import time
+import logging
 from contextlib import closing
 
 from six import string_types
@@ -14,6 +15,7 @@ from .structures import LazyFunction
 from .subprocess import run_command
 from .utils import file_exists
 
+logger = logging.getLogger(__name__)
 
 class WaitFor(LazyFunction):
     def __init__(self, func, attempts=60, wait=1, args=(), kwargs=None):
@@ -34,6 +36,7 @@ class WaitFor(LazyFunction):
             try:
                 result = self.func(*self.args, **self.kwargs)
             except Exception as e:
+                logger.debug("WaitFor error func=%s", self.func.__name__, exc_info=1)
                 last_error = str(e)
                 time.sleep(self.wait)
                 continue

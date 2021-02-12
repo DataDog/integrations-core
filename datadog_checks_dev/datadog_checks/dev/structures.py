@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import abc
 import os
+import logging
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -11,6 +12,7 @@ import six
 from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
 from .warn import warning
 
+logger = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class LazyFunction(object):
@@ -36,6 +38,7 @@ class EnvVars(dict):
     def __enter__(self):
         os.environ.clear()
         os.environ.update(self)
+        logger.debug("EnvVars: %s", " ".join('{}="{}"'.format(k, v) for k, v in self.items()))
 
     def __exit__(self, exc_type, exc_value, traceback):
         os.environ.clear()
