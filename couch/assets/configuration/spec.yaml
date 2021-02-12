@@ -43,7 +43,7 @@ files:
         example:
           - <DATABASE_1>
           - <DATABASE_2>
-        display_default: None
+        display_default: null
     - name: max_dbs_per_check
       description: Number of databases to scan per check.
       value:
@@ -54,7 +54,7 @@ files:
       value:
         type: string
         example: <ERLANG_NAME>
-        display_default: None
+        display_default: null
     - name: max_nodes_per_check
       description: CouchDB 2.x only. How many nodes each check reports if no name is provided.
       value:

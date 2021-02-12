@@ -61,7 +61,7 @@ files:
             value:
               type: string
               example: utf8
-              display_default: None
+              display_default: null
           - name: defaults_file
             description: |
               Path to an alternative configuration mechanism file.

@@ -809,7 +809,7 @@ def test_option_string_type_not_default_example_default_value_none():
             value:
               type: string
               example: something
-              display_default: None
+              display_default: null
         """
     )
 
