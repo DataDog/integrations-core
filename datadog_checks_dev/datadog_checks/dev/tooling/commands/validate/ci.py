@@ -49,7 +49,13 @@ REPOS = {
 
 
 def sort_jobs(jobs):
-    return sorted(jobs, key=lambda job: (not job.get('checkName', '').startswith('datadog_checks_'), job.get('checkName') or list(job.values())[0][0]['checkName']))
+    return sorted(
+        jobs,
+        key=lambda job: (
+            not job.get('checkName', '').startswith('datadog_checks_'),
+            job.get('checkName') or list(job.values())[0][0]['checkName'],
+        ),
+    )
 
 
 def sort_projects(projects):
