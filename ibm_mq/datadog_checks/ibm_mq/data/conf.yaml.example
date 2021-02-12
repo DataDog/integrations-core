@@ -122,7 +122,7 @@ instances:
     # mqcd_version: 6
 
     ## @param convert_endianness - boolean - optional - default: false
-    ## If you are monitoring IBM MQ remotely and if the agent and the server are using different endianness,
+    ## If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
     ## set this field to true.
     #
     # convert_endianness: false

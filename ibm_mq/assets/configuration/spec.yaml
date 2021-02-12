@@ -129,7 +129,7 @@ files:
           type: number
       - name: convert_endianness
         description: |
-          If you are monitoring IBM MQ remotely and if the agent and the server are using different endianness,
+          If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
           set this field to true.
         value:
           example: false
