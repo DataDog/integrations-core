@@ -325,7 +325,7 @@ class Connection(object):
                     "%s has been provided both in the connection string and as a "
                     "configuration option (%s), please specify it only once" % (key, value)
                 )
-        for key, value in other_connector_options.items():
+        for key in other_connector_options.keys():
             if key.upper() in cs:
                 raise ConfigurationError(
                     "%s has been provided in the connection string. "
