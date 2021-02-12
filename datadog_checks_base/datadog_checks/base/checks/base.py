@@ -10,14 +10,13 @@ import logging
 import re
 import traceback
 import unicodedata
-from collections import defaultdict, deque
+from collections import deque
 from os.path import basename
 from typing import (
     TYPE_CHECKING,
     Any,
     AnyStr,
     Callable,
-    DefaultDict,
     Deque,
     Dict,
     List,
