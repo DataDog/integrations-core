@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.20.0-rc.1 / 2021-02-12
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.19.1 / 2021-01-25
 
 * [Fixed] Update check signature. See [#8259](https://github.com/DataDog/integrations-core/pull/8259).
