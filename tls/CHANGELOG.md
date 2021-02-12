@@ -1,5 +1,9 @@
 # CHANGELOG - TLS
 
+## 2.2.0 / 2021-02-12
+
+* [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).
+
 ## 2.1.1 / 2021-02-05
 
 * [Fixed] Include validate_cert in backwards compatibility remapper. See [#8543](https://github.com/DataDog/integrations-core/pull/8543).
