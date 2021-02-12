@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.14.0 / 2021-02-12
+
+* [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).
+
 ## 1.13.0 / 2021-01-28
 
 * [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).

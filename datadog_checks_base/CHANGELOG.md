@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.4.0 / 2021-02-12
+
+* [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).
+
 ## 16.3.2 / 2021-02-01
 
 * [Fixed] Fix histogram upper bound label name for new OpenMetrics implementation. See [#8505](https://github.com/DataDog/integrations-core/pull/8505).
