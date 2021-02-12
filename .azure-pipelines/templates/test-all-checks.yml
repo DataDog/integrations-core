@@ -423,9 +423,10 @@ jobs:
     - checkName: tls
       displayName: TLS
       os: linux
-    - checkName: tokumx
-      displayName: TokuMX
-      os: linux
+    ${{ if eq(parameters.run_py2_tests, 'true') }}:
+      - checkName: tokumx
+        displayName: TokuMX
+        os: linux
     - checkName: tomcat
       displayName: Tomcat
       os: linux
