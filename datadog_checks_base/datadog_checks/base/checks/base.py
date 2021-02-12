@@ -12,19 +12,7 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
 from six import binary_type, iteritems, text_type
