@@ -4,6 +4,7 @@
 
 from contextlib import contextmanager
 
+from datadog_checks.base.log import get_check_logger
 from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -39,10 +40,10 @@ class Connection(object):
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
 
-    def __init__(self, init_config, instance_config, service_check_handler, logger):
+    def __init__(self, init_config, instance_config, service_check_handler):
         self.instance = instance_config
         self.service_check_handler = service_check_handler
-        self.log = logger
+        self.log = get_check_logger()
 
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
@@ -142,7 +143,7 @@ class Connection(object):
         cs = self.instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
 
-        self._custom_connection_string_validation(db_key, db_name)
+        self._connection_options_validation(db_key, db_name)
 
         try:
             if self.connector == 'adodbapi':
@@ -273,61 +274,54 @@ class Connection(object):
         dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
         return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
 
-    def _custom_connection_string_validation(self, db_key, db_name):
+    def _connection_options_validation(self, db_key, db_name):
         cs = self.instance.get('connection_string')
-        if cs is None:
-            return
-
-        dsn = self.instance.get('dsn')
-        host = self.instance.get('host')
         username = self.instance.get('username')
         password = self.instance.get('password')
-        database = self.instance.get(db_key) if db_name is None else db_name
-        driver = self.instance.get('driver')
-        provider = self.instance.get('adoprovider')
-
-        if 'Trusted_Connection=yes' in cs and (username or password):
-            self.log.warning("Username and password are ignored when using Windows authentication")
-        cs = cs.upper()
 
         adodbapi_options = {
-            'DSN': dsn,
-            'DRIVER': driver,
-            'SERVER': host,
-            'DATABASE': database,
-            'UID': username,
-            'PWD': password,
+            'DSN': 'dsn',
+            'DRIVER': 'driver',
+            'SERVER': 'host',
+            'DATABASE': db_name or db_key,
+            'UID': 'username',
+            'PWD': 'password',
         }
         odbc_options = {
-            'PROVIDER': provider,
-            'Data Source': host,
-            'Initial Catalog': database,
-            'User ID': username,
-            'Password': password
+            'PROVIDER': 'adoprovider',
+            'Data Source': 'host',
+            'Initial Catalog': db_name or db_key,
+            'User ID': 'username',
+            'Password': 'password'
         }
 
         if self.connector == 'adodbapi':
             other_connector = 'odbc'
             connector_options = adodbapi_options
             other_connector_options = odbc_options
-            if provider:
-                self.log.warning("Provider option will be ignored since adodbapi connection is used")
 
         else:
             other_connector = 'adodbapi'
             connector_options = odbc_options
             other_connector_options = adodbapi_options
-            if dsn:
-                self.log.warning("DSN option will be ignored since odbc connection is used")
-            if driver:
-                self.log.warning("Driver option will be ignored since odbc connection is used")
+
+        for option in {value for key, value in other_connector_options.items()
+                       if value not in connector_options.values() and self.instance.get(value) is not None}:
+            self.log.warning("%s option will be ignored since %s connection is used", option, self.connector)
+
+        if cs is None:
+            return
+
+        if 'Trusted_Connection=yes' in cs and (username or password):
+            self.log.warning("Username and password are ignored when using Windows authentication")
+        cs = cs.upper()
 
         for key, value in connector_options.items():
             if key in cs:
                 raise ConfigurationError("%s has been provided both in the connection string and as a "
-                                         "configuration option, please specify it only once".format(key))
+                                         "configuration option (%s), please specify it only once".format(key, value))
         for key, value in other_connector_options.items():
-            if key in cs or value is not None:
+            if key in cs or self.instance.get(value) is not None:
                 raise ConfigurationError("%s has been provided in the connection string. "
                                          "This option is only available for %s connections,"
                                          " however %s has been selected" % (key, other_connector, self.connector))
