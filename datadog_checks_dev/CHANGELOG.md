@@ -1,5 +1,28 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 8.0.0 / 2021-02-12
+
+* [Added] Add config spec for the new OpenMetrics implementation. See [#8452](https://github.com/DataDog/integrations-core/pull/8452).
+* [Added] Support `additionalProperties` object field for config specs. See [#8525](https://github.com/DataDog/integrations-core/pull/8525).
+* [Added] Support bind mounting single files for Docker E2E on Windows. See [#8516](https://github.com/DataDog/integrations-core/pull/8516).
+* [Fixed] Fix the ids `done` in `progress` columns. See [#8478](https://github.com/DataDog/integrations-core/pull/8478).
+* [Fixed] Fix tabs in readme consumer. See [#8551](https://github.com/DataDog/integrations-core/pull/8551).
+* [Fixed] Remove metric alert from recommended monitors. See [#8508](https://github.com/DataDog/integrations-core/pull/8508).
+* [Fixed] Fix link referencing for append and prepend. See [#8548](https://github.com/DataDog/integrations-core/pull/8548).
+* [Fixed] Implement append and prepend options for docs validator. See [#8542](https://github.com/DataDog/integrations-core/pull/8542).
+* [Fixed] Normalize links in docs validator for nested sections. See [#8541](https://github.com/DataDog/integrations-core/pull/8541).
+* [Fixed] Update metrics template. See [#8539](https://github.com/DataDog/integrations-core/pull/8539).
+* [Fixed] Fix `oneOf` in config specs. See [#8540](https://github.com/DataDog/integrations-core/pull/8540).
+* [Fixed] Do not run base_check for any base package. See [#8534](https://github.com/DataDog/integrations-core/pull/8534).
+* [Fixed] fix nested sections for readme rendering. See [#8524](https://github.com/DataDog/integrations-core/pull/8524).
+* [Fixed] Avoid forcing base dependencies for base checks. See [#8444](https://github.com/DataDog/integrations-core/pull/8444).
+* [Fixed] fix nested sections in docs validator. See [#8519](https://github.com/DataDog/integrations-core/pull/8519).
+* [Fixed] Add test cases to docs validator. See [#8503](https://github.com/DataDog/integrations-core/pull/8503).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Fix handling of multiple nested types for the example config spec consumer. See [#8465](https://github.com/DataDog/integrations-core/pull/8465).
+* [Fixed] Fix validation of Agent deps when using single check. See [#8461](https://github.com/DataDog/integrations-core/pull/8461).
+* [Changed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
 ## 7.0.1 / 2021-01-25
 
 * [Fixed] Minor error message fix. See [#8424](https://github.com/DataDog/integrations-core/pull/8424).
