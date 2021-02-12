@@ -122,9 +122,12 @@ files:
              - name (default) to filter on the resource name (defined by vCenter)
              - inventory_path to filter on the full inventory path
                (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
-             - tag to filter only the resources with a given tag. Datadog has stricter rules (i.e no space), but the filter
-                   is applied on the value coming from vCenter directly.
-                   The value to match is the one composed by <TAG_PREFIX><TAG_CATEGORY>:<TAG_VALUE>
+             - tag to filter only the resources with a given tag.
+                   The filter is applied on the value coming from vCenter. In this case, the value to match is the
+                   one composed by <TAG_PREFIX><TAG_CATEGORY>:<TAG_VALUE> .
+                   The filter also work for tags set by this vSphere integration: vsphere_host,
+                   vsphere_datastore_cluster, vsphere_folder, vsphere_cluster, vsphere_compute,
+                   vsphere_datacenter and vsphere_datastore.
              - attribute to filter only the resources with a given attribute. Datadog has stricter rules (i.e no space),
                    but the filter is applied on the value coming from vCenter directly.
                    The value to match is the one composed by <ATTR_PREFIX><ATTR_KEY>:<ATTR_VALUE>
