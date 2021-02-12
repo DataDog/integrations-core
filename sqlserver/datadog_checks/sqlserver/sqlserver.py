@@ -99,7 +99,7 @@ class SQLServer(AgentCheck):
             )
 
     def initialize_connection(self):
-        self.connection = Connection(self.init_config, self.instance, self.handle_service_check, self.log)
+        self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
 
         # Pre-process the list of metrics to collect
         try:
