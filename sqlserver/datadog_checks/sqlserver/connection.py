@@ -325,7 +325,7 @@ class Connection(object):
         for key, value in connector_options.items():
             if key in cs:
                 raise ConfigurationError("%s has been provided both in the connection string and as a "
-                                         "configuration option, please specify it only one".format(key))
+                                         "configuration option, please specify it only once".format(key))
         for key, value in other_connector_options.items():
             if key in cs or value is not None:
                 raise ConfigurationError("%s has been provided in the connection string. "
