@@ -16,10 +16,10 @@
   ],
   "public_title": "terraform",
   "categories": [
-    ""
+    "orchestration"
   ],
   "type": "crawler",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "terraform",
   "assets": {
     "dashboards": {},
