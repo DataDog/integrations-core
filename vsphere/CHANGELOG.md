@@ -1,5 +1,11 @@
 # CHANGELOG - vsphere
 
+## 5.8.0 / 2021-02-12
+
+* [Added] Support filtering by tags set by integration. See [#8603](https://github.com/DataDog/integrations-core/pull/8603).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 5.7.1 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Re-add empty_default_hostname to configuration by default. See [#7732](https://github.com/DataDog/integrations-core/pull/7732).
