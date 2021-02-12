@@ -204,7 +204,9 @@ class YarnCheck(AgentCheck):
             )
             cluster_name = DEFAULT_CLUSTER_NAME
 
-        tags.append('cluster_name:{}'.format(cluster_name))
+        tags.append('yarn_cluster:{}'.format(cluster_name))
+        if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+            tags.append('cluster_name:{}'.format(cluster_name))
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
