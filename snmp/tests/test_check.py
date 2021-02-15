@@ -160,8 +160,7 @@ def test_extract_value_does_not_match(aggregator, caplog):
     instance["community_string"] = "dummy"
     check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
     check.check(instance)
-    assert "Unable to submit metric" in str(caplog.text)
-    assert "argument must be a string or a number, not 'NoneType'" in str(caplog.text)
+    assert "Unable to submit metric `aTemperatureValueInferred`" in str(caplog.text)
 
 
 def test_extract_value_forced_type(aggregator):
