@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
-from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple, Union
 
 import yaml
 
@@ -385,3 +385,14 @@ def transform_index(src_index, index_slices):
             return None
         dst_index.extend(src_index[index_slice])
     return tuple(dst_index)
+
+
+def extract_value(pattern, value):
+    # type: (Pattern, str) -> Optional[str]
+    """
+    Extract value using a regex pattern.
+    """
+    match = pattern.match(value)
+    if match is None:
+        return None
+    return match.group(1)

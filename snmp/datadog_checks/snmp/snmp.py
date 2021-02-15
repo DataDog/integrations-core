@@ -18,6 +18,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.utils import extract_value
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
@@ -733,11 +734,3 @@ class SnmpCheck(AgentCheck):
         if metric['type'] == 'monotonic_count_and_rate':
             self._submitted_metrics += 1
         self._submitted_metrics += 1
-
-
-def extract_value(pattern, value):
-    # type: (Pattern, str) -> Optional[str]
-    match = pattern.match(str(value))
-    if match is None:
-        return None
-    return match.group(1)

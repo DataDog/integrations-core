@@ -19,7 +19,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
+# pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
 
 
 def test_command_generator():
@@ -142,6 +142,26 @@ def test_extract_value_inferred(aggregator):
     aggregator.assert_metric(
         'snmp.aTemperatureValueInferred', metric_type=aggregator.GAUGE, count=1, value=22, tags=common.CHECK_TAGS
     )
+
+
+def test_extract_value_does_not_match(aggregator, caplog):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueInferred",
+                    'extract_value': r'(\d+)ZZZ',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    assert "Unable to submit metric" in str(caplog.text)
+    assert "argument must be a string or a number, not 'NoneType'" in str(caplog.text)
 
 
 def test_extract_value_forced_type(aggregator):
