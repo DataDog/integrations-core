@@ -17,4 +17,14 @@ def test_check(dd_agent_check, prometheus_metrics):
         aggregator.assert_metric('haproxy.{}'.format(metric))
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+    # These metrics are submitted as count in Haproxy 2.0
+    exclude_metrics = []
+    if common.HAPROXY_VERSION_RAW == '2.0.20':
+        exclude_metrics = [
+            'haproxy.backend.bytes.in.total',
+            'haproxy.backend.bytes.out.total',
+            'haproxy.frontend.bytes.in.total',
+            'haproxy.frontend.bytes.out.total',
+        ]
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude_metrics)
