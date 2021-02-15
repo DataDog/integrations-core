@@ -4,8 +4,9 @@
 """
 Helpers for parsing the `metrics` section of a config file.
 """
+import re
 from logging import Logger
-from typing import Dict, List, NamedTuple, Optional, Sequence, TypedDict, Union, cast
+from typing import Dict, List, NamedTuple, Optional, Pattern, Sequence, TypedDict, Union, cast
 
 import six
 
@@ -214,6 +215,7 @@ def _parse_symbol_metric(metric):
         tags=metric.get('metric_tags', []),
         forced_type=metric.get('forced_type'),
         options=metric.get('options', {}),
+        extract_value_pattern=parsed_symbol.extract_value_pattern,
     )
 
     return MetricParseResult(
@@ -225,7 +227,10 @@ def _parse_symbol_metric(metric):
     )
 
 
-ParsedSymbol = NamedTuple('ParsedSymbol', [('name', str), ('oid', OID), ('oids_to_resolve', Dict[str, OID])])
+ParsedSymbol = NamedTuple(
+    'ParsedSymbol',
+    [('name', str), ('oid', OID), ('extract_value_pattern', Optional[Pattern]), ('oids_to_resolve', Dict[str, OID])],
+)
 
 
 def _parse_symbol(mib, symbol):
@@ -249,11 +254,20 @@ def _parse_symbol(mib, symbol):
     """
     if isinstance(symbol, str):
         oid = OID(ObjectIdentity(mib, symbol))
-        return ParsedSymbol(name=symbol, oid=oid, oids_to_resolve={})
+        return ParsedSymbol(name=symbol, oid=oid, extract_value_pattern=None, oids_to_resolve={})
 
     oid = OID(symbol['OID'])
     name = symbol['name']
-    return ParsedSymbol(name=name, oid=oid, oids_to_resolve={name: oid})
+
+    extract_value = symbol.get('extract_value')
+    extract_value_pattern = None
+    if extract_value:
+        try:
+            extract_value_pattern = re.compile(extract_value)
+        except re.error as exc:
+            raise ConfigurationError('Failed to compile regular expression {!r}: {}'.format(extract_value, exc))
+
+    return ParsedSymbol(name=name, oid=oid, extract_value_pattern=extract_value_pattern, oids_to_resolve={name: oid})
 
 
 def _parse_table_metric(metric, logger):
@@ -318,6 +332,7 @@ def _parse_table_metric(metric, logger):
             column_tags=column_tags,
             forced_type=metric.get('forced_type'),
             options=metric.get('options', {}),
+            extract_value_pattern=parsed_symbol.extract_value_pattern,
         )
         parsed_metrics.append(parsed_table_metric)
 

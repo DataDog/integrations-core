@@ -12,7 +12,7 @@ import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple
+from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple
 
 from six import iteritems
 
@@ -503,7 +503,9 @@ class SnmpCheck(AgentCheck):
             if isinstance(metric, ParsedTableMetric):
                 for index, val in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
-                    self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                    self.submit_metric(
+                        name, val, metric.forced_type, metric_tags, metric.options, metric.extract_value_pattern
+                    )
                     self.try_submit_bandwidth_usage_metric_if_bandwidth_metric(name, index, results, metric_tags)
             else:
                 result = list(results[name].items())
@@ -514,7 +516,9 @@ class SnmpCheck(AgentCheck):
                         continue
                 val = result[0][1]
                 metric_tags = tags + metric.tags
-                self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                self.submit_metric(
+                    name, val, metric.forced_type, metric_tags, metric.options, metric.extract_value_pattern
+                )
 
     BANDWIDTH_METRIC_NAME_TO_BANDWIDTH_USAGE_METRIC_NAME_MAPPING = {
         'ifHCInOctets': 'ifBandwidthInUsage',
@@ -681,14 +685,14 @@ class SnmpCheck(AgentCheck):
         self.monotonic_count(metric, value, tags=tags)
         self.rate("{}.rate".format(metric), value, tags=tags)
 
-    def submit_metric(self, name, snmp_value, forced_type, tags, options):
-        # type: (str, Any, Optional[str], List[str], dict) -> None
+    def submit_metric(self, name, snmp_value, forced_type, tags, options, extract_value_pattern):
+        # type: (str, Any, Optional[str], List[str], dict, Optional[Pattern]) -> None
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
         """
         try:
-            self._do_submit_metric(name, snmp_value, forced_type, tags, options)
+            self._do_submit_metric(name, snmp_value, forced_type, tags, options, extract_value_pattern)
         except Exception as e:
             msg = (
                 'Unable to submit metric `{}` with '
@@ -699,8 +703,8 @@ class SnmpCheck(AgentCheck):
             self.log.warning(msg)
             self.log.debug(msg, exc_info=True)
 
-    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options):
-        # type: (str, Any, Optional[str], List[str], dict) -> None
+    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options, extract_value_pattern):
+        # type: (str, Any, Optional[str], List[str], dict, Optional[Pattern]) -> None
 
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
@@ -711,6 +715,9 @@ class SnmpCheck(AgentCheck):
             metric_name = self.normalize('{}.{}'.format(name, options['metric_suffix']), prefix='snmp')
         else:
             metric_name = self.normalize(name, prefix='snmp')
+
+        if extract_value_pattern:
+            snmp_value = extract_value(extract_value_pattern, snmp_value.prettyPrint())
 
         if forced_type is not None:
             metric = as_metric_with_forced_type(snmp_value, forced_type, options)
@@ -726,3 +733,11 @@ class SnmpCheck(AgentCheck):
         if metric['type'] == 'monotonic_count_and_rate':
             self._submitted_metrics += 1
         self._submitted_metrics += 1
+
+
+def extract_value(pattern, value):
+    # type: (Pattern, str) -> Optional[str]
+    match = pattern.match(str(value))
+    if match is None:
+        return None
+    return match.group(1)

@@ -71,6 +71,24 @@ DUMMY_MIB_OID = [
     ({"MIB": "DUMMY-MIB", "symbol": "dummyZeroCounter"}, AggregatorStub.RATE, 120),  # ZeroBasedCounter64
 ]
 
+EXTRACT_VALUE_METRICS = [
+    {
+        "MIB": "DUMMY-MIB",
+        'symbol': {
+            'OID': "1.3.6.1.4.1.123456789.4.0",
+            'name': "aTemperatureValueInferred",
+            'extract_value': r'(\d+)C',
+        },
+    },  # OctetString "22C"
+    # {"MIB": "DUMMY-MIB",
+    #  'forced_type': 'counter',
+    #  'symbol': {
+    #      'OID': "1.3.6.1.4.1.123456789.4.0",
+    #      'name': "aTemperatureValueCounter",
+    #      'extract_value': r'(\d+)C',
+    #  }},  # OctetString "22C"
+]
+
 FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32
     {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64", 'forced_type': 'gauge'},  # Counter32
