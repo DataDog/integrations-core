@@ -6,11 +6,11 @@ Type definitions for items in the `metrics` section of a config file.
 
 Helps us ensure we only manipulate known fields with the correct types.
 """
-from typing import Dict, List, Pattern, TypedDict, Union
+from typing import Dict, List, TypedDict, Union
 
 # Symbols.
 
-Symbol = TypedDict('Symbol', {'OID': str, 'name': str, 'extract_value': Pattern})
+Symbol = TypedDict('Symbol', {'OID': str, 'name': str, 'extract_value': str})
 
 
 # Table metric tags.
