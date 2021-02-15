@@ -251,6 +251,96 @@ instances:
     #   - <TOP_K_LIMIT>
     #   - <BOTTOM_K_LIMIT>
 
+    ## Configure collection of statement samples
+    #
+    statement_samples:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+        #
+        # enabled: false
+
+        ## @param collections_per_second - number - optional - default: 1
+        ## Set the maximum statement sample collection rate. Each collection involves a single query to one
+        ## of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
+        ## unique statement seen.
+        #
+        # collections_per_second: 1
+
+        ## @param explained_statements_per_hour_per_query - integer - optional - default: 60
+        ## Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+        #
+        # explained_statements_per_hour_per_query: 60
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 15
+        ## Set the rate limit for how many statement sample events will be ingested per hour per normalized
+        ## execution plan.
+        #
+        # samples_per_hour_per_query: 15
+
+        ## @param explained_statements_cache_maxsize - integer - optional - default: 5000
+        ## Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This
+        ## should be increased for databases with a very large number unique normalized queries which exceed the
+        ## cache's limit.
+        #
+        # explained_statements_cache_maxsize: 5000
+
+        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
+        ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
+        ## increased for databases with a very large number of unique normalized execution plans which exceed the
+        ## cache's limit.
+        #
+        # seen_samples_cache_maxsize: 10000
+
+        ## @param events_statements_row_limit - integer - optional - default: 5000
+        ## The maximum number of rows to read out from a `performance_schema.events_statements_*` table during
+        ## a single collection.
+        #
+        # events_statements_row_limit: 5000
+
+        ## @param events_statements_table - string - optional
+        ## Force a specific events statements table. Must be one of events_statements_current,
+        ## events_statements_history, events_statements_history_long. If not set then the agent will choose
+        ## the best available table that is enabled and not empty.
+        #
+        # events_statements_table: events_statements_history_long
+
+        ## @param explain_procedure - string - optional - default: explain_statement
+        ## Override the default procedure used for collecting execution plans. The agent will use this
+        ## procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
+        #
+        # explain_procedure: explain_statement
+
+        ## @param fully_qualified_explain_procedure - string - optional - default: datadog.explain_statement
+        ## Override the default fully qualified explain procedure used for collecting execution plans for
+        ## statements sent from connections that do not have a default schema configured.
+        #
+        # fully_qualified_explain_procedure: datadog.explain_statement
+
+        ## @param events_statements_enable_procedure - string - optional - default: datadog.enable_events_statements_consumers
+        ## Override the default procedure used for enabling events statements consumers.
+        #
+        # events_statements_enable_procedure: datadog.enable_events_statements_consumers
+
+        ## @param events_statements_temp_table_name - string - optional - default: datadog.temp_events
+        ## Override the default fully qualified name for the temp table the agent creates while collecting
+        ## samples.
+        #
+        # events_statements_temp_table_name: datadog.temp_events
+
+        ## @param collection_strategy_cache_maxsize - integer - optional - default: 1000
+        ## Set the max size of the cache used for caching collection strategies. This value should be increased
+        ## to be at least as much as the number of unique schemas that are being monitored.
+        #
+        # collection_strategy_cache_maxsize: 1000
+
+        ## @param collection_strategy_cache_ttl - integer - optional - default: 300
+        ## Set how long we cache collection strategies. This should only be decreased if the set of enabled
+        ## `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
+        ## results for an extended period of time.
+        #
+        # collection_strategy_cache_ttl: 300
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

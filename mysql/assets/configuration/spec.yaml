@@ -261,7 +261,110 @@ files:
                 time: [100, 0]
                 <METRIC_COLUMN>: [<TOP_K_LIMIT>, <BOTTOM_K_LIMIT>]
               display_default: false
-
+          - name: statement_samples
+            description: Configure collection of statement samples
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+                value:
+                  type: boolean
+                  example: false
+              - name: collections_per_second
+                description: |
+                  Set the maximum statement sample collection rate. Each collection involves a single query to one
+                  of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
+                  unique statement seen.
+                value:
+                  type: number
+                  example: 1
+              - name: explained_statements_per_hour_per_query
+                description: |
+                  Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+                value:
+                  type: integer
+                  example: 60
+              - name: samples_per_hour_per_query
+                description: |
+                  Set the rate limit for how many statement sample events will be ingested per hour per normalized
+                  execution plan.
+                value:
+                  type: integer
+                  example: 15
+              - name: explained_statements_cache_maxsize
+                description: |
+                  Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This
+                  should be increased for databases with a very large number unique normalized queries which exceed the
+                  cache's limit.
+                value:
+                  type: integer
+                  example: 5000
+              - name: seen_samples_cache_maxsize
+                description: |
+                  Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
+                  increased for databases with a very large number of unique normalized execution plans which exceed the
+                  cache's limit.
+                value:
+                  type: integer
+                  example: 10000
+              - name: events_statements_row_limit
+                description: |
+                  The maximum number of rows to read out from a `performance_schema.events_statements_*` table during
+                  a single collection.
+                value:
+                  type: integer
+                  example: 5000
+              - name: events_statements_table
+                description: |
+                  Force a specific events statements table. Must be one of events_statements_current,
+                  events_statements_history, events_statements_history_long. If not set then the agent will choose
+                  the best available table that is enabled and not empty.
+                value:
+                  type: string
+                  example: events_statements_history_long
+                  display_default: null
+              - name: explain_procedure
+                description: |
+                  Override the default procedure used for collecting execution plans. The agent will use this
+                  procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
+                value:
+                  type: string
+                  example: explain_statement
+              - name: fully_qualified_explain_procedure
+                description: |
+                  Override the default fully qualified explain procedure used for collecting execution plans for
+                  statements sent from connections that do not have a default schema configured.
+                value:
+                  type: string
+                  example: datadog.explain_statement
+              - name: events_statements_enable_procedure
+                description: |
+                  Override the default procedure used for enabling events statements consumers.
+                value:
+                  type: string
+                  example: datadog.enable_events_statements_consumers
+              - name: events_statements_temp_table_name
+                description: |
+                  Override the default fully qualified name for the temp table the agent creates while collecting
+                  samples.
+                value:
+                  type: string
+                  example: datadog.temp_events
+              - name: collection_strategy_cache_maxsize
+                description: |
+                  Set the max size of the cache used for caching collection strategies. This value should be increased
+                  to be at least as much as the number of unique schemas that are being monitored.
+                value:
+                  type: integer
+                  example: 1000
+              - name: collection_strategy_cache_ttl
+                description: |
+                  Set how long we cache collection strategies. This should only be decreased if the set of enabled
+                  `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
+                  results for an extended period of time.
+                value:
+                  type: integer
+                  example: 300
           - template: instances/default
 
       - template: logs
