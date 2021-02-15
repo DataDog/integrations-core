@@ -15,7 +15,7 @@ RESULTS_TIMEOUT = 10
 
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=success_query_mock)
-def test_success(mocked_query, mocked_time, aggregator):
+def test_dns_success(mocked_query, mocked_time, aggregator):
     integration = DNSCheck('dns_check', {}, common.CONFIG_SUCCESS['instances'])
 
     integration.check(common.CONFIG_SUCCESS['instances'][0])

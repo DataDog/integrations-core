@@ -17,7 +17,7 @@ CHECK_NAME = 'envoy'
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_success(aggregator):
+def test_envoy_success(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
     c.check(instance)
