@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 
 
 class DatadogAgentStub(object):
@@ -65,7 +66,11 @@ class DatadogAgentStub(object):
         return self._cache.get(key, '')
 
     def obfuscate_sql(self, query):
-        return query
+        # this is only whitespace cleanup, NOT obfuscation
+        return re.sub(r'\s+', ' ', query or '')
+
+    def obfuscate_sql_exec_plan(self, plan, normalize=False):
+        return plan
 
 
 # Use the stub as a singleton

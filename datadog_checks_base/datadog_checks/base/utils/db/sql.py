@@ -4,11 +4,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import json
+
 import mmh3
 
 # Unicode character "Arabic Decimal Separator" (U+066B) is a character which looks like an ascii
 # comma, but is not treated like a comma when parsing metrics tags. This is used to replace
 # commas so that tags which have commas in them (such as SQL queries) properly display.
+
+
 ARABIC_DECIMAL_SEPARATOR = '，'
 
 
@@ -40,3 +44,14 @@ def normalize_query_tag(query):
     """
     query = query.replace(', ', '{} '.format(ARABIC_DECIMAL_SEPARATOR)).replace(',', ARABIC_DECIMAL_SEPARATOR)
     return query
+
+
+def compute_exec_plan_signature(normalized_json_plan):
+    """
+    Given an already normalized json string query execution plan, generate its 64-bit hex signature.
+    TODO: try to push this logic into the agent go code to avoid the two extra json serialization steps here
+    """
+    if not normalized_json_plan:
+        return None
+    with_sorted_keys = json.dumps(json.loads(normalized_json_plan), sort_keys=True)
+    return format(mmh3.hash64(with_sorted_keys, signed=False)[0], 'x')

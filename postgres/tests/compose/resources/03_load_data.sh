@@ -2,8 +2,6 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
-    CREATE EXTENSION pg_stat_statements SCHEMA public;
-    GRANT SELECT ON pg_stat_statements TO datadog;
     CREATE TABLE persons (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
     INSERT INTO persons (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
     CREATE TABLE personsdup1 (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
@@ -13,6 +11,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM persons;
     SELECT * FROM persons;
     SELECT * FROM persons;
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
 EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs <<-EOSQL
