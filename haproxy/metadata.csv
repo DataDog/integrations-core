@@ -121,6 +121,7 @@ haproxy.frontend.responses.denied.total,count,,,,Total number of denied response
 haproxy.frontend.sessions.total,count,,,,Total number of sessions.,0,haproxy,
 haproxy.frontend.status,gauge,,,,"Current status of the service (frontend: 0=STOP, 1=UP, 2=FULL - backend: 0=DOWN, 1=UP - server: 0=DOWN, 1=UP, 2=MAINT, 3=DRAIN, 4=NOLB).",0,haproxy,
 haproxy.process.active.peers,gauge,,,,Current number of active peers.,0,haproxy,
+haproxy.process.build_info,gauge,,,,HAProxy build info.,0,haproxy,
 haproxy.process.busy.polling.enabled,gauge,,,,Non zero if the busy polling is enabled.,0,haproxy,
 haproxy.process.connected.peers,gauge,,,,Current number of connected peers.,0,haproxy,
 haproxy.process.connections.total,count,,,,Total number of created sessions.,0,haproxy,
