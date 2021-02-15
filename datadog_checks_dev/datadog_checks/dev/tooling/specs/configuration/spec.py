@@ -366,26 +366,26 @@ VALID_TYPES = {
 
 
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
-    if 'oneOf' in value:
+    if 'anyOf' in value:
         if 'type' in value:
             loader.errors.append(
-                '{}, {}, {}{}: Values must contain either a `type` or `oneOf` attribute, not both'.format(
+                '{}, {}, {}{}: Values must contain either a `type` or `anyOf` attribute, not both'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
             return
 
-        one_of = value['oneOf']
+        one_of = value['anyOf']
         if not isinstance(one_of, list):
             loader.errors.append(
-                '{}, {}, {}{}: Attribute `oneOf` must be an array'.format(
+                '{}, {}, {}{}: Attribute `anyOf` must be an array'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
             return
         elif len(one_of) == 1:
             loader.errors.append(
-                '{}, {}, {}{}: Attribute `oneOf` contains a single type, use the `type` attribute instead'.format(
+                '{}, {}, {}{}: Attribute `anyOf` contains a single type, use the `type` attribute instead'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
@@ -394,7 +394,7 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
         for i, type_data in enumerate(one_of, 1):
             if not isinstance(type_data, dict):
                 loader.errors.append(
-                    '{}, {}, {}{}: Type #{} of attribute `oneOf` must be a mapping'.format(
+                    '{}, {}, {}{}: Type #{} of attribute `anyOf` must be a mapping'.format(
                         loader.source, file_name, sections_display, option_name, i
                     )
                 )

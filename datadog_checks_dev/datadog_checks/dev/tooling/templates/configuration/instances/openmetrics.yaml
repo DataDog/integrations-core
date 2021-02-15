@@ -62,11 +62,11 @@
   value:
     type: array
     items:
-      oneOf:
+      anyOf:
       - type: string
       - type: object
         additionalProperties:
-          oneOf:
+          anyOf:
           - type: string
           - type: object
             properties:
@@ -118,11 +118,11 @@
   value:
     type: array
     items:
-      oneOf:
+      anyOf:
       - type: string
       - type: object
         additionalProperties:
-          oneOf:
+          anyOf:
           - type: string
           - type: object
             properties:
@@ -155,7 +155,7 @@
   value:
     type: object
     additionalProperties:
-      oneOf:
+      anyOf:
       - type: boolean
       - type: array
         items:
@@ -247,7 +247,7 @@
   value:
     type: object
     additionalProperties:
-      oneOf:
+      anyOf:
       - type: boolean
       - type: object
         properties:
