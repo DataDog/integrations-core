@@ -470,6 +470,40 @@ This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and 
 
 [Example of flag_stream usage in a profile](https://github.com/DataDog/integrations-core/blob/e64e2d18529c6c106f02435c5fdf2621667c16ad/snmp/datadog_checks/snmp/data/profiles/apc_ups.yaml#L60-L127).
 
+#### Extract value
+
+If the metric value to be submitted is from a OID with string value and needs to be extracted from it, you can use extract value feature.
+
+Example:
+
+**Scalar Metric Example:**
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbol:
+      OID: 1.2.3.4.5.6.7
+      name: temperature
+      extract_value: '(\d+)C'
+```
+
+**Table Column Metric Example:**
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    table:
+      OID: 1.2.3.4.5.6
+      name: myTable
+    symbols:
+      - OID: 1.2.3.4.5.6.7
+        name: temperature
+        extract_value: '(\d+)C'
+    # ...
+```
+
+In the examples above, the OID value is a snmp OctetString value `22C` and we want `22` to be submitted as value for `snmp.temperature`.
+
 ### `metric_tags`
 
 _(Optional)_
