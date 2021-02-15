@@ -30,7 +30,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "select query rate": "assets/monitors/select_query_rate.json"
+    },
     "dashboards": {
       "mysql": "assets/dashboards/overview.json",
       "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
