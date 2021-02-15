@@ -108,7 +108,7 @@ def test_snmpget(aggregator):
 
 
 def test_custom_mib(aggregator):
-    instance = common.generate_instance_config(common.EXTRACT_VALUE_METRICS)
+    instance = common.generate_instance_config([oid for oid, _, _ in common.DUMMY_MIB_OID])
     instance["community_string"] = "dummy"
 
     check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
