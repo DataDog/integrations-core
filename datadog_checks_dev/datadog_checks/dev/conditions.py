@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import re
 import socket
 import time
-import logging
 from contextlib import closing
 
 from six import string_types
@@ -16,6 +16,7 @@ from .subprocess import run_command
 from .utils import file_exists
 
 logger = logging.getLogger(__name__)
+
 
 class WaitFor(LazyFunction):
     def __init__(self, func, attempts=60, wait=1, args=(), kwargs=None):

@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
-import shlex
 import logging
+import shlex
 from collections import namedtuple
 from subprocess import Popen
 from tempfile import TemporaryFile

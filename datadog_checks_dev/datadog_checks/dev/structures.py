@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import abc
-import os
 import logging
+import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -13,6 +13,7 @@ from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_
 from .warn import warning
 
 logger = logging.getLogger(__name__)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class LazyFunction(object):
