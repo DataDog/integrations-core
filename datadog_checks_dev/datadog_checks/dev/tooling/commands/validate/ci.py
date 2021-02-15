@@ -53,7 +53,7 @@ def sort_jobs(jobs):
         jobs,
         key=lambda job: (
             not job.get('checkName', '').startswith('datadog_checks_'),
-            job.get('checkName') or list(job.values())[0][0]['checkName'],
+            get_check_name_from_job(job),
         ),
     )
 
@@ -65,6 +65,17 @@ def sort_projects(projects):
 def get_coverage_sources(check_name):
     package_dir, tests_dir = coverage_sources(check_name)
     return sorted([f'{check_name}/{package_dir}', f'{check_name}/{tests_dir}'])
+
+
+def get_check_name_from_job(job):
+    check_name = job.get('checkName')
+    if not check_name:
+        # Probably a nested block using an AZP template variable:
+        # - ${{ if ... }}:
+        #    - checkName: ...
+        job = list(job.values())[0][0]
+        check_name = job.get('checkName')
+    return check_name
 
 
 def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
@@ -83,8 +94,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
     for job in jobs:
         check_name = job.get('checkName')
         if not check_name:
-            job = list(job.values())[0][0]
-            check_name = job.get('checkName')
+            check_name = get_check_name_from_job(job)
 
         defined_checks.add(check_name)
 
