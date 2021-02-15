@@ -37,15 +37,15 @@ def construct_yaml(obj, **kwargs):
 
 
 def value_type_string(value):
-    if 'oneOf' in value:
-        return ' or '.join(value_type_string(type_data) for type_data in value['oneOf'])
+    if 'anyOf' in value:
+        return ' or '.join(value_type_string(type_data) for type_data in value['anyOf'])
     else:
         value_type = value['type']
         if value_type == 'object':
             return 'mapping'
         elif value_type == 'array':
             items = value['items']
-            if 'oneOf' in items:
+            if 'anyOf' in items:
                 return f'(list of {value_type_string(items)})'
             else:
                 item_type = items['type']
