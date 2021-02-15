@@ -193,7 +193,7 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs):
 
 
 @pytest.mark.integration
-def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+def test_etcd_version_metadata(aggregator, instance, dd_environment, datadog_agent):
     check_instance = Etcd(CHECK_NAME, {}, [instance])
     check_instance.check_id = 'test:123'
     check_instance.check(instance)

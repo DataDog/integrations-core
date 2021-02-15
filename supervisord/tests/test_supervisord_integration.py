@@ -55,7 +55,7 @@ def test_connection_failure(aggregator, check, bad_instance):
         aggregator.assert_service_check("supervisord.can_connect", status=check.CRITICAL, tags=instance_tags, count=1)
 
 
-def test_version_metadata(aggregator, check, instance, datadog_agent):
+def test_supervisord_version_metadata(aggregator, check, instance, datadog_agent):
     check.check_id = 'test:123'
     check.check(instance)
 

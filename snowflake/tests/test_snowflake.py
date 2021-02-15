@@ -178,7 +178,7 @@ def test_query_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric('snowflake.query.bytes_spilled.remote', value=0, count=1, tags=expected_tags)
 
 
-def test_version_metadata(dd_run_check, instance, datadog_agent):
+def test_snowflake_version_metadata(dd_run_check, instance, datadog_agent):
     expected_version = [('4.30.2',)]
     version_metadata = {
         'version.major': '4',

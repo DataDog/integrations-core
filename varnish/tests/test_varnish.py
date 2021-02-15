@@ -49,7 +49,7 @@ def test_exclusion_filter(aggregator, check, instance):
             aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
 
-def test_version_metadata(aggregator, check, instance, datadog_agent):
+def test_varnish_version_metadata(aggregator, check, instance, datadog_agent):
     check.check_id = 'test:123'
     check.check(instance)
 

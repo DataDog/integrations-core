@@ -397,7 +397,7 @@ def test_attributes_filters(aggregator, dd_run_check, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_agent):
+def test_vsphere_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_agent):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.check_id = 'test:123'
     dd_run_check(check)

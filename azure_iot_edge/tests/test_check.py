@@ -56,7 +56,7 @@ def test_azure_iot(aggregator, mock_instance):
 
 
 @pytest.mark.usefixtures("mock_server")
-def test_version_metadata(datadog_agent, mock_instance):
+def test_azure_iot_version_metadata(datadog_agent, mock_instance):
     # type: (DatadogAgentStub, dict) -> None
     check = AzureIoTEdgeCheck('azure_iot_edge', {}, [mock_instance])
     check.check_id = 'test:123'

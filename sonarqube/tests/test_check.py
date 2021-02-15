@@ -27,7 +27,7 @@ def test_sonarqube(aggregator, dd_run_check, sonarqube_check, web_instance):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 
-def test_version_metadata(datadog_agent, dd_run_check, sonarqube_check, web_instance):
+def test_sonarqube_version_metadata(datadog_agent, dd_run_check, sonarqube_check, web_instance):
     check = sonarqube_check(web_instance)
     check.check_id = 'test:123'
 

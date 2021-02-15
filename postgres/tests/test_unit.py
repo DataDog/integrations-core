@@ -203,7 +203,7 @@ def test_malformed_get_custom_queries(check):
         ),
     ],
 )
-def test_version_metadata(check, test_case, params):
+def test_pg_version_metadata(check, test_case, params):
     check.check_id = 'test:123'
     with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
         check.set_metadata('version', test_case)

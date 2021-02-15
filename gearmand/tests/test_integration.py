@@ -21,7 +21,7 @@ def test_service_check_broken(check, aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(check, aggregator, datadog_agent):
+def test_gearmand_version_metadata(check, aggregator, datadog_agent):
     check.check_id = 'test:123'
     check.check(common.INSTANCE)
 

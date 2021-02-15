@@ -35,7 +35,7 @@ def test_connection_failure(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(aggregator, datadog_agent):
+def test_gitlabl_runner_version_metadata(aggregator, datadog_agent):
     check_instance = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=CONFIG['instances'])
     check_instance.check_id = 'test:123'
     check_instance.check(CONFIG['instances'][0])

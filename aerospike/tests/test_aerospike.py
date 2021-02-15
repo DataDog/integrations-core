@@ -24,7 +24,7 @@ def test_aerospike(aggregator, instance):
     _test_check(aggregator)
 
 
-def test_version_metadata(aggregator, instance, datadog_agent):
+def test_aerospike_version_metadata(aggregator, instance, datadog_agent):
 
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'

@@ -24,7 +24,7 @@ def test_operator_check(aggregator, operator_instance, mock_operator_data):
     aggregator.assert_all_metrics_covered()
 
 
-def test_version_metadata(datadog_agent, agent_instance, mock_agent_data):
+def test_cilium_version_metadata(datadog_agent, agent_instance, mock_agent_data):
     check = CiliumCheck('cilium', {}, [agent_instance])
     check.check_id = 'test:123'
     check.check(agent_instance)

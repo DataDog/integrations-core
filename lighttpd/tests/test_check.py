@@ -34,7 +34,7 @@ def test_lighttpd(aggregator, check, instance):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(check, instance, datadog_agent):
+def test_lighthttpd_version_metadata(check, instance, datadog_agent):
     check.check_id = 'test:123'
 
     check.check(instance)

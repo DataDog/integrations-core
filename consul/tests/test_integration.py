@@ -132,7 +132,7 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
 
 
 @pytest.mark.integration
-def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+def test_consul_version_metadata(aggregator, instance, dd_environment, datadog_agent):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance])
     consul_check.check_id = 'test:123'
     consul_check.check(instance)

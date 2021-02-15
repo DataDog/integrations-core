@@ -34,7 +34,7 @@ def _test_check(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(aggregator, instance, datadog_agent):
+def test_cockroach_version_metadata(aggregator, instance, datadog_agent):
 
     check_instance = CockroachdbCheck('cockroachdb', {}, [instance])
     check_instance.check_id = 'test:123'

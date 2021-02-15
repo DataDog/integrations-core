@@ -102,7 +102,7 @@ def test_no_partitions(aggregator, kafka_instance):
 @pytest.mark.skipif(os.environ.get('KAFKA_VERSION', '').startswith('0.9'), reason='Old Kafka version')
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(datadog_agent, kafka_instance):
+def test_kafka_consumer_version_metadata(datadog_agent, kafka_instance):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     kafka_consumer_check.check_id = 'test:123'
 

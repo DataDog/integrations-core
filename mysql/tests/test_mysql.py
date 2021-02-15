@@ -363,7 +363,7 @@ def test_replication_check_status(replica_io_running, replica_sql_running, check
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(instance_basic, datadog_agent, version_metadata):
+def test_mysql_version_metadata(instance_basic, datadog_agent, version_metadata):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.check_id = 'test:123'
 
