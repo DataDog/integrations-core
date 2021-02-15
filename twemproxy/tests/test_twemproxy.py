@@ -13,7 +13,7 @@ SC_TAGS = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'option
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_integration(check, dd_environment, setup_request, aggregator):
+def test_twemproxy_integration(check, dd_environment, setup_request, aggregator):
     check.check(common.INSTANCE)
 
     for stat in metrics.POOL_STATS:

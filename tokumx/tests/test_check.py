@@ -11,7 +11,7 @@ from . import common, metrics
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(aggregator, check):
+def test_tokumx_integration(aggregator, check):
     check.check(common.INSTANCE)
 
     server_tag = 'server:{}'.format(common.TOKUMX_SERVER)

@@ -16,7 +16,7 @@ from .utils import run_check
 @auth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_integration(aggregator, check, instance, global_tags):
+def test_valut_integration(aggregator, check, instance, global_tags):
     instance = instance()
     check = check(instance)
     run_check(check)

@@ -179,7 +179,7 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
     assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_integration(aggregator, dd_environment):
+def test_prometheus_integration(aggregator, dd_environment):
     c = PrometheusCheck('prometheus', None, {}, [dd_environment])
     c.check(dd_environment)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
@@ -191,7 +191,7 @@ def test_integration(aggregator, dd_environment):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, e2e_instance):
+def test_prometheus_e2e(dd_agent_check, e2e_instance):
     aggregator = dd_agent_check(e2e_instance, rate=True)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)

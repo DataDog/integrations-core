@@ -13,7 +13,7 @@ from .common import CHECK_NAME, CONFIG, GENERAL_METRICS, QUEUE_METRICS, SUBSCRIB
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(aggregator):
+def test_activemq_integration(aggregator):
     """
     Collect ActiveMQ metrics
     """
@@ -24,7 +24,7 @@ def test_integration(aggregator):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_activemq_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG)
 
     _test_check(aggregator)

@@ -12,7 +12,7 @@ from .common import COCKROACHDB_VERSION
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(aggregator, instance):
+def test_cockroachdb_integration(aggregator, instance):
     check = CockroachdbCheck('cockroachdb', {}, [instance])
     check.check(instance)
 
@@ -20,7 +20,7 @@ def test_integration(aggregator, instance):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
+def test_cockroachdb_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     _test_check(aggregator)
 

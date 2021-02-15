@@ -12,7 +12,7 @@ from . import common
 
 
 @pytest.mark.integration
-def test_integration(aggregator, dd_environment):
+def test_cassandra_nodetool_integration(aggregator, dd_environment):
     """
     Testing Cassandra Nodetool Integration
     """
