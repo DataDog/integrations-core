@@ -9,7 +9,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, instance, check):
+def test_ibm_was(aggregator, instance, check):
     check = check(instance)
     check.check(instance)
 

@@ -12,7 +12,7 @@ from datadog_checks.base.errors import CheckException
 from .common import HERE
 
 
-def test_check(check, aggregator, mocker):
+def test_openldap(check, aggregator, mocker):
     server_mock = ldap3.Server("fake_server")
     conn_mock = ldap3.Connection(server_mock, client_strategy=ldap3.MOCK_SYNC, collect_usage=True)
     # usage.last_received_time is not populated when using mock connection, let's set a value

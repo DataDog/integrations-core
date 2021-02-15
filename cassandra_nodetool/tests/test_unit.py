@@ -26,7 +26,7 @@ def mock_output_old_format(*args, **kwargs):
 
 
 @patch('datadog_checks.cassandra_nodetool.cassandra_nodetool.get_subprocess_output', side_effect=mock_output)
-def test_check(mock_output, aggregator):
+def test_cassandra_nodetool(mock_output, aggregator):
     _check(mock_output, aggregator)
 
 

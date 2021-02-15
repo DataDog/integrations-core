@@ -46,7 +46,7 @@ def test_no_metrics_failure(aggregator, check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
+def test_apache(aggregator, check):
     """
     This test will try and fail with `/server-status` url first then fallback on `/server-status??auto`
     """

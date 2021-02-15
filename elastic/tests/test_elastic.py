@@ -83,7 +83,7 @@ def test__get_urls(instance, url_fix):
 
 
 @pytest.mark.integration
-def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
+def test_elastic(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 

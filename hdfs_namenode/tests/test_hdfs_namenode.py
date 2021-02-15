@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 CHECK_ID = 'test:123'
 
 
-def test_check(aggregator, mocked_request):
+def test_hdfs_namenode(aggregator, mocked_request):
     instance = HDFS_NAMENODE_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 

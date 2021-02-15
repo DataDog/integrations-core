@@ -115,7 +115,7 @@ def check():
 pytestmark = pytest.mark.unit
 
 
-def test_check(aggregator, check):
+def test_cacti(aggregator, check):
     mocks = _setup_mocks()
 
     # Run the check twice to set the timestamps and capture metrics on the second run

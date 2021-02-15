@@ -13,7 +13,7 @@ from .common import CHECK, E2E_INIT_CONFIG, EXPECTED_METRICS, GLUSTER_VERSION
 
 
 @pytest.mark.unit
-def test_check(aggregator, instance, mock_gstatus_data):
+def test_glusterfs(aggregator, instance, mock_gstatus_data):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
     check.check(instance)

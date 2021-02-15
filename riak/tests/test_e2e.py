@@ -10,7 +10,7 @@ from . import common
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check, instance):
+def test_riak_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     tags = ['my_tag']
     sc_tags = tags + ['url:' + instance['url']]

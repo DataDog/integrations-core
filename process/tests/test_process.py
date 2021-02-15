@@ -168,7 +168,7 @@ def generate_expected_tags(instance):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check(mock_process, reset_process_list_cache, aggregator):
+def test_process(mock_process, reset_process_list_cache, aggregator):
     (minflt, cminflt, majflt, cmajflt) = [1, 2, 3, 4]
 
     def mock_get_pagefault_stats(pid):

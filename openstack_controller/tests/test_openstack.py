@@ -86,7 +86,7 @@ def test_populate_servers_cache_with_project_name_none(servers_detail, aggregato
 
 
 @mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
-def test_check(mock_api, aggregator):
+def test_openstack(mock_api, aggregator):
     check = OpenStackControllerCheck("test", {'ssl_verify': False}, [common.KEYSTONE_INSTANCE])
 
     check.check(common.KEYSTONE_INSTANCE)

@@ -14,7 +14,7 @@ from .common import LATENCIES_METRICS, LAZY_METRICS, NAMESPACE_METRICS, SET_METR
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, instance):
+def test_aerospike(aggregator, instance):
     check = AerospikeCheck('aerospike', {}, [instance])
     # sleep to make sure client is available
     time.sleep(30)

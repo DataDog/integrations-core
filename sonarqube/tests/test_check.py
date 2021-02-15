@@ -11,7 +11,7 @@ from .metrics import WEB_METRICS
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_check(aggregator, dd_run_check, sonarqube_check, web_instance):
+def test_sonarqube(aggregator, dd_run_check, sonarqube_check, web_instance):
     check = sonarqube_check(web_instance)
     dd_run_check(check)
 

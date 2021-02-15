@@ -15,7 +15,7 @@ from . import common
 
 
 @pytest.mark.usefixtures("mock_server")
-def test_check(aggregator, mock_instance):
+def test_azure_iot(aggregator, mock_instance):
     # type: (AggregatorStub, dict) -> None
     """
     Under normal conditions, metrics and service checks are collected as expected.

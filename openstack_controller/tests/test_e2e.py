@@ -8,7 +8,7 @@ from . import common
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check):
+def test_openstack_controller_e2e(dd_agent_check):
     aggregator = dd_agent_check()
     for metric in common.DEFAULT_METRICS:
         aggregator.assert_metric(metric)

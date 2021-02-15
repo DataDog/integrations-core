@@ -8,7 +8,7 @@ from . import common
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_marathon(aggregator, check, instance):
     check.check(instance)
 
     for metric in common.EXPECTED_METRICS:

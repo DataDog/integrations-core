@@ -74,7 +74,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_total.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_kube_api_server(self, aggregator, mock_get):
         """
         Testing kube_apiserver_metrics metrics collection.
         """

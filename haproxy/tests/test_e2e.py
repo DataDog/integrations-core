@@ -8,7 +8,7 @@ from . import common
 pytestmark = [common.requires_new_environment, pytest.mark.e2e]
 
 
-def test_check(dd_agent_check, prometheus_metrics):
+def test_haproxy_e2e(dd_agent_check, prometheus_metrics):
     aggregator = dd_agent_check(common.INSTANCE, rate=True)
 
     for metric in prometheus_metrics:

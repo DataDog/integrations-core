@@ -20,7 +20,7 @@ pytestmark = pytest.mark.unit
 CHECK_ID = 'test:123'
 
 
-def test_check(aggregator, mocked_request):
+def test_hdfs_datanode(aggregator, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
     """

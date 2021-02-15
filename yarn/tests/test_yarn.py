@@ -43,7 +43,7 @@ from .common import (
 EXPECTED_TAGS = YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS
 
 
-def test_check(aggregator, mocked_request):
+def test_yarn(aggregator, mocked_request):
     instance = YARN_CONFIG['instances'][0]
 
     # Instantiate YarnCheck

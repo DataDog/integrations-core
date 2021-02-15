@@ -26,7 +26,7 @@ def extract_nan_metrics(text):
     return metrics
 
 
-def test_check(aggregator, dd_environment, get_test_instance, caplog):
+def test_zk(aggregator, dd_environment, get_test_instance, caplog):
     """
     Collect ZooKeeper metrics.
     """

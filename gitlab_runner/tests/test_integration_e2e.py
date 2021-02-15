@@ -31,7 +31,7 @@ def assert_check(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator):
+def test_gitlab_runner(aggregator):
     gitlab_runner = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=CONFIG['instances'])
 
     gitlab_runner.check(CONFIG['instances'][0])
@@ -41,7 +41,7 @@ def test_check(aggregator):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_gitlab_runner_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
 
     assert_check(aggregator)

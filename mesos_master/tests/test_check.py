@@ -11,7 +11,7 @@ from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster
 
 
-def test_check(check, instance, aggregator):
+def test_mesos_master(check, instance, aggregator):
     check = check({}, instance)
     check.check(instance)
     metrics = {}

@@ -9,7 +9,7 @@ pytestmark = pytest.mark.e2e
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check, instance):
+def test_sap_hana_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric in metrics.STANDARD:

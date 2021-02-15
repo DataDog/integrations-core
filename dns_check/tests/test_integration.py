@@ -11,6 +11,6 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
+def test_dns(aggregator, check):
     check.check(deepcopy(common.INSTANCE_INTEGRATION))
     common._test_check(aggregator)

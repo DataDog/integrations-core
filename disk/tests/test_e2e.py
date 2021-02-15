@@ -10,7 +10,7 @@ from . import common
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check):
+def test_disk_e2e(dd_agent_check):
     aggregator = dd_agent_check()
     for metric in common.EXPECTED_METRICS:
         for device in common.EXPECTED_DEVICES:

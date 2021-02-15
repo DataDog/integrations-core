@@ -33,7 +33,7 @@ def get_mock_devices():
 
 @mock.patch('datadog_checks.btrfs.btrfs.psutil.disk_partitions', return_value=get_mock_devices())
 @mock.patch('datadog_checks.btrfs.btrfs.BTRFS.get_usage', return_value=mock_get_usage())
-def test_check(mock_get_usage, mock_device_list, aggregator):
+def test_btrfs(mock_get_usage, mock_device_list, aggregator):
     """
     Testing Btrfs check.
     """

@@ -13,7 +13,7 @@ from .metrics import ALL_METRICS
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_check(aggregator, instance):
+def test_clickhouse(aggregator, instance):
     # We do not do aggregator.assert_all_metrics_covered() because depending on timing, some other metrics may appear
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.run()

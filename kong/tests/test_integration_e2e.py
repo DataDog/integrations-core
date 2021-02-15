@@ -25,7 +25,7 @@ def check():
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, check):
+def test_kong(aggregator, check):
     for stub in common.CONFIG_STUBS:
         check.check(stub)
 

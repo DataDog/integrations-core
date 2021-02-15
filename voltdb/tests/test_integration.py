@@ -20,7 +20,7 @@ from . import assertions, common
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 class TestCheck:
-    def test_check(self, aggregator, instance):
+    def test_voltdb(self, aggregator, instance):
         # type: (AggregatorStub, Instance) -> None
         check = VoltDBCheck('voltdb', {}, [instance])
         check.run()

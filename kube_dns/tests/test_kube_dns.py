@@ -58,7 +58,7 @@ class TestKubeDNS:
         NAMESPACE + '.cachemiss_count.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_kube_dns(self, aggregator, mock_get):
         """
         Testing kube_dns check.
         """

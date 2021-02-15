@@ -7,7 +7,7 @@ from datadog_checks.ambari import AmbariCheck
 
 
 @pytest.mark.skip(reason="Cannot be automated due to network restrictions")
-def test_check(aggregator):
+def test_ambari(aggregator):
     ambari_ip = "localhost"
     init_config = {"collect_host_metrics": True, "collect_service_metrics": True, "collect_service_status": True}
     instances = [

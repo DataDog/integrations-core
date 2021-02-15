@@ -19,7 +19,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 
 @preview
-def test_check(aggregator, instance, openmetrics_metrics):
+def test_etcd(aggregator, instance, openmetrics_metrics):
     check = Etcd('etcd', {}, [instance])
     check.check(instance)
 

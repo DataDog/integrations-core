@@ -11,7 +11,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_network(aggregator, check, instance):
     check.check(instance)
 
     for metric in common.EXPECTED_METRICS:
@@ -20,7 +20,7 @@ def test_check(aggregator, check, instance):
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @pytest.mark.usefixtures("dd_environment")
-def test_check_linux(aggregator, check, instance_blacklist):
+def test_network_linux(aggregator, check, instance_blacklist):
     check.check(instance_blacklist)
 
     for metric in common.CONNTRACK_METRICS:

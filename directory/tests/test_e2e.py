@@ -8,7 +8,7 @@ from . import common
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check):
+def test_directory_e2e(dd_agent_check):
     aggregator = dd_agent_check(common.get_config_stubs(".")[0], rate=True)
     for metric in common.DIR_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)

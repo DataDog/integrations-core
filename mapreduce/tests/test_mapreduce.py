@@ -27,7 +27,7 @@ from .common import (
 pytestmark = pytest.mark.unit
 
 
-def test_check(aggregator, mocked_request):
+def test_mapreduce(aggregator, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
     """

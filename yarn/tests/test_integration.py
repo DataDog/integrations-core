@@ -11,7 +11,7 @@ from . import common
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_yarn(aggregator, check, instance):
     check = check(instance)
     check.check(instance)
     assert_check(aggregator)

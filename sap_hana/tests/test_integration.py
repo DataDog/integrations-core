@@ -11,7 +11,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, instance):
+def test_sap_hana(aggregator, instance):
     check = SapHanaCheck('sap_hana', {}, [instance])
     check.check(instance)
 

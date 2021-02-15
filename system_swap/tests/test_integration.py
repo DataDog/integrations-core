@@ -9,6 +9,6 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixture("dd_environment")
-def test_check(aggregator, check, instance):
+def test_system_swap(aggregator, check, instance):
     check.check(instance)
     common._test_check(aggregator, instance)

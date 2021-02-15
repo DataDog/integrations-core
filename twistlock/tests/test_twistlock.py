@@ -70,7 +70,7 @@ def mock_get_factory(fixture_group):
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_check(aggregator, fixture_group):
+def test_twistlock(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 

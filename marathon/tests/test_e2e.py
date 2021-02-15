@@ -8,7 +8,7 @@ from . import common
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check, instance):
+def test_marathon_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
 
     for metric in common.EXPECTED_METRICS:

@@ -72,7 +72,7 @@ def gauges():
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, gauges):
+def test_couch(aggregator, gauges):
     for config in deepcopy(INSTANCES):
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
@@ -80,7 +80,7 @@ def test_check(aggregator, gauges):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, gauges):
+def test_couch_e2e(dd_agent_check, gauges):
     aggregator = dd_agent_check({'init_config': {}, 'instances': deepcopy(INSTANCES)})
     _assert_check(aggregator, gauges)
 

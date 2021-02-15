@@ -69,7 +69,7 @@ def _assert_service_checks(aggregator, tags, count=1, include_health_checks=True
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator):
+def test_marklogic(aggregator):
     # type: (AggregatorStub) -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE])
 

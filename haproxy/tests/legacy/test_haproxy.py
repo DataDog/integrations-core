@@ -119,7 +119,7 @@ def _test_sticktable_metrics(aggregator, services=None, count=1):
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, check, instance):
+def test_haproxy_legacy(aggregator, check, instance):
     check = check(instance)
     check.check(instance)
 

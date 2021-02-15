@@ -11,7 +11,7 @@ from . import common
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
 
-def test_check(aggregator, check, instance):
+def test_varnish(aggregator, check, instance):
     check.check(instance)
 
     if common.VARNISH_VERSION.startswith("5"):

@@ -12,7 +12,7 @@ from .common import PROCESSES, PROCESSES_BY_STATE_BY_ITERATION, STATUSES, SUPERV
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
-def test_check(aggregator, check, instance):
+def test_supervisord(aggregator, check, instance):
     """
     Run Supervisord check and assess coverage
     """

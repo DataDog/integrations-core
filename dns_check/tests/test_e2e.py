@@ -9,6 +9,6 @@ from . import common
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check):
+def test_dns_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE_INTEGRATION))
     common._test_check(aggregator)

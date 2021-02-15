@@ -12,7 +12,7 @@ from .common import CHECK_NAME, METRICS, NAMESPACE
 class TestCoreDNS:
     """Basic Test for CoreDNS integration."""
 
-    def test_check(self, aggregator, mock_get, instance):
+    def test_coredns(self, aggregator, mock_get, instance):
         """
         Testing CoreDNS check.
         """
@@ -30,7 +30,7 @@ class TestCoreDNS:
         aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
-    def test_docker(self, aggregator, dd_environment, dockerinstance):
+    def test_coredns_docker(self, aggregator, dd_environment, dockerinstance):
         """
         Testing metrics emitted from docker container.
         """

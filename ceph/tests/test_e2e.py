@@ -10,7 +10,7 @@ from .common import BASIC_CONFIG, EXPECTED_METRICS, EXPECTED_SERVICE_CHECKS, EXP
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check):
+def test_ceph_e2e(dd_agent_check):
     aggregator = dd_agent_check(BASIC_CONFIG, rate=True)
 
     for metric in EXPECTED_METRICS:

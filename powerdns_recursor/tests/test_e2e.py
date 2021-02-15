@@ -11,7 +11,7 @@ from . import common, metrics
 pytestmark = [pytest.mark.e2e]
 
 
-def test_check(dd_agent_check):
+def test_powerdns_e2e(dd_agent_check):
     # get version and test v3 first.
     version = common._get_pdns_version()
     if version == 3:

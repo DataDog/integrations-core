@@ -8,7 +8,7 @@ from . import common
 pytestmark = [common.requires_new_environment, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_check(aggregator, dd_run_check, check, prometheus_metrics):
+def test_haproxy(aggregator, dd_run_check, check, prometheus_metrics):
     dd_run_check(check(common.INSTANCE))
 
     for metric in prometheus_metrics:

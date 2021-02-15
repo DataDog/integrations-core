@@ -6,7 +6,7 @@ from itertools import chain
 from datadog_checks.disk import Disk
 
 
-def test_check(aggregator, instance_basic_volume, gauge_metrics, rate_metrics):
+def test_disk(aggregator, instance_basic_volume, gauge_metrics, rate_metrics):
     """
     Basic check to see if all metrics are there
     """

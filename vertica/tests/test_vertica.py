@@ -24,7 +24,7 @@ def test_check_e2e(dd_agent_check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, datadog_agent, instance, dd_run_check):
+def test_vertica(aggregator, datadog_agent, instance, dd_run_check):
 
     check = VerticaCheck('vertica', {}, [instance])
     check.check_id = 'test:123'

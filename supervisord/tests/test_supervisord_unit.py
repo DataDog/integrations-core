@@ -21,7 +21,7 @@ def mock_server(url, transport=None):
     return MockXmlRcpServer(url, transport)
 
 
-def test_check(aggregator, check):
+def test_supervisord(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
     with patch.object(xmlrpclib, 'Server', side_effect=mock_server), patch.object(

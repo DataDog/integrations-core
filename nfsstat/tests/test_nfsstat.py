@@ -49,7 +49,7 @@ class TestNfsstat:
             c.check(instance)
         c.log.debug.assert_called_once_with("AutoFS enabled: no mount points currently.")
 
-    def test_check(self, aggregator):
+    def test_nfsstat(self, aggregator):
         instance = self.INSTANCES['main']
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
 

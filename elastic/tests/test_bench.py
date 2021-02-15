@@ -8,7 +8,7 @@ from datadog_checks.elastic import ESCheck
 from .common import PASSWORD, URL, USER
 
 
-def test_check(benchmark, dd_environment, elastic_check, instance):
+def test_elastic_bench(benchmark, dd_environment, elastic_check, instance):
     for _ in range(3):
         try:
             elastic_check.check(instance)

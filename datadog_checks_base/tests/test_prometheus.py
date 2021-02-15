@@ -117,7 +117,7 @@ def test_parse_metric_family():
         assert messages[-1].name == 'process_virtual_memory_bytes'
 
 
-def test_check(mocked_prometheus_check):
+def test_prometheus(mocked_prometheus_check):
     """ Should not be implemented as it is the mother class """
     with pytest.raises(NotImplementedError):
         mocked_prometheus_check.check(None)

@@ -12,7 +12,7 @@ CHECK_ID = 'test:123'
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_hdfs_datanode(aggregator, check, instance):
     check = check(instance)
     check.check(instance)
 

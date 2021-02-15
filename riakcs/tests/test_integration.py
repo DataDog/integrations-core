@@ -10,7 +10,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
+def test_riacks(aggregator, check):
     check.check(common.generate_config_with_creds())
     aggregator.assert_service_check(common.SERVICE_CHECK_NAME, check.OK, tags=common.EXPECTED_TAGS)
     for metric in common.EXPECTED_METRICS_21:

@@ -86,7 +86,7 @@ def test_service_check_with_invalid_host(aggregator):
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_check(aggregator):
+def test_iis(aggregator):
     """
     Returns the right metrics and service checks
     """

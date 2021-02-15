@@ -551,7 +551,7 @@ def test__collect_metrics_async_hostname(vsphere, instance, aggregator):
     aggregator.assert_metric('vsphere.mymetric', value=23.4, hostname="foo")
 
 
-def test_check(vsphere, instance):
+def test_vsphere(vsphere, instance):
     """
     Test the check() method
     """

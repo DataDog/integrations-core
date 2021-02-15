@@ -10,7 +10,7 @@ from .common import get_instance, get_queue_counts
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator):
+def test_postfix(aggregator):
     instance = get_instance()
     check = PostfixCheck('postfix', {}, [instance])
     check.check(instance)

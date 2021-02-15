@@ -18,7 +18,7 @@ RATES = list(KyotoTycoonCheck.RATES.values())
 ALL_RATES = TOTALS + RATES
 
 
-def test_check(aggregator, dd_environment):
+def test_kyototycoon(aggregator, dd_environment):
     kt = KyotoTycoonCheck('kyototycoon', {}, {})
     kt.check(deepcopy(DEFAULT_INSTANCE))
     kt.check(deepcopy(DEFAULT_INSTANCE))
@@ -27,7 +27,7 @@ def test_check(aggregator, dd_environment):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_kyototycoon_e2e(dd_agent_check):
     aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
 
     _assert_check(aggregator, rate_metric_count=1)

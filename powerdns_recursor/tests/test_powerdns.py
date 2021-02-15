@@ -11,7 +11,7 @@ from . import common, metrics
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
-def test_check(aggregator):
+def test_powerdns(aggregator):
     # get version and test v3 first.
     version = common._get_pdns_version()
     if version == 3:

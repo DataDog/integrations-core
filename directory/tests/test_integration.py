@@ -12,7 +12,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator):
+def test_disk(aggregator):
     config = common.get_config_stubs(".")[0]
     check = DirectoryCheck(common.CHECK_NAME, {}, [config])
     check.check(config)

@@ -6,7 +6,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.{check_name} import {check_class}
 
 
-def test_check(aggregator, instance):
+def test_{check_class}(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = {check_class}('{check_name}', {{}}, [instance])
     check.check(instance)

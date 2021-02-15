@@ -44,7 +44,7 @@ METRICS = [
 
 
 @pytest.mark.e2e
-def test_check(dd_agent_check):
+def test_oracle_e2e(dd_agent_check):
     aggregator = dd_agent_check()
     for metric in METRICS:
         aggregator.assert_metric(metric)

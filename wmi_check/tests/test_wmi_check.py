@@ -58,7 +58,7 @@ def test_invalid_metrics(aggregator, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check(mock_disk_sampler, aggregator, check):
+def test_wmi(mock_disk_sampler, aggregator, check):
     c = check(common.WMI_CONFIG)
     c.check(common.WMI_CONFIG)
 

@@ -13,7 +13,7 @@ from . import common
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(instance, aggregator, datadog_agent):
+def test_pgbouncer(instance, aggregator, datadog_agent):
     # add some stats
     connection = psycopg2.connect(
         host=common.HOST,

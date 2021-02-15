@@ -104,7 +104,7 @@ def test_submit_bucket(instance, aggregator):
 
 @pytest.mark.usefixtures("mock_getconnection")
 @pytest.mark.usefixtures("mock_fqdn", "mock_ticket_file_readable")
-def test_check(aggregator, instance):
+def test_mapr(aggregator, instance):
     check = MaprCheck('mapr', {}, [instance])
     check.check(instance)
 

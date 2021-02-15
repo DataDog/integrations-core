@@ -35,7 +35,7 @@ METRICS = [
 
 
 @pytest.mark.integration
-def test_check(aggregator, instance, dd_environment):
+def test_consul(aggregator, instance, dd_environment):
     """
     Testing Consul Integration
     """

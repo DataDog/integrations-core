@@ -10,7 +10,7 @@ from . import common
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
+def test_linux_proc_extras(aggregator, check):
     check.check(deepcopy(common.INSTANCE))
 
     for metric in common.EXPECTED_METRICS:
@@ -27,7 +27,7 @@ def test_check_no_irq(aggregator, check):
 
 
 @pytest.mark.e2e
-def test_check_e2e(dd_agent_check):
+def test_linux_proc_extras_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)
     expected_metrics = deepcopy(common.EXPECTED_METRICS)
     # metric removed from list because env does not emit
