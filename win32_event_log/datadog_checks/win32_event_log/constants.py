@@ -14,4 +14,10 @@ EVENT_TYPES_TO_LEVEL = {'success': 4, 'error': 2, 'warning': 3, 'information': 4
 # Audit success and audit failures event do not correspond to a specific level but can instead be queries
 # by using specific keywords.
 # https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.eventing.reader.standardeventkeywords?view=netframework-4.8
-EVENT_TYPES_TO_KEYWORD = {'failure audit': '0x8010000000000000', 'success audit': '0x8020000000000000'}
+EVENT_TYPES_TO_KEYWORD = {
+    'failure audit': '0x8010000000000000',
+    'success audit': '0x8020000000000000',
+    # Aliases for legacy version
+    'audit failure': '0x8010000000000000',
+    'audit success': '0x8020000000000000',
+}

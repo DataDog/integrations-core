@@ -21,10 +21,11 @@ pytestmark = [pytest.mark.unit]
         pytest.param({'type': ['Warning']}, '*[System[Level=3]]', id='type Warning'),
         pytest.param({'type': ['Information']}, '*[System[Level=4]]', id='type Information'),
         pytest.param({'type': ['Success Audit']}, "*[System[Keywords='0x8020000000000000']]", id='type Success Audit'),
+        pytest.param({'type': ['Audit Success']}, "*[System[Keywords='0x8020000000000000']]", id='type Success Audit'),
         pytest.param({'type': ['Failure Audit']}, "*[System[Keywords='0x8010000000000000']]", id='type Failure Audit'),
-        pytest.param({'type': ['Failure Audit']}, "*[System[Keywords='0x8010000000000000']]", id='type Failure Audit'),
+        pytest.param({'type': ['Audit Failure']}, "*[System[Keywords='0x8010000000000000']]", id='type Failure Audit'),
         pytest.param(
-            {'type': ['Information', 'Error', 'Warning', 'Success Audit', 'Failure Audit']},
+            {'type': ['Information', 'Error', 'Warning', 'Success Audit', 'Audit failure']},
             "*[System[(Level=2 or Level=3 or Level=4 or "
             "Keywords='0x8010000000000000' or Keywords='0x8020000000000000')]]",
             id='type multiple',
