@@ -18,9 +18,9 @@ def test_check(dd_agent_check, prometheus_metrics):
 
     aggregator.assert_all_metrics_covered()
 
-    # These metrics are submitted as count in Haproxy 2.0
     exclude_metrics = []
-    if common.HAPROXY_VERSION_RAW == '2.0.20':
+    if not common.HAPROXY_LEGACY:
+        # These metrics are submitted as counts with Prometheus
         exclude_metrics = [
             'haproxy.backend.bytes.in.total',
             'haproxy.backend.bytes.out.total',
