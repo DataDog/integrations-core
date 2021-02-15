@@ -474,6 +474,14 @@ This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and 
 
 If the metric value to be submitted is from a OID with string value and needs to be extracted from it, you can use extract value feature.
 
+`extract_value` is a regex pattern with one capture group like `(\d+)C`, where the capture group is `(\d+)`.
+
+Example use cases respective regex patterns:
+
+- stripping the C unit from a temperature value: `(\d+)C`
+- stripping the USD unit from a currency value: `USD(\d+)`
+- stripping the F unit from a temperature value with spaces between the metric and the unit: `(\d+) *F`
+
 Example:
 
 **Scalar Metric Example:**
