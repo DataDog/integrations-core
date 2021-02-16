@@ -123,6 +123,107 @@ def test_custom_mib(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
 
+def test_extract_value_inferred(aggregator):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueInferred",
+                    'extract_value': r'(\d+)C',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    aggregator.assert_metric(
+        'snmp.aTemperatureValueInferred', metric_type=aggregator.GAUGE, count=1, value=22, tags=common.CHECK_TAGS
+    )
+
+
+def test_extract_value_does_not_match(aggregator, caplog):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueInferred",
+                    'extract_value': r'(\d+)ZZZ',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    assert "Unable to submit metric `aTemperatureValueInferred`" in str(caplog.text)
+
+
+def test_extract_value_forced_type(aggregator):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "DUMMY-MIB",
+                'forced_type': 'counter',
+                'symbol': {
+                    'OID': "1.3.6.1.4.1.123456789.4.0",
+                    'name': "aTemperatureValueForced",
+                    'extract_value': r'(\d+)C',
+                },
+            }
+        ]
+    )
+    instance["community_string"] = "dummy"
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+    aggregator.assert_metric(
+        'snmp.aTemperatureValueForced', metric_type=aggregator.RATE, count=1, value=22, tags=common.CHECK_TAGS
+    )
+
+
+def test_extract_value_table(aggregator):
+    instance = common.generate_instance_config(
+        [
+            {
+                "MIB": "IF-MIB",
+                'table': {
+                    'OID': '1.3.6.1.2.1.2.2',
+                    'name': 'ifTable',
+                },
+                'symbols': [
+                    {
+                        'OID': "1.3.6.1.2.1.2.2.1.2",
+                        'name': "extractValue",
+                        'extract_value': r'ip(\d)tnl0',
+                    }
+                ],
+                'metric_tags': [
+                    {
+                        'column': {
+                            'OID': '1.3.6.1.2.1.31.1.1.1.1',
+                            'name': 'ifName',
+                        },
+                        'table': 'ifXTable',
+                        'tag': 'interface',
+                    }
+                ],
+            }
+        ]
+    )
+    instance["community_string"] = "public"
+
+    tags = common.CHECK_TAGS + ['interface:ip6tnl0']
+
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    check.check(instance)
+
+    aggregator.assert_metric('snmp.extractValue', metric_type=aggregator.GAUGE, count=1, value=6, tags=tags)
+
+
 def test_scalar(aggregator):
     """
     Support SNMP scalar objects
