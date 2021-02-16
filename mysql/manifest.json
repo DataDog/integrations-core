@@ -31,12 +31,12 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {
-      "select query rate": "assets/monitors/select_query_rate.json"
+      "select query rate": "assets/monitors/select_query_rate.json",
+      "replica running": "assets/monitors/replica_running.json"
     },
     "dashboards": {
       "mysql": "assets/dashboards/overview.json",
       "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
-
     },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
