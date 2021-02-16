@@ -41,6 +41,9 @@
     "logs": {
       "source": "cassandra"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "cassandra_processes": "assets/saved_views/cassandra_processes.json"
+    }
   }
 }

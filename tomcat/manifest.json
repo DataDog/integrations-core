@@ -39,6 +39,9 @@
     "logs": {
       "source": "tomcat"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "tomcat_processes": "assets/saved_views/tomcat_processes.json"
+    }
   }
 }

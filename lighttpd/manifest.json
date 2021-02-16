@@ -36,6 +36,9 @@
     "logs": {
       "source": "lighttpd"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "lighttpd_processes": "assets/saved_views/lighttpd_processes.json"
+    }
   }
 }
