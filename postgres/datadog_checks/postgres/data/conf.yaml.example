@@ -41,6 +41,12 @@ instances:
     #
     # dbname: <DBNAME>
 
+    ## @param dbstrict - boolean -optional - default: false
+    ## Whether to restrict the scope of the check to just the database in question.
+    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
+    # 
+    # dbstrict: false
+
     ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
