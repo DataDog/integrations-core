@@ -88,7 +88,7 @@ fi
 
 ### Metrics
 
-See the Spark [metadata.csv][7] for a list of metrics collected.
+See the [Spark integration documentation][7] for a list of metrics collected.
 
 
 ### Service Checks
