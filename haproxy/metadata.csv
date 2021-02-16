@@ -190,6 +190,8 @@ haproxy.server.current.throttle,gauge,,,,"Current throttle percentage for the se
 haproxy.server.downtime.seconds.total,count,,,,Total downtime (in seconds) for the service.,0,haproxy,
 haproxy.server.failed.header.rewriting.total,count,,,,Total number of failed header rewriting warnings.,0,haproxy,
 haproxy.server.http.responses.total,count,,,,Total number of HTTP responses.,0,haproxy,
+haproxy.server.idle.connections.current,gauge,,,,Current number of idle connections available for reuse.,0,haproxy,
+haproxy.server.idle.connections.limit,gauge,,,,Limit on the number of available idle connections.,0,haproxy,
 haproxy.server.last.session.seconds,gauge,,,,Number of seconds since last session assigned to server/backend.,0,haproxy,
 haproxy.server.limit.sessions,gauge,,,,Configured session limit.,0,haproxy,
 haproxy.server.loadbalanced.total,count,,,,"Total number of times a service was selected, either for new sessions, or when redispatching.",0,haproxy,
