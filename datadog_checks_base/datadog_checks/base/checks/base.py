@@ -10,22 +10,9 @@ import logging
 import re
 import traceback
 import unicodedata
-from collections import defaultdict, deque
+from collections import deque
 from os.path import basename
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    Callable,
-    DefaultDict,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
 from six import binary_type, iteritems, text_type
@@ -197,7 +184,6 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
-        self.metrics = defaultdict(list)  # type: DefaultDict[str, List[str]]
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str

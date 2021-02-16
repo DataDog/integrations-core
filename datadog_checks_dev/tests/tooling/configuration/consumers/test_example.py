@@ -1443,7 +1443,7 @@ def test_option_multiple_types():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:
@@ -1483,11 +1483,11 @@ def test_option_multiple_types_nested():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:
-                    oneOf:
+                    anyOf:
                     - type: string
                     - type: object
                       required:
