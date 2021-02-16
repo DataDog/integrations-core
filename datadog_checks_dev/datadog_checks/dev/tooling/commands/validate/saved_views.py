@@ -14,9 +14,9 @@ OPTIONAL_HEADERS = {'options', 'timerange', 'visible_facets'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
-VALID_TYPES = {'logs', 'trace'}
+VALID_TYPES = {'logs', 'trace', 'process'}
 
-VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces'}
+VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces', 'process_overview'}
 
 NO_OPTIONS_PAGES = {'insights', 'patterns', 'traces'}
 
@@ -31,6 +31,8 @@ STREAM_OPTIONS = {
 }
 
 ANALYTICS_OPTIONS = {"aggregations", "group_bys", "limit", "order", "step_ms", "widget"}
+
+PROCESS_OPTIONS = {"sort", "graph_options", "view_options", "filter", "selected_top_graph", "enabled_columns"}
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate saved view files')
@@ -113,6 +115,13 @@ def saved_views(integration):
                 echo_failure(
                     f"{integration} saved view ({view['name']}) has an invalid options "
                     f"for page `analytics`: {view_options_set}"
+                )
+
+            elif view_page == "process_overview" and not view_options_set.issubset(PROCESS_OPTIONS):
+                errors = True
+                echo_failure(
+                    f"{integration} saved view ({view['name']}) has an invalid options "
+                    f"for page `process_overview`: {view_options_set}"
                 )
 
             elif view_page in NO_OPTIONS_PAGES and view_options:
