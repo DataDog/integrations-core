@@ -93,7 +93,7 @@ See the Spark [metadata.csv][7] for a list of metrics collected.
 
 ### Service Checks
 
-See the Spark [service checks documentation][8] for a list of service checks collected.
+See the [Spark integration documentation][8] for the list of service checks collected.
  
 ### Events
 
