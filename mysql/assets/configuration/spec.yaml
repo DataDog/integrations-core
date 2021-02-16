@@ -24,7 +24,7 @@ files:
             value:
               type: string
               example: localhost
-              default: null
+              display_default: null
 
           - name: user
             description: |
@@ -33,7 +33,7 @@ files:
             value:
               type: string
               example: datadog
-              default: null
+              display_default: null
 
           - name: pass
             description: |
@@ -61,7 +61,7 @@ files:
             value:
               type: string
               example: utf8
-              default: None
+              display_default: null
           - name: defaults_file
             description: |
               Path to an alternative configuration mechanism file.
@@ -244,8 +244,8 @@ files:
             enabled: false
             value:
               type: boolean
-              example: true
-              default: false
+              example: false
+              display_default: false
 
           - template: instances/default
 

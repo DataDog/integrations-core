@@ -31,7 +31,7 @@ instances:
     password: <PASSWORD>
 
     ## @param use_legacy_check_version - boolean - required
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the vSphere 
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the vSphere
     ## integration by setting this field to "true".
     #
     use_legacy_check_version: false
@@ -70,7 +70,7 @@ instances:
     ## realtime and historical metrics), you usually want to collect events only once.
     ## By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
     ## `collection_type: historical`
-    ## If `collect_events_only: true`, this option has no effect and events will be collected. 
+    ## If `collect_events_only: true`, this option has no effect and events will be collected.
     #
     # collect_events: true
 
@@ -92,7 +92,7 @@ instances:
     # ssl_verify: true
 
     ## @param ssl_capath - string - optional
-    ## Set to the absolute file path of a directory containing CA certificates 
+    ## Set to the absolute file path of a directory containing CA certificates
     ## in PEM format
     #
     # ssl_capath: <DIRECTORY_PATH>
@@ -101,7 +101,7 @@ instances:
     ## If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
     ## Disable those by setting `tls_ignore_warning` to true.
     ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
     ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
     ## to true.
     #
@@ -117,9 +117,12 @@ instances:
     ##    - name (default) to filter on the resource name (defined by vCenter)
     ##    - inventory_path to filter on the full inventory path
     ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
-    ##    - tag to filter only the resources with a given tag. Datadog has stricter rules (i.e no space), but the filter
-    ##          is applied on the value coming from vCenter directly.
-    ##          The value to match is the one composed by <TAG_PREFIX><TAG_CATEGORY>:<TAG_VALUE>
+    ##    - tag to filter only the resources with a given tag.
+    ##          The filter is applied on the value coming from vCenter. In this case, the value to match is the
+    ##          one composed by <TAG_PREFIX><TAG_CATEGORY>:<TAG_VALUE> .
+    ##          The filter also work for tags set by this vSphere integration: vsphere_host,
+    ##          vsphere_datastore_cluster, vsphere_folder, vsphere_cluster, vsphere_compute,
+    ##          vsphere_datacenter and vsphere_datastore.
     ##    - attribute to filter only the resources with a given attribute. Datadog has stricter rules (i.e no space),
     ##          but the filter is applied on the value coming from vCenter directly.
     ##          The value to match is the one composed by <ATTR_PREFIX><ATTR_KEY>:<ATTR_VALUE>
@@ -169,7 +172,7 @@ instances:
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics. They will work only with "collection_type: historical".
     ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
-    ##         have historical metrics. They will work only with "collection_type: realtime".     
+    ##         have historical metrics. They will work only with "collection_type: realtime".
     #
     # metric_filters:
     #   vm:

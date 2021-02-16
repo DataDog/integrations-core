@@ -6,7 +6,8 @@ from contextlib import contextmanager
 
 from six import raise_from
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.log import get_check_logger
 
 try:
     import adodbapi
@@ -39,10 +40,10 @@ class Connection(object):
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
 
-    def __init__(self, init_config, instance_config, service_check_handler, logger):
+    def __init__(self, init_config, instance_config, service_check_handler):
         self.instance = instance_config
         self.service_check_handler = service_check_handler
-        self.log = logger
+        self.log = get_check_logger()
 
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
@@ -57,10 +58,12 @@ class Connection(object):
         if pyodbc is not None:
             self.valid_connectors.append('odbc')
 
-        self.connector = init_config.get('connector', 'adodbapi')
-        if self.connector.lower() not in self.valid_connectors:
-            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.connector)
-            self.connector = 'adodbapi'
+        self.default_connector = init_config.get('connector', 'adodbapi')
+        if self.default_connector.lower() not in self.valid_connectors:
+            self.log.error("Invalid database connector %s, defaulting to adodbapi", self.default_connector)
+            self.default_connector = 'adodbapi'
+
+        self.connector = self.get_connector()
 
         self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
         if self.adoprovider.upper() not in self.valid_adoproviders:
@@ -135,15 +138,15 @@ class Connection(object):
 
         conn_key = self._conn_key(db_key, db_name)
 
-        _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
+        _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
-        if 'Trusted_Connection=yes' in cs and (username or password):
-            self.log.warning("Username and password are ignored when using Windows authentication")
         cs += ';' if cs != '' else ''
 
+        self._connection_options_validation(db_key, db_name)
+
         try:
-            if self.get_connector() == 'adodbapi':
+            if self.connector == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, db_name=db_name)
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
@@ -230,11 +233,11 @@ class Connection(object):
         return exists, context
 
     def get_connector(self):
-        connector = self.instance.get('connector', self.connector)
-        if connector != self.connector:
+        connector = self.instance.get('connector', self.default_connector)
+        if connector != self.default_connector:
             if connector.lower() not in self.valid_connectors:
-                self.log.warning("Invalid database connector %s using default %s", connector, self.connector)
-                connector = self.connector
+                self.log.warning("Invalid database connector %s using default %s", connector, self.default_connector)
+                connector = self.default_connector
             else:
                 self.log.debug("Overriding default connector for %s with %s", self.instance['host'], connector)
         return connector
@@ -270,6 +273,65 @@ class Connection(object):
         """Return a key to use for the connection cache"""
         dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
         return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
+
+    def _connection_options_validation(self, db_key, db_name):
+        cs = self.instance.get('connection_string')
+        username = self.instance.get('username')
+        password = self.instance.get('password')
+
+        adodbapi_options = {
+            'DSN': 'dsn',
+            'DRIVER': 'driver',
+            'SERVER': 'host',
+            'DATABASE': db_name or db_key,
+            'UID': 'username',
+            'PWD': 'password',
+        }
+        odbc_options = {
+            'PROVIDER': 'adoprovider',
+            'Data Source': 'host',
+            'Initial Catalog': db_name or db_key,
+            'User ID': 'username',
+            'Password': 'password',
+        }
+
+        if self.connector == 'adodbapi':
+            other_connector = 'odbc'
+            connector_options = adodbapi_options
+            other_connector_options = odbc_options
+
+        else:
+            other_connector = 'adodbapi'
+            connector_options = odbc_options
+            other_connector_options = adodbapi_options
+
+        for option in {
+            value
+            for key, value in other_connector_options.items()
+            if value not in connector_options.values() and self.instance.get(value) is not None
+        }:
+            self.log.warning("%s option will be ignored since %s connection is used", option, self.connector)
+
+        if cs is None:
+            return
+
+        if 'Trusted_Connection=yes' in cs and (username or password):
+            self.log.warning("Username and password are ignored when using Windows authentication")
+        cs = cs.upper()
+
+        for key, value in connector_options.items():
+            if key.upper() in cs and self.instance.get(value) is not None:
+                raise ConfigurationError(
+                    "%s has been provided both in the connection string and as a "
+                    "configuration option (%s), please specify it only once" % (key, value)
+                )
+        for key in other_connector_options.keys():
+            if key.upper() in cs:
+                raise ConfigurationError(
+                    "%s has been provided in the connection string. "
+                    "This option is only available for %s connections,"
+                    " however %s has been selected" % (key, other_connector, self.connector)
+                )
 
     def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
         """Return a connection string to use with odbc"""

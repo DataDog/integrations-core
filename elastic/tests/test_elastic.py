@@ -104,6 +104,21 @@ def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, nod
 
 
 @pytest.mark.integration
+def test_disable_cluster_tag(dd_environment, instance, aggregator, new_cluster_tags):
+    disable_instance = deepcopy(instance)
+    disable_instance['disable_legacy_cluster_tag'] = True
+    elastic_check = ESCheck('elastic', {}, instances=[disable_instance])
+    elastic_check.check(None)
+    es_version = elastic_check._get_es_version()
+
+    # cluster stats
+    expected_metrics = health_stats_for_version(es_version)
+    expected_metrics.update(CLUSTER_PENDING_TASKS)
+    for m_name in expected_metrics:
+        aggregator.assert_metric(m_name, at_least=1, tags=new_cluster_tags)
+
+
+@pytest.mark.integration
 def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags, node_tags):
     instance['gc_collectors_as_rate'] = True
     check = ESCheck('elastic', {}, instances=[instance])

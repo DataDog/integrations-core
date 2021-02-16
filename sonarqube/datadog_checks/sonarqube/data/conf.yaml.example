@@ -87,9 +87,12 @@ instances:
 
   -
     ## @param web_endpoint - string - optional
-    ## The SonarQube web endpoint which should expose its API at `/api`.
+    ## The SonarQube web endpoint which should expose its API at `/api`. For example:
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ##   web_endpoint: http://<WEB_ENDPOINT>:<PORT>
+    ##
+    ## NOTE: This only takes effect when `is_jmx` is set to `false` and is required for all
+    ## API metrics.
     #
     # web_endpoint: <WEB_ENDPOINT>
 
@@ -121,13 +124,14 @@ instances:
     # default_exclude: []
 
     ## @param components - mapping - optional
-    ## The components for which metrics should be collected. Each object may override the default options.
-    ## For example:
-    ##
+    ## The components for which metrics should be collected. Each object may override the default
+    ## options. For example, the following will gather all default metrics for "some-project",
+    ## and only what is included/excluded for "another-project":
+    ##   
     ##   components:
-    ##     default-component:
     ##     some-project:
-    ##       tag: project
+    ##     another-project:
+    ##       tag: project-2
     ##       include:
     ##         - issues.
     ##         - maintainability.
@@ -135,7 +139,8 @@ instances:
     ##       exclude:
     ##         - issues.(false_positive_issues|reopened_issues)
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ## NOTE: This is required for all project checks, regardless of `is_jmx` being set to `true` 
+    ## or `false.
     #
     # components: {}
 
@@ -150,12 +155,12 @@ instances:
     port: <PORT>
 
     ## @param user - string - optional
-    ## User to use when connecting to JMX.
+    ## User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
     #
     # user: <USER>
 
     ## @param password - string - optional
-    ## Password to use when connecting to JMX or HTTP (depending on the value of `is_jmx`).
+    ## Password to use when connecting to JMX (or HTTP if `is_jmx = false`).
     #
     # password: <PASSWORD>
 

@@ -14,7 +14,7 @@ The Vault check is included in the [Datadog Agent][3] package. No additional ins
 
 1. Ensure you have enabled [Prometheus metrics in the Vault configuration][16].
 
-2. For the Vault check to work properly, you need to either enable unauthenticated access to Vault metrics or provide a Vault client token:
+2. For the Vault check to work properly, you need to either enable unauthenticated access to Vault metrics (Vault 1.3.0+) or provide a Vault client token:
 
    **To enable unauthenticated access**, set Vault's [`unauthenticated_metrics_access`][14] configuration to `true`. This allows unauthenticated access to the `/v1/sys/metrics` endpoint.
    

@@ -10,7 +10,7 @@ botocore==1.13.42
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.1.5
 contextlib2==0.6.0; python_version < "3.0"
-cryptography==3.3.1
+cryptography==3.3.2
 cx-oracle==7.2.0
 ddtrace==0.32.2
 dnspython==1.16.0
@@ -23,7 +23,7 @@ in-toto==0.5.0
 ipaddress==1.0.22; python_version < "3.0"
 jaydebeapi==1.2.3
 jpype1==0.7.1; python_version <= "2.7"
-jpype1==1.0.2; python_version > "3"
+jpype1==1.2.1; python_version > "3"
 kafka-python==2.0.2
 kazoo==2.6.1
 kubernetes==8.0.1

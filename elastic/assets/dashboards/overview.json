@@ -5,8 +5,8 @@
     "template_variables": [
         {
             "default": "*",
-            "name": "cluster_name",
-            "prefix": "cluster_name"
+            "name": "elastic_cluster",
+            "prefix": "elastic_cluster"
         },
         {
             "default": "*",
@@ -112,7 +112,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "(sum:elasticsearch.search.query.time{$cluster_name}/sum:elasticsearch.search.query.total{$cluster_name})",
+                        "q": "(sum:elasticsearch.search.query.time{$elastic_cluster}/sum:elasticsearch.search.query.total{$elastic_cluster})",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -121,7 +121,7 @@
                     },
                     {
                         "display_type": "line",
-                        "q": "(sum:elasticsearch.search.fetch.time{$cluster_name}/sum:elasticsearch.search.fetch.total{$cluster_name})",
+                        "q": "(sum:elasticsearch.search.fetch.time{$elastic_cluster}/sum:elasticsearch.search.fetch.total{$elastic_cluster})",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -130,7 +130,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Avg query and fetch latency over $cluster_name",
+                "title": "Avg query and fetch latency over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -175,7 +175,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:elasticsearch.docs.count{$cluster_name}",
+                        "q": "sum:elasticsearch.docs.count{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -184,7 +184,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Number of documents in $cluster_name",
+                "title": "Number of documents in $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -211,10 +211,10 @@
                 "requests": [
                     {
                         "aggregator": "max",
-                        "q": "max:elasticsearch.active_shards{$cluster_name}"
+                        "q": "max:elasticsearch.active_shards{$elastic_cluster}"
                     }
                 ],
-                "title": "Active shards over $cluster_name",
+                "title": "Active shards over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -247,7 +247,7 @@
                                 "value": 0
                             }
                         ],
-                        "q": "max:elasticsearch.initializing_shards{$cluster_name}"
+                        "q": "max:elasticsearch.initializing_shards{$elastic_cluster}"
                     }
                 ],
                 "title": "Initializing shards",
@@ -282,7 +282,7 @@
                                 "value": 0
                             }
                         ],
-                        "q": "max:elasticsearch.relocating_shards{$cluster_name}"
+                        "q": "max:elasticsearch.relocating_shards{$elastic_cluster}"
                     }
                 ],
                 "title": "Relocating shards",
@@ -317,7 +317,7 @@
                                 "value": 0
                             }
                         ],
-                        "q": "max:elasticsearch.unassigned_shards{$cluster_name}"
+                        "q": "max:elasticsearch.unassigned_shards{$elastic_cluster}"
                     }
                 ],
                 "title": "Unassigned shards",
@@ -339,7 +339,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "max:elasticsearch.active_shards{$cluster_name}",
+                        "q": "max:elasticsearch.active_shards{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -348,7 +348,7 @@
                     },
                     {
                         "display_type": "line",
-                        "q": "max:elasticsearch.active_primary_shards{$cluster_name}",
+                        "q": "max:elasticsearch.active_primary_shards{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -357,7 +357,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Active shards (total and primary) over $cluster_name",
+                "title": "Active shards (total and primary) over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -402,7 +402,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "max:elasticsearch.initializing_shards{$cluster_name}",
+                        "q": "max:elasticsearch.initializing_shards{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -411,7 +411,7 @@
                     },
                     {
                         "display_type": "line",
-                        "q": "max:elasticsearch.unassigned_shards{$cluster_name}",
+                        "q": "max:elasticsearch.unassigned_shards{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -420,7 +420,7 @@
                     },
                     {
                         "display_type": "line",
-                        "q": "max:elasticsearch.relocating_shards{$cluster_name}",
+                        "q": "max:elasticsearch.relocating_shards{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -429,7 +429,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Shards initializing, relocating, unassigned over $cluster_name",
+                "title": "Shards initializing, relocating, unassigned over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -453,10 +453,10 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "top(diff(avg:elasticsearch.indexing.index.total{$cluster_name} by {host}), 10, 'sum', 'desc')"
+                        "q": "top(diff(avg:elasticsearch.indexing.index.total{$elastic_cluster} by {host}), 10, 'sum', 'desc')"
                     }
                 ],
-                "title": "Nodes of $cluster_name with most indexing activity (top 10 hosts)",
+                "title": "Nodes of $elastic_cluster with most indexing activity (top 10 hosts)",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "toplist"
@@ -477,7 +477,7 @@
                 ],
                 "indexes": [],
                 "message_display": "expanded-lg",
-                "query": "source:elasticsearch $cluster_name",
+                "query": "source:elasticsearch $elastic_cluster",
                 "show_date_column": true,
                 "show_message_column": true,
                 "sort": {
@@ -500,7 +500,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_second(avg:elasticsearch.transport.rx_count{$cluster_name,$node_name} by {host})",
+                        "q": "per_second(avg:elasticsearch.transport.rx_count{$elastic_cluster,$node_name} by {host})",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -509,7 +509,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Bytes received over $cluster_name,$node_name",
+                "title": "Bytes received over $elastic_cluster,$node_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -535,7 +535,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_second(sum:elasticsearch.http.total_opened{$cluster_name})",
+                        "q": "per_second(sum:elasticsearch.http.total_opened{$elastic_cluster})",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -544,7 +544,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Rate of opened HTTP connections over $cluster_name",
+                "title": "Rate of opened HTTP connections over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -570,7 +570,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_second(avg:elasticsearch.transport.tx_count{$cluster_name,$node_name} by {host})",
+                        "q": "per_second(avg:elasticsearch.transport.tx_count{$elastic_cluster,$node_name} by {host})",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -579,7 +579,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Bytes sent over $cluster_name,$node_name",
+                "title": "Bytes sent over $elastic_cluster,$node_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -622,10 +622,10 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "top(diff(avg:elasticsearch.search.query.total{$cluster_name} by {host}), 10, 'sum', 'desc')"
+                        "q": "top(diff(avg:elasticsearch.search.query.total{$elastic_cluster} by {host}), 10, 'sum', 'desc')"
                     }
                 ],
-                "title": "Nodes of $cluster_name with most queries (top 10 hosts)",
+                "title": "Nodes of $elastic_cluster with most queries (top 10 hosts)",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "toplist"
@@ -662,7 +662,7 @@
                                 "value": 90
                             }
                         ],
-                        "q": "(1-(sum:elasticsearch.fs.total.available_in_bytes{$cluster_name} by {host}/sum:elasticsearch.fs.total.total_in_bytes{$cluster_name} by {host}))*100"
+                        "q": "(1-(sum:elasticsearch.fs.total.available_in_bytes{$elastic_cluster} by {host}/sum:elasticsearch.fs.total.total_in_bytes{$elastic_cluster} by {host}))*100"
                     }
                 ],
                 "title": "Disk space used",
@@ -684,7 +684,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:elasticsearch.pending_tasks_total{$cluster_name}",
+                        "q": "sum:elasticsearch.pending_tasks_total{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -693,7 +693,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Total number of pending task in $cluster_name",
+                "title": "Total number of pending task in $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -719,7 +719,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "sum:elasticsearch.get.missing.total{$cluster_name,$node_name}",
+                        "q": "sum:elasticsearch.get.missing.total{$elastic_cluster,$node_name}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -728,7 +728,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Total number of unsuccessful GETs over $cluster_name,$node_name",
+                "title": "Total number of unsuccessful GETs over $elastic_cluster,$node_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -754,7 +754,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:elasticsearch.indexing.index.time{$cluster_name}",
+                        "q": "avg:elasticsearch.indexing.index.time{$elastic_cluster}",
                         "style": {
                             "line_type": "solid",
                             "line_width": "normal",
@@ -763,7 +763,7 @@
                     }
                 ],
                 "show_legend": false,
-                "title": "Avg indexing latency over $cluster_name",
+                "title": "Avg indexing latency over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -790,10 +790,10 @@
                 "requests": [
                     {
                         "aggregator": "last",
-                        "q": "sum:elasticsearch.store.size{$cluster_name}"
+                        "q": "sum:elasticsearch.store.size{$elastic_cluster}"
                     }
                 ],
-                "title": "Sum of elasticsearch.store.size over $cluster_name",
+                "title": "Sum of elasticsearch.store.size over $elastic_cluster",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -927,10 +927,10 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:elasticsearch.process.open_fd{$cluster_name,$node_name}"
+                        "q": "avg:elasticsearch.process.open_fd{$elastic_cluster,$node_name}"
                     }
                 ],
-                "title": "Average number of file descriptors opened over $cluster_name,$node_name",
+                "title": "Average number of file descriptors opened over $elastic_cluster,$node_name",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"

@@ -1,0 +1,296 @@
+- name: openmetrics_endpoint
+  required: true
+  description: |
+    The URL exposing metrics in the OpenMetrics format.
+  value:
+    type: string
+- name: namespace
+  hidden: true
+  description: |
+    The namespace to be prepended to all metrics.
+  value:
+    type: string
+    pattern: '\w+'
+- name: raw_metric_prefix
+  description: |
+    A prefix that will be removed from all exposed metric names, if present.
+    All configuration options will use the prefix-less name.
+  value:
+    type: string
+    example: <PREFIX>_
+    display_default: null
+- name: metrics  # Only shown for the `openmetrics` provider integration
+  hidden: true
+  description: |
+    This list defines which metrics to collect from the `openmetrics_endpoint`.
+    Metrics may be defined in 3 ways:
+
+    1. If the item is a string, then it represents the exposed metric name, and
+       the sent metric name will be identical. For example:
+
+         metrics:
+         - <METRIC_1>
+         - <METRIC_2>
+    2. If the item is a mapping, then the keys represent the exposed metric names.
+
+         a. If a value is a string, then it represents the sent metric name. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+              - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+         b. If a value is a mapping, then it must have a `name` and/or `type` key.
+            The `name` represents the sent metric name, and the `type` represents how
+            the metric should be handled, overriding any type information the endpoint
+            may provide. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>:
+                  name: <SENT_METRIC_1>
+                  type: <METRIC_TYPE_1>
+              - <EXPOSED_METRIC_2>:
+                  name: <SENT_METRIC_2>
+                  type: <METRIC_TYPE_2>
+
+            The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+
+    Regular expressions may be used to match the exposed metric names, for example:
+
+      metrics:
+      - ^network_(ingress|egress)_.+
+      - .+:
+          type: gauge
+  value:
+    type: array
+    items:
+      anyOf:
+      - type: string
+      - type: object
+        additionalProperties:
+          anyOf:
+          - type: string
+          - type: object
+            properties:
+            - name: name
+              type: string
+            - name: type
+              type: string
+            additionalProperties: true
+- name: extra_metrics  # Hidden for the `openmetrics` provider integration
+  description: |
+    This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    what the check collects by default. If the check already collects a metric, then
+    metric definitions here take precedence. Metrics may be defined in 3 ways:
+
+    1. If the item is a string, then it represents the exposed metric name, and
+       the sent metric name will be identical. For example:
+
+         metrics:
+         - <METRIC_1>
+         - <METRIC_2>
+    2. If the item is a mapping, then the keys represent the exposed metric names.
+
+         a. If a value is a string, then it represents the sent metric name. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+              - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+         b. If a value is a mapping, then it must have a `name` and/or `type` key.
+            The `name` represents the sent metric name, and the `type` represents how
+            the metric should be handled, overriding any type information the endpoint
+            may provide. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>:
+                  name: <SENT_METRIC_1>
+                  type: <METRIC_TYPE_1>
+              - <EXPOSED_METRIC_2>:
+                  name: <SENT_METRIC_2>
+                  type: <METRIC_TYPE_2>
+
+            The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+
+    Regular expressions may be used to match the exposed metric names, for example:
+
+      metrics:
+      - ^network_(ingress|egress)_.+
+      - .+:
+          type: gauge
+  value:
+    type: array
+    items:
+      anyOf:
+      - type: string
+      - type: object
+        additionalProperties:
+          anyOf:
+          - type: string
+          - type: object
+            properties:
+            - name: name
+              type: string
+            - name: type
+              type: string
+            additionalProperties: true
+- name: exclude_metrics
+  description: |
+    A list of metrics to exclude, with each entry being either
+    the exact metric name or a regular expression.
+  value:
+    type: array
+    items:
+      type: string
+- name: exclude_metrics_by_labels
+  description: |
+    A mapping of labels where metrics with matching label name and values are ignored. To match
+    all values of a label, set it to `true`.
+
+    For example, the following configuration instructs the check to exclude all metrics with
+    a label `worker` or a label `pid` with the value of either `23` or `42`.
+
+      exclude_metrics_by_labels:
+        worker: true
+        pid:
+        - '23'
+        - '42'
+  value:
+    type: object
+    additionalProperties:
+      anyOf:
+      - type: boolean
+      - type: array
+        items:
+          type: string
+- name: exclude_labels
+  description: |
+    A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+  value:
+    type: array
+    items:
+      type: string
+- name: rename_labels
+  description: |
+    A mapping of label names to how they should be renamed.
+  value:
+    example:
+      <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+      <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+    type: object
+- name: enable_health_service_check
+  description: |
+    Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    the health of the `openmetrics_endpoint`.
+  value:
+    example: true
+    type: boolean
+- name: hostname_label
+  description: |
+    Override the hostname for every metric submission with the value of one of its labels.
+  value:
+    type: string
+- name: hostname_format
+  description: |
+    When `hostname_label` is set, this instructs the check how to format the values. The string
+    `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+  value:
+    example: <HOSTNAME>
+    type: string
+- name: collect_histogram_buckets
+  description: |
+    Whether or not to send histogram buckets.
+  value:
+    example: true
+    type: boolean
+- name: non_cumulative_histogram_buckets
+  description: |
+    Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+  value:
+    example: false
+    type: boolean
+- name: histogram_buckets_as_distributions
+  description: |
+    Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+
+    Learn more about distribution metrics:
+    https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+  value:
+    example: false
+    type: boolean
+- name: share_labels
+  description: |
+    This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    exposed metrics from which to share labels, and the values are mappings that configure the
+    sharing behavior. Each mapping must have at least one of the following keys:
+
+      labels - This is a list of labels to share. All labels are shared if this is not set.
+      match - This is a list of labels to match on other metrics as a condition for sharing.
+      values - This is a list of allowed values as a condition for sharing.
+
+    To unconditionally share all labels of a metric, set it to `true`.
+
+    For example, the following configuration instructs the check to apply all labels from `metric_a`
+    to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    to all other metrics if its value is equal to `23` or `42`.
+
+      share_labels:
+        metric_a: true
+        metric_b:
+          labels:
+          - node
+          match:
+          - pod
+        metric_c:
+          values:
+          - 23
+          - 42
+  value:
+    type: object
+    additionalProperties:
+      anyOf:
+      - type: boolean
+      - type: object
+        properties:
+        - name: labels
+          type: array
+          items:
+            type: string
+        - name: match
+          type: array
+          items:
+            type: string
+- name: request_size
+  description: |
+    The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
+  value:
+    example: 16
+    type: number
+- name: raw_line_filters
+  description: |
+    A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    from being parsed.
+  value:
+    type: array
+    items:
+      type: string
+- name: cache_metric_wildcards
+  description: |
+    Whether or not to cache data from metrics that are defined by regular expressions rather
+    than the full metric name.
+  value:
+    example: true
+    type: boolean
+- name: use_latest_spec
+  description: |
+    Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+  value:
+    example: false
+    type: boolean
+- name: telemetry
+  description: |
+    Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+  value:
+    example: false
+    type: boolean
+- template: instances/http
+- template: instances/default

@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+from collections import defaultdict
 from datetime import datetime
 
 import mock
@@ -1114,3 +1115,8 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
         },
     }
     assert pod_tags_by_pvc == expected_result
+
+    # Test None case
+    empty = defaultdict(set)
+    pod_tags_by_pvc = check._create_pod_tags_by_pvc(None)
+    assert pod_tags_by_pvc == empty

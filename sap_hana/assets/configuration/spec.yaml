@@ -17,7 +17,7 @@ files:
         description: The port used to connect to the system.
         value:
           type: integer
-          default: 30015
+          display_default: 30015
       - name: username
         description: The database user to authenticate as.
         required: true
@@ -39,12 +39,12 @@ files:
         description: The number of rows to return with each query result.
         value:
           type: integer
-          default: 1000
+          display_default: 1000
       - name: timeout
         description: The timeout in seconds for connecting to `server`.
         value:
           type: integer
-          default: 10
+          display_default: 10
       - template: instances/db
       - name: use_tls
         description: |

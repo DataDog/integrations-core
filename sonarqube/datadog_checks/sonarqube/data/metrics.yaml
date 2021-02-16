@@ -1,4 +1,5 @@
 # https://docs.sonarqube.org/latest/instance-administration/monitoring/
+# If `is_jmx: true` is not defined in any instance, this file can be safely renamed or removed to reduce log chattiness
 jmx_metrics:
   - include:
       domain: SonarQube

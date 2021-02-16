@@ -80,7 +80,7 @@ def test_linkerd_v2_new(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check(
-        'linkerd.prometheus.health', status=LinkerdCheck.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
+        'linkerd.openmetrics.health', status=LinkerdCheck.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
     )
 
 

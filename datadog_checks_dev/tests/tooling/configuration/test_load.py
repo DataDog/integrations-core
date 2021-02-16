@@ -2513,6 +2513,124 @@ def test_value_type_object_properties_required_not_met():
     ) in spec.errors
 
 
+def test_value_type_object_additional_properties_invalid_type():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties: 9000
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `additionalProperties` '
+        'for `type` object must be a mapping or set to `true`'
+    ) in spec.errors
+
+
+def test_value_type_object_additional_properties_nested_error():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                  - name: bar
+                    type: string
+                  required:
+                  - foo
+                  - bar
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: All entries in attribute `required` '
+        'for `type` object must be defined in the `properties` attribute'
+    ) in spec.errors
+
+
+def test_value_type_object_additional_properties_nested_ok():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                  - name: foo
+                    type: string
+                  - name: bar
+                    type: string
+                  required:
+                  - foo
+                  - bar
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_value_type_object_additional_properties_true_ok():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
 def test_value_type_unknown():
     spec = get_spec(
         """
@@ -2882,13 +3000,13 @@ def test_value_one_of_with_type():
               description: words
               value:
                 type: number
-                oneOf: []
+                anyOf: []
         """
     )
     spec.load()
 
     assert (
-        'test, test.yaml, instances, foo: Values must contain either a `type` or `oneOf` attribute, not both'
+        'test, test.yaml, instances, foo: Values must contain either a `type` or `anyOf` attribute, not both'
         in spec.errors
     )
 
@@ -2908,12 +3026,12 @@ def test_value_one_of_not_array():
             - name: foo
               description: words
               value:
-                oneOf: bar
+                anyOf: bar
         """
     )
     spec.load()
 
-    assert 'test, test.yaml, instances, foo: Attribute `oneOf` must be an array' in spec.errors
+    assert 'test, test.yaml, instances, foo: Attribute `anyOf` must be an array' in spec.errors
 
 
 def test_value_one_of_single_type():
@@ -2931,14 +3049,14 @@ def test_value_one_of_single_type():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
         """
     )
     spec.load()
 
     assert (
-        'test, test.yaml, instances, foo: Attribute `oneOf` contains a single type, use the `type` attribute instead'
+        'test, test.yaml, instances, foo: Attribute `anyOf` contains a single type, use the `type` attribute instead'
         in spec.errors
     )
 
@@ -2958,14 +3076,14 @@ def test_value_one_of_type_not_mapping():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - bar
                 - {}
         """
     )
     spec.load()
 
-    assert 'test, test.yaml, instances, foo: Type #1 of attribute `oneOf` must be a mapping' in spec.errors
+    assert 'test, test.yaml, instances, foo: Type #1 of attribute `anyOf` must be a mapping' in spec.errors
 
 
 def test_value_one_of_type_recursive_validation_error():
@@ -2983,7 +3101,7 @@ def test_value_one_of_type_recursive_validation_error():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: object
                   required:
@@ -3013,11 +3131,11 @@ def test_value_one_of_type_super_recursive_validation_error():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:
-                    oneOf:
+                    anyOf:
                     - type: string
                     - type: object
                       required:
@@ -3047,7 +3165,7 @@ def test_value_one_of_type_recursive_validation_success():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:

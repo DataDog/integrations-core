@@ -127,10 +127,12 @@ It respects a few extra [option](#options)-level attributes:
 
 - `example` - A complete example of an option in lieu of a strictly typed `value` attribute
 - `enabled` - Whether or not to un-comment the option, overriding the behavior of `required`
+- `display_priority` - This is an integer affecting the order in which options are displayed, with higher values indicating higher priority.
+  The default is `0`.
 
 It also respects a few extra fields under the `value` attribute of each option:
 
-- `default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
+- `display_default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
   You may set it to `null` explicitly to disable showing this part of the header.
 - `compact_example` - Whether or not to display complex types like arrays in their most compact representation. It defaults to `false`.
 

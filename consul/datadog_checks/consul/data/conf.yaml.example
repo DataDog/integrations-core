@@ -108,6 +108,15 @@ instances:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
+    ## @param services_exclude - list of strings - optional
+    ## List services to exclude from the Consul service catalog.
+    ## Note: The excluded services will take precedence over service_whitelist.
+    ## The default settings will still query up to 50 services.
+    #
+    # services_exclude:
+    #   - <SERVICE_1>
+    #   - <SERVICE_2>
+
     ## @param max_services - number - optional - default: 50
     ## Increase the maximum number of queried services.
     #

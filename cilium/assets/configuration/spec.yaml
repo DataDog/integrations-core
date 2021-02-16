@@ -16,7 +16,7 @@ files:
       value:
         type: string
         example: http://localhost:9090/metrics
-        default: None
+        display_default: null
     - name: operator_endpoint
       description: |
         Provide instead of `agent_endpoint` to collect `cilium-operator` metrics.
@@ -24,7 +24,7 @@ files:
       value:
         type: string
         example: http://localhost:6942/metrics
-        default: None
+        display_default: null
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.hidden: true

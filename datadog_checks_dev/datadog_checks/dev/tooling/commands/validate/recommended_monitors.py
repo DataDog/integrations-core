@@ -13,7 +13,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 EXTRA_NOT_ALLOWED_FIELDS = ['id']
-ALLOWED_MONITOR_TYPES = ['metric alert', 'query alert', 'event alert', 'service check']
+ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
 
 
 @click.command(

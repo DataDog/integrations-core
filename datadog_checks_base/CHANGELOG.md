@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.4.0 / 2021-02-09
+
+* [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
+* [Added] Add support for legacy config to OpenMetricsCompatibilityScraper. See [#8507](https://github.com/DataDog/integrations-core/pull/8507).
+
 ## 16.3.2 / 2021-02-01
 
 * [Fixed] Fix histogram upper bound label name for new OpenMetrics implementation. See [#8505](https://github.com/DataDog/integrations-core/pull/8505).

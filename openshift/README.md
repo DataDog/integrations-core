@@ -102,7 +102,7 @@ Do not forget to add a <a href="https://docs.datadoghq.com/agent/kubernetes/daem
 </div>
 
 <div class="alert alert-warning">
-<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>allowHostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
+<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>allowHostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the Pod network is otherwise restricted.
 </div>
 
 **Note**: The Docker socket is owned by the root group, so you may need to elevate the Agent's privileges to pull in Docker metrics. To run the Agent process as a root user, you can configure your SCC with the following:

@@ -45,13 +45,42 @@ def dd_environment():
 @pytest.fixture(scope='session')
 def prometheus_metrics():
     metrics = deepcopy(METRIC_MAP)
+
+    # metrics added in 2.2
+    if HAPROXY_VERSION < version.parse('2.2'):
+        metrics.pop('haproxy_frontend_internal_errors_total')
+        metrics.pop('haproxy_backend_internal_errors_total')
+        metrics.pop('haproxy_server_internal_errors_total')
+
+    # metrics added in 2.3
+    if HAPROXY_VERSION < version.parse('2.3'):
+        metrics.pop('haproxy_process_bytes_out_rate')
+        metrics.pop('haproxy_process_bytes_out_total')
+        metrics.pop('haproxy_process_failed_resolutions')
+        metrics.pop('haproxy_process_spliced_bytes_out_total')
+        metrics.pop('haproxy_server_used_connections_current')
+        metrics.pop('haproxy_server_need_connections_current')
+        metrics.pop('haproxy_server_safe_idle_connections_current')
+        metrics.pop('haproxy_server_unsafe_idle_connections_current')
+
+    # renamed in >= v2.3
     if HAPROXY_VERSION >= version.parse('2.3'):
-        # the two following metrics were renamed in >= v2.3
         metrics.pop('haproxy_server_server_idle_connections_current')
         metrics.pop('haproxy_server_server_idle_connections_limit')
     else:
         metrics.pop('haproxy_server_idle_connections_current')
         metrics.pop('haproxy_server_idle_connections_limit')
+
+    # default NaN starting from 2.4 if not configured
+    if HAPROXY_VERSION >= version.parse('2.4.dev7'):
+        metrics.pop('haproxy_server_current_throttle')
+
+    # metrics added in 2.4
+    if HAPROXY_VERSION < version.parse('2.4.dev7'):
+        metrics.pop('haproxy_backend_uweight')
+        metrics.pop('haproxy_server_uweight')
+        metrics.pop('haproxy_process_recv_logs_total')
+        metrics.pop('haproxy_process_uptime_seconds')
 
     metrics = list(metrics.values())
     return metrics

@@ -36,6 +36,11 @@ files:
       value:
         example: false
         type: boolean
+    - name: disable_legacy_cluster_tag
+      description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `vault_cluster`.
+      value:
+        type: boolean
+        example: false
     - template: instances/http
     - template: instances/default
   - template: logs

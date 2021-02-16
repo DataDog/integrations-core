@@ -37,7 +37,7 @@ files:
       description: The database to connect to.
       value:
         type: string
-        default: default
+        display_default: default
     - name: connect_timeout
       description: The timeout for connecting to the `server`.
       value:

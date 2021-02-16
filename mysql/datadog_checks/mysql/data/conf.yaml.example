@@ -230,7 +230,7 @@ instances:
     ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
     ## success manager or Datadog support.
     #
-    # deep_database_monitoring: true
+    # deep_database_monitoring: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -246,7 +246,10 @@ SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
 REPLICA_VARS = {
     'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
-    'Slaves_connected': ('mysql.replication.slaves_connected', GAUGE),
+    'Replicas_connected': [
+        ('mysql.replication.slaves_connected', GAUGE),
+        ('mysql.replication.replicas_connected', GAUGE),
+    ],
 }
 
 SYNTHETIC_VARS = {

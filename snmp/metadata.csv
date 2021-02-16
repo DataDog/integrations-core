@@ -761,3 +761,6 @@ snmp.processorDeviceStatus,gauge,,,,[Dell Poweredge] The status of the processor
 snmp.processorDeviceThreadCount,gauge,,thread,,[Dell Poweredge] The number of processor threads detected for the processor device.,0,snmp,
 snmp.temperatureProbeReading,gauge,,decidegree celsius,,[Dell Poweredge] The value of the Dell temperature probe in tenths of degrees Centigrade.,0,snmp,
 snmp.temperatureProbeStatus,gauge,,,,[Dell Poweredge] The status of the Dell temperature probe.,0,snmp,
+datadog.snmp.check_duration,gauge,,second,,The duration of a check run in seconds.,0,snmp,
+datadog.snmp.check_interval,count,,second,,The interval between check runs in seconds.,0,snmp,
+datadog.snmp.submitted_metrics,gauge,,,,The number of submitted metrics for a check run.,0,snmp,

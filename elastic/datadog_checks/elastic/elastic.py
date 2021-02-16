@@ -8,7 +8,7 @@ import requests
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse
 
-from datadog_checks.base import AgentCheck, to_string
+from datadog_checks.base import AgentCheck, is_affirmative, to_string
 
 from .config import from_instance
 from .metrics import (
@@ -80,9 +80,11 @@ class ESCheck(AgentCheck):
         if stats_data.get('cluster_name'):
             # retrieve the cluster name from the data, and append it to the
             # master tag list.
-            cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
-            base_tags.append(cluster_name_tag)
-            service_check_tags.append(cluster_name_tag)
+            cluster_tags = ["elastic_cluster:{}".format(stats_data['cluster_name'])]
+            if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+                cluster_tags.append("cluster_name:{}".format(stats_data['cluster_name']))
+            base_tags.extend(cluster_tags)
+            service_check_tags.extend(cluster_tags)
         self._process_stats_data(stats_data, stats_metrics, base_tags)
 
         # Load cluster-wise data
