@@ -7,6 +7,7 @@ from collections import defaultdict
 from contextlib import closing
 from itertools import chain
 
+from pyhdb import OperationalError
 from six import iteritems
 from six.moves import zip
 
@@ -99,7 +100,10 @@ class SapHanaCheck(AgentCheck):
                     continue
         finally:
             if self._connection_lost:
-                self._conn.close()
+                try:
+                    self._conn.close()
+                except OperationalError:
+                    self.log.debug("Could not close lost connection")
                 self._conn = None
                 self._connection_lost = False
 
