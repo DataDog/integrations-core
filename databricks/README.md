@@ -8,7 +8,7 @@ Monitor your [Databricks][1] clusters with the Datadog [Spark integration][6].
 
 ### Installation
 
-Monitor Databricks Spark applications with the [Datadog Spark integration][2]. Install the Datadog Agent on your clusters following the Configuration instructions for your appropriate cluster.
+Monitor Databricks Spark applications with the [Datadog Spark integration][2]. Install the Datadog Agent on your clusters following the [Configuration](#configuration) instructions for your appropriate cluster.
 
 ### Configuration
 
