@@ -58,9 +58,8 @@ def construct_types(types):
         else:
             raise ConfigurationError('Unknown value for event filter `type`: {}'.format(event_type))
 
-    parts = ['Level={}'.format(value_to_xpath_string(value)) for value in sorted(event_levels)] + [
-        'Keywords={}'.format(value_to_xpath_string(value)) for value in sorted(event_keywords)
-    ]
+    parts = ['Level={}'.format(value_to_xpath_string(value)) for value in sorted(event_levels)]
+    parts.extend('Keywords={}'.format(value_to_xpath_string(value)) for value in sorted(event_keywords))
     return combine_value_parts(parts)
 
 
