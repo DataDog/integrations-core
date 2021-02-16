@@ -109,5 +109,5 @@ Need help? Contact [Datadog support][3].
 [4]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [6]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[7]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
+[7]: https://docs.datadoghq.com/integrations/spark/#metrics
 [8]: https://docs.datadoghq.com/integrations/spark/?tab=host#service-checks
