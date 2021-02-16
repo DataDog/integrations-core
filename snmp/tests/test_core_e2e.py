@@ -96,7 +96,7 @@ def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
         'upsAdvTestDiagnosticsResults',
     ]
 
-    common.assert_common_metrics(aggregator, tags)
+    common.assert_common_metrics(aggregator, tags, is_e2e=True)
 
     for metric in metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
@@ -124,10 +124,6 @@ def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
         'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=2
     )
     aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=2)
-
-    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags, count=2)
-    aggregator.assert_metric('datadog.snmp.check_interval', metric_type=aggregator.COUNT, tags=tags, count=1)
-    aggregator.assert_metric('datadog.snmp.submitted_metrics', 20, metric_type=aggregator.GAUGE, tags=tags, count=2)
 
     aggregator.assert_all_metrics_covered()
 
@@ -170,7 +166,8 @@ def test_e2e_regex_match(dd_agent_check):
         }
     ]
     config = common.generate_container_instance_config(metrics)
-    config['instances'][0]['metric_tags'] = [
+    instance = config['instances'][0]
+    instance['metric_tags'] = [
         {
             "OID": "1.3.6.1.2.1.1.5.0",
             "symbol": "sysName",
@@ -203,7 +200,7 @@ def test_e2e_regex_match(dd_agent_check):
             'remainder:ba948911b9',
             'letter1:4',
             'letter2:1',
-            'snmp_device:172.18.0.2',
+            'snmp_device:' + instance['ip_address'],
         ],
     )
 
@@ -404,10 +401,6 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
             print("\t{}".format(key))
 
     print("Corecheck metrics not found in Python metrics:")
-    print(
-        "(expected to be listed here: datadog.snmp.check_duration, datadog.snmp.check_interval, "
-        "datadog.snmp.submitted_metrics)"
-    )
     for key in sorted(actual_metrics):
         if key not in expected_metrics:
             print("\t{}".format(key))
