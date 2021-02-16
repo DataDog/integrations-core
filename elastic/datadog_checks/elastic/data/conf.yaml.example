@@ -116,10 +116,10 @@ instances:
     #
     # gc_collectors_as_rate: false
 
-    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: true
     ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
     #
-    # disable_legacy_cluster_tag: false
+    disable_legacy_cluster_tag: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
