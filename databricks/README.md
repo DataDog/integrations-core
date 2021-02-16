@@ -30,7 +30,7 @@ instances:
 
 For job clusters, use the following script to configure the Spark integration.
 
-   **Note**: Job clusters are monitored in `spark_driver_mode` via the Spark UI port.
+**Note**: Job clusters are monitored in `spark_driver_mode` with the Spark UI port.
 
 
 ```shell script
