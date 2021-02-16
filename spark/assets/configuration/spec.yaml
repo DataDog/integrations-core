@@ -108,7 +108,9 @@ files:
         description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `spark_cluster`.
         value:
           type: boolean
-          example: false
+          default: false
+          example: true
+        enabled: true
       - template: instances/http
         overrides:
           auth_token.description: |
