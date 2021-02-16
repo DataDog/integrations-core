@@ -1,13 +1,13 @@
 {
   "display_name": "Palo Alto Networks Firewall",
-  "maintainer": "anshum.garg@datadoghq.com",
+  "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "pan.firewall",
+  "name": "pan_firewall",
   "metric_prefix": "pan.firewall",
-  "metric_to_check": "pan.firewall.*",
+  "metric_to_check": "",
   "creates_events": false,
   "short_description": "Palo Alto Networks Firewall log events",
-  "guid": "",
+  "guid": "f7f2aa4b-cb93-4406-975d-3a282fef6d0e",
   "support": "core",
   "process_signatures": [],
   "supported_os": [
@@ -22,7 +22,7 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "pan.firewall",
+  "integration_id": "pan-firewall",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
