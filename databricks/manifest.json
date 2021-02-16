@@ -16,7 +16,9 @@
   ],
   "public_title": "Databricks",
   "categories": [
-    ""
+    "cloud",
+    "collaboration",
+    "processing"
   ],
   "type": "check",
   "is_public": false,

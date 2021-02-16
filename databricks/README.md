@@ -110,4 +110,4 @@ Need help? Contact [Datadog support][3].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [6]: https://docs.datadoghq.com/integrations/spark/?tab=host
 [7]: https://docs.datadoghq.com/integrations/spark/#metrics
-[8]: https://docs.datadoghq.com/integrations/spark/?tab=host#service-checks
+[8]: https://docs.datadoghq.com/integrations/spark/#service-checks
