@@ -1,0 +1,30 @@
+{
+  "name": "All high severity issues",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:pan.firewall @type:THREAT @severity:high",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": [
+    "@type",
+    "@evt.name",
+    "@subtype",
+    "@network.client.geoip.country.name",
+    "@network.destination.ip",
+    "@usr.id",
+    "@http.useragent_details.browser.family",
+    "@network.client.ip"
+  ],
+  "options": {
+    "columns": [
+      "@network.client.ip",
+      "@network.client.geoip.country.name",
+      "@subtype"
+    ],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

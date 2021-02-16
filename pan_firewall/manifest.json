@@ -1,0 +1,44 @@
+{
+  "display_name": "Palo Alto Networks Firewall",
+  "maintainer": "anshum.garg@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "pan.firewall",
+  "metric_prefix": "pan.firewall",
+  "metric_to_check": "pan.firewall.*",
+  "creates_events": false,
+  "short_description": "Palo Alto Networks Firewall log events",
+  "guid": "",
+  "support": "core",
+  "process_signatures": [],
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Palo Alto Networks Firewall Integration",
+  "categories": [
+    "log collection",
+    "security"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "pan.firewall",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "logs": {
+      "source": "pan.firewall"
+    },
+    "dashboards": {
+      "Palo Alto Networks Firewall Overview": "assets/dashboards/palo_alto_networks_firewall_overview.json"
+    },
+    "saved_views": {
+      "High Severity Issues": "assets/saved_views/all_high_severity_issues.json",
+      "Authentication Protocol": "assets/saved_views/top_ips_flagged_in_high_severity_threats.json"
+    },
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "metrics_metadata": "metadata.csv"
+  }
+}
