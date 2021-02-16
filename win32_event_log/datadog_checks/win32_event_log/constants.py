@@ -11,7 +11,7 @@
 # https://docs.microsoft.com/en-us/windows/win32/wes/eventmanifestschema-leveltype-complextype#remarks
 EVENT_TYPES_TO_LEVEL = {'success': 4, 'error': 2, 'warning': 3, 'information': 4}
 
-# Audit success and audit failures event do not correspond to a specific level but can instead be queries
+# Audit success and audit failure events do not correspond to a specific level but can instead be queried
 # by using specific keywords.
 # https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.eventing.reader.standardeventkeywords?view=netframework-4.8
 EVENT_TYPES_TO_KEYWORD = {
