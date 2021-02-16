@@ -1,5 +1,11 @@
 # CHANGELOG - snmp
 
+## 4.1.0 / 2021-02-16
+
+* [Added] Add extract value feature. See [#8622](https://github.com/DataDog/integrations-core/pull/8622).
+* [Added] Add SNMP check duration, interval, metrics count. See [#8211](https://github.com/DataDog/integrations-core/pull/8211).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 4.0.0 / 2021-01-25
 
 * [Added] Snmp Juniper profiles for EX (switches), MX (routers) and SRX (firewalls) series. See [#8206](https://github.com/DataDog/integrations-core/pull/8206).
