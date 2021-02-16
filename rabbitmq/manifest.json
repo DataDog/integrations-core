@@ -32,8 +32,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "rabbitmq": "/assets/dashboards/rabbitmq_screenboard_dashboard.json",
-      "RabbitMQ - Metrics": "/assets/dashboards/rabbitmq_dashboard.json"
+      "rabbitmq": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
+      "RabbitMQ - Metrics": "assets/dashboards/rabbitmq_dashboard.json"
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
