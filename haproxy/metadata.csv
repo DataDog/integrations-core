@@ -189,7 +189,7 @@ haproxy.server.check.code,gauge,,,,"layer5-7 code, if available of the last heal
 haproxy.server.check.duration.seconds,gauge,,second,,Previously run health check duration (>= 2.4),0,haproxy,
 haproxy.server.check.failures.total,count,,,,Total number of failed check (Only counts checks failed when the server is up).,0,haproxy,
 haproxy.server.check.status,gauge,,,,"Status of last health check, if enabled. (>= 2.4)",0,haproxy,
-haproxy.server.check.last.change.seconds,gauge,,second,,Number of seconds since the last UP<->DOWN transition.,0,haproxy,
+haproxy.server.check.last.change.seconds,gauge,,second,,Number of seconds since the last UP<->DOWN transition. (>= 2.4),0,haproxy,
 haproxy.server.check.up.down.total,count,,,,Total number of UP->DOWN transitions.,0,haproxy,
 haproxy.server.client.aborts.total,count,,,,Total number of data transfers aborted by the client.,0,haproxy,
 haproxy.server.connect.time.average.seconds,gauge,,,,Avg. connect time for last 1024 successful connections.,0,haproxy,
