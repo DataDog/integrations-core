@@ -111,6 +111,9 @@ instances:
     #   type:
     #   - Error
     #   - Warning
+    #   - Information
+    #   - Success Audit
+    #   - Failure Audit
     #   id:
     #   - 9000
 
