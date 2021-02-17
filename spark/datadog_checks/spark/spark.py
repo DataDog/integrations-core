@@ -4,7 +4,7 @@
 import re
 
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
@@ -475,7 +475,7 @@ class SparkCheck(AgentCheck):
                 if not version_set:
                     version_set = self._collect_version(tracking_url, tags)
                 response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
-            except RequestException as e:
+            except Exception as e:
                 self.log.warning("Exception happened when fetching app ids for %s: %s", tracking_url, e)
                 continue
 
