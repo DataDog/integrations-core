@@ -59,6 +59,7 @@ DEFAULT_STATEMENT_METRIC_LIMITS = {
 
 
 def generate_synthetic_rows(rows):
+    # type: (List[PyMysqlRow]) -> List[PyMysqlRow]
     """
     Given a list of rows, generate a new list of rows with "synthetic" column values derived from
     the existing row values.
@@ -66,12 +67,8 @@ def generate_synthetic_rows(rows):
     synthetic_rows = []
     for row in rows:
         new = copy.copy(row)
-        new['avg_time'] = new['time'] / new['count'] if new['count'] > 0 else 0
-        new['rows_sent_ratio'] = (
-            new['rows_sent'] / new['rows_examined']
-            if new['rows_examined'] > 0
-            else 0
-        )
+        new['avg_time'] = float(new['time']) / new['count'] if new['count'] > 0 else 0
+        new['rows_sent_ratio'] = float(new['rows_sent']) / new['rows_examined'] if new['rows_examined'] > 0 else 0
 
         synthetic_rows.append(new)
 
@@ -107,7 +104,7 @@ class MySQLStatementMetrics(object):
         monotonic_rows = self._query_summary_per_statement(db)
         monotonic_rows = self._merge_duplicate_rows(monotonic_rows, key=keyfunc)
         rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
-        metrics.append(('dd.mysql.queries.query_rows_raw', len(rows) , []))
+        metrics.append(('dd.mysql.queries.query_rows_raw', len(rows), []))
 
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
@@ -117,7 +114,7 @@ class MySQLStatementMetrics(object):
             tiebreaker_reverse=True,
             key=keyfunc,
         )
-        metrics.append(('dd.mysql.queries.query_rows_limited', len(rows) , []))
+        metrics.append(('dd.mysql.queries.query_rows_limited', len(rows), []))
 
         for row in rows:
             tags = []
