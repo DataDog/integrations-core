@@ -40,6 +40,8 @@ STATEMENT_METRICS = {
     'rows_examined': 'mysql.queries.rows_examined',
 }
 
+# These limits define the top K and bottom K unique query rows for each metric. For each check run the
+# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
 DEFAULT_STATEMENT_METRIC_LIMITS = {
     'count': (800, 0),
     'errors': (100, 0),
