@@ -9,7 +9,7 @@ from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
-from datadog_checks.postgres import util
+from datadog_checks.postgres import statements, util
 
 from .common import SCHEMA_NAME
 
@@ -260,3 +260,75 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     except psycopg2.OperationalError:
         # could not connect to server because there is no server running
         pass
+
+
+def test_generate_synthetic_rows():
+    rows = [
+        {
+            'calls': 45,
+            'total_time': 1134,
+            'rows': 800,
+            'shared_blks_hit': 15,
+            'shared_blks_read': 5,
+            'shared_blks_dirtied': 10,
+            'shared_blks_written': 10,
+            'local_blks_hit': 10,
+            'local_blks_read': 10,
+            'local_blks_dirtied': 10,
+            'local_blks_written': 10,
+            'temp_blks_read': 10,
+            'temp_blks_written': 10,
+        },
+        {
+            'calls': 0,
+            'total_time': 0,
+            'rows': 0,
+            'shared_blks_hit': 0,
+            'shared_blks_read': 0,
+            'shared_blks_dirtied': 0,
+            'shared_blks_written': 0,
+            'local_blks_hit': 0,
+            'local_blks_read': 0,
+            'local_blks_dirtied': 0,
+            'local_blks_written': 0,
+            'temp_blks_read': 0,
+            'temp_blks_written': 10,
+        },
+    ]
+    result = statements.generate_synthetic_rows(rows)
+    assert result == [
+        {
+            'avg_time': 25.2,
+            'calls': 45,
+            'total_time': 1134,
+            'rows': 800,
+            'shared_blks_ratio': 0.75,
+            'shared_blks_hit': 15,
+            'shared_blks_read': 5,
+            'shared_blks_dirtied': 10,
+            'shared_blks_written': 10,
+            'local_blks_hit': 10,
+            'local_blks_read': 10,
+            'local_blks_dirtied': 10,
+            'local_blks_written': 10,
+            'temp_blks_read': 10,
+            'temp_blks_written': 10,
+        },
+        {
+            'avg_time': 0,
+            'calls': 0,
+            'total_time': 0,
+            'rows': 0,
+            'shared_blks_ratio': 0,
+            'shared_blks_hit': 0,
+            'shared_blks_read': 0,
+            'shared_blks_dirtied': 0,
+            'shared_blks_written': 0,
+            'local_blks_hit': 0,
+            'local_blks_read': 0,
+            'local_blks_dirtied': 0,
+            'local_blks_written': 0,
+            'temp_blks_read': 0,
+            'temp_blks_written': 10,
+        },
+    ]

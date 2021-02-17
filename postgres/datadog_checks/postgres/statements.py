@@ -63,7 +63,8 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
     'query': 'query',
 }
 
-# Limits to restrict collection to top K and bottom K queries for each metric
+# These limits define the top K and bottom K unique query rows for each metric. For each check run the
+# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
 DEFAULT_STATEMENT_METRIC_LIMITS = {
     'calls': (800, 0),
     'total_time': (800, 0),
@@ -92,9 +93,9 @@ def generate_synthetic_rows(rows):
     synthetic_rows = []
     for row in rows:
         new = copy.copy(row)
-        new['avg_time'] = new['total_time'] / new['calls'] if new['calls'] > 0 else 0
+        new['avg_time'] = float(new['total_time']) / new['calls'] if new['calls'] > 0 else 0
         new['shared_blks_ratio'] = (
-            new['shared_blks_hit'] / (new['shared_blks_hit'] + new['shared_blks_read'])
+            float(new['shared_blks_hit']) / (new['shared_blks_hit'] + new['shared_blks_read'])
             if new['shared_blks_hit'] + new['shared_blks_read'] > 0
             else 0
         )
@@ -181,13 +182,13 @@ class PostgresStatementMetrics(object):
             return (queryid, row['datname'], row['rolname'])
 
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
-        metrics.append(('dd.postgres.queries.query_rows_raw', len(rows) , []))
+        metrics.append(('dd.postgres.queries.query_rows_raw', len(rows), []))
 
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows, DEFAULT_STATEMENT_METRIC_LIMITS, tiebreaker_metric='calls', tiebreaker_reverse=True, key=row_keyfunc
         )
-        metrics.append(('dd.postgres.queries.query_rows_limited', len(rows) , []))
+        metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
 
         for row in rows:
             try:
