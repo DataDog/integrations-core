@@ -2,7 +2,7 @@
   "name": "couchdb",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:couchdb",
+  "query": "Filter by: integration:couch",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:couchdb"
+        "integration:couch"
       ]
     },
     "selected_top_graph": "scatterplot",

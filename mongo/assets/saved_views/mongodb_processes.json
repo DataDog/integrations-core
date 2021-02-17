@@ -2,7 +2,7 @@
   "name": "mongodb",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:mongodb",
+  "query": "Filter by: integration:mongo",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:mongodb"
+        "integration:mongo"
       ]
     },
     "selected_top_graph": "scatterplot",

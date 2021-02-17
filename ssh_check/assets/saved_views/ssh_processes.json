@@ -2,7 +2,7 @@
   "name": "ssh",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:ssh",
+  "query": "Filter by: integration:ssh_check",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:ssh"
+        "integration:ssh_check"
       ]
     },
     "selected_top_graph": "scatterplot",

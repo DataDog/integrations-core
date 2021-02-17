@@ -2,7 +2,7 @@
   "name": "riak-cs",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:riak-cs",
+  "query": "Filter by: integration:riakcs",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:riak-cs"
+        "integration:riakcs"
       ]
     },
     "selected_top_graph": "scatterplot",

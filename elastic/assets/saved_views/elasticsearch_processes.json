@@ -2,7 +2,7 @@
   "name": "elasticsearch",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:elasticsearch",
+  "query": "Filter by: integration:elastic",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:elasticsearch"
+        "integration:elastic"
       ]
     },
     "selected_top_graph": "scatterplot",

@@ -2,7 +2,7 @@
   "name": "powerdns",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:powerdns",
+  "query": "Filter by: integration:powerdns_recursor",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:powerdns"
+        "integration:powerdns_recursor"
       ]
     },
     "selected_top_graph": "scatterplot",

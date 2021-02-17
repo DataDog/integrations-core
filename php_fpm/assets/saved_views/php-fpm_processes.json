@@ -2,7 +2,7 @@
   "name": "php-fpm",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:php-fpm",
+  "query": "Filter by: integration:php_fpm",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:php-fpm"
+        "integration:php_fpm"
       ]
     },
     "selected_top_graph": "scatterplot",

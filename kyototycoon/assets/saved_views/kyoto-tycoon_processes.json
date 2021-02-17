@@ -2,7 +2,7 @@
   "name": "kyoto-tycoon",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:kyoto-tycoon",
+  "query": "Filter by: integration:kyototycoon",
   "options": {
     "sort": {
       "order": "DESC",
@@ -17,7 +17,7 @@
       "text": "",
       "groups": [],
       "tags": [
-        "integration:kyoto-tycoon"
+        "integration:kyototycoon"
       ]
     },
     "selected_top_graph": "scatterplot",
