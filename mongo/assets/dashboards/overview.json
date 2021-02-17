@@ -1,735 +1,764 @@
 {
   "title": "MongoDB - Overview",
+  "author": "Datadog",
   "description": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
   "widgets": [
     {
       "id": 0,
       "definition": {
-        "type": "image",
-        "url": "/static/images/logos/mongodb_small.svg",
-        "sizing": "zoom"
+        "type": "note",
+        "content": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)\n\nDifferent MongoDB metrics are fetched from each member depending on its role in the cluster. For exemple the replication lag is fetched from the primary for all members of the replica set.\n\nFor this reason you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment you need one additional integration instance pointed to a mongos proxy.\n\nRefer to [Datadog's documentation](https://docs.datadoghq.com/integrations/mongo/?tab=host) for more information.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
       },
-      "layout": { "x": 0, "y": 0, "width": 32, "height": 10 }
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 5 }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "title": "Overview",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7,
+            "definition": {
+              "title": "Healthy members",
+              "title_size": "13",
+              "title_align": "center",
+              "time": { "live_span": "10m" },
+              "type": "check_status",
+              "check": "mongodb.can_connect",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 8,
+            "definition": {
+              "title": "Averaged uptime",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "avg:mongodb.uptime{$scope,$replset_name}.rollup(avg, 60)",
+                  "aggregator": "last"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 9,
+            "definition": {
+              "title": "Shards count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:shardsvr,replset_state:primary,$scope,$replset_name} by {member}.fill(last, 30))",
+                  "aggregator": "last"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
+          },
+          {
+            "id": 10,
+            "definition": {
+              "title": "Nodes per shard",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:shardsvr,cluster-name:florian-mongo-shards,$scope,$replset_name} by {member})/count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:shardsvr,replset_state:primary,$scope,$replset_name} by {member}.fill(last, 30))",
+                  "aggregator": "last"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": { "x": 2, "y": 2, "width": 2, "height": 2 }
+          },
+          {
+            "id": 11,
+            "definition": {
+              "title": "Configsvr count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:configsvr,$scope,$replset_name} by {member})",
+                  "aggregator": "last"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": { "x": 4, "y": 2, "width": 2, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 5 }
     },
     {
       "id": 2,
       "definition": {
-        "type": "timeseries",
-        "requests": [
+        "title": "Replication",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "100*exclude_null(sum:mongodb.connections.current{$scope,$replset_name} by {replset_name})/(exclude_null(sum:mongodb.connections.current{$scope,$replset_name} by {replset_name})+exclude_null(sum:mongodb.connections.available{$scope,$replset_name} by {replset_name}))",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
+            "id": 12,
+            "definition": {
+              "title": "Oplog usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mongodb.oplog.logsizemb{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mongodb.oplog.usedsizemb{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 13,
+            "definition": {
+              "title": "Maximum lag per replica set",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:mongodb.replset.optime_lag{$scope,$replset_name} by {replset_name}.fill(zero).rollup(avg, 15)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 4, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 14,
+            "definition": {
+              "type": "note",
+              "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure to use Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions that is fetched from secondaries.",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 8, "y": 0, "width": 4, "height": 3 }
           }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Percentage of client connections used (%)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 33, "y": 90, "width": 45, "height": 15 }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Throughput",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 15,
+            "definition": {
+              "title": "Read requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:mongodb.opcounters.getmoreps{*,*,$scope,$replset_name}, sum:mongodb.opcounters.queryps{*,*,$scope,$replset_name}",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": { "x": 0, "y": 0, "width": 5, "height": 3 }
+          },
+          {
+            "id": 16,
+            "definition": {
+              "title": "Most used replica sets for reads",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(sum:mongodb.opcounters.getmoreps{$scope,$replset_name} by {replset_name}, 10, 'sum', 'desc')"
+                }
+              ]
+            },
+            "layout": { "x": 5, "y": 0, "width": 3, "height": 3 }
+          },
+          {
+            "id": 17,
+            "definition": {
+              "title": "Network I/O",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mongodb.network.bytesinps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mongodb.network.bytesoutps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 8, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 18,
+            "definition": {
+              "title": "Write requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "16",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:mongodb.opcounters.deleteps{*,*,$scope,$replset_name}, sum:mongodb.opcounters.insertps{*,*,$scope,$replset_name}, sum:mongodb.opcounters.updateps{*,*,$scope,$replset_name}",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": { "x": 0, "y": 3, "width": 5, "height": 3 }
+          },
+          {
+            "id": 19,
+            "definition": {
+              "title": "Most used replica sets for writes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "q": "top(sum:mongodb.opcounters.deleteps{$scope,$replset_name} by {replset_name}, 10, 'sum', 'desc')"
+                }
+              ]
+            },
+            "layout": { "x": 5, "y": 3, "width": 3, "height": 3 }
+          },
+          {
+            "id": 20,
+            "definition": {
+              "title": "Query operations per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:mongodb.opcounters.queryps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.deleteps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.insertps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.updateps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.getmoreps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.commandps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 8, "y": 3, "width": 4, "height": 3 }
+          }
+        ]
+      }
     },
     {
       "id": 4,
       "definition": {
-        "type": "timeseries",
-        "requests": [
+        "title": "Resource Utilization",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}, sum:mongodb.opcounters.queryps{$scope,$replset_name}",
-            "display_type": "area",
-            "style": {
-              "palette": "green",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
+            "id": 21,
+            "definition": {
+              "type": "note",
+              "content": "This metric reports the percentage of used client connection for each replica set. Use these values to understand the load and capacity requirements of your cluster.",
+              "background_color": "white",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right"
+            },
+            "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
+          },
+          {
+            "id": 22,
+            "definition": {
+              "title": "Percentage of client connections used (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "100*exclude_null(sum:mongodb.connections.current{*,*,$scope,$replset_name} by {replset_name})/(exclude_null(sum:mongodb.connections.current{*,*,$scope,$replset_name} by {replset_name})+exclude_null(sum:mongodb.connections.available{*,*,$scope,$replset_name} by {replset_name}))",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": { "x": 2, "y": 0, "width": 4, "height": 2 }
+          },
+          {
+            "id": 23,
+            "definition": {
+              "title": "Average memory usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:mongodb.mem.resident{$scope,$replset_name}.fill(zero)",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 6, "y": 0, "width": 4, "height": 2 }
+          },
+          {
+            "id": 24,
+            "definition": {
+              "type": "note",
+              "content": "Amount of RAM used by the mongo process. During normal use, this value tends to grow. In dedicated database servers, this number tends to approach the total amount of system memory.",
+              "background_color": "white",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": true,
+              "tick_pos": "25%",
+              "tick_edge": "left"
+            },
+            "layout": { "x": 10, "y": 0, "width": 2, "height": 3 }
+          },
+          {
+            "id": 25,
+            "definition": {
+              "type": "note",
+              "content": "The number of page fault usually increase significantly when your server is experiencing poor performance.\nIt can be caused by limited memory or data sets getting larger.\n\nIn containerized environment you may want to change to query to group `by {pod_name}` instead.",
+              "background_color": "white",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right"
+            },
+            "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
+          },
+          {
+            "id": 26,
+            "definition": {
+              "title": "Number of page faults per host",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:mongodb.extra_info.page_faultsps{*,*,$scope,$replset_name} by {host}",
+                  "style": { "palette": "warm" },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": { "x": 2, "y": 2, "width": 4, "height": 2 }
+          },
+          {
+            "id": 27,
+            "definition": {
+              "title": "Data size per replica set",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "2",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:mongodb.stats.datasize{$scope,$replset_name} by {replset_name}",
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": { "x": 6, "y": 2, "width": 4, "height": 2 }
           }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Read requests per second",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 33, "y": 50, "width": 41, "height": 15 }
+        ]
+      }
     },
     {
       "id": 5,
       "definition": {
-        "type": "timeseries",
-        "requests": [
+        "title": "Sharding Stats",
+        "reflow_type": "fixed",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}, sum:mongodb.opcounters.insertps{$scope,$replset_name}, sum:mongodb.opcounters.updateps{$scope,$replset_name}",
-            "display_type": "area",
-            "style": {
-              "palette": "purple",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
+            "id": 28,
+            "definition": {
+              "title": "Count of current sessions opened to the sharded cluster.",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:mongodb.sessions.count{$scope,$replset_name}",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 29,
+            "definition": {
+              "title": "Total chunks count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "sum:mongodb.chunks.total{$scope,$replset_name}.rollup(avg, 60).fill(zero)",
+                  "aggregator": "last"
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "chk",
+              "precision": 2
+            },
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 30,
+            "definition": {
+              "title": "Jumbo chunks count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "sum:mongodb.chunks.jumbo{$scope,$replset_name}.rollup(avg, 60).fill(zero)",
+                  "aggregator": "last"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 31,
+            "definition": {
+              "type": "note",
+              "content": "Count of chunks requires Agent 7.24+/6.24+ and 'jumbo_chunks' set in the integration configuration directed to your 'mongos' proxy.",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top"
+            },
+            "layout": { "x": 0, "y": 5, "width": 3, "height": 2 }
+          },
+          {
+            "id": 32,
+            "definition": {
+              "type": "note",
+              "content": "If MongoDB cannot split a chunk that exceeds the specified chunk size, MongoDB labels the chunk as jumbo.\n\nThese jumbo chunks can become a performance bottleneck as they continue to grow, especially if the shard key value occurs with high frequency.",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top"
+            },
+            "layout": { "x": 3, "y": 5, "width": 3, "height": 2 }
           }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Write requests per second",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "16"
+        ]
       },
-      "layout": { "x": 33, "y": 66, "width": 41, "height": 15 }
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
     },
     {
       "id": 6,
-      "layout": { "x": 151, "y": 37, "width": 67, "height": 84 },
       "definition": {
         "title": "MongoDB events",
         "title_size": "16",
         "title_align": "left",
         "type": "event_stream",
-        "query": "sources:mongodb",
+        "query": "sources:mongodb $scope $replset_name",
         "tags_execution": "and",
         "event_size": "l"
-      }
-    },
-    {
-      "id": 11,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(sum:mongodb.opcounters.getmoreps{$scope} by {replset_name}, 10, 'sum', 'desc')"
-          }
-        ],
-        "title": "Most used replica sets for reads",
-        "title_size": "16",
-        "title_align": "left"
       },
-      "layout": { "x": 75, "y": 50, "width": 32, "height": 15 }
-    },
-    {
-      "id": 12,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(sum:mongodb.opcounters.deleteps{$scope} by {replset_name}, 10, 'sum', 'desc')"
-          }
-        ],
-        "title": "Most used replica sets for writes",
-        "title_size": "16",
-        "title_align": "left"
-      },
-      "layout": { "x": 75, "y": 66, "width": 32, "height": 15 }
-    },
-    {
-      "id": 15,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mongodb.stats.datasize{$scope} by {replset_name}",
-            "display_type": "line",
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Data size per replica set",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "2"
-      },
-      "layout": { "x": 79, "y": 106, "width": 45, "height": 15 }
-    },
-    {
-      "id": 19,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:mongodb.extra_info.page_faultsps{$scope,$replset_name} by {host}",
-            "display_type": "line",
-            "style": { "palette": "warm" }
-          }
-        ],
-        "custom_links": [],
-        "title": "Number of page faults per host",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 33, "y": 106, "width": 45, "height": 15 }
-    },
-    {
-      "id": 23,
-      "definition": {
-        "type": "note",
-        "content": "[Resource utilization](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/#resource-util)",
-        "background_color": "vivid_green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      },
-      "layout": { "x": 33, "y": 83, "width": 91, "height": 6 }
-    },
-    {
-      "id": 25,
-      "layout": { "x": 33, "y": 7, "width": 19, "height": 12 },
-      "definition": {
-        "title": "Healthy members",
-        "title_size": "13",
-        "title_align": "center",
-        "time": { "live_span": "10m" },
-        "type": "check_status",
-        "check": "mongodb.can_connect",
-        "grouping": "cluster",
-        "group_by": [],
-        "tags": ["$replset_name", "$scope"]
-      }
-    },
-    {
-      "id": 3191591883691354,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "avg:mongodb.uptime{$replset_name,$scope}.rollup(avg, 60)",
-            "aggregator": "last"
-          }
-        ],
-        "title": "Averaged uptime",
-        "title_size": "16",
-        "title_align": "left",
-        "time": { "live_span": "5m" },
-        "autoscale": true,
-        "precision": 2
-      },
-      "layout": { "x": 54, "y": 7, "width": 20, "height": 12 }
-    },
-    {
-      "id": 969391019410024,
-      "definition": {
-        "type": "note",
-        "content": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
-        "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": { "x": 0, "y": 12, "width": 32, "height": 30 }
-    },
-    {
-      "id": 7523423806308668,
-      "definition": {
-        "type": "note",
-        "content": "Overview",
-        "background_color": "vivid_green",
-        "font_size": "24",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      },
-      "layout": { "x": 33, "y": 0, "width": 41, "height": 6 }
-    },
-    {
-      "id": 2542554703715758,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:shardsvr,replset_state:primary,$scope,$replset_name} by {member}.fill(last, 30))",
-            "aggregator": "last"
-          }
-        ],
-        "title": "Shards count",
-        "title_size": "16",
-        "title_align": "left",
-        "time": { "live_span": "5m" },
-        "autoscale": true,
-        "precision": 2
-      },
-      "layout": { "x": 33, "y": 21, "width": 13, "height": 15 }
-    },
-    {
-      "id": 6506115826124236,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:shardsvr,cluster-name:florian-mongo-shards,$replset_name,$scope} by {member})/count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:shardsvr,replset_state:primary,$scope,$replset_name} by {member}.fill(last, 30))",
-            "aggregator": "last"
-          }
-        ],
-        "title": "Nodes per shard",
-        "title_size": "16",
-        "title_align": "left",
-        "time": { "live_span": "5m" },
-        "autoscale": true,
-        "precision": 2
-      },
-      "layout": { "x": 47, "y": 21, "width": 13, "height": 15 }
-    },
-    {
-      "id": 2074569169595136,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "count_not_null(avg:mongodb.replset.optime_lag{sharding_cluster_role:configsvr,$scope,$replset_name} by {member})",
-            "aggregator": "last"
-          }
-        ],
-        "title": "Configsvr count",
-        "title_size": "16",
-        "title_align": "left",
-        "time": { "live_span": "5m" },
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": { "x": 61, "y": 21, "width": 13, "height": 15 }
-    },
-    {
-      "id": 7496789811643972,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mongodb.oplog.logsizemb{$replset_name,$scope}.fill(zero)",
-            "metadata": [
-              {
-                "expression": "avg:mongodb.oplog.logsizemb{$replset_name}.fill(zero)",
-                "alias_name": "Oplog allocated size"
-              }
-            ],
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          },
-          {
-            "q": "avg:mongodb.oplog.usedsizemb{$replset_name,$scope}.fill(zero)",
-            "metadata": [
-              {
-                "expression": "avg:mongodb.oplog.usedsizemb{$replset_name}.fill(zero)",
-                "alias_name": "Oplog used size"
-              }
-            ],
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Oplog usage",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 76, "y": 7, "width": 48, "height": 14 }
-    },
-    {
-      "id": 8854910238490842,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "max:mongodb.replset.optime_lag{$replset_name,$scope} by {replset_name}.fill(zero).rollup(avg, 15)",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Maximum lag per replica set",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 76, "y": 22, "width": 48, "height": 14 }
-    },
-    {
-      "id": 718134078973554,
-      "definition": {
-        "type": "note",
-        "content": "Replication",
-        "background_color": "vivid_green",
-        "font_size": "24",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      },
-      "layout": { "x": 76, "y": 0, "width": 48, "height": 6 }
-    },
-    {
-      "id": 310910308022672,
-      "definition": {
-        "type": "note",
-        "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure to use Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions that is fetched from secondaries.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": { "x": 125, "y": 16, "width": 24, "height": 20 }
-    },
-    {
-      "id": 2106334669501354,
-      "definition": {
-        "type": "note",
-        "content": "Sharding stats",
-        "background_color": "vivid_green",
-        "font_size": "24",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      },
-      "layout": { "x": 151, "y": 0, "width": 42, "height": 6 }
-    },
-    {
-      "id": 1125388920204490,
-      "definition": {
-        "type": "note",
-        "content": "Count of chunks requires Agent 7.24+/6.24+ and 'jumbo_chunks' set in the integration configuration directed to your 'mongos' proxy.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
-      },
-      "layout": { "x": 125, "y": 4, "width": 24, "height": 11 }
-    },
-    {
-      "id": 5604104041760040,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mongodb.sessions.count{$scope}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Count of current sessions opened to the sharded cluster.",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 151, "y": 22, "width": 42, "height": 14 }
-    },
-    {
-      "id": 5146716915175314,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:mongodb.chunks.total{$scope}.rollup(avg, 60).fill(zero)",
-            "aggregator": "last"
-          }
-        ],
-        "title": "Total chunks count",
-        "title_size": "16",
-        "title_align": "left",
-        "time": { "live_span": "5m" },
-        "autoscale": true,
-        "custom_unit": "chk",
-        "precision": 2
-      },
-      "layout": { "x": 151, "y": 7, "width": 20, "height": 13 }
-    },
-    {
-      "id": 8687466789452424,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:mongodb.chunks.jumbo{$scope}.rollup(avg, 60).fill(zero)",
-            "aggregator": "last"
-          }
-        ],
-        "title": "Jumbo chunks count",
-        "title_size": "16",
-        "title_align": "left",
-        "time": { "live_span": "5m" },
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": { "x": 173, "y": 7, "width": 20, "height": 13 }
-    },
-    {
-      "id": 1070053836189638,
-      "definition": {
-        "type": "note",
-        "content": "If MongoDB cannot split a chunk that exceeds the specified chunk size, MongoDB labels the chunk as jumbo.\n\nThese jumbo chunks can become a performance bottleneck as they continue to grow, especially if the shard key value occurs with high frequency.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": { "x": 194, "y": 2, "width": 24, "height": 18 }
-    },
-    {
-      "id": 4624482388397142,
-      "definition": {
-        "type": "note",
-        "content": "This metric reports the percentage of used client connection for each replica set. Use these values to understand the load and capacity requirements of your cluster.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
-      },
-      "layout": { "x": 1, "y": 92, "width": 31, "height": 12 }
-    },
-    {
-      "id": 5258592740898122,
-      "definition": {
-        "type": "note",
-        "content": "The number of page fault usually increase significantly when your server is experiencing poor performance.\nIt can be caused by limited memory or data sets getting larger.\n\nIn containerized environment you may want to change to query to group `by {pod_name}` instead.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
-      },
-      "layout": { "x": 1, "y": 106, "width": 31, "height": 15 }
-    },
-    {
-      "id": 3814661911978164,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mongodb.mem.resident{$replset_name,$scope}.fill(zero)",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Average memory usage",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 79, "y": 90, "width": 45, "height": 15 }
-    },
-    {
-      "id": 7951348519517230,
-      "definition": {
-        "type": "note",
-        "content": "Amount of RAM used by the mongo process. During normal use, this value tends to grow. In dedicated database servers, this number tends to approach the total amount of system memory.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": { "x": 125, "y": 90, "width": 22, "height": 15 }
-    },
-    {
-      "id": 1000217136031842,
-      "definition": {
-        "type": "note",
-        "content": "Different MongoDB metrics are fetched from each member depending on its role in the cluster. For exemple the replication lag is fetched from the primary for all members of the replica set.\n\nFor this reason you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment you need one additional integration instance pointed to a mongos proxy.\n\nRefer to [Datadog's documentation](https://docs.datadoghq.com/integrations/mongo/?tab=host) for more information.",
-        "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": { "x": 0, "y": 44, "width": 32, "height": 30 }
-    },
-    {
-      "id": 2834898103372432,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mongodb.network.bytesinps{$replset_name,$scope}.fill(zero)",
-            "display_type": "line",
-            "style": {
-              "palette": "orange",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          },
-          {
-            "q": "avg:mongodb.network.bytesoutps{$replset_name,$scope}.fill(zero)",
-            "display_type": "line",
-            "style": {
-              "palette": "purple",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Network I/O",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 108, "y": 50, "width": 41, "height": 15 }
-    },
-    {
-      "id": 312589060485664,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:mongodb.opcounters.queryps{$replset_name,$scope}.fill(zero), sum:mongodb.opcounters.deleteps{$replset_name,$scope}.fill(zero), sum:mongodb.opcounters.insertps{$replset_name,$scope}.fill(zero), sum:mongodb.opcounters.updateps{$replset_name,$scope}.fill(zero), sum:mongodb.opcounters.getmoreps{$replset_name,$scope}.fill(zero), sum:mongodb.opcounters.commandps{$replset_name,$scope}.fill(zero)",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Query operations per second",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": { "x": 108, "y": 66, "width": 41, "height": 14 }
-    },
-    {
-      "id": 4363528440629624,
-      "definition": {
-        "type": "note",
-        "content": "Throughput",
-        "background_color": "vivid_green",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      },
-      "layout": { "x": 33, "y": 43, "width": 116, "height": 6 }
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 8 }
     }
   ],
   "template_variables": [
-    { "name": "scope", "default": "*", "prefix": null },
+    { "name": "scope", "default": "*", "prefix": "" },
     { "name": "replset_name", "default": "*", "prefix": "replset_name" }
   ],
-  "layout_type": "free",
+  "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "id": "kjt-hec-9bv"
+  "reflow_type": "fixed",
+  "id": "ux8-qaq-ths"
 }
