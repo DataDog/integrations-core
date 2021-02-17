@@ -1,6 +1,6 @@
 {
 	"name": "[Apache] resource utilization",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "avg(last_4h):anomalies(+ avg:apache.performance.cpu_load{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
 	"message": "High number of keep-alive async connections, combined with high CPU. You may want to lower the maximum number of simultaneous connections to the server (MaxRequestWorkers), and/or decrease the KeepAliveTimeout to avoid holding connections open longer than necessary.\n\n",
 	"tags": [
