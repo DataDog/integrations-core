@@ -40,7 +40,42 @@ STATEMENT_METRICS = {
     'rows_examined': 'mysql.queries.rows_examined',
 }
 
-DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
+DEFAULT_STATEMENT_METRIC_LIMITS = {
+    'count': (800, 0),
+    'errors': (100, 0),
+    'time': (800, 0),
+    'select_scan': (100, 0),
+    'select_full_join': (100, 0),
+    'no_index_used': (100, 0),
+    'no_good_index_used': (100, 0),
+    'lock_time': (100, 0),
+    'rows_affected': (100, 0),
+    'rows_sent': (100, 0),
+    'rows_examined': (100, 0),
+    # Synthetic column limits
+    'avg_time': (800, 0),
+    'rows_sent_ratio': (0, 100),
+}
+
+
+def generate_synthetic_rows(rows):
+    """
+    Given a list of rows, generate a new list of rows with "synthetic" column values derived from
+    the existing row values.
+    """
+    synthetic_rows = []
+    for row in rows:
+        new = copy.copy(row)
+        new['avg_time'] = new['time'] / new['count'] if new['count'] > 0 else 0
+        new['rows_sent_ratio'] = (
+            new['rows_sent'] / new['rows_examined']
+            if new['rows_examined'] > 0
+            else 0
+        )
+
+        synthetic_rows.append(new)
+
+    return synthetic_rows
 
 
 class MySQLStatementMetrics(object):
@@ -72,6 +107,9 @@ class MySQLStatementMetrics(object):
         monotonic_rows = self._query_summary_per_statement(db)
         monotonic_rows = self._merge_duplicate_rows(monotonic_rows, key=keyfunc)
         rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
+        metrics.append(('dd.mysql.queries.query_rows_raw', len(rows) , []))
+
+        rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows,
             DEFAULT_STATEMENT_METRIC_LIMITS,
@@ -79,6 +117,7 @@ class MySQLStatementMetrics(object):
             tiebreaker_reverse=True,
             key=keyfunc,
         )
+        metrics.append(('dd.mysql.queries.query_rows_limited', len(rows) , []))
 
         for row in rows:
             tags = []
