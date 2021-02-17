@@ -139,7 +139,7 @@ datadog-vault==2.10.0
 datadog-vertica==2.0.0
 datadog-voltdb==1.0.0
 datadog-vsphere==5.7.1
-datadog-win32-event-log==2.7.0; sys_platform == 'win32'
+datadog-win32-event-log==2.8.0-rc.1; sys_platform == 'win32'
 datadog-windows-service==3.0.0; sys_platform == 'win32'
 datadog-wmi-check==1.9.2; sys_platform == 'win32'
 datadog-yarn==1.17.1
