@@ -181,10 +181,13 @@ class PostgresStatementMetrics(object):
             return (queryid, row['datname'], row['rolname'])
 
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
+        metrics.append(('dd.postgres.queries.query_rows_raw', len(rows) , []))
+
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows, DEFAULT_STATEMENT_METRIC_LIMITS, tiebreaker_metric='calls', tiebreaker_reverse=True, key=row_keyfunc
         )
+        metrics.append(('dd.postgres.queries.query_rows_limited', len(rows) , []))
 
         for row in rows:
             try:
