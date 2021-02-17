@@ -1,5 +1,5 @@
 {
-	"name": "[Apache] Low number of idle workers {{host.name}}",
+	"name": "[Apache] Low number of idle workers",
 	"type": "query alert",
 	"query": "avg(last_4h):anomalies(avg:apache.performance.idle_workers{*} by {host}, 'basic', 2, direction='below', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
 	"message": "The number of idle workers is abnormally low: {{value}}. You may see slower request processing times.",

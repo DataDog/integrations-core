@@ -36,7 +36,10 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[Apache] Low number of idle workers": "assets/recommended_monitors/high_keep_alive_and_cpu.json",
+      "[Apache] resource utilization": "apache/assets/recommended_monitors/high_keep_alive_and_cpu.json"
+    },
     "dashboards": {
       "apache": "assets/dashboards/apache_dashboard.json"
     },
