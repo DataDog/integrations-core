@@ -188,4 +188,6 @@ METRIC_MAP = {
     'haproxy_server_used_connections_current': 'server.used.connections.current',
     'haproxy_server_uweight': 'server.uweight',
     'haproxy_server_weight': 'server.weight',
+    'haproxy_sticktable_size': 'sticktable.size',
+    'haproxy_sticktable_used': 'sticktable.used',
 }

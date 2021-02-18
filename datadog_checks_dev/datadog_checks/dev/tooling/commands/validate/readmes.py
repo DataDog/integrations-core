@@ -166,12 +166,16 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
                 match = re.match(IMAGE_REGEX, line)
                 if not match:
                     files_failed[readme_path] = True
-                    display_queue.append((echo_failure, f"     No valid image file on line {line_no}"))
                     display_queue.append(
-                        (
-                            echo_info,
+                        lambda line_no=line_no, **kwargs: echo_failure(
+                            f"     No valid image file on line {line_no}", **kwargs
+                        )
+                    )
+                    display_queue.append(
+                        lambda repo=repo, integration=integration, **kwargs: echo_failure(
                             f"     This image path must be in the form: "
                             f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>",  # noqa
+                            **kwargs,
                         )
                     )
                     break
@@ -182,12 +186,20 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
                     if not path.exists(file_path):
                         files_failed[readme_path] = True
                         display_queue.append(
-                            (echo_failure, f"     image: {rel_path} is linked in its readme but does not exist")
+                            lambda rel_path=rel_path, **kwargs: echo_failure(
+                                f"     image: {rel_path} is linked in its readme but does not exist", **kwargs
+                            )
                         )
     if not has_support and manifest.get('support') == 'partner':
         files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme does not contain a Support H2 section"))
+        display_queue.append(
+            lambda **kwargs: echo_failure("     readme does not contain a Support H2 section", **kwargs)
+        )
 
     if not (has_overview and has_setup):
         files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme does not contain both an Overview and Setup H2 section"))
+        display_queue.append(
+            lambda **kwargs: echo_failure(
+                "     readme does not contain both an Overview and Setup H2 section", **kwargs
+            )
+        )
