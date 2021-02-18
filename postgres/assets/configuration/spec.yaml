@@ -45,7 +45,7 @@ files:
       value:
         type: boolean
         display_default: false
-        example: "false"
+        example: false
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -66,7 +66,7 @@ files:
       value:
         type: string
         display_default: false
-        example: false
+        example: "false"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
