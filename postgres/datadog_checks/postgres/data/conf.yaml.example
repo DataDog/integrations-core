@@ -66,7 +66,7 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional - default: 1000
+    ## @param query_timeout - integer - optional
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
