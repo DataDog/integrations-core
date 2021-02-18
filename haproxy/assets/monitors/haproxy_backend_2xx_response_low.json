@@ -1,0 +1,28 @@
+{
+	"name": "[HAProxy] Backend HTTP 2xx response rate is low on {{host.name}}",
+	"type": "query alert",
+	"query": "sum(last_5m):100 * sum:haproxy.backend.http.responses.total{code:2xx}.as_count() / sum:haproxy.backend.http.responses.total{*}.as_count() <= 99",
+	"message": "The rate of 2xx backend response code session is low  ({{value}}%)",
+	"tags": [
+		"integration:haproxy"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 99,
+			"warning": 95
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notifies when 2xx backend response code is lower than it should be."
+	}
+}

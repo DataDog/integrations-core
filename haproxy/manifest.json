@@ -36,7 +36,12 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "Backend 2xx responses": "assets/monitors/haproxy_backend_2xx_response_low.json",
+      "Backend session": "assets/monitors/haproxy_backend_session_pct_high.json",
+      "Frontend 2xx responses": "assets/monitors/haproxy_frontend_2xx_response_low.json",
+      "Frontend session": "assets/monitors/haproxy_frontend_session_pct_high.json"
+    },
     "dashboards": {
       "haproxy": "assets/dashboards/overview.json",
       "HAProxy - Overview (Prometheus)": "assets/dashboards/prometheus_overview.json"

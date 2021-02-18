@@ -1,0 +1,28 @@
+{
+	"name": "[HAProxy] Number of frontend session is close to the limit on {{host.name}}",
+	"type": "query alert",
+	"query": "sum(last_5m):100 * avg:haproxy.frontend.session.current{*}.as_count() / avg:haproxy.frontend.limit.sessions{*}.as_count() >= 90",
+	"message": "The number of opened frontend session is close to the limit configured ({{value}}%)",
+	"tags": [
+        "integration:haproxy"
+    ],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 90,
+			"warning": 80
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notifies when the number of opened frontend session is getting close to the limit configured"
+	}
+}
