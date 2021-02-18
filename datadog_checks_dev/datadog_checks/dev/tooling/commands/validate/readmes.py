@@ -192,7 +192,6 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
                         )
     if not has_support and manifest.get('support') == 'partner':
         files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme does not contain a Support H2 section"))
         display_queue.append(
             lambda **kwargs: echo_failure("     readme does not contain a Support H2 section", **kwargs)
         )
