@@ -150,23 +150,33 @@ class AerospikeCheck(AgentCheck):
             self.log.debug("Could not determine version, assuming Aerospike v5.1")
             version = V5_1
 
+        # Handle metric compatibility for latency/throughput
         if version < V5_1:
             self.collect_throughput(namespaces)
             self.collect_latency(namespaces)
-
-            if version < V5_0:
-                try:
-                    datacenters = self.get_datacenters()
-
-                    for dc in datacenters:
-                        self.collect_datacenter(dc)
-
-                except Exception as e:
-                    self.log.debug("There were no datacenters found: %s", e)
         else:
             self.collect_latencies(namespaces)
 
+        # Handle metric compatibility for xdr/dc
+        if version >= V5_0:
+            self.collect_xdr()
+        else:
+            try:
+                datacenters = self.get_datacenters()
+                for dc in datacenters:
+                    self.collect_datacenter(dc)
+            except Exception as e:
+                self.log.debug("There were no datacenters found: %s", e)
+
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
+
+    def collect_xdr(self):
+        # TODO: get list of datacenters. dcs command is deprecated
+        if self._required_datacenters:
+            for dc in self._required_datacenters:
+                data = self.get_info('get-stats:context=xdr;dc={}'.format(dc))
+        else:
+            self.log.debug("No datacenters to collect XDR metrics from")
 
     def collect_version(self):
         try:
