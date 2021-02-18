@@ -1,6 +1,6 @@
 {
   "title": "MongoDB - Overview",
-  "author": "Datadog",
+  "author_name": "Datadog",
   "description": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
   "widgets": [
     {
