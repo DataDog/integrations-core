@@ -31,7 +31,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 2,
+            "id": 6,
             "definition": {
               "title": "Hit rate",
               "type": "query_value",
@@ -66,7 +66,7 @@
             "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
           },
           {
-            "id": 3,
+            "id": 7,
             "definition": {
               "title": "Blocked clients",
               "type": "query_value",
@@ -95,7 +95,7 @@
             "layout": { "x": 2, "y": 0, "width": 2, "height": 2 }
           },
           {
-            "id": 4,
+            "id": 8,
             "definition": {
               "title": "Unsaved changes",
               "type": "query_value",
@@ -124,7 +124,7 @@
             "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
           },
           {
-            "id": 5,
+            "id": 9,
             "definition": {
               "title": "Redis keyspace",
               "type": "query_value",
@@ -148,7 +148,7 @@
             "layout": { "x": 6, "y": 0, "width": 2, "height": 2 }
           },
           {
-            "id": 6,
+            "id": 10,
             "definition": {
               "title": "Master link down",
               "type": "query_value",
@@ -178,7 +178,7 @@
             "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
           },
           {
-            "id": 7,
+            "id": 11,
             "definition": {
               "type": "note",
               "content": "Amount of time that the master link has been down. Only available when the connection between a master and its slave has been lost. Ideally, this value should never exceed zero–the master and slave should be in constant communication to ensure the slave is not serving up stale data.",
@@ -196,7 +196,7 @@
       "layout": { "x": 4, "y": 0, "width": 8, "height": 5 }
     },
     {
-      "id": 8,
+      "id": 2,
       "definition": {
         "title": "Performance Metrics",
         "reflow_type": "fixed",
@@ -204,7 +204,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 9,
+            "id": 12,
             "definition": {
               "title": "Commands per second",
               "show_legend": false,
@@ -230,7 +230,7 @@
             "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
           },
           {
-            "id": 10,
+            "id": 13,
             "definition": {
               "title": "Cache hit rate",
               "show_legend": false,
@@ -273,7 +273,7 @@
             "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
           },
           {
-            "id": 11,
+            "id": 14,
             "definition": {
               "title": "Slowlog",
               "show_legend": true,
@@ -304,7 +304,7 @@
             "layout": { "x": 0, "y": 2, "width": 6, "height": 3 }
           },
           {
-            "id": 12,
+            "id": 15,
             "definition": {
               "title": "Latency",
               "show_legend": false,
@@ -329,7 +329,7 @@
             "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
           },
           {
-            "id": 13,
+            "id": 16,
             "definition": {
               "type": "note",
               "content": "Latency is the measurement of the time between a client request and the actual server response. Tracking latency is the most direct way to detect changes in Redis performance. Due to the single-threaded nature of Redis, outliers in your latency distribution could cause serious bottlenecks. A long response time for one request increases the latency for all subsequent requests.",
@@ -346,7 +346,7 @@
       }
     },
     {
-      "id": 14,
+      "id": 3,
       "definition": {
         "title": "Memory Metrics",
         "reflow_type": "fixed",
@@ -354,7 +354,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 15,
+            "id": 17,
             "definition": {
               "title": "Evictions",
               "show_legend": false,
@@ -380,7 +380,7 @@
             "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
           },
           {
-            "id": 16,
+            "id": 18,
             "definition": {
               "title": "Fragmentation ratio",
               "show_legend": false,
@@ -415,7 +415,7 @@
             "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
           },
           {
-            "id": 17,
+            "id": 19,
             "definition": {
               "title": "Blocked clients",
               "show_legend": false,
@@ -444,7 +444,7 @@
             "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
           },
           {
-            "id": 18,
+            "id": 20,
             "definition": {
               "title": "Used memory",
               "show_legend": false,
@@ -469,7 +469,7 @@
             "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
           },
           {
-            "id": 19,
+            "id": 21,
             "definition": {
               "type": "note",
               "content": "Memory usage is a critical component of Redis performance. If used_memory exceeds the total available system memory, the operating system will begin swapping old/unused sections of memory. Every swapped section is written to disk, severely affecting performance. Writing or reading from disk is up to 5 orders of magnitude (100,000x!) slower than writing or reading from memory (0.1 µs for memory vs. 10 ms for disk).",
@@ -487,7 +487,7 @@
       "layout": { "x": 0, "y": 0, "width": 6, "height": 10 }
     },
     {
-      "id": 20,
+      "id": 4,
       "definition": {
         "title": "Base Activity Metrics",
         "reflow_type": "fixed",
@@ -495,7 +495,7 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 21,
+            "id": 22,
             "definition": {
               "title": "Connected slaves",
               "show_legend": false,
@@ -524,7 +524,7 @@
             "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
           },
           {
-            "id": 22,
+            "id": 23,
             "definition": {
               "title": "Rejected connections",
               "show_legend": false,
@@ -549,7 +549,7 @@
             "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
           },
           {
-            "id": 23,
+            "id": 24,
             "definition": {
               "title": "Keys",
               "show_legend": false,
@@ -574,7 +574,7 @@
             "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
           },
           {
-            "id": 24,
+            "id": 25,
             "definition": {
               "title": "Connected clients",
               "show_legend": false,
@@ -600,7 +600,7 @@
             "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
           },
           {
-            "id": 25,
+            "id": 26,
             "definition": {
               "type": "note",
               "content": "Redis is capable of handling many active connections, with a default of 10,000 client connections available. You can set the maximum number of connections to a different value, by altering the `maxclient` directive in redis.conf. Any new connection attempts will be disconnected if your Redis instance is currently at its maximum number of connections.",
@@ -618,7 +618,7 @@
       "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
     },
     {
-      "id": 26,
+      "id": 5,
       "definition": {
         "title": "Logs",
         "reflow_type": "fixed",
