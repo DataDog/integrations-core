@@ -94,7 +94,6 @@ class PostgresMetricsCache:
         if self.config.dbstrict:
             res["query"] += f"  AND psd.datname in('{self.config.dbname}')"
 
-
         return res
 
     def get_bgw_metrics(self, version):
