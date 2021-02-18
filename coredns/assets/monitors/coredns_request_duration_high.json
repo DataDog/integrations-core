@@ -1,0 +1,28 @@
+{
+	"name": "[CoreDNS] Request duration is high on {{host.name}}",
+	"type": "query alert",
+	"query": "sum(last_5m):avg:coredns.request_duration.seconds{*}.as_count() >= 0.02",
+	"message": "Request duration process is high on {{host.name}} ({{value}} s)",
+	"tags": [
+		"integration:coredns"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 0.02,
+			"warning": 0.01
+		}
+	},
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when the request is taking long to process."
+    }
+}
