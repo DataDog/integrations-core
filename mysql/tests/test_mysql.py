@@ -57,7 +57,9 @@ def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
 
     _assert_complex_config(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=['alice.age', 'bob.age'])
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+    )
 
 
 def _assert_complex_config(aggregator):
