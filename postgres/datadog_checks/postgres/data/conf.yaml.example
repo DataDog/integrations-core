@@ -35,16 +35,16 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param dbname - string - optional - default: postgres
+    ## @param dbname - string - optional
     ## The name of the PostgresSQL database to monitor.
     ## Note: If omitted, the default system Postgres database is queried.
     #
     # dbname: <DBNAME>
 
-    ## @param dbstrict - boolean -optional - default: false
+    ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
-    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
-    # 
+    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter. 
+    #
     # dbstrict: false
 
     ## @param ssl - string - optional - default: false
@@ -66,7 +66,7 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional
+    ## @param query_timeout - integer - optional - default: 1000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
