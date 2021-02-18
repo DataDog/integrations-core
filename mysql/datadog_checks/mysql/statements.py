@@ -98,7 +98,7 @@ class MySQLStatementMetrics(object):
 
     def _collect_per_statement_metrics(self, db):
         # type: (pymysql.connections.Connection) -> List[Metric]
-        metrics = []
+        metrics = []  # type: List[Metric]
 
         def keyfunc(row):
             return (row['schema'], row['digest'])
