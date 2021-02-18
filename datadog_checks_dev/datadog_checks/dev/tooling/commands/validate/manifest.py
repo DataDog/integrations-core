@@ -300,7 +300,8 @@ def manifest(ctx, fix):
             if errors:
                 file_failures += 1
                 for error in errors:
-                    display_queue.append((echo_failure, f'  {"->".join(error.absolute_path)}:{error.message}'))
+                    path_structure = [str(path) for path in error.absolute_path]
+                    display_queue.append((echo_failure, f'  {"->".join(path_structure)} Error: {error.message}'))
 
             # guid
             guid = decoded.get('guid')
