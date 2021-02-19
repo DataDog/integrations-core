@@ -33,6 +33,7 @@
       "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
     },
     "dashboards": {
+      "kubernetes": "assets/dashboards/kubernetes_dashboard.json",
       "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
       "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
       "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json",

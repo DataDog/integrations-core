@@ -72,7 +72,7 @@ class IbmMqCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self, queue_manager):
         try:
-            version = self.metadata_collector.collect_metadata(queue_manager)
+            version = self.metadata_collector.collect_metadata(queue_manager, self.config.convert_endianness)
             if version:
                 raw_version = '{}.{}.{}.{}'.format(version["major"], version["minor"], version["mod"], version["fix"])
                 self.set_metadata('version', raw_version, scheme='parts', part_map=version)

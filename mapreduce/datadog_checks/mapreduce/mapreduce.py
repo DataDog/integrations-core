@@ -65,7 +65,10 @@ class MapReduceCheck(AgentCheck):
                 self.DEFAULT_CLUSTER_NAME,
             )
             cluster_name = self.DEFAULT_CLUSTER_NAME
-        self.metric_tags = self.custom_tags + ['cluster_name:{}'.format(cluster_name)]
+
+        self.metric_tags = self.custom_tags + ['mapreduce_cluster:{}'.format(cluster_name)]
+        if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+            self.metric_tags.append('cluster_name:{}'.format(cluster_name))
 
     def check(self, instance):
         # Get the running MR applications from YARN
