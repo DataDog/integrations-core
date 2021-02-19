@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 5.3.3 / 2021-02-19
+
+* [Fixed] Add dbstrict option to limit queries to specified databases. See [#8643](https://github.com/DataDog/integrations-core/pull/8643).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
 ## 5.3.2 / 2021-02-01
 
 * [Fixed] Fix Postgres statements to remove information_schema query. See [#8498](https://github.com/DataDog/integrations-core/pull/8498).

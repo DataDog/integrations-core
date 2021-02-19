@@ -4,7 +4,7 @@
 import re
 
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
@@ -175,7 +175,7 @@ class SparkCheck(AgentCheck):
                 SPARK_YARN_MODE,
             )
             self.cluster_mode = SPARK_YARN_MODE
-
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
         # Get the cluster name from the instance configuration
@@ -187,7 +187,10 @@ class SparkCheck(AgentCheck):
 
     def check(self, _):
         tags = list(self.tags)
-        tags.append('cluster_name:%s' % self.cluster_name)
+
+        tags.append('spark_cluster:%s' % self.cluster_name)
+        if not self._disable_legacy_cluster_tag:
+            tags.append('cluster_name:%s' % self.cluster_name)
 
         spark_apps = self._get_running_apps()
 
@@ -259,7 +262,10 @@ class SparkCheck(AgentCheck):
         Determine what mode was specified
         """
         tags = list(self.tags)
-        tags.append('cluster_name:%s' % self.cluster_name)
+
+        tags.append('spark_cluster:%s' % self.cluster_name)
+        if not self._disable_legacy_cluster_tag:
+            tags.append('cluster_name:%s' % self.cluster_name)
 
         if self.cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
@@ -475,7 +481,7 @@ class SparkCheck(AgentCheck):
                 if not version_set:
                     version_set = self._collect_version(tracking_url, tags)
                 response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
-            except RequestException as e:
+            except Exception as e:
                 self.log.warning("Exception happened when fetching app ids for %s: %s", tracking_url, e)
                 continue
 

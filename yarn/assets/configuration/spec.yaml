@@ -100,7 +100,9 @@ files:
             description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `yarn_cluster`.
             value:
               type: boolean
-              example: false
+              display_default: false
+              example: true
+            enabled: true
           - template: instances/http
           - template: instances/default
 

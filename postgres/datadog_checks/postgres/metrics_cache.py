@@ -91,6 +91,8 @@ class PostgresMetricsCache:
 
         if not self.config.collect_default_db:
             res["query"] += "  AND psd.datname not ilike 'postgres'"
+        if self.config.dbstrict:
+            res["query"] += "  AND psd.datname in('%s')", self.config.dbname
 
         return res
 

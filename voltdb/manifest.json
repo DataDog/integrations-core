@@ -29,7 +29,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
+    },
     "monitors": {
       "CPU load": "assets/monitors/cpu_load.json"
     },
