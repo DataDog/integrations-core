@@ -11,7 +11,7 @@ parameters:
 
 steps:
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
-  - script: ddev test --cov --junit -d ${{ parameters.check }}
+  - script: ddev test --cov --junit ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
