@@ -28,6 +28,6 @@ class {check_class}(AgentCheck):
         # If your check ran succesfully, you can send the status.
         # More info at
         # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK)
+        # self.service_check({check_name}.can_connect, AgentCheck.OK)
 
         pass
