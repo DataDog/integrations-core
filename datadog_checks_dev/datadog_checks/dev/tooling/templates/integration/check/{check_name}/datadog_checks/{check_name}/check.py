@@ -9,7 +9,7 @@ class {check_class}(AgentCheck):
         # type: (Any) -> None
         # The following are useful bits of code to help new users started.
 
-        # This is how you make HTTP Requests.
+        # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
         # self.http.get("<url>")
 
