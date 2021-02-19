@@ -29,6 +29,6 @@
 		}
 	},
 	"recommended_monitor_metadata": {
-        "description": "Notify your team when the number of idle workers is running low."
+        "description": "Notify your team when the number of keep-alive async connections and the CPU load are both running high."
     }
 }
