@@ -28,11 +28,10 @@ class {check_class}(AgentCheck):
         # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
         # self.gauge("test", 1.23, tags=['foo:bar'])
 
-
         # Perform database queries using the Query Manager
         # self._query_manager.execute()
 
-        # If your check ran succesfully, you can send the status.
+        # If your check ran successfully, you can send the status.
         # More info at
         # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
         # self.service_check({check_name}.can_connect, AgentCheck.OK)
