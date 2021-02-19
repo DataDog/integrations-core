@@ -20,8 +20,7 @@ class {check_class}(AgentCheck):
         # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
         # self.count("count", 1.0)
 
-        # This is how you can perform database queries.
-        # You would need to define your query manager in your __init__ method.
+        # Define a query manager in the __init__ method and perform database queries.
         # More info at
         # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
         # self._query_manager.execute()
