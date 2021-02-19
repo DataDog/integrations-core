@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 8.0.1 / 2021-02-19
+
+* [Fixed] Fix error printing json errors when error on list object. See [#8650](https://github.com/DataDog/integrations-core/pull/8650).
+* [Fixed] Fix validate readme command. See [#8645](https://github.com/DataDog/integrations-core/pull/8645).
+* [Fixed] Replace `oneOf` with `anyOf` for multi-type support. See [#8626](https://github.com/DataDog/integrations-core/pull/8626).
+
 ## 8.0.0 / 2021-02-12
 
 * [Added] Add config spec for the new OpenMetrics implementation. See [#8452](https://github.com/DataDog/integrations-core/pull/8452).
