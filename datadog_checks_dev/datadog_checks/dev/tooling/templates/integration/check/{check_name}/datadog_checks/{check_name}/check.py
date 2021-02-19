@@ -24,11 +24,10 @@ class {check_class}(AgentCheck):
         # self.http.get("<url>")
 
         # This is how you submit metrics
+        # There are different types of metrics that you can submit (gauge, event).
+        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
         # self.gauge("test", 1.23, tags=['foo:bar'])
 
-        # There are different types of metrics that you can submit (events, count).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.count("count", 1.0)
 
         # Perform database queries using the Query Manager
         # self._query_manager.execute()
