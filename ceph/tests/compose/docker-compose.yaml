@@ -5,6 +5,7 @@ services:
     image: ceph/daemon:${CEPH_VERSION}
     container_name: dd-test-ceph
     command: demo
+    restart: always
     environment:
       - NETWORK_AUTO_DETECT=4
       - CEPH_DEMO_UID=demo
