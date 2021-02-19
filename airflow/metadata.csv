@@ -13,7 +13,7 @@ airflow.previously_succeeded,count,,task,,Number of previously succeeded task in
 airflow.zombies_killed,count,,task,,Zombie tasks killed,0,airflow,zombies_killed
 airflow.scheduler_heartbeat,count,,,,Scheduler heartbeats,0,airflow,scheduler_heartbeat
 airflow.dag_processing.processes,count,,,,Number of currently running DAG parsing processes,0,airflow,dag_proc.processes
-aiflow.dag_processing.manager_stalls,count,,,,Number of stalled `DagFileProcessorManager`,0,airflow,dag_proc.manager_stalls
+airflow.dag_processing.manager_stalls,count,,,,Number of stalled `DagFileProcessorManager`,0,airflow,dag_proc.manager_stalls
 airflow.dag_file_refresh_error,count,,error,,Number of failures loading any DAG files,0,airflow,dag_file_refresh_error
 airflow.scheduler.critical_section_duration,gauge,,millisecond,,Milliseconds spent in the critical section of scheduler loop -- only a single scheduler can enter this loop at a time,0,airflow,critical_section_duration
 airflow.scheduler.tasks.killed_externally,count,,task,,Number of tasks killed externally,-1,airflow,scheduler.tasks.killed_externally
