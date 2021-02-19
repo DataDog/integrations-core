@@ -20,10 +20,12 @@ from .utils import kebab_case_name, normalize_package_name
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
 SIMPLE_NAME = r'^\w+$'
+EXCLUDE_TEMPLATES = {"marketplace"}
 
 
 def get_valid_templates():
-    return sorted(os.listdir(TEMPLATES_DIR))
+    templates = [template for template in os.listdir(TEMPLATES_DIR) if template not in EXCLUDE_TEMPLATES]
+    return sorted(templates)
 
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
