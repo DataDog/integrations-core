@@ -12,7 +12,7 @@ init_config:
 
   ## @param ignore_nonincreasing_oid - boolean - optional - default: false
   ## Set to true to ignore non increasing oid.
-  ## See https://pysnmp.readthedocs.io/en/latest/faq/oids-not-increasing.html?highlight=ignorenonincreasingoid
+  ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
   #
   # ignore_nonincreasing_oid: false
 
