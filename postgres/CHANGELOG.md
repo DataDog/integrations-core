@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 5.3.4 / 2021-02-19
+
+* [Fixed] Fix query syntax. See [#8661](https://github.com/DataDog/integrations-core/pull/8661).
+
 ## 5.3.3 / 2021-02-19
 
 * [Fixed] Add dbstrict option to limit queries to specified databases. See [#8643](https://github.com/DataDog/integrations-core/pull/8643).
