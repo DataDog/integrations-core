@@ -337,7 +337,7 @@ def metadata(check, check_duplicates, show_warnings):
             # metric_name header
             if metric_prefix:
                 prefix = row['metric_name'].split('.')[0]
-                if prefix not in ['system', 'jvm', 'http', 'datadog']:
+                if prefix not in ['system', 'jvm', 'http', 'datadog', 'sftp']:
                     if not row['metric_name'].startswith(metric_prefix):
                         metric_prefix_count[prefix] += 1
             else:
