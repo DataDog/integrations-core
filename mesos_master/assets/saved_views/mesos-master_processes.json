@@ -1,5 +1,5 @@
 {
-  "name": "mesos-master",
+  "name": "Mesos Master",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:mesos_master",

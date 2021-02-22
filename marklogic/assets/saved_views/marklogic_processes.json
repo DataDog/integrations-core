@@ -1,5 +1,5 @@
 {
-  "name": "marklogic",
+  "name": "MarkLogic",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:marklogic",

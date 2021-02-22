@@ -1,5 +1,5 @@
 {
-  "name": "lighttpd",
+  "name": "Lighttpd",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:lighttpd",

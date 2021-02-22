@@ -1,5 +1,5 @@
 {
-  "name": "mongodb",
+  "name": "MongoDB",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:mongo",

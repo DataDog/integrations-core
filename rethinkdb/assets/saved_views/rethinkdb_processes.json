@@ -1,5 +1,5 @@
 {
-  "name": "rethinkdb",
+  "name": "RethinkDB",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:rethinkdb",

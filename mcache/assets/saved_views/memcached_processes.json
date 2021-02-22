@@ -1,5 +1,5 @@
 {
-  "name": "memcached",
+  "name": "Memcached",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:mcache",

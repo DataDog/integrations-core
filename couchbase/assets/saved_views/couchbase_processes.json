@@ -1,5 +1,5 @@
 {
-  "name": "couchbase",
+  "name": "Couchbase",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:couchbase",

@@ -1,5 +1,5 @@
 {
-  "name": "pgbouncer",
+  "name": "PGBouncer",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:pgbouncer",

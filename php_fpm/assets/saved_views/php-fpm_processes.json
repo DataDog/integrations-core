@@ -1,5 +1,5 @@
 {
-  "name": "php-fpm",
+  "name": "PHP-FPM",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:php_fpm",

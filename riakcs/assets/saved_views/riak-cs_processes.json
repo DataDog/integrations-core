@@ -1,5 +1,5 @@
 {
-  "name": "riak-cs",
+  "name": "Riak CS",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:riakcs",

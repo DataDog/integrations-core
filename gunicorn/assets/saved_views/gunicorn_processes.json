@@ -1,5 +1,5 @@
 {
-  "name": "gunicorn",
+  "name": "Gunicorn",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:gunicorn",

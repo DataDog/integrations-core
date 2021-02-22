@@ -1,5 +1,5 @@
 {
-  "name": "powerdns",
+  "name": "PowerDNS Recursor",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:powerdns_recursor",

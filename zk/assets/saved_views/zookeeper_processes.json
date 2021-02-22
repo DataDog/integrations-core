@@ -1,5 +1,5 @@
 {
-  "name": "zookeeper",
+  "name": "ZooKeeper",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:zk",

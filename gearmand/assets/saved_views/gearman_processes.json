@@ -1,5 +1,5 @@
 {
-  "name": "gearman",
+  "name": "Gearman",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:gearmand",

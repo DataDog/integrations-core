@@ -1,5 +1,5 @@
 {
-  "name": "redis",
+  "name": "Redis",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:redisdb",

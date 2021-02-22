@@ -1,5 +1,5 @@
 {
-  "name": "postfix",
+  "name": "Postfix",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:postfix",

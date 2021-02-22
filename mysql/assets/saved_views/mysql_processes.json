@@ -1,5 +1,5 @@
 {
-  "name": "mysql",
+  "name": "MySQL",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:mysql",

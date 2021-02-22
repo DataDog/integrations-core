@@ -1,5 +1,5 @@
 {
-  "name": "couchdb",
+  "name": "CouchDB",
   "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:couch",
