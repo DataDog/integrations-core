@@ -41,6 +41,10 @@ class {check_class}(AgentCheck):
         # Perform database queries using the Query Manager
         # self._query_manager.execute()
 
+        # This is how you use the persistent cache
+        # self.write_persistent_cache("key", "value")
+        # value = self.read_persistent_cache("key")
+
         # If your check ran successfully, you can send the status.
         # More info at
         # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
