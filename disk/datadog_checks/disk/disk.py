@@ -64,8 +64,6 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
-        self._last_read_time_by_disk = {}
-        self._last_write_time_by_disk = {}
 
         deprecations_init_conf = {
             'file_system_global_blacklist': 'file_system_global_exclude',
@@ -315,13 +313,8 @@ class Disk(AgentCheck):
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.extend(self.devices_label.get(disk_name))
-                if disk_name in self._last_read_time_by_disk:
-                    read_time_since_last_run = disk.read_time - self._last_read_time_by_disk[disk_name]
-                    write_time_since_last_run = disk.write_time - self._last_write_time_by_disk[disk_name]
-                    self.count(self.METRIC_DISK.format('read_time'), read_time_since_last_run, tags=metric_tags)
-                    self.count(self.METRIC_DISK.format('write_time'), write_time_since_last_run, tags=metric_tags)
-                self._last_read_time_by_disk[disk_name] = disk.read_time
-                self._last_write_time_by_disk[disk_name] = disk.write_time
+                self.monotonic_count(self.METRIC_DISK.format('read_time'), disk.read_time, tags=metric_tags)
+                self.monotonic_count(self.METRIC_DISK.format('write_time'), disk.write_time, tags=metric_tags)
                 # FIXME: 8.x, metrics kept for backwards compatibility but are incorrect: the value is not a percentage
                 # See: https://github.com/DataDog/integrations-core/pull/7323#issuecomment-756427024
                 self.rate(self.METRIC_DISK.format('read_time_pct'), disk.read_time * 100 / 1000, tags=metric_tags)

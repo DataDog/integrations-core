@@ -45,7 +45,7 @@ def test_bad_config():
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_default(aggregator, gauge_metrics, rate_metrics):
+def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics):
     """
     Mock psutil and run the check
     """
@@ -76,24 +76,12 @@ def test_default(aggregator, gauge_metrics, rate_metrics):
                 tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
             )
 
-        # Diskstats counters won't be there on the first run
-        for name in ['system.disk.read_time', 'system.disk.write_time']:
+        for name, value in iteritems(count_metrics):
             aggregator.assert_metric(
                 name,
-                count=0,
-                metric_type=aggregator.COUNT,
-                tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
-            )
-
-        # We need a second run to get Diskstats
-        c.check(instance)
-
-        for name in ['system.disk.read_time', 'system.disk.write_time']:
-            aggregator.assert_metric(
-                name,
-                value=0,  # Mocked value hasn't changed between runs, so the difference is 0
+                value=value,
                 count=1,
-                metric_type=aggregator.COUNT,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
             )
 
@@ -114,7 +102,7 @@ def test_rw(aggregator):
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics):
+def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics, count_metrics):
     """
     Same as above, using mount to tag
     """
@@ -128,7 +116,7 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
             tags=['device:{}'.format(DEFAULT_MOUNT_POINT), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
         )
 
-    for name, value in iteritems(rate_metrics):
+    for name, value in chain(iteritems(rate_metrics), iteritems(count_metrics)):
         aggregator.assert_metric(
             name,
             value=value,
@@ -139,7 +127,7 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
+def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics):
     instance = {
         'use_mount': 'no',
         'device_tag_re': {'{}.*'.format(DEFAULT_DEVICE_NAME[:-1]): 'type:dev,tag:two'},
@@ -168,7 +156,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     for name, value in iteritems(gauge_metrics):
         aggregator.assert_metric(name, value=value, tags=tags)
 
-    for name, value in iteritems(rate_metrics):
+    for name, value in chain(iteritems(rate_metrics), iteritems(count_metrics)):
         aggregator.assert_metric(
             name,
             value=value,
@@ -197,7 +185,7 @@ def test_get_devices_label():
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
+def test_min_disk_size(aggregator, gauge_metrics, rate_metrics, count_metrics):
     instance = {'min_disk_size': 0.001}
     c = Disk('disk', {}, [instance])
 
@@ -213,18 +201,24 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
         aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
         aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
+    for name in count_metrics:
+        aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+        aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
+
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
-def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics):
+def test_labels_from_blkid_cache_file(
+    aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics, count_metrics
+):
     """
     Verify that the disk labels are set when the blkid_cache_file option is set
     """
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
-    for metric in chain(gauge_metrics, rate_metrics):
+    for metric in chain(gauge_metrics, rate_metrics, count_metrics):
         aggregator.assert_metric(
             metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL', 'device_label:MYLABEL']
         )
@@ -233,19 +227,19 @@ def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gau
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_blkid_cache_file_contains_no_labels(
-    aggregator, instance_blkid_cache_file_no_label, gauge_metrics, rate_metrics
+    aggregator, instance_blkid_cache_file_no_label, gauge_metrics, rate_metrics, count_metrics
 ):
     """
     Verify that the disk labels are ignored if the cache file doesn't contain any
     """
     c = Disk('disk', {}, [instance_blkid_cache_file_no_label])
     c.check(instance_blkid_cache_file_no_label)
-    for metric in chain(gauge_metrics, rate_metrics):
+    for metric in chain(gauge_metrics, rate_metrics, count_metrics):
         aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1'])
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_timeout_config(aggregator, gauge_metrics, rate_metrics):
+def test_timeout_config(aggregator):
     """Test timeout configuration value is used on every timeout on the check."""
 
     # Arbitrary value
@@ -266,7 +260,7 @@ def test_timeout_config(aggregator, gauge_metrics, rate_metrics):
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
+def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics):
     """Test a warning is raised when there is a Timeout exception."""
 
     # Raise exception for "/faulty" mountpoint
@@ -295,7 +289,7 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
     for name in gauge_metrics:
         aggregator.assert_metric(name, count=0)
 
-    for name in rate_metrics:
+    for name in chain(rate_metrics, count_metrics):
         aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
         aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
