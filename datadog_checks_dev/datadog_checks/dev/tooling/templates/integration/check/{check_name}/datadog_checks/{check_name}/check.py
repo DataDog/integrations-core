@@ -4,6 +4,7 @@ from typing import Any
 from datadog_checks.base import AgentCheck
 
 
+
 class {check_class}(AgentCheck):
     def __init__(self, name, init_config, instances):
         # super({check_name}, self).__init__(name, init_config, instances)
@@ -11,12 +12,21 @@ class {check_class}(AgentCheck):
         # Define a query manager.
         # More info at
         # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[queries.SomeQuery1])
+        # sample_query = {
+        #     "name": "",
+        #     "query": "",
+        #     "columns": [
+        #         {"name": "", "type": ""}
+        #     ],
+        # }
+        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
         # self.check_initializations.append(self._query_manager.compile_queries)
         pass
 
     def check(self, _):
         # type: (Any) -> None
+        # Use self.instance to read the check configuration
+
         # The following are useful bits of code to help new users started.
 
         # Perform HTTP Requests with our HTTP wrapper.
