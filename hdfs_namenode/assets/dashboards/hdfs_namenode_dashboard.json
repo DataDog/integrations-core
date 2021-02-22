@@ -1,0 +1,179 @@
+{
+    "title": "HDFS Name Node - Overview",
+    "description": "This dashboard provides an overview of [NameNode resource usage metrics](https://www.datadoghq.com/blog/monitor-hadoop-metrics/#namenode-emitted-metrics) from your Hadoop cluster, along with a breakdown of the status of your DataNodes. For a bigger-picture view, you can monitor HDFS metrics on the [Hadoop overview dashboard](https://app.datadoghq.com/screen/integration/90/hadoop---overview). Further reading on Hadoop monitoring:\n\n- [An architectural overview of Hadoop](https://www.datadoghq.com/blog/hadoop-architecture-overview/)\n\n- [Datadog's guide to key metrics for Hadoop monitoring](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)\n\n- [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)\n\n- [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)\n\n- [Datadog's blog post announcing Hadoop monitoring support](https://www.datadoghq.com/blog/monitoring-spark/)\n\n- [Docs for Datadog's NameNode integration](https://docs.datadoghq.com/integrations/hdfs/#hdfs-namenode-integration)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.blocks_total{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Blocks Total",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 2
+            },
+            "layout": {
+                "x": 51,
+                "y": 1,
+                "width": 30,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.capacity_total{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:hdfs.namenode.capacity_used{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Capacity Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 2,
+                "y": 1,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.num_live_data_nodes{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Live Data Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 2,
+                "y": 19,
+                "width": 16,
+                "height": 14
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.num_dead_data_nodes{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Dead Data Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 23,
+                "y": 19,
+                "width": 16,
+                "height": 14
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.num_stale_data_nodes{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Stale Data Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 65,
+                "y": 19,
+                "width": 16,
+                "height": 14
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.num_decommissioning_data_nodes{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Decommissioning Data Nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 44,
+                "y": 19,
+                "width": 16,
+                "height": 14
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 42
+}

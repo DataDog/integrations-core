@@ -28,7 +28,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "hdfs_datanode": "assets/dashboards/hdfs_datanode_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hdfs_datanode"
