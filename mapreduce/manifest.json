@@ -27,7 +27,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "mapreduce": "assets/dashboards/mapreduce_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mapreduce"

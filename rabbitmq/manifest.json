@@ -31,7 +31,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
+      "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
+    },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
       "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json"
