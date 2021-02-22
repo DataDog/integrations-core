@@ -336,10 +336,10 @@ def metadata(check, check_duplicates, show_warnings):
 
             # metric_name header
             if metric_prefix:
-                if not row['metric_name'].startswith(metric_prefix):
-                    prefix = row['metric_name'].split('.')[0]
-                    metric_prefix_count[prefix] += 1
-
+                prefix = row['metric_name'].split('.')[0]
+                if prefix not in ['system', 'jvm', 'http', 'datadog']:
+                    if not row['metric_name'].startswith(metric_prefix):
+                        metric_prefix_count[prefix] += 1
             else:
                 errors = True
                 if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
@@ -417,7 +417,6 @@ def metadata(check, check_duplicates, show_warnings):
         if show_warnings:
             for header, count in empty_warning_count.items():
                 echo_warning(f'{current_check}: {header} is empty in {count} rows.')
-
 
     if errors:
         abort()
