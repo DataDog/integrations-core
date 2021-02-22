@@ -39,9 +39,6 @@
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv",
-    "saved_views": {
-      "ssh_processes": "assets/saved_views/ssh_processes.json"
-    }
+    "metrics_metadata": "metadata.csv"
   }
 }
