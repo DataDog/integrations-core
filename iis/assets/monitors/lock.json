@@ -29,6 +29,6 @@
 	"priority": null,
 	"restricted_roles": null,
     "recommended_monitor_metadata": {
-        "description": "Notifies when IIS not found error per second are higher than usual for a specific site."
+        "description": "Notifies when IIS not locked error per second are higher than usual for a specific site."
       }
 }
