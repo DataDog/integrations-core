@@ -8,7 +8,7 @@ class {check_class}(AgentCheck):
     def __init__(self, name, init_config, instances):
         # super({check_name}, self).__init__(name, init_config, instances)
 
-        # Define a query manager.
+        # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
         # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
         # self._query_manager = QueryManager(self, self.execute_query, queries=[queries.SomeQuery1])
