@@ -100,26 +100,26 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
 
     """
     tags = []
-    parent_props = infrastructure_data.get(mor, {})
-    parent_name = to_string(parent_props.get('name', 'unknown'))
+    properties = infrastructure_data.get(mor, {})
+    entity_name = to_string(properties.get('name', 'unknown'))
     if isinstance(mor, vim.HostSystem):
-        tags.append('vsphere_host:{}'.format(parent_name))
+        tags.append('vsphere_host:{}'.format(entity_name))
     elif isinstance(mor, vim.Folder):
         if isinstance(mor, vim.StoragePod):
-            tags.append('vsphere_datastore_cluster:{}'.format(parent_name))
+            tags.append('vsphere_datastore_cluster:{}'.format(entity_name))
             # Legacy mode: keep it as "folder"
             if config.include_datastore_cluster_folder_tag:
-                tags.append('vsphere_folder:{}'.format(parent_name))
+                tags.append('vsphere_folder:{}'.format(entity_name))
         else:
-            tags.append('vsphere_folder:{}'.format(parent_name))
+            tags.append('vsphere_folder:{}'.format(entity_name))
     elif isinstance(mor, vim.ComputeResource):
         if isinstance(mor, vim.ClusterComputeResource):
-            tags.append('vsphere_cluster:{}'.format(parent_name))
-        tags.append('vsphere_compute:{}'.format(parent_name))
+            tags.append('vsphere_cluster:{}'.format(entity_name))
+        tags.append('vsphere_compute:{}'.format(entity_name))
     elif isinstance(mor, vim.Datacenter):
-        tags.append('vsphere_datacenter:{}'.format(parent_name))
+        tags.append('vsphere_datacenter:{}'.format(entity_name))
     elif isinstance(mor, vim.Datastore):
-        tags.append('vsphere_datastore:{}'.format(parent_name))
+        tags.append('vsphere_datastore:{}'.format(entity_name))
 
     parent = infrastructure_data.get(mor, {}).get('parent')
     if parent is None:
