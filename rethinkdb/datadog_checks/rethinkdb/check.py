@@ -27,10 +27,10 @@ class RethinkDBCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
 
-        self.config = Config(cast(Instance, self.instance))
+        self._config = Config(cast(Instance, self.instance))
 
-        if self.config.password:
-            self.register_secret(self.config.password)
+        if self._config.password:
+            self.register_secret(self._config.password)
 
         self._conn = None  # type: Optional[rethinkdb.net.Connection]
 
@@ -53,7 +53,7 @@ class RethinkDBCheck(AgentCheck):
             self,
             executor=self._execute_raw_query,
             queries=manager_queries,
-            tags=self.config.tags,
+            tags=self._config.tags,
         )
         self._query_funcs = {}  # type: Dict[str, Callable]
 
@@ -77,7 +77,7 @@ class RethinkDBCheck(AgentCheck):
     @contextmanager
     def connect_submitting_service_checks(self):
         # type: () -> Iterator[None]
-        config = self.config
+        config = self._config
         tags = config.service_check_tags
 
         try:

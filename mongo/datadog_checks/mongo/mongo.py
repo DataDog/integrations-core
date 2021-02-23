@@ -67,7 +67,7 @@ class MongoDb(AgentCheck):
 
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
-        self.config = MongoConfig(self.instance, self.log)
+        self._config = MongoConfig(self.instance, self.log)
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
@@ -82,26 +82,26 @@ class MongoDb(AgentCheck):
         return {'pymongo': pymongo.version}
 
     def refresh_collectors(self, deployment_type, mongo_version, all_dbs, tags):
-        collect_tcmalloc_metrics = 'tcmalloc' in self.config.additional_metrics
+        collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
         potential_collectors = [
             ConnPoolStatsCollector(self, tags),
             ReplicationOpLogCollector(self, tags),
-            FsyncLockCollector(self, self.config.db_name, tags),
-            CollStatsCollector(self, self.config.db_name, tags, coll_names=self.config.coll_names),
-            ServerStatusCollector(self, self.config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
+            FsyncLockCollector(self, self._config.db_name, tags),
+            CollStatsCollector(self, self._config.db_name, tags, coll_names=self._config.coll_names),
+            ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
         ]
-        if self.config.replica_check:
+        if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
-        if 'jumbo_chunks' in self.config.additional_metrics:
+        if 'jumbo_chunks' in self._config.additional_metrics:
             potential_collectors.append(JumboStatsCollector(self, tags))
-        if 'top' in self.config.additional_metrics:
+        if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
         if LooseVersion(mongo_version) >= LooseVersion("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
-        if self.config.collections_indexes_stats:
+        if self._config.collections_indexes_stats:
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                 potential_collectors.append(
-                    IndexStatsCollector(self, self.config.db_name, tags, self.config.coll_names)
+                    IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
                 )
             else:
                 self.log.debug(
@@ -116,11 +116,11 @@ class MongoDb(AgentCheck):
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
         # stated in the configuration of the query.
         is_secondary = isinstance(deployment_type, ReplicaSetDeployment) and deployment_type.is_secondary
-        queries = self.config.custom_queries
+        queries = self._config.custom_queries
         if is_secondary:
             # On a secondary node, only collect the custom queries that define the 'run_on_secondary' parameter.
-            queries = [q for q in self.config.custom_queries if is_affirmative(q.get('run_on_secondary', False))]
-            missing_queries = len(self.config.custom_queries) - len(queries)
+            queries = [q for q in self._config.custom_queries if is_affirmative(q.get('run_on_secondary', False))]
+            missing_queries = len(self._config.custom_queries) - len(queries)
             if missing_queries:
                 self.log.debug(
                     "{} custom queries defined in the configuration won't be run because the mongod node is a "
@@ -129,7 +129,7 @@ class MongoDb(AgentCheck):
                     "duplicated information."
                 )
 
-        potential_collectors.append(CustomQueriesCollector(self, self.config.db_name, tags, queries))
+        potential_collectors.append(CustomQueriesCollector(self, self._config.db_name, tags, queries))
 
         self.collectors = [coll for coll in potential_collectors if coll.compatible_with(deployment_type)]
 
@@ -144,7 +144,7 @@ class MongoDb(AgentCheck):
             metrics_to_collect.update(default_metrics)
 
         # Additional metrics metrics
-        for option in self.config.additional_metrics:
+        for option in self._config.additional_metrics:
             if option not in metrics.AVAILABLE_METRICS:
                 if option in metrics.DEFAULT_METRICS:
                     self.log.warning(
@@ -163,23 +163,23 @@ class MongoDb(AgentCheck):
 
     def check(self, _):
         try:
-            api = MongoApi(self.config, self.log)
+            api = MongoApi(self._config, self.log)
             self.log.debug("Connected!")
         except Exception:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             raise
 
         try:
             mongo_version = api.server_info().get('version', '0.0')
             self.set_metadata('version', mongo_version)
         except Exception:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self.log.exception("Error when collecting the version from the mongo server.")
             raise
         else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
-        tags = deepcopy(self.config.metric_tags)
+        tags = deepcopy(self._config.metric_tags)
         deployment = api.deployment_type
         if isinstance(deployment, ReplicaSetDeployment):
             tags.extend(

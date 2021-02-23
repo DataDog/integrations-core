@@ -35,22 +35,27 @@ class IbmMqCheck(AgentCheck):
             self.log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
-        self.config = IBMMQConfig(self.instance)
+        self._config = IBMMQConfig(self.instance)
 
         self.queue_metric_collector = QueueMetricCollector(
-            self.config, self.service_check, self.warning, self.send_metric, self.send_metrics_from_properties, self.log
+            self._config,
+            self.service_check,
+            self.warning,
+            self.send_metric,
+            self.send_metrics_from_properties,
+            self.log,
         )
-        self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
+        self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
         self.metadata_collector = MetadataCollector(self.log)
-        self.stats_collector = StatsCollector(self.config, self.send_metrics_from_properties, self.log)
+        self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
         try:
-            queue_manager = connection.get_queue_manager_connection(self.config)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self.config.tags)
+            queue_manager = connection.get_queue_manager_connection(self._config)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags)
         except Exception as e:
             self.warning("cannot connect to queue manager: %s", e)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self._config.tags)
             raise
 
         self._collect_metadata(queue_manager)
@@ -58,7 +63,7 @@ class IbmMqCheck(AgentCheck):
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
             self.queue_metric_collector.collect_queue_metrics(queue_manager)
-            if self.config.collect_statistics_metrics:
+            if self._config.collect_statistics_metrics:
                 self.stats_collector.collect(queue_manager)
         finally:
             queue_manager.disconnect()
@@ -72,7 +77,7 @@ class IbmMqCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self, queue_manager):
         try:
-            version = self.metadata_collector.collect_metadata(queue_manager, self.config.convert_endianness)
+            version = self.metadata_collector.collect_metadata(queue_manager, self._config.convert_endianness)
             if version:
                 raw_version = '{}.{}.{}.{}'.format(version["major"], version["minor"], version["mod"], version["fix"])
                 self.set_metadata('version', raw_version, scheme='parts', part_map=version)

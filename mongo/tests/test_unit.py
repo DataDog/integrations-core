@@ -136,7 +136,7 @@ def test_parse_server_config(check):
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
-    config = check(instance).config
+    config = check(instance)._config
     assert config.username == 'john doe'
     assert config.password == 'p@ss\\word'
     assert config.db_name == 'test'
@@ -154,7 +154,7 @@ def test_username_no_password(check):
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
-    config = check(instance).config
+    config = check(instance)._config
     assert config.username == 'john doe'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
