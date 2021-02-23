@@ -29,7 +29,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "riakcs": "assets/dashboards/riakcs_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv",
