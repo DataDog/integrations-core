@@ -23,6 +23,6 @@
 		}
 	},
     "recommended_monitor_metadata": {
-        "description": "Notify your team when the request is taking long to process."
+        "description": "Notify your team when the request duration is too high."
     }
 }
