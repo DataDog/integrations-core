@@ -72,22 +72,22 @@ jmx_metrics:
           metric_type: gauge
         ConnectionCount:
           alias: activemq.artemis.connection_count
-          metric_type: gauge
+          metric_type: counter
         TotalConnectionCount:
           alias: activemq.artemis.total_connection_count
-          metric_type: gauge
+          metric_type: monotonic_count
         TotalMessageCount:
           alias: activemq.artemis.total_message_count
-          metric_type: gauge
+          metric_type: monotonic_count
         TotalMessagesAdded:
           alias: activemq.artemis.total_messages_added
-          metric_type: gauge
+          metric_type: monotonic_count
         TotalMessagesAcknowledged:
           alias: activemq.artemis.total_messages_acknowledged
-          metric_type: gauge
+          metric_type: monotonic_count
         TotalConsumerCount:
           alias: activemq.artemis.total_consumer_count
-          metric_type: gauge
+          metric_type: monotonic_count
 
   - include:
       domain: org.apache.activemq.artemis
@@ -98,19 +98,19 @@ jmx_metrics:
           metric_type: gauge
         NumberOfPages:
           alias: activemq.artemis.address.pages_count
-          metric_type: gauge
+          metric_type: counter
         NumberOfMessages:
           alias: activemq.artemis.address.number_of_messages
-          metric_type: gauge
+          metric_type: monotonic_count
         NumberOfBytesPerPage:
           alias: activemq.artemis.address.bytes_per_page
           metric_type: gauge
         RoutedMessageCount:
           alias: activemq.artemis.address.routed_messages
-          metric_type: gauge
+          metric_type: monotonic_count
         UnRoutedMessageCount:
           alias: activemq.artemis.address.unrouted_messages
-          metric_type: gauge
+          metric_type: monotonic_count
 
   - include:
       domain: org.apache.activemq.artemis
@@ -118,7 +118,7 @@ jmx_metrics:
       attribute:
         MessageCount:
           alias: activemq.artemis.queue.message_count
-          metric_type: gauge
+          metric_type: monotonic_count
         ConsumerCount:
           alias: activemq.artemis.queue.consumer_count
           metric_type: gauge
@@ -127,13 +127,14 @@ jmx_metrics:
           metric_type: gauge
         MessagesAdded:
           alias: activemq.artemis.queue.messages_added
-          metric_type: gauge
+          metric_type: monotonic_count
         MessagesExpired:
+          # implied as monotonic count, reports as gauge
           alias: activemq.artemis.queue.messages_expired
           metric_type: gauge
         MessagesAcknowledged:
           alias: activemq.artemis.queue.messages_acknowledged
-          metric_type: gauge
+          metric_type: monotonic_count
         MessagesKilled:
           alias: activemq.artemis.queue.messages_killed
-          metric_type: gauge
+          metric_type: monotonic_count
