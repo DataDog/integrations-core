@@ -58,8 +58,17 @@ jmx_metrics:
   - include:
       domain: org.apache.activemq.artemis
       attribute:
+        AddressMemoryUsage:
+          alias: activemq.artemis.address_memory_usage
+          metric_type: gauge
+        AddressMemoryUsagePercentage:
+          alias: activemq.artemis.address_memory_usage_pct
+          metric_type: gauge
         MaxDiskUsage:
           alias: activemq.artemis.max_disk_usage
+          metric_type: gauge
+        DiskStoreUsage:
+          alias: activemq.artemis.disk_store_usage_pct
           metric_type: gauge
         ConnectionCount:
           alias: activemq.artemis.connection_count
@@ -78,6 +87,29 @@ jmx_metrics:
           metric_type: gauge
         TotalConsumerCount:
           alias: activemq.artemis.total_consumer_count
+          metric_type: gauge
+
+  - include:
+      domain: org.apache.activemq.artemis
+      component: addresses
+      attribute:
+        AddressSize:
+          alias: activemq.artemis.address.size
+          metric_type: gauge
+        NumberOfPages:
+          alias: activemq.artemis.address.pages_count
+          metric_type: gauge
+        NumberOfMessages:
+          alias: activemq.artemis.address.number_of_messages
+          metric_type: gauge
+        NumberOfBytesPerPage:
+          alias: activemq.artemis.address.bytes_per_page
+          metric_type: gauge
+        RoutedMessageCount:
+          alias: activemq.artemis.address.routed_messages
+          metric_type: gauge
+        UnRoutedMessageCount:
+          alias: activemq.artemis.address.unrouted_messages
           metric_type: gauge
 
   - include:
