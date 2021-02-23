@@ -175,7 +175,11 @@ class VSphereCheck(AgentCheck):
             return {}
 
         self.gauge(
-            'datadog.vsphere.query_tags.time', t0.total(), tags=self._config.base_tags, raw=True, hostname=self._hostname
+            'datadog.vsphere.query_tags.time',
+            t0.total(),
+            tags=self._config.base_tags,
+            raw=True,
+            hostname=self._hostname,
         )
 
         return mor_tags

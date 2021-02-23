@@ -100,7 +100,7 @@ class TlsContextWrapper(object):
                 config[field] = config[unique_name]
                 del config[unique_name]
 
-        self._config = config
+        self.config = config
         self.tls_context = self._create_tls_context()
 
     def _create_tls_context(self):
@@ -111,17 +111,17 @@ class TlsContextWrapper(object):
         context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-        if not self._config['tls_verify']:
+        if not self.config['tls_verify']:
             context.verify_mode = ssl.CERT_NONE
             return context
         context.verify_mode = ssl.CERT_REQUIRED
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-        context.check_hostname = self._config['tls_validate_hostname']
+        context.check_hostname = self.config['tls_validate_hostname']
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-        ca_cert = self._config['tls_ca_cert']
+        ca_cert = self.config['tls_ca_cert']
         if ca_cert:
             ca_cert = os.path.expanduser(ca_cert)
             if os.path.isdir(ca_cert):
@@ -132,8 +132,8 @@ class TlsContextWrapper(object):
             context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-        client_cert, client_key = self._config['tls_cert'], self._config['tls_private_key']
-        client_key_pass = self._config['tls_private_key_password']
+        client_cert, client_key = self.config['tls_cert'], self.config['tls_private_key']
+        client_key_pass = self.config['tls_private_key_password']
         if client_key:
             client_key = os.path.expanduser(client_key)
         if client_cert:

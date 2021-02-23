@@ -38,7 +38,12 @@ class IbmMqCheck(AgentCheck):
         self._config = IBMMQConfig(self.instance)
 
         self.queue_metric_collector = QueueMetricCollector(
-            self._config, self.service_check, self.warning, self.send_metric, self.send_metrics_from_properties, self.log
+            self._config,
+            self.service_check,
+            self.warning,
+            self.send_metric,
+            self.send_metrics_from_properties,
+            self.log,
         )
         self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
         self.metadata_collector = MetadataCollector(self.log)

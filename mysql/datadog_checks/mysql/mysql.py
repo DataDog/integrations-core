@@ -303,7 +303,7 @@ class MySql(AgentCheck):
 
             if len(self._config.queries) > self._config.max_custom_queries:
                 self.warning(
-                    "Maximum number (%s) of custom queries reached.  Skipping the rest.", self._config.max_custom_queries
+                    "Maximum number (%s) of custom queries reached. Skipping the rest.", self._config.max_custom_queries
                 )
 
     def _collect_replication_metrics(self, db, results, above_560):
