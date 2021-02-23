@@ -66,9 +66,9 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
 # These limits define the top K and bottom K unique query rows for each metric. For each check run the
 # max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
 DEFAULT_STATEMENT_METRIC_LIMITS = {
-    'calls': (800, 0),
-    'total_time': (800, 0),
-    'rows': (800, 0),
+    'calls': (400, 0),
+    'total_time': (400, 0),
+    'rows': (400, 0),
     'shared_blks_hit': (50, 0),
     'shared_blks_read': (50, 0),
     'shared_blks_dirtied': (50, 0),
@@ -80,8 +80,8 @@ DEFAULT_STATEMENT_METRIC_LIMITS = {
     'temp_blks_read': (50, 0),
     'temp_blks_written': (50, 0),
     # Synthetic column limits
-    'avg_time': (800, 0),
-    'shared_blks_ratio': (0, 100),
+    'avg_time': (400, 0),
+    'shared_blks_ratio': (0, 50),
 }
 
 
@@ -186,7 +186,11 @@ class PostgresStatementMetrics(object):
 
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
-            rows, DEFAULT_STATEMENT_METRIC_LIMITS, tiebreaker_metric='calls', tiebreaker_reverse=True, key=row_keyfunc
+            rows,
+            self.config.statement_metric_limits or DEFAULT_STATEMENT_METRIC_LIMITS,
+            tiebreaker_metric='calls',
+            tiebreaker_reverse=True,
+            key=row_keyfunc
         )
         metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
 

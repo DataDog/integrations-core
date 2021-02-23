@@ -62,6 +62,7 @@ class PostgresConfig:
 
         # Deep Database monitoring adds additional telemetry for statement metrics
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.statement_metric_limits = instance.get('statement_metric_limits', None)
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
 
