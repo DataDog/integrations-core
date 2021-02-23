@@ -85,8 +85,8 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
-def get_parent_tags_recursively(mor, infrastructure_data, config, parent_field='parent', include_only=None):
-    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, str, List[str]) -> List[str]
+def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
+    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, List[str]) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -99,47 +99,41 @@ def get_parent_tags_recursively(mor, infrastructure_data, config, parent_field='
           HOST2
 
     """
-    mor_props = infrastructure_data[mor]
-    if parent_field == 'parent':
-        parent = mor_props.get('parent')
-    elif parent_field == 'runtime.host':
-        parent = mor_props.get('runtime.host')
-    else:
-        raise TypeError('Invalid parent field: {}'.format(parent_field))
-    if parent:
-        tags = []
-        parent_props = infrastructure_data.get(parent, {})
-        parent_name = to_string(parent_props.get('name', 'unknown'))
-        if isinstance(parent, vim.HostSystem):
-            tags.append('vsphere_host:{}'.format(parent_name))
-        elif isinstance(parent, vim.Folder):
-            if isinstance(parent, vim.StoragePod):
-                tags.append('vsphere_datastore_cluster:{}'.format(parent_name))
-                # Legacy mode: keep it as "folder"
-                if config.include_datastore_cluster_folder_tag:
-                    tags.append('vsphere_folder:{}'.format(parent_name))
-            else:
+    tags = []
+    parent_props = infrastructure_data.get(mor, {})
+    parent_name = to_string(parent_props.get('name', 'unknown'))
+    if isinstance(mor, vim.HostSystem):
+        tags.append('vsphere_host:{}'.format(parent_name))
+    elif isinstance(mor, vim.Folder):
+        if isinstance(mor, vim.StoragePod):
+            tags.append('vsphere_datastore_cluster:{}'.format(parent_name))
+            # Legacy mode: keep it as "folder"
+            if config.include_datastore_cluster_folder_tag:
                 tags.append('vsphere_folder:{}'.format(parent_name))
-        elif isinstance(parent, vim.ComputeResource):
-            if isinstance(parent, vim.ClusterComputeResource):
-                tags.append('vsphere_cluster:{}'.format(parent_name))
-            tags.append('vsphere_compute:{}'.format(parent_name))
-        elif isinstance(parent, vim.Datacenter):
-            tags.append('vsphere_datacenter:{}'.format(parent_name))
-        elif isinstance(parent, vim.Datastore):
-            tags.append('vsphere_datastore:{}'.format(parent_name))
+        else:
+            tags.append('vsphere_folder:{}'.format(parent_name))
+    elif isinstance(mor, vim.ComputeResource):
+        if isinstance(mor, vim.ClusterComputeResource):
+            tags.append('vsphere_cluster:{}'.format(parent_name))
+        tags.append('vsphere_compute:{}'.format(parent_name))
+    elif isinstance(mor, vim.Datacenter):
+        tags.append('vsphere_datacenter:{}'.format(parent_name))
+    elif isinstance(mor, vim.Datastore):
+        tags.append('vsphere_datastore:{}'.format(parent_name))
 
-        parent_tags = get_parent_tags_recursively(parent, infrastructure_data, config)
-        parent_tags.extend(tags)
-        if include_only:
-            filtered_parent_tags = []
-            for tag in parent_tags:
-                for prefix in include_only:
-                    if tag.startswith(prefix + ":"):
-                        filtered_parent_tags.append(tag)
-            parent_tags = filtered_parent_tags
-        return parent_tags
-    return []
+    parent = infrastructure_data.get(mor, {}).get('parent')
+    if parent is None:
+        return tags
+    parent_tags = get_tags_recursively(parent, infrastructure_data, config)
+    parent_tags.extend(tags)
+    if include_only:
+        filtered_parent_tags = []
+        for tag in parent_tags:
+            for prefix in include_only:
+                if tag.startswith(prefix + ":"):
+                    filtered_parent_tags.append(tag)
+        parent_tags = filtered_parent_tags
+    return parent_tags
 
 
 def should_collect_per_instance_values(config, metric_name, resource_type):
