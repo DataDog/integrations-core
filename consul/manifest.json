@@ -43,6 +43,9 @@
     "logs": {
       "source": "consul"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "consul_processes": "assets/saved_views/consul_processes.json"
+    }
   }
 }

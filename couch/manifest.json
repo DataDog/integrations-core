@@ -45,6 +45,9 @@
     "logs": {
       "source": "couchdb"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "couchdb_processes": "assets/saved_views/couchdb_processes.json"
+    }
   }
 }

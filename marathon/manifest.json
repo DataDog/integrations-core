@@ -38,6 +38,9 @@
     "logs": {
       "source": "marathon"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "marathon_processes": "assets/saved_views/marathon_processes.json"
+    }
   }
 }
