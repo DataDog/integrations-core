@@ -43,20 +43,20 @@ STATEMENT_METRICS = {
 # These limits define the top K and bottom K unique query rows for each metric. For each check run the
 # max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
 DEFAULT_STATEMENT_METRIC_LIMITS = {
-    'count': (800, 0),
+    'count': (400, 0),
     'errors': (100, 0),
-    'time': (800, 0),
-    'select_scan': (100, 0),
-    'select_full_join': (100, 0),
-    'no_index_used': (100, 0),
-    'no_good_index_used': (100, 0),
-    'lock_time': (100, 0),
+    'time': (400, 0),
+    'select_scan': (50, 0),
+    'select_full_join': (50, 0),
+    'no_index_used': (50, 0),
+    'no_good_index_used': (50, 0),
+    'lock_time': (50, 0),
     'rows_affected': (100, 0),
     'rows_sent': (100, 0),
     'rows_examined': (100, 0),
     # Synthetic column limits
-    'avg_time': (800, 0),
-    'rows_sent_ratio': (0, 100),
+    'avg_time': (400, 0),
+    'rows_sent_ratio': (0, 50),
 }
 
 
@@ -111,7 +111,7 @@ class MySQLStatementMetrics(object):
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows,
-            DEFAULT_STATEMENT_METRIC_LIMITS,
+            self.config.statement_metric_limits or DEFAULT_STATEMENT_METRIC_LIMITS,
             tiebreaker_metric='count',
             tiebreaker_reverse=True,
             key=keyfunc,
