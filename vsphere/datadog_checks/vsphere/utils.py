@@ -85,8 +85,8 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
-def get_parent_tags_recursively(mor, infrastructure_data, config):
-    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig) -> List[str]
+def get_parent_tags_recursively(mor, infrastructure_data, config, parent_field='parent', include_only=None):
+    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, str, List[str]) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -100,7 +100,12 @@ def get_parent_tags_recursively(mor, infrastructure_data, config):
 
     """
     mor_props = infrastructure_data[mor]
-    parent = mor_props.get('parent')
+    if parent_field == 'parent':
+        parent = mor_props.get('parent')
+    elif parent_field == 'runtime.host':
+        parent = mor_props.get('runtime.host')
+    else:
+        raise TypeError('Invalid parent field: {}'.format(parent_field))
     if parent:
         tags = []
         parent_props = infrastructure_data.get(parent, {})
@@ -126,6 +131,13 @@ def get_parent_tags_recursively(mor, infrastructure_data, config):
 
         parent_tags = get_parent_tags_recursively(parent, infrastructure_data, config)
         parent_tags.extend(tags)
+        if include_only:
+            filtered_parent_tags = []
+            for tag in parent_tags:
+                for prefix in include_only:
+                    if tag.startswith(prefix + ":"):
+                        filtered_parent_tags.append(tag)
+            parent_tags = filtered_parent_tags
         return parent_tags
     return []
 
