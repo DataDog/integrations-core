@@ -46,7 +46,8 @@
       "5xx_errors": "assets/saved_views/5xx_errors.json",
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
-      "response_time_overview": "assets/saved_views/response_time.json"
+      "response_time_overview": "assets/saved_views/response_time.json",
+      "haproxy_processes": "assets/saved_views/haproxy_processes.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

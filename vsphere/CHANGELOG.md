@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 5.8.1 / 2021-02-23
+
+* [Fixed] Add `vsphere_cluster` tag from host parent. See [#8674](https://github.com/DataDog/integrations-core/pull/8674).
+
 ## 5.8.0 / 2021-02-12
 
 * [Added] Support filtering by tags set by integration. See [#8603](https://github.com/DataDog/integrations-core/pull/8603).

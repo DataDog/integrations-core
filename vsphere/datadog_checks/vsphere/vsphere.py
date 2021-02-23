@@ -42,7 +42,7 @@ from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
     get_mapped_instance_tag,
-    get_parent_tags_recursively,
+    get_tags_recursively,
     is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
@@ -237,7 +237,16 @@ class VSphereCheck(AgentCheck):
             else:
                 tags.append('vsphere_{}:{}'.format(mor_type_str, mor_name))
 
-            tags.extend(get_parent_tags_recursively(mor, infrastructure_data, self.config))
+            parent = properties.get('parent')
+            runtime_host = properties.get('runtime.host')
+            if parent is not None:
+                tags.extend(get_tags_recursively(parent, infrastructure_data, self.config))
+            if runtime_host is not None:
+                tags.extend(
+                    get_tags_recursively(
+                        runtime_host, infrastructure_data, self.config, include_only=['vsphere_cluster']
+                    )
+                )
             tags.append('vsphere_type:{}'.format(mor_type_str))
 
             # Attach tags from fetched attributes.

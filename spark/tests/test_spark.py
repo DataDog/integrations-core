@@ -19,12 +19,12 @@ from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.spark import SparkCheck
 
-from .common import INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
+from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
 
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
 SPARK_APP_ID = 'app_001'
-CLUSTER_NAME = 'SparkCluster'
+
 APP_NAME = 'PySparkShell'
 
 # URLs for cluster managers
@@ -57,6 +57,9 @@ TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
 CUSTOM_TAGS = ['optional:tag1']
+COMMON_TAGS = [
+    'app_name:' + APP_NAME,
+] + CLUSTER_TAGS
 
 
 def join_url_dir(url, *args):
@@ -551,13 +554,11 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
 }
 
 SPARK_JOB_RUNNING_METRIC_TAGS = [
-    'cluster_name:' + CLUSTER_NAME,
-    'app_name:' + APP_NAME,
     'status:running',
     'job_id:0',
     'stage_id:0',
     'stage_id:1',
-]
+] + COMMON_TAGS
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -573,13 +574,11 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
 }
 
 SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
-    'cluster_name:' + CLUSTER_NAME,
-    'app_name:' + APP_NAME,
     'status:succeeded',
     'job_id:0',
     'stage_id:0',
     'stage_id:1',
-]
+] + COMMON_TAGS
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -600,11 +599,9 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
 }
 
 SPARK_STAGE_RUNNING_METRIC_TAGS = [
-    'cluster_name:' + CLUSTER_NAME,
-    'app_name:' + APP_NAME,
     'status:running',
     'stage_id:1',
-]
+] + COMMON_TAGS
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -625,11 +622,9 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
 }
 
 SPARK_STAGE_COMPLETE_METRIC_TAGS = [
-    'cluster_name:' + CLUSTER_NAME,
-    'app_name:' + APP_NAME,
     'status:complete',
     'stage_id:0',
-]
+] + COMMON_TAGS
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
@@ -678,10 +673,8 @@ SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
 }
 
 SPARK_EXECUTOR_LEVEL_METRIC_TAGS = [
-    'cluster_name:' + CLUSTER_NAME,
-    'app_name:' + APP_NAME,
     'executor_id:1',
-]
+] + COMMON_TAGS
 
 SPARK_RDD_METRIC_VALUES = {
     'spark.rdd.count': 1,
@@ -715,8 +708,6 @@ SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.used_bytes': 12,
 }
 
-SPARK_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME]
-
 
 @pytest.mark.unit
 def test_yarn(aggregator):
@@ -738,7 +729,7 @@ def test_yarn(aggregator):
 
         # Check the driver metrics
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the executor level metrics
         for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
@@ -746,21 +737,21 @@ def test_yarn(aggregator):
 
         # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
-        tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+        tags = ['url:http://localhost:8088'] + CLUSTER_TAGS + CUSTOM_TAGS
         tags.sort()
 
         for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
@@ -782,7 +773,7 @@ def test_auth_yarn(aggregator):
         c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
         c.check(YARN_AUTH_CONFIG)
 
-        tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+        tags = ['url:http://localhost:8088'] + CUSTOM_TAGS + CLUSTER_TAGS
         tags.sort()
 
         for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
@@ -820,7 +811,7 @@ def test_mesos(aggregator):
 
         # Check the driver metrics
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the executor level metrics
         for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
@@ -828,31 +819,31 @@ def test_mesos(aggregator):
 
         # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the service tests
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            tags = ['url:http://localhost:5050', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+            tags = ['url:http://localhost:5050'] + CLUSTER_TAGS + CUSTOM_TAGS
             tags.sort()
             sc.tags.sort()
             assert sc.tags == tags
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+            tags = ['url:http://localhost:4040'] + CLUSTER_TAGS + CUSTOM_TAGS
             tags.sort()
             sc.tags.sort()
             assert sc.tags == tags
@@ -869,7 +860,7 @@ def test_mesos_filter(aggregator):
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:5050', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:5050'] + CLUSTER_TAGS
 
         assert aggregator.metrics_asserted_pct == 100.0
 
@@ -898,7 +889,7 @@ def test_driver_unit(aggregator):
 
         # Check the driver metrics
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the executor level metrics
         for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
@@ -906,31 +897,31 @@ def test_driver_unit(aggregator):
 
         # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the service tests
 
         for sc in aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+            tags = ['url:http://localhost:4040'] + CLUSTER_TAGS + CUSTOM_TAGS
             tags.sort()
             sc.tags.sort()
             assert sc.tags == tags
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+            tags = ['url:http://localhost:4040'] + CLUSTER_TAGS + CUSTOM_TAGS
             tags.sort()
             sc.tags.sort()
             assert sc.tags == tags
@@ -967,7 +958,7 @@ def test_standalone_unit(aggregator):
 
         # Check the driver metrics
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the executor level metrics
         for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
@@ -975,27 +966,27 @@ def test_standalone_unit(aggregator):
 
         # Check the executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1029,7 +1020,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
         # Check the driver metrics
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the executor level metrics
         for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
@@ -1037,27 +1028,27 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
 
         # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1091,7 +1082,7 @@ def test_standalone_pre20(aggregator):
 
         # Check the driver metrics
         for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the executor level metrics
         for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
@@ -1099,27 +1090,27 @@ def test_standalone_pre20(aggregator):
 
         # Check the summary executor metrics
         for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the RDD metrics
         for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the streaming statistics metrics
         for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the structured streaming metrics
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS)
+            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
+            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -1146,6 +1137,23 @@ def test_metadata(aggregator, datadog_agent):
         }
 
         datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.unit
+def test_disable_legacy_cluster_tags(aggregator):
+    instance = MESOS_FILTERED_CONFIG
+    instance['disable_legacy_cluster_tag'] = True
+
+    with mock.patch('requests.get', mesos_requests_get_mock):
+        c = SparkCheck('spark', {}, [instance])
+        c.check(instance)
+
+        for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            # Only spark_cluster tag is present
+            assert sc.tags == ['url:http://localhost:5050', 'spark_cluster:{}'.format(CLUSTER_NAME)]
+
+        assert aggregator.metrics_asserted_pct == 100.0
 
 
 def test_do_not_crash_on_version_collection_failure():
@@ -1221,6 +1229,9 @@ def run_ssl_server():
     return httpd
 
 
+SPARK_DRIVER_CLUSTER_TAGS = ['spark_cluster:{}'.format('SparkDriver'), 'cluster_name:{}'.format('SparkDriver')]
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_standalone(aggregator):
@@ -1247,7 +1258,7 @@ def test_integration_standalone(aggregator):
     aggregator.assert_service_check(
         'spark.standalone_master.can_connect',
         status=SparkCheck.OK,
-        tags=['cluster_name:{}'.format('SparkCluster'), 'url:{}'.format('http://spark-master:8080')],
+        tags=['url:{}'.format('http://spark-master:8080')] + CLUSTER_TAGS,
     )
     aggregator.assert_all_metrics_covered()
 
@@ -1280,7 +1291,7 @@ def test_integration_driver_1(aggregator):
     aggregator.assert_service_check(
         'spark.driver.can_connect',
         status=SparkCheck.OK,
-        tags=['cluster_name:{}'.format('SparkDriver'), 'url:{}'.format('http://spark-app-1:4040')],
+        tags=['url:{}'.format('http://spark-app-1:4040')] + SPARK_DRIVER_CLUSTER_TAGS,
     )
     aggregator.assert_all_metrics_covered()
 
@@ -1314,6 +1325,6 @@ def test_integration_driver_2(aggregator):
     aggregator.assert_service_check(
         'spark.driver.can_connect',
         status=SparkCheck.OK,
-        tags=['cluster_name:{}'.format('SparkDriver'), 'url:{}'.format('http://spark-app-2:4050')],
+        tags=['url:{}'.format('http://spark-app-2:4050')] + SPARK_DRIVER_CLUSTER_TAGS,
     )
     aggregator.assert_all_metrics_covered()

@@ -39,6 +39,9 @@
     "logs": {
       "source": "activemq"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "activemq_processes": "assets/saved_views/activemq_processes.json"
+    }
   }
 }

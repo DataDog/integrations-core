@@ -6,7 +6,7 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/activemq.png",
+                "url": "/static/images/logos/activemq_large.svg",
                 "sizing": "center"
             },
             "layout": {

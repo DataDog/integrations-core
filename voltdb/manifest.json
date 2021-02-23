@@ -35,7 +35,9 @@
     "monitors": {
       "CPU load": "assets/monitors/cpu_load.json"
     },
-    "saved_views": {},
+    "saved_views": {
+      "voltdb_processes": "assets/saved_views/voltdb_processes.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "voltdb"
