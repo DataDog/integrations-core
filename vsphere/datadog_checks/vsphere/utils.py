@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Type
+from typing import List, Optional, Type
 
 from pyVmomi import vim
 from six import iteritems
@@ -86,7 +86,7 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
 
 
 def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
-    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, List[str]) -> List[str]
+    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, Optional[List[str]]) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
