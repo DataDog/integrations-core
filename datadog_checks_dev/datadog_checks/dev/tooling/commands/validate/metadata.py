@@ -207,6 +207,7 @@ VALID_UNIT_NAMES = {
     'span',
 }
 
+ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400
@@ -336,9 +337,10 @@ def metadata(check, check_duplicates, show_warnings):
 
             # metric_name header
             if metric_prefix:
-                if not row['metric_name'].startswith(metric_prefix):
-                    prefix = row['metric_name'].split('.')[0]
-                    metric_prefix_count[prefix] += 1
+                prefix = row['metric_name'].split('.')[0]
+                if prefix not in ALLOWED_PREFIXES:
+                    if not row['metric_name'].startswith(metric_prefix):
+                        metric_prefix_count[prefix] += 1
             else:
                 errors = True
                 if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
@@ -407,17 +409,15 @@ def metadata(check, check_duplicates, show_warnings):
             errors = True
             echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
+        for prefix, count in metric_prefix_count.items():
+            echo_failure(
+                f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                "defined in the manifest."
+            )
+
         if show_warnings:
             for header, count in empty_warning_count.items():
                 echo_warning(f'{current_check}: {header} is empty in {count} rows.')
-
-            for prefix, count in metric_prefix_count.items():
-                # Don't spam this warning when we're validating everything
-                if check:
-                    echo_warning(
-                        f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
-                        "defined in the manifest."
-                    )
 
     if errors:
         abort()
