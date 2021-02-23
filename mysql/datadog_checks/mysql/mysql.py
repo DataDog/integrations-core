@@ -70,16 +70,16 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.version = None
-        self.config = MySQLConfig(self.instance)
+        self._config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
         self._conn = None
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.config.tags)
-        self._statement_metrics = MySQLStatementMetrics(self.config)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._config.tags)
+        self._statement_metrics = MySQLStatementMetrics(self._config)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
-        self.check_initializations.append(self.config.configuration_checks)
+        self.check_initializations.append(self._config.configuration_checks)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -108,9 +108,9 @@ class MySql(AgentCheck):
 
                 # Metric collection
                 self._collect_metrics(db)
-                self._collect_system_metrics(self.config.host, db, self.config.tags)
-                if self.config.deep_database_monitoring:
-                    self._collect_statement_metrics(db, self.config.tags)
+                self._collect_system_metrics(self._config.host, db, self._config.tags)
+                if self._config.deep_database_monitoring:
+                    self._collect_statement_metrics(db, self._config.tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -137,50 +137,50 @@ class MySql(AgentCheck):
         self.qcache_stats[host_key] = (self._qcache_hits, self._qcache_inserts, self._qcache_not_cached)
 
     def _get_host_key(self):
-        if self.config.defaults_file:
-            return self.config.defaults_file
+        if self._config.defaults_file:
+            return self._config.defaults_file
 
-        hostkey = self.config.host
-        if self.config.mysql_sock:
-            hostkey = "{0}:{1}".format(hostkey, self.config.mysql_sock)
-        elif self.config.port:
-            hostkey = "{0}:{1}".format(hostkey, self.config.port)
+        hostkey = self._config.host
+        if self._config.mysql_sock:
+            hostkey = "{0}:{1}".format(hostkey, self._config.mysql_sock)
+        elif self._config.port:
+            hostkey = "{0}:{1}".format(hostkey, self._config.port)
 
         return hostkey
 
     def _get_connection_args(self):
-        ssl = dict(self.config.ssl) if self.config.ssl else None
+        ssl = dict(self._config.ssl) if self._config.ssl else None
         connection_args = {
             'ssl': ssl,
-            'connect_timeout': self.config.connect_timeout,
+            'connect_timeout': self._config.connect_timeout,
         }
-        if self.config.charset:
-            connection_args['charset'] = self.config.charset
+        if self._config.charset:
+            connection_args['charset'] = self._config.charset
 
-        if self.config.defaults_file != '':
-            connection_args['read_default_file'] = self.config.defaults_file
+        if self._config.defaults_file != '':
+            connection_args['read_default_file'] = self._config.defaults_file
             return connection_args
 
-        connection_args.update({'user': self.config.user, 'passwd': self.config.password})
-        if self.config.mysql_sock != '':
+        connection_args.update({'user': self._config.user, 'passwd': self._config.password})
+        if self._config.mysql_sock != '':
             self.service_check_tags = [
-                'server:{0}'.format(self.config.mysql_sock),
+                'server:{0}'.format(self._config.mysql_sock),
                 'port:unix_socket',
-            ] + self.config.tags
-            connection_args.update({'unix_socket': self.config.mysql_sock})
+            ] + self._config.tags
+            connection_args.update({'unix_socket': self._config.mysql_sock})
         else:
-            connection_args.update({'host': self.config.host})
+            connection_args.update({'host': self._config.host})
 
-        if self.config.port:
-            connection_args.update({'port': self.config.port})
+        if self._config.port:
+            connection_args.update({'port': self._config.port})
         return connection_args
 
     @contextmanager
     def _connect(self):
         service_check_tags = [
-            'server:{0}'.format((self.config.mysql_sock if self.config.mysql_sock != '' else self.config.host)),
-            'port:{}'.format(self.config.port if self.config.port else 'unix_socket'),
-        ] + self.config.tags
+            'server:{0}'.format((self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host)),
+            'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
+        ] + self._config.tags
         db = None
         try:
             connect_args = self._get_connection_args()
@@ -206,10 +206,10 @@ class MySql(AgentCheck):
         results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(
-            self.config.options.get('disable_innodb_metrics', False)
+            self._config.options.get('disable_innodb_metrics', False)
         ) and self._is_innodb_engine_enabled(db):
             results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-            self.innodb_stats.process_innodb_stats(results, self.config.options, metrics)
+            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
@@ -238,14 +238,14 @@ class MySql(AgentCheck):
         metrics.update(INNODB_VARS)
         metrics.update(BINLOG_VARS)
 
-        if is_affirmative(self.config.options.get('extra_status_metrics', False)):
+        if is_affirmative(self._config.options.get('extra_status_metrics', False)):
             self.log.debug("Collecting Extra Status Metrics")
             metrics.update(OPTIONAL_STATUS_VARS)
 
             if self.version.version_compatible((5, 6, 6)):
                 metrics.update(OPTIONAL_STATUS_VARS_5_6_6)
 
-        if is_affirmative(self.config.options.get('galera_cluster', False)):
+        if is_affirmative(self._config.options.get('galera_cluster', False)):
             # already in result-set after 'SHOW STATUS' just add vars to collect
             self.log.debug("Collecting Galera Metrics.")
             metrics.update(GALERA_VARS)
@@ -253,7 +253,7 @@ class MySql(AgentCheck):
         performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
         above_560 = self.version.version_compatible((5, 6, 0))
         if (
-            is_affirmative(self.config.options.get('extra_performance_metrics', False))
+            is_affirmative(self._config.options.get('extra_performance_metrics', False))
             and above_560
             and performance_schema_enabled
         ):
@@ -262,12 +262,12 @@ class MySql(AgentCheck):
             results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)
 
-        if is_affirmative(self.config.options.get('schema_size_metrics', False)):
+        if is_affirmative(self._config.options.get('schema_size_metrics', False)):
             # report avg query response time per schema to Datadog
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self.config.options.get('replication', False)):
+        if is_affirmative(self._config.options.get('replication', False)):
             replication_metrics = self._collect_replication_metrics(db, results, above_560)
             metrics.update(replication_metrics)
             self._check_replication_status(results)
@@ -290,28 +290,28 @@ class MySql(AgentCheck):
             if src in results:
                 results[dst] = results[src]
 
-        self._submit_metrics(metrics, results, self.config.tags)
+        self._submit_metrics(metrics, results, self._config.tags)
 
         # Collect custom query metrics
         # Max of 20 queries allowed
-        if isinstance(self.config.queries, list):
-            for check in self.config.queries[: self.config.max_custom_queries]:
-                total_tags = self.config.tags + check.get('tags', [])
+        if isinstance(self._config.queries, list):
+            for check in self._config.queries[: self._config.max_custom_queries]:
+                total_tags = self._config.tags + check.get('tags', [])
                 self._collect_dict(
                     check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags
                 )
 
-            if len(self.config.queries) > self.config.max_custom_queries:
+            if len(self._config.queries) > self._config.max_custom_queries:
                 self.warning(
-                    "Maximum number (%s) of custom queries reached.  Skipping the rest.", self.config.max_custom_queries
+                    "Maximum number (%s) of custom queries reached.  Skipping the rest.", self._config.max_custom_queries
                 )
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
         is_mariadb = self.version.flavor == "MariaDB"
-        replication_channel = self.config.options.get('replication_channel')
+        replication_channel = self._config.options.get('replication_channel')
         results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
-        nonblocking = is_affirmative(self.config.options.get('replication_non_blocking_status', False))
+        nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
         results.update(self._get_replica_status(db, above_560, nonblocking))
         return REPLICA_VARS
 
@@ -361,7 +361,7 @@ class MySql(AgentCheck):
         self.gauge(
             name=self.SLAVE_SERVICE_CHECK_NAME,
             value=1 if replica_running_status == AgentCheck.OK else 0,
-            tags=self.config.tags,
+            tags=self._config.tags,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
         self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
