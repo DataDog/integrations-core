@@ -51,7 +51,16 @@ ACTIVEMQ_E2E_METRICS = [
 ]
 
 ARTEMIS_E2E_METRICS = [
+    "activemq.artemis.address.bytes_per_page",
+    "activemq.artemis.address.number_of_messages",
+    "activemq.artemis.address.pages_count",
+    "activemq.artemis.address.routed_messages",
+    "activemq.artemis.address.size",
+    "activemq.artemis.address.unrouted_messages",
+    "activemq.artemis.address_memory_usage",
+    "activemq.artemis.address_memory_usage_pct",
     "activemq.artemis.connection_count",
+    "activemq.artemis.disk_store_usage_pct",
     "activemq.artemis.max_disk_usage",
     "activemq.artemis.queue.consumer_count",
     "activemq.artemis.queue.max_consumers",
