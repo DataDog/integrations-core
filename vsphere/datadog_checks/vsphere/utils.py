@@ -124,16 +124,16 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
     parent = infrastructure_data.get(mor, {}).get('parent')
     if parent is None:
         return tags
-    parent_tags = get_tags_recursively(parent, infrastructure_data, config)
-    parent_tags.extend(tags)
-    if include_only:
-        filtered_parent_tags = []
-        for tag in parent_tags:
-            for prefix in include_only:
-                if tag.startswith(prefix + ":"):
-                    filtered_parent_tags.append(tag)
-        parent_tags = filtered_parent_tags
-    return parent_tags
+    tags.extend(get_tags_recursively(parent, infrastructure_data, config))
+    if not include_only:
+        return tags
+    filtered_tags = []
+    for tag in tags:
+        for prefix in include_only:
+            if not tag.startswith(prefix + ":"):
+                continue
+            filtered_tags.append(tag)
+    return filtered_tags
 
 
 def should_collect_per_instance_values(config, metric_name, resource_type):
