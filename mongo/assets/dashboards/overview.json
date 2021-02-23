@@ -228,10 +228,10 @@
             "definition": {
               "type": "note",
               "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure to use Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions that is fetched from secondaries.",
-              "background_color": "transparent",
+              "background_color": "white",
               "font_size": "12",
               "text_align": "left",
-              "show_tick": false,
+              "show_tick": true,
               "tick_pos": "50%",
               "tick_edge": "left"
             },
@@ -567,7 +567,7 @@
             "id": 25,
             "definition": {
               "type": "note",
-              "content": "The number of page fault usually increase significantly when your server is experiencing poor performance.\nIt can be caused by limited memory or data sets getting larger.\n\nIn containerized environment you may want to change to query to group `by {pod_name}` instead.",
+              "content": "Page faults increase significantly when your server is experiencing poor performance. It can be caused by limited memory or data sets getting larger. In containerized environment you may want to change to query to group by {pod_name} instead.",
               "background_color": "white",
               "font_size": "12",
               "text_align": "left",
@@ -716,7 +716,8 @@
               "text_align": "left",
               "show_tick": false,
               "tick_pos": "50%",
-              "tick_edge": "top"
+              "tick_edge": "top",
+              "has_padding": false
             },
             "layout": { "x": 0, "y": 5, "width": 3, "height": 2 }
           },
@@ -730,7 +731,8 @@
               "text_align": "left",
               "show_tick": false,
               "tick_pos": "50%",
-              "tick_edge": "top"
+              "tick_edge": "top",
+              "has_padding": false
             },
             "layout": { "x": 3, "y": 5, "width": 3, "height": 2 }
           }
