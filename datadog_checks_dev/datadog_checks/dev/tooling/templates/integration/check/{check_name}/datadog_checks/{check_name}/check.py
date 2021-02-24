@@ -40,7 +40,8 @@ class {check_class}(AgentCheck):
         # Perform database queries using the Query Manager
         # self._query_manager.execute()
 
-        # This is how you use the persistent cache
+        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
+        # If you need an in-memory cache that is persisted across runs you can define a dictionary  in the __init__ method.
         # self.write_persistent_cache("key", "value")
         # value = self.read_persistent_cache("key")
 
