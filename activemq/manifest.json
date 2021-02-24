@@ -33,7 +33,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "activemq": "assets/dashboards/activemq_dashboard.json"
+      "activemq": "assets/dashboards/activemq_dashboard.json",
+      "artemis": "assets/dashboards/artemis_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
