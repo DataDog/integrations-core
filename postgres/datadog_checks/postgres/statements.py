@@ -65,7 +65,7 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
 
 # These limits define the top K and bottom K unique query rows for each metric. For each check run the
 # max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
-DEFAULT_STATEMENT_METRIC_LIMITS = {
+DEFAULT_STATEMENT_METRICS_LIMITS = {
     'calls': (400, 0),
     'total_time': (400, 0),
     'rows': (400, 0),
@@ -187,7 +187,7 @@ class PostgresStatementMetrics(object):
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows,
-            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRIC_LIMITS,
+            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRICS_LIMITS,
             tiebreaker_metric='calls',
             tiebreaker_reverse=True,
             key=row_keyfunc
