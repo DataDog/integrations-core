@@ -192,7 +192,7 @@ files:
         type: boolean
         example: false
         display_default: false
-    - name: statement_metric_limits
+    - name: statement_metrics_limits
       description: |
         Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
         ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default

@@ -35,7 +35,7 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param dbname - string - optional
+    ## @param dbname - string - optional - default: postgres
     ## The name of the PostgresSQL database to monitor.
     ## Note: If omitted, the default system Postgres database is queried.
     #
@@ -66,7 +66,7 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional - default: 1000
+    ## @param query_timeout - integer - optional
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
@@ -167,7 +167,7 @@ instances:
     #
     # deep_database_monitoring: false
 
-    ## @param statement_metric_limits - mapping - optional
+    ## @param statement_metrics_limits - mapping - optional - default: false
     ## Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
     ## ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
     ## values unless instructed otherwise. This API may change in the future.
@@ -175,7 +175,7 @@ instances:
     ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
     ## success manager or Datadog support.
     #
-    # statement_metric_limits:
+    # statement_metrics_limits:
     #   calls:
     #   - 100
     #   - 0
