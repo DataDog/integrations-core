@@ -76,7 +76,7 @@ def _autodiscovery_ready():
 
     autodiscovery_checks = []
     for result_line in result.stdout.splitlines():
-        if 'autodiscovery_subnet' in result_line:
+        if 'network' in result_line:
             autodiscovery_checks.append(result_line)
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml

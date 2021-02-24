@@ -172,7 +172,7 @@ class SnmpCheck(AgentCheck):
         instance['ip_address'] = ip_address
 
         instance.setdefault('tags', [])
-        instance['tags'].append('autodiscovery_subnet:{}'.format(network_address))
+        instance['tags'].append('network:{}'.format(network_address))
 
         return self._build_config(instance)
 
@@ -452,7 +452,7 @@ class SnmpCheck(AgentCheck):
             # At this point, `tags` might include some extra tags added in try clause
 
             # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
-            # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
+            # by using `sum by {X}` queries in UI. X being a tag like `network`, `snmp_profile`, etc
             self.gauge('snmp.devices_monitored', 1, tags=tags)
 
             # Report service checks

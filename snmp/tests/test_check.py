@@ -900,7 +900,7 @@ def test_discovery(aggregator):
     check_tags = [
         'snmp_device:{}'.format(host),
         'snmp_profile:profile1',
-        'autodiscovery_subnet:{}'.format(to_native_string(network)),
+        'network:{}'.format(to_native_string(network)),
     ]
     network_tags = ['network:{}'.format(network)]
 
@@ -949,7 +949,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     host = socket.gethostbyname(common.HOST)
     network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
     check_tags = [
-        'autodiscovery_subnet:{}'.format(to_native_string(network)),
+        'network:{}'.format(to_native_string(network)),
     ]
     network_tags = ['network:{}'.format(network)]
     instance = {

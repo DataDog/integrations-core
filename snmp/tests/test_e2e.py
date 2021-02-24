@@ -67,7 +67,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     common_tags = [
         'snmp_profile:generic-router',
         'snmp_device:{}'.format(snmp_device),
-        'autodiscovery_subnet:{}.0/29'.format(subnet_prefix),
+        'network:{}.0/29'.format(subnet_prefix),
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
@@ -103,7 +103,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     # ==== apc_ups profile ===
     common_tags = [
         'snmp_device:{}'.format(snmp_device),
-        'autodiscovery_subnet:{}.0/28'.format(subnet_prefix),
+        'network:{}.0/28'.format(subnet_prefix),
         'snmp_profile:apc_ups',
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
@@ -152,7 +152,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     # ==== test snmp v3 ===
     common_tags = [
         'snmp_device:{}'.format(snmp_device),
-        'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
+        'network:{}.0/27'.format(subnet_prefix),
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
@@ -160,7 +160,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     # test ignored IPs
     tags = [
         'snmp_device:{}'.format(_build_device_ip(container_ip, '2')),
-        'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
+        'network:{}.0/27'.format(subnet_prefix),
     ]
     aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)
 
