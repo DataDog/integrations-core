@@ -24,13 +24,47 @@ class {check_class}(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        # Use self.instance to read the check configuration
+        # The following are useful bits of code to help new users get started.
 
-        # The following are useful bits of code to help new users started.
+        # Use self.instance to read the check configuration
+        # url = self.instance.get(url)
 
         # Perform HTTP Requests with our HTTP wrapper.
         # More info at https://datadoghq.dev/integrations-core/base/http/
-        # self.http.get("<url>")
+        # try:
+        #     response = self.http.get(url)
+        #     response.raise_for_status()
+        #     response_json = response.json()
+
+        # except Timeout as e:
+        #     self.service_check(
+        #         {check_name}.can_connect,
+        #         AgentCheck.CRITICAL,
+        #         message="Request timeout: {{}}, {{}}".format(url, e),
+        #     )
+        #     raise
+
+        # except (HTTPError, InvalidURL, ConnectionError) as e:
+        #     self.service_check(
+        #         {check_name}.can_connect,
+        #         AgentCheck.CRITICAL,
+        #         message="Request failed: {{}}, {{}}".format(url, e),
+        #     )
+        #     raise
+
+        # except JSONDecodeError as e:
+        #     self.service_check(
+        #         {check_name}.can_connect,
+        #         AgentCheck.CRITICAL,
+        #         message="JSON Parse failed: {{}}, {{}}".format(url, e),
+        #     )
+        #     raise
+
+        # except ValueError as e:
+        #     self.service_check(
+        #         {check_name}.can_connect, AgentCheck.CRITICAL, message=str(e)
+        #     )
+        #     raise
 
         # This is how you submit metrics
         # There are different types of metrics that you can submit (gauge, event).
@@ -41,7 +75,8 @@ class {check_class}(AgentCheck):
         # self._query_manager.execute()
 
         # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs you can define a dictionary  in the __init__ method.
+        # If you need an in-memory cache that is persisted across runs
+        # You can define a dictionary in the __init__ method.
         # self.write_persistent_cache("key", "value")
         # value = self.read_persistent_cache("key")
 
