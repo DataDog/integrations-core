@@ -94,9 +94,14 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+## Further Reading
+
+- [Announcing support for GKE Autopilot][11]
+
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [2]: https://console.cloud.google.com/apis/api/container.googleapis.com
 [3]: https://cloud.google.com/sdk/docs/
 [4]: https://cloud.google.com/sdk/docs/initializing
 [5]: /integrations/google_cloud_platform/
 [6]: https://app.datadoghq.com/screen/integration/gce
+[11]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/
