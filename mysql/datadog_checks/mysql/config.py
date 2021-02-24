@@ -29,7 +29,7 @@ class MySQLConfig(object):
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
-        self.statement_metric_limits = instance.get('statement_metric_limits', None)
+        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

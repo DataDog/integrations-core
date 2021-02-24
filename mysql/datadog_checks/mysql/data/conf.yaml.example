@@ -25,14 +25,14 @@ init_config:
 #
 instances:
 
-    ## @param host - string - optional - default: localhost
+    ## @param host - string - optional
     ## MySQL host to connect to.
     ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
     ## provide a value for the sock key (below).
     #
   - host: localhost
 
-    ## @param user - string - optional - default: datadog
+    ## @param user - string - optional
     ## Username used to connect to MySQL.
     #
     user: datadog
@@ -53,7 +53,7 @@ instances:
     #
     # sock: <SOCK>
 
-    ## @param charset - string - optional - default: utf8
+    ## @param charset - string - optional
     ## Charset you want to use.
     #
     # charset: utf8
@@ -232,7 +232,7 @@ instances:
     #
     # deep_database_monitoring: false
 
-    ## @param statement_metric_limits - mapping - optional
+    ## @param statement_metrics_limits - mapping - optional - default: false
     ## Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
     ## ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
     ## values unless instructed otherwise. This API may change in the future.
@@ -240,7 +240,7 @@ instances:
     ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
     ## success manager or Datadog support.
     #
-    # statement_metric_limits:
+    # statement_metrics_limits:
     #   calls:
     #   - 100
     #   - 0
