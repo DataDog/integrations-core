@@ -27,7 +27,7 @@ def test_activemq_metrics(dd_agent_check):
 @pytest.mark.e2e
 def test_artemis_metrics(dd_agent_check):
     instance = {}
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
 
     for metric in ARTEMIS_E2E_METRICS + JVM_E2E_METRICS:
         aggregator.assert_metric(metric)
