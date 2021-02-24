@@ -74,6 +74,13 @@ instances:
     #
     context_name: "%%extra_context_name%%"
 
+    ## @param loader - string - optional
+    ## Check loader to use. Available loaders for snmp:
+    ## - core: will use corecheck SNMP integration
+    ## - python: will use python SNMP integration
+    #
+    loader: "%%extra_loader%%"
+
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
