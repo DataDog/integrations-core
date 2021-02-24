@@ -33,7 +33,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.11
           name: devNetworkName
-        tag: network
+        tag: device_network
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
     table:
       OID: 1.3.6.1.4.1.29671.1.1.5
