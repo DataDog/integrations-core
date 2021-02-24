@@ -190,7 +190,7 @@ class PostgresStatementMetrics(object):
             self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRICS_LIMITS,
             tiebreaker_metric='calls',
             tiebreaker_reverse=True,
-            key=row_keyfunc
+            key=row_keyfunc,
         )
         metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
 
