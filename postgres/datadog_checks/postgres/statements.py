@@ -187,7 +187,7 @@ class PostgresStatementMetrics(object):
         rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows,
-            self.config.statement_metric_limits or DEFAULT_STATEMENT_METRIC_LIMITS,
+            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRIC_LIMITS,
             tiebreaker_metric='calls',
             tiebreaker_reverse=True,
             key=row_keyfunc
