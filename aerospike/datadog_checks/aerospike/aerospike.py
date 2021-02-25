@@ -170,14 +170,6 @@ class AerospikeCheck(AgentCheck):
 
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
-    def collect_xdr(self):
-        # TODO: get list of datacenters. dcs command is deprecated
-        if self._required_datacenters:
-            for dc in self._required_datacenters:
-                data = self.get_info('get-stats:context=xdr;dc={}'.format(dc))
-        else:
-            self.log.debug("No datacenters to collect XDR metrics from")
-
     def collect_version(self):
         try:
             raw_version = self.get_info("build")[0]
@@ -236,6 +228,17 @@ class AerospikeCheck(AgentCheck):
 
         return datacenters
 
+    def collect_xdr(self):
+        # TODO: get list of datacenters. dcs command is deprecated
+        if self._required_datacenters:
+            for dc in self._required_datacenters:
+                datacenter_tags = ['datacenter:{}'.format(dc)]
+                # Do not separate because of multiple dc output
+                data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
+                self.log.debug("Got data for dc `%s`: %s", dc, data)
+        else:
+            self.log.debug("No datacenters were specified to collect XDR metrics: %s", self._required_datacenters)
+
     def get_client(self):
         client_config = {'hosts': [self._host]}
         if self._tls_config:
@@ -265,13 +268,14 @@ class AerospikeCheck(AgentCheck):
         except Exception as e:
             self.log.warning("Command `%s` was unsuccessful: %s", command, str(e))
             return []
+
+        if not data:
+            return []
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
         if not separator:
             return data
-        if not data:
-            return []
 
         return data.split(separator)
 
