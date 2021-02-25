@@ -697,8 +697,8 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             msg = (
                 'Unable to submit metric `{}` with '
-                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`: {}'.format(
-                    name, snmp_value, type(snmp_value), forced_type, tags, options, e
+                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`, extract_value_pattern=`{}`: {}'.format(
+                    name, snmp_value, type(snmp_value), forced_type, tags, options, extract_value_pattern, e
                 )
             )
             self.log.warning(msg)
@@ -726,12 +726,7 @@ class SnmpCheck(AgentCheck):
             metric = as_metric_with_inferred_type(snmp_value)
 
         if metric is None:
-            raise RuntimeError(
-                'Failed to get value for metric {}: type={} value={} forced_type={} options={} '
-                'extract_value_pattern={}'.format(
-                    metric_name, type(snmp_value), snmp_value, forced_type, options, extract_value_pattern
-                )
-            )
+            raise RuntimeError('Unsupported metric type {} for {}'.format(type(snmp_value), metric_name))
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
