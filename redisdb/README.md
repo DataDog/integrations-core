@@ -81,29 +81,116 @@ Datadog APM integrates with Redis to see the traces across your distributed syst
 
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-#### Containerized
+#### Docker
 
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                                      |
-| -------------------- | -------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `redisdb`                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                              |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"6379", "password":"%%env_REDIS_PASSWORD%%"}` |
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["redisdb"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]'
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation for more details. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][18].
 
-| Parameter      | Value                                               |
-| -------------- | --------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "redis", "service": "<YOUR_APP_NAME>"}` |
+Then, set [Log Integrations][20] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"redis","service":"<YOUR_APP_NAME>"}]'
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][23].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  annotations:
+    ad.datadoghq.com/redis.check_names: '["redisdb"]'
+    ad.datadoghq.com/redis.init_configs: '[{}]'
+    ad.datadoghq.com/redis.instances: |
+      [
+        {
+          "host": "%%host%%",
+          "port":"6379",
+          "password":"%%env_REDIS_PASSWORD%%"
+        }
+      ]
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:latest
+      ports:
+        - containerPort: 6379
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][13].
+
+Then, set [Log Integrations][20] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][24].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  annotations:
+    ad.datadoghq.com/redis.logs: '[{"source":"redis","service":"<YOUR_APP_NAME>"}]'
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:latest
+      ports:
+        - containerPort: 6379
+```
 
 ##### Trace collection
 
@@ -119,7 +206,70 @@ Required environment variables on the Agent container:
 
 See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container that makes requests to Redis][7].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "redis",
+    "image": "redis:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"redisdb\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"host\":\"%%host%%\",\"port\":\"6379\",\"password\":\"%%env_REDIS_PASSWORD%%\"}]"
+    }
+  }]
+}
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][26].
+
+Then, set [Log Integrations][20] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "redis",
+    "image": "redis:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"redis\",\"service\":\"<YOUR_APP_NAME>\"}]"
+    }
+  }]
+}
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][25].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -194,3 +344,14 @@ Additional helpful documentation, links, and articles:
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
 [16]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles
+[17]: https://docs.datadoghq.com/agent/faq/template_variables/
+[18]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[21]: https://docs.datadoghq.com/agent/docker/apm/?tab=linux
+[22]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[25]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[26]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[27]: https://docs.datadoghq.com/agent/guide/secrets-management/?tab=linux
