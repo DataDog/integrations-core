@@ -28,6 +28,7 @@ SERVICE_CHECK_CONNECT = '%s.can_connect' % SOURCE_TYPE_NAME
 DATACENTER_SERVICE_CHECK_CONNECT = '%s.datacenter.can_connect' % SOURCE_TYPE_NAME
 CLUSTER_METRIC_TYPE = SOURCE_TYPE_NAME
 DATACENTER_METRIC_TYPE = '%s.datacenter' % SOURCE_TYPE_NAME
+XDR_DATACENTER_METRIC_TYPE = '%s.xdr_dc' % SOURCE_TYPE_NAME
 NAMESPACE_METRIC_TYPE = '%s.namespace' % SOURCE_TYPE_NAME
 NAMESPACE_TPS_METRIC_TYPE = '%s.namespace.tps' % SOURCE_TYPE_NAME
 NAMESPACE_LATENCY_METRIC_TYPE = '%s.namespace.latency' % SOURCE_TYPE_NAME
@@ -233,9 +234,30 @@ class AerospikeCheck(AgentCheck):
         if self._required_datacenters:
             for dc in self._required_datacenters:
                 datacenter_tags = ['datacenter:{}'.format(dc)]
-                # Do not separate because of multiple dc output
                 data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
                 self.log.debug("Got data for dc `%s`: %s", dc, data)
+                parsed_data = data.split("\n")
+                tags = list()
+                for line in parsed_data:
+                    line = line.strip()
+                    if 'returned' in line:
+                        # Parse remote dc host and port from
+                        # `ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:`
+                        remote_dc = line.split(" (")[0].split(":")
+                        tags = [
+                            'remote_dc_host:{}'.format(remote_dc[0]),
+                            'remote_dc_port:{}'.format(remote_dc[1]),
+                        ] + datacenter_tags
+                    else:
+                        # Parse metrics from
+                        # lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;...
+                        xdr_metrics = line.split(';')
+                        self.log.debug("For dc host tags {}, got: {}".format(tags, xdr_metrics))
+                        for item in xdr_metrics:
+                            metric = item.split('=')
+                            key = metric[0]
+                            value = metric[1]
+                            self.send(XDR_DATACENTER_METRIC_TYPE, key, value, tags)
         else:
             self.log.debug("No datacenters were specified to collect XDR metrics: %s", self._required_datacenters)
 
