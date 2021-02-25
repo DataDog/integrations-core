@@ -107,9 +107,8 @@ MOCK_DATACENTER_METRICS = [
 
 MOCK_XDR_DATACENTER_METRICS = """
 ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:\n
-lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348    
+lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348
 """
-
 
 DATACENTER_METRICS = [
     'aerospike.datacenter.dc_timelag',
