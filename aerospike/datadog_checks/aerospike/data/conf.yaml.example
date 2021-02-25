@@ -65,14 +65,17 @@ instances:
     #   - migrate_tx_objs
 
     ## @param namespaces - list of strings - optional
-    ## all namespaces are collected by default. If you want to collect specific namespaces specify them here.
+    ## All namespaces are collected by default. If you want to collect specific namespaces specify them here.
     #
     # namespaces:
     #   - example_namespace
     #   - another_example_namespace
 
     ## @param datacenters - list of strings - optional
-    ## all datacenters are collected by default. If you want to collect specific datacenters specify them here.
+    ## For Aerospike v4 or lower, all datacenters are collected by default.
+    ## If you want to collect specific datacenters specify them here.
+    ##
+    ## Aerospike v5 or higher, you must specify a list of datacenters to monitor XDR metrics.
     #
     # datacenters:
     #   - example_datacenter

@@ -230,11 +230,18 @@ class AerospikeCheck(AgentCheck):
         return datacenters
 
     def collect_xdr(self):
-        # TODO: get list of datacenters. dcs command is deprecated
+        """
+        XDR metrics are available from the get-stats command as of Aerospike 5.0.0
+
+        https://www.aerospike.com/docs/reference/info/#get-stats
+        """
         if self._required_datacenters:
             for dc in self._required_datacenters:
                 datacenter_tags = ['datacenter:{}'.format(dc)]
                 data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
+                if not data:
+                    self.log.debug("Got invalid data for dc %s", dc)
+                    continue
                 self.log.debug("Got data for dc `%s`: %s", dc, data)
                 parsed_data = data.split("\n")
                 tags = list()
@@ -252,7 +259,7 @@ class AerospikeCheck(AgentCheck):
                         # Parse metrics from
                         # lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;...
                         xdr_metrics = line.split(';')
-                        self.log.debug("For dc host tags {}, got: {}".format(tags, xdr_metrics))
+                        self.log.debug("For dc host tags %s, got: %s", tags, xdr_metrics)
                         for item in xdr_metrics:
                             metric = item.split('=')
                             key = metric[0]
@@ -291,13 +298,14 @@ class AerospikeCheck(AgentCheck):
             self.log.warning("Command `%s` was unsuccessful: %s", command, str(e))
             return []
 
-        if not data:
-            return []
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
         if not separator:
             return data
+
+        if not data:
+            return []
 
         return data.split(separator)
 

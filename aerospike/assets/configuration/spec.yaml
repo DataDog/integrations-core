@@ -72,7 +72,7 @@ files:
           - migrate_rx_objs
           - migrate_tx_objs
     - name: namespaces
-      description: all namespaces are collected by default. If you want to collect specific namespaces specify them here.
+      description: All namespaces are collected by default. If you want to collect specific namespaces specify them here.
       value:
         type: array
         items:
@@ -81,7 +81,11 @@ files:
           - example_namespace
           - another_example_namespace
     - name: datacenters
-      description: all datacenters are collected by default. If you want to collect specific datacenters specify them here.
+      description: |
+        For Aerospike v4 or lower, all datacenters are collected by default.
+        If you want to collect specific datacenters specify them here.
+
+        Aerospike v5 or higher, you must specify a list of datacenters to monitor XDR metrics.
       value:
         type: array
         items:

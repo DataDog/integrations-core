@@ -36,6 +36,28 @@ def test_datacenter_metrics(aggregator):
         aggregator.assert_metric(metric)
 
 
+def test_xdr_metrics(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    original_get_info = check.get_info
+
+    def mock_get_info(command, separator=None):
+        if command.startswith('get-stats:context=xdr;dc='):
+            return common.MOCK_XDR_DATACENTER_METRICS
+
+        return original_get_info(command, separator)
+
+    check.get_info = mock_get_info
+    check._client = mock.MagicMock()
+    check.get_namespaces = mock.MagicMock()
+    check.collect_info = mock.MagicMock()
+    check.collect_throughput = mock.MagicMock()
+    check.collect_latency = mock.MagicMock()
+    check.collect_xdr = mock.MagicMock()
+    check.check(None)
+    for metric in common.XDR_DC_METRICS:
+        aggregator.assert_metric(metric)
+
+
 def test_connection_uses_tls():
     instance = copy.deepcopy(common.INSTANCE)
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}

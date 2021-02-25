@@ -105,6 +105,11 @@ MOCK_DATACENTER_METRICS = [
     'dc_as_size=2',
 ]
 
+MOCK_XDR_DATACENTER_METRICS = """
+ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:\n
+lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348    
+"""
+
 
 DATACENTER_METRICS = [
     'aerospike.datacenter.dc_timelag',
@@ -122,4 +127,25 @@ DATACENTER_METRICS = [
     'aerospike.datacenter.dc_size',
     'aerospike.datacenter.dc_as_open_conn',
     'aerospike.datacenter.dc_as_size',
+]
+
+XDR_DC_METRICS = [
+    'aerospike.xdr_dc.lag',
+    'aerospike.xdr_dc.in_queue',
+    'aerospike.xdr_dc.in_progress',
+    'aerospike.xdr_dc.success',
+    'aerospike.xdr_dc.abandoned',
+    'aerospike.xdr_dc.not_found',
+    'aerospike.xdr_dc.filtered_out',
+    'aerospike.xdr_dc.retry_no_node',
+    'aerospike.xdr_dc.retry_conn_reset',
+    'aerospike.xdr_dc.retry_dest',
+    'aerospike.xdr_dc.recoveries',
+    'aerospike.xdr_dc.recoveries_pending',
+    'aerospike.xdr_dc.hot_keys',
+    'aerospike.xdr_dc.uncompressed_pct',
+    'aerospike.xdr_dc.compression_ratio',
+    'aerospike.xdr_dc.throughput',
+    'aerospike.xdr_dc.latency_ms',
+    'aerospike.xdr_dc.lap_us',
 ]
