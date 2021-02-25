@@ -239,6 +239,7 @@ class AerospikeCheck(AgentCheck):
             for dc in self._required_datacenters:
                 datacenter_tags = ['datacenter:{}'.format(dc)]
                 data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
+                self.log.debug("Got metrics for dc %s: %s", dc, data)
                 if not data:
                     self.log.debug("Got invalid data for dc %s", dc)
                     continue
@@ -257,7 +258,6 @@ class AerospikeCheck(AgentCheck):
                                 'remote_dc_port:{}'.format(remote_dc[1]),
                             ] + datacenter_tags
                         else:
-                            if line
                             # Parse metrics from
                             # lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;...
                             xdr_metrics = line.split(';')
