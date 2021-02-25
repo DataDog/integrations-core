@@ -360,7 +360,14 @@ class RequestsWrapper(object):
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
                     response = request_method(url, **new_options)
             else:
-                response = request_method(url, **new_options)
+                try:
+                    response = request_method(url, **new_options)
+                except SSLError as e:
+                    # try the connection manually
+                    # get the server component (parse url)
+                    # fetch the intermediate certs (like ofek's code)
+                    # retry the request
+                    pass
 
             return response
 
