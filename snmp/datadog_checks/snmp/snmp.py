@@ -726,7 +726,12 @@ class SnmpCheck(AgentCheck):
             metric = as_metric_with_inferred_type(snmp_value)
 
         if metric is None:
-            raise RuntimeError('Unsupported metric type {} for {}'.format(type(snmp_value), metric_name))
+            raise RuntimeError(
+                'Failed to get value for metric {}: type={} value={} forced_type={} options={} '
+                'extract_value_pattern={}'.format(
+                    metric_name, type(snmp_value), snmp_value, forced_type, options, extract_value_pattern
+                )
+            )
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
