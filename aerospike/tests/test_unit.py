@@ -49,7 +49,7 @@ def test_xdr_metrics(aggregator):
         uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=14;lap_us=232\n\n
         """
     )
-    check.collect_latency(None)
+    check.collect_xdr()
 
     for metric in common.XDR_DC_METRICS:
         aggregator.assert_metric(metric)
