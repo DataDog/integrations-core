@@ -12,8 +12,8 @@ from datadog_checks.dev.tooling.utils import (
     get_check_files,
     get_version_string,
     initialize_root,
+    is_logs_only,
     parse_agent_req_file,
-    is_logs_only
 )
 
 from ..common import not_windows_ci
