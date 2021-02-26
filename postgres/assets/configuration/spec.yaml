@@ -192,6 +192,21 @@ files:
         type: boolean
         example: false
         display_default: false
+    - name: statement_metrics_limits
+      description: |
+        Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
+        ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
+        values unless instructed otherwise. This API may change in the future.
+
+        If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+        success manager or Datadog support.
+      value:
+        type: object
+        example:
+          calls: [100, 0]
+          time: [100, 0]
+          <METRIC_COLUMN>: [<TOP_K_LIMIT>, <BOTTOM_K_LIMIT>]
+        display_default: false
     - name: pg_stat_statements_view
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
