@@ -355,9 +355,9 @@ class Couchbase(AgentCheck):
             namespace = '.'.join([namespace, prefix])
 
         if prefix == 'database' and mname in ['cache_feed', 'import_feed']:
-            # Handle cache_feed stats
+            # Handle cache_feed and import_feed sub stats
             for cfname, cfval in mval.items():
-                self.gauge('.'.join([namespace, mname, cfname]), cfval, tags)
+                self.monotonic_count('.'.join([namespace, mname, cfname]), cfval, tags)
         elif prefix == 'gsi_views':
             # gsi view metrics are formatted with design doc and views `sync_gateway_2.1.access_query_count`
             # parse design doc as tag and submit rest as a metric
