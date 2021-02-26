@@ -92,19 +92,19 @@ jmx_metrics:
       attribute:
         errorCount:
           alias: jboss.undertow_listener.error_count
-          metric_type: gauge
+          metric_type: counter
         processingTime:
           alias: jboss.undertow_listener.processing_time
-          metric_type: gauge
+          metric_type: counter
         requestCount:
           alias: jboss.undertow_listener.request_count
-          metric_type: gauge
+          metric_type: counter
         bytesSent:
           alias: jboss.undertow_listener.bytes_sent
-          metric_type: gauge
+          metric_type: counter
         bytesReceived:
           alias: jboss.undertow_listener.bytes_received
-          metric_type: gauge
+          metric_type: counter
 
   - include:
       domain: jboss.as
@@ -118,13 +118,13 @@ jmx_metrics:
           metric_type: gauge
         rejectedSessions:
           alias: jboss.undertow_session.rejected
-          metric_type: gauge
+          metric_type: counter
         sessionsCreated:
           alias: jboss.undertow_session.created
-          metric_type: gauge
+          metric_type: counter
         expiredSessions:
           alias: jboss.undertow_session.expired
-          metric_type: gauge
+          metric_type: counter
         sessionAvgAliveTime:
           alias: jboss.undertow_session.alivetime_avg
           metric_type: gauge
