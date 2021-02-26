@@ -39,7 +39,14 @@ def test_datacenter_metrics(aggregator):
 def test_xdr_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     check.get_info = mock.MagicMock(
-        return_value="ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:\nlag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348    \n\nip-10-10-17-144.ec2.internal:3000 (10.10.17.144) returned:\nlag=0;in_queue=0;in_progress=0;success=98294822;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=813513;retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20286479;uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=14;lap_us=232\n\n"
+        return_value="ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:\nlag=0;in_queue=0;in_progress=0;"
+        "success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;"
+        "retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;"
+        "compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348    \n\nip-10-10-17-144.ec2.internal"
+        ":3000 (10.10.17.144) returned:\nlag=0;in_queue=0;in_progress=0;success=98294822;abandoned=0;"
+        "not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=813513;retry_dest=0;recoveries=293;"
+        "recoveries_pending=0;hot_keys=20286479;uncompressed_pct=0.000;compression_ratio=1.000;"
+        "throughput=0;latency_ms=14;lap_us=232\n\n"
     )
     check.collect_xdr()
 
