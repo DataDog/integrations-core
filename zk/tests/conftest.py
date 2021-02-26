@@ -126,29 +126,28 @@ def dd_environment(get_instance):
             raise RetryError("Zookeeper failed to boot!")
         sys.stderr.write("ZK boot complete.\n")
 
+    is_tls = get_tls()
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
     if [3, 5, 0] <= get_version() < [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
-        if get_tls():
+        if is_tls:
             compose_file = os.path.join(HERE, 'compose', 'zk35_ssl.yaml')
     elif get_version() >= [3, 6, 0]:
         compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
-        if get_tls():
+        if is_tls:
             compose_file = os.path.join(HERE, 'compose', 'zk36plus_ssl.yaml')
 
     private_key = os.path.join(HERE, 'compose/client', 'private_key.pem')
     cert = os.path.join(HERE, 'compose/client', 'cert.pem')
     ca_cert = os.path.join(HERE, 'compose/client', 'ca_cert.pem')
 
-    condition_tls = [
-        CheckDockerLogs(
-            compose_file,
-            'Starting server',
-        )
-    ]
-
-    if get_tls():
-        condition = condition_tls
+    if is_tls:
+        condition = [
+            CheckDockerLogs(
+                compose_file,
+                patterns=['Starting server', 'Started AdminServer', 'bound to port']
+            )
+        ]
     else:
         condition = [condition_non_tls]
 
