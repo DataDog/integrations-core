@@ -239,7 +239,6 @@ class AerospikeCheck(AgentCheck):
             for dc in self._required_datacenters:
                 datacenter_tags = ['datacenter:{}'.format(dc)]
                 data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
-                self.log.debug("Got metrics for dc %s: %s", dc, data)
                 if not data:
                     self.log.debug("Got invalid data for dc %s", dc)
                     continue
