@@ -64,7 +64,7 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 3. Deploy the Datadog Agent and Cluster Agent on Autopilot with the following command:
 
   ```bash
-  helm install --name <RELEASE_NAME> \
+  helm install <RELEASE_NAME> \
       --set datadog.apiKey=<DATADOG_API_KEY> \
       --set datadog.appKey=<DATADOG_APP_KEY> \
       --set clusterAgent.enabled=true \
