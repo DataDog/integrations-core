@@ -11,9 +11,10 @@ from datadog_checks.couchbase.couchbase_consts import (
     NODE_HEALTH_SERVICE_CHECK_NAME,
     QUERY_STATS,
     SERVICE_CHECK_NAME,
+    SG_SERVICE_CHECK_NAME,
 )
 
-from .common import BUCKET_NAME, CHECK_TAGS, PORT
+from .common import BUCKET_NAME, CHECK_TAGS, PORT, SYNC_GATEWAY_METRICS
 
 NODE_STATS = [
     'cmd_get',
@@ -123,6 +124,24 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
 
     for mname in QUERY_STATS:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_sync_gateway_metrics(aggregator, instance_sg, couchbase_container_ip):
+    """
+    Test Sync Gateway metrics (prefixed "couchbase.sync_gateway.")
+    """
+    couchbase = Couchbase('couchbase', {}, instances=[instance_sg])
+    couchbase.check(instance_sg)
+    db_tags = ['db:sync_gateway'] + CHECK_TAGS
+    for mname in SYNC_GATEWAY_METRICS:
+        if mname.count('.') > 2:
+            # metrics tagged by database have an additional namespace
+            aggregator.assert_metric(mname, tags=db_tags, count=1)
+        else:
+            aggregator.assert_metric(mname, tags=CHECK_TAGS, count=1)
+    aggregator.assert_service_check(SG_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
 
 
 @pytest.mark.integration
