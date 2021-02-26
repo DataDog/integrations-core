@@ -322,8 +322,8 @@ class Couchbase(AgentCheck):
         url = '{}{}'.format(url, SG_METRICS_PATH)
         try:
             data = self._get_stats(url).get('syncgateway', {})
-        except requests.exceptions.RequestException:
-            msg = "Error accessing the Sync Gateway monitoring endpoint %s, make sure you're running at least" % url
+        except requests.exceptions.RequestException as e:
+            msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % url, str(e)
             self.log.debug(msg)
             self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, tags)
             return
