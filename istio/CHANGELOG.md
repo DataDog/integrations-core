@@ -1,5 +1,10 @@
 # CHANGELOG - istio
 
+## 3.9.1 / 2021-02-26
+
+* [Fixed] Allow custom metrics for legacy istio. See [#8700](https://github.com/DataDog/integrations-core/pull/8700).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
 ## 3.9.0 / 2021-01-24
 
 * [Added] Revert "Update base package pin (#8426)". See [#8436](https://github.com/DataDog/integrations-core/pull/8436).
