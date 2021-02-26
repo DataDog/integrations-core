@@ -28,6 +28,7 @@ class PostgresConfig:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
+        self.dbstrict = is_affirmative(instance.get('dbstrict', False))
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):

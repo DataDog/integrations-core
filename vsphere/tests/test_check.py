@@ -59,7 +59,7 @@ def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_i
     """This test does the same check than test_historical_events, but deactivate the option to get datastore cluster
     folder in metrics tags"""
     check = VSphereCheck('vsphere', {}, [historical_instance])
-    check.config.include_datastore_cluster_folder_tag = False
+    check._config.include_datastore_cluster_folder_tag = False
     dd_run_check(check)
 
     fixture_file = os.path.join(HERE, 'fixtures', 'metrics_historical_values.json')
@@ -118,9 +118,9 @@ def test_external_host_tags(aggregator, realtime_instance):
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
         ex_tags = [to_string(t) for t in ex_tags]  # json library loads data in unicode, let's convert back to native
         assert ex_host == sub_host
-        assert ex_tags == sub_tags
+        assert sorted(ex_tags) == sorted(sub_tags)
 
-    check.config.excluded_host_tags = ['vsphere_host']
+    check._config.excluded_host_tags = ['vsphere_host']
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
     submitted_tags = check.set_external_tags.mock_calls[0].args[0]
@@ -130,7 +130,7 @@ def test_external_host_tags(aggregator, realtime_instance):
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
         ex_tags = [to_string(t) for t in ex_tags if 'vsphere_host:' not in t]
         assert ex_host == sub_host
-        assert ex_tags == sub_tags
+        assert sorted(ex_tags) == sorted(sub_tags)
 
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()

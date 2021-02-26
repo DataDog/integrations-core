@@ -29,11 +29,15 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
+    },
     "monitors": {
       "CPU load": "assets/monitors/cpu_load.json"
     },
-    "saved_views": {},
+    "saved_views": {
+      "voltdb_processes": "assets/saved_views/voltdb_processes.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "voltdb"

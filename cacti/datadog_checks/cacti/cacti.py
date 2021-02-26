@@ -40,7 +40,7 @@ class CactiCheck(AgentCheck):
         super(CactiCheck, self).__init__(name, init_config, instances)
         self.last_ts = {}
         # Load the instance config
-        self.config = self._get_config(instances[0])
+        self._config = self._get_config(instances[0])
 
     @staticmethod
     def get_library_versions():
@@ -57,24 +57,24 @@ class CactiCheck(AgentCheck):
         self.log.debug("Connected to MySQL to fetch Cacti metadata")
 
         # Get whitelist patterns, if available
-        patterns = self._get_whitelist_patterns(self.config.whitelist)
+        patterns = self._get_whitelist_patterns(self._config.whitelist)
 
         # Fetch the RRD metadata from MySQL
         rrd_meta = self._fetch_rrd_meta(
-            connection, self.config.rrd_path, patterns, self.config.field_names, self.config.tags
+            connection, self._config.rrd_path, patterns, self._config.field_names, self._config.tags
         )
 
         # Load the metrics from each RRD, tracking the count as we go
         metric_count = 0
         for hostname, device_name, rrd_path in rrd_meta:
-            m_count = self._read_rrd(rrd_path, hostname, device_name, self.config.tags)
+            m_count = self._read_rrd(rrd_path, hostname, device_name, self._config.tags)
             metric_count += m_count
 
-        self.gauge('cacti.metrics.count', metric_count, tags=self.config.tags)
+        self.gauge('cacti.metrics.count', metric_count, tags=self._config.tags)
 
     def _get_connection(self):
         return pymysql.connect(
-            self.config.host, self.config.user, self.config.password, self.config.db, self.config.port
+            self._config.host, self._config.user, self._config.password, self._config.db, self._config.port
         )
 
     def _get_whitelist_patterns(self, whitelist=None):

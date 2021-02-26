@@ -42,6 +42,9 @@
     "logs": {
       "source": "memcached"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "memcached_processes": "assets/saved_views/memcached_processes.json"
+    }
   }
 }

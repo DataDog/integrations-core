@@ -75,7 +75,7 @@ def test_get_instance_with_default(check):
     res = check.metrics_cache.get_instance_metrics(version)
     assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
-    check.config.collect_default_db = True
+    check._config.collect_default_db = True
     res = check.metrics_cache.get_instance_metrics(version)
     assert "  AND psd.datname not ilike 'postgres'" not in res['query']
 
@@ -88,7 +88,7 @@ def test_malformed_get_custom_queries(check):
     db = MagicMock()
     check.db = db
 
-    check.config.custom_queries = [{}]
+    check._config.custom_queries = [{}]
 
     # Make sure 'metric_prefix' is defined
     check._collect_custom_queries([])
@@ -97,7 +97,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'query' is defined
     malformed_custom_query = {'metric_prefix': 'postgresql'}
-    check.config.custom_queries = [malformed_custom_query]
+    check._config.custom_queries = [malformed_custom_query]
 
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(

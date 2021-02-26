@@ -10,7 +10,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "nginx.",
-  "metric_to_check": ["nginx.net.connections", "nginx.connections.active"],
+  "metric_to_check": [
+    "nginx.net.connections",
+    "nginx.connections.active"
+  ],
   "name": "nginx",
   "process_signatures": [
     "nginx: master process"
@@ -41,7 +44,8 @@
       "4xx_errors": "assets/saved_views/4xx_errors.json",
       "5xx_errors": "assets/saved_views/5xx_errors.json",
       "status_code_overview": "assets/saved_views/status_code_overview.json",
-      "bot_errors": "assets/saved_views/bot_errors.json"
+      "bot_errors": "assets/saved_views/bot_errors.json",
+      "nginx_processes": "assets/saved_views/nginx_processes.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

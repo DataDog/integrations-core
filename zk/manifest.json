@@ -40,6 +40,9 @@
     "logs": {
       "source": "zookeeper"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "zookeeper_processes": "assets/saved_views/zookeeper_processes.json"
+    }
   }
 }

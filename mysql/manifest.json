@@ -41,7 +41,8 @@
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
       "operations_overview": "assets/saved_views/operations_overview.json",
-      "slow_operations": "assets/saved_views/slow_operations.json"
+      "slow_operations": "assets/saved_views/slow_operations.json",
+      "mysql_processes": "assets/saved_views/mysql_processes.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
