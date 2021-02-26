@@ -347,6 +347,7 @@ class Couchbase(AgentCheck):
                         self._submit_gateway_metrics(mname, mval, db_tags, subgroup)
                     except Exception as e:
                         self.log.debug("Unable to parse metric %s with value `%s`: %s", mname, mval, str(e))
+                        continue
 
     def _submit_gateway_metrics(self, mname, mval, tags, prefix=None):
         namespace = '.'.join(['couchbase', 'sync_gateway'])
