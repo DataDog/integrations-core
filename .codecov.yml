@@ -407,7 +407,7 @@ coverage:
         target: 75
         flags:
         - riak
-      Riak_CS:
+      RiakCS:
         target: 75
         flags:
         - riakcs
