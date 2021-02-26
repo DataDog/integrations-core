@@ -25,7 +25,10 @@ from datadog_checks.couchbase.couchbase_consts import (
     QUERY_STATS,
     SECONDS_VALUE_PATTERN,
     SERVICE_CHECK_NAME,
+    SG_METRICS_PATH,
+    SG_SERVICE_CHECK_NAME,
     SOURCE_TYPE_NAME,
+    SYNC_GATEWAY_COUNT_METRICS,
     TO_SECONDS,
 )
 
@@ -314,6 +317,60 @@ class Couchbase(AgentCheck):
                 )
 
         return query_data
+
+    def _collect_sync_gateway_metrics(self, url, tags):
+        url = '{}{}'.format(url, SG_METRICS_PATH)
+        try:
+            data = self._get_stats(url).get('syncgateway', {})
+        except requests.exceptions.RequestException:
+            msg = "Error accessing the Sync Gateway monitoring endpoint %s, make sure you're running at least" % url
+            self.log.debug(msg)
+            self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, tags)
+            return
+
+        self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.OK, tags)
+
+        global_resource_stats = data.get('global', {}).get('resource_utilization', {})
+        for mname, mval in global_resource_stats.items():
+            try:
+                self._submit_gateway_metrics(mname, mval, tags)
+            except Exception as e:
+                self.log.debug("Unable to parse metric %s with value `%s: %s`", mname, mval, str(e))
+
+        per_db_stats = data.get('per_db', {})
+        for db, db_groups in per_db_stats.items():
+            db_tags = ['db:{}'.format(db)] + tags
+            for subgroup, db_metrics in db_groups.items():
+                self.log.debug("Submitting metrics for group `%s`: `%s`", subgroup, db_metrics)
+                for mname, mval in db_metrics.items():
+                    try:
+                        self._submit_gateway_metrics(mname, mval, db_tags, subgroup)
+                    except Exception as e:
+                        self.log.debug("Unable to parse metric %s with value `%s`: %s", mname, mval, str(e))
+
+    def _submit_gateway_metrics(self, mname, mval, tags, prefix=None):
+        namespace = '.'.join(['couchbase', 'sync_gateway'])
+        if prefix:
+            namespace = '.'.join([namespace, prefix])
+
+        if prefix == 'database' and mname in ['cache_feed', 'import_feed']:
+            # Handle cache_feed stats
+            for cfname, cfval in mval.items():
+                self.gauge('.'.join([namespace, mname, cfname]), cfval, tags)
+        elif prefix == 'gsi_views':
+            # gsi view metrics are formatted with design doc and views `sync_gateway_2.1.access_query_count`
+            # parse design doc as tag and submit rest as a metric
+            match = re.match(r'\{([^}:;]+)\}-(\w+):', mname)
+            if match:
+                design_doc_tag = match.groups()[0]
+                gsi_tags = ['design_doc_name:{}'.format(design_doc_tag)] + tags
+                ddname = match.groups()[0]
+                self.monotonic_count('.'.join([namespace, ddname]), tags=gsi_tags)
+
+        elif mname in SYNC_GATEWAY_COUNT_METRICS:
+            self.monotonic_count('.'.join([namespace, mname]), mval, tags)
+        else:
+            self.gauge('.'.join([namespace, mname]), mval, tags)
 
     # Takes a camelCased variable and returns a joined_lower equivalent.
     # Returns input if non-camelCase variable is detected.
