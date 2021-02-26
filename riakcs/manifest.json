@@ -3,7 +3,7 @@
     "data store"
   ],
   "creates_events": false,
-  "display_name": "Riak CS",
+  "display_name": "RiakCS",
   "guid": "55ba6b94-8eeb-486b-aa94-6366a044fdf0",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
