@@ -143,10 +143,7 @@ def dd_environment(get_instance):
 
     if is_tls:
         condition = [
-            CheckDockerLogs(
-                compose_file,
-                patterns=['Starting server', 'Started AdminServer', 'bound to port']
-            )
+            CheckDockerLogs(compose_file, patterns=['Starting server', 'Started AdminServer', 'bound to port'])
         ]
     else:
         condition = [condition_non_tls]
