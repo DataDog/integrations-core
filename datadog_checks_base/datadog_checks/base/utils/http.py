@@ -8,6 +8,9 @@ from contextlib import contextmanager
 from copy import deepcopy
 from io import open
 from ipaddress import ip_address, ip_network
+from requests.exceptions import SSLError
+import socket
+import ssl
 
 import requests
 import requests_unixsocket
@@ -98,6 +101,10 @@ PROXY_SETTINGS_DISABLED = {
 KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
+
+
+def closing(sock):
+    return sock
 
 
 class RequestsWrapper(object):
@@ -367,7 +374,38 @@ class RequestsWrapper(object):
                     # get the server component (parse url)
                     # fetch the intermediate certs (like ofek's code)
                     # retry the request
-                    pass
+                    parsed_url = urlparse(url)
+                    hostname = parsed_url.hostname
+
+                    for res in socket.getaddrinfo(hostname, 443):
+                        af, socktype, proto, canonname, sa = res
+                        sock = None
+                        try:
+                            sock = socket.socket(af, socktype, proto)
+                            sock.settimeout(10)
+                            sock.connect(sa)
+                            # Break explicitly a reference cycle
+                            err = None
+
+                        except socket.error as _:
+                            err = _
+                            if sock is not None:
+                                sock.close()
+
+                    with closing(sock):
+                        try:
+                            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                            context.verify_mode = ssl.CERT_NONE
+
+                            with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
+                                der_cert = secure_sock.getpeercert(binary_form=True)
+                        except Exception as e:
+                            self.log.error(
+                                'Error occurred while getting cert to discover intermediate certificates: %s', e
+                            )
+                            return
+                    print(der_cert)
+                    return
 
             return response
 
