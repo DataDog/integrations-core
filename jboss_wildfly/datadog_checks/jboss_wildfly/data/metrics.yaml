@@ -50,34 +50,34 @@ jmx_metrics:
       attribute:
         numberOfAbortedTransactions:
           alias: jboss.transactions.aborted
-          metric_type: gauge
+          metric_type: counter
         numberOfApplicationRollbacks:
           alias: jboss.transactions.application_rollbacks
-          metric_type: gauge
+          metric_type: counter
         numberOfCommittedTransactions:
           alias: jboss.transactions.committed
-          metric_type: gauge
+          metric_type: counter
         numberOfHeuristics:
           alias: jboss.transactions.heuristics
-          metric_type: gauge
+          metric_type: counter
         numberOfInflightTransactions:
           alias: jboss.transactions.inflight
           metric_type: gauge
         numberOfNestedTransactions:
           alias: jboss.transactions.nested
-          metric_type: gauge
+          metric_type: counter
         numberOfResourceRollbacks:
           alias: jboss.transactions.resource_rollbacks
-          metric_type: gauge
+          metric_type: counter
         numberOfSystemRollbacks:
           alias: jboss.transactions.system_rollbacks
-          metric_type: gauge
+          metric_type: counter
         numberOfTimedOutTransactions:
           alias: jboss.transactions.timed_out
-          metric_type: gauge
+          metric_type: counter
         numberOfTransactions:
           alias: jboss.transactions.count
-          metric_type: gauge
+          metric_type: counter
 
 
 
