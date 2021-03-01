@@ -242,6 +242,8 @@ class AerospikeCheck(AgentCheck):
                 if not data:
                     self.log.debug("Got invalid data for dc %s", dc)
                     continue
+                if data.startswith('ERROR:'):
+                    self.log.debug("Error collecting XDR metrics: %s", data)
                 self.log.debug("Got data for dc `%s`: %s", dc, data)
                 parsed_data = data.split("\n")
                 tags = list()

@@ -54,6 +54,17 @@ def test_xdr_metrics(aggregator):
         aggregator.assert_metric(metric)
 
 
+def test_collect_xdr_invalid_data(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check.get_info = mock.MagicMock(return_value=["ERROR::XDR-not-configured"])
+    check.log = mock.MagicMock()
+    check.collect_xdr(None)
+
+    check.log.debug.assert_called_with('Error collecting XDR metrics: ERROR::XDR-not-configured')
+
+    aggregator.assert_all_metrics_covered()  # no metric
+
+
 def test_connection_uses_tls():
     instance = copy.deepcopy(common.INSTANCE)
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}
