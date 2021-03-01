@@ -1,169 +1,296 @@
-- name: prometheus_url
+- name: openmetrics_endpoint
   required: true
-  description: The URL where your application metrics are exposed by Prometheus.
+  description: |
+    The URL exposing metrics in the OpenMetrics format.
   value:
     type: string
 - name: namespace
-  required: true
-  hidden: true
-  description: The namespace to be prepended to all metrics.
-  value:
-    type: string
-    example: service
-- name: metrics
-  required: true
   hidden: true
   description: |
-    List of metrics to be fetched from the prometheus endpoint, if there's a
-    value it'll be renamed. This list should contain at least one metric.
+    The namespace to be prepended to all metrics.
   value:
-    type: array
-    example:
-      - processor:cpu
-      - memory:mem
-      - io
-    items:
-      type: string
-- name: prometheus_metrics_prefix
-  description: <PREFIX> for exposed Prometheus metrics.
+    type: string
+    pattern: '\w+'
+- name: raw_metric_prefix
+  description: |
+    A prefix that will be removed from all exposed metric names, if present.
+    All configuration options will use the prefix-less name.
   value:
     type: string
     example: <PREFIX>_
-    default: null
-- name: health_service_check
-  description: |
-    Send a service check reporting about the health of the Prometheus endpoint.
-    The service check is named <NAMESPACE>.prometheus.health
-  value:
-    type: boolean
-    example: true
-- name: label_to_hostname
-  description: Override the hostname with the value of one label.
-  value:
-    type: string
-    example: <LABEL>
-- name: label_joins
-  description: Allows targeting a metric to retrieve its label with a 1:1 mapping.
-  value:
-    example:
-      target_metric:
-        label_to_match: <MATCHED_LABEL>
-        labels_to_get:
-          - <EXTRA_LABEL_1>
-          - <EXTRA_LABEL_2>
-    type: object
-    properties:
-    - name: target_metric
-      type: object
-      properties:
-      - name: label_to_match
-        type: string
-      - name: labels_to_get
-        type: array
-        items:
-          type: string
-- name: labels_mapper
-  description: |
-    The label mapper allows you to rename labels.
-    Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
-  value:
-    example:
-      flavor: origin
-    type: object
-- name: type_overrides
-  description: |
-    Override a type in the Prometheus payload or type an untyped metric (ignored by default).
-    Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
-    The "*" wildcard can be used to match multiple metric names.
-  value:
-    example:
-      <METRIC_NAME>: <METRIC_TYPE>
-    type: object
-- name: send_histograms_buckets
-  description: Set send_histograms_buckets to true to send the histograms bucket.
-  value:
-    example: true
-    type: boolean
-- name: send_distribution_buckets
-  description: |
-    Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
-
-    Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
-  value:
-    example: false
-    type: boolean
-- name: send_monotonic_counter
-  description: Set send_monotonic_counter to true to send counters as monotonic counter.
-  value:
-    example: true
-    type: boolean
-- name: send_monotonic_with_gauge
-  description: |
-    Set send_monotonic_with_gauge to true to send counters as both monotonic counters and gauges.
-    This option only works when `send_monotonic_counter` is False.
+    display_default: null
+- name: metrics  # Only shown for the `openmetrics` provider integration
   hidden: true
+  description: |
+    This list defines which metrics to collect from the `openmetrics_endpoint`.
+    Metrics may be defined in 3 ways:
+
+    1. If the item is a string, then it represents the exposed metric name, and
+       the sent metric name will be identical. For example:
+
+         metrics:
+         - <METRIC_1>
+         - <METRIC_2>
+    2. If the item is a mapping, then the keys represent the exposed metric names.
+
+         a. If a value is a string, then it represents the sent metric name. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+              - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+         b. If a value is a mapping, then it must have a `name` and/or `type` key.
+            The `name` represents the sent metric name, and the `type` represents how
+            the metric should be handled, overriding any type information the endpoint
+            may provide. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>:
+                  name: <SENT_METRIC_1>
+                  type: <METRIC_TYPE_1>
+              - <EXPOSED_METRIC_2>:
+                  name: <SENT_METRIC_2>
+                  type: <METRIC_TYPE_2>
+
+            The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+
+    Regular expressions may be used to match the exposed metric names, for example:
+
+      metrics:
+      - ^network_(ingress|egress)_.+
+      - .+:
+          type: gauge
   value:
-    example: false
-    type: boolean
-- name: send_distribution_counts_as_monotonic
-  description: If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
+    type: array
+    items:
+      anyOf:
+      - type: string
+      - type: object
+        additionalProperties:
+          anyOf:
+          - type: string
+          - type: object
+            properties:
+            - name: name
+              type: string
+            - name: type
+              type: string
+            additionalProperties: true
+- name: extra_metrics  # Hidden for the `openmetrics` provider integration
+  description: |
+    This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    what the check collects by default. If the check already collects a metric, then
+    metric definitions here take precedence. Metrics may be defined in 3 ways:
+
+    1. If the item is a string, then it represents the exposed metric name, and
+       the sent metric name will be identical. For example:
+
+         metrics:
+         - <METRIC_1>
+         - <METRIC_2>
+    2. If the item is a mapping, then the keys represent the exposed metric names.
+
+         a. If a value is a string, then it represents the sent metric name. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+              - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+         b. If a value is a mapping, then it must have a `name` and/or `type` key.
+            The `name` represents the sent metric name, and the `type` represents how
+            the metric should be handled, overriding any type information the endpoint
+            may provide. For example:
+
+              metrics:
+              - <EXPOSED_METRIC_1>:
+                  name: <SENT_METRIC_1>
+                  type: <METRIC_TYPE_1>
+              - <EXPOSED_METRIC_2>:
+                  name: <SENT_METRIC_2>
+                  type: <METRIC_TYPE_2>
+
+            The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+
+    Regular expressions may be used to match the exposed metric names, for example:
+
+      metrics:
+      - ^network_(ingress|egress)_.+
+      - .+:
+          type: gauge
   value:
-    example: false
-    type: boolean
-- name: send_distribution_sums_as_monotonic
-  description: If set to true, sends histograms and summary sums as monotonic counters (instead of gauges).
+    type: array
+    items:
+      anyOf:
+      - type: string
+      - type: object
+        additionalProperties:
+          anyOf:
+          - type: string
+          - type: object
+            properties:
+            - name: name
+              type: string
+            - name: type
+              type: string
+            additionalProperties: true
+- name: exclude_metrics
+  description: |
+    A list of metrics to exclude, with each entry being either
+    the exact metric name or a regular expression.
   value:
-    example: false
-    type: boolean
-- name: exclude_labels
-  description: A list of labels to be excluded
-  value:
-    example:
-      - timestamp
     type: array
     items:
       type: string
-- name: bearer_token_auth
+- name: exclude_metrics_by_labels
   description: |
-    If set to true, adds a bearer token authentication header.
-    Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
-  value:
-    example: false
-    type: boolean
-- name: bearer_token_path
-  description: |
-    The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
-    Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
-  value:
-    example: <TOKEN_PATH>
-    type: string
-- name: ignore_metrics
-  description: A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
-  value:
-    type: array
-    items:
-      type: string
-    example:
-      - <IGNORED_METRIC_NAME>
-      - <PREFIX_*>
-      - <*_SUFFIX>
-      - <PREFIX_*_SUFFIX>
-      - <*_SUBSTRING_*>
-- name: ignore_metrics_by_labels
-  description: |
-    A mapping of labels where metrics with matching label key and values are ignored.
-    Use the "*" wildcard to match all label values.
+    A mapping of labels where metrics with matching label name and values are ignored. To match
+    all values of a label, set it to `true`.
+
+    For example, the following configuration instructs the check to exclude all metrics with
+    a label `worker` or a label `pid` with the value of either `23` or `42`.
+
+      exclude_metrics_by_labels:
+        worker: true
+        pid:
+        - '23'
+        - '42'
   value:
     type: object
-    properties:
-      - name: target_label_key
-        type: string
-      - name: target_label_value_list
-        type: array
+    additionalProperties:
+      anyOf:
+      - type: boolean
+      - type: array
         items:
           type: string
+- name: exclude_labels
+  description: |
+    A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+  value:
+    type: array
+    items:
+      type: string
+- name: rename_labels
+  description: |
+    A mapping of label names to how they should be renamed.
+  value:
     example:
-      <KEY_1>: [<LABEL_1>, <LABEL_2>]
-      <KEY_2>: ['*']
+      <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+      <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+    type: object
+- name: enable_health_service_check
+  description: |
+    Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    the health of the `openmetrics_endpoint`.
+  value:
+    example: true
+    type: boolean
+- name: hostname_label
+  description: |
+    Override the hostname for every metric submission with the value of one of its labels.
+  value:
+    type: string
+- name: hostname_format
+  description: |
+    When `hostname_label` is set, this instructs the check how to format the values. The string
+    `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+  value:
+    example: <HOSTNAME>
+    type: string
+- name: collect_histogram_buckets
+  description: |
+    Whether or not to send histogram buckets.
+  value:
+    example: true
+    type: boolean
+- name: non_cumulative_histogram_buckets
+  description: |
+    Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+  value:
+    example: false
+    type: boolean
+- name: histogram_buckets_as_distributions
+  description: |
+    Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+
+    Learn more about distribution metrics:
+    https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+  value:
+    example: false
+    type: boolean
+- name: share_labels
+  description: |
+    This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    exposed metrics from which to share labels, and the values are mappings that configure the
+    sharing behavior. Each mapping must have at least one of the following keys:
+
+      labels - This is a list of labels to share. All labels are shared if this is not set.
+      match - This is a list of labels to match on other metrics as a condition for sharing.
+      values - This is a list of allowed values as a condition for sharing.
+
+    To unconditionally share all labels of a metric, set it to `true`.
+
+    For example, the following configuration instructs the check to apply all labels from `metric_a`
+    to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    to all other metrics if its value is equal to `23` or `42`.
+
+      share_labels:
+        metric_a: true
+        metric_b:
+          labels:
+          - node
+          match:
+          - pod
+        metric_c:
+          values:
+          - 23
+          - 42
+  value:
+    type: object
+    additionalProperties:
+      anyOf:
+      - type: boolean
+      - type: object
+        properties:
+        - name: labels
+          type: array
+          items:
+            type: string
+        - name: match
+          type: array
+          items:
+            type: string
+- name: request_size
+  description: |
+    The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
+  value:
+    example: 16
+    type: number
+- name: raw_line_filters
+  description: |
+    A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    from being parsed.
+  value:
+    type: array
+    items:
+      type: string
+- name: cache_metric_wildcards
+  description: |
+    Whether or not to cache data from metrics that are defined by regular expressions rather
+    than the full metric name.
+  value:
+    example: true
+    type: boolean
+- name: use_latest_spec
+  description: |
+    Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+  value:
+    example: false
+    type: boolean
+- name: telemetry
+  description: |
+    Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+  value:
+    example: false
+    type: boolean
 - template: instances/http
 - template: instances/default

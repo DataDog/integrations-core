@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.azure_iot_edge.config import Config
-from datadog_checks.azure_iot_edge.metrics import EDGE_AGENT_METRICS, EDGE_HUB_METRICS
+from datadog_checks.azure_iot_edge.metrics import EDGE_AGENT_METRICS, EDGE_AGENT_TYPE_OVERRIDES, EDGE_HUB_METRICS
 from datadog_checks.azure_iot_edge.types import Instance
 from datadog_checks.base import ConfigurationError
 
@@ -31,6 +31,7 @@ def test_config():
             'prometheus_url': 'http://testserver:9602/metrics',
             'namespace': 'edge_agent',
             'metrics': EDGE_AGENT_METRICS,
+            'type_overrides': EDGE_AGENT_TYPE_OVERRIDES,
             'tags': [],
             'exclude_labels': ['ms_telemetry', 'instance_number'],
             'metadata_metric_name': 'edgeAgent_metadata',

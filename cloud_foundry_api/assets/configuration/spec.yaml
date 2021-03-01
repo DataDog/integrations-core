@@ -43,7 +43,7 @@ files:
       value:
         type: integer
         maximum: 5000
-        default: 100
+        display_default: 100
     - template: instances/default
     - template: instances/http
       overrides:
@@ -65,4 +65,3 @@ files:
     options:
     - template: init_config/default
     - template: init_config/http
-

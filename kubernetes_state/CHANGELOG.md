@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 5.6.3 / 2020-12-23 / Agent 7.25.0
+
+* [Fixed] Fix deployment count metric. See [#8247](https://github.com/DataDog/integrations-core/pull/8247).
+
 ## 5.6.2 / 2020-12-21
 
 * [Fixed] Fix deployment count metric. See [#8229](https://github.com/DataDog/integrations-core/pull/8229).

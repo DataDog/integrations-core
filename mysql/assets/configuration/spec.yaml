@@ -24,7 +24,7 @@ files:
             value:
               type: string
               example: localhost
-              default: null
+              display_default: null
 
           - name: user
             description: |
@@ -33,7 +33,7 @@ files:
             value:
               type: string
               example: datadog
-              default: null
+              display_default: null
 
           - name: pass
             description: |
@@ -61,7 +61,7 @@ files:
             value:
               type: string
               example: utf8
-              default: None
+              display_default: null
           - name: defaults_file
             description: |
               Path to an alternative configuration mechanism file.
@@ -244,8 +244,23 @@ files:
             enabled: false
             value:
               type: boolean
-              example: true
-              default: false
+              example: false
+              display_default: false
+          - name: statement_metrics_limits
+            description: |
+              Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
+              ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
+              values unless instructed otherwise. This API may change in the future.
+
+              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+              success manager or Datadog support.
+            value:
+              type: object
+              example:
+                calls: [100, 0]
+                time: [100, 0]
+                <METRIC_COLUMN>: [<TOP_K_LIMIT>, <BOTTOM_K_LIMIT>]
+              display_default: false
 
           - template: instances/default
 

@@ -2509,8 +2509,126 @@ def test_value_type_object_properties_required_not_met():
 
     assert (
         'test, test.yaml, instances, foo: All entries in attribute `required` '
-        'for `type` object must be defined in the`properties` attribute'
+        'for `type` object must be defined in the `properties` attribute'
     ) in spec.errors
+
+
+def test_value_type_object_additional_properties_invalid_type():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties: 9000
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `additionalProperties` '
+        'for `type` object must be a mapping or set to `true`'
+    ) in spec.errors
+
+
+def test_value_type_object_additional_properties_nested_error():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                  - name: bar
+                    type: string
+                  required:
+                  - foo
+                  - bar
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: All entries in attribute `required` '
+        'for `type` object must be defined in the `properties` attribute'
+    ) in spec.errors
+
+
+def test_value_type_object_additional_properties_nested_ok():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                  - name: foo
+                    type: string
+                  - name: bar
+                    type: string
+                  required:
+                  - foo
+                  - bar
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_value_type_object_additional_properties_true_ok():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                additionalProperties: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
 
 
 def test_value_type_unknown():
@@ -2859,6 +2977,199 @@ def test_template_hide_duplicate():
             - template: instances/jmx
               overrides:
                 password.hidden: true
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_value_one_of_with_type():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: number
+                anyOf: []
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Values must contain either a `type` or `anyOf` attribute, not both'
+        in spec.errors
+    )
+
+
+def test_value_one_of_not_array():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf: bar
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, instances, foo: Attribute `anyOf` must be an array' in spec.errors
+
+
+def test_value_one_of_single_type():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf:
+                - type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `anyOf` contains a single type, use the `type` attribute instead'
+        in spec.errors
+    )
+
+
+def test_value_one_of_type_not_mapping():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf:
+                - bar
+                - {}
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, instances, foo: Type #1 of attribute `anyOf` must be a mapping' in spec.errors
+
+
+def test_value_one_of_type_recursive_validation_error():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf:
+                - type: string
+                - type: object
+                  required:
+                  - foo
+                  - foo
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: All entries in attribute `required` for `type` object must be unique'
+    ) in spec.errors
+
+
+def test_value_one_of_type_super_recursive_validation_error():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf:
+                - type: string
+                - type: array
+                  items:
+                    anyOf:
+                    - type: string
+                    - type: object
+                      required:
+                      - foo
+                      - foo
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: All entries in attribute `required` for `type` object must be unique'
+    ) in spec.errors
+
+
+def test_value_one_of_type_recursive_validation_success():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
         """
     )
     spec.load()

@@ -31,12 +31,16 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[Kafka] High producer request rate": "assets/recommended_monitors/kafka_high_producer_request_rate.json",
+      "[Kafka] Offline partition": "assets/recommended_monitors/kafka_offline_partition.json"
+    },
     "dashboards": {},
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "kafka_patterns": "assets/saved_views/kafka_patterns.json",
-      "logger_overview": "assets/saved_views/logger_overview.json"
+      "logger_overview": "assets/saved_views/logger_overview.json",
+      "kafka_processes": "assets/saved_views/kafka_processes.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

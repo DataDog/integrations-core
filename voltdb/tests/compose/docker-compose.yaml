@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  voltdb0:
+    image: ${VOLTDB_IMAGE}
+    container_name: voltdb0
+    environment:
+      - HOST_COUNT=3
+      - HOSTS=voltdb0,voltdb1,voltdb2
+    volumes:
+      - ${VOLTDB_DEPLOYMENT}:/tmp/deployment.xml
+      - ./certs:/tmp/certs
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
+      - ${DD_LOG_1}:/var/log/voltdb.log
+    ports:
+      - ${VOLTDB_CLIENT_PORT}:${VOLTDB_CLIENT_PORT}  # JSON Interface: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
+
+  voltdb1:
+    image: ${VOLTDB_IMAGE}
+    container_name: voltdb1
+    environment:
+      - HOST_COUNT=3
+      - HOSTS=voltdb0,voltdb1,voltdb2
+    volumes:
+      - ${VOLTDB_DEPLOYMENT}:/tmp/deployment.xml
+      - ./certs:/tmp/certs
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml
+
+  voltdb2:
+    image: ${VOLTDB_IMAGE}
+    container_name: voltdb2
+    environment:
+      - HOST_COUNT=3
+      - HOSTS=voltdb0,voltdb1,voltdb2
+    volumes:
+      - ${VOLTDB_DEPLOYMENT}:/tmp/deployment.xml
+      - ./certs:/tmp/certs
+      - ./log4j.xml:/opt/voltdb/voltdb/log4j.xml

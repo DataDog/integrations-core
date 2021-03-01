@@ -88,7 +88,7 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
 
-    formatted_filters = check.config.resource_filters
+    formatted_filters = check._config.resource_filters
 
     config = VSphereConfig(realtime_instance, MagicMock())
     infra = MockedAPI(config).get_infrastructure()

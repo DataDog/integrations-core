@@ -6,7 +6,7 @@
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "https://static.datadoghq.com/static/images/saas_logos/bot/vsphere@2x.png",
+        "url": "/static/images/logos/vsphere_large.svg",
         "sizing": "fit"
       },
       "layout": { "x": 0, "y": 1, "width": 47, "height": 10 }

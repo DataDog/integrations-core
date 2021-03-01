@@ -9,6 +9,7 @@ from six import iteritems
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.common import compute_percent
 
 
 class HDFSNameNode(AgentCheck):
@@ -120,10 +121,11 @@ class HDFSNameNode(AgentCheck):
                 self._set_metric(metric_name, metric_type, metric_value, tags)
 
         if 'CapacityUsed' in bean and 'CapacityTotal' in bean:
+            capacity_in_use = compute_percent(float(bean['CapacityUsed']), float(bean.get('CapacityTotal', 0)))
             self._set_metric(
                 'hdfs.namenode.capacity_in_use',
                 self.GAUGE,
-                float(bean['CapacityUsed']) / float(bean['CapacityTotal']),
+                capacity_in_use,
                 tags,
             )
 

@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-import ssl
+import pytest
 
 from datadog_checks.tls import TLSCheck
+
+from .conftest import CA_CERT, PRIVATE_KEY
 
 
 def test_tags_local():
@@ -26,11 +27,28 @@ def test_tags_local_hostname_no_validation():
         'name': 'foo',
         'local_cert_path': 'cert.pem',
         'server_hostname': 'www.google.com',
-        'validate_hostname': False,
+        'tls_validate_hostname': False,
     }
     c = TLSCheck('tls', {}, [instance])
 
     assert c._tags == ['name:foo']
+
+
+# This is a special edge case where both supported `validate_hostname` configs are used with differing values.
+# This case should realistically never happen, but theoretically can happen
+# If either `tls_validate_hostname` or `validate_hostname` is false, then `tls_validate_hostname` is False
+def test_tags_local_hostname_no_validation_legacy_edge_case():
+    instance = {
+        'name': 'foo',
+        'local_cert_path': 'cert.pem',
+        'server_hostname': 'www.google.com',
+        'validate_hostname': False,
+        'tls_validate_hostname': True,
+    }
+    c = TLSCheck('tls', {}, [instance])
+
+    assert c._tags == ['name:foo']
+    assert c._tls_validate_hostname is False
 
 
 def test_tags_remote():
@@ -38,36 +56,6 @@ def test_tags_remote():
     c = TLSCheck('tls', {}, [instance])
 
     assert c._tags == ['name:foo', 'server_hostname:www.google.com', 'server:www.google.com', 'port:443']
-
-
-def test_cert():
-    instance = {'cert': 'cert'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._cert == os.path.expanduser(instance['cert'])
-
-
-def test_private_key():
-    instance = {'private_key': 'private_key'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._private_key == os.path.expanduser(instance['private_key'])
-
-
-def test_ca_cert_file():
-    instance = {'ca_cert': 'ca_cert'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._cafile == os.path.expanduser(instance['ca_cert'])
-    assert c._capath is None
-
-
-def test_ca_cert_dir():
-    instance = {'ca_cert': '~'}
-    c = TLSCheck('tls', {}, [instance])
-
-    assert c._cafile is None
-    assert c._capath == os.path.expanduser(instance['ca_cert'])
 
 
 def test_validation_data():
@@ -78,9 +66,23 @@ def test_validation_data():
     assert isinstance(c.validation_data, tuple)
 
 
-def test_tls_context():
-    c = TLSCheck('tls', {}, [{}])
-
-    assert c._tls_context is None
-    assert c.tls_context == c._tls_context
-    assert isinstance(c.tls_context, ssl.SSLContext)
+@pytest.mark.parametrize(
+    'extra_config, expected_http_kwargs',
+    [
+        pytest.param({'ca_cert': CA_CERT}, {'tls_ca_cert': CA_CERT}, id='legacy ca_cert param'),
+        pytest.param({'private_key': PRIVATE_KEY}, {'tls_private_key': PRIVATE_KEY}, id='legacy private_key param'),
+        pytest.param(
+            {'validate_hostname': False}, {'tls_validate_hostname': False}, id='legacy validate_hostname param'
+        ),
+        pytest.param({'validate_cert': False}, {'tls_verify': False}, id='legacy validate_cert param'),
+    ],
+)
+def test_config(extra_config, expected_http_kwargs):
+    instance = {
+        'name': 'foo',
+    }
+    instance.update(extra_config)
+    c = TLSCheck('tls', {}, [instance])
+    c.get_tls_context()  # need to call this for config values to be saved by _tls_context_wrapper
+    actual_options = {k: v for k, v in c._tls_context_wrapper.config.items() if k in expected_http_kwargs}
+    assert expected_http_kwargs == actual_options

@@ -6,7 +6,7 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "https://s3.amazonaws.com/dd-integrations/harbor/configuration/tile/logo.png",
+                "url": "/static/images/logos/harbor_large.svg",
                 "sizing": "zoom"
             },
             "layout": {

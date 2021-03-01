@@ -35,8 +35,8 @@
         "id": 1,
         "definition": {
           "type": "image",
-          "url": "https://s3.amazonaws.com/dd-integrations/presto/configuration/tile/logo.png",
-          "sizing": "zoom"
+          "url": "/static/images/logos/presto_large.svg",
+          "sizing": "fit"
         },
         "layout": {
           "x": 1,

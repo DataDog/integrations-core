@@ -20,12 +20,16 @@ class MySQLConfig(object):
         self.password = str(instance.get('pass', ''))
         self.tags = self._build_tags(instance.get('tags', []))
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
+        replication_channel = self.options.get('replication_channel')
+        if replication_channel:
+            self.tags.append("channel:{0}".format(replication_channel))
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
         self.connect_timeout = instance.get('connect_timeout', 10)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

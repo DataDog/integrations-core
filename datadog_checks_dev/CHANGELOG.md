@@ -1,5 +1,63 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 8.0.1 / 2021-02-19
+
+* [Fixed] Fix error printing json errors when error on list object. See [#8650](https://github.com/DataDog/integrations-core/pull/8650).
+* [Fixed] Fix validate readme command. See [#8645](https://github.com/DataDog/integrations-core/pull/8645).
+* [Fixed] Replace `oneOf` with `anyOf` for multi-type support. See [#8626](https://github.com/DataDog/integrations-core/pull/8626).
+
+## 8.0.0 / 2021-02-12
+
+* [Added] Add config spec for the new OpenMetrics implementation. See [#8452](https://github.com/DataDog/integrations-core/pull/8452).
+* [Added] Support `additionalProperties` object field for config specs. See [#8525](https://github.com/DataDog/integrations-core/pull/8525).
+* [Added] Support bind mounting single files for Docker E2E on Windows. See [#8516](https://github.com/DataDog/integrations-core/pull/8516).
+* [Fixed] Fix the ids `done` in `progress` columns. See [#8478](https://github.com/DataDog/integrations-core/pull/8478).
+* [Fixed] Fix tabs in readme consumer. See [#8551](https://github.com/DataDog/integrations-core/pull/8551).
+* [Fixed] Remove metric alert from recommended monitors. See [#8508](https://github.com/DataDog/integrations-core/pull/8508).
+* [Fixed] Fix link referencing for append and prepend. See [#8548](https://github.com/DataDog/integrations-core/pull/8548).
+* [Fixed] Implement append and prepend options for docs validator. See [#8542](https://github.com/DataDog/integrations-core/pull/8542).
+* [Fixed] Normalize links in docs validator for nested sections. See [#8541](https://github.com/DataDog/integrations-core/pull/8541).
+* [Fixed] Update metrics template. See [#8539](https://github.com/DataDog/integrations-core/pull/8539).
+* [Fixed] Fix `oneOf` in config specs. See [#8540](https://github.com/DataDog/integrations-core/pull/8540).
+* [Fixed] Do not run base_check for any base package. See [#8534](https://github.com/DataDog/integrations-core/pull/8534).
+* [Fixed] fix nested sections for readme rendering. See [#8524](https://github.com/DataDog/integrations-core/pull/8524).
+* [Fixed] Avoid forcing base dependencies for base checks. See [#8444](https://github.com/DataDog/integrations-core/pull/8444).
+* [Fixed] fix nested sections in docs validator. See [#8519](https://github.com/DataDog/integrations-core/pull/8519).
+* [Fixed] Add test cases to docs validator. See [#8503](https://github.com/DataDog/integrations-core/pull/8503).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Fix handling of multiple nested types for the example config spec consumer. See [#8465](https://github.com/DataDog/integrations-core/pull/8465).
+* [Fixed] Fix validation of Agent deps when using single check. See [#8461](https://github.com/DataDog/integrations-core/pull/8461).
+* [Changed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
+## 7.0.1 / 2021-01-25
+
+* [Fixed] Minor error message fix. See [#8424](https://github.com/DataDog/integrations-core/pull/8424).
+
+## 7.0.0 / 2021-01-22
+
+* [Added] Add --export-csv option. See [#8350](https://github.com/DataDog/integrations-core/pull/8350).
+* [Added] Add config spec support for options with multiple types. See [#8378](https://github.com/DataDog/integrations-core/pull/8378).
+* [Added] Add docs spec progress to docs status board. See [#8357](https://github.com/DataDog/integrations-core/pull/8357).
+* [Added] Add option to exclude release prs. See [#8351](https://github.com/DataDog/integrations-core/pull/8351).
+* [Added] Support installing minimum and unpinned datadog_checks_base dependencies for tests. See [#8318](https://github.com/DataDog/integrations-core/pull/8318).
+* [Added] Allow MockResponse method `iter_lines` to be called multiple times. See [#8353](https://github.com/DataDog/integrations-core/pull/8353).
+* [Added] [1/3] Add units to metadata check. See [#8308](https://github.com/DataDog/integrations-core/pull/8308).
+* [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
+* [Added] Support nightly datadog_checks_base package checks. See [#8293](https://github.com/DataDog/integrations-core/pull/8293).
+* [Added] Add snmp_tile template to ddev create --type. See [#8216](https://github.com/DataDog/integrations-core/pull/8216).
+* [Added] Add new global fixture to mock HTTP requests. See [#8276](https://github.com/DataDog/integrations-core/pull/8276).
+* [Added] Update Codecov config validation with new flag carryforward options. See [#8085](https://github.com/DataDog/integrations-core/pull/8085).
+* [Added] Ensure default templates are included in config spec. See [#8232](https://github.com/DataDog/integrations-core/pull/8232).
+* [Fixed] Update logs template with docs feedback. See [#8412](https://github.com/DataDog/integrations-core/pull/8412).
+* [Fixed] Fix conflicting link references in tile readme template. See [#8409](https://github.com/DataDog/integrations-core/pull/8409).
+* [Fixed] Update logs readme template. See [#8399](https://github.com/DataDog/integrations-core/pull/8399).
+* [Fixed] Increase indentation of log snippets. See [#8360](https://github.com/DataDog/integrations-core/pull/8360).
+* [Fixed] Fix dep validation to work on single checks for PRs. See [#8297](https://github.com/DataDog/integrations-core/pull/8297).
+* [Fixed] Fix ddev env test last error. See [#8264](https://github.com/DataDog/integrations-core/pull/8264).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+* [Changed] Rename legacy OpenMetrics config spec. See [#8413](https://github.com/DataDog/integrations-core/pull/8413).
+* [Changed] Small changes in template for "SNMP tiles". See [#8289](https://github.com/DataDog/integrations-core/pull/8289).
+
 ## 6.1.0 / 2020-12-22
 
 * [Added] Add metric_to_check validation redirection for snmp_<vendor> integrations. See [#8215](https://github.com/DataDog/integrations-core/pull/8215).

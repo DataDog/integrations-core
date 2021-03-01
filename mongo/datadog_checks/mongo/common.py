@@ -23,6 +23,10 @@ REPLSET_MEMBER_STATES = {
     10: ('REMOVED', 'Removed'),
 }
 
+PRIMARY_STATE_ID = 1
+SECONDARY_STATE_ID = 2
+ARBITER_STATE_ID = 7
+
 DEFAULT_TIMEOUT = 30
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
@@ -78,8 +82,9 @@ class ReplicaSetDeployment(Deployment):
         self.replset_state_name = get_state_name(replset_state).lower()
         self.use_shards = cluster_role is not None
         self.cluster_role = cluster_role
-        self.is_primary = replset_state == 1
-        self.is_secondary = replset_state == 2
+        self.is_primary = replset_state == PRIMARY_STATE_ID
+        self.is_secondary = replset_state == SECONDARY_STATE_ID
+        self.is_arbiter = replset_state == ARBITER_STATE_ID
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.

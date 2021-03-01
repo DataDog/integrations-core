@@ -49,7 +49,13 @@ REPOS = {
 
 
 def sort_jobs(jobs):
-    return sorted(jobs, key=lambda job: (not job['checkName'].startswith('datadog_checks_'), job['checkName']))
+    return sorted(
+        jobs,
+        key=lambda job: (
+            not job.get('checkName', '').startswith('datadog_checks_'),
+            get_attribute_from_job(job, 'checkName'),
+        ),
+    )
 
 
 def sort_projects(projects):
@@ -59,6 +65,17 @@ def sort_projects(projects):
 def get_coverage_sources(check_name):
     package_dir, tests_dir = coverage_sources(check_name)
     return sorted([f'{check_name}/{package_dir}', f'{check_name}/{tests_dir}'])
+
+
+def get_attribute_from_job(job, attribute):
+    value = job.get(attribute)
+    if not value:
+        # Probably a nested block using an AZP template variable:
+        # - ${{ if ... }}:
+        #    - checkName: ...
+        job = list(job.values())[0][0]
+        value = job.get(attribute)
+    return value
 
 
 def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
@@ -75,7 +92,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
     fixed = False
 
     for job in jobs:
-        check_name = job['checkName']
+        check_name = get_attribute_from_job(job, 'checkName')
         defined_checks.add(check_name)
 
         if check_name not in testable_checks:
@@ -91,7 +108,8 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
             )
             cached_display_names[check_name] = display_name
 
-        if 'displayName' not in job:
+        job_name = get_attribute_from_job(job, 'displayName')
+        if not job_name:
             message = 'Job `{}` has no `displayName` attribute'.format(check_name)
 
             if fix:
@@ -103,7 +121,6 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 success = False
                 echo_failure(message)
 
-        job_name = job['displayName']
         if not job_name.startswith(display_name):
             message = 'Job `{}` has an incorrect `displayName` ({}), it should be `{}`'.format(
                 check_name, job_name, display_name
@@ -118,7 +135,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 success = False
                 echo_failure(message)
 
-        if 'os' not in job:
+        if not get_attribute_from_job(job, 'os'):
             message = 'Job `{}` has no `os` attribute'.format(check_name)
 
             if fix:
@@ -217,12 +234,15 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
             echo_failure(f'Defined project `{check_name}` has no tox.ini file')
             continue
 
+        # Project names cannot contain spaces, see:
+        # https://github.com/DataDog/integrations-core/pull/6760#issuecomment-634976885
         if check_name in cached_display_names:
-            display_name = cached_display_names[check_name]
+            display_name = cached_display_names[check_name].replace(' ', '_')
         else:
             display_name = repo_data['display_name_overrides'].get(
                 check_name, load_manifest(check_name).get('display_name', check_name)
             )
+            display_name = display_name.replace(' ', '_')
             cached_display_names[check_name] = display_name
 
         if project != display_name:

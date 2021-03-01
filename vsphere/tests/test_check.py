@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -58,7 +59,7 @@ def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_i
     """This test does the same check than test_historical_events, but deactivate the option to get datastore cluster
     folder in metrics tags"""
     check = VSphereCheck('vsphere', {}, [historical_instance])
-    check.config.include_datastore_cluster_folder_tag = False
+    check._config.include_datastore_cluster_folder_tag = False
     dd_run_check(check)
 
     fixture_file = os.path.join(HERE, 'fixtures', 'metrics_historical_values.json')
@@ -117,9 +118,9 @@ def test_external_host_tags(aggregator, realtime_instance):
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
         ex_tags = [to_string(t) for t in ex_tags]  # json library loads data in unicode, let's convert back to native
         assert ex_host == sub_host
-        assert ex_tags == sub_tags
+        assert sorted(ex_tags) == sorted(sub_tags)
 
-    check.config.excluded_host_tags = ['vsphere_host']
+    check._config.excluded_host_tags = ['vsphere_host']
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
     submitted_tags = check.set_external_tags.mock_calls[0].args[0]
@@ -129,7 +130,7 @@ def test_external_host_tags(aggregator, realtime_instance):
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
         ex_tags = [to_string(t) for t in ex_tags if 'vsphere_host:' not in t]
         assert ex_host == sub_host
-        assert ex_tags == sub_tags
+        assert sorted(ex_tags) == sorted(sub_tags)
 
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
@@ -310,6 +311,38 @@ def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_in
     assert tags
     assert check.api_rest.make_batch.call_count == 2
     assert check.api_rest.smart_connect.call_count == 1
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_tags_filters_integration_tags(aggregator, dd_run_check, historical_instance):
+    historical_instance['collect_tags'] = True
+    historical_instance['resource_filters'] = [
+        {
+            'resource': 'cluster',
+            'property': 'tag',
+            'patterns': [
+                r'vsphere_datacenter:Datacenter2',
+            ],
+        },
+        {
+            'resource': 'datastore',
+            'property': 'tag',
+            'patterns': [
+                r'vsphere_datastore:Datastore 1',
+            ],
+        },
+    ]
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter2', count=1)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Dätacenter', count=0)
+
+    aggregator.assert_metric('vsphere.disk.used.latest', count=1)
+    aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 1', count=1)
+    aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 2', count=0)
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')

@@ -34,7 +34,7 @@ files:
         value:
           type: string
           example: /proc
-          default: null
+          display_default: null
       - template: init_config/default
     - template: instances
       options:

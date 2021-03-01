@@ -1,0 +1,48 @@
+name: GlusterFS
+files:
+- name: glusterfs.yaml
+  options:
+  - template: init_config
+    options:
+    - name: gstatus_path
+      description: |
+        Path to the gstatus command.
+
+        A version of the gstatus is shipped with the Agent binary.
+        If you are using a source install, specify the location of gstatus.
+      value:
+        type: string
+        example: /opt/datadog-agent/embedded/sbin/gstatus
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: use_sudo
+      description: |
+        GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
+
+        dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
+
+        Enable the option for the check to run with sudo.
+      value:
+        type: boolean
+        example: true
+
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60
+        min_collection_interval.enabled: true
+        min_collection_interval.description: |
+          The GlusterFS integration collects cluster-wide metrics which can put additional workload on the server.
+          Increase the collection interval to reduce the frequency.
+
+          This changes the collection interval of the check. For more information, see:
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/glusterfs/glusterd.log
+      source: glusterfs
+    - type: file
+      path: /var/log/glusterfs/cli.log
+      source: glusterfs

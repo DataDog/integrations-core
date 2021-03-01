@@ -70,6 +70,11 @@ files:
             value:
               example: true
               type: boolean
+          - name: collect_node_metrics
+            description: Set this parameter to false to remove yarn.node metrics from metric collection.
+            value:
+              example: true
+              type: boolean
           - name: queue_blacklist
             description: |
               Do not emit metrics for certain yarn capacityScheduler queues.
@@ -91,7 +96,13 @@ files:
             value:
               example: false
               type: boolean
-
+          - name: disable_legacy_cluster_tag
+            description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `yarn_cluster`.
+            value:
+              type: boolean
+              display_default: false
+              example: true
+            enabled: true
           - template: instances/http
           - template: instances/default
 

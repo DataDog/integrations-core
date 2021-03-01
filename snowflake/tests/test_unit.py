@@ -12,6 +12,13 @@ from .conftest import CHECK_NAME
 
 PROXY_CONFIG = {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}
 INVALID_PROXY = {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}
+INVALID_CONFIG = {
+    "account": "test_acct.us-central1.gcp",
+    "database": "SNOWFLAKE",
+    "schema": "ACCOUNT_USAGE",
+    'role': "ACCOUNTADMIN",
+    "authenticator": "oauth",
+}
 
 
 def test_config():
@@ -25,23 +32,28 @@ def test_config():
 
     # Test missing user and pass
     account_config = {'account': 'TEST123'}
-    with pytest.raises(Exception, match='Must specify a user and password'):
+    with pytest.raises(Exception, match='Must specify a user'):
         SnowflakeCheck(CHECK_NAME, {}, [account_config])
 
 
 def test_default_authentication(instance):
     # Test default auth
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.authenticator == 'snowflake'
+    assert check._config.authenticator == 'snowflake'
 
 
-def test_invalid_auth(instance):
-    # Test oauth
-    oauth_inst = copy.deepcopy(instance)
-    oauth_inst['authenticator'] = 'oauth'
+def test_invalid_oauth(oauth_instance):
+    # Test oauth without user
+    with pytest.raises(Exception, match='Must specify a user'):
+        SnowflakeCheck(CHECK_NAME, {}, [INVALID_CONFIG])
+
+    # Test oauth without token
+    no_token_config = copy.deepcopy(INVALID_CONFIG)
+    no_token_config['user'] = "test_user"
     with pytest.raises(Exception, match='If using OAuth, you must specify a token'):
-        SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+        SnowflakeCheck(CHECK_NAME, {}, [no_token_config])
 
+    oauth_inst = copy.deepcopy(oauth_instance)
     oauth_inst['authenticator'] = 'testauth'
     with pytest.raises(Exception, match='The Authenticator method set is invalid: testauth'):
         SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
@@ -77,11 +89,9 @@ def test_default_auth(instance):
         )
 
 
-def test_oauth_auth(instance):
+def test_oauth_auth(oauth_instance):
     # Test oauth
-    oauth_inst = copy.deepcopy(instance)
-    oauth_inst['authenticator'] = 'oauth'
-    oauth_inst['token'] = 'testtoken'
+    oauth_inst = copy.deepcopy(oauth_instance)
 
     with mock.patch('datadog_checks.snowflake.check.sf') as sf:
         check = SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
@@ -90,7 +100,7 @@ def test_oauth_auth(instance):
         check.check(oauth_inst)
         sf.connect.assert_called_with(
             user='testuser',
-            password='pass',
+            password=None,
             account='test_acct.us-central1.gcp',
             database='SNOWFLAKE',
             schema='ACCOUNT_USAGE',
@@ -149,7 +159,7 @@ def test_proxy_settings(instance):
 
 def test_default_metric_groups(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.metric_groups == [
+    assert check._config.metric_groups == [
         'snowflake.query',
         'snowflake.billing',
         'snowflake.storage',
@@ -177,7 +187,7 @@ def test_additional_metric_groups(instance):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['snowflake.logins', 'snowflake.data_transfer']
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
+    assert check._config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
 
     assert check.metric_queries == [
         queries.LoginMetrics,

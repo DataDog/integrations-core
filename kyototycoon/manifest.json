@@ -35,6 +35,9 @@
     "logs": {
       "source": "kyototycoon"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "kyoto-tycoon_processes": "assets/saved_views/kyoto-tycoon_processes.json"
+    }
   }
 }

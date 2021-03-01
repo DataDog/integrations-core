@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  namenode:
+    image: vromero/activemq-artemis:${ARTEMIS_VERSION}
+    container_name: dd-test-activemq-server
+    environment:
+      JAVA_OPTS: >-
+        -Dcom.sun.management.jmxremote.port=${JMX_PORT}
+        -Dcom.sun.management.jmxremote.rmi.port=${JMX_PORT}
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Djava.rmi.server.hostname=localhost
+      ARTEMIS_USERNAME: admin
+      ARTEMIS_PASSWORD: admin
+      DISABLE_SECURITY: "true"
+      ENABLE_JMX: "true"
+      JMX_PORT: ${JMX_PORT}
+      JMX_RMI_PORT: ${JMX_PORT}
+    ports:
+      - "8161:8161"
+      - "${JMX_PORT}:${JMX_PORT}"
+      - "61616:61616"

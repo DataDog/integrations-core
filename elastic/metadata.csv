@@ -142,6 +142,10 @@ elasticsearch.search.query.total,gauge,,query,,The total number of queries.,0,el
 elasticsearch.search.scroll.current,gauge,,query,,The number of currently active scroll queries.,0,elasticsearch,current scroll queries
 elasticsearch.search.scroll.time,gauge,,second,,The total time spent on scroll queries.,0,elasticsearch,total scroll query time
 elasticsearch.search.scroll.total,gauge,,query,,The total number of scroll queries.,0,elasticsearch,total scroll queries
+elasticsearch.slm.snapshot_deletion_failures,gauge,,error,,The total number of snapshot deletion failures.,0,elasticsearch,slm del fail
+elasticsearch.slm.snapshots_deleted,gauge,,,,The total number of deleted snapshots.,0,elasticsearch,slm del
+elasticsearch.slm.snapshots_failed,gauge,,error,,The total number of failed snapshots.,0,elasticsearch,slm fail
+elasticsearch.slm.snapshots_taken,gauge,,,,The total number of snaphots.,0,elasticsearch,slm taken
 elasticsearch.store.size,gauge,,byte,,The total size in bytes of the store.,0,elasticsearch,store size
 elasticsearch.thread_pool.bulk.active,gauge,,thread,,The number of active threads in the bulk pool.,0,elasticsearch,active bulk threads
 elasticsearch.thread_pool.bulk.queue,gauge,,thread,,The number of queued threads in the bulk pool.,0,elasticsearch,queued bulk threads
@@ -249,10 +253,14 @@ jvm.mem.pools.survivor.used,gauge,,byte,,The amount of memory in bytes currently
 jvm.mem.pools.survivor.max,gauge,,byte,,The maximum amount of memory that can be used by the Survivor Space.,0,elasticsearch,jvm survivor max
 jvm.threads.count,gauge,,thread,,The number of active threads in the JVM.,0,elasticsearch,jvm threads
 jvm.threads.peak_count,gauge,,thread,,The peak number of threads used by the JVM.,0,elasticsearch,jvm peak threads
-elasticsearch.index.health,gauge,,,,The status of the index,0,elasticsearch,index health
+elasticsearch.index.health,gauge,,,,"The status of the index as a number: green = 0, yellow = 1, red = 2",0,elasticsearch,index health
+elasticsearch.index.health.reverse,gauge,,,,"The status of the index as a number: red = 0, yellow = 1, green = 2",0,elasticsearch,index health r
 elasticsearch.index.docs.count,gauge,,document,,The number of documents in the index,0,elasticsearch,index doc count
 elasticsearch.index.docs.deleted,gauge,,document,,The number of deleted documents in the index,0,elasticsearch,index doc deleted count
 elasticsearch.index.primary_shards,gauge,,shard,,The number of primary shards in the index,0,elasticsearch,index primary shards count
 elasticsearch.index.replica_shards,gauge,,shard,,The number of replica shards in the index,0,elasticsearch,index replica shards count
 elasticsearch.index.primary_store_size,gauge,,byte,,The store size of primary shards in the index,0,elasticsearch,index primary store size
 elasticsearch.index.store_size,gauge,,byte,,The store size of primary and replica shards in the index,0,elasticsearch,index pri and rep store size
+elasticsearch.cgroup.cpu.stat.number_of_elapsed_periods,gauge,,,,The number of reporting periods that have elapsed,0,elasticsearch,cgroup cpu stat
+elasticsearch.cgroup.cpu.stat.number_of_times_throttled,gauge,,,,The number of times all tasks in the same cgroup as the Elasticsearch process have been throttled,0,elasticsearch,cpu stat throttled
+elasticsearch.process.cpu.percent,gauge,,percent,,CPU usage in percent or -1 if not known at the time the stats are computed,0,elasticsearch,process cpu percent

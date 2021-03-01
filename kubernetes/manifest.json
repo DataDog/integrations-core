@@ -33,11 +33,13 @@
       "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
     },
     "dashboards": {
+      "kubernetes": "assets/dashboards/kubernetes_dashboard.json",
       "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
       "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
       "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json",
       "Kubernetes ReplicaSets Overview": "assets/dashboards/kubernetes_replicasets.json",
-      "Kubernetes Services Overview": "assets/dashboards/kubernetes_services.json"
+      "Kubernetes Services Overview": "assets/dashboards/kubernetes_services.json",
+      "Kubernetes DaemonDets Overview": "assets/dashboards/kubernetes_daemonsets.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},

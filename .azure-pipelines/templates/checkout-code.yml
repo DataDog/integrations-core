@@ -8,10 +8,17 @@ steps:
 
 # Azure checks out the code from the PR but leaves us in a detached state.
 # Because ddev cannot work in that state, we create a branch.
-# Only applies to PRs
+# Only applies to PRs and manual runs
 - script: git checkout -B azure/$(System.PullRequest.SourceBranch)
   condition: eq(variables['Build.Reason'], 'PullRequest')
   displayName: 'Create branch from PR'
+
+# Azure checks out the code from the PR but leaves us in a detached state.
+# Because ddev cannot work in that state, we create a branch.
+# Only applies to PRs and manual runs
+- script: git checkout -B azure/$(Build.SourceBranch)
+  condition: eq(variables['Build.Reason'], 'Manual')
+  displayName: 'Create branch from branch (manual build)'
 
 # Azure pulls a commit hash via git fetch rather than clone so
 # we checkout the branches we need which also gets us out of a
@@ -25,3 +32,9 @@ steps:
 - script: git checkout azure/$(System.PullRequest.SourceBranch)
   condition: eq(variables['Build.Reason'], 'PullRequest')
   displayName: 'Checkout branch'
+
+# Switch to the branch where the manual run is triggered. Also see:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables#system-variables
+- script: git checkout azure/$(Build.SourceBranch)
+  condition: eq(variables['Build.Reason'], 'Manual')
+  displayName: 'Checkout branch (manual build)'

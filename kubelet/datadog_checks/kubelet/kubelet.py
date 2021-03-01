@@ -240,7 +240,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         )
         return kubelet_instance
 
-    def _create_pod_tags_by_pvc(self, pods):
+    def _create_pod_tags_by_pvc(self, pod_list):
         """
         Return a map, e.g.
             {
@@ -250,7 +250,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         that can be used to add pod tags to associated volume metrics
         """
         pod_tags_by_pvc = defaultdict(set)
-        for pod in pods['items']:
+        if pod_list is None:
+            return pod_tags_by_pvc
+        pods = pod_list.get('items', [])
+        for pod in pods:
             # get kubernetes namespace of PVC
             kube_ns = pod.get('metadata', {}).get('namespace')
             if not kube_ns:

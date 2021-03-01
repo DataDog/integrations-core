@@ -4,15 +4,18 @@
 import socket
 import ssl
 from datetime import datetime
-from os.path import expanduser, isdir
+from hashlib import sha256
 
 import service_identity
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
+from cryptography.x509.extensions import ExtensionNotFound
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.time import get_timestamp
 
 from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
 
@@ -30,6 +33,15 @@ class TLSCheck(AgentCheck):
     DEFAULT_EXPIRE_DAYS_CRITICAL = 7
     DEFAULT_EXPIRE_SECONDS_WARNING = days_to_seconds(DEFAULT_EXPIRE_DAYS_WARNING)
     DEFAULT_EXPIRE_SECONDS_CRITICAL = days_to_seconds(DEFAULT_EXPIRE_DAYS_CRITICAL)
+
+    # This remapper is used to support legacy TLS integration config values
+    TLS_CONFIG_REMAPPER = {
+        'cert': {'name': 'tls_cert'},
+        'private_key': {'name': 'tls_private_key'},
+        'ca_cert': {'name': 'tls_ca_cert'},
+        'validate_hostname': {'name': 'tls_validate_hostname'},
+        'validate_cert': {'name': 'tls_verify'},
+    }
 
     def __init__(self, name, init_config, instances):
         super(TLSCheck, self).__init__(name, init_config, instances)
@@ -59,29 +71,25 @@ class TLSCheck(AgentCheck):
             self._sock_type = socket.SOCK_STREAM
             self._port = int(self.instance.get('port', parsed_uri.port or 443))
 
-        self._validate_cert = is_affirmative(self.instance.get('validate_cert', True))
-
         # https://en.wikipedia.org/wiki/Server_Name_Indication
         self._server_hostname = self.instance.get('server_hostname', self._server)
+
+        # `validate_hostname` is still supported for legacy implementations of TLS
+        self._tls_validate_hostname = is_affirmative(self.instance.get('tls_validate_hostname', True))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
 
-        self._cert = self.instance.get('cert')
-        if self._cert:
-            self._cert = expanduser(self._cert)
+        # If either `tls_validate_hostname` or `validate_hostname` is false, then set to false
+        if not self._tls_validate_hostname or not self._validate_hostname:
+            self._tls_validate_hostname = False
 
-        self._private_key = self.instance.get('private_key')
-        if self._private_key:
-            self._private_key = expanduser(self._private_key)
-
-        self._cafile = None
-        self._capath = None
-        ca_cert = self.instance.get('ca_cert')
-        if ca_cert:
-            ca_cert = expanduser(ca_cert)
-            if isdir(ca_cert):
-                self._capath = ca_cert
-            else:
-                self._cafile = ca_cert
+        self._fetch_intermediate_certs = is_affirmative(
+            self.instance.get('fetch_intermediate_certs', self.init_config.get('fetch_intermediate_certs', False))
+        )
+        self._intermediate_cert_refresh_interval = (
+            # Convert minutes to seconds
+            float(self.instance.get('intermediate_cert_refresh_interval', 60))
+            * 60
+        )
 
         # Thresholds expressed in seconds take precedence over those expressed in days
         self._seconds_warning = (
@@ -109,7 +117,7 @@ class TLSCheck(AgentCheck):
         if self._local_cert_path:
             self.check = self.check_local
             self.log.debug('Selecting local connection for method of collection')
-            if self._validate_hostname and self._server_hostname:
+            if self._tls_validate_hostname and self._server_hostname:
                 self._tags.append('server_hostname:{}'.format(self._server_hostname))
         else:
             self.check = self.check_remote
@@ -122,9 +130,18 @@ class TLSCheck(AgentCheck):
         self._validation_data = None
         self._tls_context = None
 
-    def check_remote(self, instance):
+        # Only fetch intermediate certs from the indicated URIs occasionally
+        self._intermediate_cert_uri_cache = {}
+
+        # Only load intermediate certs once
+        self._intermediate_cert_id_cache = set()
+
+    def check_remote(self, _):
         if not self._server:
             raise ConfigurationError('You must specify `server` in your configuration file.')
+
+        if self._fetch_intermediate_certs:
+            self.fetch_intermediate_certs()
 
         try:
             self.log.debug('Checking that TLS service check can connect')
@@ -141,7 +158,9 @@ class TLSCheck(AgentCheck):
         with closing(sock):
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                with closing(self.tls_context.wrap_socket(sock, server_hostname=self._server_hostname)) as secure_sock:
+                with closing(
+                    self.get_tls_context().wrap_socket(sock, server_hostname=self._server_hostname)
+                ) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     protocol_version = secure_sock.version()
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
@@ -181,10 +200,10 @@ class TLSCheck(AgentCheck):
         self.validate_certificate(cert)
         self.check_age(cert)
 
-    def check_local(self, instance):
-        if self._validate_hostname and not self._server_hostname:
+    def check_local(self, _):
+        if self._tls_validate_hostname and not self._server_hostname:
             raise ConfigurationError(
-                'You must specify `server_hostname` in your configuration file, or disable `validate_hostname`.'
+                'You must specify `server_hostname` in your configuration file, or disable `tls_validate_hostname`.'
             )
 
         try:
@@ -233,7 +252,7 @@ class TLSCheck(AgentCheck):
 
     def validate_certificate(self, cert):
         self.log.debug('Validating certificate')
-        if self._validate_hostname:
+        if self._tls_validate_hostname:
             validator, host_type = self.validation_data
 
             try:
@@ -319,6 +338,76 @@ class TLSCheck(AgentCheck):
 
             raise
 
+    def fetch_intermediate_certs(self):
+        # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
+        try:
+            sock = self.create_connection()
+        except Exception as e:
+            self.log.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            return
+
+        with closing(sock):
+            try:
+                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                context.verify_mode = ssl.CERT_NONE
+
+                with closing(context.wrap_socket(sock, server_hostname=self._server_hostname)) as secure_sock:
+                    der_cert = secure_sock.getpeercert(binary_form=True)
+            except Exception as e:
+                self.log.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
+                return
+
+        self.load_intermediate_certs(der_cert)
+
+    def load_intermediate_certs(self, der_cert):
+        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        try:
+            cert = load_der_x509_certificate(der_cert, default_backend())
+        except Exception as e:
+            self.log.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
+            return
+
+        try:
+            authority_information_access = cert.extensions.get_extension_for_oid(
+                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+            )
+        except ExtensionNotFound:
+            self.log.debug(
+                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
+            )
+            return
+
+        for access_description in authority_information_access.value:
+            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
+                continue
+
+            uri = access_description.access_location.value
+            if (
+                uri in self._intermediate_cert_uri_cache
+                and get_timestamp() - self._intermediate_cert_uri_cache[uri] < self._intermediate_cert_refresh_interval
+            ):
+                continue
+
+            # Assume HTTP for now
+            try:
+                response = self.http.get(uri)  # SKIP_HTTP_VALIDATION
+                response.raise_for_status()
+            except Exception as e:
+                self.log.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                continue
+            else:
+                access_time = get_timestamp()
+                intermediate_cert = response.content
+
+            cert_id = sha256(intermediate_cert).digest()
+            if cert_id not in self._intermediate_cert_id_cache:
+                self.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+                self._intermediate_cert_id_cache.add(cert_id)
+
+            self._intermediate_cert_uri_cache[uri] = access_time
+            self.load_intermediate_certs(intermediate_cert)
+
     @property
     def validation_data(self):
         if self._validation_data is None:
@@ -334,38 +423,3 @@ class TLSCheck(AgentCheck):
         if b'-----BEGIN CERTIFICATE-----' in cert:
             return load_pem_x509_certificate(cert, backend)
         return load_der_x509_certificate(cert, backend)
-
-    @property
-    def tls_context(self):
-        if self._tls_context is None:
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-            # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
-            self._tls_context = ssl.SSLContext(protocol=PROTOCOL_TLS_CLIENT)
-
-            # Run our own validation later on if need be
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            #
-            # IMPORTANT: This must be set before verify_mode in Python 3.7+, see:
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            self._tls_context.check_hostname = False
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-            self._tls_context.verify_mode = ssl.CERT_REQUIRED if self._validate_cert else ssl.CERT_NONE
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-            if self._cafile or self._capath:  # no cov
-                self._tls_context.load_verify_locations(self._cafile, self._capath, None)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-            else:
-                self._tls_context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-            if self._cert:  # no cov
-                self._tls_context.load_cert_chain(self._cert, keyfile=self._private_key)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.create_default_context
-            if 'SSLv3' in self._allowed_versions:  # no cov
-                self._tls_context.options &= ~ssl.OP_NO_SSLv3
-
-        return self._tls_context

@@ -33,14 +33,17 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[Redis] High memory consumption": "assets/monitors/high_mem.json"
+    },
     "dashboards": {
       "redis": "assets/dashboards/overview.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "pid_overview": "assets/saved_views/pid_overview.json",
-      "redis_pattern": "assets/saved_views/redis_pattern.json"
+      "redis_pattern": "assets/saved_views/redis_pattern.json",
+      "redis_processes": "assets/saved_views/redis_processes.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

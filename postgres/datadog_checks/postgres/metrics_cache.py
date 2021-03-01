@@ -91,6 +91,8 @@ class PostgresMetricsCache:
 
         if not self.config.collect_default_db:
             res["query"] += "  AND psd.datname not ilike 'postgres'"
+        if self.config.dbstrict:
+            res["query"] += "  AND psd.datname in('{}')".format(self.config.dbname)
 
         return res
 
@@ -152,22 +154,21 @@ class PostgresMetricsCache:
         """Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
-        Uses a dictionary to save the result for each instance
+        Caches the result on a dictionary
         """
-        metrics = self.replication_metrics
-        if version >= V10 and metrics is None:
+        if self.replication_metrics is not None:
+            return self.replication_metrics
+
+        if is_aurora:
+            logger.debug("Detected Aurora {}. Won't collect replication metrics", version)
+            self.replication_metrics = {}
+        elif version >= V10:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
-            metrics = self.replication_metrics
-        elif version >= V9_1 and metrics is None:
-            if is_aurora:
-                logger.debug("Detected Aurora {}. Won't collect replication metrics", version)
-                self.replication_metrics = {}
-            else:
-                self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-                if version >= V9_2:
-                    self.replication_metrics.update(REPLICATION_METRICS_9_2)
-            metrics = self.replication_metrics
-        return metrics
+        elif version >= V9_1:
+            self.replication_metrics = dict(REPLICATION_METRICS_9_1)
+            if version >= V9_2:
+                self.replication_metrics.update(REPLICATION_METRICS_9_2)
+        return self.replication_metrics
 
     def get_replication_stats_metrics(self, version):
         if version >= V10 and self.replication_stats_metrics is None:

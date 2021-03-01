@@ -5,7 +5,7 @@ import re
 from contextlib import contextmanager
 
 from ...subprocess import run_command
-from ...utils import find_free_port, get_ip, path_join
+from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
@@ -241,7 +241,19 @@ class DockerInterface(object):
             # Mount the /proc directory
             '/proc:/host/proc',
         ]
-        volumes.extend(self.metadata.get('docker_volumes', []))
+        if not ON_WINDOWS:
+            volumes.extend(self.metadata.get('docker_volumes', []))
+        else:
+            for volume in self.metadata.get('docker_volumes', []):
+                parts = volume.split(':')
+                possible_file = ':'.join(parts[:2])
+                if not file_exists(possible_file):
+                    volumes.append(volume)
+                else:
+                    # Workaround for https://github.com/moby/moby/issues/30555
+                    vm_file = possible_file.replace(':', '/', 1).replace('\\', '/')
+                    remaining = ':'.join(parts[2:])
+                    volumes.append(f'/{vm_file}:{remaining}')
 
         command = [
             'docker',

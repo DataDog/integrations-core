@@ -17,7 +17,7 @@ server {
 
     auth_gss on;
     auth_gss_keytab ${KRB5_KEYTAB};
-    auth_gss_service_name ${KRB5_SVC}/${HOSTNAME}.${DOMAIN};
+    auth_gss_service_name ${SERVICE_NAME};
     auth_gss_realm ${KRB5_REALM};
     auth_gss_allow_basic_fallback off;
   }

@@ -1,0 +1,90 @@
+version: '3.7'
+
+services:
+
+  agent:
+    image: agent
+    build: ./kerberos-agent
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      KRB5_KEYTAB: ${KRB5_KEYTAB}
+      KRB5_CCNAME: ${KRB5_CCNAME}
+      KRB5_REALM: ${KRB5_REALM}
+      KRB5_SVC: ${KRB5_SVC}
+      KRB5_KDC: kerberos-kdc
+      WEBHOST: ${WEBHOST}
+      DOMAIN: example.com
+      KRB5_USER: datadog/admin
+      KRB5_PASS: 123pass
+    hostname: agent
+    domainname: example.com
+    volumes:
+      - ${SHARED_VOLUME}:${SHARED_VOLUME}
+    networks:
+      kdc-net:
+        aliases:
+          - agent.example.com
+    depends_on:
+      - web
+      - kerberos-kdc
+
+
+  kerberos-kdc:
+    build: ./kerberos-kdc
+    image: kerberos-kdc
+    environment:
+      KRB5_KEYTAB: ${KRB5_KEYTAB}
+      KRB5_CCNAME: ${KRB5_CCNAME}
+      KRB5_REALM: ${KRB5_REALM}
+      KRB5_SVC: ${KRB5_SVC}
+      KRB5_KDC: kerberos-kdc
+      WEBHOST: ${WEBHOST}
+      DOMAIN: example.com
+      KRB5_USER: datadog/admin
+      KRB5_PASS: 123pass
+    hostname: kerberos-kdc
+    domainname: example.com
+    volumes: 
+      - ${SHARED_VOLUME}:${SHARED_VOLUME}
+    networks:
+      kdc-net:
+        aliases:
+          - kerberos-kdc.example.com
+    ports:
+      - "88:8888"
+      - "749:8749"
+      - "464:8464"
+
+  web:
+    image: kerberos-nginx:1.17.3
+    build: ./kerberos-nginx
+    environment:
+      KRB5_KEYTAB: ${KRB5_KEYTAB}
+      KRB5_CCNAME: ${KRB5_CCNAME}
+      KRB5_REALM: ${KRB5_REALM}
+      KRB5_SVC: ${KRB5_SVC}
+      KRB5_KDC: kerberos-kdc
+      WEBHOST: ${WEBHOST}
+      WEBPORT: ${WEBPORT}
+      DOMAIN: example.com
+      KRB5_USER: datadog/admin
+      KRB5_PASS: 123pass
+      SERVICE_NAME: ${KRB5_SVC}/compose_web_1.compose_kdc-net
+    hostname: web
+    domainname: example.com
+    volumes: 
+      - ${SHARED_VOLUME}:${SHARED_VOLUME}
+    networks:
+      kdc-net:
+        aliases:
+          - ${WEBHOST}
+    expose:
+      - "${WEBPORT}"
+    ports:
+      - "${WEBPORT}:${WEBPORT}"
+    depends_on:
+      - kerberos-kdc
+
+networks:
+  kdc-net: {}
+

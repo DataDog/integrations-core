@@ -25,7 +25,7 @@ files:
       value:
         type: string
         example: /var/run/redis/redis.sock
-        default: null
+        display_default: null
     - name: db
       description: |
         The index of the database (keyspace) to use.
@@ -109,7 +109,7 @@ files:
       description: |
         Set the maximum number of entries to fetch from the slow query log.
         By default, the check reads this value from the redis config, but is limited to 128.
-        
+
         Set a custom value here if you need to get more than 128 slowlog entries every 15 seconds.
         Warning: Higher values may impact the performance of your Redis instance.
       value:

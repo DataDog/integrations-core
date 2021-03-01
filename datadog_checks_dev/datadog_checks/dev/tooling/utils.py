@@ -291,6 +291,11 @@ def get_assets_from_manifest(check_name, asset_type):
     paths = load_manifest(check_name).get('assets', {}).get(asset_type, {})
     assets = []
     nonexistent_assets = []
+
+    # translate singular string assets (like `service_checks`) to a dict
+    if isinstance(paths, str):
+        paths = {'_': paths}
+
     for path in paths.values():
         asset = os.path.join(get_root(), check_name, *path.split('/'))
 
@@ -299,6 +304,7 @@ def get_assets_from_manifest(check_name, asset_type):
             continue
         else:
             assets.append(asset)
+
     return sorted(assets), nonexistent_assets
 
 
@@ -318,6 +324,15 @@ def get_default_config_spec(check_name):
     return os.path.join(get_root(), check_name, 'assets', 'configuration', 'spec.yaml')
 
 
+def get_docs_spec(check_name):
+    path = load_manifest(check_name).get('assets', {}).get('docs', {}).get('spec', '')
+    return os.path.join(get_root(), check_name, *path.split('/'))
+
+
+def get_default_docs_spec(check_name):
+    return os.path.join(get_root(), check_name, 'assets', 'docs', 'spec.yaml')
+
+
 def get_assets_directory(check_name):
     return os.path.join(get_root(), check_name, 'assets')
 
@@ -331,6 +346,10 @@ def get_data_directory(check_name):
 
 def get_check_directory(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name)
+
+
+def get_check_package_directory(check_name):
+    return os.path.join(get_root(), check_name)
 
 
 def get_test_directory(check_name):
@@ -474,6 +493,18 @@ def load_manifest(check_name):
     return {}
 
 
+def load_service_checks(check_name):
+    """
+    Load the service checks into a list of dicts, if available.
+    """
+    # Note: currently only loads the first available service check file.
+    # needs expansion if we ever end up supporting multiple files
+    service_check, _ = get_assets_from_manifest(check_name, 'service_checks')
+    if service_check:
+        return json.loads(read_file(service_check[0]).strip())
+    return []
+
+
 def load_saved_views(path):
     """
     Load the saved view file into a dictionary
@@ -560,13 +591,21 @@ def has_agent_8_check_signature(check):
 
 
 def has_saved_views(check):
+    return _has_asset_in_manifest(check, 'saved_views')
+
+
+def has_recommended_monitor(check):
+    return _has_asset_in_manifest(check, 'monitors')
+
+
+def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
     except JSONDecodeError as e:
         raise Exception("Cannot decode {}: {}".format(manifest_file, e))
-    return len(manifest.get('assets', {}).get('saved_views', {})) > 0
+    return len(manifest.get('assets', {}).get(asset, {})) > 0
 
 
 def is_tile_only(check):

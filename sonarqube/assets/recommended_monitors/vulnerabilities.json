@@ -1,6 +1,6 @@
 {
 	"name": "[SonarQube] Vulnerabilities",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "max(last_5m):avg:sonarqube.security.vulnerabilities{*} > 0",
 	"message": "At least one vulnerability has been detected.",
 	"tags": [

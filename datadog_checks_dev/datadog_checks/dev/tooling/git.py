@@ -98,7 +98,7 @@ def git_commit(targets, message, force=False, sign=False, update=False):
     """
     Commit the changes for the given targets.
 
-    `targets` - be files or directiries
+    `targets` - be files or directories
     `message` - the commit message
     `force` - (optional) force the commit
     `sign` - sign with `-S` option

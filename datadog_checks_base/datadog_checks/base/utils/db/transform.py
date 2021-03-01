@@ -5,12 +5,16 @@ from __future__ import division
 
 import re
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Tuple
+
+from datadog_checks.base.types import ServiceCheckStatus
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
 from .. import constants
 from ..common import compute_percent, total_time_to_temporal_percent
-from .utils import create_extra_transformer, normalize_datetime
+from ..time import ensure_aware_datetime
+from .utils import create_extra_transformer
 
 # Used for the user-defined `expression`s
 ALLOWED_GLOBALS = {
@@ -26,6 +30,7 @@ SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
 def get_tag(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> str
     """
     Convert a column to a tag that will be used in every subsequent submission.
 
@@ -49,6 +54,7 @@ def get_tag(transformers, column_name, **modifiers):
 
 
 def get_tag_list(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], List[str]]
     """
     Convert a column to a list of tags that will be used in every submission.
 
@@ -70,6 +76,7 @@ def get_tag_list(transformers, column_name, **modifiers):
 
 
 def get_monotonic_gauge(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], None]
     """
     Send the result as both a `gauge` suffixed by `.total` and a `monotonic_count` suffixed by `.count`.
     """
@@ -84,6 +91,7 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
 
 
 def get_temporal_percent(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], None]
     """
     Send the result as percentage of time since the last check run as a `rate`.
 
@@ -126,6 +134,7 @@ def get_temporal_percent(transformers, column_name, **modifiers):
 
 
 def get_match(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], None]
     """
     This is used for querying unstructured data.
 
@@ -210,6 +219,7 @@ def get_match(transformers, column_name, **modifiers):
 
 
 def get_service_check(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], None]
     """
     Submit a service check.
 
@@ -234,6 +244,7 @@ def get_service_check(transformers, column_name, **modifiers):
 
 
 def get_time_elapsed(transformers, column_name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], None]
     """
     Send the number of seconds elapsed from a time in the past as a `gauge`.
 
@@ -258,19 +269,20 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     if time_format == 'native':
 
         def time_elapsed(_, value, **kwargs):
-            value = normalize_datetime(value)
+            value = ensure_aware_datetime(value)
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
     else:
 
         def time_elapsed(_, value, **kwargs):
-            value = normalize_datetime(datetime.strptime(value, time_format))
+            value = ensure_aware_datetime(datetime.strptime(value, time_format))
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
 
     return time_elapsed
 
 
 def get_expression(transformers, name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], Any]
     """
     This allows the evaluation of a limited subset of Python syntax and built-in functions.
 
@@ -375,6 +387,7 @@ def get_expression(transformers, name, **modifiers):
 
 
 def get_percent(transformers, name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Callable[[Any, Any, Any], None]
     """
     Send a percentage based on 2 sources as a `gauge`.
 
@@ -441,6 +454,7 @@ EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}
 
 
 def _compile_service_check_statuses(modifiers):
+    # type: (Dict[str, Any]) -> Dict[str, ServiceCheckStatus]
     status_map = modifiers.pop('status_map', None)
     if status_map is None:
         raise ValueError('the `status_map` parameter is required')
@@ -467,6 +481,7 @@ def _compile_service_check_statuses(modifiers):
 
 
 def _compile_match_items(transformers, modifiers):
+    # type: (Dict[str, Any], Dict[str, Any]) -> Dict[str, Tuple[str, Any]]
     items = modifiers.pop('items', None)
     if items is None:
         raise ValueError('the `items` parameter is required')

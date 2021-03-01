@@ -87,7 +87,6 @@ The type system is based on a loose subset of OpenAPI 3 [data types][openapi-dat
 
 The differences are:
 
-- Types cannot be mixed e.g. `oneOf` is invalid in all cases
 - Only the `minimum` and `maximum` numeric modifiers are supported
 - Only the `pattern` string modifier is supported
 - The `properties` object modifier is not a map, but rather a list of maps with a required `name`
@@ -105,7 +104,7 @@ The template format looks like `path/to/template_file` where `path/to` must poin
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
 You can use custom templates that will take precedence over the pre-defined templates by using the `template_paths`
-parameter of the [ConfigSpec](#datadog_checks.dev.tooling.configuration.core.ConfigSpec) class.
+parameter of the [ConfigSpec](#datadog_checks.dev.tooling.specs.configuration.core.ConfigSpec) class.
 
 ### Override
 
@@ -126,12 +125,14 @@ are shipped with every Agent and individual Integration release.
 
 It respects a few extra [option](#options)-level attributes:
 
-- `example` - A complete example of a option in lieu of a strictly typed `value` attribute
+- `example` - A complete example of an option in lieu of a strictly typed `value` attribute
 - `enabled` - Whether or not to un-comment the option, overriding the behavior of `required`
+- `display_priority` - This is an integer affecting the order in which options are displayed, with higher values indicating higher priority.
+  The default is `0`.
 
 It also respects a few extra fields under the `value` attribute of each option:
 
-- `default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
+- `display_default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
   You may set it to `null` explicitly to disable showing this part of the header.
 - `compact_example` - Whether or not to display complex types like arrays in their most compact representation. It defaults to `false`.
 
@@ -141,7 +142,7 @@ Use the `--sync` flag of the [config validation command](../ddev/cli.md#config_1
 
 ## API
 
-::: datadog_checks.dev.tooling.configuration.ConfigSpec
+::: datadog_checks.dev.tooling.specs.configuration.ConfigSpec
     rendering:
       heading_level: 3
     selection:

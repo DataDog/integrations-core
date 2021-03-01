@@ -49,9 +49,9 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
-        self.config = PostgresConfig(self.instance)
-        self.metrics_cache = PostgresMetricsCache(self.config)
-        self.statement_metrics = PostgresStatementMetrics(self.config)
+        self._config = PostgresConfig(self.instance)
+        self.metrics_cache = PostgresMetricsCache(self._config)
+        self.statement_metrics = PostgresStatementMetrics(self._config)
         self._clean_state()
 
     def _clean_state(self):
@@ -126,10 +126,10 @@ class PostgreSql(AgentCheck):
             if is_relations:
                 schema_field = get_schema_field(descriptors)
                 relations_filter = build_relations_filter(relations_config, schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
+                self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
                 cursor.execute(query.format(relations=relations_filter))
             else:
-                self.log.debug("Running query: %s", query)
+                self.log.debug("Running query: %s", str(query))
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
@@ -159,15 +159,15 @@ class PostgreSql(AgentCheck):
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
-        if is_relations and len(results) > self.config.max_relations:
+        if is_relations and len(results) > self._config.max_relations:
             self.warning(
                 "Query: %s returned more than %s results (%s). "
                 "Truncating. You can edit this limit by setting the `max_relations` config option",
                 query,
-                self.config.max_relations,
+                self._config.max_relations,
                 len(results),
             )
-            results = results[: self.config.max_relations]
+            results = results[: self._config.max_relations]
 
         return results
 
@@ -248,16 +248,16 @@ class PostgreSql(AgentCheck):
 
         metric_scope = [CONNECTION_METRICS]
 
-        if self.config.collect_function_metrics:
+        if self._config.collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)
-        if self.config.collect_count_metrics:
+        if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
 
         # Do we need relation-specific metrics?
         relations_config = {}
-        if self.config.relations:
+        if self._config.relations:
             metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
-            relations_config = self._build_relations_config(self.config.relations)
+            relations_config = self._build_relations_config(self._config.relations)
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -277,12 +277,12 @@ class PostgreSql(AgentCheck):
         self._query_scope(cursor, bgw_instance_metrics, instance_tags, False, relations_config)
         self._query_scope(cursor, archiver_instance_metrics, instance_tags, False, relations_config)
 
-        if self.config.collect_activity_metrics:
+        if self._config.collect_activity_metrics:
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
 
-        for scope in list(metric_scope) + self.config.custom_metrics:
-            self._query_scope(cursor, scope, instance_tags, scope in self.config.custom_metrics, relations_config)
+        for scope in list(metric_scope) + self._config.custom_metrics:
+            self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics, relations_config)
 
         cursor.close()
 
@@ -297,36 +297,36 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            if self.config.host == 'localhost' and self.config.password == '':
+            if self._config.host == 'localhost' and self._config.password == '':
                 # Use ident method
                 connection_string = "user=%s dbname=%s application_name=%s" % (
-                    self.config.user,
-                    self.config.dbname,
-                    self.config.application_name,
+                    self._config.user,
+                    self._config.dbname,
+                    self._config.application_name,
                 )
-                if self.config.query_timeout:
-                    connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
+                if self._config.query_timeout:
+                    connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
                 self.db = psycopg2.connect(connection_string)
             else:
                 args = {
-                    'host': self.config.host,
-                    'user': self.config.user,
-                    'password': self.config.password,
-                    'database': self.config.dbname,
-                    'sslmode': self.config.ssl_mode,
-                    'application_name': self.config.application_name,
+                    'host': self._config.host,
+                    'user': self._config.user,
+                    'password': self._config.password,
+                    'database': self._config.dbname,
+                    'sslmode': self._config.ssl_mode,
+                    'application_name': self._config.application_name,
                 }
-                if self.config.port:
-                    args['port'] = self.config.port
-                if self.config.query_timeout:
-                    args['options'] = '-c statement_timeout=%s' % self.config.query_timeout
+                if self._config.port:
+                    args['port'] = self._config.port
+                if self._config.query_timeout:
+                    args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
                 self.db = psycopg2.connect(**args)
 
     def _collect_custom_queries(self, tags):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
-        for custom_query in self.config.custom_queries:
+        for custom_query in self._config.custom_queries:
             metric_prefix = custom_query.get('metric_prefix')
             if not metric_prefix:
                 self.log.error("custom query field `metric_prefix` is required")
@@ -424,37 +424,37 @@ class PostgreSql(AgentCheck):
             self.count(metric_name, metric_value, tags=list(set(metrics_tags + tags)))
 
     def check(self, _):
-        tags = copy.copy(self.config.tags)
+        tags = copy.copy(self._config.tags)
         # Collect metrics
         try:
             # Check version
             self._connect()
-            if self.config.tag_replication_role:
+            if self._config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s", str(self.version))
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self._is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            if self.config.deep_database_monitoring:
+            if self._config.deep_database_monitoring:
                 self._collect_per_statement_metrics(tags)
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
-                self.config.host, self.config.port, self.config.dbname, str(e)
+                self._config.host, self._config.port, self._config.dbname, str(e)
             )
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags, message=message
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags, message=message
             )
             raise e
         else:
             message = u'Established connection to postgres://%s:%s/%s' % (
-                self.config.host,
-                self.config.port,
-                self.config.dbname,
+                self._config.host,
+                self._config.port,
+                self._config.dbname,
             )
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.service_check_tags, message=message
+                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags, message=message
             )
             try:
                 # commit to close the current query transaction

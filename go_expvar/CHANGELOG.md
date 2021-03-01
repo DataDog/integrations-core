@@ -1,6 +1,6 @@
 # CHANGELOG - go_expvar
 
-## 1.11.0 / 2020-12-11
+## 1.11.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add config specs. See [#8006](https://github.com/DataDog/integrations-core/pull/8006).
 

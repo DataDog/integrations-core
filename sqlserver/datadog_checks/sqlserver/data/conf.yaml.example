@@ -42,12 +42,12 @@ instances:
   - host: <HOST>,<PORT>
 
     ## @param username - string - optional
-    ## Username for the Datadog-SQL server check user
+    ## Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## Password for the Datadog-SQL server check user
+    ## Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
     #
     # password: <PASSWORD>
 
@@ -176,7 +176,9 @@ instances:
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
     ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
-    ## "Trusted_Connection=yes" to use Windows Authentication
+    ## "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
+    ## with the `ddagentuser` user, you can find more information about this user
+    ## in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
     #
     # connection_string: <CONNECTION_STRING>
 

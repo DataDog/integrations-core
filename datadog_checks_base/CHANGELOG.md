@@ -1,5 +1,51 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.4.0 / 2021-02-09
+
+* [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
+* [Added] Add support for legacy config to OpenMetricsCompatibilityScraper. See [#8507](https://github.com/DataDog/integrations-core/pull/8507).
+
+## 16.3.2 / 2021-02-01
+
+* [Fixed] Fix histogram upper bound label name for new OpenMetrics implementation. See [#8505](https://github.com/DataDog/integrations-core/pull/8505).
+* [Fixed] Provide error message on subprocess output. See [#8455](https://github.com/DataDog/integrations-core/pull/8455).
+
+## 16.3.1 / 2021-01-29
+
+* [Fixed] Fix Prometheus summary quantile metrics. See [#8488](https://github.com/DataDog/integrations-core/pull/8488).
+
+## 16.3.0 / 2021-01-28
+
+* [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
+
+## 16.2.0 / 2021-01-24
+
+* [Added] Add `rate` OpenMetrics transformer. See [#8434](https://github.com/DataDog/integrations-core/pull/8434).
+* [Added] Remove any OpenMetrics metric prefixes immediately during parsing. See [#8432](https://github.com/DataDog/integrations-core/pull/8432).
+* [Added] Add OpenMetrics option to share labels conditionally based on sample values. See [#8431](https://github.com/DataDog/integrations-core/pull/8431).
+* [Fixed] Remove class substitution logic for new OpenMetrics base class. See [#8435](https://github.com/DataDog/integrations-core/pull/8435).
+
+## 16.1.0 / 2021-01-22
+
+* [Added] Add new version of OpenMetrics base class. See [#8300](https://github.com/DataDog/integrations-core/pull/8300).
+* [Fixed] Properly support check namespacing for the `submit_histogram_bucket` method. See [#8390](https://github.com/DataDog/integrations-core/pull/8390).
+
+## 16.0.0 / 2021-01-13
+
+* [Added] Add `no_op` utility. See [#8356](https://github.com/DataDog/integrations-core/pull/8356).
+* [Added] Support tags set at runtime on the DB QueryManager. See [#8304](https://github.com/DataDog/integrations-core/pull/8304).
+* [Added] Add the `host` tag to RDS instances' parsed tags. See [#8292](https://github.com/DataDog/integrations-core/pull/8292).
+* [Added] Update prometheus mixin to use the request wrapper. See [#8223](https://github.com/DataDog/integrations-core/pull/8223).
+* [Added] Add optional argument for overriding get_tls_context() parameters. See [#8275](https://github.com/DataDog/integrations-core/pull/8275).
+* [Added] Allow semver version metadata to start with an optional `v`. See [#8303](https://github.com/DataDog/integrations-core/pull/8303).
+* [Added] Update redis dependency. See [#8301](https://github.com/DataDog/integrations-core/pull/8301).
+* [Fixed] Fix aggregator stub's `assert_histogram_bucket` method. See [#8291](https://github.com/DataDog/integrations-core/pull/8291).
+* [Removed] Remove unneccessary `pytz` dependency. See [#8354](https://github.com/DataDog/integrations-core/pull/8354).
+
+## 15.7.2 / 2020-12-23 / Agent 7.25.0
+
+* [Fixed] Bump lxml to 4.6.2. See [#8249](https://github.com/DataDog/integrations-core/pull/8249).
+
 ## 15.7.1 / 2020-12-15
 
 * [Fixed] openmetrics: fix error in label_joins when metrics in label_mapping are not present anymore in active_label_mapping. See [#8167](https://github.com/DataDog/integrations-core/pull/8167).

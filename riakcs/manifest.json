@@ -32,6 +32,9 @@
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "riak-cs_processes": "assets/saved_views/riak-cs_processes.json"
+    }
   }
 }

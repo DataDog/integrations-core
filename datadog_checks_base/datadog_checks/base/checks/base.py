@@ -10,9 +10,9 @@ import logging
 import re
 import traceback
 import unicodedata
-from collections import defaultdict, deque
+from collections import deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
 from six import binary_type, iteritems, text_type
@@ -184,7 +184,6 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
-        self.metrics = defaultdict(list)  # type: DefaultDict[str, List[str]]
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -309,15 +308,19 @@ class AgentCheck(object):
 
         return self._http
 
-    def get_tls_context(self, refresh=False):
-        # type: (bool) -> ssl.SSLContext
+    def get_tls_context(self, refresh=False, overrides=None):
+        # type: (bool, Dict[AnyStr, Any]) -> ssl.SSLContext
         """
         Creates and cache an SSLContext instance based on user configuration.
+        Note that user configuration can be overridden by using `overrides`.
+        This should only be applied to older integration that manually set config values.
 
         Since: Agent 7.24
         """
         if not hasattr(self, '_tls_context_wrapper'):
-            self._tls_context_wrapper = TlsContextWrapper(self.instance or {}, self.TLS_CONFIG_REMAPPER)
+            self._tls_context_wrapper = TlsContextWrapper(
+                self.instance or {}, self.TLS_CONFIG_REMAPPER, overrides=overrides
+            )
 
         if refresh:
             self._tls_context_wrapper.refresh_tls_context()
@@ -389,8 +392,8 @@ class AgentCheck(object):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
-        # type: (str, float, int, int, bool, str, Sequence[str]) -> None
+    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False):
+        # type: (str, float, int, int, bool, str, Sequence[str], bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -412,7 +415,15 @@ class AgentCheck(object):
             hostname = ''
 
         aggregator.submit_histogram_bucket(
-            self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+            self,
+            self.check_id,
+            self._format_namespace(name, raw),
+            value,
+            lower_bound,
+            upper_bound,
+            monotonic,
+            hostname,
+            tags,
         )
 
     def _submit_metric(

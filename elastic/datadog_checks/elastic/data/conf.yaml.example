@@ -84,6 +84,12 @@ instances:
     #
     # pshard_stats: false
 
+    ## @param slm_stats - boolean - optional - default: false
+    ## Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
+    ## The user must have `manage_slm` cluster privilege to get these metrics.
+    #
+    # slm_stats: false
+
     ## @param pshard_graceful_timeout - boolean - optional - default: false
     ## Continue gracefully if pshard stats TO
     #
@@ -109,6 +115,11 @@ instances:
     ## Note: Only for ES versions 0.9.10 or higher.
     #
     # gc_collectors_as_rate: false
+
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
+    #
+    disable_legacy_cluster_tag: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

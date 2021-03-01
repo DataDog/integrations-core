@@ -2,11 +2,13 @@
 
 ## Overview
 
-Use the Datadog Agent to monitor how well Istio is performing.
+Datadog monitors every aspect of your Istio environment, so you can:
+- Assess the health of Envoy and the Istio control plane with logs ([see below](#log-collection)).
+- Break down the performance of your service mesh with request, bandwidth, and resource consumption metrics ([see below](#metrics)).
+- Map network communication between containers, pods, and services over the mesh with [Network Performance Monitoring][19].
+- Drill into distributed traces for applications transacting over the mesh with [APM][20].
 
-- Collect metrics on what apps are making what kinds of requests
-- Look at how applications are using bandwidth
-- Understand Istio's resource consumption
+To learn more about monitoring your Istio environment with Datadog, [see the Istio blog][21].
 
 ## Setup
 
@@ -54,7 +56,7 @@ Each of the endpoints is optional, but at least one must be configured. See the 
 
 Note: `connectionID` Prometheus label is excluded.
 
-##### Disable sidecar injection
+##### Disable sidecar injection for Datadog Agent pods
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
@@ -132,6 +134,7 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor your Istio service mesh with Datadog][9]
 - [Learn how Datadog collects key metrics to monitor Istio][14]
+- [How to monitor Istio with Datadog][21]
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -151,3 +154,6 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
 [18]: https://istio.io/v1.1/docs/tasks/telemetry/
+[19]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
+[20]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
+[21]: https://www.datadoghq.com/blog/istio-datadog/

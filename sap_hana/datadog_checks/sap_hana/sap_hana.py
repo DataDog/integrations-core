@@ -7,7 +7,7 @@ from collections import defaultdict
 from contextlib import closing
 from itertools import chain
 
-import pyhdb
+from pyhdb import OperationalError
 from six import iteritems
 from six.moves import zip
 
@@ -17,6 +17,7 @@ from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
+from .connection import HanaConnection
 from .exceptions import QueryExecutionError
 from .utils import compute_percent, positive
 
@@ -36,6 +37,7 @@ class SapHanaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._batch_size = int(self.instance.get('batch_size', 1000))
         self._tags = self.instance.get('tags', [])
+        self._use_tls = self.instance.get('use_tls', False)
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -98,7 +100,10 @@ class SapHanaCheck(AgentCheck):
                     continue
         finally:
             if self._connection_lost:
-                self._conn.close()
+                try:
+                    self._conn.close()
+                except OperationalError:
+                    self.log.debug("Could not close lost connection")
                 self._conn = None
                 self._connection_lost = False
 
@@ -543,8 +548,14 @@ class SapHanaCheck(AgentCheck):
 
     def get_connection(self):
         try:
-            connection = pyhdb.connection.Connection(
-                host=self._server, port=self._port, user=self._username, password=self._password, timeout=self._timeout
+            tls_context = self.get_tls_context() if self._use_tls else None
+            connection = HanaConnection(
+                host=self._server,
+                port=self._port,
+                user=self._username,
+                password=self._password,
+                tls_context=tls_context,
+                timeout=self._timeout,
             )
             connection.connect()
         except Exception as e:

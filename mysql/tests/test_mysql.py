@@ -57,7 +57,9 @@ def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
 
     _assert_complex_config(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=['alice.age', 'bob.age'])
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+    )
 
 
 def _assert_complex_config(aggregator):
@@ -72,6 +74,7 @@ def _assert_complex_config(aggregator):
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
+        + variables.STATEMENT_VARS
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
@@ -163,6 +166,7 @@ def test_complex_config_replica(aggregator, instance_complex):
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
+        + variables.STATEMENT_VARS
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
@@ -252,6 +256,70 @@ def test_statement_metrics(aggregator, instance_complex):
         )
 
 
+def test_generate_synthetic_rows():
+    rows = [
+        {
+            'count': 45,
+            'errors': 1,
+            'time': 1134,
+            'select_scan': 100,
+            'select_full_join': 98,
+            'no_index_used': 54,
+            'no_good_index_used': 12,
+            'lock_time': 1500,
+            'rows_affected': 10,
+            'rows_sent': 20,
+            'rows_examined': 50,
+        },
+        {
+            'count': 0,
+            'errors': 0,
+            'time': 0,
+            'select_scan': 0,
+            'select_full_join': 0,
+            'no_index_used': 0,
+            'no_good_index_used': 0,
+            'lock_time': 0,
+            'rows_affected': 0,
+            'rows_sent': 0,
+            'rows_examined': 0,
+        },
+    ]
+    result = statements.generate_synthetic_rows(rows)
+    assert result == [
+        {
+            'avg_time': 25.2,
+            'count': 45,
+            'errors': 1,
+            'time': 1134,
+            'select_scan': 100,
+            'select_full_join': 98,
+            'no_index_used': 54,
+            'no_good_index_used': 12,
+            'lock_time': 1500,
+            'rows_affected': 10,
+            'rows_sent': 20,
+            'rows_sent_ratio': 0.4,
+            'rows_examined': 50,
+        },
+        {
+            'avg_time': 0,
+            'count': 0,
+            'errors': 0,
+            'time': 0,
+            'select_scan': 0,
+            'select_full_join': 0,
+            'no_index_used': 0,
+            'no_good_index_used': 0,
+            'lock_time': 0,
+            'rows_affected': 0,
+            'rows_sent': 0,
+            'rows_sent_ratio': 0,
+            'rows_examined': 0,
+        },
+    ]
+
+
 def _test_optional_metrics(aggregator, optional_metrics, at_least):
     """
     Check optional metrics - there should be at least `at_least` matches
@@ -326,6 +394,39 @@ def test_parse_get_version():
         assert v.version == '5.5.12'
         assert v.flavor == 'MySQL'
         assert v.build == 'log'
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'replica_io_running, replica_sql_running, check_status',
+    [
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), MySql.CRITICAL),
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), MySql.CRITICAL),
+        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), MySql.OK),
+        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {}), MySql.WARNING),
+        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {}), MySql.WARNING),
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
+        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.OK),
+        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.OK),
+    ],
+)
+def test_replication_check_status(replica_io_running, replica_sql_running, check_status, instance_basic, aggregator):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+    mysql_check.service_check_tags = ['foo:bar']
+    mocked_results = {
+        'Slaves_connected': 1,
+        'Binlog_enabled': True,
+    }
+    if replica_io_running[1] is not None:
+        mocked_results[replica_io_running[0]] = replica_io_running[1]
+    if replica_sql_running[1] is not None:
+        mocked_results[replica_sql_running[0]] = replica_sql_running[1]
+
+    mysql_check._check_replication_status(mocked_results)
+
+    aggregator.assert_service_check('mysql.replication.slave_running', check_status, tags=['foo:bar'], count=1)
+    aggregator.assert_service_check('mysql.replication.replica_running', check_status, tags=['foo:bar'], count=1)
 
 
 @pytest.mark.integration

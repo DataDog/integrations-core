@@ -1,4 +1,8 @@
 from datadog_checks.base.stubs import aggregator
+from datadog_checks.dev import get_here
+from datadog_checks.linkerd.metrics import construct_metrics_config
+
+HERE = get_here()
 
 LINKERD_FIXTURE_METRICS = {
     'jvm:start_time': 'jvm.start_time',
@@ -338,6 +342,11 @@ MOCK_INSTANCE = {
     'type_overrides': LINKERD_FIXTURE_TYPES,
 }
 
+MOCK_INSTANCE_NEW = {
+    'openmetrics_endpoint': 'http://fake.tld/prometheus',
+    'extra_metrics': construct_metrics_config(LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES),
+}
+
 LINKERD_FIXTURE_VALUES = {
     'linkerd.jvm.start_time': 1.52103079e12,
     'linkerd.jvm.application_time_millis': 52340.887,
@@ -540,3 +549,28 @@ EXPECTED_METRICS_V2 = {
 EXPECTED_METRICS_V2_E2E = {
     k: aggregator.COUNT if v == aggregator.MONOTONIC_COUNT else v for k, v in EXPECTED_METRICS_V2.items()
 }
+
+EXPECTED_METRICS_V2_NEW = {}
+
+for metric_name, metric_type in list(EXPECTED_METRICS_V2.items()):
+    if metric_name == 'linkerd.prometheus.health':
+        EXPECTED_METRICS_V2_NEW['linkerd.openmetrics.health'] = metric_type
+    elif metric_name.endswith('_total'):
+        EXPECTED_METRICS_V2_NEW['{}.count'.format(metric_name[:-6])] = aggregator.MONOTONIC_COUNT
+    elif metric_name.endswith('.sum'):
+        EXPECTED_METRICS_V2_NEW[metric_name] = aggregator.MONOTONIC_COUNT
+    elif metric_name.endswith('.count'):
+        EXPECTED_METRICS_V2_NEW[metric_name] = aggregator.MONOTONIC_COUNT
+
+        metric_prefix = metric_name[:-6]
+        # Histogram buckets
+        if metric_prefix in (
+            'linkerd.control.response_latency',
+            'linkerd.response_latency',
+            'linkerd.route.actual_response_latency',
+            'linkerd.route.response_latency',
+            'linkerd.tcp.connection_duration',
+        ):
+            EXPECTED_METRICS_V2_NEW['{}.bucket'.format(metric_prefix)] = aggregator.MONOTONIC_COUNT
+    else:
+        EXPECTED_METRICS_V2_NEW[metric_name] = metric_type

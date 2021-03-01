@@ -1,5 +1,13 @@
 # CHANGELOG - process
 
+## 1.17.1 / 2021-01-25
+
+* [Fixed] Clear process cache if cached PIDs not found. See [#8414](https://github.com/DataDog/integrations-core/pull/8414). Thanks [gingerlime](https://github.com/gingerlime).
+
+## 1.17.0 / 2020-12-28
+
+* [Added] Clear stale PIDs from cache. See [#8263](https://github.com/DataDog/integrations-core/pull/8263). Thanks [gingerlime](https://github.com/gingerlime).
+
 ## 1.16.0 / 2020-09-09 / Agent 7.23.0
 
 * [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).

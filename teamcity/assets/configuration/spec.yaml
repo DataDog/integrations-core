@@ -55,3 +55,23 @@ files:
         example: false
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /opt/teamcity/logs/teamcity-server.log
+      source: teamcity
+    - type: file
+      path: /opt/teamcity/logs/teamcity-activities.log
+      source: teamcity
+    - type: file
+      path: /opt/teamcity/logs/teamcity-vcs.log
+      source: teamcity
+    - type: file
+      path: /opt/teamcity/logs/teamcity-cleanup.log
+      source: teamcity
+    - type: file
+      path: /opt/teamcity/logs/teamcity-notifications.log
+      source: teamcity
+    - type: file
+      path: /opt/teamcity/logs/teamcity-ws.log
+      source: teamcity

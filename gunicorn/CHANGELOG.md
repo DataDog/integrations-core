@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.14.1 / 2021-01-15
+
+* [Fixed] Prevent raising an error if the master process no longer exists. See [#8314](https://github.com/DataDog/integrations-core/pull/8314).
+
 ## 1.14.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

@@ -28,6 +28,7 @@ class PostgresConfig:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
+        self.dbstrict = is_affirmative(instance.get('dbstrict', False))
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
@@ -61,6 +62,7 @@ class PostgresConfig:
 
         # Deep Database monitoring adds additional telemetry for statement metrics
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
 

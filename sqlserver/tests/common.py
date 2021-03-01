@@ -8,6 +8,17 @@ from itertools import chain
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import (
+    AO_METRICS,
+    AO_METRICS_PRIMARY,
+    AO_METRICS_SECONDARY,
+    DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_METRICS,
+    FCI_METRICS,
+    INSTANCE_METRICS,
+    INSTANCE_METRICS_TOTAL,
+    TASK_SCHEDULER_METRICS,
+)
 
 
 def get_local_driver():
@@ -32,21 +43,30 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
-EXPECTED_METRICS = [
+EXPECTED_DEFAULT_METRICS = [
     m[0]
     for m in chain(
-        SQLServer.INSTANCE_METRICS,
-        SQLServer.INSTANCE_METRICS_TOTAL,
-        SQLServer.TASK_SCHEDULER_METRICS,
-        SQLServer.DATABASE_METRICS,
-        SQLServer.DATABASE_FRAGMENTATION_METRICS,
-        SQLServer.FCI_METRICS,
+        INSTANCE_METRICS,
+        INSTANCE_METRICS_TOTAL,
+        DATABASE_METRICS,
     )
-] + CUSTOM_METRICS
+]
+EXPECTED_METRICS = (
+    EXPECTED_DEFAULT_METRICS
+    + [
+        m[0]
+        for m in chain(
+            TASK_SCHEDULER_METRICS,
+            DATABASE_FRAGMENTATION_METRICS,
+            FCI_METRICS,
+        )
+    ]
+    + CUSTOM_METRICS
+)
 
-EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in SQLServer.AO_METRICS_PRIMARY]
-EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in SQLServer.AO_METRICS_SECONDARY]
-EXPECTED_AO_METRICS_COMMON = [m[0] for m in SQLServer.AO_METRICS]
+EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
+EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
+EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -86,17 +106,22 @@ CUSTOM_QUERY_B = {
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
 INSTANCE_E2E['driver'] = 'FreeTDS'
 
-INSTANCE_SQL2017 = {
+INSTANCE_SQL2017_DEFAULTS = {
     'host': LOCAL_SERVER,
     'username': 'sa',
     'password': 'Password12!',
-    'connector': 'odbc',
-    'driver': '{ODBC Driver 17 for SQL Server}',
-    'include_task_scheduler_metrics': True,
-    'include_db_fragmentation_metrics': True,
-    'include_fci_metrics': True,
-    'include_ao_metrics': False,
 }
+INSTANCE_SQL2017 = INSTANCE_SQL2017_DEFAULTS.copy()
+INSTANCE_SQL2017.update(
+    {
+        'connector': 'odbc',
+        'driver': '{ODBC Driver 17 for SQL Server}',
+        'include_task_scheduler_metrics': True,
+        'include_db_fragmentation_metrics': True,
+        'include_fci_metrics': True,
+        'include_ao_metrics': False,
+    }
+)
 
 INIT_CONFIG = {
     'custom_metrics': [

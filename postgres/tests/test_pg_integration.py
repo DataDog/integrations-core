@@ -230,7 +230,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
 
     for _ in range(3):
         check.check(pg_instance)
-        assert check.config.tags == expected_tags
+        assert check._config.tags == expected_tags
 
 
 def test_statement_metrics(aggregator, integration_check, pg_instance):

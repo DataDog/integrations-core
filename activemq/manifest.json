@@ -32,11 +32,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "activemq": "assets/dashboards/activemq_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "activemq"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "activemq_processes": "assets/saved_views/activemq_processes.json"
+    }
   }
 }

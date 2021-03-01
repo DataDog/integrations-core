@@ -3,13 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-HOST = get_docker_hostname()
+# from datadog_checks.dev import get_docker_hostname
+# HOST = get_docker_hostname()
+# get_docker_hostname value value causes socket error on azure CI, so we have
+# to hardcode the ip 127.0.0.1 to make it work.
+# get_docker_hostname is still useful to test locally.
+HOST = "127.0.0.1"
 PORT = 3000
+VERSION = os.environ.get('AEROSPIKE_VERSION')
 
 NAMESPACE_METRICS = [
     'objects',
@@ -19,9 +23,12 @@ NAMESPACE_METRICS = [
     'tombstones',
     'retransmit_all_batch_sub_dup_res',
     'truncate_lut',
+    'ops_sub_write_success',
+]
+
+TPS_METRICS = [
     'tps.write',
     'tps.read',
-    'ops_sub_write_success',
 ]
 
 SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
@@ -49,6 +56,24 @@ LAZY_METRICS = [
     'aerospike.namespace.latency.batch_index_over_8ms',
     'aerospike.namespace.latency.batch_index_over_1ms',
     'aerospike.namespace.latency.batch_index_ops_sec',
+]
+
+LATENCIES_METRICS = [
+    'aerospike.namespace.latency.read_over_1ms',
+    'aerospike.namespace.latency.read_over_8ms',
+    'aerospike.namespace.latency.read_over_64ms',
+    'aerospike.namespace.latency.read',
+    'aerospike.namespace.latency.read_ops_sec',
+    'aerospike.namespace.latency.write_ops_sec',
+    'aerospike.namespace.latency.write_over_1ms',
+    'aerospike.namespace.latency.write_over_64ms',
+    'aerospike.namespace.latency.write',
+    'aerospike.namespace.latency.write_over_8ms',
+    'aerospike.namespace.latency.batch_index_ops_sec',
+    'aerospike.namespace.latency.batch_index_over_1ms',
+    'aerospike.namespace.latency.batch_index_over_64ms',
+    'aerospike.namespace.latency.batch_index',
+    'aerospike.namespace.latency.batch_index_over_8ms',
 ]
 
 INSTANCE = {

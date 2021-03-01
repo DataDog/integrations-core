@@ -90,6 +90,7 @@ def assert_collection(aggregator, tags, runs=1):
                     raise
             else:
                 aggregator.assert_metric_has_tag_prefix(metric, 'is_leader:')
+                aggregator.assert_metric_has_tag_prefix(metric, 'vault_cluster:')
                 aggregator.assert_metric_has_tag_prefix(metric, 'cluster_name:')
                 aggregator.assert_metric_has_tag_prefix(metric, 'vault_version:')
 

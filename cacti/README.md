@@ -16,7 +16,7 @@ The Cacti check is included in the [Datadog Agent][1] package, to start gatherin
 1. Install `librrd` headers and libraries.
 2. Install python bindings to `rrdtool`.
 
-#### librrd headers and librairies
+#### librrd headers and libraries
 
 On Debian/Ubuntu:
 

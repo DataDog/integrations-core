@@ -4,6 +4,7 @@
 from __future__ import division
 
 import logging
+import ssl
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from itertools import chain
@@ -19,12 +20,21 @@ from . import views
 from .utils import kilobytes_to_bytes, node_state_to_service_check
 
 # Python 3 only
+PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
 class VerticaCheck(AgentCheck):
     __NAMESPACE__ = 'vertica'
     SERVICE_CHECK_CONNECT = 'can_connect'
     SERVICE_CHECK_NODE_STATE = 'node_state'
+
+    # This remapper is used to support legacy Vertica integration config values
+    TLS_CONFIG_REMAPPER = {
+        'cert': {'name': 'tls_cert'},
+        'private_key': {'name': 'tls_private_key'},
+        'ca_cert': {'name': 'tls_ca_cert'},
+        'validate_hostname': {'name': 'tls_validate_hostname'},
+    }
 
     def __init__(self, name, init_config, instances):
         super(VerticaCheck, self).__init__(name, init_config, instances)
@@ -44,8 +54,13 @@ class VerticaCheck(AgentCheck):
 
         self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
 
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify', True))
-        self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
+        # If `tls_verify` is explicitly set to true, set `use_tls` to true (for legacy support)
+        # `tls_verify` used to do what `use_tls` does now
+        self._tls_verify = is_affirmative(self.instance.get('tls_verify'))
+        self._use_tls = is_affirmative(self.instance.get('use_tls', False))
+
+        if self._tls_verify and not self._use_tls:
+            self._use_tls = True
 
         custom_queries = self.instance.get('custom_queries', [])
         use_global_custom_queries = self.instance.get('use_global_custom_queries', True)
@@ -558,7 +573,7 @@ class VerticaCheck(AgentCheck):
             # but we still get logs via parent root logger
             connection_options['log_path'] = ''
 
-        if self._tls_verify:
+        if self._use_tls:
             tls_context = self.get_tls_context()
             connection_options['ssl'] = tls_context
 

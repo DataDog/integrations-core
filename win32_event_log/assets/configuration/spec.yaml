@@ -111,6 +111,9 @@ files:
           type:
            - Error
            - Warning
+           - Information
+           - Success Audit
+           - Failure Audit
           id:
            - 9000
     - name: included_messages
@@ -236,7 +239,7 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
-        default: <PAYLOAD_SIZE>
+        display_default: <PAYLOAD_SIZE>
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -248,7 +251,7 @@ files:
       enabled: true
       value:
         type: boolean
-        default: true
+        display_default: true
         example: false
     - name: host
       description: |
@@ -260,7 +263,7 @@ files:
       value:
         type: string
         example: <REMOTE_HOSNAME>
-        default: localhost
+        display_default: localhost
     - name: log_file
       description: |
         The `log_file` filter instructs the check to only capture events
@@ -295,7 +298,7 @@ files:
           type: string
         example:
           - information
-        default: information
+        display_default: information
     - name: event_id
       description: |
         The `event_id` filter instructs the check to only capture events
@@ -336,7 +339,7 @@ files:
         type: array
         items:
           type: string
-        default: Message
+        display_default: Message
         example:
           - Message
     - template: instances/default
