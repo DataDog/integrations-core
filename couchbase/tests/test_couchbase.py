@@ -131,9 +131,8 @@ def test_metadata(instance_query, datadog_agent):
     check = Couchbase('couchbase', {}, instances=[instance_query])
     check.check_id = 'test:123'
     check.check(instance_query)
-    server = instance_query['server']
 
-    data = check.get_data(server, instance_query)
+    data = check.get_data()
 
     nodes = data['stats']['nodes']
 
