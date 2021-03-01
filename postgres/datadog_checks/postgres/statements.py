@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
 
+import copy
+
 import psycopg2
 import psycopg2.extras
 
@@ -61,7 +63,46 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
     'query': 'query',
 }
 
-DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
+# These limits define the top K and bottom K unique query rows for each metric. For each check run the
+# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
+DEFAULT_STATEMENT_METRICS_LIMITS = {
+    'calls': (400, 0),
+    'total_time': (400, 0),
+    'rows': (400, 0),
+    'shared_blks_hit': (50, 0),
+    'shared_blks_read': (50, 0),
+    'shared_blks_dirtied': (50, 0),
+    'shared_blks_written': (50, 0),
+    'local_blks_hit': (50, 0),
+    'local_blks_read': (50, 0),
+    'local_blks_dirtied': (50, 0),
+    'local_blks_written': (50, 0),
+    'temp_blks_read': (50, 0),
+    'temp_blks_written': (50, 0),
+    # Synthetic column limits
+    'avg_time': (400, 0),
+    'shared_blks_ratio': (0, 50),
+}
+
+
+def generate_synthetic_rows(rows):
+    """
+    Given a list of rows, generate a new list of rows with "synthetic" column values derived from
+    the existing row values.
+    """
+    synthetic_rows = []
+    for row in rows:
+        new = copy.copy(row)
+        new['avg_time'] = float(new['total_time']) / new['calls'] if new['calls'] > 0 else 0
+        new['shared_blks_ratio'] = (
+            float(new['shared_blks_hit']) / (new['shared_blks_hit'] + new['shared_blks_read'])
+            if new['shared_blks_hit'] + new['shared_blks_read'] > 0
+            else 0
+        )
+
+        synthetic_rows.append(new)
+
+    return synthetic_rows
 
 
 class PostgresStatementMetrics(object):
@@ -141,9 +182,17 @@ class PostgresStatementMetrics(object):
             return (queryid, row['datname'], row['rolname'])
 
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
+        metrics.append(('dd.postgres.queries.query_rows_raw', len(rows), []))
+
+        rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
-            rows, DEFAULT_STATEMENT_METRIC_LIMITS, tiebreaker_metric='calls', tiebreaker_reverse=True, key=row_keyfunc
+            rows,
+            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRICS_LIMITS,
+            tiebreaker_metric='calls',
+            tiebreaker_reverse=True,
+            key=row_keyfunc,
         )
+        metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
 
         for row in rows:
             try:
