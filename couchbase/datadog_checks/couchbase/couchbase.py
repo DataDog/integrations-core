@@ -45,15 +45,11 @@ class Couchbase(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
-        self._sync_gateway_url = self.instance.get("sync_gateway_url")
         self._server = self.instance.get('server', None)
         if self._server is None:
             raise ConfigurationError("The server must be specified")
         self._tags = list(set(self.instance.get('tags', [])))
         self._tags.append('instance:{}'.format(self._server))
-
-        # Clean up tags in case there was a None entry in the instance
-        # e.g. if the yaml contains tags: but no actual tags
 
         # Keep track of all instances
         self._instance_states = defaultdict(lambda: self.CouchbaseInstanceState())
@@ -191,8 +187,6 @@ class Couchbase(AgentCheck):
         data = self.get_data()
         self._collect_version(data)
         self._create_metrics(data)
-        if self._sync_gateway_url:
-            self._collect_sync_gateway_metrics(self._sync_gateway_url)
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
