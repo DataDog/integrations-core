@@ -222,6 +222,23 @@ def test_e2e_symbol_metric_tags(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
+def test_e2e_extract_value_using_regex(dd_agent_check):
+    metrics = [
+        {
+            "MIB": "DUMMY-MIB",
+            'symbol': {
+                'OID': "1.3.6.1.4.1.123456789.4.0",
+                'name': "aTemperatureValueInferred",
+                'extract_value': '(\\d+)C',
+            },
+        }
+    ]
+    config = common.generate_container_instance_config(metrics)
+    instance = config['instances'][0]
+    instance["community_string"] = "dummy"
+    assert_python_vs_core(dd_agent_check, config)
+
+
 # Profile tests
 # expected_total_count: Test with some expected_total_count to be sure that both python and corecheck impl
 # are collecting some metrics.
