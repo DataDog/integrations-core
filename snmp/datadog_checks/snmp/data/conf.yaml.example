@@ -6,11 +6,11 @@
 init_config:
 
   ## @param loader - string - optional - default: python
-  ## Check loader to use. Available loaders:
-  ## - core: will use corecheck SNMP integration
-  ## - python: will use python SNMP integration
+  ## Check loader to use for all instances. Available loaders:
+  ## - core: (recommended) will use new corecheck SNMP integration
+  ## - python: will use legacy python SNMP integration
   #
-  # loader: core
+  loader: core
 
   ## @param mibs_folder - string - optional
   ## Specify an additional folder for your custom mib files (python format).
@@ -299,7 +299,7 @@ instances:
 
     ## @param loader - string - optional - default: python
     ## Check loader to use. Available loaders:
-    ## - core: will use corecheck SNMP integration
-    ## - python: will use python SNMP integration
+    ## - core: (recommended) will use new corecheck SNMP integration
+    ## - python: will use legacy python SNMP integration
     #
     # loader: core
