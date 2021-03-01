@@ -5,6 +5,13 @@
 
 init_config:
 
+  ## @param loader - string - optional - default: python
+  ## Check loader to use. Available loaders:
+  ## - core: will use corecheck SNMP integration
+  ## - python: will use python SNMP integration
+  #
+  # loader: core
+
   ## @param mibs_folder - string - optional
   ## Specify an additional folder for your custom mib files (python format).
   #
@@ -289,3 +296,10 @@ instances:
     ##         the OIDs will be refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
+
+    ## @param loader - string - optional - default: python
+    ## Check loader to use. Available loaders:
+    ## - core: will use corecheck SNMP integration
+    ## - python: will use python SNMP integration
+    #
+    # loader: core
