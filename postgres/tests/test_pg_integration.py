@@ -10,9 +10,9 @@ import pytest
 from semver import VersionInfo
 
 from datadog_checks.base.utils.db.statement_samples import statement_samples_client
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
-from datadog_checks.base.utils.serialization import json
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10

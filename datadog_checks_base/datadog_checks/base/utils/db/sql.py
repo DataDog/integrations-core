@@ -4,9 +4,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
-from datadog_checks.base.utils.serialization import json
-
 import mmh3
+
+from datadog_checks.base.utils.serialization import json
 
 # Unicode character "Arabic Decimal Separator" (U+066B) is a character which looks like an ascii
 # comma, but is not treated like a comma when parsing metrics tags. This is used to replace
