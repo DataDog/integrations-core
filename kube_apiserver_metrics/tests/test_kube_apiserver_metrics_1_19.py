@@ -21,7 +21,7 @@ instance = {
 
 @pytest.fixture()
 def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.15.0.txt')
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.19.7.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
@@ -46,14 +46,11 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.audit_event',
         NAMESPACE + '.go_threads',
         NAMESPACE + '.go_goroutines',
-        NAMESPACE + '.APIServiceRegistrationController_depth',
         NAMESPACE + '.etcd_object_counts',
         NAMESPACE + '.rest_client_requests_total',
-        NAMESPACE + '.apiserver_request_count',
-        NAMESPACE + '.apiserver_dropped_requests_total',
-        NAMESPACE + '.http_requests_total',
         NAMESPACE + '.authenticated_user_requests',
         NAMESPACE + '.apiserver_request_total',
+        NAMESPACE + '.apiserver_request_terminations_total',
         NAMESPACE + '.grpc_client_handled_total',
         NAMESPACE + '.grpc_client_msg_received_total',
         NAMESPACE + '.grpc_client_msg_sent_total',
@@ -67,8 +64,6 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
         NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
         NAMESPACE + '.admission_controller_admission_duration_seconds.count',
-        NAMESPACE + '.request_latencies.sum',
-        NAMESPACE + '.request_latencies.count',
         NAMESPACE + '.request_duration_seconds.sum',
         NAMESPACE + '.request_duration_seconds.count',
         NAMESPACE + '.registered_watchers',
@@ -76,15 +71,18 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.process_virtual_memory_bytes',
         NAMESPACE + '.etcd_request_duration_seconds.sum',
         NAMESPACE + '.etcd_request_duration_seconds.count',
+        NAMESPACE + '.watch_events_sizes.sum',
+        NAMESPACE + '.watch_events_sizes.count',
+        NAMESPACE + '.authentication_duration_seconds.sum',
+        NAMESPACE + '.authentication_duration_seconds.count',
+        NAMESPACE + '.authentication_attempts',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
         NAMESPACE + '.rest_client_requests_total.count',
-        NAMESPACE + '.apiserver_request_count.count',
-        NAMESPACE + '.apiserver_dropped_requests_total.count',
-        NAMESPACE + '.http_requests_total.count',
         NAMESPACE + '.authenticated_user_requests.count',
         NAMESPACE + '.apiserver_request_total.count',
+        NAMESPACE + '.apiserver_request_terminations_total.count',
     ]
 
     def test_check(self, aggregator, mock_get):
