@@ -1,11 +1,12 @@
 import datetime
 import decimal
 import itertools
-import json
 import logging
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
+
+from datadog_checks.base.utils.serialization import json
 
 try:
     import datadog_agent

@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import re
@@ -15,6 +14,7 @@ except ImportError:
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
 from datadog_checks.base.utils.db.statement_samples import statement_samples_client
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter, resolve_db_host

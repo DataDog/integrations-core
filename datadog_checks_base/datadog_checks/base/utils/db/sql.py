@@ -4,7 +4,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
-import json
+from datadog_checks.base.utils.serialization import json
 
 import mmh3
 
