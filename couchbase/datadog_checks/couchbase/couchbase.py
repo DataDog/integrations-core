@@ -48,6 +48,7 @@ class Couchbase(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
+        self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
         self._server = self.instance.get('server', None)
         if self._server is None:
             raise ConfigurationError("The server must be specified")
@@ -188,6 +189,8 @@ class Couchbase(AgentCheck):
         data = self.get_data()
         self._collect_version(data)
         self._create_metrics(data)
+        if self._sync_gateway_url:
+            self._collect_sync_gateway_metrics()
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
@@ -318,28 +321,28 @@ class Couchbase(AgentCheck):
 
         return query_data
 
-    def _collect_sync_gateway_metrics(self, url, tags):
-        url = '{}{}'.format(url, SG_METRICS_PATH)
+    def _collect_sync_gateway_metrics(self):
+        url = '{}{}'.format(self._sync_gateway_url, SG_METRICS_PATH)
         try:
             data = self._get_stats(url).get('syncgateway', {})
         except requests.exceptions.RequestException as e:
             msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % url, str(e)
             self.log.debug(msg)
-            self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, tags)
+            self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, self._tags)
             return
 
-        self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.OK, tags)
+        self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
 
         global_resource_stats = data.get('global', {}).get('resource_utilization', {})
         for mname, mval in global_resource_stats.items():
             try:
-                self._submit_gateway_metrics(mname, mval, tags)
+                self._submit_gateway_metrics(mname, mval, self._tags)
             except Exception as e:
                 self.log.debug("Unable to parse metric %s with value `%s: %s`", mname, mval, str(e))
 
         per_db_stats = data.get('per_db', {})
         for db, db_groups in per_db_stats.items():
-            db_tags = ['db:{}'.format(db)] + tags
+            db_tags = ['db:{}'.format(db)] + self._tags
             for subgroup, db_metrics in db_groups.items():
                 self.log.debug("Submitting metrics for group `%s`: `%s`", subgroup, db_metrics)
                 for mname, mval in db_metrics.items():
