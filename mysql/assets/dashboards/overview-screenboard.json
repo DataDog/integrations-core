@@ -1,5 +1,5 @@
 {
-  "title": "MySQL - Overview",
+  "title": "MySQL",
   "description": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.\n\nTo learn more about our MySQL integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications. (cloned)",
   "widgets": [
     {
