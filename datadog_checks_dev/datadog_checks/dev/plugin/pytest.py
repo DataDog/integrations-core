@@ -10,8 +10,6 @@ from base64 import urlsafe_b64encode
 
 import pytest
 
-from datadog_checks.dev.subprocess import run_command_print
-
 from .._env import (
     AGENT_COLLECTOR_SEPARATOR,
     E2E_FIXTURE_NAME,
@@ -144,7 +142,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
         pytest.skip('Not running E2E tests')
 
     # Lazily import to reduce plugin load times for everyone
-    from datadog_checks.dev import TempDir
+    from datadog_checks.dev import TempDir, run_command
 
     def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
@@ -170,7 +168,6 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
             with open(config_file, 'wb') as f:
                 output = json.dumps(config).encode('utf-8')
-                print("config: ", output)
                 f.write(output)
             check_command.extend(['--config', config_file])
 
@@ -181,10 +178,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
                 if value is not True:
                     check_command.append(str(value))
 
-        print("check_command:", " ".join(check_command))
-        result = run_command_print(check_command, capture=True)
-        print("result.stdout:", result.stdout)
-        print("result.stdout:", result.stdout)
+        result = run_command(check_command, capture=True)
 
         matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
@@ -196,8 +190,6 @@ def dd_agent_check(request, aggregator, datadog_agent):
             )
 
         for raw_json in matches:
-            # remove log lines if any
-            raw_json = '\n'.join(line for line in raw_json.split("\n") if not re.match(r'\d{4}-\d{2}-\d{2}', line))
             try:
                 collector = json.loads(raw_json)
             except Exception as e:
