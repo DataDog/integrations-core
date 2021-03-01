@@ -10,38 +10,39 @@ parameters:
   force_base_package: false
 
 steps:
+- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
+  - script: ddev test --cov --junit ${{ parameters.check }}
+    displayName: 'Run Unit/Integration tests'
+    env:
+      CODECOV_TOKEN: $(CODECOV_TOKEN)
 
-# Run e2e first
+- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
+    - script: ddev test --junit ${{ parameters.check }}
+      displayName: 'Run Unit/Integration tests (no coverage)'
+
+# Nightly base package check
+- ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
+    - script: ddev test --force-base-min --force-env-rebuild --junit ${{ parameters.check }}
+      displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
+
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |
-      docker run datadog/agent-dev:alex-snmp-corecheck-py3 cat /opt/datadog-agent/version-manifest.txt
-      ddev env test --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck --prod -e DD_LOG_LEVEL=debug
+      ENV_TEST_OPTS=''
+      if [ "${{ parameters.repo }}" == "core" ]; then
+          ENV_TEST_OPTS='--base'
+      fi
+      ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
-#- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true')) }}:
-#  - script: ddev test --cov --junit ${{ parameters.check }}
-#    displayName: 'Run Unit/Integration tests'
-#    env:
-#      CODECOV_TOKEN: $(CODECOV_TOKEN)
-#
-#- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
-#    - script: ddev test --junit ${{ parameters.check }}
-#      displayName: 'Run Unit/Integration tests (no coverage)'
-#
-## Nightly base package check
-#- ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
-#    - script: ddev test --force-base-package --force-env-rebuild --junit ${{ parameters.check }}
-#      displayName: 'Run Unit/Integration tests (no coverage, forced datadog_checks_base package)'
+- ${{ if eq(parameters.benchmark, 'true') }}:
+  - script: ddev test --bench --junit ${{ parameters.check }}
+    displayName: 'Run benchmarks'
 
-#- ${{ if eq(parameters.benchmark, 'true') }}:
-#  - script: ddev test --bench --junit ${{ parameters.check }}
-#    displayName: 'Run benchmarks'
-#
-#- ${{ if eq(parameters.latest_metrics, 'true') }}:
-#    - script: ddev test --latest-metrics --junit ${{ parameters.check }}
-#      displayName: 'Verify latest metrics supported'
+- ${{ if eq(parameters.latest_metrics, 'true') }}:
+    - script: ddev test --latest-metrics --junit ${{ parameters.check }}
+      displayName: 'Verify latest metrics supported'
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
   condition: succeededOrFailed()
