@@ -53,7 +53,6 @@ class Couchbase(AgentCheck):
 
         # Keep track of all instances
         self._instance_states = defaultdict(lambda: self.CouchbaseInstanceState())
-        self._instance_state = self._instance_states[hash_mutable(self.instance)]
 
     def _create_metrics(self, data):
         # Get storage metrics
@@ -184,6 +183,7 @@ class Couchbase(AgentCheck):
         return r.json()
 
     def check(self, _):
+        self._instance_state = self._instance_states[hash_mutable(self.instance)]
         data = self.get_data()
         self._collect_version(data)
         self._create_metrics(data)
