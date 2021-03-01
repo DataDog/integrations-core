@@ -9,6 +9,7 @@ import re
 from base64 import urlsafe_b64encode
 
 import pytest
+
 from datadog_checks.dev.subprocess import run_command_print
 
 from .._env import (
@@ -143,7 +144,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
         pytest.skip('Not running E2E tests')
 
     # Lazily import to reduce plugin load times for everyone
-    from datadog_checks.dev import TempDir, run_command
+    from datadog_checks.dev import TempDir
 
     def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
