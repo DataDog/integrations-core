@@ -22,7 +22,7 @@ SUPPORTED_METRIC_TYPES = [
 
 def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
-    assert_python_vs_core(dd_agent_check, instance, expected_total_count=10+5)
+    assert_python_vs_core(dd_agent_check, instance, expected_total_count=10 + 5)
 
 
 def test_e2e_v3_version_autodetection(dd_agent_check):
@@ -38,7 +38,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -55,7 +55,7 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
 
 
 def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
@@ -229,32 +229,32 @@ def test_e2e_symbol_metric_tags(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=42 + 5)
 
 
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=14+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=14 + 5)
 
 
 def test_e2e_profile_aruba(dd_agent_check):
     config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=67+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=67 + 5)
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     config = common.generate_container_profile_config('chatsworth_pdu')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=225+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5)
 
 
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
     config = common.generate_container_profile_config('checkpoint-firewall')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=301+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=301 + 5)
 
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554+5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554 + 5)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
@@ -418,9 +418,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
         aggregator.assert_service_check(name, status, tags, count=len(stubs), message=message)
 
     # assert count
-    total_count_corecheck = sum(
-        len(metrics) for key, metrics in aggregator._metrics.items()
-    )
+    total_count_corecheck = sum(len(metrics) for key, metrics in aggregator._metrics.items())
     assert total_count_python == total_count_corecheck
     if expected_total_count is not None:
         assert expected_total_count == total_count_corecheck
