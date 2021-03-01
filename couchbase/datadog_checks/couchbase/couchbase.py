@@ -187,32 +187,12 @@ class Couchbase(AgentCheck):
         r.raise_for_status()
         return r.json()
 
-<<<<<<< HEAD
-    def check(self, instance):
-        instance_state = self._instance_states[hash_mutable(instance)]
-
-        server = instance.get('server', None)
-        if server is None:
-            raise Exception("The server must be specified")
-        tags = instance.get('tags', [])
-        # Clean up tags in case there was a None entry in the instance
-        # e.g. if the yaml contains tags: but no actual tags
-        if tags is None:
-            tags = []
-        else:
-            tags = list(set(tags))
-        tags.append('instance:{}'.format(server))
-        data = self.get_data(server, instance)
-        self._collect_version(data)
-        self._create_metrics(data, instance_state, server, tags=list(set(tags)))
-=======
     def check(self, _):
         data = self.get_data()
         self._collect_version(data)
         self._create_metrics(data)
         if self._sync_gateway_url:
             self._collect_sync_gateway_metrics(self._sync_gateway_url)
->>>>>>> 456fac51b... Refactor instance and use newer signature
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
