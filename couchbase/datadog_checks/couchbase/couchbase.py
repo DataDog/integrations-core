@@ -12,7 +12,7 @@ from collections import defaultdict
 import requests
 from six import string_types
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
@@ -45,23 +45,34 @@ class Couchbase(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
+        self._sync_gateway_url = self.instance.get("sync_gateway_url")
+        self._server = self.instance.get('server', None)
+        if self._server is None:
+            raise ConfigurationError("The server must be specified")
+        self._tags = list(set(self.instance.get('tags', [])))
+        self._tags.append('instance:{}'.format(self._server))
+
+        # Clean up tags in case there was a None entry in the instance
+        # e.g. if the yaml contains tags: but no actual tags
+
         # Keep track of all instances
         self._instance_states = defaultdict(lambda: self.CouchbaseInstanceState())
+        self._instance_state = self._instance_states[hash_mutable(self.instance)]
 
-    def _create_metrics(self, data, instance_state, server, tags=None):
+    def _create_metrics(self, data):
         # Get storage metrics
         storage_totals = data['stats']['storageTotals']
         for key, storage_type in storage_totals.items():
             for metric_name, val in storage_type.items():
                 if val is not None:
                     metric_name = 'couchbase.{}.{}'.format(key, self.camel_case_to_joined_lower(metric_name))
-                    self.gauge(metric_name, val, tags=tags)
+                    self.gauge(metric_name, val, tags=self._tags)
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
             metric_tags = ['bucket:{}'.format(bucket_name), 'device:{}'.format(bucket_name)]
-            if tags:
-                metric_tags.extend(tags)
+            if self._tags:
+                metric_tags.extend(self._tags)
             for metric_name, val in bucket_stats.items():
                 if val is not None:
                     norm_metric_name = self.camel_case_to_joined_lower(metric_name)
@@ -72,15 +83,15 @@ class Couchbase(AgentCheck):
         # Get node metrics
         for node_name, node_stats in data['nodes'].items():
             metric_tags = ['node:{}'.format(node_name), 'device:{}'.format(node_name)]
-            if tags:
-                metric_tags.extend(tags)
+            if self._tags:
+                metric_tags.extend(self._tags)
             for metric_name, val in node_stats['interestingStats'].items():
                 if val is not None:
                     metric_name = 'couchbase.by_node.{}'.format(self.camel_case_to_joined_lower(metric_name))
                     self.gauge(metric_name, val, tags=metric_tags)
 
             # Get cluster health data
-            self._process_cluster_health_data(node_name, node_stats, tags)
+            self._process_cluster_health_data(node_name, node_stats)
 
         # Get query metrics
         for metric_name, val in data['query'].items():
@@ -92,13 +103,13 @@ class Couchbase(AgentCheck):
                         val = self.extract_seconds_value(val)
 
                     full_metric_name = 'couchbase.query.{}'.format(self.camel_case_to_joined_lower(norm_metric_name))
-                    self.gauge(full_metric_name, val, tags=tags)
+                    self.gauge(full_metric_name, val, tags=self._tags)
 
         # Get tasks, we currently only care about 'rebalance' tasks
         rebalance_status, rebalance_msg = data['tasks'].get('rebalance', (None, None))
 
         # Only fire an event when the state has changed
-        if rebalance_status is not None and instance_state.previous_status != rebalance_status:
+        if rebalance_status is not None and self._instance_state.previous_status != rebalance_status:
             rebalance_event = None
 
             # If we get an error, we create an error event with the msg we receive
@@ -106,39 +117,39 @@ class Couchbase(AgentCheck):
                 msg_title = 'Encountered an error while rebalancing'
                 msg = rebalance_msg
 
-                rebalance_event = self._create_event('error', msg_title, msg, server, tags=tags)
+                rebalance_event = self._create_event('error', msg_title, msg)
 
             # We only want to fire a 'completion' of a rebalance so make sure we're not firing an event on first run
-            elif rebalance_status == 'notRunning' and instance_state.previous_status is not None:
+            elif rebalance_status == 'notRunning' and self._instance_state.previous_status is not None:
                 msg_title = 'Stopped rebalancing'
                 msg = 'stopped rebalancing.'
-                rebalance_event = self._create_event('info', msg_title, msg, server, tags=tags)
+                rebalance_event = self._create_event('info', msg_title, msg)
 
             # If a rebalance task is running, fire an event. This will also fire an event if a rebalance task was
             #   already running when the check first runs.
             elif rebalance_status == 'gracefulFailover':
                 msg_title = 'Failing over gracefully'
                 msg = 'is failing over gracefully.'
-                rebalance_event = self._create_event('info', msg_title, msg, server, tags=tags)
+                rebalance_event = self._create_event('info', msg_title, msg)
             elif rebalance_status == 'rebalance':
                 msg_title = 'Rebalancing'
                 msg = 'is rebalancing.'
-                rebalance_event = self._create_event('info', msg_title, msg, server, tags=tags)
+                rebalance_event = self._create_event('info', msg_title, msg)
 
             # Send the event
             if rebalance_event is not None:
                 self.event(rebalance_event)
 
             # Update the status of this instance
-            instance_state.previous_status = rebalance_status
+            self._instance_state.previous_status = rebalance_status
 
-    def _process_cluster_health_data(self, node_name, node_stats, tags):
+    def _process_cluster_health_data(self, node_name, node_stats):
         """
         Process and send cluster health data (i.e. cluster membership status and node health
         """
 
         # Tags for service check
-        cluster_health_tags = list(tags) + ['node:{}'.format(node_name)]
+        cluster_health_tags = list(self._tags) + ['node:{}'.format(node_name)]
 
         # Get the membership status of the node
         cluster_membership = node_stats.get('clusterMembership', None)
@@ -150,12 +161,12 @@ class Couchbase(AgentCheck):
         health_status = NODE_HEALTH_TRANSLATION.get(health, AgentCheck.UNKNOWN)
         self.service_check(NODE_HEALTH_SERVICE_CHECK_NAME, health_status, tags=cluster_health_tags)
 
-    def _create_event(self, alert_type, msg_title, msg, server, tags=None):
+    def _create_event(self, alert_type, msg_title, msg):
         """
         Create an event object
         """
-        msg_title = 'Couchbase {}: {}'.format(server, msg_title)
-        msg = 'Couchbase instance {} {}'.format(server, msg)
+        msg_title = 'Couchbase {}: {}'.format(self._server, msg_title)
+        msg = 'Couchbase instance {} {}'.format(self._server, msg)
 
         return {
             'timestamp': int(time.time()),
@@ -164,8 +175,8 @@ class Couchbase(AgentCheck):
             'msg_title': msg_title,
             'alert_type': alert_type,
             'source_type_name': SOURCE_TYPE_NAME,
-            'aggregation_key': server,
-            'tags': tags,
+            'aggregation_key': self._server,
+            'tags': self._tags,
         }
 
     def _get_stats(self, url):
@@ -176,6 +187,7 @@ class Couchbase(AgentCheck):
         r.raise_for_status()
         return r.json()
 
+<<<<<<< HEAD
     def check(self, instance):
         instance_state = self._instance_states[hash_mutable(instance)]
 
@@ -193,6 +205,14 @@ class Couchbase(AgentCheck):
         data = self.get_data(server, instance)
         self._collect_version(data)
         self._create_metrics(data, instance_state, server, tags=list(set(tags)))
+=======
+    def check(self, _):
+        data = self.get_data()
+        self._collect_version(data)
+        self._create_metrics(data)
+        if self._sync_gateway_url:
+            self._collect_sync_gateway_metrics(self._sync_gateway_url)
+>>>>>>> 456fac51b... Refactor instance and use newer signature
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
@@ -212,20 +232,19 @@ class Couchbase(AgentCheck):
 
             self.set_metadata('version', version)
 
-    def get_data(self, server, instance):
+    def get_data(self):
         # The dictionary to be returned.
         couchbase = {'stats': None, 'buckets': {}, 'nodes': {}, 'query': {}, 'tasks': {}}
 
         # build couchbase stats entry point
-        url = '{}{}'.format(server, COUCHBASE_STATS_PATH)
+        url = '{}{}'.format(self._server, COUCHBASE_STATS_PATH)
 
         # Fetch initial stats and capture a service check based on response.
-        service_check_tags = instance.get('tags', [])
+        service_check_tags = self._tags
         if service_check_tags is None:
             service_check_tags = []
         else:
             service_check_tags = list(set(service_check_tags))
-        service_check_tags.append('instance:{}'.format(server))
         try:
             overall_stats = self._get_stats(url)
             # No overall stats? bail out now
@@ -252,7 +271,7 @@ class Couchbase(AgentCheck):
         # Next, get all buckets .
         endpoint = overall_stats['buckets']['uri']
 
-        url = '{}{}'.format(server, endpoint)
+        url = '{}{}'.format(self._server, endpoint)
         buckets = self._get_stats(url)
 
         if buckets is not None:
@@ -261,12 +280,12 @@ class Couchbase(AgentCheck):
 
                 # Fetch URI for the stats bucket
                 endpoint = bucket['stats']['uri']
-                url = '{}{}'.format(server, endpoint)
+                url = '{}{}'.format(self._server, endpoint)
 
                 try:
                     bucket_stats = self._get_stats(url)
                 except requests.exceptions.HTTPError:
-                    url_backup = '{}/pools/nodes/buckets/{}/stats'.format(server, bucket_name)
+                    url_backup = '{}/pools/nodes/buckets/{}/stats'.format(self._server, bucket_name)
                     bucket_stats = self._get_stats(url_backup)
 
                 bucket_samples = bucket_stats['op']['samples']
@@ -274,12 +293,12 @@ class Couchbase(AgentCheck):
                     couchbase['buckets'][bucket['name']] = bucket_samples
 
         # Next, get the query monitoring data
-        query_data = self._get_query_monitoring_data(instance)
+        query_data = self._get_query_monitoring_data()
         if query_data is not None:
             couchbase['query'] = query_data
 
         # Next, get all the tasks
-        tasks_url = '{}{}/tasks'.format(server, COUCHBASE_STATS_PATH)
+        tasks_url = '{}{}/tasks'.format(self._server, COUCHBASE_STATS_PATH)
         try:
             tasks = self._get_stats(tasks_url)
             for task in tasks:
@@ -308,9 +327,9 @@ class Couchbase(AgentCheck):
 
         return couchbase
 
-    def _get_query_monitoring_data(self, instance):
+    def _get_query_monitoring_data(self):
         query_data = None
-        query_monitoring_url = instance.get('query_monitoring_url')
+        query_monitoring_url = self.instance.get('query_monitoring_url')
         if query_monitoring_url:
             url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
             try:
