@@ -11,8 +11,6 @@ import mmh3
 # Unicode character "Arabic Decimal Separator" (U+066B) is a character which looks like an ascii
 # comma, but is not treated like a comma when parsing metrics tags. This is used to replace
 # commas so that tags which have commas in them (such as SQL queries) properly display.
-
-
 ARABIC_DECIMAL_SEPARATOR = '，'
 
 
