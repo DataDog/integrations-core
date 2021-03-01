@@ -25,7 +25,10 @@ from datadog_checks.couchbase.couchbase_consts import (
     QUERY_STATS,
     SECONDS_VALUE_PATTERN,
     SERVICE_CHECK_NAME,
+    SG_METRICS_PATH,
+    SG_SERVICE_CHECK_NAME,
     SOURCE_TYPE_NAME,
+    SYNC_GATEWAY_COUNT_METRICS,
     TO_SECONDS,
 )
 
@@ -45,6 +48,7 @@ class Couchbase(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
+        self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
         self._server = self.instance.get('server', None)
         if self._server is None:
             raise ConfigurationError("The server must be specified")
@@ -185,6 +189,8 @@ class Couchbase(AgentCheck):
         data = self.get_data()
         self._collect_version(data)
         self._create_metrics(data)
+        if self._sync_gateway_url:
+            self._collect_sync_gateway_metrics()
 
     def _collect_version(self, data):
         nodes = data['stats']['nodes']
@@ -314,6 +320,61 @@ class Couchbase(AgentCheck):
                 )
 
         return query_data
+
+    def _collect_sync_gateway_metrics(self):
+        url = '{}{}'.format(self._sync_gateway_url, SG_METRICS_PATH)
+        try:
+            data = self._get_stats(url).get('syncgateway', {})
+        except requests.exceptions.RequestException as e:
+            msg = "Error accessing the Sync Gateway monitoring endpoint %s: %s," % url, str(e)
+            self.log.debug(msg)
+            self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.CRITICAL, msg, self._tags)
+            return
+
+        self.service_check(SG_SERVICE_CHECK_NAME, AgentCheck.OK, self._tags)
+
+        global_resource_stats = data.get('global', {}).get('resource_utilization', {})
+        for mname, mval in global_resource_stats.items():
+            try:
+                self._submit_gateway_metrics(mname, mval, self._tags)
+            except Exception as e:
+                self.log.debug("Unable to parse metric %s with value `%s: %s`", mname, mval, str(e))
+
+        per_db_stats = data.get('per_db', {})
+        for db, db_groups in per_db_stats.items():
+            db_tags = ['db:{}'.format(db)] + self._tags
+            for subgroup, db_metrics in db_groups.items():
+                self.log.debug("Submitting metrics for group `%s`: `%s`", subgroup, db_metrics)
+                for mname, mval in db_metrics.items():
+                    try:
+                        self._submit_gateway_metrics(mname, mval, db_tags, subgroup)
+                    except Exception as e:
+                        self.log.debug("Unable to parse metric %s with value `%s`: %s", mname, mval, str(e))
+                        continue
+
+    def _submit_gateway_metrics(self, mname, mval, tags, prefix=None):
+        namespace = '.'.join(['couchbase', 'sync_gateway'])
+        if prefix:
+            namespace = '.'.join([namespace, prefix])
+
+        if prefix == 'database' and mname in ['cache_feed', 'import_feed']:
+            # Handle cache_feed and import_feed sub stats
+            for cfname, cfval in mval.items():
+                self.monotonic_count('.'.join([namespace, mname, cfname]), cfval, tags)
+        elif prefix == 'gsi_views':
+            # gsi view metrics are formatted with design doc and views `sync_gateway_2.1.access_query_count`
+            # parse design doc as tag and submit rest as a metric
+            match = re.match(r'\{([^}:;]+)\}-(\w+):', mname)
+            if match:
+                design_doc_tag = match.groups()[0]
+                gsi_tags = ['design_doc_name:{}'.format(design_doc_tag)] + tags
+                ddname = match.groups()[0]
+                self.monotonic_count('.'.join([namespace, ddname]), tags=gsi_tags)
+
+        elif mname in SYNC_GATEWAY_COUNT_METRICS:
+            self.monotonic_count('.'.join([namespace, mname]), mval, tags)
+        else:
+            self.gauge('.'.join([namespace, mname]), mval, tags)
 
     # Takes a camelCased variable and returns a joined_lower equivalent.
     # Returns input if non-camelCase variable is detected.
