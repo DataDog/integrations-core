@@ -1,6 +1,6 @@
 {
     "title": "PHP-FPM - Metrics",
-    "description": "An overview of your PHP-FPM metrics",
+    "description": "An overview of your PHP-FPM metrics by pool. Clone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
