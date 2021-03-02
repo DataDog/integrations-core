@@ -253,6 +253,7 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
         # See II-153
         'snmp.networkDeviceStatus',
         'snmp.memoryDeviceStatus',
+        'datadog.snmp.submitted_metrics',  # count won't match because of the reason explained above
     ]
     assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
 
@@ -312,9 +313,11 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
     python_config['init_config']['loader'] = 'python'
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
+    metrics_to_skip = metrics_to_skip or []
+
+    # building expected metrics (python)
     aggregator = dd_agent_check(python_config, rate=True)
     expected_metrics = defaultdict(list)
-    metrics_to_skip = metrics_to_skip or []
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
             if stub.name in metrics_to_skip:
@@ -322,16 +325,16 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
             stub = normalize_stub_metric(stub)
             expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
 
-    expected_sc = defaultdict(list)
+    expected_service_checks = defaultdict(list)
     for _, service_checks in aggregator._service_checks.items():
         for stub in service_checks:
-            expected_sc[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
+            expected_service_checks[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
 
     total_count_python = sum(len(stubs) for stubs in expected_metrics.values())
 
+    # building actual metrics (core)
     aggregator.reset()
     aggregator = dd_agent_check(core_config, rate=True)
-
     aggregator_metrics = aggregator._metrics
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
@@ -364,7 +367,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
 
     aggregator.assert_all_metrics_covered()
 
-    for (name, status, tags, message), stubs in expected_sc.items():
+    for (name, status, tags, message), stubs in expected_service_checks.items():
         aggregator.assert_service_check(name, status, tags, count=len(stubs), message=message)
 
     # assert count
