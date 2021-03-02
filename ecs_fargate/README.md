@@ -354,6 +354,9 @@ Need help? Contact [Datadog support][19].
 - Blog post: [Monitor AWS Fargate applications with Datadog][34]
 - FAQ: [Integration Setup for ECS Fargate][7]
 - Blog post: [Monitor your Fargate container logs with FireLens and Datadog][24]
+- Blog post: [Key metrics for monitoring AWS Fargate][38]
+- Blog post: [How to collect metrics and logs from AWS Fargate workloads][39]
+- Blog post: [AWS Fargate monitoring with Datadog][40]
 
 [1]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [2]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
@@ -391,3 +394,6 @@ Need help? Contact [Datadog support][19].
 [35]: https://aws.amazon.com/cloudformation/
 [36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [37]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html
+[38]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
+[40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
