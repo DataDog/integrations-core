@@ -70,6 +70,7 @@ ALL_RESOURCES_WITH_NO_METRICS = [vim.Folder,vim.Datacenter]
 # Time after which we reap the jobs that clog the queue
 # TODO: use it
 JOB_TIMEOUT = 10
+MAX_JOB_TIMEOUT = 60
 MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
@@ -1512,19 +1513,28 @@ class VSphereCheck(AgentCheck):
         if set_external_tags is not None:
             set_external_tags(self.get_external_host_tags())
 
+        pending_task_list = []
         if self.pool_started:
             self.log.info("Waiting for Collection operation threaded jobs to complete")
             for each_job in self.task_list:
                 if not each_job.wait(JOB_TIMEOUT):
-                    err_msg = u"Collection operation timed out while querying perf metrics"
-                    error_code = 'CollectionError'
-                    self.log.warning(err_msg)
-                    self.raiseAlert(instance, error_code, err_msg)
-                    self.log.critical("Restarting thread pool")
-                    self.restart_pool()
-                    thread_crashed = True
-                    break
-            if not thread_crashed:
+                    pending_task_list.append(each_job)
+
+            if pending_task_list:
+                self.log.info("Waiting for unfinished jobs to complete")
+                for pending_job in pending_task_list:
+                    if not pending_job.wait(MAX_JOB_TIMEOUT):
+                        err_msg = u"Collection operation timed out while querying perf metrics"
+                        error_code = 'CollectionError'
+                        self.log.warning(err_msg)
+                        self.raiseAlert(instance, error_code, err_msg)
+                    else:
+                        pending_task_list.remove(pending_job)
+
+            if pending_task_list:
+                self.log.critical("Restarting thread pool")
+                self.restart_pool()
+            else:
                 self.log.info("Thread jobs completed")
 
         # ## <TEST-INSTRUMENTATION>
