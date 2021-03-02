@@ -8,9 +8,16 @@ from contextlib import contextmanager
 from copy import deepcopy
 from io import open
 from ipaddress import ip_address, ip_network
+from typing import Callable
 from requests.exceptions import SSLError
 import socket
 import ssl
+from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
+from cryptography.x509.extensions import ExtensionNotFound
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
+from hashlib import sha256
+from requests.adapters import HTTPAdapter, PoolManager
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 
 import requests
 import requests_unixsocket
@@ -119,6 +126,7 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
         'auth_token_handler',
+        'context',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -352,7 +360,6 @@ class RequestsWrapper(object):
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
-
             if persist:
                 request_method = getattr(self.session, method)
             else:
@@ -370,41 +377,29 @@ class RequestsWrapper(object):
                 try:
                     response = request_method(url, **new_options)
                 except SSLError as e:
-                    # try the connection manually
-                    # get the server component (parse url)
-                    # fetch the intermediate certs (like ofek's code)
-                    # retry the request
                     parsed_url = urlparse(url)
                     hostname = parsed_url.hostname
+                    print(hostname, url)
+                    certs = self.fetch_intermediate_certs(hostname)
+                    print(type(certs[0]))
+                    # s = requests.Session()
+                    certadapter = CACert(certs=certs)
+                    # print(dir(certadapter))
+                    # s.mount(url[:-1], certadapter)
+                    # r = s.get(url)
+                    # print(r.text)
+                    # requests.get(url)
+                    request_method = getattr(self.session, method)
+                    self.session.mount(url, certadapter)
+                    response = request_method(url, **new_options)
 
-                    for res in socket.getaddrinfo(hostname, 443):
-                        af, socktype, proto, canonname, sa = res
-                        sock = None
-                        try:
-                            sock = socket.socket(af, socktype, proto)
-                            sock.settimeout(10)
-                            sock.connect(sa)
-                            # Break explicitly a reference cycle
-                            err = None
+                    # from urllib import request as req
 
-                        except socket.error as _:
-                            err = _
-                            if sock is not None:
-                                sock.close()
-
-                    with closing(sock):
-                        try:
-                            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                            context.verify_mode = ssl.CERT_NONE
-
-                            with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
-                                der_cert = secure_sock.getpeercert(binary_form=True)
-                        except Exception as e:
-                            self.log.error(
-                                'Error occurred while getting cert to discover intermediate certificates: %s', e
-                            )
-                            return
-                    print(der_cert)
+                    # context = ssl.create_default_context()
+                    # for cert in certs:
+                    #     context.load_verify_locations(cadata=cert)
+                    # print(cert)
+                    # r = req.urlopen(url, context=context)
                     return
 
             return response
@@ -420,6 +415,111 @@ class RequestsWrapper(object):
 
         return options
 
+    def create_connection(self, hostname):
+        """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""
+        err = None
+        try:
+            for res in socket.getaddrinfo(hostname, 443, 0, socket.SOCK_STREAM):
+                af, socktype, proto, canonname, sa = res
+                sock = None
+                try:
+                    sock = socket.socket(af, socktype, proto)
+                    sock.settimeout(10)
+                    sock.connect(sa)
+                    # Break explicitly a reference cycle
+                    err = None
+                    return sock
+
+                except socket.error as _:
+                    err = _
+                    if sock is not None:
+                        sock.close()
+
+            if err is not None:
+                raise err
+            else:
+                raise socket.error('No valid addresses found, try checking your IPv6 connectivity')  # noqa: G
+        except socket.gaierror as e:
+            err_code, message = e.args
+            if err_code == socket.EAI_NODATA or err_code == socket.EAI_NONAME:
+                raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
+
+            raise
+
+    def fetch_intermediate_certs(self, hostname):
+        # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
+        try:
+            sock = self.create_connection(hostname)
+        except Exception as e:
+            print('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            return
+
+        with closing(sock):
+            try:
+                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                context.verify_mode = ssl.CERT_NONE
+
+                with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
+                    der_cert = secure_sock.getpeercert(binary_form=True)
+            except Exception as e:
+                print('Error occurred while getting cert to discover intermediate certificates:', e)
+                return
+
+        return self.load_intermediate_certs(der_cert)
+
+    def load_intermediate_certs(self, der_cert, certs=[]):
+        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        try:
+            cert = load_der_x509_certificate(der_cert)
+        except Exception as e:
+            print('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
+            return
+
+        try:
+            authority_information_access = cert.extensions.get_extension_for_oid(
+                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+            )
+        except ExtensionNotFound:
+            self.log.debug(
+                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
+            )
+            return
+
+        for access_description in authority_information_access.value:
+            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
+                continue
+
+            uri = access_description.access_location.value
+            # if (
+            #     uri in self._intermediate_cert_uri_cache
+            #     and get_timestamp() - self._intermediate_cert_uri_cache[uri] < self._intermediate_cert_refresh_interval
+            # ):
+            #     continue
+
+            # Assume HTTP for now
+            try:
+                response = requests.get(uri)  # SKIP_HTTP_VALIDATION
+                # response.raise_for_status()
+            except Exception as e:
+                print('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                continue
+            else:
+                access_time = get_timestamp()
+                intermediate_cert = response.content
+
+            cert_id = sha256(intermediate_cert).digest()
+            certs.append(intermediate_cert)
+            # print(f"found cert_id {cert_id}")
+            # if cert_id not in self._intermediate_cert_id_cache:
+            #     self.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+            #     self._intermediate_cert_id_cache.add(cert_id)
+
+            # self._intermediate_cert_uri_cache[uri] = access_time
+            # self.context.load_verify_locations(cadata=intermediate_cert)
+            self.load_intermediate_certs(intermediate_cert, certs)
+        return certs
+
     @property
     def session(self):
         if self._session is None:
@@ -429,7 +529,6 @@ class RequestsWrapper(object):
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
                 self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
-
             # Enable Unix Domain Socket (UDS) support.
             # See: https://github.com/msabramo/requests-unixsocket
             self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
@@ -830,6 +929,19 @@ def quote_uds_url(url):
 # TODO: use an enum and remove STANDARD_FIELDS when mkdocstrings supports it
 class StandardFields(object):
     pass
+
+
+class CACert(HTTPAdapter):
+    def __init__(self, **kwargs):
+        self.certs = kwargs['certs']
+        super(CACert, self).__init__()
+
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        context = ssl.create_default_context()
+        for cert in self.certs:
+            context.load_verify_locations(cadata=cert)
+        pool_kwargs['ssl_context'] = context
+        self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block, strict=True, **pool_kwargs)
 
 
 if not PY2:
