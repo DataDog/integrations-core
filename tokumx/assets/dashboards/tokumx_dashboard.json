@@ -1,6 +1,6 @@
 {
     "title": "TokuMX - Metrics",
-    "description": "An overview of your TokuMX metrics",
+    "description": "An overview of your TokuMX metrics. Clone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
