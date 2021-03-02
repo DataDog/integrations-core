@@ -317,22 +317,22 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
 
     # building expected metrics (python)
     aggregator = dd_agent_check(python_config, rate=True)
-    expected_metrics = defaultdict(list)
+    python_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
             if stub.name in metrics_to_skip:
                 continue
             stub = normalize_stub_metric(stub)
-            expected_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
+            python_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
 
-    expected_service_checks = defaultdict(list)
+    python_service_checks = defaultdict(list)
     for _, service_checks in aggregator._service_checks.items():
         for stub in service_checks:
-            expected_service_checks[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
+            python_service_checks[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
 
-    total_count_python = sum(len(stubs) for stubs in expected_metrics.values())
+    total_count_python = sum(len(stubs) for stubs in python_metrics.values())
 
-    # building actual metrics (core)
+    # building core metrics (core)
     aggregator.reset()
     aggregator = dd_agent_check(core_config, rate=True)
     aggregator_metrics = aggregator._metrics
@@ -343,22 +343,22 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
 
-    actual_metrics = defaultdict(list)
+    core_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for metric in metrics:
-            actual_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))].append(metric)
+            core_metrics[(metric.name, metric.type, tuple(sorted(metric.tags)))].append(metric)
 
     print("Python metrics not found in Corecheck metrics:")
-    for key in sorted(expected_metrics):
-        if key not in actual_metrics:
+    for key in sorted(python_metrics):
+        if key not in core_metrics:
             print("\t{}".format(key))
 
     print("Corecheck metrics not found in Python metrics:")
-    for key in sorted(actual_metrics):
-        if key not in expected_metrics:
+    for key in sorted(core_metrics):
+        if key not in python_metrics:
             print("\t{}".format(key))
 
-    for (name, mtype, tags), stubs in expected_metrics.items():
+    for (name, mtype, tags), stubs in python_metrics.items():
         if name in ASSERT_VALUE_METRICS:
             for stub in stubs:
                 aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs), value=stub.value)
@@ -367,7 +367,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
 
     aggregator.assert_all_metrics_covered()
 
-    for (name, status, tags, message), stubs in expected_service_checks.items():
+    for (name, status, tags, message), stubs in python_service_checks.items():
         aggregator.assert_service_check(name, status, tags, count=len(stubs), message=message)
 
     # assert count
