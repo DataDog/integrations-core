@@ -17,12 +17,14 @@ files:
       description: |
         Kind of object to look at for the leader election.
         Can be:
+          * auto
           * lease
           * endpoints
           * configmap
+        auto makes the check try lease first and fallback to endpoints if lease isn't available
       value:
         type: string
-        example: endpoints
+        example: auto
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:10251/metrics

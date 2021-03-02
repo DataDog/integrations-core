@@ -118,7 +118,7 @@ def make_fake_object(record=None):
 
 class TestElectionRecord:
     def test_parse_annotation(self):
-        record = ElectionRecordAnnotation(RAW_VALID_RECORD)
+        record = ElectionRecordAnnotation("endpoints", RAW_VALID_RECORD)
 
         valid, reason = record.validate()
         assert valid is True
@@ -171,7 +171,7 @@ class TestElectionRecord:
         }
 
         for raw, expected_reason in iteritems(cases):
-            valid, reason = ElectionRecordAnnotation(raw).validate()
+            valid, reason = ElectionRecordAnnotation("endpoints", raw).validate()
             assert reason == expected_reason
             if expected_reason is None:
                 assert valid is True
@@ -183,7 +183,7 @@ class TestElectionRecord:
             holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() + timedelta(seconds=20)
         )
 
-        record = ElectionRecordAnnotation(raw)
+        record = ElectionRecordAnnotation("endpoints", raw)
         assert record.seconds_until_renew > 19
         assert record.seconds_until_renew < 21
 
@@ -191,7 +191,7 @@ class TestElectionRecord:
             holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() - timedelta(seconds=5)
         )
 
-        record = ElectionRecordAnnotation(raw)
+        record = ElectionRecordAnnotation("endpoints", raw)
         assert record.seconds_until_renew > -6
         assert record.seconds_until_renew < -4
 

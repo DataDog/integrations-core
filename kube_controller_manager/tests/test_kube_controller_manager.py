@@ -49,8 +49,9 @@ def mock_leader():
     with mock.patch(
         'datadog_checks.kube_controller_manager.KubeControllerManagerCheck._get_record',
         return_value=ElectionRecordAnnotation(
+            "endpoints",
             '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,'
-            + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
+            + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}',
         ),
     ):
         yield

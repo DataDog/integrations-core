@@ -62,37 +62,53 @@ class KubeLeaderElectionMixin(object):
         else:
             config.load_incluster_config()
 
-        obj = None
-        if kind.lower() in ["leases", "lease"]:
-            coordination_v1 = client.CoordinationV1Api()
-            obj = coordination_v1.read_namespaced_lease(name, namespace)
-
-            return ElectionRecordLease(obj)
-
-        else:
-            v1 = client.CoreV1Api()
-
-            if kind.lower() in ["endpoints", "endpoint", "ep"]:
-                obj = v1.read_namespaced_endpoints(name, namespace)
-            elif kind.lower() in ["configmap", "cm"]:
-                obj = v1.read_namespaced_config_map(name, namespace)
-            else:
-                raise ValueError("Unknown kind {}".format(kind))
-
-            if not obj:
-                raise ValueError("Empty input object")
-
+        if kind.lower() == "auto":
+            # Try lease object
             try:
-                annotations = obj.metadata.annotations
-            except AttributeError:
-                raise ValueError("Invalid input object type")
+                return KubeLeaderElectionMixin._get_record_from_lease(client, name, namespace)
+            except client.exceptions.ApiException:
+                pass
 
-            for name in ELECTION_ANNOTATION_NAMES:
-                if name in annotations:
-                    return ElectionRecordAnnotation(annotations[name])
+            # Default to endpoints object
+            return KubeLeaderElectionMixin._get_record_from_annotation(client, "endpoints", name, namespace)
 
-            # Could not find annotation
-            raise ValueError("Object has no leader election annotation")
+        elif kind.lower() in ["leases", "lease"]:
+            return KubeLeaderElectionMixin._get_record_from_lease(client, name, namespace)
+        else:
+            return KubeLeaderElectionMixin._get_record_from_annotation(client, kind, name, namespace)
+
+    @staticmethod
+    def _get_record_from_lease(client, name, namespace):
+        coordination_v1 = client.CoordinationV1Api()
+        obj = coordination_v1.read_namespaced_lease(name, namespace)
+
+        return ElectionRecordLease(obj)
+
+    @staticmethod
+    def _get_record_from_annotation(client, kind, name, namespace):
+        v1 = client.CoreV1Api()
+
+        if kind.lower() in ["endpoints", "endpoint", "ep"]:
+            obj = v1.read_namespaced_endpoints(name, namespace)
+        elif kind.lower() in ["configmap", "cm"]:
+            obj = v1.read_namespaced_config_map(name, namespace)
+        else:
+            raise ValueError("Unknown kind {}".format(kind))
+
+        if not obj:
+            raise ValueError("Empty input object")
+
+        try:
+            annotations = obj.metadata.annotations
+        except AttributeError:
+            raise ValueError("Invalid input object type")
+
+        for name in ELECTION_ANNOTATION_NAMES:
+            if name in annotations:
+                return ElectionRecordAnnotation(kind, annotations[name])
+
+        # Could not find annotation
+        raise ValueError("Object has no leader election annotation")
 
     def _report_status(self, config, record):
         # Compute prefix for gauges and service check
@@ -100,9 +116,13 @@ class KubeLeaderElectionMixin(object):
 
         # Compute tags for gauges and service check
         tags = []
-        for n in ["record_kind", "record_name", "record_namespace"]:
-            if n in config:
-                tags.append("{}:{}".format(n, config[n]))
+        for k, v in {
+            "record_kind": record.kind,
+            "record_name": config.get("record_name"),
+            "record_namespace": config.get("record_namespace"),
+        }.items():
+            if v is not None:
+                tags.append("{}:{}".format(k, v))
         tags += config.get("tags", [])
 
         # Sanity check on the record

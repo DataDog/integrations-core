@@ -42,8 +42,9 @@ REQUIRED_FIELDS = [
 
 
 class ElectionRecordAnnotation(ElectionRecord):
-    def __init__(self, record_string):
+    def __init__(self, record_kind, record_string):
         super(ElectionRecordAnnotation, self).__init__()
+        self._kind = record_kind
         self._record = json.loads(record_string)
 
     def validate(self):
@@ -95,6 +96,10 @@ class ElectionRecordAnnotation(ElectionRecord):
     def transitions(self):
         return self._record.get("leaderTransitions", 0)
 
+    @property
+    def kind(self):
+        return self._kind
+
 
 class ElectionRecordLease(ElectionRecord):
     def __init__(self, lease):
@@ -123,3 +128,7 @@ class ElectionRecordLease(ElectionRecord):
     @property
     def transitions(self):
         return self._lease.lease_transitions
+
+    @property
+    def kind(self):
+        return "lease"
