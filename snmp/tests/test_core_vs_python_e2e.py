@@ -20,6 +20,12 @@ SUPPORTED_METRIC_TYPES = [
 ]
 
 
+ASSERT_VALUE_METRICS = [
+    'snmp.devices_monitored',
+    'datadog.snmp.submitted_metrics',
+]
+
+
 def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
     assert_python_vs_core(dd_agent_check, instance, expected_total_count=10 + 5)
@@ -299,9 +305,6 @@ def test_e2e_profile_netapp(dd_agent_check):
 def test_e2e_profile_palo_alto(dd_agent_check):
     config = common.generate_container_profile_config('palo-alto')
     assert_python_vs_core(dd_agent_check, config)
-
-
-ASSERT_VALUE_METRICS = []
 
 
 def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
