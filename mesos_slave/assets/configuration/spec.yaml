@@ -55,3 +55,8 @@ files:
                     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
                     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
           - template: instances/default
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/mesos/*
+            source: mesos
