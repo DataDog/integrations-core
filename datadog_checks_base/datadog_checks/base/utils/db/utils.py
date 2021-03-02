@@ -95,7 +95,7 @@ def resolve_db_host(db_host):
     except socket.gaierror as e:
         # could be connecting via a unix domain socket
         logger.debug(
-            "failed to resolve DB host '%s' due to socket.gaierror(%s). falling back to agent hostname: %s",
+            "failed to resolve DB host '%s' due to %r. falling back to agent hostname: %s",
             db_host,
             e,
             agent_hostname,
