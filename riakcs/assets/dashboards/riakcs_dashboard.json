@@ -1,5 +1,5 @@
 {
-    "title": "Riakcs - Metrics",
+    "title": "Riak CS - Metrics",
     "description": "An overview of your Riakcs metrics",
     "layout_type": "ordered",
     "template_variables": [
