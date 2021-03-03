@@ -34,7 +34,7 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    sudo ldconfig
    ```
 
-2. Decompress both packages into a single directory that is available to all users on the given machine (i.e. `/opt/oracle`):
+2. Decompress both packages into a single directory that is available to all users on the given machine (for example, `/opt/oracle`):
 
    ```shell
    mkdir -p /opt/oracle/ && cd /opt/oracle/
