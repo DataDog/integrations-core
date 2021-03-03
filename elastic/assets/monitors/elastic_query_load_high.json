@@ -1,0 +1,28 @@
+{
+	"name": "[ElasticSearch] Query load is high on {{host.name}} ",
+	"type": "query alert",
+	"query": "avg(last_5m):sum:elasticsearch.search.query.current{*} by {host} > 10",
+	"message": "Number of query currently in progress is high ({{value}} queries)",
+	"tags": [
+		"integration:elastic"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 10,
+			"warning": 8
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when the query load is high."
+	}
+}
