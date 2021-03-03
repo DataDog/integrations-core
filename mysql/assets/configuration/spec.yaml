@@ -359,7 +359,7 @@ files:
                   example: 1000
               - name: collection_strategy_cache_ttl
                 description: |
-                  Set how long we cache collection strategies. This should only be decreased if the set of enabled
+                  Sets how long to cache collection strategies. This should only be decreased if the set of enabled
                   `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
                   results for an extended period of time.
                 value:
