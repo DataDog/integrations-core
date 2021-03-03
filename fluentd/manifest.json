@@ -35,9 +35,14 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "fluentd": "assets/dashboards/fluentd_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "fluentd_processes": "assets/saved_views/fluentd_processes.json"
+    }
   }
 }

@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.dev.utils import ON_WINDOWS, mock_context_manager
 
-from .metrics import CORE_GAUGES, CORE_RATES, UNIX_GAUGES
+from .metrics import CORE_COUNTS, CORE_GAUGES, CORE_RATES, UNIX_GAUGES
 from .mocks import (
     MockDiskIOMetrics,
     MockDiskMetrics,
@@ -67,3 +67,8 @@ def gauge_metrics():
 @pytest.fixture(scope='session')
 def rate_metrics():
     return CORE_RATES
+
+
+@pytest.fixture(scope='session')
+def count_metrics():
+    return CORE_COUNTS

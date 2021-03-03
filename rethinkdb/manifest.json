@@ -36,7 +36,9 @@
       "RethinkDB Overview": "assets/dashboards/overview.json"
     },
     "monitors": {},
-    "saved_views": {},
+    "saved_views": {
+      "rethinkdb_processes": "assets/saved_views/rethinkdb_processes.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "rethinkdb"

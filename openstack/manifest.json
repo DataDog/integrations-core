@@ -27,10 +27,14 @@
   "assets": {
     "monitors": {},
     "dashboards": {
+      "openstack": "assets/dashboards/openstack_dashboard.json",
       "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "openstack_processes": "assets/saved_views/openstack_processes.json"
+    }
   }
 }

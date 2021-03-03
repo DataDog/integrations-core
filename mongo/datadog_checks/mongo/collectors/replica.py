@@ -20,7 +20,7 @@ class ReplicaCollector(MongoCollector):
     def __init__(self, check, tags):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
-        self.hostname = self.extract_hostname_for_event(self.check.config.clean_server_name)
+        self.hostname = self.extract_hostname_for_event(self.check._config.clean_server_name)
 
     def compatible_with(self, deployment):
         # Can only be run on mongod that are part of a replica set.
@@ -67,7 +67,7 @@ class ReplicaCollector(MongoCollector):
                 "for {replset_name}; it was {old_state} before.".format(
                     node=node_hostname,
                     id=member_id,
-                    uri=self.check.config.clean_server_name,
+                    uri=self.check._config.clean_server_name,
                     status=long_state_str,
                     status_short=short_state_str,
                     replset_name=replset_name,
@@ -101,7 +101,7 @@ class ReplicaCollector(MongoCollector):
 
         if api.deployment_type.is_arbiter:
             try:
-                api = MongoApi(self.check.config, self.log, replicaset=api.deployment_type.replset_name)
+                api = MongoApi(self.check._config, self.log, replicaset=api.deployment_type.replset_name)
             except Exception:
                 self.log.warning(
                     "Current node is an arbiter, the extra connection to the primary was unsuccessful."

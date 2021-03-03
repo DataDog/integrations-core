@@ -34,11 +34,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "gearman": "assets/dashboards/gearman_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "gearman"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "gearman_processes": "assets/saved_views/gearman_processes.json"
+    }
   }
 }

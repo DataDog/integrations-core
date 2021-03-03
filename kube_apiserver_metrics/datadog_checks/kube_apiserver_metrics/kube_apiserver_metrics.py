@@ -16,6 +16,17 @@ METRICS = {
     'go_goroutines': 'go_goroutines',
     'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
     'etcd_object_counts': 'etcd_object_counts',
+    'etcd_request_duration_seconds': 'etcd_request_duration_seconds',
+    'apiserver_registered_watchers': 'registered_watchers',
+    'apiserver_request_duration_seconds': 'request_duration_seconds',
+    'apiserver_request_latencies': 'request_latencies',
+    'apiserver_request_latency_seconds': 'request_latencies',
+    'process_resident_memory_bytes': 'process_resident_memory_bytes',
+    'process_virtual_memory_bytes': 'process_virtual_memory_bytes',
+    'grpc_client_started_total': 'grpc_client_started_total',
+    'grpc_client_handled_total': 'grpc_client_handled_total',
+    'grpc_client_msg_sent_total': 'grpc_client_msg_sent_total',
+    'grpc_client_msg_received_total': 'grpc_client_msg_received_total',
     # For Kubernetes < 1.14
     'rest_client_request_latency_seconds': 'rest_client_request_latency_seconds',
     'apiserver_admission_webhook_admission_latencies_seconds': 'admission_webhook_admission_latencies_seconds',
@@ -35,6 +46,13 @@ METRICS = {
     'apiserver_admission_step_admission_duration_seconds_summary':
         'admission_step_admission_latencies_seconds_summary',
     # fmt: on
+    # For Kubernetes >= 1.16
+    # https://v1-16.docs.kubernetes.io/docs/setup/release/#added-metrics
+    'authentication_attempts': 'authentication_attempts',
+    'apiserver_watch_events_sizes': 'watch_events_sizes',
+    # For Kubernetes >= 1.17
+    # https://github.com/kubernetes/kubernetes/pull/82409
+    'authentication_duration_seconds': 'authentication_duration_seconds',
 }
 
 
@@ -58,6 +76,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             'rest_client_requests_total': self.rest_client_requests_total,
             'apiserver_request_count': self.apiserver_request_count,
             'apiserver_dropped_requests_total': self.apiserver_dropped_requests_total,
+            'apiserver_request_terminations_total': self.apiserver_request_terminations_total,
             'http_requests_total': self.http_requests_total,
             'authenticated_user_requests': self.authenticated_user_requests,
             # metric added in kubernetes 1.15
@@ -149,3 +168,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def apiserver_request_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.apiserver_request_total', metric, scraper_config)
+
+    def apiserver_request_terminations_total(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.apiserver_request_terminations_total', metric, scraper_config)
