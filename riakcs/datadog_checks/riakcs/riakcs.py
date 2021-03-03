@@ -34,6 +34,7 @@ class RiakCs(AgentCheck):
     SERVICE_CHECK_NAME = 'riakcs.can_connect'
 
     def check(self, instance):
+        print("hello!")
         s3, aggregation_key, tags, metrics = self._connect(instance)
 
         stats = self._get_stats(s3, aggregation_key, tags)
