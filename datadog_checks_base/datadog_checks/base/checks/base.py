@@ -250,10 +250,9 @@ class AgentCheck(object):
         self._config_model_shared = None  # type: Any
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
-
-        if not PY2:
-            self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations = deque(
+            [self.send_config_metadata, self.load_configuration_models]
+        )  # type: Deque[Callable[[], None]]
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]

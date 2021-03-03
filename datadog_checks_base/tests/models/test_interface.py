@@ -2,16 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY3
 
 from datadog_checks.base import AgentCheck
 
 from ..utils import requires_py3
-
-if PY3:
-    from .config_models import ConfigMixin
-else:
-    ConfigMixin = object
+from .config_models import ConfigMixin
 
 pytestmark = [requires_py3]
 

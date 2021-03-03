@@ -49,6 +49,23 @@ def get_default_value(type_data):
     return example
 
 
+def get_compat_dynamic_default_value(type_data):
+    # TODO: remove when we drop Python 2
+    option_type = type_data.get('type')
+    if option_type == 'object':
+        return {}
+    elif option_type == 'array':
+        return []
+    elif option_type == 'string':
+        return ''
+    elif option_type == 'integer':
+        return 0
+    elif option_type == 'number':
+        return 0.0
+    else:
+        return None
+
+
 def add_imports(model_file_lines, need_defaults, need_deprecations):
     import_lines = []
 
@@ -98,6 +115,10 @@ class ModelConsumer:
             deprecation_data = defaultdict(dict)
             defaults_file_needs_dynamic_values = False
             defaults_file_needs_value_normalization = False
+
+            # TODO: remove when we drop Python 2
+            compat_file_lines = []
+            compat_file_needs_value_normalization = False
 
             for section in sorted(file['options'], key=lambda s: s['name']):
                 errors = []
@@ -164,6 +185,11 @@ class ModelConsumer:
                 options_with_defaults = False
                 validator_data = []
 
+                compat_file_lines.append('')
+                compat_file_lines.append('')
+                compat_file_lines.append(f'class {schema_name}(object):')
+                compat_file_lines.append('    def __init__(self, **kwargs):')
+
                 for option in sorted(section['options'], key=lambda o: o['name']):
                     option_name = option['name']
                     normalized_option_name = normalize_option_name(option_name)
@@ -191,8 +217,11 @@ class ModelConsumer:
 
                     options[option_name] = type_data
 
+                    compat_file_line_attribute = f'        self.{normalized_option_name} = kwargs.get({option_name!r}, '
+
                     if option['required']:
                         required_options.append(option_name)
+                        compat_file_line_attribute += 'None'
                     else:
                         options_with_defaults = True
                         defaults_file_lines.append('')
@@ -203,9 +232,17 @@ class ModelConsumer:
                         if default_value is not NO_DEFAULT:
                             defaults_file_needs_value_normalization = True
                             defaults_file_lines.append(f'    return {default_value!r}')
+
+                            compat_file_needs_value_normalization = True
+                            compat_file_line_attribute += f'{default_value!r}'
                         else:
                             defaults_file_needs_dynamic_values = True
                             defaults_file_lines.append('    return get_default_field_value(field, value)')
+
+                            compat_file_line_attribute += f'{get_compat_dynamic_default_value(type_data)!r}'
+
+                    compat_file_line_attribute += ')'
+                    compat_file_lines.append(compat_file_line_attribute)
 
                     validators = type_data.pop('validators', [])
                     if not isinstance(validators, list):
@@ -371,6 +408,41 @@ class ModelConsumer:
 
             package_root_lines.append('')
             model_files['__init__.py'] = ('\n'.join(package_root_lines), [])
+
+            compat_file_lines.append('')
+            compat_file_lines.append('')
+            compat_file_lines.append('class ConfigMixin(object):')
+            compat_file_lines.append('')
+            compat_file_lines.append('    @property')
+            compat_file_lines.append('    def config(self):')
+            compat_file_lines.append('        # type: () -> InstanceConfig')
+            compat_file_lines.append('        return self._config_model_instance')
+            compat_file_lines.append('')
+            compat_file_lines.append('    @property')
+            compat_file_lines.append('    def shared_config(self):')
+            compat_file_lines.append('        # type: () -> SharedConfig')
+            compat_file_lines.append('        return self._config_model_shared')
+
+            compat_file_lines.append('')
+            compat_file_contents = '\n'.join(compat_file_lines)
+            if compat_file_needs_value_normalization:
+                compat_file_contents = self.code_formatter.apply_black(compat_file_contents)
+
+            model_files['compat.py'] = (compat_file_contents, [])
+
+            # TODO: remove when we drop Python 2
+            model_files['api.py'] = model_files.pop('__init__.py')
+            model_files['__init__.py'] = (
+                """\
+from six import PY3
+
+if PY3:
+    from .api import ConfigMixin, InstanceConfig, SharedConfig
+else:
+    from .compat import ConfigMixin, InstanceConfig, SharedConfig
+""",
+                [],
+            )
 
             # Custom
             model_files['validators.py'] = ('', [])
