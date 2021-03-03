@@ -2,12 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+import time
 
 import mock
 import psycopg2
 import pytest
 from semver import VersionInfo
 
+from datadog_checks.base.utils.db.statement_samples import statement_samples_client
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
@@ -263,6 +266,129 @@ def test_statement_metrics(aggregator, integration_check, pg_instance):
 
     for name in STATEMENT_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
+@pytest.fixture
+def bob_conn():
+    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def dbm_instance(pg_instance):
+    pg_instance['deep_database_monitoring'] = True
+    pg_instance['min_collection_interval'] = 1
+    pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
+    pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collections_per_second': 1}
+    return pg_instance
+
+
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+def test_statement_samples_collect(integration_check, dbm_instance, bob_conn, pg_stat_activity_view):
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    check = integration_check(dbm_instance)
+    check._connect()
+    # clear out any samples kept from previous runs
+    statement_samples_client._events = []
+    query = "SELECT city FROM persons WHERE city = %s"
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # the simple query protocol, sending the whole query as a plain string to postgres.
+    # if a client is using the extended query protocol with prepare then the query would appear as
+    expected_query = query % "'hello'"
+    # leave bob's connection open until after the check has run to ensure we're able to see the query in
+    # pg_stat_activity
+    cursor = bob_conn.cursor()
+    cursor.execute(query, ("hello",))
+    check.check(dbm_instance)
+    matching = [e for e in statement_samples_client._events if e['db']['statement'] == expected_query]
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+        # pg_monitor role exists only in version 10+
+        assert len(matching) == 0, "did not expect to catch any events"
+        return
+    assert len(matching) > 0, "should have collected an event"
+    event = matching[0]
+    assert event['db']['plan']['definition'] is not None, "missing execution plan"
+    assert 'Plan' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
+    # we're expected to get a duration because the connection is in "idle" state
+    assert event['duration']
+    cursor.close()
+
+
+def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
+    dbm_instance['statement_samples']['run_sync'] = False
+    # one collection every two seconds
+    dbm_instance['statement_samples']['collections_per_second'] = 0.5
+    check = integration_check(dbm_instance)
+    check._connect()
+    # clear out any samples kept from previous runs
+    statement_samples_client._events = []
+    query = "SELECT city FROM persons WHERE city = 'hello'"
+    # leave bob's connection open until after the check has run to ensure we're able to see the query in
+    # pg_stat_activity
+    cursor = bob_conn.cursor()
+    for _ in range(5):
+        cursor.execute(query)
+        check.check(dbm_instance)
+        time.sleep(1)
+    cursor.close()
+
+    matching = [e for e in statement_samples_client._events if e['db']['statement'] == query]
+    assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
+
+    metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    assert 2 < len(metrics) < 6
+
+
+def test_statement_samples_collection_loop_inactive_stop(aggregator, integration_check, dbm_instance):
+    dbm_instance['statement_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    while check.statement_samples._collection_loop_future.running():
+        time.sleep(0.1)
+    # make sure there were no unhandled exceptions
+    check.statement_samples._collection_loop_future.result()
+    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_inactive_stop")
+
+
+def test_statement_samples_invalid_activity_view(aggregator, integration_check, dbm_instance):
+    dbm_instance['pg_stat_activity_view'] = "wrong_view"
+
+    # run synchronously, so we expect it to blow up right away
+    dbm_instance['statement_samples'] = {'enabled': True, 'run_sync': True}
+    check = integration_check(dbm_instance)
+    check._connect()
+    with pytest.raises(psycopg2.errors.UndefinedTable):
+        check.check(dbm_instance)
+
+    # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
+    dbm_instance['statement_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    while check.statement_samples._collection_loop_future.running():
+        time.sleep(0.1)
+    # make sure there were no unhandled exceptions
+    check.statement_samples._collection_loop_future.result()
+    aggregator.assert_metric_has_tag_prefix("dd.postgres.statement_samples.error", "error:database-")
+
+
+@pytest.mark.parametrize(
+    "number_key",
+    [
+        "explained_statements_cache_maxsize",
+        "explained_statements_per_hour_per_query",
+        "seen_samples_cache_maxsize",
+        "collections_per_second",
+    ],
+)
+def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
+    pg_instance['statement_samples'] = {
+        number_key: "not-a-number",
+    }
+    with pytest.raises(ValueError):
+        integration_check(pg_instance)
 
 
 def assert_state_clean(check):
