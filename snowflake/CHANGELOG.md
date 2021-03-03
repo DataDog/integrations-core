@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 3.0.1 / 2021-01-14
+## 3.0.1 / 2021-01-14 / Agent 7.26.0
 
 * [Fixed] Do not throw configuration error for missing password when using OAuth. See [#8363](https://github.com/DataDog/integrations-core/pull/8363).
 
