@@ -233,15 +233,14 @@ class DockerInterface(object):
         env_vars.update(self.env_vars)
 
         volumes = [
+            # Mount the config directory, not the file, to ensure updates are propagated
+            # https://github.com/moby/moby/issues/15793#issuecomment-135411504
+            f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}',
             # Mount the check directory
             f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
             # Mount the /proc directory
             '/proc:/host/proc',
         ]
-        if self.config:
-            # Mount the config directory, not the file, to ensure updates are propagated
-            # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-            volumes.append(f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}')
         if not ON_WINDOWS:
             volumes.extend(self.metadata.get('docker_volumes', []))
         else:
