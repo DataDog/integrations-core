@@ -309,7 +309,7 @@ files:
                   example: 10000
               - name: events_statements_row_limit
                 description: |
-                  The maximum number of rows to read out from a `performance_schema.events_statements_*` table during
+                  Sets the maximum number of rows to read out from a `performance_schema.events_statements_*` table during
                   a single collection.
                 value:
                   type: integer
