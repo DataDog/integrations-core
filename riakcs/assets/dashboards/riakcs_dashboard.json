@@ -115,7 +115,7 @@
                     }
                 ],
                 "type": "timeseries",
-                "title": "RiakCS Bucket rates for Creates, Gets, Puts, and Deletes"
+                "title": "Riak CS bucket rates for creates, gets, puts, and deletes"
             }
         }
     ]
