@@ -25,7 +25,7 @@ from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
-from .network import CertAdapter, create_socket_connection, closing
+from .network import CertAdapter, closing, create_socket_connection
 from .time import get_timestamp
 
 try:

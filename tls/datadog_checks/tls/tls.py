@@ -15,7 +15,7 @@ from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.network import create_socket_connection, closing
+from datadog_checks.base.utils.network import closing, create_socket_connection
 from datadog_checks.base.utils.time import get_timestamp
 
 from .utils import days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
