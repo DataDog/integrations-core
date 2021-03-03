@@ -352,7 +352,7 @@ Verifies the database is available and accepting connections.
         ```
     - Then restart the Agent.
 
-- Verify if your environment variables are set correctly by running the following command from the perspective of the Agent.
+- Verify your environment variables are set correctly by running the following command from the Agent.
 Ensure the displayed output matches the correct value.
 
   ```shell script
