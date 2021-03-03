@@ -34,7 +34,7 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    sudo ldconfig
    ```
 
-2. Decompress both packages into a single directory that available to all users on the given machine (i.e. `/opt/oracle`):
+2. Decompress both packages into a single directory that is available to all users on the given machine (i.e. `/opt/oracle`):
 
    ```shell
    mkdir -p /opt/oracle/ && cd /opt/oracle/
@@ -324,7 +324,7 @@ Verifies the database is available and accepting connections.
 
 ### Common Problems
 #### Oracle Instant Client
-- Verify that both the Oracle Instant Client and SDK are located in one directory.
+- Verify that both the Oracle Instant Client and SDK files are located in one directory.
 
 ##### Linux
 - See further installation documentation on [Oracle][15].
@@ -332,7 +332,8 @@ Verifies the database is available and accepting connections.
 ##### Windows
 - Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version, see [Windows downloads page][16] for more details.
 - Ensure the `PATH` environment variable contains `C:\oracle\instantclient_19_9`. 
-    Otherwise, navigate to `Control Panel` -> Settings -> Advanced System Settings -> Environment Variables and
+
+    Otherwise, navigate to Control Panel -> Settings -> Advanced System Settings -> Environment Variables and
     append `;C:\oracle\instantclient_19_9` to the `PATH` variable.
     Also verify that `OCI_LIB64=C:\oracle\instantclient_19_9` exists.
 
@@ -344,12 +345,12 @@ Verifies the database is available and accepting connections.
     JVMNotFoundException("No JVM shared library file ({jpype._jvmfinder.JVMNotFoundException: No JVM shared library file (libjvm.so) found. Try setting up the JAVA_HOME environment variable properly.})"
     ```
 
-    1. Ensure that the `JAVA_HOME` environment variable is set and pointing to the correct directory.
-    2. Add the environment variable to `/etc/environment`:
+    - Ensure that the `JAVA_HOME` environment variable is set and pointing to the correct directory.
+    - Add the environment variable to `/etc/environment`:
         ```text
         JAVA_HOME=/path/to/java
         ```
-    3. Then restart the Agent.
+    - Then restart the Agent.
 
 - Verify if your environment variables are set correctly by running the following command from the perspective of the Agent.
 Ensure the displayed output matches the correct value.
