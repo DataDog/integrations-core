@@ -321,7 +321,7 @@ jobs:
     - checkName: oracle
       displayName: Oracle Database
       os: linux
-    - checkName: pdh_check
+    - checkName: pdh_check (Windows)
       displayName: PDH
       os: windows
     - checkName: pgbouncer
