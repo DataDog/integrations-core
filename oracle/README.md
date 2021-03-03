@@ -12,13 +12,14 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
+To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver.
+Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
 ##### Oracle Instant Client
 
 The Oracle check requires either access to the `cx_Oracle` Python module, or the Oracle JDBC Driver:
 
-1. Go to the [download page][4] and install both the Instant Client Basic and SDK packages.
+1. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
     If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
 
@@ -33,7 +34,7 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    sudo ldconfig
    ```
 
-2. Decompress those libraries in a given directory available to all users on the given machine (i.e. `/opt/oracle`):
+2. Decompress both packages into a single directory that available to all users on the given machine (i.e. `/opt/oracle`):
 
    ```shell
    mkdir -p /opt/oracle/ && cd /opt/oracle/
@@ -321,6 +322,42 @@ Verifies the database is available and accepting connections.
 
 ## Troubleshooting
 
+### Common Problems
+#### Oracle Instant Client
+- Verify that both the Oracle Instant Client and SDK are located in one directory.
+
+##### Linux
+- See further installation documentation on [Oracle][15].
+
+##### Windows
+- Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version, see [Windows downloads page][16] for more details.
+- Ensure the `PATH` environment variable contains `C:\oracle\instantclient_19_9`. 
+    Otherwise, navigate to `Control Panel` -> Settings -> Advanced System Settings -> Environment Variables and
+    append `;C:\oracle\instantclient_19_9` to the `PATH` variable.
+    Also verify that `OCI_LIB64=C:\oracle\instantclient_19_9` exists.
+
+
+#### JDBC Driver
+- If you encounter a `JVMNotFoundException`:
+
+    ```text
+    JVMNotFoundException("No JVM shared library file ({jpype._jvmfinder.JVMNotFoundException: No JVM shared library file (libjvm.so) found. Try setting up the JAVA_HOME environment variable properly.})"
+    ```
+
+    1. Ensure that the `JAVA_HOME` environment variable is set and pointing to the correct directory.
+    2. Add the environment variable to `/etc/environment`:
+        ```text
+        JAVA_HOME=/path/to/java
+        ```
+    3. Then restart the Agent.
+
+- Verify if your environment variables are set correctly by running the following command from the perspective of the Agent.
+Ensure the displayed output matches the correct value.
+
+  ```shell script
+    sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
+  ```
+
 Need help? Contact [Datadog support][12].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
@@ -337,3 +374,5 @@ Need help? Contact [Datadog support][12].
 [12]: https://docs.datadoghq.com/help/
 [13]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
 [14]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
+[15]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[16]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
