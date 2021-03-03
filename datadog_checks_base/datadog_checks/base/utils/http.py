@@ -401,7 +401,7 @@ class RequestsWrapper(object):
         try:
             sock = create_socket_connection(hostname)
         except Exception as e:
-            print('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            self.logger.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
             return
 
         with closing(sock):
@@ -412,7 +412,7 @@ class RequestsWrapper(object):
                 with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
             except Exception as e:
-                print('Error occurred while getting cert to discover intermediate certificates:', e)
+                self.logger.error('Error occurred while getting cert to discover intermediate certificates:', e)
                 return
         certs = []
         self.load_intermediate_certs(der_cert, certs)
@@ -424,7 +424,7 @@ class RequestsWrapper(object):
         try:
             cert = load_der_x509_certificate(der_cert)
         except Exception as e:
-            print('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
+            self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
             return
 
         try:
@@ -447,7 +447,7 @@ class RequestsWrapper(object):
             try:
                 response = requests.get(uri)  # SKIP_HTTP_VALIDATION
             except Exception as e:
-                print('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
                 continue
             else:
                 intermediate_cert = response.content
