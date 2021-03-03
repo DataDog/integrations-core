@@ -325,7 +325,7 @@ files:
                   display_default: null
               - name: explain_procedure
                 description: |
-                  Override the default procedure used for collecting execution plans. The agent will use this
+                  Overrides the default procedure used for collecting execution plans. The agent will use this
                   procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
                 value:
                   type: string
