@@ -15,10 +15,10 @@ from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.network import create_socket_connection
+from datadog_checks.base.utils.network import create_socket_connection, closing
 from datadog_checks.base.utils.time import get_timestamp
 
-from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
+from .utils import days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
