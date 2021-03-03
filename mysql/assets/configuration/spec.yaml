@@ -272,7 +272,7 @@ files:
                   example: false
               - name: collections_per_second
                 description: |
-                  Set the maximum statement sample collection rate. Each collection involves a single query to one
+                  Sets the maximum statement sample collection rate. Each collection involves a single query to one
                   of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
                   unique statement seen.
                 value:
