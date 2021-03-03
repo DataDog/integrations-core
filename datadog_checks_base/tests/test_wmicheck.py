@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from tests.utils import requires_windows
+from datadog_test_libs.requirements import requires_windows
 
 try:
     from datadog_checks.base.checks.win.wmi import WinWMICheck

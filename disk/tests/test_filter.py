@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+from datadog_test_libs.requirements import requires_windows
+
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.disk.disk import IGNORE_CASE, Disk
 
 from .mocks import MockPart
-from .utils import assert_regex_equal, requires_windows
+from .utils import assert_regex_equal
 
 
 def test_default_casing():
