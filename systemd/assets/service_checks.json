@@ -47,7 +47,7 @@
         "description": "Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other."
     },
     {
-        "agent_version": "6.13.0",
+        "agent_version": "6.19.0",
         "integration": "Systemd",
         "groups": [
             "host",
