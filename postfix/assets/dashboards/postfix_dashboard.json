@@ -18,7 +18,7 @@
                     }
                 ],
                 "type": "timeseries",
-                "title": "Postfix Queue size"
+                "title": "Postfix queue size"
             }
         }
     ]
