@@ -6,7 +6,7 @@ parameters:
   run_py2_tests: true
   force_base_package: false
   coverage: true
-  test_e2e: false
+  test_e2e: true
 
 jobs:
 - ${{ each check in parameters.checks }}:
