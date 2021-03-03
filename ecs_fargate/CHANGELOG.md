@@ -1,6 +1,6 @@
 # CHANGELOG - ECS Fargate
 
-## 2.12.0 / 2021-01-25
+## 2.12.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).

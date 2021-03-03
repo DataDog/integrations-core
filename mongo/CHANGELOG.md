@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 2.2.0 / 2021-01-25
+## 2.2.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Better arbiter support. See [#8294](https://github.com/DataDog/integrations-core/pull/8294).
 * [Fixed] Refactor connection and api. See [#8283](https://github.com/DataDog/integrations-core/pull/8283).

@@ -1,6 +1,6 @@
 # CHANGELOG - SAP HANA
 
-## 1.4.0 / 2021-01-25
+## 1.4.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add SSL support for connection. See [#8098](https://github.com/DataDog/integrations-core/pull/8098).
 

@@ -121,6 +121,20 @@ haproxy.frontend.session.current,gauge,,connection,,Number of active frontend se
 haproxy.frontend.session.limit,gauge,,connection,,Configured frontend session limit (legacy check only).,0,haproxy,frontend sess lim
 haproxy.frontend.session.pct,gauge,,percent,,"Percentage of sessions in use (frontend.session.current/frontend.session.limit * 100, legacy check only).",-1,haproxy,frontend sess pct
 haproxy.frontend.session.rate,gauge,,connection,second,Number of frontend sessions created per second (legacy check only).,0,haproxy,frontend sess rate
+haproxy.listener.bytes.in.total,count,,,,Total number of request bytes since process started (>= 2.4).,0,haproxy,
+haproxy.listener.bytes.out.total,count,,,,Total number of response bytes since process started (>= 2.4).,0,haproxy,
+haproxy.listener.current.sessions,gauge,,,,"Number of current sessions on the frontend, backend or server (>= 2.4).",0,haproxy,
+haproxy.listener.denied.connections.total,count,,,,Total number of incoming connections blocked on a listener/frontend by a tcp-request connection rule since the worker process started (>= 2.4).,0,haproxy,
+haproxy.listener.denied.sessions.total,count,,,,Total number of incoming sessions blocked on a listener/frontend by a tcp-request connection rule since the worker process started,0,haproxy,
+haproxy.listener.failed.header.rewriting.total,count,,,,Total number of failed HTTP header rewrites since the worker process started (>= 2.4).,0,haproxy,
+haproxy.listener.internal.errors.total,count,,,,Total number of internal errors since process started (>= 2.4).,0,haproxy,
+haproxy.listener.limit.sessions,gauge,,,,"Frontend/listener/server's maxconn, backend's fullconn (>= 2.4).",0,haproxy,
+haproxy.listener.max.sessions,gauge,,,,Highest value of current sessions encountered since process started (>= 2.4).,0,haproxy,
+haproxy.listener.request.errors.total,count,,,,Total number of invalid requests since process started (>= 2.4).,0,haproxy,
+haproxy.listener.requests.denied.total,count,,,,Total number of denied requests since process started (>= 2.4).,0,haproxy,
+haproxy.listener.responses.denied.total,count,,,,Total number of denied responses since process started (>= 2.4).,0,haproxy,
+haproxy.listener.sessions.total,count,,,,Total number of sessions since process started (>= 2.4).,0,haproxy,
+haproxy.listener.status,gauge,,,,"Current status of the service, per state label value (>= 2.4).",0,haproxy,
 haproxy.process.active.peers,gauge,,,,Current number of active peers.,0,haproxy,
 haproxy.process.build_info,gauge,,,,Build info.,0,haproxy,
 haproxy.process.busy.polling.enabled,gauge,,,,Non zero if the busy polling is enabled.,0,haproxy,

@@ -613,6 +613,17 @@ def is_tile_only(check):
     return not os.path.exists(config_file)
 
 
+def is_logs_only(check):
+    config_file = get_config_file(check)
+    if not file_exists(config_file):
+        return False
+    with open(config_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        if 'init_config:' not in content and '# logs:' in content:
+            return True
+    return False
+
+
 def is_jmx_integration(check_name):
     config_file = get_config_file(check_name)
     if not file_exists(config_file):

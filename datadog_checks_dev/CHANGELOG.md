@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 9.0.0 / 2021-03-01
+
+* [Added] Add ddev example committer tool. See [#8697](https://github.com/DataDog/integrations-core/pull/8697).
+* [Fixed] Validate metric prefixes for all metric metadata. See [#8672](https://github.com/DataDog/integrations-core/pull/8672).
+* [Fixed] Remove marketplace option for ddev create. See [#8649](https://github.com/DataDog/integrations-core/pull/8649).
+* [Changed] Create missing cards when using `--move-cards`. See [#8595](https://github.com/DataDog/integrations-core/pull/8595).
+
 ## 8.0.1 / 2021-02-19
 
 * [Fixed] Fix error printing json errors when error on list object. See [#8650](https://github.com/DataDog/integrations-core/pull/8650).

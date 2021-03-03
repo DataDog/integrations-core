@@ -1,6 +1,6 @@
 # CHANGELOG - process
 
-## 1.17.1 / 2021-01-25
+## 1.17.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Clear process cache if cached PIDs not found. See [#8414](https://github.com/DataDog/integrations-core/pull/8414). Thanks [gingerlime](https://github.com/gingerlime).
 
