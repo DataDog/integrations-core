@@ -95,7 +95,7 @@
                     }
                 ],
                 "type": "timeseries",
-                "title": "RiakCS Object rates for Gets, Puts, and Deletes"
+                "title": "Riak CS object rates for gets, puts, and deletes"
             }
         },
         {
