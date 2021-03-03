@@ -301,7 +301,7 @@ files:
                   example: 5000
               - name: seen_samples_cache_maxsize
                 description: |
-                  Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
+                  Sets the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
                   increased for databases with a very large number of unique normalized execution plans which exceed the
                   cache's limit.
                 value:
