@@ -324,7 +324,7 @@ Verifies the database is available and accepting connections.
 
 ### Common Problems
 #### Oracle Instant Client
-- Verify that both the Oracle Instant Client and SDK files are located in one directory.
+- Verify that both the Oracle Instant Client and SDK files are located in the same directory.
 
 ##### Linux
 - See further installation documentation on [Oracle][15].
