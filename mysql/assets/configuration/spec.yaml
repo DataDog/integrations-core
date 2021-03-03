@@ -332,7 +332,7 @@ files:
                   example: explain_statement
               - name: fully_qualified_explain_procedure
                 description: |
-                  Override the default fully qualified explain procedure used for collecting execution plans for
+                  Overrides the default fully qualified explain procedure used for collecting execution plans for
                   statements sent from connections that do not have a default schema configured.
                 value:
                   type: string
