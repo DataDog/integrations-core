@@ -316,7 +316,7 @@ files:
                   example: 5000
               - name: events_statements_table
                 description: |
-                  Force a specific events statements table. Must be one of events_statements_current,
+                  Forces a specific events statements table. Must be one of events_statements_current,
                   events_statements_history, events_statements_history_long. If not set then the agent will choose
                   the best available table that is enabled and not empty.
                 value:
