@@ -476,7 +476,7 @@ coverage:
         flags:
         - teamcity
       TokuMX:
-        target: 75
+        target: 50
         flags:
         - tokumx
       Twemproxy:
