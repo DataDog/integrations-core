@@ -1,5 +1,5 @@
 # Profile for Juniper SRX Series Firewall devices
-# See: 
+# See:
 #   https://www.juniper.net/documentation/en_US/junos/topics/concept/standard-mib-overview.html
 #   https://www.juniper.net/documentation/en_US/junos/topics/concept/enterprise-specific-mibs-overview.html
 
@@ -19,7 +19,7 @@ extends:
 device:
   vendor: "juniper-networks"
 
-sysobjectid: 
+sysobjectid:
   - 1.3.6.1.4.1.2636.1.1.1.2.26 # SRX5800
   - 1.3.6.1.4.1.2636.1.1.1.2.28 # SRX5600
   - 1.3.6.1.4.1.2636.1.1.1.2.34 # SRX3600
@@ -33,5 +33,15 @@ sysobjectid:
   - 1.3.6.1.4.1.2636.1.1.1.2.64 # SRX110
   - 1.3.6.1.4.1.2636.1.1.1.2.65 # SRX120
   - 1.3.6.1.4.1.2636.1.1.1.2.86 # SRX550
-  
+  - 1.3.6.1.4.1.2636.1.1.1.2.133 # SRX300
+  - 1.3.6.1.4.1.2636.1.1.1.2.134 # SRX320
+  - 1.3.6.1.4.1.2636.1.1.1.2.135 # SRX340
+  - 1.3.6.1.4.1.2636.1.1.1.2.136 # SRX345
+  - 1.3.6.1.4.1.2636.1.1.1.2.137 # SRX1500
+  - 1.3.6.1.4.1.2636.1.1.1.2.140 # SRX4600
+  - 1.3.6.1.4.1.2636.1.1.1.2.141 # SRX4800
+  - 1.3.6.1.4.1.2636.1.1.1.2.142 # SRX4100
+  - 1.3.6.1.4.1.2636.1.1.1.2.143 # SRX4200
+  - 1.3.6.1.4.1.2636.1.1.1.2.164 # SRX380
+
 

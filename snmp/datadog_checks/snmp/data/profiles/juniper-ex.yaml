@@ -1,5 +1,5 @@
 # Profile for Juniper EX Series Ethernet devices
-# See: 
+# See:
 #   https://www.juniper.net/documentation/en_US/junos/topics/concept/standard-mib-overview.html
 #   https://www.juniper.net/documentation/en_US/junos/topics/concept/enterprise-specific-mibs-overview.html
 
@@ -20,7 +20,7 @@ extends:
 device:
   vendor: "juniper-networks"
 
-sysobjectid: 
+sysobjectid:
   - 1.3.6.1.4.1.2636.1.1.1.1.30 # EX3200
   - 1.3.6.1.4.1.2636.1.1.1.1.31 # EX4200
   - 1.3.6.1.4.1.2636.1.1.1.1.32 # EX8208
@@ -29,3 +29,9 @@ sysobjectid:
   - 1.3.6.1.4.1.2636.1.1.1.1.44 # EX4500
   - 1.3.6.1.4.1.2636.1.1.1.1.74 # EX6210
   - 1.3.6.1.4.1.2636.1.1.1.1.76 # EX3300
+  - 1.3.6.1.4.1.2636.1.1.1.2.131  # EX3400
+  - 1.3.6.1.4.1.2636.1.1.1.2.132  # EX2300
+  - 1.3.6.1.4.1.2636.1.1.1.2.151  # EX9251
+  - 1.3.6.1.4.1.2636.1.1.1.2.156  # EX9253
+  - 1.3.6.1.4.1.2636.1.1.1.2.165  # EX4400
+  - 1.3.6.1.4.1.2636.1.1.1.2.508  # EX4650
