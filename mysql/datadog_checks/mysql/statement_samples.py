@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
@@ -218,6 +219,7 @@ class MySQLStatementSamples(object):
         self._tags_str = None
         self._service = "mysql"
         self._collection_loop_future = None
+        self._cancel_event = threading.Event()
         self._rate_limiter = ConstantRateLimiter(1)
         self._config = config
         self._db_hostname = resolve_db_host(self._config.host)
@@ -308,6 +310,13 @@ class MySQLStatementSamples(object):
         else:
             self._log.debug("Statement sampler collection loop already running")
 
+    def cancel(self):
+        """
+        Cancels the collection loop thread if it's running.
+        Returns immediately, leaving the thread to stop & clean up on its own time.
+        """
+        self._cancel_event.set()
+
     def _get_db_connection(self):
         """
         lazy reconnect db
@@ -318,7 +327,7 @@ class MySQLStatementSamples(object):
             self._db = pymysql.connect(**self._connection_args)
         return self._db
 
-    def close(self):
+    def _close_db_conn(self):
         if self._db:
             try:
                 self._db.close()
@@ -331,6 +340,10 @@ class MySQLStatementSamples(object):
         try:
             self._log.info("Starting statement sampler collection loop")
             while True:
+                if self._cancel_event.isSet():
+                    self._log.info("Collection loop cancelled")
+                    self._check.count("dd.mysql.statement_samples.collection_loop_cancel", 1, tags=self._tags)
+                    break
                 if time.time() - self._last_check_run > self._config.min_collection_interval * 2:
                     self._log.info("Stopping statement sampler collection loop due to check inactivity")
                     self._check.count("dd.mysql.statement_samples.collection_loop_inactive_stop", 1, tags=self._tags)
@@ -354,7 +367,7 @@ class MySQLStatementSamples(object):
             )
         finally:
             self._log.info("Shutting down statement sampler collection loop")
-            self.close()
+            self._close_db_conn()
 
     def _cursor_run(self, cursor, query, params=None, obfuscated_params=None):
         """

@@ -127,6 +127,9 @@ class MySql(AgentCheck):
             finally:
                 self._conn = None
 
+    def cancel(self):
+        self._statement_samples.cancel()
+
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
         qcache_st = self.qcache_stats.get(host_key, (None, None, None))

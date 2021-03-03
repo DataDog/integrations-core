@@ -390,7 +390,7 @@ def test_statement_samples_collect(
 
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
-    mysql_check._statement_samples.close()
+    mysql_check._statement_samples._close_db_conn()
 
 
 @pytest.mark.integration
@@ -421,6 +421,21 @@ def test_statement_samples_loop_inactive_stop(aggregator, dbm_instance):
     # make sure there were no unhandled exceptions
     mysql_check._statement_samples._collection_loop_future.result()
     aggregator.assert_metric("dd.mysql.statement_samples.collection_loop_inactive_stop")
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_samples_check_cancel(aggregator, dbm_instance):
+    # confirm that the collection loop stops on its own after the check has not been run for a while
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check.check(dbm_instance)
+    assert mysql_check._statement_samples._collection_loop_future.running(), "thread should be running"
+    mysql_check.cancel()
+    # wait for it to stop and make sure it doesn't throw any exceptions
+    mysql_check._statement_samples._collection_loop_future.result()
+    assert not mysql_check._statement_samples._collection_loop_future.running(), "thread should be stopped"
+    assert mysql_check._statement_samples._db is None, "db connection should be gone"
+    aggregator.assert_metric("dd.mysql.statement_samples.collection_loop_cancel")
 
 
 @pytest.mark.integration
