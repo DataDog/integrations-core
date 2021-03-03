@@ -4,7 +4,7 @@
 import collections
 
 import pytest
-from disk.tests.utils import requires_windows
+from datadog_test_libs.requirements import requires_windows
 
 try:
     from datadog_checks.base.checks.win.wmi import WMISampler
