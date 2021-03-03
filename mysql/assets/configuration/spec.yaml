@@ -280,7 +280,7 @@ files:
                   example: 1
               - name: explained_statements_per_hour_per_query
                 description: |
-                  Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+                  Sets the rate limit for how many execution plans will be collected per hour per normalized statement.
                 value:
                   type: integer
                   example: 60
