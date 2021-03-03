@@ -345,7 +345,7 @@ files:
                   example: datadog.enable_events_statements_consumers
               - name: events_statements_temp_table_name
                 description: |
-                  Override the default fully qualified name for the temp table the agent creates while collecting
+                  Overrides the default fully qualified name for the temp table the agent creates while collecting
                   samples.
                 value:
                   type: string
