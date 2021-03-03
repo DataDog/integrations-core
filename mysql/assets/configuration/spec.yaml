@@ -353,7 +353,7 @@ files:
               - name: collection_strategy_cache_maxsize
                 description: |
                   Sets the max size of the cache used for caching collection strategies. This value should be increased
-                  to be at least as much as the number of unique schemas that are being monitored.
+                  to be at least as many as the number of unique schemas that are being monitored.
                 value:
                   type: integer
                   example: 1000
