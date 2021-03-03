@@ -59,7 +59,7 @@
             "critical",
             "unknown"
         ],
-        "name": "Unit Active State",
+        "name": "Unit sub-state",
         "description": "Returns `OK` `CRITICAL` or `UNKNOWN` based on the substate of the unit and the user-provided mapping in systemd.d/conf.yaml."
     }
 ]
