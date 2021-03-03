@@ -1,3 +1,68 @@
+## Datadog Agent version [7.26.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7260)
+
+* ActiveMQ [1.9.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
+* Amazon Kafka [1.4.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Ambari [1.6.1](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
+* Azure IoT Edge [2.0.0](https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/CHANGELOG.md) **BREAKING CHANGE**
+* Cacti [1.8.1](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
+* Cassandra [1.10.0](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
+* datadog_checks_base [16.3.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* Cilium [1.5.2](https://github.com/DataDog/integrations-core/blob/master/cilium/CHANGELOG.md)
+* Cisco ACI [1.13.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [2.0.1](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* CockroachDB [1.5.1](https://github.com/DataDog/integrations-core/blob/master/cockroachdb/CHANGELOG.md)
+* CoreDNS [1.6.1](https://github.com/DataDog/integrations-core/blob/master/coredns/CHANGELOG.md)
+* Couchbase [1.16.1](https://github.com/DataDog/integrations-core/blob/master/couchbase/CHANGELOG.md)
+* CRI-O [1.5.1](https://github.com/DataDog/integrations-core/blob/master/crio/CHANGELOG.md)
+* Disk [4.1.1](https://github.com/DataDog/integrations-core/blob/master/disk/CHANGELOG.md)
+* Amazon Fargate [2.12.0](https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/CHANGELOG.md)
+* EKS Fargate [1.3.0](https://github.com/DataDog/integrations-core/blob/master/eks_fargate/CHANGELOG.md)
+* Elasticsearch [1.23.1](https://github.com/DataDog/integrations-core/blob/master/elastic/CHANGELOG.md)
+* Envoy [1.20.1](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* etcd [2.6.1](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
+* Exchange Server [1.8.2](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
+* External DNS [1.2.1](https://github.com/DataDog/integrations-core/blob/master/external_dns/CHANGELOG.md)
+* Gitlab Runner [2.11.1](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)
+* Gitlab [4.4.1](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md)
+* GlusterFS [1.1.1](https://github.com/DataDog/integrations-core/blob/master/glusterfs/CHANGELOG.md)
+* Gunicorn [1.14.1](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
+* HAProxy [2.16.0](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md)
+* Harbor [1.8.0](https://github.com/DataDog/integrations-core/blob/master/harbor/CHANGELOG.md)
+* HTTP [5.1.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md) **BREAKING CHANGE**
+* IBM MQ [3.11.1](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md)
+* Istio [3.9.0](https://github.com/DataDog/integrations-core/blob/master/istio/CHANGELOG.md)
+* Kafka Consumer [2.8.2](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Kafka [2.5.0](https://github.com/DataDog/integrations-core/blob/master/kafka/CHANGELOG.md)
+* Kubernetes API server metrics [1.7.1](https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/CHANGELOG.md)
+* Kube_scheduler [1.6.1](https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/CHANGELOG.md)
+* Kubelet [5.1.0](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
+* Linkerd [2.7.0](https://github.com/DataDog/integrations-core/blob/master/linkerd/CHANGELOG.md)
+* MongoDB [2.2.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [2.2.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Network [2.1.1](https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md)
+* nginx-ingress-controller [1.8.1](https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/CHANGELOG.md)
+* Nginx [3.11.1](https://github.com/DataDog/integrations-core/blob/master/nginx/CHANGELOG.md)
+* OpenMetrics [1.12.0](https://github.com/DataDog/integrations-core/blob/master/openmetrics/CHANGELOG.md)
+* Oracle Database [3.1.1](https://github.com/DataDog/integrations-core/blob/master/oracle/CHANGELOG.md)
+* Postfix [1.8.1](https://github.com/DataDog/integrations-core/blob/master/postfix/CHANGELOG.md)
+* Postgres [5.3.2](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Process [1.17.1](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
+* ProxySQL [3.0.0](https://github.com/DataDog/integrations-core/blob/master/proxysql/CHANGELOG.md) **BREAKING CHANGE**
+* RethinkDB [1.3.2](https://github.com/DataDog/integrations-core/blob/master/rethinkdb/CHANGELOG.md)
+* SAP HANA [1.4.0](https://github.com/DataDog/integrations-core/blob/master/sap_hana/CHANGELOG.md)
+* Scylla [1.3.1](https://github.com/DataDog/integrations-core/blob/master/scylla/CHANGELOG.md)
+* SNMP [4.0.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md) **BREAKING CHANGE**
+* Snowflake [3.0.1](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* Solr [1.8.0](https://github.com/DataDog/integrations-core/blob/master/solr/CHANGELOG.md)
+* Spark [1.19.1](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [2.3.6](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Teamcity [1.12.0](https://github.com/DataDog/integrations-core/blob/master/teamcity/CHANGELOG.md)
+* TLS [2.1.1](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md) **BREAKING CHANGE**
+* Tomcat [1.6.0](https://github.com/DataDog/integrations-core/blob/master/tomcat/CHANGELOG.md)
+* Vertica [2.0.0](https://github.com/DataDog/integrations-core/blob/master/vertica/CHANGELOG.md) **BREAKING CHANGE**
+* VoltDB [1.0.0](https://github.com/DataDog/integrations-core/blob/master/voltdb/CHANGELOG.md)
+* Windows Service [3.0.0](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md) **BREAKING CHANGE**
+
 ## Datadog Agent version [7.25.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7250)
 
 * Active Directory [1.10.1](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
@@ -370,7 +435,7 @@
 
 ## Datadog Agent version [7.21.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7211)
 
-* datadog_checks_downloader [3.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* There were no integration updates for this version of the Agent.
 
 ## Datadog Agent version [7.21.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7210)
 
@@ -384,7 +449,7 @@
 * Cassandra [1.6.1](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md)
 * Ceph [2.1.1](https://github.com/DataDog/integrations-core/blob/master/ceph/CHANGELOG.md)
 * datadog_checks_base [11.12.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
-* datadog_checks_downloader [3.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+* datadog_checks_downloader [3.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
 * Cisco ACI [1.10.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
 * ClickHouse [1.3.1](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
 * Confluent Platform [1.1.1](https://github.com/DataDog/integrations-core/blob/master/confluent_platform/CHANGELOG.md)

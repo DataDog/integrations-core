@@ -1,6 +1,6 @@
 # CHANGELOG - GlusterFS
 
-## 1.1.1 / 2021-01-28
+## 1.1.1 / 2021-01-28 / Agent 7.26.0
 
 * [Fixed] Fix error handling when Agent has no sudo access. See [#8470](https://github.com/DataDog/integrations-core/pull/8470).
 

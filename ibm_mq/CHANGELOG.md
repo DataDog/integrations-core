@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 3.11.1 / 2021-01-25
+## 3.11.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Better explain ssl_key_repository_location. See [#8417](https://github.com/DataDog/integrations-core/pull/8417).
 

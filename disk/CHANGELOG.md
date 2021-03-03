@@ -1,6 +1,6 @@
 # CHANGELOG - disk
 
-## 4.1.1 / 2021-01-28
+## 4.1.1 / 2021-01-28 / Agent 7.26.0
 
 * [Fixed] Fix example config for `create_mounts`. See [#8480](https://github.com/DataDog/integrations-core/pull/8480).
 

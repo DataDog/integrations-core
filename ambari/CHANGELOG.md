@@ -1,6 +1,6 @@
 # CHANGELOG - Ambari
 
-## 1.6.1 / 2021-01-25
+## 1.6.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update check signature. See [#8176](https://github.com/DataDog/integrations-core/pull/8176).
 

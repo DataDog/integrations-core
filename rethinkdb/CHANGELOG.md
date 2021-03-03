@@ -1,6 +1,6 @@
 # CHANGELOG - RethinkDB
 
-## 1.3.2 / 2021-01-25
+## 1.3.2 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update logs template with docs feedback. See [#8412](https://github.com/DataDog/integrations-core/pull/8412).
 * [Fixed] Update logs readme template. See [#8399](https://github.com/DataDog/integrations-core/pull/8399).
