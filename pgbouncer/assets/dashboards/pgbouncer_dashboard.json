@@ -1,5 +1,5 @@
 {
-    "title": "PGBouncer - Metrics",
+    "title": "PgBouncer - Metrics",
     "description": "This dashboard provides a high-level overview of PgBouncer, so you can monitor connection pool performance metrics and track traffic to and from your PostgreSQL database. Further reading on PgBouncer monitoring:\n\n- [Datadog's PgBouncer integration docs](https://docs.datadoghq.com/integrations/pgbouncer/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
