@@ -266,7 +266,7 @@ files:
             options:
               - name: enabled
                 description: |
-                  Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+                  Enables collection of statement samples. Requires `deep_database_monitoring: true`.
                 value:
                   type: boolean
                   example: false
