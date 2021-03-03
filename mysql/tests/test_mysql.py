@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import json
 import subprocess
 import time
 from collections import Counter
@@ -12,12 +11,14 @@ from os import environ
 import mock
 import psutil
 import pytest
+from pkg_resources import parse_version
+
 from datadog_checks.base.utils.db.statement_samples import statement_samples_client
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.version_utils import get_version
-from pkg_resources import parse_version
 
 from . import common, tags, variables
 from .common import MYSQL_VERSION_PARSED
@@ -345,8 +346,9 @@ def test_generate_synthetic_rows():
         ('testdb', 'select name as nam from users'),
     ],
 )
-def test_statement_samples_collect(dbm_instance, bob_conn, events_statements_table, explain_strategy, schema,
-                                   statement):
+def test_statement_samples_collect(
+    dbm_instance, bob_conn, events_statements_table, explain_strategy, schema, statement
+):
     # try to collect a sample from all supported events_statements tables using all possible strategies
     dbm_instance['statement_samples']['events_statements_table'] = events_statements_table
     dbm_instance['statement_samples']['run_sync'] = True
@@ -449,8 +451,9 @@ def test_statement_samples_invalid_explain_procedure(aggregator, dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("events_statements_enable_procedure",
-                         ["datadog.enable_events_statements_consumers", "invalid_proc"])
+@pytest.mark.parametrize(
+    "events_statements_enable_procedure", ["datadog.enable_events_statements_consumers", "invalid_proc"]
+)
 def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_statements_enable_procedure):
     dbm_instance['statement_samples']['run_sync'] = True
     dbm_instance['statement_samples']['events_statements_enable_procedure'] = events_statements_enable_procedure
@@ -460,7 +463,8 @@ def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_stat
     with closing(root_conn.cursor()) as cursor:
         cursor.execute(
             "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = "
-            "'events_statements_history_long';")
+            "'events_statements_history_long';"
+        )
 
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     assert original_enabled_consumers == {'events_statements_current', 'events_statements_history'}

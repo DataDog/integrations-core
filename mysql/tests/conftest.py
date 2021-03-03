@@ -7,6 +7,7 @@ import os
 import mock
 import pymysql
 import pytest
+
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
@@ -186,13 +187,15 @@ def _create_explain_procedure(conn, schema):
 def _create_enable_consumers_procedure(conn):
     logger.debug("creating enable_events_statements_consumers procedure")
     cur = conn.cursor()
-    cur.execute("""
+    cur.execute(
+        """
         CREATE PROCEDURE datadog.enable_events_statements_consumers()
             SQL SECURITY DEFINER
         BEGIN
             UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%';
         END;
-    """)
+    """
+    )
     cur.execute("GRANT EXECUTE ON PROCEDURE datadog.enable_events_statements_consumers to 'dog'@'%'")
     cur.close()
 

@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import re
@@ -19,6 +18,7 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
 from datadog_checks.base.utils.db.statement_samples import statement_samples_client
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter, resolve_db_host
+from datadog_checks.base.utils.serialization import json
 
 VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
@@ -291,7 +291,7 @@ class MySQLStatementSamples(object):
         self._tags_str = ','.join(tags)
         for t in self._tags:
             if t.startswith('service:'):
-                self._service = t[len('service:'):]
+                self._service = t[len('service:') :]
         if not self._version_processed and self._check.version:
             self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
             if self._check.version.flavor == "MariaDB" or not self._check.version.version_compatible((5, 7, 0)):
@@ -541,8 +541,11 @@ class MySQLStatementSamples(object):
             with closing(self._get_db_connection().cursor()) as cursor:
                 self._cursor_run(cursor, 'CALL {}()'.format(self._events_statements_enable_procedure))
         except pymysql.err.DatabaseError as e:
-            self._log.debug("failed to enable events_statements consumers using procedure=%s: %s",
-                            self._events_statements_enable_procedure, e)
+            self._log.debug(
+                "failed to enable events_statements consumers using procedure=%s: %s",
+                self._events_statements_enable_procedure,
+                e,
+            )
 
     def _get_sample_collection_strategy(self):
         """
@@ -622,9 +625,7 @@ class MySQLStatementSamples(object):
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
         submitted_count, failed_count = statement_samples_client.submit_events(events)
-        self._check.count(
-            "dd.mysql.statement_samples.error", failed_count, tags=self._tags + ["error:submit-events"]
-        )
+        self._check.count("dd.mysql.statement_samples.error", failed_count, tags=self._tags + ["error:submit-events"])
         self._check.histogram("dd.mysql.collect_statement_samples.time", (time.time() - start_time) * 1000, tags=tags)
         self._check.count("dd.mysql.collect_statement_samples.events_submitted.count", submitted_count, tags=tags)
         self._check.gauge(
@@ -707,7 +708,7 @@ class MySQLStatementSamples(object):
                         'Successfully collected execution plan. strategy=%s, schema=%s, statement="%s"',
                         strategy,
                         schema,
-                        obfuscated_statement
+                        obfuscated_statement,
                     )
                     self._check.histogram(
                         "dd.mysql.run_explain.time",
