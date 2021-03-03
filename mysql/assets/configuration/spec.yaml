@@ -339,7 +339,7 @@ files:
                   example: datadog.explain_statement
               - name: events_statements_enable_procedure
                 description: |
-                  Override the default procedure used for enabling events statements consumers.
+                  Overrides the default procedure used for enabling events statements consumers.
                 value:
                   type: string
                   example: datadog.enable_events_statements_consumers
