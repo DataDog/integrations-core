@@ -294,7 +294,7 @@ files:
               - name: explained_statements_cache_maxsize
                 description: |
                   Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This
-                  should be increased for databases with a very large number unique normalized queries which exceed the
+                  should be increased for databases with a very large number of unique normalized queries which exceed the
                   cache's limit.
                 value:
                   type: integer
