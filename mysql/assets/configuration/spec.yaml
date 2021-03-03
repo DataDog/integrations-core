@@ -352,7 +352,7 @@ files:
                   example: datadog.temp_events
               - name: collection_strategy_cache_maxsize
                 description: |
-                  Set the max size of the cache used for caching collection strategies. This value should be increased
+                  Sets the max size of the cache used for caching collection strategies. This value should be increased
                   to be at least as much as the number of unique schemas that are being monitored.
                 value:
                   type: integer
