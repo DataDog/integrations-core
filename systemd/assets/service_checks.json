@@ -45,5 +45,21 @@
         ],
         "name": "Unit Active State",
         "description": "Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other."
+    },
+    {
+        "agent_version": "6.13.0",
+        "integration": "Systemd",
+        "groups": [
+            "host",
+            "unit"
+        ],
+        "check": "systemd.unit.substate",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "name": "Unit Active State",
+        "description": "Returns `OK` `CRITICAL` or `UNKNOWN` based on the substate of the unit and the user-provided mapping in systemd.d/conf.yaml."
     }
 ]
