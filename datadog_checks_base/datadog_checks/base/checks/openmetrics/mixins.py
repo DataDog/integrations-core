@@ -735,7 +735,7 @@ class OpenMetricsScraperMixin(object):
                 return
             # check for wilcards in transformers
             for transformerkey in metric_transformers.keys():
-                if transformerkey.endswith('*') and metric.name.startswith(transformerkey[:-1]):                    
+                if transformerkey.endswith('*') and metric.name.startswith(transformerkey[:-1]):
                     transformer = metric_transformers[transformerkey]
                     transformer(metric, scraper_config, transformerkey)
 
