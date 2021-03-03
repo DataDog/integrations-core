@@ -286,7 +286,7 @@ files:
                   example: 60
               - name: samples_per_hour_per_query
                 description: |
-                  Set the rate limit for how many statement sample events will be ingested per hour per normalized
+                  Sets the rate limit for how many statement sample events will be ingested per hour per normalized
                   execution plan.
                 value:
                   type: integer
