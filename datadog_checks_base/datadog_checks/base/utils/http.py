@@ -368,11 +368,13 @@ class RequestsWrapper(object):
             else:
                 try:
                     response = request_method(url, **new_options)
-                except SSLError:
+                except SSLError as e:
                     # fetch the intermediate certs
                     parsed_url = urlparse(url)
                     hostname = parsed_url.hostname
                     certs = self.fetch_intermediate_certs(hostname)
+                    if not certs:
+                        raise e
                     # retry the connection via session object
                     certadapter = CertAdapter(certs=certs)
                     request_method = getattr(self.session, method)
