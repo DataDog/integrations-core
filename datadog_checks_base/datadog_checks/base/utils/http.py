@@ -4,20 +4,19 @@
 import logging
 import os
 import re
+import ssl
 from contextlib import contextmanager
 from copy import deepcopy
 from io import open
 from ipaddress import ip_address, ip_network
-from requests.exceptions import SSLError
-import ssl
-from cryptography.x509 import load_der_x509_certificate
-from cryptography.x509.extensions import ExtensionNotFound
-from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
-
 
 import requests
 import requests_unixsocket
+from cryptography.x509 import load_der_x509_certificate
+from cryptography.x509.extensions import ExtensionNotFound
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from requests import auth as requests_auth
+from requests.exceptions import SSLError
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import quote, urlparse, urlunparse
@@ -26,8 +25,8 @@ from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .network import CertAdapter, create_socket_connection
 from .time import get_timestamp
-from .network import create_socket_connection, CertAdapter
 
 try:
     from contextlib import ExitStack
@@ -373,7 +372,7 @@ class RequestsWrapper(object):
             else:
                 try:
                     response = request_method(url, **new_options)
-                except SSLError as e:
+                except SSLError:
                     # fetch the intermediate certs
                     parsed_url = urlparse(url)
                     hostname = parsed_url.hostname

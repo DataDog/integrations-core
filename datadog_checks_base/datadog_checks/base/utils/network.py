@@ -1,6 +1,7 @@
 import socket
-from requests.adapters import HTTPAdapter, PoolManager
 import ssl
+
+from requests.adapters import HTTPAdapter, PoolManager
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
