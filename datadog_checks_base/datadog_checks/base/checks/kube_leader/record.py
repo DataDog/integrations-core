@@ -5,6 +5,28 @@
 import json
 from datetime import datetime
 
+from kubernetes.client.models.v1_lease_spec import V1LeaseSpec
+
+
+class ElectionRecord(object):
+    def __init__(self):
+        super(ElectionRecord, self).__init__()
+
+    @property
+    def seconds_until_renew(self):
+        """
+        Returns the number of seconds between the current time
+        and the set renew time. It can be negative if the
+        leader election is running late.
+        """
+        delta = self.renew_time - datetime.now(self.renew_time.tzinfo)
+        return delta.total_seconds()
+
+    @property
+    def summary(self):
+        return "Leader: {} since {}, next renew {}".format(self.leader_name, self.acquire_time, self.renew_time)
+
+
 # Import lazily to reduce memory footprint
 parse_rfc3339 = None
 
@@ -19,8 +41,10 @@ REQUIRED_FIELDS = [
 ]
 
 
-class ElectionRecord(object):
-    def __init__(self, record_string):
+class ElectionRecordAnnotation(ElectionRecord):
+    def __init__(self, record_kind, record_string):
+        super(ElectionRecordAnnotation, self).__init__()
+        self._kind = record_kind
         self._record = json.loads(record_string)
 
     def validate(self):
@@ -73,15 +97,38 @@ class ElectionRecord(object):
         return self._record.get("leaderTransitions", 0)
 
     @property
-    def seconds_until_renew(self):
-        """
-        Returns the number of seconds between the current time
-        and the set renew time. It can be negative if the
-        leader election is running late.
-        """
-        delta = self.renew_time - datetime.now(self.renew_time.tzinfo)
-        return delta.total_seconds()
+    def kind(self):
+        return self._kind
+
+
+class ElectionRecordLease(ElectionRecord):
+    def __init__(self, lease):
+        super(ElectionRecordLease, self).__init__()
+        self._lease = lease.spec
+
+    def validate(self):
+        return isinstance(self._lease, V1LeaseSpec), None
 
     @property
-    def summary(self):
-        return "Leader: {} since {}, next renew {}".format(self.leader_name, self.acquire_time, self.renew_time)
+    def leader_name(self):
+        return self._lease.holder_identity
+
+    @property
+    def lease_duration(self):
+        return self._lease.lease_duration_seconds
+
+    @property
+    def renew_time(self):
+        return self._lease.renew_time
+
+    @property
+    def acquire_time(self):
+        return self._lease.acquire_time
+
+    @property
+    def transitions(self):
+        return self._lease.lease_transitions
+
+    @property
+    def kind(self):
+        return "lease"

@@ -1,6 +1,6 @@
 # CHANGELOG - kafka
 
-## 2.5.0 / 2021-01-25
+## 2.5.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
 

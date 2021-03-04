@@ -1,0 +1,122 @@
+{
+    "title": "Riak CS - Metrics",
+    "description": "An overview of your Riak CS metrics",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riakcs.block_get.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.block_put.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.block_delete.latency_mean{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "RiakCS Block latency mean for Gets, Puts, and Deletes"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riakcs.object_get.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.object_put.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.object_delete.latency_mean{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "RiakCS Object latency mean for Gets, Puts, and Deletes"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riakcs.service_get_buckets.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.bucket_put.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.bucket_delete.latency_mean{$scope}"
+                    },
+                    {
+                        "q": "riakcs.bucket_create.latency_mean{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "RiakCS Bucket latency mean for Creates, Gets, Puts, and Deletes"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riakcs.block_get.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.block_put.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.block_delete.meter_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "RiakCS Block rates for Gets, Puts, and Deletes"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riakcs.object_get.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.object_put.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.object_delete.meter_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak CS object rates for gets, puts, and deletes"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riakcs.service_get_buckets.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.bucket_put.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.bucket_delete.meter_rate{$scope}"
+                    },
+                    {
+                        "q": "riakcs.bucket_create.meter_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak CS bucket rates for creates, gets, puts, and deletes"
+            }
+        }
+    ]
+}

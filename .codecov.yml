@@ -407,7 +407,7 @@ coverage:
         target: 75
         flags:
         - riak
-      Riak_CS:
+      RiakCS:
         target: 75
         flags:
         - riakcs
@@ -476,7 +476,7 @@ coverage:
         flags:
         - teamcity
       TokuMX:
-        target: 75
+        target: 50
         flags:
         - tokumx
       Twemproxy:

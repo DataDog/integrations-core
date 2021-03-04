@@ -1,6 +1,6 @@
 # CHANGELOG - spark
 
-## 1.19.1 / 2021-01-25
+## 1.19.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update check signature. See [#8259](https://github.com/DataDog/integrations-core/pull/8259).
 

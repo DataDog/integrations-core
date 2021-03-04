@@ -6,7 +6,7 @@
 * [Fixed] Clarify windows user and validate connection options. See [#8582](https://github.com/DataDog/integrations-core/pull/8582).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
-## 2.3.6 / 2021-01-27
+## 2.3.6 / 2021-01-27 / Agent 7.26.0
 
 * [Fixed] Fix cursor execution returning None. See [#8481](https://github.com/DataDog/integrations-core/pull/8481).
 

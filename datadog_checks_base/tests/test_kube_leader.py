@@ -7,11 +7,13 @@ from datetime import datetime, timedelta
 
 import mock
 import pytest
+from kubernetes.client.models.v1_lease import V1Lease
+from kubernetes.client.models.v1_lease_spec import V1LeaseSpec
 from kubernetes.config.dateutil import format_rfc3339
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
-from datadog_checks.base.checks.kube_leader import ElectionRecord
+from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation, ElectionRecordLease
 
 # Trigger lazy imports
 try:
@@ -26,6 +28,18 @@ RAW_VALID_RECORD = (
     '"acquireTime":"2018-12-17T11:53:07Z",'
     '"renewTime":"2018-12-18T12:32:22Z",'
     '"leaderTransitions":7}'
+)
+
+LEASE_OBJECT = V1Lease(
+    api_version="coordination.k8s.io/v1",
+    kind="Lease",
+    spec=V1LeaseSpec(
+        acquire_time=datetime(2021, 2, 4, 8, 23, 33),
+        holder_identity="ip-172-20-76-27_fa8a18f2-9c8a-42e8-99ff-2e759d623d0e",
+        lease_duration_seconds=15,
+        lease_transitions=42,
+        renew_time=datetime(2021, 2, 4, 15, 51, 10),
+    ),
 )
 
 EP_INSTANCE = {
@@ -103,8 +117,8 @@ def make_fake_object(record=None):
 
 
 class TestElectionRecord:
-    def test_parse_raw(self):
-        record = ElectionRecord(RAW_VALID_RECORD)
+    def test_parse_annotation(self):
+        record = ElectionRecordAnnotation("endpoints", RAW_VALID_RECORD)
 
         valid, reason = record.validate()
         assert valid is True
@@ -119,6 +133,24 @@ class TestElectionRecord:
             "Leader: dd-cluster-agent-568f458dd6-kj6vt "
             "since 2018-12-17 11:53:07+00:00, "
             "next renew 2018-12-18 12:32:22+00:00"
+        )
+
+    def test_parse_lease(self):
+        record = ElectionRecordLease(LEASE_OBJECT)
+
+        valid, reason = record.validate()
+        assert valid is True
+        assert reason is None
+
+        assert record.leader_name == "ip-172-20-76-27_fa8a18f2-9c8a-42e8-99ff-2e759d623d0e"
+        assert record.lease_duration == 15
+        assert record.transitions == 42
+        assert record.renew_time > record.acquire_time
+        assert record.seconds_until_renew < 0
+        assert record.summary == (
+            "Leader: ip-172-20-76-27_fa8a18f2-9c8a-42e8-99ff-2e759d623d0e "
+            "since 2021-02-04 08:23:33, "
+            "next renew 2021-02-04 15:51:10"
         )
 
     def test_validation(self):
@@ -139,7 +171,7 @@ class TestElectionRecord:
         }
 
         for raw, expected_reason in iteritems(cases):
-            valid, reason = ElectionRecord(raw).validate()
+            valid, reason = ElectionRecordAnnotation("endpoints", raw).validate()
             assert reason == expected_reason
             if expected_reason is None:
                 assert valid is True
@@ -151,7 +183,7 @@ class TestElectionRecord:
             holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() + timedelta(seconds=20)
         )
 
-        record = ElectionRecord(raw)
+        record = ElectionRecordAnnotation("endpoints", raw)
         assert record.seconds_until_renew > 19
         assert record.seconds_until_renew < 21
 
@@ -159,7 +191,7 @@ class TestElectionRecord:
             holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() - timedelta(seconds=5)
         )
 
-        record = ElectionRecord(raw)
+        record = ElectionRecordAnnotation("endpoints", raw)
         assert record.seconds_until_renew > -6
         assert record.seconds_until_renew < -4
 
