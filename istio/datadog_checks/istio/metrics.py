@@ -304,5 +304,5 @@ ISTIOD_METRICS = {
     'sidecar_injection_requests_total': 'sidecar_injection.requests_total',
     'sidecar_injection_success_total': 'sidecar_injection.success_total',
     'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
-    'sidecar_injection_skip_total': 'sidecar_injection.skip_total'
+    'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
