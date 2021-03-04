@@ -372,8 +372,6 @@ class RequestsWrapper(object):
                     parsed_url = urlparse(url)
                     hostname = parsed_url.hostname
                     certs = self.fetch_intermediate_certs(hostname)
-                    if not certs:
-                        raise e
                     # retry the connection via session object
                     certadapter = CertAdapter(certs=certs)
                     request_method = getattr(self.session, method)
@@ -395,23 +393,25 @@ class RequestsWrapper(object):
 
     def fetch_intermediate_certs(self, hostname):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
+        certs = []
+
         try:
             sock = create_socket_connection(hostname)
         except Exception as e:
             self.logger.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
-            return
+            return certs
 
         with closing(sock):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                context.verify_mode = ssl.CERT_NONE
+                context.sverify_mode = ssl.CERT_NONE
 
                 with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
             except Exception as e:
                 self.logger.error('Error occurred while getting cert to discover intermediate certificates:', e)
-                return
-        certs = []
+                return certs
+
         self.load_intermediate_certs(der_cert, certs)
         return certs
 
