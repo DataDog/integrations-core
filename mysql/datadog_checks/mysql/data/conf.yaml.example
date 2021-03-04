@@ -256,12 +256,12 @@ instances:
     statement_samples:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+        ## Enables collection of statement samples. Requires `deep_database_monitoring: true`.
         #
         # enabled: false
 
         ## @param collections_per_second - number - optional - default: 1
-        ## Set the maximum statement sample collection rate. Each collection involves a single query to one
+        ## Sets the maximum statement sample collection rate. Each collection involves a single query to one
         ## of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
         ## unique statement seen.
         #
@@ -330,12 +330,12 @@ instances:
 
         ## @param collection_strategy_cache_maxsize - integer - optional - default: 1000
         ## Sets the max size of the cache used for caching collection strategies. This value should be increased
-        ## to be at least as much as the number of unique schemas that are being monitored.
+        ## to be at least as many as the number of unique schemas that are being monitored.
         #
         # collection_strategy_cache_maxsize: 1000
 
         ## @param collection_strategy_cache_ttl - integer - optional - default: 300
-        ## Set how long we cache collection strategies. This should only be decreased if the set of enabled
+        ## Sets how long to cache collection strategies. This should only be decreased if the set of enabled
         ## `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
         ## results for an extended period of time.
         #
