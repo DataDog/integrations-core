@@ -8,7 +8,7 @@ except ImportError:
     from ...stubs import datadog_agent
 
 from .. import AgentCheck
-from .record import ElectionRecord
+from .record import ElectionRecordAnnotation, ElectionRecordLease
 
 # Import lazily to reduce memory footprint
 client = config = None
@@ -34,7 +34,7 @@ class KubeLeaderElectionMixin(object):
 
         The config objet requires the following fields:
             namespace (prefix for the metrics and check)
-            record_kind (endpoints or configmap)
+            record_kind (leases, endpoints or configmap)
             record_name
             record_namespace
             tags (optional)
@@ -61,9 +61,33 @@ class KubeLeaderElectionMixin(object):
             config.load_kube_config(config_file=kubeconfig_path)
         else:
             config.load_incluster_config()
+
+        if kind.lower() == "auto":
+            # Try lease object
+            try:
+                return KubeLeaderElectionMixin._get_record_from_lease(client, name, namespace)
+            except client.exceptions.ApiException:
+                pass
+
+            # Default to endpoints object
+            return KubeLeaderElectionMixin._get_record_from_annotation(client, "endpoints", name, namespace)
+
+        elif kind.lower() in ["leases", "lease"]:
+            return KubeLeaderElectionMixin._get_record_from_lease(client, name, namespace)
+        else:
+            return KubeLeaderElectionMixin._get_record_from_annotation(client, kind, name, namespace)
+
+    @staticmethod
+    def _get_record_from_lease(client, name, namespace):
+        coordination_v1 = client.CoordinationV1Api()
+        obj = coordination_v1.read_namespaced_lease(name, namespace)
+
+        return ElectionRecordLease(obj)
+
+    @staticmethod
+    def _get_record_from_annotation(client, kind, name, namespace):
         v1 = client.CoreV1Api()
 
-        obj = None
         if kind.lower() in ["endpoints", "endpoint", "ep"]:
             obj = v1.read_namespaced_endpoints(name, namespace)
         elif kind.lower() in ["configmap", "cm"]:
@@ -81,7 +105,7 @@ class KubeLeaderElectionMixin(object):
 
         for name in ELECTION_ANNOTATION_NAMES:
             if name in annotations:
-                return ElectionRecord(annotations[name])
+                return ElectionRecordAnnotation(kind, annotations[name])
 
         # Could not find annotation
         raise ValueError("Object has no leader election annotation")
@@ -92,9 +116,13 @@ class KubeLeaderElectionMixin(object):
 
         # Compute tags for gauges and service check
         tags = []
-        for n in ["record_kind", "record_name", "record_namespace"]:
-            if n in config:
-                tags.append("{}:{}".format(n, config[n]))
+        for k, v in {
+            "record_kind": record.kind,
+            "record_name": config.get("record_name"),
+            "record_namespace": config.get("record_namespace"),
+        }.items():
+            if v is not None:
+                tags.append("{}:{}".format(k, v))
         tags += config.get("tags", [])
 
         # Sanity check on the record

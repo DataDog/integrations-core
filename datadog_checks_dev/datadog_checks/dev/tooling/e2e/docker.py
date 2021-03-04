@@ -4,6 +4,8 @@
 import re
 from contextlib import contextmanager
 
+from datadog_checks.dev.tooling.commands.console import echo_debug
+
 from ...subprocess import run_command
 from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
@@ -63,8 +65,9 @@ class DockerInterface(object):
         # If we use a default non-RC build, and it's missing the py suffix, adds it
         if default_agent and self.agent_build and 'rc' not in self.agent_build and 'py' not in self.agent_build:
             # Agent 6 image no longer supports -pyX
-            if self.agent_build != 'datadog/agent:6':
+            if self.agent_build != 'datadog/agent:6' and self.agent_build != 'datadog/agent:7':
                 self.agent_build = f'{self.agent_build}-py{self.python_version}'
+            echo_debug("Using default agent. Agent build: {}".format(self.agent_build))
 
         if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = f'{self.agent_build}-jmx'
@@ -233,14 +236,15 @@ class DockerInterface(object):
         env_vars.update(self.env_vars)
 
         volumes = [
-            # Mount the config directory, not the file, to ensure updates are propagated
-            # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-            f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}',
             # Mount the check directory
             f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
             # Mount the /proc directory
             '/proc:/host/proc',
         ]
+        if self.config:
+            # Mount the config directory, not the file, to ensure updates are propagated
+            # https://github.com/moby/moby/issues/15793#issuecomment-135411504
+            volumes.append(f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}')
         if not ON_WINDOWS:
             volumes.extend(self.metadata.get('docker_volumes', []))
         else:

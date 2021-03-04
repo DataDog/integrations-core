@@ -364,7 +364,7 @@ jobs:
       displayName: Riak
       os: linux
     - checkName: riakcs
-      displayName: Riak CS
+      displayName: RiakCS
       os: linux
     - checkName: sap_hana
       displayName: SAP HANA

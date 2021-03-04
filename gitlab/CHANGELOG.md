@@ -1,6 +1,6 @@
 # CHANGELOG - gitlab
 
-## 4.4.1 / 2021-01-25
+## 4.4.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
 * [Fixed] Update check signature. See [#8248](https://github.com/DataDog/integrations-core/pull/8248).

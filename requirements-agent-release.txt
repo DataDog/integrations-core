@@ -24,7 +24,7 @@ datadog-confluent-platform==1.3.0
 datadog-consul==1.17.1
 datadog-coredns==1.6.1; sys_platform == 'linux2'
 datadog-couch==3.13.1
-datadog-couchbase==1.16.1
+datadog-couchbase==1.17.0
 datadog-crio==1.5.1
 datadog-directory==1.9.1
 datadog-disk==4.1.1
@@ -60,7 +60,7 @@ datadog-ibm-mq==3.11.1; sys_platform != 'win32'
 datadog-ibm-was==1.8.1
 datadog-ignite==1.3.0
 datadog-iis==2.10.3; sys_platform == 'win32'
-datadog-istio==3.9.0
+datadog-istio==3.9.1
 datadog-jboss-wildfly==1.5.0
 datadog-kafka-consumer==2.8.2
 datadog-kafka==2.5.0
@@ -119,7 +119,7 @@ datadog-snowflake==3.0.1
 datadog-solr==1.8.0
 datadog-sonarqube==1.1.1
 datadog-spark==1.19.1
-datadog-sqlserver==2.3.6
+datadog-sqlserver==2.3.7
 datadog-squid==1.9.1
 datadog-ssh-check==1.11.3
 datadog-statsd==1.6.0

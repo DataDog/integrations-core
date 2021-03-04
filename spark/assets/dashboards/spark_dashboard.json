@@ -1,0 +1,443 @@
+{
+    "title": "Spark - Overview",
+    "description": "This dashboard tracks the current status of your Spark jobs, tasks, and stages. It also allows you to track expensive operations like shuffles, which point to possible areas for optimization. Further reading on Spark monitoring:\n\n- [Datadog's blog post announcing support for Hadoop and Spark monitoring](https://www.datadoghq.com/blog/monitoring-spark/)\n\n- [How Datadog uses and monitors Spark for highly reliable data pipelines](https://www.datadoghq.com/blog/engineering/highly-reliable-data-pipelines/)\n\n- [Docs for Datadog's Spark integration](https://docs.datadoghq.com/integrations/spark/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/spark_large.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 2,
+                "y": 2,
+                "width": 21,
+                "height": 11
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.count{status:succeeded}",
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "sum:spark.job.count{status:running}",
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "avg:spark.job.count{status:failed}",
+                        "display_type": "bars"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Jobs",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 101,
+                "y": 15,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.num_tasks{status:running}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks Running",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 116,
+                "y": 2,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.count{status:running}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Jobs Running",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 88,
+                "y": 2,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.executor.count{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Executors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 74,
+                "y": 2,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.stage.count{status:active}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Stages Running",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 102,
+                "y": 2,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.num_tasks{status:running}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.job.num_completed_tasks{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.job.num_skipped_tasks{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.job.num_failed_tasks{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Job Tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 101,
+                "y": 32,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.num_active_stages{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.job.num_completed_stages{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.job.num_skipped_stages{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.job.num_failed_stages{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Job Stages",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 52,
+                "y": 32,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.stage.input_bytes{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.stage.output_bytes{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Stage Input/Output Bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 101,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.stage.input_records{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.stage.output_records{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Stage Input/Output Records",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 52,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.stage.shuffle_read_bytes{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.stage.shuffle_write_bytes{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.stage.shuffle_write_bytes{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Shuffle Read/Write Bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 101,
+                "y": 66,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:spark.stage.shuffle_read_records{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:spark.stage.shuffle_write_records{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Shuffle Read/Write Records",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 52,
+                "y": 66,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.rdd.memory_used{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.rdd.disk_used{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "RDD Memory/Disk Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 52,
+                "y": 15,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "event_stream",
+                "query": "spark has status",
+                "tags_execution": "and",
+                "event_size": "s",
+                "title": "Spark Application Events",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1d"
+                }
+            },
+            "layout": {
+                "x": 2,
+                "y": 15,
+                "width": 48,
+                "height": 66
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "event_timeline",
+                "query": "spark has status",
+                "tags_execution": "and",
+                "title": "Spark Application Event Counts",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1d"
+                }
+            },
+            "layout": {
+                "x": 25,
+                "y": 2,
+                "width": 47,
+                "height": 9
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 95
+}

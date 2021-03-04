@@ -56,6 +56,12 @@ instances:
     #
     # query_monitoring_url: http://localhost:8093
 
+    ## @param sync_gateway_url - string - optional - default: http://localhost:4986
+    ## Url to get Sync Gateway stats.
+    ## See https://docs.couchbase.com/sync-gateway/current/stats-monitoring.html
+    #
+    # sync_gateway_url: http://localhost:4986
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

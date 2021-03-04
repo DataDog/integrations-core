@@ -68,11 +68,15 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
+    'go_threads': 'go_threads',
+    'go_goroutines': 'go_goroutines',
 }
 
 DEPRECATED_GAUGES = {
     'kubelet_runtime_operations': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+    'kubelet_docker_operations': 'kubelet.docker.operations',
+    'kubelet_docker_operations_errors': 'kubelet.docker.errors',
 }
 
 NEW_1_14_GAUGES = {
@@ -83,6 +87,7 @@ NEW_1_14_GAUGES = {
 
 DEFAULT_HISTOGRAMS = {
     'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+    'storage_operation_duration_seconds': 'storage.operation.duration',
 }
 
 DEPRECATED_HISTOGRAMS = {
@@ -97,12 +102,21 @@ DEFAULT_SUMMARIES = {}
 
 DEPRECATED_SUMMARIES = {
     'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+    'kubelet_pod_start_latency_microseconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_worker_latency_microseconds': 'kubelet.pod.worker.duration',
+    'kubelet_pod_worker_start_latency_microseconds': 'kubelet.pod.worker.start.duration',
+    'kubelet_runtime_operations_latency_microseconds': 'kubelet.runtime.operations.duration',
+    'kubelet_docker_operations_latency_microseconds': 'kubelet.docker.operations.duration',
 }
 
 NEW_1_14_SUMMARIES = {}
 
 TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
+    'kubelet_pod_start_duration_seconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_worker_duration_seconds': 'kubelet.pod.worker.duration',
+    'kubelet_pod_worker_start_duration_seconds': 'kubelet.pod.worker.start.duration',
+    'kubelet_runtime_operations_duration_seconds': 'kubelet.runtime.operations.duration',
 }
 
 log = logging.getLogger('collector')
