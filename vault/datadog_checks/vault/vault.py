@@ -89,6 +89,13 @@ class Vault(OpenMetricsBaseCheck):
         # potential configuration errors as part of the check run phase.
         self.check_initializations.append(self.parse_config)
 
+        self.METRIC_TRANSFORMERS = {
+            'vault_route_create_*':self.transform,
+            'vault_route_delete_*':self.transform,
+            'vault_route_list_*':self.transform,
+            'vault_route_read_*':self.transform
+        }
+
     def check(self, _):
         submission_queue = []
         dynamic_tags = []
@@ -107,7 +114,7 @@ class Vault(OpenMetricsBaseCheck):
         if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
-                self.process(self._scraper_config)
+                self.process(self._scraper_config, self.METRIC_TRANSFORMERS)  
             except Exception as e:
                 error = str(e)
                 if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
@@ -324,3 +331,10 @@ class Vault(OpenMetricsBaseCheck):
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it
         pass
+
+    def transform(self, metric, scraper_config, transformerkey):
+        metricname =transformerkey.replace('_','.')[:-2]
+        metrictag = metric.name[len(transformerkey)-1:-1]
+        for i in metric.samples:
+            i.labels['mountpoint'] = metrictag
+        self.submit_openmetric(metricname, metric, scraper_config)
