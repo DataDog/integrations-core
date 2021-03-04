@@ -367,7 +367,7 @@ class RequestsWrapper(object):
             else:
                 try:
                     response = request_method(url, **new_options)
-                except SSLError as e:
+                except SSLError:
                     # fetch the intermediate certs
                     parsed_url = urlparse(url)
                     hostname = parsed_url.hostname
