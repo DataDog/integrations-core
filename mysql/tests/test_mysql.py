@@ -463,7 +463,7 @@ def test_statement_samples_max_per_digest(dbm_instance):
         mysql_check.check(dbm_instance)
     rows = mysql_check._statement_samples._get_new_events_statements('events_statements_history_long', 1000)
     count_by_digest = Counter(r['digest'] for r in rows)
-    for digest, count in count_by_digest.items():
+    for _, count in count_by_digest.items():
         assert count == 1, "we should be reading exactly one row per digest out of the database"
 
 
