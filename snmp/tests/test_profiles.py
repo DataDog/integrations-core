@@ -2237,9 +2237,10 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.parametrize("file", ["juniper-ex", "juniper-ex-variation"])
 @pytest.mark.usefixtures("dd_environment")
-def test_juniper_ex(aggregator):
-    run_profile_check('juniper-ex')
+def test_juniper_ex(aggregator, file):
+    run_profile_check(file, 'juniper-ex')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-ex',
         'device_vendor:juniper-networks',
@@ -2253,9 +2254,10 @@ def test_juniper_ex(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@pytest.mark.parametrize("file", ["juniper-mx", "juniper-mx-variation"])
 @pytest.mark.usefixtures("dd_environment")
-def test_juniper_mx(aggregator):
-    run_profile_check('juniper-mx')
+def test_juniper_mx(aggregator, file):
+    run_profile_check(file, 'juniper-mx')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-mx',
         'device_vendor:juniper-networks',
@@ -2267,9 +2269,10 @@ def test_juniper_mx(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@pytest.mark.parametrize("file", ["juniper-srx", "juniper-srx-variation"])
 @pytest.mark.usefixtures("dd_environment")
-def test_juniper_srx(aggregator):
-    run_profile_check('juniper-srx')
+def test_juniper_srx(aggregator, file):
+    run_profile_check(file, 'juniper-srx')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-srx',
         'device_vendor:juniper-networks',
