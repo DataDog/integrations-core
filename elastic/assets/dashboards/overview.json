@@ -973,7 +973,11 @@
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "q": "per_second(sum:elasticsearch.transport.rx_count{$cluster_name,$node_name})",
-                  "alias": "Bytes received",
+                  "metadata": [{
+                    "expression": "per_second(sum:elasticsearch.transport.rx_count{$cluster_name,$node_name})",
+                    "alias_name": "Bytes received"
+                  }]
+                  ,
                   "style": {
                     "palette": "green",
                     "line_type": "solid",
@@ -982,10 +986,13 @@
                   "display_type": "area"
                 },
                 {
-                  "alias": "Bytes sent",
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "q": "-per_second(sum:elasticsearch.transport.tx_count{$cluster_name,$node_name})",
+                  "metadata": [{
+                    "expression": "-per_second(sum:elasticsearch.transport.tx_count{$cluster_name,$node_name})",
+                    "alias_name": "Bytes sent"
+                  }],
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -1018,10 +1025,14 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "alias": "Bytes received",
+                  
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "q": "per_second(avg:elasticsearch.transport.rx_count{$cluster_name,$node_name} by {host})",
+                  "metadata": [{
+                    "expression": "per_second(avg:elasticsearch.transport.rx_count{$cluster_name,$node_name} by {host})",
+                    "alias_name": "Bytes received"
+                  }],
                   "style": {
                     "palette": "green",
                     "line_type": "solid",
@@ -1030,10 +1041,13 @@
                   "display_type": "line"
                 },
                 {
-                  "alias": "Bytes sent",
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "q": "-per_second(avg:elasticsearch.transport.tx_count{$cluster_name,$node_name} by {host})",
+                  "metadata": [{
+                    "expression": "-per_second(avg:elasticsearch.transport.tx_count{$cluster_name,$node_name} by {host})",
+                    "alias_name": "Bytes sent"
+                  }],
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
