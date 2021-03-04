@@ -340,7 +340,39 @@ Verifies the database is available and accepting connections.
 ### Common Problems
 #### Oracle Instant Client
 - Verify that both the Oracle Instant Client and SDK files are located in the same directory.
+The structure of the directory should look similar:
+```text
+|____libociei.dylib
+|____libocci.dylib
+|____libocci.dylib.10.1
+|____adrci
+|____uidrvci
+|____libclntsh.dylib.19.1
+|____ojdbc8.jar
+|____BASIC_README
+|____liboramysql19.dylib
+|____libocijdbc19.dylib
+|____libocci.dylib.19.1
+|____libclntsh.dylib
+|____network
+|____xstreams.jar
+|____libclntsh.dylib.10.1
+|____libnnz19.dylib
+|____libclntshcore.dylib.19.1
+|____libocci.dylib.12.1
+|____libocci.dylib.18.1
+|____libclntsh.dylib.11.1
+|____sdk
+|____BASIC_LICENSE
+|____SDK_LICENSE
+|____libocci.dylib.11.1
+|____libclntsh.dylib.12.1
+|____libclntsh.dylib.18.1
+|____ucp.jar
+|____genezi
+|____SDK_README
 
+```
 ##### Linux
 - See further installation documentation on [Oracle][15].
 
