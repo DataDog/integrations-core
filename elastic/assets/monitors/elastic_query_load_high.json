@@ -2,7 +2,7 @@
 	"name": "[ElasticSearch] Query load is high on {{host.name}} ",
 	"type": "query alert",
 	"query": "avg(last_5m):sum:elasticsearch.search.query.current{*} by {host} > 10",
-	"message": "Number of query currently in progress is high ({{value}} queries)",
+	"message": "Number of queries currently in progress is high ({{value}} queries)",
 	"tags": [
 		"integration:elastic"
 	],

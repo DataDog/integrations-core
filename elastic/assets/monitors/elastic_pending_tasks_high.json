@@ -2,7 +2,7 @@
 	"name": "[ElasticSearch] Number of pending tasks is high",
 	"type": "query alert",
 	"query": "avg(last_5m):sum:elasticsearch.pending_tasks_total{*} > 15",
-	"message": "Number of pending task (all priority) is high: {{value}} tasks",
+	"message": "Number of pending tasks (all priority) is high: {{value}} tasks",
 	"tags": [
 		"integration:elastic"
 	],
