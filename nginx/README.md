@@ -174,6 +174,138 @@ http {
 ```
 
 <!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+
+#### Docker
+
+To configure this check for an Agent running on a container:
+
+##### Metric collection
+
+Set [Autodiscovery Integration Templates][19] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["nginx"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/nginx_status/"}]'
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
+
+Then, set [Log Integrations][18] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"nginx","service":"nginx"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][8] as pod annotations on your application container. Aside from this, you can also configure templates with [a file, a configmap, or a key-value store][20].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.check_names: '["nginx"]'
+    ad.datadoghq.com/nginx.init_configs: '[{}]'
+    ad.datadoghq.com/nginx.instances: |
+      [
+        {
+          "nginx_status_url":"http://%%host%%:81/nginx_status/"
+        }
+      ]
+  labels:
+    name: nginx
+spec:
+  containers:
+    - name: nginx
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
+
+Then, set [Log Integrations][22] as pod annotations. You can also configure this with [a file, a configmap, or a key-value store][23].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.logs: '[{"source":"nginx","service":"nginx"}]'
+  labels:
+    name: nginx
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "nginx",
+    "image": "nginx:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"nginx\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"nginx_status_url\":\"http://%%host%%:81/nginx_status/\"}]"
+    }
+  }]
+}
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
+
+Then, set [Log Integrations][22] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "nginx",
+    "image": "nginx:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"nginx\",\"service\":\"nginx\"}]"
+    }
+  }]
+}
+```
+
+<!-- xxz tab xxx -->
+
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -276,3 +408,11 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
 [15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[17]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[18]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[20]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[21]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[22]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[23]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
