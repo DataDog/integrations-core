@@ -19,6 +19,7 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 
 The Oracle check requires either access to the `cx_Oracle` Python module, or the Oracle JDBC Driver:
 
+###### Linux
 1. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
     If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
@@ -41,6 +42,20 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
+
+###### Windows
+1. Install the [Microsoft Visual Studio 2017 Redistributable][17] or the appropriate version for the Oracle Instant Client installation.
+
+2. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
+
+3. Extract both packages into a single directory that is available to all users on the given machine (for example, `C:\oracle`):
+
+4. Add the System Variable `OCI_LIB64=C:\oracle` where the value is the path to the directory containing the Oracle Instant Client.
+
+5. Modify the `PATH` environment variable to contain the path of the Oracle Instant Client.
+
+    Navigate to Control Panel -> Settings -> Advanced System Settings -> Environment Variables and
+    append `;C:\oracle\` to the `PATH` variable.
 
 ##### JDBC Driver
 
@@ -331,11 +346,8 @@ Verifies the database is available and accepting connections.
 
 ##### Windows
 - Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version, see [Windows downloads page][16] for more details.
-- Ensure the `PATH` environment variable contains `C:\oracle\instantclient_19_9`. 
-
-    Otherwise, navigate to Control Panel -> Settings -> Advanced System Settings -> Environment Variables and
-    append `;C:\oracle\instantclient_19_9` to the `PATH` variable.
-    Also verify that `OCI_LIB64=C:\oracle\instantclient_19_9` exists.
+- Ensure the `PATH` environment variable contains the path of your directory (for example, `C:\oracle\`). 
+  Also verify that the environment variable `OCI_LIB64=C:\oracle` exists.
 
 
 #### JDBC Driver
@@ -354,10 +366,17 @@ Verifies the database is available and accepting connections.
 
 - Verify your environment variables are set correctly by running the following command from the Agent.
 Ensure the displayed output matches the correct value.
-
-  ```shell script
-    sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
-  ```
+    
+    ###### Linux
+    
+    ```shell script
+      sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
+    ```
+    ###### Windows
+    
+     ```shell script
+       sudo -u dd-agent -- %PROGRAMFILES%\Datadog\"Datadog Agent"\embedded\python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
+     ```
 
 Need help? Contact [Datadog support][12].
 
@@ -377,3 +396,4 @@ Need help? Contact [Datadog support][12].
 [14]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
 [15]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
 [16]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
+[17]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
