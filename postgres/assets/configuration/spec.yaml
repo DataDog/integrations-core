@@ -215,6 +215,56 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
+    - name: statement_samples
+      description: Configure collection of statement samples
+      options:
+        - name: enabled
+          description: |
+            Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collections_per_second
+          description: |
+            Set the maximum statement sample collection rate. Each collection involves a single query to
+            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique statement seen.
+          value:
+            type: number
+            example: 1
+        - name: explain_function
+          description: |
+            Override the default function used to collect execution plans for statements.
+          value:
+            type: string
+            example: datadog.explain_statement
+        - name: explained_statements_per_hour_per_query
+          description: |
+            Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+          value:
+            type: integer
+            example: 60
+        - name: samples_per_hour_per_query
+          description: |
+            Set the rate limit for how many statement sample events will be ingested per hour per normalized execution
+            plan.
+          value:
+            type: integer
+            example: 15
+        - name: explained_statements_cache_maxsize
+          description: |
+            Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This should
+            be increased for databases with a very large number unique normalized queries which exceed the cache's
+            limit.
+          value:
+            type: integer
+            example: 5000
+        - name: seen_samples_cache_maxsize
+          description: |
+            Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
+            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+          value:
+            type: integer
+            example: 10000
     - template: instances/default
   - template: logs
     example:

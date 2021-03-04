@@ -1,6 +1,6 @@
 # CHANGELOG - postfix
 
-## 1.8.1 / 2021-01-06
+## 1.8.1 / 2021-01-06 / Agent 7.26.0
 
 * [Fixed] Fix postqueue defer counting. See [#8296](https://github.com/DataDog/integrations-core/pull/8296).
 

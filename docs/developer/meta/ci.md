@@ -51,11 +51,11 @@ will be executed in lexicographical order.
 In addition to running tests on our CI, there are also some validations that are run to check for correctness of changes to various components of integrations. If any of these validations fail on your branch, then the CI will fail.
 
 
-In short, each validation is a ``ddev`` command, which fails if the component it is validating is not correct. 
+In short, each validation is a ``ddev`` command, which fails if the component it is validating is not correct.
 
-See the [ddev documentation](../ddev/cli.md#validate) and [source code](https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/validate) for the full docs for each validation.
+See the [ddev documentation](../ddev/cli.md#ddev-validate) and [source code](https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/validate) for the full docs for each validation.
 
-!!! tip 
+!!! tip
     A list of the current validations can be found [here](https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/run-validations.yml).
 
 
@@ -67,7 +67,7 @@ ddev validate ci
 
 This validates that all CI entries for integrations are valid. This includes checking if the integration has the correct [codecov][codecov-home] config, and has a valid CI entry if it is testable.
 
-!!! tip 
+!!! tip
     Run `ddev validate ci --fix` to resolve most errors.
 
 ### Agent requirements
@@ -84,7 +84,7 @@ This validates that each integration version is in sync with the [`requirements-
 ddev validate codeowners
 ```
 
-This validates that every integration has a [codeowner entry](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners). If you fail this validation, add an entry in the [codewners file](https://github.com/DataDog/integrations-extras/blob/master/.github/CODEOWNERS) corresponding to any newly added integration. 
+This validates that every integration has a [codeowner entry](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners). If you fail this validation, add an entry in the [codewners file](https://github.com/DataDog/integrations-extras/blob/master/.github/CODEOWNERS) corresponding to any newly added integration.
 
 Note: This validation command is only run when contributing to [integrations-extras](https://github.com/DataDog/integrations-extras)
 
@@ -105,8 +105,8 @@ ddev validate dashboards
 
 This validates that dashboards are formatted correctly. This means that they need to be proper JSON and generated from Datadog's `/dashboard` [API](https://docs.datadoghq.com/api/v1/dashboards/).
 
-!!! tip 
-    If you see a failure regarding use of the screen endpoint, consider using our dashboard [utility command](../ddev/cli.md#export) to generate your dashboard payload.
+!!! tip
+    If you see a failure regarding use of the screen endpoint, consider using our dashboard [utility command](../ddev/cli.md#ddev-meta-dash-export) to generate your dashboard payload.
 
 ### Dependencies
 
@@ -114,7 +114,7 @@ This validates that dashboards are formatted correctly. This means that they nee
 ddev validate dep
 ```
 
-This command: 
+This command:
 
 - Verifies the uniqueness of dependency versions across all checks.
 - Verifies all the dependencies are pinned.
@@ -129,7 +129,7 @@ This validation only applies if your work introduces new external dependencies.
 ddev validate manifest
 ```
 
-This validates that the manifest files contain required fields, are formatted correctly, and don't contain common errors. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file) for more detailed constraints. 
+This validates that the manifest files contain required fields, are formatted correctly, and don't contain common errors. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file) for more detailed constraints.
 
 ### Metadata
 
@@ -137,7 +137,7 @@ This validates that the manifest files contain required fields, are formatted co
 ddev validate metadata
 ```
 
-This checks that every `metadata.csv` file is formatted correctly. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file) for more detailed constraints. 
+This checks that every `metadata.csv` file is formatted correctly. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file) for more detailed constraints.
 
 ### README files
 
@@ -155,7 +155,7 @@ ddev validate saved-views
 
 This validates that saved views for an integration are formatted correctly and contain required fields, such as "type".
 
-!!! tip 
+!!! tip
     View [example saved views](https://github.com/DataDog/integrations-core/tree/master/postgres/assets/saved_views) for inspiration and guidance.
 
 ### Service check data
@@ -168,7 +168,7 @@ This checks that every service check file is formatted correctly. See the [Datad
 
 ### Imports
 
-``` 
+```
 ddev validate imports
 ```
 This verifies that all integrations import the base package in the correct way, such as:
@@ -177,14 +177,14 @@ This verifies that all integrations import the base package in the correct way, 
 from datadog_checks.base.foo import bar
 ```
 
-!!! tip 
+!!! tip
     See the [New Integration Instructions](https://docs.datadoghq.com/developers/integrations/new_check_howto/?tab=configurationtemplate#implement-check-logic) for more examples of how to use the base package.
 
 ## Labeler
 
 We use a [GitHub Action][github-actions-labeler] to automatically add labels to pull requests.
 
-!!! tip 
+!!! tip
     If the Labeler CI step fails on your PR, it's probably because your PR is from a fork. Don't worry if this happens- the team can manually add labels for you.
 
 The labeler is [configured][github-actions-labeler-config] to add the following:

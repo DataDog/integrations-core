@@ -1,6 +1,6 @@
 # CHANGELOG - nginx
 
-## 3.11.1 / 2021-01-26
+## 3.11.1 / 2021-01-26 / Agent 7.26.0
 
 * [Fixed] Lower log level for version metadata submission. See [#8448](https://github.com/DataDog/integrations-core/pull/8448).
 

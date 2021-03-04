@@ -6,7 +6,7 @@
 * [Added] Add SNMP check duration, interval, metrics count. See [#8211](https://github.com/DataDog/integrations-core/pull/8211).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
-## 4.0.0 / 2021-01-25
+## 4.0.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Snmp Juniper profiles for EX (switches), MX (routers) and SRX (firewalls) series. See [#8206](https://github.com/DataDog/integrations-core/pull/8206).
 * [Fixed] Use mibless syntax for _generic-host-resources.yaml. See [#8305](https://github.com/DataDog/integrations-core/pull/8305).

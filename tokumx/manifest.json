@@ -30,7 +30,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "tokumx": "assets/dashboards/tokumx_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv",

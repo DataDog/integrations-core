@@ -1,6 +1,6 @@
 # CHANGELOG - teamcity
 
-## 1.12.0 / 2021-01-25
+## 1.12.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Document logs support. See [#7702](https://github.com/DataDog/integrations-core/pull/7702).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - cisco_aci
 
-## 1.13.0 / 2021-01-28
+## 1.13.0 / 2021-01-28 / Agent 7.26.0
 
 * [Security] Upgrade cryptography python package. See [#8476](https://github.com/DataDog/integrations-core/pull/8476).
 
