@@ -406,7 +406,7 @@ class RequestsWrapper(object):
         with closing(sock):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                context.sverify_mode = ssl.CERT_NONE
+                context.verify_mode = ssl.CERT_NONE
 
                 with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
