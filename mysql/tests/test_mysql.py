@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import subprocess
 import time
 from collections import Counter
@@ -13,7 +14,6 @@ import psutil
 import pytest
 from pkg_resources import parse_version
 
-from datadog_checks.base.utils.db.statement_samples import statement_samples_client
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -22,6 +22,8 @@ from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
 from .common import MYSQL_VERSION_PARSED
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -347,8 +349,13 @@ def test_generate_synthetic_rows():
     ],
 )
 def test_statement_samples_collect(
-    dbm_instance, bob_conn, events_statements_table, explain_strategy, schema, statement
+    dbm_instance, bob_conn, events_statements_table, explain_strategy, schema, statement, caplog
 ):
+    dbm_instance = copy.deepcopy(dbm_instance)
+    caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
+    caplog.set_level(logging.DEBUG, logger="datadog_checks")
+    caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
+
     # try to collect a sample from all supported events_statements tables using all possible strategies
     dbm_instance['statement_samples']['events_statements_table'] = events_statements_table
     dbm_instance['statement_samples']['run_sync'] = True
@@ -356,8 +363,10 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
+    logger.debug("running first check")
     mysql_check.check(dbm_instance)
-    statement_samples_client._events = []
+
+    mysql_check._statement_samples._statement_samples_client._events = []
     mysql_check._statement_samples._init_caches()
 
     # we deliberately want to keep the connection open for the duration of the test to ensure
@@ -369,21 +378,24 @@ def test_statement_samples_collect(
         if schema:
             cursor.execute("use {}".format(schema))
         cursor.execute(statement)
+    logger.debug("running second check")
     mysql_check.check(dbm_instance)
-    matching = [e for e in statement_samples_client._events if e['db']['statement'] == statement]
+    matching = [
+        e for e in mysql_check._statement_samples._statement_samples_client._events if e['db']['statement'] == statement
+    ]
     assert len(matching) > 0, "should have collected an event"
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
     if schema == 'testdb' and explain_strategy == 'FQ_PROCEDURE':
         # explain via the FQ_PROCEDURE will fail if a query contains non-fully-qualified tables because it will
         # default to the schema of the FQ_PROCEDURE, so in case of "select * from testdb" it'll try to do
         # "select start from datadog.testdb" which would be the wrong schema.
-        assert not with_plans, "cannot collect plan in this case"
+        assert not with_plans, "should not have collected any plans"
     elif schema == 'information_schema' and explain_strategy == 'PROCEDURE':
         # we can't create an explain_statement procedure in performance_schema so this is not expected to work
-        assert not with_plans, "cannot collect plan in this case"
+        assert not with_plans, "should not have collected any plans"
     elif not schema and explain_strategy == 'PROCEDURE':
         # if there is no default schema then we cannot use the non-fully-qualified procedure strategy
-        assert not with_plans, "cannot collect plan in this case"
+        assert not with_plans, "should not have collected any plans"
     else:
         event = with_plans[0]
         assert 'query_block' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
@@ -404,7 +416,9 @@ def test_statement_samples_rate_limit(aggregator, bob_conn, dbm_instance):
             cursor.execute(query)
             mysql_check.check(dbm_instance)
             time.sleep(1)
-    matching = [e for e in statement_samples_client._events if e['db']['statement'] == query]
+    matching = [
+        e for e in mysql_check._statement_samples._statement_samples_client._events if e['db']['statement'] == query
+    ]
     assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
     metrics = aggregator.metrics("dd.mysql.collect_statement_samples.time")
     assert 2 < len(metrics) < 6
@@ -442,10 +456,10 @@ def test_statement_samples_check_cancel(aggregator, dbm_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_samples_max_per_digest(dbm_instance):
     # clear out any events from previous test runs
-    statement_samples_client._events = []
     dbm_instance['statement_samples']['run_sync'] = True
     dbm_instance['statement_samples']['events_statements_table'] = 'events_statements_history_long'
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check._statement_samples._statement_samples_client._events = []
     for _ in range(3):
         mysql_check.check(dbm_instance)
     rows = mysql_check._statement_samples._get_new_events_statements('events_statements_history_long', 1000)

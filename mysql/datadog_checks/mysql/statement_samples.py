@@ -17,7 +17,11 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.statement_samples import statement_samples_client
+from datadog_checks.base.utils.db.statement_samples import (
+    StatementSamplesClient,
+    StubStatementSamplesClient,
+    using_stub_datadog_agent,
+)
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
@@ -199,6 +203,10 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
 )
 
 
+def _new_statement_samples_client():
+    return StubStatementSamplesClient() if using_stub_datadog_agent else StatementSamplesClient()
+
+
 class MySQLStatementSamples(object):
     """
     Collects statement samples and execution plans.
@@ -259,6 +267,7 @@ class MySQLStatementSamples(object):
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
         self._init_caches()
+        self._statement_samples_client = _new_statement_samples_client()
 
     def _init_caches(self):
         self._collection_strategy_cache = TTLCache(
@@ -637,7 +646,7 @@ class MySQLStatementSamples(object):
         rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
-        submitted_count, failed_count = statement_samples_client.submit_events(events)
+        submitted_count, failed_count = self._statement_samples_client.submit_events(events)
         self._check.count("dd.mysql.statement_samples.error", failed_count, tags=self._tags + ["error:submit-events"])
         self._check.histogram("dd.mysql.collect_statement_samples.time", (time.time() - start_time) * 1000, tags=tags)
         self._check.count("dd.mysql.collect_statement_samples.events_submitted.count", submitted_count, tags=tags)
