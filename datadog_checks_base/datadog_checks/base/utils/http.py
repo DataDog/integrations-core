@@ -118,7 +118,6 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
         'auth_token_handler',
-        'context',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
