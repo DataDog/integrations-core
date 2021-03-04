@@ -303,4 +303,6 @@ ISTIOD_METRICS = {
     'process_virtual_memory_max_bytes': 'process.virtual_memory_max_bytes',
     'sidecar_injection_requests_total': 'sidecar_injection.requests_total',
     'sidecar_injection_success_total': 'sidecar_injection.success_total',
+    'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
+    'sidecar_injection_skip_total': 'sidecar_injection.skip_total'
 }
