@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 2.2.1 / 2021-01-29
+## 2.2.1 / 2021-01-29 / Agent 7.26.0
 
 * [Fixed] Fix condition for replication status. See [#8475](https://github.com/DataDog/integrations-core/pull/8475).
 

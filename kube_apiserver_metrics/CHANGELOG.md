@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## 1.7.1 / 2021-01-25
+## 1.7.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update metrics whose name has changed in Kubernetes 1.14. See [#8337](https://github.com/DataDog/integrations-core/pull/8337).
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).

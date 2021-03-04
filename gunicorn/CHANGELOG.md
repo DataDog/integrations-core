@@ -1,6 +1,6 @@
 # CHANGELOG - gunicorn
 
-## 1.14.1 / 2021-01-15
+## 1.14.1 / 2021-01-15 / Agent 7.26.0
 
 * [Fixed] Prevent raising an error if the master process no longer exists. See [#8314](https://github.com/DataDog/integrations-core/pull/8314).
 

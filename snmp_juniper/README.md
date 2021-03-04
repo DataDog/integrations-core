@@ -33,7 +33,9 @@ Juniper does not include any events.
 Additional helpful documentation, links, and articles:
 
 - [Monitor SNMP with Datadog][2]
+- [Monitor Juniper network devices with Datadog][4]
 
 [1]: https://docs.datadoghq.com/network_monitoring/devices/setup/
 [2]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [3]: https://docs.datadoghq.com/network_monitoring/devices/data/
+[4]: https://www.datadoghq.com/blog/monitor-juniper-network-devices-with-datadog/

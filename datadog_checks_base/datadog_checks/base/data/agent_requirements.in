@@ -7,6 +7,7 @@ binary==1.0.0
 boto3==1.10.27
 boto==2.46.1
 botocore==1.13.42
+cachetools==3.1.1
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.1.5
 contextlib2==0.6.0; python_version < "3.0"
@@ -26,7 +27,7 @@ jpype1==0.7.1; python_version <= "2.7"
 jpype1==1.2.1; python_version > "3"
 kafka-python==2.0.2
 kazoo==2.6.1
-kubernetes==8.0.1
+kubernetes==12.0.1
 ldap3==2.5
 lxml==4.6.2
 lz4==2.2.1
@@ -58,7 +59,7 @@ python-dateutil==2.8.0
 python3-gearman==0.1.0; sys_platform != "win32" and python_version > "3.0"
 pyvmomi==v6.5.0.2017.5-1
 pywin32==228; sys_platform == "win32"
-pyyaml==5.3.1
+pyyaml==5.4.1
 redis==3.5.3
 requests-kerberos==0.12.0
 requests-unixsocket==0.2.0

@@ -6,6 +6,7 @@ parameters:
   run_py2_tests: true
   force_base_package: false
   coverage: true
+  test_e2e: true
 
 jobs:
 - ${{ each check in parameters.checks }}:
@@ -19,7 +20,7 @@ jobs:
       pip_cache_config: ${{ parameters.pip_cache_config }}
       run_py2_tests: ${{ parameters.run_py2_tests }}
       force_base_package: ${{ parameters.force_base_package }}
-      test_e2e: ${{ parameters.test_e2e }}
+      test_e2e: ${{ and(parameters.test_e2e, eq(check.os, 'linux')) }}  # e2e tests cannot run on windows
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:

@@ -1,0 +1,532 @@
+{
+    "title": "ZooKeeper - Overview",
+    "description": "This dashboard presents an overview of your Apache ZooKeeper cluster, helping you ensure the performance and availability of your distributed systems. Further reading for ZooKeeper monitoring:\n\n- [Datadog's Apache ZooKeeper integration docs](https://docs.datadoghq.com/integrations/zk/)\n\nYou might also be interested in our dashboards for:\n\n- [Apache Kafka](https://app.datadoghq.com/screen/integration/50/)\n\n- [Apache Hadoop](https://app.datadoghq.com/screen/integration/90)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "heatmap",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.connections{*} by {host}"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Active connections",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 68,
+                "y": 6,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "heatmap",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.outstanding_requests{*} by {host}",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Outstanding requests",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 68,
+                "y": 40,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:zookeeper.avg_latency{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Average request latency",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 68,
+                "y": 23,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:zookeeper.max_file_descriptor_count{*} by {host} - avg:zookeeper.open_file_descriptor_count{*} by {host}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Available file descriptors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 20,
+                "y": 40,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.pending_syncs{*} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Pending syncs (leader)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 68,
+                "y": 57,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/zookeeper_large.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 18,
+                "height": 14
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:jvm.mem.heap_max{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:jvm.mem.heap_used{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "JVM heap usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 117,
+                "y": 23,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:system.swap.free{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Free swap",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 20,
+                "y": 57,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.followers{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Followers",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 23,
+                "width": 18,
+                "height": 7
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "heatmap",
+                "requests": [
+                    {
+                        "q": "diff(avg:jvm.gc.parnew.time{*})"
+                    }
+                ],
+                "custom_links": [],
+                "title": "ParNew time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 117,
+                "y": 6,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "note",
+                "content": "ZooKeeper metrics",
+                "background_color": "pink",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 20,
+                "y": 0,
+                "width": 95,
+                "height": 5
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "note",
+                "content": "JVM metrics",
+                "background_color": "pink",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 117,
+                "y": 0,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.pending_syncs{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 10,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Pending syncs",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 18,
+                "height": 7
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "( ( sum:zookeeper.max_file_descriptor_count{*} - sum:zookeeper.open_file_descriptor_count{*} ) / sum:zookeeper.max_file_descriptor_count{*} ) * 100",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "value": 15,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 25,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 16,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Available % FD",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 39,
+                "width": 18,
+                "height": 7
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.timeouts{*} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Timeouts",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 20,
+                "y": 23,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "per_second(avg:zookeeper.bytes_sent{*})",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "0 - per_second(avg:zookeeper.bytes_received{*})",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Bytes sent/received per second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 20,
+                "y": 6,
+                "width": 47,
+                "height": 16
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:zookeeper.num_alive_connections{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Average connections",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 31,
+                "width": 18,
+                "height": 7
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:zookeeper.znode_count{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "znodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 47,
+                "width": 18,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 35
+}

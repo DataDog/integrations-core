@@ -1,6 +1,6 @@
 # CHANGELOG - Linkerd
 
-## 2.7.0 / 2021-01-25
+## 2.7.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Allow the use of the new OpenMetrics implementation. See [#8438](https://github.com/DataDog/integrations-core/pull/8438).
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).

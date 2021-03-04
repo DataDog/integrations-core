@@ -6,7 +6,7 @@
 * [Added] Refactor and use new Agent signature. See [#8712](https://github.com/DataDog/integrations-core/pull/8712).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
-## 1.16.1 / 2021-01-25
+## 1.16.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Fix error log message. See [#8271](https://github.com/DataDog/integrations-core/pull/8271).
 

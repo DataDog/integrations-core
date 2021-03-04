@@ -1,6 +1,6 @@
 # CHANGELOG - Envoy
 
-## 1.20.1 / 2021-01-25
+## 1.20.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update check signature. See [#8258](https://github.com/DataDog/integrations-core/pull/8258).
 
