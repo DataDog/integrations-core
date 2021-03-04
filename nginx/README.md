@@ -305,34 +305,6 @@ Then, set [Log Integrations][22] as Docker labels:
 ```
 
 <!-- xxz tab xxx -->
-
-<!-- xxx tab "Containerized" xxx -->
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
-
-##### Metric collection
-
-| Parameter            | Value                                                      |
-| -------------------- | ---------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `nginx`                                                    |
-| `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"nginx_status_url": "http://%%host%%:81/nginx_status/"}` |
-
-**Note**: This `<INSTANCE_CONFIG>` configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
-
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
-
-| Parameter      | Value                                     |
-| -------------- | ----------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "nginx", "service": "nginx"}` |
-
-<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
