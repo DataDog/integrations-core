@@ -1,5 +1,8 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.5.0 / 2021-03-04
+* [Added] Add utilities for Deep Database Monitoring [#8627](https://github.com/DataDog/integrations-core/pull/8627)
+
 ## 16.4.0 / 2021-02-09
 
 * [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
