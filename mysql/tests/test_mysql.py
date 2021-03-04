@@ -351,7 +351,6 @@ def test_generate_synthetic_rows():
 def test_statement_samples_collect(
     dbm_instance, bob_conn, events_statements_table, explain_strategy, schema, statement, caplog
 ):
-    dbm_instance = copy.deepcopy(dbm_instance)
     caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
     caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
