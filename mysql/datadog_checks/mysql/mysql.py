@@ -316,8 +316,6 @@ class MySql(AgentCheck):
         return REPLICA_VARS
 
     def _check_replication_status(self, results):
-        # get replica running form global status page
-        replica_running_status = AgentCheck.UNKNOWN
         # Replica_IO_Running: Whether the I/O thread for reading the source's binary log is running.
         # You want this to be Yes unless you have not yet started replication or have explicitly stopped it.
         replica_io_running = collect_type('Slave_IO_Running', results, dict)
@@ -334,38 +332,50 @@ class MySql(AgentCheck):
         binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
-        replicas = collect_scalar('Slaves_connected', results) or collect_scalar('Replicas_connected', results)
+        replicas = collect_scalar('Slaves_connected', results)
+        if replicas is None:
+            replicas = collect_scalar('Replicas_connected', results)
 
-        if not (replica_io_running is None and replica_sql_running is None):
-            if not replica_io_running and not replica_sql_running:
-                self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
-                replica_running_status = AgentCheck.CRITICAL
-            elif not replica_io_running or not replica_sql_running:
-                self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
-                replica_running_status = AgentCheck.WARNING
+        # If the host act as a source
+        source_repl_running_status = AgentCheck.UNKNOWN
+        if self._is_source_host(replicas, results):
+            if replicas > 0 and binlog_running:
+                self.log.debug("Host is master, there are replicas and binlog is running")
+                source_repl_running_status = AgentCheck.OK
+            else:
+                source_repl_running_status = AgentCheck.WARNING
 
-        if replica_running_status == AgentCheck.UNKNOWN:
-            if self._is_source_host(replicas, results):  # master
-                if replicas > 0 and binlog_running:
-                    self.log.debug("Host is master, there are replicas and binlog is running")
-                    replica_running_status = AgentCheck.OK
-                else:
+            self._submit_replication_status(source_repl_running_status, ['replication_mode:source'])
+
+        # If the host act as a replica
+        # A host can be both a source and a replica
+        # See https://dev.mysql.com/doc/refman/8.0/en/replication-solutions-performance.html
+        # get replica running form global status page
+        replica_running_status = AgentCheck.UNKNOWN
+        if self._is_replica_host(replicas, results):
+            if not (replica_io_running is None and replica_sql_running is None):
+                if not replica_io_running and not replica_sql_running:
+                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
+                    replica_running_status = AgentCheck.CRITICAL
+                elif not replica_io_running or not replica_sql_running:
+                    self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
                     replica_running_status = AgentCheck.WARNING
-            else:  # replica (or standalone)
-                if not (replica_io_running is None and replica_sql_running is None):
-                    if replica_io_running and replica_sql_running:
-                        self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
-                        replica_running_status = AgentCheck.OK
+                else:
+                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
+                    replica_running_status = AgentCheck.OK
 
+                self._submit_replication_status(replica_running_status, ['replication_mode:replica'])
+
+    def _submit_replication_status(self, status, additional_tags):
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
             name=self.SLAVE_SERVICE_CHECK_NAME,
-            value=1 if replica_running_status == AgentCheck.OK else 0,
-            tags=self._config.tags,
+            value=1 if status == AgentCheck.OK else 0,
+            tags=self._config.tags + additional_tags,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
-        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
-        self.service_check(self.REPLICA_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
+        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
+        self.service_check(self.REPLICA_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
 
     def _collect_statement_metrics(self, db, tags):
         tags = self.service_check_tags + tags
@@ -381,6 +391,9 @@ class MySql(AgentCheck):
             return True
 
         return False
+
+    def _is_replica_host(self, replicas, results):
+        return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
