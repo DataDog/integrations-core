@@ -365,7 +365,7 @@ def test_statement_samples_collect(
     logger.debug("running first check")
     mysql_check.check(dbm_instance)
 
-    mysql_check._statement_samples._statement_samples_client._events = []
+    mysql_check._statement_samples._statement_samples_client._payloads = []
     mysql_check._statement_samples._init_caches()
 
     # we deliberately want to keep the connection open for the duration of the test to ensure
@@ -379,9 +379,8 @@ def test_statement_samples_collect(
         cursor.execute(statement)
     logger.debug("running second check")
     mysql_check.check(dbm_instance)
-    matching = [
-        e for e in mysql_check._statement_samples._statement_samples_client._events if e['db']['statement'] == statement
-    ]
+    events = mysql_check._statement_samples._statement_samples_client.get_events()
+    matching = [e for e in events if e['db']['statement'] == statement]
     assert len(matching) > 0, "should have collected an event"
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
     if schema == 'testdb' and explain_strategy == 'FQ_PROCEDURE':
@@ -415,9 +414,8 @@ def test_statement_samples_rate_limit(aggregator, bob_conn, dbm_instance):
             cursor.execute(query)
             mysql_check.check(dbm_instance)
             time.sleep(1)
-    matching = [
-        e for e in mysql_check._statement_samples._statement_samples_client._events if e['db']['statement'] == query
-    ]
+    events = mysql_check._statement_samples._statement_samples_client.get_events()
+    matching = [e for e in events if e['db']['statement'] == query]
     assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
     metrics = aggregator.metrics("dd.mysql.collect_statement_samples.time")
     assert 2 < len(metrics) < 6
@@ -458,7 +456,6 @@ def test_statement_samples_max_per_digest(dbm_instance):
     dbm_instance['statement_samples']['run_sync'] = True
     dbm_instance['statement_samples']['events_statements_table'] = 'events_statements_history_long'
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check._statement_samples._statement_samples_client._events = []
     for _ in range(3):
         mysql_check.check(dbm_instance)
     rows = mysql_check._statement_samples._get_new_events_statements('events_statements_history_long', 1000)
