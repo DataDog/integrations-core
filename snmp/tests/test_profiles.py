@@ -1568,15 +1568,10 @@ def test_cisco_csr(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    tags = ['neighbor:244.12.239.177'] + common_tags
-    for metric in PEER_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
-
-    for metric in PEER_RATES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
+    _check_bgp4(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2249,6 +2244,7 @@ def test_juniper_ex(aggregator, file):
     _check_juniper_dcu(aggregator, common_tags)
     _check_juniper_cos(aggregator, common_tags)
     _check_juniper_firewall(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -2264,6 +2260,7 @@ def test_juniper_mx(aggregator, file):
     ]
     _check_juniper_virtual_chassis(aggregator, common_tags)
     _check_juniper_firewall(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -2280,6 +2277,7 @@ def test_juniper_srx(aggregator, file):
     _check_juniper_userfirewall(aggregator, common_tags)
     _check_juniper_dcu(aggregator, common_tags)
     _check_juniper_scu(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -2414,3 +2412,15 @@ def _check_juniper_cos(aggregator, common_tags):
             aggregator.assert_metric(
                 'snmp.{}'.format(cos_metric), metric_type=aggregator.GAUGE, tags=common_tags + tags, count=1
             )
+
+
+def _check_bgp4(aggregator, common_tags):
+    """
+    Shared testing function for profiles supporting BGP4 metrics.
+    """
+    tags = ['neighbor:244.12.239.177'] + common_tags
+    for metric in PEER_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in PEER_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
