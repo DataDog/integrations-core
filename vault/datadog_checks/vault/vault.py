@@ -90,10 +90,10 @@ class Vault(OpenMetricsBaseCheck):
         self.check_initializations.append(self.parse_config)
 
         self.METRIC_TRANSFORMERS = {
-            'vault_route_create_*':self.transform,
-            'vault_route_delete_*':self.transform,
-            'vault_route_list_*':self.transform,
-            'vault_route_read_*':self.transform
+            'vault_route_create_*':self.transform_route_metrics,
+            'vault_route_delete_*':self.transform_route_metrics,
+            'vault_route_list_*':self.transform_route_metrics,
+            'vault_route_read_*':self.transform_route_metrics
         }
 
     def check(self, _):
@@ -332,7 +332,7 @@ class Vault(OpenMetricsBaseCheck):
         # This validation is called during `__init__` but we don't need it
         pass
 
-    def transform(self, metric, scraper_config, transformerkey):
+    def transform_route_metrics(self, metric, scraper_config, transformerkey):
         metricname =transformerkey.replace('_','.')[:-2]
         metrictag = metric.name[len(transformerkey)-1:-1]
         for i in metric.samples:
