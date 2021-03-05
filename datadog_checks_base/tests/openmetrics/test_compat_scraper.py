@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from datadog_test_libs.requirements import requires_py3
 
-from ..utils import requires_py3
 from .utils import get_legacy_check
 
 pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_compat_scraper]
