@@ -93,7 +93,7 @@ class Vault(OpenMetricsBaseCheck):
             'vault_route_create_*': self.transform_route_metrics,
             'vault_route_delete_*': self.transform_route_metrics,
             'vault_route_list_*': self.transform_route_metrics,
-            'vault_route_read_*': self.transform_route_metrics
+            'vault_route_read_*': self.transform_route_metrics,
         }
 
     def check(self, _):
@@ -334,7 +334,7 @@ class Vault(OpenMetricsBaseCheck):
 
     def transform_route_metrics(self, metric, scraper_config, transformerkey):
         metricname = transformerkey.replace('_', '.')[:-2]
-        metrictag = metric.name[len(transformerkey) - 1:-1]
+        metrictag = metric.name[len(transformerkey) - 1: -1]
         for i in metric.samples:
             i.labels['mountpoint'] = metrictag
         self.submit_openmetric(metricname, metric, scraper_config)
