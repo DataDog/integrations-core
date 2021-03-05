@@ -5,7 +5,7 @@ from __future__ import division
 
 from ipaddress import ip_address
 
-from six import text_type
+from six import PY2, text_type
 
 # https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
 DEFAULT_PROTOCOL_VERSIONS = {'TLSv1.2', 'TLSv1.3'}
@@ -59,3 +59,16 @@ def days_to_seconds(days):
 
 def seconds_to_days(seconds):
     return seconds / 60 / 60 / 24
+
+
+if PY2:
+    from contextlib import closing as _closing
+
+    def closing(sock):
+        return _closing(sock)
+
+
+else:
+
+    def closing(sock):
+        return sock

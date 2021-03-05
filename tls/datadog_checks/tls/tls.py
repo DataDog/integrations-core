@@ -15,10 +15,9 @@ from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.network import closing, create_socket_connection
 from datadog_checks.base.utils.time import get_timestamp
 
-from .utils import days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
+from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
@@ -146,9 +145,7 @@ class TLSCheck(AgentCheck):
 
         try:
             self.log.debug('Checking that TLS service check can connect')
-            sock = create_socket_connection(
-                hostname=self._server, port=self._port, sock_type=self._sock_type, timeout=self._timeout
-            )
+            sock = self.create_connection()
         except Exception as e:
             self.log.debug('Error occurred while connecting to socket: %s', str(e))
             self.service_check(self.SERVICE_CHECK_CAN_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
@@ -310,12 +307,41 @@ class TLSCheck(AgentCheck):
             self.log.debug('Age is valid')
             self.service_check(self.SERVICE_CHECK_EXPIRATION, self.OK, tags=self._tags)
 
+    def create_connection(self):
+        """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""
+        err = None
+        try:
+            for res in socket.getaddrinfo(self._server, self._port, 0, self._sock_type):
+                af, socktype, proto, canonname, sa = res
+                sock = None
+                try:
+                    sock = socket.socket(af, socktype, proto)
+                    sock.settimeout(self._timeout)
+                    sock.connect(sa)
+                    # Break explicitly a reference cycle
+                    err = None
+                    return sock
+
+                except socket.error as _:
+                    err = _
+                    if sock is not None:
+                        sock.close()
+
+            if err is not None:
+                raise err
+            else:
+                raise socket.error('No valid addresses found, try checking your IPv6 connectivity')  # noqa: G
+        except socket.gaierror as e:
+            err_code, message = e.args
+            if err_code == socket.EAI_NODATA or err_code == socket.EAI_NONAME:
+                raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
+
+            raise
+
     def fetch_intermediate_certs(self):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
         try:
-            sock = create_socket_connection(
-                hostname=self._server, port=self._port, sock_type=self._sock_type, timeout=self._timeout
-            )
+            sock = self.create_connection()
         except Exception as e:
             self.log.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
             return
