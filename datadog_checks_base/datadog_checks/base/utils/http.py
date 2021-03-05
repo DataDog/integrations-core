@@ -358,29 +358,33 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = request_method(url, **new_options)
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug(u'Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = request_method(url, **new_options)
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
-                try:
-                    response = request_method(url, **new_options)
-                except SSLError as e:
-                    # fetch the intermediate certs
-                    parsed_url = urlparse(url)
-                    hostname = parsed_url.hostname
-                    certs = self.fetch_intermediate_certs(hostname)
-                    if not certs:
-                        raise e
-                    # retry the connection via session object
-                    certadapter = CertAdapter(certs=certs)
-                    request_method = getattr(self.session, method)
-                    self.session.mount(url, certadapter)
-                    response = request_method(url, **new_options)
-
+                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             return response
+
+    def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
+        try:
+            response = request_method(url, **new_options)
+        except SSLError as e:
+            # fetch the intermediate certs
+            parsed_url = urlparse(url)
+            hostname = parsed_url.hostname
+            certs = self.fetch_intermediate_certs(hostname)
+            if not certs:
+                raise e
+            # retry the connection via session object
+            certadapter = CertAdapter(certs=certs)
+            session = requests.Session() if not persist else self.session
+            request_method = getattr(session, method)
+            session.mount(url, certadapter)
+            response = request_method(url, **new_options)
+        return response
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options
