@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.6.0 / 2021-03-05
+
+* [Added] Upgrade orjson to 3.5.0. See [#8765](https://github.com/DataDog/integrations-core/pull/8765).
+* [Added] Upgrade PyJWT to 2.0.1 on Python 3. See [#8762](https://github.com/DataDog/integrations-core/pull/8762).
+* [Fixed] Improve orjson compatibility. See [#8767](https://github.com/DataDog/integrations-core/pull/8767).
+* [Fixed] Revert "Upgrade orjson to 3.5.0". See [#8769](https://github.com/DataDog/integrations-core/pull/8769).
+
 ## 16.5.0 / 2021-03-04
 
 * [Added] Add ability to look for wildcards in Prometheus metric transformers. See [#8750](https://github.com/DataDog/integrations-core/pull/8750).
