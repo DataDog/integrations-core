@@ -1,6 +1,6 @@
 {
 	"name": "[Vault] S3 time to access secrets is high",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "avg(last_1m):avg:vault.vault.s3.get.quantile{*} > 50",
 	"message": "S3 time to access secrets is high in the past 1 minute.",
 	"tags": [
