@@ -138,7 +138,7 @@ Postfix sends logs to the syslog daemon, which then writes logs to the file syst
    logs_enabled: true
    ```
 
-2. Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][5] for all available configuration options.
+2. Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][4] for all available configuration options.
 
    ```yaml
    logs:
