@@ -352,6 +352,20 @@ def test_statement_samples_collection_loop_inactive_stop(aggregator, integration
     aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_inactive_stop")
 
 
+def test_statement_samples_collection_loop_cancel(aggregator, integration_check, dbm_instance):
+    dbm_instance['statement_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    assert check.statement_samples._collection_loop_future.running(), "thread should be running"
+    check.cancel()
+    # wait for it to stop and make sure it doesn't throw any exceptions
+    check.statement_samples._collection_loop_future.result()
+    assert not check.statement_samples._collection_loop_future.running(), "thread should be stopped"
+    assert check.statement_samples._db is None, "db connection should be gone"
+    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_cancel")
+
+
 def test_statement_samples_invalid_activity_view(aggregator, integration_check, dbm_instance):
     dbm_instance['pg_stat_activity_view'] = "wrong_view"
 
