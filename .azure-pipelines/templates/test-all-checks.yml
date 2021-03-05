@@ -3,6 +3,7 @@ parameters:
   pip_cache_config: null
   run_py2_tests: true
   force_base_package: false
+  test_e2e: true
 jobs:
 - template: ./test-all.yml
   parameters:

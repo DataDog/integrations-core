@@ -733,6 +733,10 @@ class OpenMetricsScraperMixin(object):
                     self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
+            # check for wilcards in transformers
+            for transformer_name, transformer in iteritems(metric_transformers):
+                if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
+                    transformer(metric, scraper_config, transformer_name)
 
             # try matching wildcards
             if scraper_config['_wildcards_re'] and scraper_config['_wildcards_re'].search(metric.name):
