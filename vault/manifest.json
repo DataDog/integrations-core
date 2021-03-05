@@ -29,7 +29,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {
-      "[Vault] S3 time to access secrets is high": "/assets/monitors/vault_S3_time_high.json"
+      "[Vault] S3 time to access secrets is high": "assets/monitors/vault_S3_time_high.json"
     },
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview.json"
