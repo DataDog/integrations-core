@@ -301,6 +301,8 @@ class PostgresStatementSamples(object):
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
+            # if we're using the orjson implementation then json.dumps returns bytes
+            plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)

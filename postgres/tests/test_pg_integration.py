@@ -290,7 +290,7 @@ def test_statement_samples_collect(integration_check, dbm_instance, bob_conn, pg
     check = integration_check(dbm_instance)
     check._connect()
     # clear out any samples kept from previous runs
-    statement_samples_client._events = []
+    statement_samples_client._payloads = []
     query = "SELECT city FROM persons WHERE city = %s"
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -301,7 +301,7 @@ def test_statement_samples_collect(integration_check, dbm_instance, bob_conn, pg
     cursor = bob_conn.cursor()
     cursor.execute(query, ("hello",))
     check.check(dbm_instance)
-    matching = [e for e in statement_samples_client._events if e['db']['statement'] == expected_query]
+    matching = [e for e in statement_samples_client.get_events() if e['db']['statement'] == expected_query]
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
         # pg_monitor role exists only in version 10+
         assert len(matching) == 0, "did not expect to catch any events"
@@ -322,7 +322,7 @@ def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instan
     check = integration_check(dbm_instance)
     check._connect()
     # clear out any samples kept from previous runs
-    statement_samples_client._events = []
+    statement_samples_client._payloads = []
     query = "SELECT city FROM persons WHERE city = 'hello'"
     # leave bob's connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
@@ -333,7 +333,7 @@ def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instan
         time.sleep(1)
     cursor.close()
 
-    matching = [e for e in statement_samples_client._events if e['db']['statement'] == query]
+    matching = [e for e in statement_samples_client.get_events() if e['db']['statement'] == query]
     assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
 
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
