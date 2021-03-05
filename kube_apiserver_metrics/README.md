@@ -26,7 +26,7 @@ annotations:
     '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]'
 ```
 
-Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
+Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s). Recall that you must add `cluster_check:true` to your configuration file when using a ConfigMap to configure cluster checks.
 
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][4].
 See the [sample kube_apiserver_metrics.d/conf.yaml][2] for all available configuration options.
