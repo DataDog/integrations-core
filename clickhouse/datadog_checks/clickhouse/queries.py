@@ -239,8 +239,16 @@ SystemEvents = {
                 'PerfInstructions': {'name': 'perf.instructions', 'type': 'monotonic_gauge'},
                 'PerfLocalMemoryMisses': {'name': 'perf.local_memory.misses', 'type': 'monotonic_gauge'},
                 'PerfLocalMemoryReferences': {'name': 'perf.local_memory.references', 'type': 'monotonic_gauge'},
-                'PerfMinEnabledRunningTime': {'name': 'perf.min_enabled.running_time', 'type': 'temporal_percent'},
-                'PerfMinEnabledTime': {'name': 'perf.min_enabled.min_time', 'type': 'temporal_percent'},
+                'PerfMinEnabledRunningTime': {
+                    'name': 'perf.min_enabled.running_time',
+                    'type': 'temporal_percent',
+                    'scale': 'microsecond',
+                },
+                'PerfMinEnabledTime': {
+                    'name': 'perf.min_enabled.min_time',
+                    'type': 'temporal_percent',
+                    'scale': 'microsecond',
+                },
                 'PerfRefCpuCycles': {'name': 'perf.cpu.ref_cycles', 'type': 'monotonic_gauge'},
                 'PerfStalledCyclesBackend': {'name': 'perf.stalled_cycles.backend', 'type': 'monotonic_gauge'},
                 'PerfStalledCyclesFrontend': {'name': 'perf.stalled_cycles.frontend', 'type': 'monotonic_gauge'},
