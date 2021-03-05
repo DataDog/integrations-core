@@ -6,7 +6,7 @@ import os
 
 from datadog_checks.dev import EnvVars
 from datadog_checks.eks_fargate import EksFargateCheck
-from datadog_checks.eks_fargate.eks_fargate import HOSTNAME_ENV_VAR, KUBELET_NODE_ENV_VAR, extract_resource_values
+from datadog_checks.eks_fargate.eks_fargate import KUBELET_NODE_ENV_VAR, extract_resource_values
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,7 +20,6 @@ def test_eksfargate(monkeypatch, aggregator):
     with EnvVars(
         {
             KUBELET_NODE_ENV_VAR: 'fargate-foo',
-            HOSTNAME_ENV_VAR: 'bar',
         }
     ):
         instance = {'tags': ['foo:bar']}
@@ -28,15 +27,17 @@ def test_eksfargate(monkeypatch, aggregator):
         monkeypatch.setattr(check, 'pod_list', json.loads(mock_from_file('pods.json')))
         check.check(instance)
         aggregator.assert_metric(
-            check.NAMESPACE + '.pods.running', value=1, tags=['virtual_node:fargate-foo', 'pod_name:bar', 'foo:bar']
+            check.NAMESPACE + '.pods.running',
+            value=1,
+            tags=['virtual_node:fargate-foo', 'foo:bar'],
         )
         aggregator.assert_metric(
-            check.NAMESPACE + '.capacity.cpu', value=0.25, tags=['virtual_node:fargate-foo', 'pod_name:bar', 'foo:bar']
+            check.NAMESPACE + '.cpu.capacity', value=0.25, tags=['virtual_node:fargate-foo', 'foo:bar']
         )
         aggregator.assert_metric(
-            check.NAMESPACE + '.capacity.memory',
+            check.NAMESPACE + '.memory.capacity',
             value=0.5,
-            tags=['virtual_node:fargate-foo', 'pod_name:bar', 'foo:bar'],
+            tags=['virtual_node:fargate-foo', 'foo:bar'],
         )
 
 
@@ -51,8 +52,8 @@ def test_not_eksfargate(monkeypatch, aggregator):
         monkeypatch.setattr(check, 'pod_list', json.loads(mock_from_file('pods.json')))
         check.check(instance)
         assert check.NAMESPACE + '.pods.running' not in aggregator._metrics
-        assert check.NAMESPACE + '.capacity.cpu' not in aggregator._metrics
-        assert check.NAMESPACE + '.capacity.memory' not in aggregator._metrics
+        assert check.NAMESPACE + '.cpu.capacity' not in aggregator._metrics
+        assert check.NAMESPACE + '.memory.capacity' not in aggregator._metrics
 
 
 def test_extract_resource_values():

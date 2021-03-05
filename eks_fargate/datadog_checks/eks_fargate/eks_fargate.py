@@ -6,7 +6,6 @@ import logging
 import os
 from datetime import datetime, timedelta
 
-import requests
 from kubeutil import get_connection_info
 
 from datadog_checks.base import AgentCheck
@@ -25,7 +24,6 @@ except ImportError:
 
 
 KUBELET_NODE_ENV_VAR = 'DD_KUBERNETES_KUBELET_NODENAME'
-HOSTNAME_ENV_VAR = 'HOSTNAME'
 CAPACITY_ANNOTATION_KEY = 'CapacityProvisioned'
 POD_LIST_PATH = '/pods'
 
@@ -41,9 +39,8 @@ class EksFargateCheck(AgentCheck):
         super(EksFargateCheck, self).__init__(name, init_config, instances)
         self.NAMESPACE = 'eks.fargate'
 
-        pod_name = os.getenv(HOSTNAME_ENV_VAR)
         virtual_node = os.getenv(KUBELET_NODE_ENV_VAR, "")
-        self.fargate_mode = 'fargate' in virtual_node and pod_name is not None
+        self.fargate_mode = 'fargate' in virtual_node
 
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
@@ -56,7 +53,6 @@ class EksFargateCheck(AgentCheck):
 
         if self.fargate_mode:
             self.tags = []
-            self.tags.append('pod_name:' + pod_name)
             self.tags.append('virtual_node:' + virtual_node)
             self.tags.extend(instances[0].get('tags', []))
 
@@ -64,36 +60,37 @@ class EksFargateCheck(AgentCheck):
         if self.fargate_mode:
             for pod in self.pod_list.get('items', []):
                 pod_id = pod.get('metadata', {}).get('uid')
-                tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.ORCHESTRATOR) or []
+                tagger_tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.ORCHESTRATOR) or []
+                tagger_tags.extend(self.tags)
+                tags = set(tagger_tags)
                 # Submit the heartbeat metric for fargate virtual nodes.
-                self.gauge(self.NAMESPACE + '.pods.running', 1, set(self.tags + tags))
+                self.gauge(self.NAMESPACE + '.pods.running', 1, tags)
                 pod_annotations = pod.get('metadata', {}).get('annotations')
                 if CAPACITY_ANNOTATION_KEY not in pod_annotations:
                     continue
                 cpu_val, mem_val = extract_resource_values(pod_annotations.get(CAPACITY_ANNOTATION_KEY))
-                if cpu_val == 0 and mem_val == 0:
+                if cpu_val == 0 or mem_val == 0:
                     continue
-                self.gauge(self.NAMESPACE + '.capacity.cpu', cpu_val, set(self.tags + tags))
-                self.gauge(self.NAMESPACE + '.capacity.memory', mem_val, set(self.tags + tags))
+                self.gauge(self.NAMESPACE + '.cpu.capacity', cpu_val, tags)
+                self.gauge(self.NAMESPACE + '.memory.capacity', mem_val, tags)
 
-    def perform_kubelet_query(self, url, verbose=True, timeout=10, stream=False):
+    def perform_kubelet_query(self, url):
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
-        return requests.get(
+        return self.http.get(
             url,
-            timeout=timeout,
             verify=self.kubelet_credentials.verify(),
             cert=self.kubelet_credentials.cert_pair(),
             headers=self.kubelet_credentials.headers(url),
-            params={'verbose': verbose},
-            stream=stream,
+            params={'verbose': True},
+            stream=True,
         )
 
     def get_pod_list(self):
         try:
             cutoff_date = compute_pod_expiration_datetime()
-            with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
+            with self.perform_kubelet_query(self.pod_list_url) as r:
                 if cutoff_date:
                     f = ExpiredPodFilter(cutoff_date)
                     pod_list = json.load(r.raw, object_hook=f.json_hook)
