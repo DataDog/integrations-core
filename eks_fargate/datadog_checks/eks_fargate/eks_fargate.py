@@ -26,6 +26,7 @@ except ImportError:
 KUBELET_NODE_ENV_VAR = 'DD_KUBERNETES_KUBELET_NODENAME'
 CAPACITY_ANNOTATION_KEY = 'CapacityProvisioned'
 POD_LIST_PATH = '/pods'
+GB_TO_BYTE_CONVERSION_FACTOR = 1024 * 1024 * 1024
 
 log = logging.getLogger('collector')
 
@@ -49,7 +50,6 @@ class EksFargateCheck(AgentCheck):
 
         self.pod_list_url = endpoint.strip("/") + POD_LIST_PATH
         self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
-        self.pod_list = self.get_pod_list()
 
         if self.fargate_mode:
             self.tags = []
@@ -58,7 +58,8 @@ class EksFargateCheck(AgentCheck):
 
     def check(self, instance):
         if self.fargate_mode:
-            for pod in self.pod_list.get('items', []):
+            pod_list = self.get_pod_list()
+            for pod in pod_list.get('items', []):
                 pod_id = pod.get('metadata', {}).get('uid')
                 tagger_tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.ORCHESTRATOR) or []
                 tagger_tags.extend(self.tags)
@@ -124,6 +125,7 @@ def extract_resource_values(capacity_annotation):
         cpu_val = float(cpu.strip('vCPU'))
     if mem.endswith('GB'):
         mem_val = float(mem.strip('GB'))
+        mem_val *= GB_TO_BYTE_CONVERSION_FACTOR
     return cpu_val, mem_val
 
 
