@@ -18,6 +18,8 @@ Be sure to replace the `<DATADOG_API_KEY>` placeholders with your own API key an
 
 #### Standard cluster
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Driver only" xxx -->
 ##### Install the Datadog Agent on Driver
 Create a notebook with the following script to install the Datadog Agent on the driver node of the cluster.
 to install the Datadog Agent and collect system and Spark metrics.
@@ -82,6 +84,8 @@ fi
 """, True)
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "All nodes" xxx -->
 ##### Install the Datadog Agent on Driver and Worker Nodes
 
 ```shell script
@@ -131,6 +135,8 @@ chmod a+x /tmp/start_datadog.sh
 /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 """, True)
 ```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Job cluster
 
