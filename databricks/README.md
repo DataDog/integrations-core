@@ -164,7 +164,7 @@ if [ \$DB_IS_DRIVER ]; then
 
   current=\$(hostname -I | xargs)
 
-  # WRITING SPARK CONFIG FILE FOR STREAMING SPARK METRICS
+  # WRITING SPARK CONFIG FILE
   echo "init_config:
 instances:
     - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
