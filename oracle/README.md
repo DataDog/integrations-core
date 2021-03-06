@@ -19,7 +19,9 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 
 The Oracle check requires either access to the `cx_Oracle` Python module, or the Oracle JDBC Driver:
 
-###### Linux
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Linux" xxx -->
+
 1. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
     If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
@@ -43,19 +45,22 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
 
-###### Windows
+<!-- xxz tabs xxx -->
+<!-- xxx tab "Windows" xxx -->    
+These installation steps are a guideline referenced from the [official installation][18].
+
 1. Install the [Microsoft Visual Studio 2017 Redistributable][17] or the appropriate version for the Oracle Instant Client installation.
 
 2. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
 3. Extract both packages into a single directory that is available to all users on the given machine (for example, `C:\oracle`):
 
-4. Add the System Variable `OCI_LIB64=C:\oracle` where the value is the path to the directory containing the Oracle Instant Client.
-
-5. Modify the `PATH` environment variable to contain the path of the Oracle Instant Client.
+4. Modify the `PATH` environment variable to contain the path of the Oracle Instant Client.
 
     Navigate to Control Panel -> Settings -> Advanced System Settings -> Environment Variables and
     append `;C:\oracle\` to the `PATH` variable.
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### JDBC Driver
 
@@ -341,7 +346,10 @@ Verifies the database is available and accepting connections.
 #### Oracle Instant Client
 - Verify that both the Oracle Instant Client and SDK files are located in the same directory.
 The structure of the directory should look similar:
+
 ```text
+|____sdk/
+|____network/
 |____libociei.dylib
 |____libocci.dylib
 |____libocci.dylib.10.1
@@ -354,7 +362,6 @@ The structure of the directory should look similar:
 |____libocijdbc19.dylib
 |____libocci.dylib.19.1
 |____libclntsh.dylib
-|____network
 |____xstreams.jar
 |____libclntsh.dylib.10.1
 |____libnnz19.dylib
@@ -362,7 +369,6 @@ The structure of the directory should look similar:
 |____libocci.dylib.12.1
 |____libocci.dylib.18.1
 |____libclntsh.dylib.11.1
-|____sdk
 |____BASIC_LICENSE
 |____SDK_LICENSE
 |____libocci.dylib.11.1
@@ -373,6 +379,7 @@ The structure of the directory should look similar:
 |____SDK_README
 
 ```
+
 ##### Linux
 - See further installation documentation on [Oracle][15].
 
@@ -399,16 +406,19 @@ The structure of the directory should look similar:
 - Verify your environment variables are set correctly by running the following command from the Agent.
 Ensure the displayed output matches the correct value.
     
-    ###### Linux
-    
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Linux" xxx -->
     ```shell script
       sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
     ```
-    ###### Windows
-    
+
+<!-- xxz tabs xxx -->
+<!-- xxx tab "Windows" xxx -->    
      ```shell script
        sudo -u dd-agent -- %PROGRAMFILES%\Datadog\"Datadog Agent"\embedded\python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
      ```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Need help? Contact [Datadog support][12].
 
@@ -429,3 +439,4 @@ Need help? Contact [Datadog support][12].
 [15]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
 [16]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [17]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+[18]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
