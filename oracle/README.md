@@ -21,7 +21,7 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Linux" xxx -->
-
+###### Linux
 1. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
     If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
@@ -46,7 +46,9 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    ```
 
 <!-- xxz tabs xxx -->
-<!-- xxx tab "Windows" xxx -->    
+<!-- xxx tab "Windows" xxx -->
+###### Windows
+
 These installation steps are a guideline referenced from the [official installation][18].
 
 1. Install the [Microsoft Visual Studio 2017 Redistributable][17] or the appropriate version for the Oracle Instant Client installation.
@@ -408,12 +410,16 @@ Ensure the displayed output matches the correct value.
     
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Linux" xxx -->
+#### Linux
+
     ```shell script
       sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
     ```
 
 <!-- xxz tabs xxx -->
-<!-- xxx tab "Windows" xxx -->    
+<!-- xxx tab "Windows" xxx -->
+#### Windows
+
      ```shell script
        sudo -u dd-agent -- %PROGRAMFILES%\Datadog\"Datadog Agent"\embedded\python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
      ```
