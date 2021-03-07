@@ -1,5 +1,10 @@
 # CHANGELOG - nginx
 
+## 3.11.2 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 3.11.1 / 2021-01-26 / Agent 7.26.0
 
 * [Fixed] Lower log level for version metadata submission. See [#8448](https://github.com/DataDog/integrations-core/pull/8448).
