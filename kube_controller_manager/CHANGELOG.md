@@ -1,5 +1,11 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.8.0 / 2021-03-07
+
+* [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).
+* [Fixed] Bump base package requirement. See [#8770](https://github.com/DataDog/integrations-core/pull/8770).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.7.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
