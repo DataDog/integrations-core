@@ -2,8 +2,8 @@
 
 ## 5.2.0 / 2021-03-07
 
-* [Added] [kubelet] Add new metrics. See [#8562](https://github.com/DataDog/integrations-core/pull/8562).
-* [Fixed] [kubelet] Fix TypeError when retrieved pod_list is occasionally None. See [#8530](https://github.com/DataDog/integrations-core/pull/8530).
+* [Added] Add new metrics. See [#8562](https://github.com/DataDog/integrations-core/pull/8562).
+* [Fixed] Fix TypeError when retrieved pod_list is occasionally None. See [#8530](https://github.com/DataDog/integrations-core/pull/8530).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
 ## 5.1.0 / 2021-01-25 / Agent 7.26.0

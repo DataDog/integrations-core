@@ -2,7 +2,7 @@
 
 ## 1.8.0 / 2021-03-07
 
-* [Added] [kube_apiserver_metrics] Add new metrics. See [#8557](https://github.com/DataDog/integrations-core/pull/8557).
+* [Added] Add new metrics. See [#8557](https://github.com/DataDog/integrations-core/pull/8557).
 
 ## 1.7.1 / 2021-01-25 / Agent 7.26.0
 
