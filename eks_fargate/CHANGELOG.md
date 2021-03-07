@@ -1,5 +1,10 @@
 # CHANGELOG - eks_fargate
 
+## 1.4.0 / 2021-03-07
+
+* [Added] [eks_fargate] Add pod capacity metrics. See [#8754](https://github.com/DataDog/integrations-core/pull/8754).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.3.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
