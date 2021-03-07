@@ -89,7 +89,7 @@ datadog-mysql==2.3.0
 datadog-nagios==1.7.1
 datadog-network==2.1.2
 datadog-nfsstat==1.6.2; sys_platform == 'linux2'
-datadog-nginx-ingress-controller==1.8.1
+datadog-nginx-ingress-controller==1.8.2
 datadog-nginx==3.11.2
 datadog-openldap==1.6.0
 datadog-openmetrics==1.12.0
