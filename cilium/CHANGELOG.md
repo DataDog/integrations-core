@@ -1,5 +1,9 @@
 # CHANGELOG - Cilium
 
+## 1.5.3 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
 ## 1.5.2 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
