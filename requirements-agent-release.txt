@@ -102,7 +102,7 @@ datadog-php-fpm==1.11.1
 datadog-postfix==1.8.2; sys_platform != 'win32'
 datadog-postgres==5.4.0
 datadog-powerdns-recursor==1.8.1
-datadog-presto==2.3.0
+datadog-presto==2.3.1
 datadog-process==1.17.1
 datadog-prometheus==3.3.0
 datadog-proxysql==3.0.0
