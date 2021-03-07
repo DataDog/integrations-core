@@ -63,7 +63,7 @@ datadog-iis==2.10.4; sys_platform == 'win32'
 datadog-istio==3.10.0
 datadog-jboss-wildfly==1.5.1
 datadog-kafka-consumer==2.8.2
-datadog-kafka==2.5.0
+datadog-kafka==2.5.1
 datadog-kong==1.12.0
 datadog-kube-apiserver-metrics==1.7.1
 datadog-kube-controller-manager==1.7.0
