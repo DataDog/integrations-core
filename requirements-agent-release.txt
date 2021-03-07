@@ -134,7 +134,7 @@ datadog-tokumx==2.3.3
 datadog-tomcat==1.6.1
 datadog-twemproxy==1.8.1
 datadog-twistlock==1.10.1
-datadog-varnish==1.9.1
+datadog-varnish==1.9.2
 datadog-vault==2.10.0
 datadog-vertica==2.0.0
 datadog-voltdb==1.0.0
