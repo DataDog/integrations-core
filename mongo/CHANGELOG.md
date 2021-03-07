@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+## 2.2.1 / 2021-03-07
+
+* [Fixed] Support Alibaba ApsaraDB. See [#8316](https://github.com/DataDog/integrations-core/pull/8316).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.2.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Better arbiter support. See [#8294](https://github.com/DataDog/integrations-core/pull/8294).
