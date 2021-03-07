@@ -1,5 +1,16 @@
 # CHANGELOG - snmp
 
+## 5.0.0 / 2021-03-07
+
+* [Added] Add BGP metrics to Juniper SRX Profile. See [#8771](https://github.com/DataDog/integrations-core/pull/8771).
+* [Added] Support for additional Juniper devices. See [#8749](https://github.com/DataDog/integrations-core/pull/8749).
+* [Fixed] Fix Juniper EX sysObjectIds . See [#8728](https://github.com/DataDog/integrations-core/pull/8728).
+* [Fixed] Better tests for generic_host_resources. See [#8266](https://github.com/DataDog/integrations-core/pull/8266).
+* [Fixed] Add extract_value_pattern  to log on failure to submit metric. See [#8693](https://github.com/DataDog/integrations-core/pull/8693).
+* [Fixed] 🐛  [snmp] use OIDPrinter to debug oids from bulks. See [#8688](https://github.com/DataDog/integrations-core/pull/8688).
+* [Fixed] Fix oids not increasing link. See [#8655](https://github.com/DataDog/integrations-core/pull/8655).
+* [Changed] Move SNMP auto_conf.yaml to agent repo. See [#8709](https://github.com/DataDog/integrations-core/pull/8709).
+
 ## 4.1.0 / 2021-02-16
 
 * [Added] Add extract value feature. See [#8622](https://github.com/DataDog/integrations-core/pull/8622).
