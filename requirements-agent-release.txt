@@ -49,7 +49,7 @@ datadog-gunicorn==1.14.2; sys_platform != 'win32'
 datadog-haproxy==2.17.0
 datadog-harbor==1.8.1
 datadog-hazelcast==1.3.1
-datadog-hdfs-datanode==1.16.0; sys_platform != 'win32'
+datadog-hdfs-datanode==1.16.1; sys_platform != 'win32'
 datadog-hdfs-namenode==1.15.1; sys_platform != 'win32'
 datadog-hive==1.5.0
 datadog-hivemq==1.3.0
