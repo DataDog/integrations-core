@@ -1,5 +1,9 @@
 # CHANGELOG - Prometheus
 
+## 3.3.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 3.3.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
