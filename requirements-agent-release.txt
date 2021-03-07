@@ -88,7 +88,7 @@ datadog-mongo==2.2.1
 datadog-mysql==2.3.0
 datadog-nagios==1.7.1
 datadog-network==2.1.2
-datadog-nfsstat==1.6.1; sys_platform == 'linux2'
+datadog-nfsstat==1.6.2; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==1.8.1
 datadog-nginx==3.11.1
 datadog-openldap==1.6.0
