@@ -4,36 +4,29 @@
 import socket
 import ssl
 from datetime import datetime
-from hashlib import sha256
 
 import service_identity
-from cryptography.hazmat.backends import default_backend
-from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
-from cryptography.x509.extensions import ExtensionNotFound
-from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from six import text_type
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base import AgentCheck, is_affirmative
 
-from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
+from .const import (
+    DEFAULT_EXPIRE_SECONDS_CRITICAL,
+    DEFAULT_EXPIRE_SECONDS_WARNING,
+    SERVICE_CHECK_EXPIRATION,
+    SERVICE_CHECK_VALIDATION,
+    SERVICE_CHECK_VERSION,
+)
+from .tls_local import TLSLocalCheck
+from .tls_remote import TLSRemoteCheck
+from .utils import days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
 class TLSCheck(AgentCheck):
-    SERVICE_CHECK_CAN_CONNECT = 'tls.can_connect'
-    SERVICE_CHECK_VERSION = 'tls.version'
-    SERVICE_CHECK_VALIDATION = 'tls.cert_validation'
-    SERVICE_CHECK_EXPIRATION = 'tls.cert_expiration'
-
-    DEFAULT_EXPIRE_DAYS_WARNING = 14
-    DEFAULT_EXPIRE_DAYS_CRITICAL = 7
-    DEFAULT_EXPIRE_SECONDS_WARNING = days_to_seconds(DEFAULT_EXPIRE_DAYS_WARNING)
-    DEFAULT_EXPIRE_SECONDS_CRITICAL = days_to_seconds(DEFAULT_EXPIRE_DAYS_CRITICAL)
-
     # This remapper is used to support legacy TLS integration config values
     TLS_CONFIG_REMAPPER = {
         'cert': {'name': 'tls_cert'},
@@ -43,12 +36,22 @@ class TLSCheck(AgentCheck):
         'validate_cert': {'name': 'tls_verify'},
     }
 
+    def __new__(cls, name, init_config, instances):
+        local_cert_path = instances[0].get('local_cert_path', '')
+
+        # Decide the method of collection for this instance (local file vs remote connection)
+        if local_cert_path:
+            return TLSLocalCheck(name, init_config, instances)
+        else:
+            return TLSRemoteCheck(name, init_config, instances)
+
     def __init__(self, name, init_config, instances):
         super(TLSCheck, self).__init__(name, init_config, instances)
 
         self._name = self.instance.get('name')
         self._local_cert_path = self.instance.get('local_cert_path', '')
         self._timeout = float(self.instance.get('timeout', 10))
+        self._validate_cert = self.instance.get('validate_cert', self.instance.get('tls_verify'))
 
         server = self.instance.get('server', '')
         parsed_uri = urlparse(server)
@@ -95,12 +98,12 @@ class TLSCheck(AgentCheck):
         self._seconds_warning = (
             int(self.instance.get('seconds_warning', 0))
             or days_to_seconds(float(self.instance.get('days_warning', 0)))
-            or self.DEFAULT_EXPIRE_SECONDS_WARNING
+            or DEFAULT_EXPIRE_SECONDS_WARNING
         )
         self._seconds_critical = (
             int(self.instance.get('seconds_critical', 0))
             or days_to_seconds(float(self.instance.get('days_critical', 0)))
-            or self.DEFAULT_EXPIRE_SECONDS_CRITICAL
+            or DEFAULT_EXPIRE_SECONDS_CRITICAL
         )
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLSocket.version
@@ -113,22 +116,8 @@ class TLSCheck(AgentCheck):
         if self._name:
             self._tags.append('name:{}'.format(self._name))
 
-        # Decide the method of collection for this instance (local file vs remote connection)
-        if self._local_cert_path:
-            self.check = self.check_local
-            self.log.debug('Selecting local connection for method of collection')
-            if self._tls_validate_hostname and self._server_hostname:
-                self._tags.append('server_hostname:{}'.format(self._server_hostname))
-        else:
-            self.check = self.check_remote
-            self.log.debug('Selecting remote connection for method of collection')
-            self._tags.append('server_hostname:{}'.format(self._server_hostname))
-            self._tags.append('server:{}'.format(self._server))
-            self._tags.append('port:{}'.format(self._port))
-
         # Assign lazily since these aren't used by both collection methods
         self._validation_data = None
-        self._tls_context = None
 
         # Only fetch intermediate certs from the indicated URIs occasionally
         self._intermediate_cert_uri_cache = {}
@@ -136,121 +125,34 @@ class TLSCheck(AgentCheck):
         # Only load intermediate certs once
         self._intermediate_cert_id_cache = set()
 
-    def check_remote(self, _):
-        if not self._server:
-            raise ConfigurationError('You must specify `server` in your configuration file.')
-
-        if self._fetch_intermediate_certs:
-            self.fetch_intermediate_certs()
-
-        try:
-            self.log.debug('Checking that TLS service check can connect')
-            sock = self.create_connection()
-        except Exception as e:
-            self.log.debug('Error occurred while connecting to socket: %s', str(e))
-            self.service_check(self.SERVICE_CHECK_CAN_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
-            return
-        else:
-            self.log.debug('TLS check able to connect')
-            self.service_check(self.SERVICE_CHECK_CAN_CONNECT, self.OK, tags=self._tags)
-
-        # Get the cert & TLS version from the connection
-        with closing(sock):
-            self.log.debug('Getting cert and TLS protocol version')
-            try:
-                with closing(
-                    self.get_tls_context().wrap_socket(sock, server_hostname=self._server_hostname)
-                ) as secure_sock:
-                    der_cert = secure_sock.getpeercert(binary_form=True)
-                    protocol_version = secure_sock.version()
-                    self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
-            except Exception as e:
-                # https://docs.python.org/3/library/ssl.html#ssl.SSLCertVerificationError
-                err_code = getattr(e, 'verify_code', None)
-                message = getattr(e, 'verify_message', str(e))
-                self.log.debug('Error occurred while getting cert and TLS version from connection: %s', str(e))
-                self.service_check(self.SERVICE_CHECK_VALIDATION, self.CRITICAL, tags=self._tags, message=message)
-
-                # There's no sane way to tell it to not validate just the expiration
-                # This only works on Python 3.7+, see: https://bugs.python.org/issue28182
-                # https://github.com/openssl/openssl/blob/0b45d8eec051fd9816b6bf46a975fa461ffc983d/include/openssl/x509_vfy.h#L109
-                if err_code == 10:
-                    self.service_check(
-                        self.SERVICE_CHECK_EXPIRATION, self.CRITICAL, tags=self._tags, message='Certificate has expired'
-                    )
-
-                return
-
-        # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
-        try:
-            self.log.debug('Deserializing peer certificate')
-            cert = load_der_x509_certificate(der_cert, default_backend())
-            self.log.debug('Deserialized peer certificate: %s', cert)
-        except Exception as e:
-            self.log.debug('Error while deserializing peer certificate: %s', str(e))
-            self.service_check(
-                self.SERVICE_CHECK_VALIDATION,
-                self.CRITICAL,
-                tags=self._tags,
-                message='Unable to parse the certificate: {}'.format(e),
-            )
-            return
-
-        self.check_protocol_version(protocol_version)
-        self.validate_certificate(cert)
-        self.check_age(cert)
-
-    def check_local(self, _):
-        if self._tls_validate_hostname and not self._server_hostname:
-            raise ConfigurationError(
-                'You must specify `server_hostname` in your configuration file, or disable `tls_validate_hostname`.'
-            )
-
-        try:
-            with open(self._local_cert_path, 'rb') as f:
-                self.log.debug('Reading from local cert path')
-                cert = f.read()
-        except Exception as e:
-            self.log.debug('Error occurred while reading from local cert path: %s', str(e))
-            self.service_check(
-                self.SERVICE_CHECK_VALIDATION,
-                self.CRITICAL,
-                tags=self._tags,
-                message='Unable to open the certificate: {}'.format(e),
-            )
-            return
-
-        # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
-        try:
-            self.log.debug('Parsing certificate')
-            cert = self.local_cert_loader(cert)
-            self.log.debug('Deserialized certificate: %s', cert)
-        except Exception as e:
-            self.service_check(
-                self.SERVICE_CHECK_VALIDATION,
-                self.CRITICAL,
-                tags=self._tags,
-                message='Unable to parse the certificate: {}'.format(e),
-            )
-            return
-
-        self.validate_certificate(cert)
-        self.check_age(cert)
-
     def check_protocol_version(self, version):
+        if version is None:
+            self.service_check(
+                SERVICE_CHECK_VERSION, self.UNKNOWN, tags=self._tags, message='Could not fetch protocol version'
+            )
+            return
+
         self.log.debug('Checking protocol version')
         if version in self._allowed_versions:
             self.log.debug('Protocol version is allowed')
-            self.service_check(self.SERVICE_CHECK_VERSION, self.OK, tags=self._tags)
+            self.service_check(SERVICE_CHECK_VERSION, self.OK, tags=self._tags)
         else:
             self.service_check(
-                self.SERVICE_CHECK_VERSION,
+                SERVICE_CHECK_VERSION,
                 self.CRITICAL,
                 tags=self._tags,
                 message='Disallowed protocol version: {}'.format(version),
             )
 
     def validate_certificate(self, cert):
+        if cert is None:
+            self.service_check(
+                SERVICE_CHECK_VALIDATION,
+                self.UNKNOWN,
+                tags=self._tags,
+                message='Could not validate the certificate',
+            )
+            return
         self.log.debug('Validating certificate')
         if self._tls_validate_hostname:
             validator, host_type = self.validation_data
@@ -259,7 +161,7 @@ class TLSCheck(AgentCheck):
                 validator(cert, text_type(self._server_hostname))
             except service_identity.VerificationError:
                 self.service_check(
-                    self.SERVICE_CHECK_VALIDATION,
+                    SERVICE_CHECK_VALIDATION,
                     self.CRITICAL,
                     tags=self._tags,
                     message='The {} on the certificate does not match the given host'.format(host_type),
@@ -267,16 +169,22 @@ class TLSCheck(AgentCheck):
                 return
             except service_identity.CertificateError as e:  # no cov
                 self.service_check(
-                    self.SERVICE_CHECK_VALIDATION,
+                    SERVICE_CHECK_VALIDATION,
                     self.CRITICAL,
                     tags=self._tags,
                     message='The certificate contains invalid/unexpected data: {}'.format(e),
                 )
                 return
         self.log.debug('Certificate is valid')
-        self.service_check(self.SERVICE_CHECK_VALIDATION, self.OK, tags=self._tags)
+        self.service_check(SERVICE_CHECK_VALIDATION, self.OK, tags=self._tags)
 
     def check_age(self, cert):
+        if cert is None:
+            self.service_check(
+                SERVICE_CHECK_EXPIRATION, self.UNKNOWN, tags=self._tags, message='Cannot verify certificate expiration'
+            )
+            return
+
         self.log.debug('Checking age of certificate')
         delta = cert.not_valid_after - datetime.utcnow()
         seconds_left = delta.total_seconds()
@@ -287,25 +195,25 @@ class TLSCheck(AgentCheck):
 
         if seconds_left <= 0:
             self.service_check(
-                self.SERVICE_CHECK_EXPIRATION, self.CRITICAL, tags=self._tags, message='Certificate has expired'
+                SERVICE_CHECK_EXPIRATION, self.CRITICAL, tags=self._tags, message='Certificate has expired'
             )
         elif seconds_left < self._seconds_critical:
             self.service_check(
-                self.SERVICE_CHECK_EXPIRATION,
+                SERVICE_CHECK_EXPIRATION,
                 self.CRITICAL,
                 tags=self._tags,
                 message='Certificate will expire in only {} days'.format(days_left),
             )
         elif seconds_left < self._seconds_warning:
             self.service_check(
-                self.SERVICE_CHECK_EXPIRATION,
+                SERVICE_CHECK_EXPIRATION,
                 self.WARNING,
                 tags=self._tags,
                 message='Certificate will expire in {} days'.format(days_left),
             )
         else:
             self.log.debug('Age is valid')
-            self.service_check(self.SERVICE_CHECK_EXPIRATION, self.OK, tags=self._tags)
+            self.service_check(SERVICE_CHECK_EXPIRATION, self.OK, tags=self._tags)
 
     def create_connection(self):
         """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""
@@ -338,76 +246,6 @@ class TLSCheck(AgentCheck):
 
             raise
 
-    def fetch_intermediate_certs(self):
-        # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
-        try:
-            sock = self.create_connection()
-        except Exception as e:
-            self.log.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
-            return
-
-        with closing(sock):
-            try:
-                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                context.verify_mode = ssl.CERT_NONE
-
-                with closing(context.wrap_socket(sock, server_hostname=self._server_hostname)) as secure_sock:
-                    der_cert = secure_sock.getpeercert(binary_form=True)
-            except Exception as e:
-                self.log.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
-                return
-
-        self.load_intermediate_certs(der_cert)
-
-    def load_intermediate_certs(self, der_cert):
-        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
-        # https://tools.ietf.org/html/rfc5280#section-5.2.7
-        try:
-            cert = load_der_x509_certificate(der_cert, default_backend())
-        except Exception as e:
-            self.log.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
-            return
-
-        try:
-            authority_information_access = cert.extensions.get_extension_for_oid(
-                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
-            )
-        except ExtensionNotFound:
-            self.log.debug(
-                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
-            )
-            return
-
-        for access_description in authority_information_access.value:
-            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
-                continue
-
-            uri = access_description.access_location.value
-            if (
-                uri in self._intermediate_cert_uri_cache
-                and get_timestamp() - self._intermediate_cert_uri_cache[uri] < self._intermediate_cert_refresh_interval
-            ):
-                continue
-
-            # Assume HTTP for now
-            try:
-                response = self.http.get(uri)  # SKIP_HTTP_VALIDATION
-                response.raise_for_status()
-            except Exception as e:
-                self.log.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
-                continue
-            else:
-                access_time = get_timestamp()
-                intermediate_cert = response.content
-
-            cert_id = sha256(intermediate_cert).digest()
-            if cert_id not in self._intermediate_cert_id_cache:
-                self.get_tls_context().load_verify_locations(cadata=intermediate_cert)
-                self._intermediate_cert_id_cache.add(cert_id)
-
-            self._intermediate_cert_uri_cache[uri] = access_time
-            self.load_intermediate_certs(intermediate_cert)
-
     @property
     def validation_data(self):
         if self._validation_data is None:
@@ -417,9 +255,3 @@ class TLSCheck(AgentCheck):
                 self._validation_data = (service_identity.cryptography.verify_certificate_hostname, 'hostname')
 
         return self._validation_data
-
-    def local_cert_loader(self, cert):
-        backend = default_backend()
-        if b'-----BEGIN CERTIFICATE-----' in cert:
-            return load_pem_x509_certificate(cert, backend)
-        return load_der_x509_certificate(cert, backend)
