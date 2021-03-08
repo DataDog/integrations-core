@@ -6,7 +6,7 @@ Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest
 
 ### Key Use Cases
 #### Respond to high severity threat events
-Firewall threat logs provide rich context on threats detected by the firewall which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
+Firewall threat logs provide rich context on threats detected by a firewall, which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
 
 #### Make informed decisions on Firewall deployment
 Firewall traffic logs can be used to measure the traffic and sessions passing through a firewall and also gives you the ability to monitor for anomalous throughput across firewall deployment.
