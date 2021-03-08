@@ -54,7 +54,6 @@ files:
       value:
         type: string
         example: '<REGEX>'
-        default: None
     - name: reverse_content_match
       description: |
         The reverse_content_match parameter will allow the content_match

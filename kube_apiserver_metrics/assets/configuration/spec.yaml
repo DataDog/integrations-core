@@ -19,7 +19,7 @@ files:
       overrides:
         prometheus_url.value.example: https://localhost:443/metrics
         prometheus_url.display_priority: 1
-        bearer_token_auth.value.default: true
+        bearer_token_auth.value.display_default: true
         bearer_token_auth.value.example: true
 
 - name: auto_conf.yaml
@@ -49,13 +49,11 @@ files:
       description: Used to specify the path where the service account token is located.
       value:
         type: string
-        default: /var/run/secrets/kubernetes.io/serviceaccount/token
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.
       value:
         type: boolean
-        default: false
         example: false
     - name: tags
       description: |
