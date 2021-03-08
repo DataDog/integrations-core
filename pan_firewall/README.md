@@ -44,7 +44,7 @@ Firewall authentication logs provide detailed information on users as they authe
  5. Click OK, this will create syslog server profile.
  6. Click on the Objects tab, this will open the log forwarding profile screen.
  7. Create log forwarding profile by providing the name, log type and syslog profile 
- 8. Create a pan.firewall.d/conf.yaml file at the root of  [Agent’s configuration directory](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7)  with the below content and restart agent
+ 8. Create a pan.firewall.d/conf.yaml file at the root of the [Agent’s configuration directory](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7) with the below content.
  
      ```yaml
      logs:
