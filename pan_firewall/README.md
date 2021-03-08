@@ -9,7 +9,7 @@ Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest
 Firewall threat logs provide rich context on threats detected by the firewall which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
 
 #### Make informed decisions on Firewall deployment
-Firewall traffic logs can be used to measure the traffic and sessions passing through the firewalls and also gives you the ability to monitor for anomalous throughput across firewall deployment.
+Firewall traffic logs can be used to measure the traffic and sessions passing through a firewall and also gives you the ability to monitor for anomalous throughput across firewall deployment.
 
 #### Monitor authentication anomalies
 Firewall authentication logs provide detailed information on users as they authenticate with Palo Alto Networks Firewall. These logs can be used to monitor anomalous spikes in authentication traffic from specific protocols, users, locations, and more.
