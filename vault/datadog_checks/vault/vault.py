@@ -94,6 +94,7 @@ class Vault(OpenMetricsBaseCheck):
             'vault_route_delete_*': self.transform_route_metrics,
             'vault_route_list_*': self.transform_route_metrics,
             'vault_route_read_*': self.transform_route_metrics,
+            'vault_route_rollback_*': self.transform_route_metrics,
         }
 
     def check(self, _):
