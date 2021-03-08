@@ -2,7 +2,7 @@
 
 ## Overview
 
-Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse and analyze Palo Alto Networks Firewall Logs. This log integration relies upon HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
+Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse and analyze Palo Alto Networks firewall logs. This log integration relies on the HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
 
 ### Key Use Cases
 #### Respond to high severity threat events
@@ -79,4 +79,3 @@ Additional helpful documentation, links, and articles:
 
 - [Log types and fields](https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions)
 - [Logs Collection documentation](https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent)
-
