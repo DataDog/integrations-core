@@ -26,7 +26,7 @@ def test_eksfargate(monkeypatch, aggregator):
     ):
         instance = {'tags': ['foo:bar']}
         check = EksFargateCheck('eks_fargate', {}, [instance])
-        monkeypatch.setattr(check, 'get_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+        monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
         check.check(instance)
         aggregator.assert_metric(
             check.NAMESPACE + '.pods.running',
@@ -51,7 +51,7 @@ def test_not_eksfargate(monkeypatch, aggregator):
     ):
         instance = {}
         check = EksFargateCheck('eks_fargate', {}, [instance])
-        monkeypatch.setattr(check, 'get_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+        monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
         check.check(instance)
         assert check.NAMESPACE + '.pods.running' not in aggregator._metrics
         assert check.NAMESPACE + '.cpu.capacity' not in aggregator._metrics
