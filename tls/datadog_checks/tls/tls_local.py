@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
-from tls.datadog_checks.tls import TLSCheck
-from tls.datadog_checks.tls.const import SERVICE_CHECK_VALIDATION
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.tls.const import SERVICE_CHECK_VALIDATION
+
+from . import TLSCheck
 
 
 class TLSLocalCheck(TLSCheck):

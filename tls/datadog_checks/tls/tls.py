@@ -18,8 +18,6 @@ from .const import (
     SERVICE_CHECK_VALIDATION,
     SERVICE_CHECK_VERSION,
 )
-from .tls_local import TLSLocalCheck
-from .tls_remote import TLSRemoteCheck
 from .utils import days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
 
 # Python 3 only
@@ -41,8 +39,12 @@ class TLSCheck(AgentCheck):
 
         # Decide the method of collection for this instance (local file vs remote connection)
         if local_cert_path:
+            from .tls_local import TLSLocalCheck
+
             return TLSLocalCheck(name, init_config, instances)
         else:
+            from .tls_remote import TLSRemoteCheck
+
             return TLSRemoteCheck(name, init_config, instances)
 
     def __init__(self, name, init_config, instances):
@@ -51,7 +53,6 @@ class TLSCheck(AgentCheck):
         self._name = self.instance.get('name')
         self._local_cert_path = self.instance.get('local_cert_path', '')
         self._timeout = float(self.instance.get('timeout', 10))
-        self._validate_cert = self.instance.get('validate_cert', self.instance.get('tls_verify'))
 
         server = self.instance.get('server', '')
         parsed_uri = urlparse(server)
