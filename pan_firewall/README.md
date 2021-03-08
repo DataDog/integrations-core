@@ -59,7 +59,7 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ### Logs
 
-The Firewall integration collects logs from Palo Alto Networks firewall and forwards them to Datadog.
+The PANOS integration collects logs from Palo Alto Networks firewall and forwards them to Datadog.
 
 ### Metrics
 
