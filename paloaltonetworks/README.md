@@ -2,17 +2,17 @@
 
 ## Overview
 
-Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse and analyze Palo Alto Networks Firewall Logs. This log integration relies upon HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
+Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse and analyze Palo Alto Networks firewall logs. This log integration relies on the HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
 
 ### Key Use Cases
 #### Respond to high severity threat events
-Firewall threat logs provide rich context on threats detected by the firewall which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
+Firewall threat logs provide rich context on threats detected by a firewall, which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
 
 #### Make informed decisions on Firewall deployment
-Firewall traffic logs can be used to measure the traffic and sessions passing through the firewalls and also gives you the ability to monitor for anomalous throughput across firewall deployment.
+Firewall traffic logs can be used to measure the traffic and sessions passing through a firewall and also gives you the ability to monitor for anomalous throughput across firewall deployment.
 
 #### Monitor authentication anomalies
-Firewall authentication logs provide detailed information on users as they authenticate with Palo Alto Networks Firewall. These logs can be used to monitor anomalous spikes in authentication traffic from specific protocols, users, locations, and more.
+Firewall authentication logs provide detailed information on users as they authenticate with Palo Alto Networks firewall. These logs can be used to monitor anomalous spikes in authentication traffic from specific protocols, users, locations, and more.
 
 ## Setup
 
@@ -44,7 +44,7 @@ Firewall authentication logs provide detailed information on users as they authe
  5. Click OK, this will create syslog server profile.
  6. Click on the Objects tab, this will open the log forwarding profile screen.
  7. Create log forwarding profile by providing the name, log type and syslog profile 
- 8. Create a pan.firewall.d/conf.yaml file at the root of  [Agent’s configuration directory](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7)  with the below content and restart agent
+ 8. Create a pan.firewall.d/conf.yaml file at the root of the [Agent’s configuration directory](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7) with the below content.
  
      ```yaml
      logs:
@@ -59,7 +59,7 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ### Logs
 
-The Firewall integration collects logs from Palo Alto Networks firewall and forwards them to Datadog.
+The PANOS integration collects logs from Palo Alto Networks firewall and forwards them to Datadog.
 
 ### Metrics
 
@@ -79,4 +79,3 @@ Additional helpful documentation, links, and articles:
 
 - [Log types and fields](https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions)
 - [Logs Collection documentation](https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent)
-
