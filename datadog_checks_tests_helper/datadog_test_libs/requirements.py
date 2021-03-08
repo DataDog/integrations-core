@@ -1,5 +1,3 @@
-import platform
-
 import pytest
 from six import PY2
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
