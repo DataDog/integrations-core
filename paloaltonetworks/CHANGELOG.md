@@ -5,4 +5,5 @@
 ### Changes
 
 * Initial panos Integration.
-* Updated manifest. 
+* Updated manifest.
+* Updated GUID. 
