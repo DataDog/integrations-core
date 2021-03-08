@@ -16,12 +16,12 @@ files:
       value:
         type: string
         example: .
-        default: None
+        display_default: None
     - name: port
       description: ASP .NET port to connect to.
       required: true
       value:
         type: integer
         example: 26379
-        default: None
+        display_default: None
     - template: instances/default
