@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import abc
 import socket
 import ssl
 from datetime import datetime
 
 import service_identity
+import six
 from six import text_type
 from six.moves.urllib.parse import urlparse
 
@@ -24,6 +26,7 @@ from .utils import days_to_seconds, get_protocol_versions, is_ip_address, second
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
+@six.add_metaclass(abc.ABCMeta)
 class TLSCheck(AgentCheck):
     # This remapper is used to support legacy TLS integration config values
     TLS_CONFIG_REMAPPER = {
@@ -41,11 +44,11 @@ class TLSCheck(AgentCheck):
         if local_cert_path:
             from .tls_local import TLSLocalCheck
 
-            return TLSLocalCheck(name, init_config, instances)
+            return super(TLSCheck, TLSLocalCheck).__new__(TLSLocalCheck)
         else:
             from .tls_remote import TLSRemoteCheck
 
-            return TLSRemoteCheck(name, init_config, instances)
+            return super(TLSCheck, TLSRemoteCheck).__new__(TLSRemoteCheck)
 
     def __init__(self, name, init_config, instances):
         super(TLSCheck, self).__init__(name, init_config, instances)
@@ -128,9 +131,7 @@ class TLSCheck(AgentCheck):
 
     def check_protocol_version(self, version):
         if version is None:
-            self.service_check(
-                SERVICE_CHECK_VERSION, self.UNKNOWN, tags=self._tags, message='Could not fetch protocol version'
-            )
+            self.log.debug('Could not fetch protocol version')
             return
 
         self.log.debug('Checking protocol version')
@@ -147,12 +148,7 @@ class TLSCheck(AgentCheck):
 
     def validate_certificate(self, cert):
         if cert is None:
-            self.service_check(
-                SERVICE_CHECK_VALIDATION,
-                self.UNKNOWN,
-                tags=self._tags,
-                message='Could not validate the certificate',
-            )
+            self.log.debug('Could not validate the certificate')
             return
         self.log.debug('Validating certificate')
         if self._tls_validate_hostname:
@@ -181,9 +177,7 @@ class TLSCheck(AgentCheck):
 
     def check_age(self, cert):
         if cert is None:
-            self.service_check(
-                SERVICE_CHECK_EXPIRATION, self.UNKNOWN, tags=self._tags, message='Cannot verify certificate expiration'
-            )
+            self.log.debug('Cannot verify certificate expiration')
             return
 
         self.log.debug('Checking age of certificate')

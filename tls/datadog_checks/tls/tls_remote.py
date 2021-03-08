@@ -8,12 +8,12 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.x509.base import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
-from tls.datadog_checks.tls import TLSCheck
-from tls.datadog_checks.tls.const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.time import get_timestamp
 
+from . import TLSCheck
+from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
 from .utils import closing
 
 
@@ -41,12 +41,7 @@ class TLSRemoteCheck(TLSCheck):
 
     def _get_cert_and_protocol_version(self, sock):
         if sock is None:
-            self.service_check(
-                SERVICE_CHECK_VALIDATION,
-                self.UNKNOWN,
-                tags=self._tags,
-                message="Could not validate certificate because there is no connection",
-            )
+            self.log.debug("Could not validate certificate because there is no connection")
             return None, None
         # Get the cert & TLS version from the connection
         with closing(sock):
