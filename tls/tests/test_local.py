@@ -12,8 +12,6 @@ from datadog_checks.tls.const import (
 )
 from datadog_checks.tls.tls_local import TLSLocalCheck
 
-pytestmark = pytest.mark.unit
-
 
 def test_no_server_hostname(instance_local_no_server_hostname):
     c = TLSLocalCheck('tls', {}, [instance_local_no_server_hostname])

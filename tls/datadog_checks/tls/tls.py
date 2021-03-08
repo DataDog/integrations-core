@@ -89,15 +89,6 @@ class TLSCheck(AgentCheck):
         if not self._tls_validate_hostname or not self._validate_hostname:
             self._tls_validate_hostname = False
 
-        self._fetch_intermediate_certs = is_affirmative(
-            self.instance.get('fetch_intermediate_certs', self.init_config.get('fetch_intermediate_certs', False))
-        )
-        self._intermediate_cert_refresh_interval = (
-            # Convert minutes to seconds
-            float(self.instance.get('intermediate_cert_refresh_interval', 60))
-            * 60
-        )
-
         # Thresholds expressed in seconds take precedence over those expressed in days
         self._seconds_warning = (
             int(self.instance.get('seconds_warning', 0))

@@ -9,7 +9,7 @@ from cryptography.x509.base import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.time import get_timestamp
 
 from . import TLSCheck
@@ -24,6 +24,15 @@ class TLSRemoteCheck(TLSCheck):
         self._tags.append('server_hostname:{}'.format(self._server_hostname))
         self._tags.append('server:{}'.format(self._server))
         self._tags.append('port:{}'.format(self._port))
+
+        self._fetch_intermediate_certs = is_affirmative(
+            self.instance.get('fetch_intermediate_certs', self.init_config.get('fetch_intermediate_certs', False))
+        )
+        self._intermediate_cert_refresh_interval = (
+            # Convert minutes to seconds
+                float(self.instance.get('intermediate_cert_refresh_interval', 60))
+                * 60
+        )
 
     def check(self, _):
         if not self._server:

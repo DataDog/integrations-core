@@ -14,8 +14,6 @@ from datadog_checks.tls.const import (
 )
 from datadog_checks.tls.tls_remote import TLSRemoteCheck
 
-pytestmark = pytest.mark.unit
-
 
 def test_no_server(instance_remote_no_server):
     c = TLSRemoteCheck('tls', {}, [instance_remote_no_server])
