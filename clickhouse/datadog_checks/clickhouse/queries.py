@@ -19,7 +19,7 @@ SystemMetrics = {
                     'type': 'gauge',
                 },
                 'BackgroundDistributedSchedulePoolTask': {
-                    'name': 'background_pool_distributed.task.active',
+                    'name': 'background_pool.distributed.task.active',
                     'type': 'gauge',
                 },
                 'BackgroundFetchesPoolTask': {'name': 'background_pool_fetches.task.active', 'type': 'gauge'},
