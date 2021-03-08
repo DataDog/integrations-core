@@ -427,8 +427,6 @@ def test_statement_samples_loop_inactive_stop(aggregator, dbm_instance):
     # confirm that the collection loop stops on its own after the check has not been run for a while
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
-    while mysql_check._statement_samples._collection_loop_future.running():
-        time.sleep(0.1)
     # make sure there were no unhandled exceptions
     mysql_check._statement_samples._collection_loop_future.result()
     aggregator.assert_metric("dd.mysql.statement_samples.collection_loop_inactive_stop")
@@ -440,7 +438,6 @@ def test_statement_samples_check_cancel(aggregator, dbm_instance):
     # confirm that the collection loop stops on its own after the check has not been run for a while
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
-    assert mysql_check._statement_samples._collection_loop_future.running(), "thread should be running"
     mysql_check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     mysql_check._statement_samples._collection_loop_future.result()
