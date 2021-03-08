@@ -24,7 +24,7 @@ SystemMetrics = {
                 },
                 'BackgroundFetchesPoolTask': {'name': 'background_pool.fetches.task.active', 'type': 'gauge'},
                 'BackgroundMessageBrokerSchedulePoolTask': {
-                    'name': 'background_pool_message_broker.task.active',
+                    'name': 'background_pool.message_broker.task.active',
                     'type': 'gauge',
                 },
                 'BackgroundMovePoolTask': {'name': 'background_pool.move.task.active', 'type': 'gauge'},
