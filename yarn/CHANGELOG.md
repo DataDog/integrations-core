@@ -1,5 +1,10 @@
 # CHANGELOG - yarn
 
+## 1.18.0 / 2021-03-07
+
+* [Added] Rename cluster_name tag to yarn_cluster. See [#8579](https://github.com/DataDog/integrations-core/pull/8579).
+* [Added] Yarn config option to disable node metrics collection. See [#8591](https://github.com/DataDog/integrations-core/pull/8591).
+
 ## 1.17.1 / 2021-02-09
 
 * [Fixed] Avoid failing on KeyError. See [#8563](https://github.com/DataDog/integrations-core/pull/8563).

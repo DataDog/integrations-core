@@ -1,5 +1,11 @@
 # CHANGELOG - spark
 
+## 1.20.0 / 2021-03-07
+
+* [Added] Rename cluster_name tag to spark_cluster. See [#8592](https://github.com/DataDog/integrations-core/pull/8592).
+* [Fixed] Skip apps which have the UI disabled. See [#8558](https://github.com/DataDog/integrations-core/pull/8558).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.19.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update check signature. See [#8259](https://github.com/DataDog/integrations-core/pull/8259).

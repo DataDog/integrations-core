@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.7.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.7.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Add config specs. See [#7318](https://github.com/DataDog/integrations-core/pull/7318).
