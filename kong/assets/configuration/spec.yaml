@@ -4,8 +4,7 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/http
-    - template: init_config/default
+    - template: init_config/openmetrics
   - template: instances
     options:
     - name: kong_status_url
@@ -14,8 +13,11 @@ files:
       value:
         example: http://localhost:8001/status/
         type: string
-    - template: instances/http
-    - template: instances/default
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:8001/metrics
+        extra_metrics.value.example:
+        - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
   - template: logs
     example:
     - type: file

@@ -1,0 +1,101 @@
+# HELP kong_bandwidth Total bandwidth in bytes consumed per service/route in Kong
+# TYPE kong_bandwidth counter
+kong_bandwidth{type="egress",service="google"} 1277
+kong_bandwidth{type="ingress",service="google"} 254
+# HELP kong_datastore_reachable Datastore reachable from Kong, 0 is unreachable
+# TYPE kong_datastore_reachable gauge
+kong_datastore_reachable 1
+# HELP kong_http_consumer_status HTTP status codes for customer per service/route in Kong
+# TYPE kong_http_consumer_status counter
+kong_http_consumer_status{service="upstream",route="default",code="200",consumer="consumer1"} 5185
+# HELP kong_http_status HTTP status codes per service/route in Kong
+# TYPE kong_http_status counter
+kong_http_status{code="301",service="google"} 2
+# HELP kong_latency Latency added by Kong, total request time and upstream latency for each service/route in Kong
+# TYPE kong_latency histogram
+kong_latency_bucket{type="kong",service="google",le="00001.0"} 1
+kong_latency_bucket{type="kong",service="google",le="00002.0"} 1
+kong_latency_bucket{type="kong",service="google",le="+Inf"} 2
+kong_latency_bucket{type="request",service="google",le="00300.0"} 1
+kong_latency_bucket{type="request",service="google",le="00400.0"} 1
+kong_latency_bucket{type="request",service="google",le="+Inf"} 2
+kong_latency_bucket{type="upstream",service="google",le="00300.0"} 2
+kong_latency_bucket{type="upstream",service="google",le="00400.0"} 2
+kong_latency_bucket{type="upstream",service="google",le="+Inf"} 2
+kong_latency_count{type="kong",service="google"} 2
+kong_latency_count{type="request",service="google"} 2
+kong_latency_count{type="upstream",service="google"} 2
+kong_latency_sum{type="kong",service="google"} 2145
+kong_latency_sum{type="request",service="google"} 2672
+kong_latency_sum{type="upstream",service="google"} 527
+# HELP kong_memory_lua_shared_dict_bytes Allocated slabs in bytes in a shared_dict
+# TYPE kong_memory_lua_shared_dict_bytes gauge
+kong_memory_lua_shared_dict_bytes{shared_dict="kong"} 45056
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_cluster_events"} 40960
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_db_cache"} 798720
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_db_cache_miss"} 86016
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_healthchecks"} 40960
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_locks"} 61440
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_process_events"} 45056
+kong_memory_lua_shared_dict_bytes{shared_dict="kong_rate_limiting_counters"} 86016
+kong_memory_lua_shared_dict_bytes{shared_dict="prometheus_metrics"} 49152
+# HELP kong_memory_lua_shared_dict_total_bytes Total capacity in bytes of a shared_dict
+# TYPE kong_memory_lua_shared_dict_total_bytes gauge
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong"} 5242880
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_cluster_events"} 5242880
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_db_cache"} 134217728
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_db_cache_miss"} 12582912
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_healthchecks"} 5242880
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_locks"} 8388608
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_process_events"} 5242880
+kong_memory_lua_shared_dict_total_bytes{shared_dict="kong_rate_limiting_counters"} 12582912
+kong_memory_lua_shared_dict_total_bytes{shared_dict="prometheus_metrics"} 5242880
+# HELP kong_memory_workers_lua_vms_bytes Allocated bytes in worker Lua VM
+# TYPE kong_memory_workers_lua_vms_bytes gauge
+kong_memory_workers_lua_vms_bytes{pid="33"} 18222
+kong_memory_workers_lua_vms_bytes{pid="34"} 18168
+kong_memory_workers_lua_vms_bytes{pid="35"} 18167
+kong_memory_workers_lua_vms_bytes{pid="36"} 18167
+kong_memory_workers_lua_vms_bytes{pid="37"} 18167
+kong_memory_workers_lua_vms_bytes{pid="38"} 18167
+kong_memory_workers_lua_vms_bytes{pid="39"} 18167
+kong_memory_workers_lua_vms_bytes{pid="40"} 18167
+kong_memory_workers_lua_vms_bytes{pid="41"} 18167
+kong_memory_workers_lua_vms_bytes{pid="42"} 18167
+kong_memory_workers_lua_vms_bytes{pid="43"} 18167
+kong_memory_workers_lua_vms_bytes{pid="44"} 18167
+kong_memory_workers_lua_vms_bytes{pid="45"} 18167
+kong_memory_workers_lua_vms_bytes{pid="46"} 18167
+kong_memory_workers_lua_vms_bytes{pid="47"} 18167
+kong_memory_workers_lua_vms_bytes{pid="48"} 18167
+# HELP kong_nginx_http_current_connections Number of HTTP connections
+# TYPE kong_nginx_http_current_connections gauge
+kong_nginx_http_current_connections{state="accepted"} 8
+kong_nginx_http_current_connections{state="active"} 1
+kong_nginx_http_current_connections{state="handled"} 8
+kong_nginx_http_current_connections{state="reading"} 0
+kong_nginx_http_current_connections{state="total"} 8
+kong_nginx_http_current_connections{state="waiting"} 0
+kong_nginx_http_current_connections{state="writing"} 1
+# HELP kong_nginx_stream_current_connections Number of Stream connections
+# TYPE kong_nginx_stream_current_connections gauge
+kong_nginx_stream_current_connections{state="accepted"} 8
+kong_nginx_stream_current_connections{state="active"} 1
+kong_nginx_stream_current_connections{state="handled"} 8
+kong_nginx_stream_current_connections{state="reading"} 0
+kong_nginx_stream_current_connections{state="total"} 8
+kong_nginx_stream_current_connections{state="waiting"} 0
+kong_nginx_stream_current_connections{state="writing"} 1
+# HELP kong_nginx_metric_errors_total Number of nginx-lua-prometheus errors
+# TYPE kong_nginx_metric_errors_total counter
+kong_nginx_metric_errors_total 0
+# HELP kong_stream_status Stream status codes per service/route in Kong
+# TYPE kong_stream_status counter
+kong_stream_status{code="301",service="google"} 2
+# HELP kong_upstream_target_health Health status of targets of upstream. States = healthchecks_off|healthy|unhealthy|dns_error, value is 1 when state is populated.
+# TYPE kong_upstream_target_health gauge
+kong_upstream_target_health{upstream="upstream1",target="target1",address="localhost:1001",state="healthchecks_off"} 1
+kong_upstream_target_health{upstream="upstream2",target="target2",address="localhost:1002",state="healthy"} 1
+kong_upstream_target_health{upstream="upstream3",target="target3",address="localhost:1003",state="unhealthy"} 1
+kong_upstream_target_health{upstream="upstream4",target="target4",address="localhost:1004",state="dns_error"} 1
+kong_upstream_target_health{upstream="upstream5",target="target5",address="localhost:1005",state="unhealthy"} 0

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import simplejson as json
+from six import PY2
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
@@ -14,6 +15,17 @@ class Kong(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}}
 
     """ collects metrics for Kong """
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if not PY2 and 'openmetrics_endpoint' in instance:
+            # TODO: when we drop Python 2 move this import up top
+            from .check import KongCheck
+
+            return KongCheck(name, init_config, instances)
+        else:
+            return super(Kong, cls).__new__(cls)
 
     def check(self, instance):
         metrics = self._fetch_data(instance)
