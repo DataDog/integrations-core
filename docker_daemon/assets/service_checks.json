@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.1.0",
-        "integration":"docker",
+        "integration":"Docker",
         "check": "docker.service_up",
         "statuses": ["ok", "critical"],
         "groups": ["host"],
@@ -10,7 +10,7 @@
     },
     {
         "agent_version": "5.1.0",
-        "integration":"docker",
+        "integration":"Docker",
         "check": "docker.container_health",
         "statuses": ["ok", "critical", "unknown"],
         "groups": ["host"],
@@ -19,7 +19,7 @@
     },
     {
         "agent_version": "5.1.0",
-        "integration":"docker",
+        "integration":"Docker",
         "check": "docker.exit",
         "statuses": ["ok", "critical"],
         "groups": ["host"],
