@@ -6,3 +6,4 @@
 
 * Initial panos Integration.
 * Updated manifest. 
+* Updated integration id and name.

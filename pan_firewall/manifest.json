@@ -2,7 +2,7 @@
   "display_name": "Palo Alto Networks Firewall",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "paloaltonetworks",
+  "name": "pan_firewall",
   "metric_prefix": "pan.firewall",
   "metric_to_check": "",
   "creates_events": false,
@@ -22,7 +22,7 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "paloaltonetworks",
+  "integration_id": "pan-firewall",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
