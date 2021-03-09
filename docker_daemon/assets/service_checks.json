@@ -1,0 +1,29 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"docker",
+        "check": "docker.service_up",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to collect the list of containers from the Docker daemon. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.1.0",
+        "integration":"docker",
+        "check": "docker.container_health",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "Container Health",
+        "description": "Returns `CRITICAL` if a container is unhealthy. Returns `OK` otherwise or `UNKNOWN` if the health is unknown."
+    },
+    {
+        "agent_version": "5.1.0",
+        "integration":"docker",
+        "check": "docker.exit",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Exit Code",
+        "description": "Returns `CRITICAL` if a container exited with a non-zero exit code. Returns `OK` otherwise."
+    }
+]
