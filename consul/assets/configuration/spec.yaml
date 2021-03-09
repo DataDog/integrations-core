@@ -23,7 +23,6 @@ files:
         The Prometheus endpoint is available for Consul versions v1.1.0 or higher.
       value:
         type: boolean
-        default: false
         example: false
     - name: catalog_checks
       description: Set to true to perform checks against the Consul service catalog.
