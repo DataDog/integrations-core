@@ -84,6 +84,10 @@ V_20_METRICS = [
     'clickhouse.background_pool.message_broker.task.active',
     'clickhouse.postgresql.connection',
     'clickhouse.tables_to_drop.queue.total',
+    'clickhouse.query.time',
+    'clickhouse.query.select.time',
+    'clickhouse.selected.rows.total',
+    'clickhouse.selected.bytes.total'
 ]
 
 # This is not tested by our current envs.
@@ -92,7 +96,8 @@ V_21_METRICS = [
     'clickhouse.background_pool.schedule.memory',
     'clickhouse.parts.committed',
     'clickhouse.parts.compact',
-    'clickhouse.parts.delete_on_destroy' 'clickhouse.parts.deleting',
+    'clickhouse.parts.delete_on_destroy',
+    'clickhouse.parts.deleting',
     'clickhouse.parts.inmemory',
     'clickhouse.parts.outdated',
     'clickhouse.parts.precommitted',
