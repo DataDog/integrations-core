@@ -221,32 +221,136 @@ _Available for Agent versions >6.0_
 4. [Restart the Agent][10].
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+<!-- xxx tab "Docker" xxx -->
+#### Docker
 
-#### Containerized
+To configure this check for an Agent running on a container:
 
-For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
+##### Metric Collection
+
+Set [Autodiscovery Integration Templates][27] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["mysql"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}]'
+```
+
+See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][29].
+
+Then, set [Log Integrations][30] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"mysql","service":"mysql"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-| Parameter            | Value                                                                  |
-| -------------------- | ---------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `mysql`                                                                |
-| `<INIT_CONFIG>`      | blank or `{}`                                                          |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}` |
+Set [Autodiscovery Integrations Templates][31] as pod annotations on your application container. Aside from this, you can also configure templates with [a file, a configmap, or a key-value store][32].
 
-See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  annotations:
+    ad.datadoghq.com/nginx.check_names: '["mysql"]'
+    ad.datadoghq.com/nginx.init_configs: '[{}]'
+    ad.datadoghq.com/nginx.instances: |
+      [
+        {
+          "server": "%%host%%", 
+          "user": "datadog",
+          "pass": "<UNIQUEPASSWORD>"
+        }
+      ]
+  labels:
+    name: mysql
+spec:
+  containers:
+    - name: mysql
+```
+
+See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][33].
+
+Then, set [Log Integrations][34] as pod annotations. You can also configure this with [a file, a configmap, or a key-value store][35].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  annotations:
+    ad.datadoghq.com/mysql.logs: '[{"source": "mysql", "service": "mysql"}]'
+  labels:
+    name: mysql
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][36] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "mysql",
+    "image": "mysql:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"mysql\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"user\": \"datadog\",\"pass\": \"<UNIQUEPASSWORD>\"}]"
+    }
+  }]
+}
+```
+
+See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][37].
 
-| Parameter      | Value                                     |
-| -------------- | ----------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "mysql", "service": "mysql"}` |
+Then, set [Log Integrations][34] as Docker labels:
 
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "mysql",
+    "image": "mysql:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"mysql\",\"service\":\"mysql\"}]"
+    }
+  }]
+}
+```
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -460,3 +564,14 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [24]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [25]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [26]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[27]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[28]: https://docs.datadoghq.com/agent/faq/template_variables/
+[29]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[30]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[31]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[32]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[33]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[34]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[35]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[36]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[37]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
