@@ -78,7 +78,7 @@ V_18_19_METRICS = [
 ]
 
 V_20_METRICS = [
-    'clickhouse.background_pool.buffer_flush.task.active',
+    'clickhouse.background_pool.buffer_flush_schedule.task.active',
     'clickhouse.background_pool.distributed.task.active',
     'clickhouse.background_pool.fetches.task.active',
     'clickhouse.background_pool.message_broker.task.active',

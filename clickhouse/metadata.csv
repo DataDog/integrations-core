@@ -215,7 +215,7 @@ clickhouse.table.mergetree.replicated.fetch.replica.fail.count,count,,byte,,The 
 clickhouse.table.mergetree.replicated.fetch.replica.fail.total,gauge,,byte,,The total number of times a data part was failed to download from replica of a ReplicatedMergeTree table.,0,clickhouse,
 clickhouse.table.mergetree.replicated.merge.count,count,,byte,,The number of times data parts of ReplicatedMergeTree tables were successfully merged during the last interval.,0,clickhouse,
 clickhouse.table.mergetree.replicated.merge.total,gauge,,byte,,The total number of times data parts of ReplicatedMergeTree tables were successfully merged.,0,clickhouse,
-clickhouse.background_pool.buffer_flush.task.active,gauge,,task,,Number of active tasks in BackgroundBufferFlushSchedulePool. This pool is used for periodic Buffer flushes,0,clickhouse,
+clickhouse.background_pool.buffer_flush_schedule.task.active,gauge,,task,,Number of active tasks in BackgroundBufferFlushSchedulePool. This pool is used for periodic Buffer flushes,0,clickhouse,
 clickhouse.background_pool.distributed.task.active,gauge,,task,,Number of active tasks in BackgroundDistributedSchedulePool. This pool is used for distributed sends that is done in background.,0,clickhouse,
 clickhouse.background_pool.fetches.task.active,gauge,,task,,Number of active tasks in BackgroundFetchesPool,0,clickhouse,
 clickhouse.background_pool.message_broker.task.active,gauge,,task,,Number of active tasks in BackgroundProcessingPool for message streaming,0,clickhouse,
