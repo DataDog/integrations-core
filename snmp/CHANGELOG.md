@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 5.0.1 / 2021-03-10
+
+* [Fixed] Fix snmp get bulk log. See [#8803](https://github.com/DataDog/integrations-core/pull/8803).
+
 ## 5.0.0 / 2021-03-07
 
 * [Added] Add BGP metrics to Juniper SRX Profile. See [#8771](https://github.com/DataDog/integrations-core/pull/8771).
