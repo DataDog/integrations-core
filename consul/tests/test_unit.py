@@ -276,7 +276,7 @@ def test_cull_services_list():
 
     # Big whitelist
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(num_services)]
+    consul_check.services_include = ['service_{}'.format(k) for k in range(num_services)]
     assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
     # Big whitelist with max_services
@@ -284,20 +284,20 @@ def test_cull_services_list():
     assert len(consul_check._cull_services_list(services)) == max_services
 
     # Whitelist < MAX_SERVICES should spit out the whitelist
-    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(MAX_SERVICES - 1)]
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    consul_check.services_include = ['service_{}'.format(k) for k in range(MAX_SERVICES - 1)]
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
     # Whitelist < max_services param should spit out the whitelist
-    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(max_services - 1)]
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    consul_check.services_include = ['service_{}'.format(k) for k in range(max_services - 1)]
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
     # No whitelist, still triggers truncation
-    consul_check.service_whitelist = []
+    consul_check.services_include = []
     consul_check.max_services = MAX_SERVICES
     assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
     # No whitelist with max_services set, also triggers truncation
-    consul_check.service_whitelist = []
+    consul_check.services_include = []
     consul_check.max_services = max_services
     assert len(consul_check._cull_services_list(services)) == max_services
 
@@ -307,18 +307,18 @@ def test_cull_services_list():
     assert len(consul_check._cull_services_list(services)) == num_services
 
     # Num. services < MAX_SERVICES should spit out only the whitelist when one is defined
-    consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    consul_check.services_include = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
     # Num. services < max_services (from consul.yaml) should be no-op in absence of whitelist
     num_services = max_services - 1
-    consul_check.service_whitelist = []
+    consul_check.services_include = []
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
     assert len(consul_check._cull_services_list(services)) == num_services
 
     # Num. services < max_services should spit out only the whitelist when one is defined
-    consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
+    consul_check.services_include = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.services_include)
 
     # Excluded services will not be in final service list
     consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
@@ -326,8 +326,8 @@ def test_cull_services_list():
 
     # Excluded services will be prioritized over whitelisted services
     consul_check.services_exclude = ['service_1', 'service_2', 'service_3']
-    consul_check.service_whitelist = ['service_4', 'service_5', 'service_6']
-    test_whitelist_length = len(consul_check.service_whitelist)
+    consul_check.services_include = ['service_4', 'service_5', 'service_6']
+    test_whitelist_length = len(consul_check.services_include)
     test_service_list_length = len(set(consul_check._cull_services_list(services)))
     assert (
         set(consul_check.services_exclude) not in set(consul_check._cull_services_list(services))

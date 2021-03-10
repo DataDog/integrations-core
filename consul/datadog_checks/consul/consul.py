@@ -96,7 +96,12 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.instance.get('network_latency_checks', self.init_config.get('network_latency_checks'))
         )
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
-        self.service_whitelist = self.instance.get('service_whitelist', self.init_config.get('service_whitelist', []))
+        default_services_include = self.init_config.get(
+            'service_whitelist', self.init_config.get('services_include', [])
+        )
+        self.services_include = self.instance.get(
+            'service_whitelist', self.instance.get('services_include', default_services_include)
+        )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
 
@@ -262,18 +267,18 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
     def _cull_services_list(self, services):
 
-        if self.service_whitelist and self.services_exclude:
+        if self.services_include and self.services_exclude:
             self.warning(
                 'Detected both whitelist and services_exclude options are configured.'
                 'Consul check will only consider the exclude list.'
             )
-            self.service_whitelist = None
+            self.services_include = None
 
-        if self.service_whitelist:
-            if len(self.service_whitelist) > self.max_services:
+        if self.services_include:
+            if len(self.services_include) > self.max_services:
                 self.warning('More than %d services in whitelist. Service list will be truncated.', self.max_services)
 
-            whitelisted_services = [s for s in services if s in self.service_whitelist]
+            whitelisted_services = [s for s in services if s in self.services_include]
             services = {s: services[s] for s in whitelisted_services[: self.max_services]}
         else:
             allowed_services = {s: services[s] for s in services if s not in self.services_exclude}
