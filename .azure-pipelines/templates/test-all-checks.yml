@@ -320,8 +320,11 @@ jobs:
       displayName: OpenStack Controller
       os: linux
     - checkName: oracle
-      displayName: Oracle Database
+      displayName: Oracle Database (Linux)
       os: linux
+    - checkName: oracle
+      displayName: Oracle Database (Windows)
+      os: windows
     - checkName: pdh_check
       displayName: PDH
       os: windows
