@@ -269,17 +269,17 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         if self.services_include and self.services_exclude:
             self.warning(
-                'Detected both whitelist and services_exclude options are configured.'
+                'Detected that both services_include and services_exclude options are set.'
                 'Consul check will only consider the exclude list.'
             )
             self.services_include = None
 
         if self.services_include:
             if len(self.services_include) > self.max_services:
-                self.warning('More than %d services in whitelist. Service list will be truncated.', self.max_services)
+                self.warning('More than %d services in services_include. Service list will be truncated.', self.max_services)
 
-            whitelisted_services = [s for s in services if s in self.services_include]
-            services = {s: services[s] for s in whitelisted_services[: self.max_services]}
+            included_services = [s for s in services if s in self.services_include]
+            services = {s: services[s] for s in included_services[: self.max_services]}
         else:
             allowed_services = {s: services[s] for s in services if s not in self.services_exclude}
 
@@ -287,13 +287,13 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
             if len(allowed_services) <= self.max_services:
                 log_line = (
-                    'Consul service whitelist not defined. Agent will poll for all %s services found',
+                    'Consul services_include not defined. Agent will poll for all %s services found',
                     len(allowed_services),
                 )
                 self.log.debug(log_line)
                 services = allowed_services
             else:
-                log_line = 'Consul service whitelist not defined. Agent will poll for at most {} services'.format(
+                log_line = 'Consul services_include not defined. Agent will poll for at most {} services'.format(
                     self.max_services
                 )
                 self.warning(log_line)
@@ -378,7 +378,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.service_check(CONSUL_CHECK, self.OK, tags=service_check_tags)
 
         if self.perform_catalog_checks:
-            # Collect node by service, and service by node counts for a whitelist of services
+            # Collect node by service, and service by node counts for a include list of services
 
             services = self.get_services_in_cluster()
 
@@ -487,7 +487,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                     )
 
             for node, service_status in iteritems(nodes_to_service_status):
-                # For every node discovered for whitelisted services, gauge the following:
+                # For every node discovered for included services, gauge the following:
                 # `consul.catalog.services_up` : Total services registered on node
                 # `consul.catalog.services_passing` : Total passing services on node
                 # `consul.catalog.services_warning` : Total warning services on node
