@@ -6,8 +6,6 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying these instructions.
-
 ### Installation
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
