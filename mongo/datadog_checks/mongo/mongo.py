@@ -82,7 +82,12 @@ class MongoDb(AgentCheck):
     @property
     def api_client(self):
         if self._api_client is None:
-            self._api_client = MongoApi(self._config, self.log)
+            try:
+                self._api_client = MongoApi(self._config, self.log)
+                self.log.debug("Connected!")
+            except Exception:
+                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+                raise
 
         return self._api_client
 
@@ -178,12 +183,7 @@ class MongoDb(AgentCheck):
             raise
 
     def _check(self):
-        try:
-            api = self.api_client
-            self.log.debug("Connected!")
-        except Exception:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-            raise
+        api = self.api_client
 
         try:
             mongo_version = api.server_info().get('version', '0.0')
