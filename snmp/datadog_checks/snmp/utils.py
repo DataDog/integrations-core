@@ -253,7 +253,7 @@ class OIDPrinter(object):
     """
 
     def __init__(self, oids, with_values):
-        # type: (Union[Mapping, Sequence], bool) -> None
+        # type: (Union[Mapping, Sequence[ObjectType]], bool) -> None
         self.oids = oids
         self.with_values = with_values
 
