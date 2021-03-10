@@ -143,8 +143,13 @@ class Oracle(AgentCheck):
                         jpype.java.lang.Thread.currentThread().setContextClassLoader(
                             jpype.java.lang.ClassLoader.getSystemClassLoader()
                         )
-                    self.log.debug("Attempting JDBC connection: class: %s connect_string: %s user: %s driver: %s",
-                                   self.ORACLE_DRIVER_CLASS, connect_string, self._user, self._jdbc_driver)
+                    self.log.debug(
+                        "Attempting JDBC connection: class: %s connect_string: %s user: %s driver: %s",
+                        self.ORACLE_DRIVER_CLASS,
+                        connect_string,
+                        self._user,
+                        self._jdbc_driver,
+                    )
                     connection = jdb.connect(
                         self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
                     )
