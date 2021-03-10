@@ -15,7 +15,7 @@ SystemMetrics = {
             'source': 'value',
             'items': {
                 'BackgroundBufferFlushSchedulePoolTask': {
-                    'name': 'background_pool.buffer_flush.task.active',
+                    'name': 'background_pool.buffer_flush_schedule.task.active',
                     'type': 'gauge',
                 },
                 'BackgroundDistributedSchedulePoolTask': {
