@@ -217,12 +217,15 @@ class SnmpCheck(AgentCheck):
         )
         for oid in config.oid_config.bulk_oids:
             try:
+                oid_object_type = oid.as_object_type()
                 self.log.debug(
-                    '[%s] Running SNMP command getBulk on OID %s', fetch_id, OIDPrinter((oid,), with_values=False)
+                    '[%s] Running SNMP command getBulk on OID %s',
+                    fetch_id,
+                    OIDPrinter((oid_object_type,), with_values=False),
                 )
                 binds = snmp_bulk(
                     config,
-                    oid.as_object_type(),
+                    oid_object_type,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
