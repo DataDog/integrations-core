@@ -175,6 +175,7 @@ class MongoDb(AgentCheck):
             self._check()
         except Exception:
             self._api_client = None
+            raise
 
     def _check(self):
         try:
