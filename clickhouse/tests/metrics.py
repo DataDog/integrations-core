@@ -5,10 +5,10 @@
 # This is not actually every metric, but rather the metrics that are
 # immediately available upon the start up of our environment. Some
 # metrics take a while to show up and others we cannot trigger.
-ALL_METRICS = [
-    'clickhouse.background_pool.processing.memory',
+# Additionally, these are metrics that are present across all versions
+# we support (v18-v21).
+BASE_METRICS = [
     'clickhouse.background_pool.processing.task.active',
-    'clickhouse.background_pool.schedule.memory',
     'clickhouse.background_pool.schedule.task.active',
     'clickhouse.connection.http',
     'clickhouse.connection.interserver',
@@ -28,7 +28,6 @@ ALL_METRICS = [
     'clickhouse.lock.context.acquisition.total',
     'clickhouse.merge.active',
     'clickhouse.merge.disk.reserved',
-    'clickhouse.merge.memory',
     'clickhouse.query.active',
     'clickhouse.query.insert.delayed',
     'clickhouse.query.memory',
@@ -36,7 +35,6 @@ ALL_METRICS = [
     'clickhouse.query.select.total',
     'clickhouse.query.total',
     'clickhouse.query.waiting',
-    'clickhouse.replica.leader.election',
     'clickhouse.syscall.read',
     'clickhouse.syscall.write',
     'clickhouse.table.buffer.row',
@@ -46,7 +44,6 @@ ALL_METRICS = [
     'clickhouse.table.mergetree.row.current',
     'clickhouse.table.mergetree.size',
     'clickhouse.table.replicated.active',
-    'clickhouse.table.replicated.leader',
     'clickhouse.table.replicated.log.max',
     'clickhouse.table.replicated.log.pointer',
     'clickhouse.table.replicated.part.check',
@@ -71,3 +68,39 @@ ALL_METRICS = [
     'clickhouse.zk.request',
     'clickhouse.zk.watch',
 ]
+
+V_18_19_METRICS = [
+    'clickhouse.background_pool.processing.memory',
+    'clickhouse.background_pool.schedule.memory',
+    'clickhouse.merge.memory',
+    'clickhouse.replica.leader.election',
+    'clickhouse.table.replicated.leader',
+]
+
+V_20_METRICS = [
+    'clickhouse.background_pool.buffer_flush.task.active',
+    'clickhouse.background_pool.distributed.task.active',
+    'clickhouse.background_pool.fetches.task.active',
+    'clickhouse.background_pool.message_broker.task.active',
+    'clickhouse.postgresql.connection',
+    'clickhouse.tables_to_drop.queue.total',
+]
+
+# This is not tested by our current envs.
+V_21_METRICS = [
+    'clickhouse.ddl.max_processed',
+    'clickhouse.background_pool.schedule.memory',
+    'clickhouse.parts.committed',
+    'clickhouse.parts.compact',
+    'clickhouse.parts.delete_on_destroy' 'clickhouse.parts.deleting',
+    'clickhouse.parts.inmemory',
+    'clickhouse.parts.outdated',
+    'clickhouse.parts.precommitted',
+    'clickhouse.parts.temporary',
+]
+
+version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, 21: V_21_METRICS}
+
+
+def get_metrics(version):
+    return BASE_METRICS + version_mapper.get(version, [])
