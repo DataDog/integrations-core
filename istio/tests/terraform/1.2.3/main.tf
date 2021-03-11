@@ -1,7 +1,7 @@
 # Reusable local variable
 locals {
   # short version of username (to avoid hitting GCP 40 chars limit for cluster name)
-  short_user = substr("${var.user}", 0, 17) 
+  short_user = substr("${var.user}", 0, 17)
 }
 
 # Shared common terraform config found in the templates/terraform folder in datadog_checks_dev
@@ -45,4 +45,23 @@ resource "null_resource" "startup" {
 
 output "kubeconfig" {
   value = abspath("${local_file.kubeconfig.filename}")
+}
+
+resource "local_file" "kubeconfig" {
+  content = "${data.template_file.kubeconfig.rendered}"
+  filename = "${path.module}/kubeconfig"
+}
+
+data "template_file" "kubeconfig" {
+  template = file("${path.module}/kubeconfig-template.yaml")
+
+  vars = {
+    cluster_name = google_container_cluster.gke_cluster.name
+    user_name = google_container_cluster.gke_cluster.master_auth.0.username
+    user_password = google_container_cluster.gke_cluster.master_auth.0.password
+    endpoint = google_container_cluster.gke_cluster.endpoint
+    cluster_ca = google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate
+    client_cert = google_container_cluster.gke_cluster.master_auth.0.client_certificate
+    client_cert_key = google_container_cluster.gke_cluster.master_auth.0.client_key
+  }
 }
