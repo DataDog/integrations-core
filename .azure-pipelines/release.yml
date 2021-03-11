@@ -1,12 +1,11 @@
 trigger: none
 
 pr:
-  branches:
+  tags:
     include:
-    - master
+    - release
   paths:
-    exclude:
-    - datadog_checks_base/datadog_checks/*
+    include:
     - */CHANGELOG.md
 
 variables:
@@ -18,6 +17,7 @@ jobs:
   parameters:
     job_name: Changed
     display: Linux
+    force_base_package: true
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -30,6 +30,7 @@ jobs:
     job_name: Changed
     check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet azure_iot_edge disk dns_check dotnetclr exchange_server iis network pdh_check sqlserver tcp_check win32_event_log windows_service wmi_check'
     display: Windows
+    force_base_package: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |
