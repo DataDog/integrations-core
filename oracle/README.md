@@ -12,7 +12,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver.
+To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver (linux only).
 Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
 ##### Oracle Instant Client
@@ -49,9 +49,9 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
-These installation steps are a guideline referenced from the [official installation][18].
+These installation steps are a guideline referenced from the [official installation][17].
 
-1. Install the [Microsoft Visual Studio 2017 Redistributable][17] or the appropriate version for the Oracle Instant Client installation.
+1. Install the [Microsoft Visual Studio 2017 Redistributable][16] or the appropriate version for the Oracle Instant Client installation.
 
 2. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
@@ -66,12 +66,10 @@ These installation steps are a guideline referenced from the [official installat
 
 ##### JDBC Driver
 
-The following runtimes are required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver:
+This method only works on linux.
+Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver
 
-- Java 8 or higher 
-- [Microsoft Visual C++ Runtime 2015][13] on windows.
-
-Once these are installed, follow the following steps: 
+Once it is installed, follow the following steps: 
 
 1. [Download the JDBC Driver][2] jar file.
 2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
@@ -325,7 +323,7 @@ SQL> select blocking_session,username,osuser, sid, serial#, wait_class, seconds_
 where blocking_session is not NULL order by blocking_session;
 ```
 
-3. Once configured, you can create a [monitor][14] based on `oracle.custom_query.locks` metrics.
+3. Once configured, you can create a [monitor][13] based on `oracle.custom_query.locks` metrics.
 
 ## Data Collected
 
@@ -383,10 +381,10 @@ The structure of the directory should look similar:
 ```
 
 ##### Linux
-- See further installation documentation on [Oracle][15].
+- See further installation documentation on [Oracle][14].
 
 ##### Windows
-- Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version, see [Windows downloads page][16] for more details.
+- Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version, see [Windows downloads page][15] for more details.
 - Ensure the `PATH` environment variable contains the path of your directory (for example, `C:\oracle\`). 
   Also verify that the environment variable `OCI_LIB64=C:\oracle` exists.
 
@@ -440,9 +438,8 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [12]: https://docs.datadoghq.com/help/
-[13]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
-[14]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
-[15]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
-[16]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
-[17]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
-[18]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
+[13]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
+[14]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[15]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
+[16]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+[17]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
