@@ -178,7 +178,7 @@ class MongoDb(AgentCheck):
     def check(self, _):
         try:
             self._check()
-        except Exception:
+        except pymongo.errors.ConnectionFailure:
             self._api_client = None
             raise
 
