@@ -71,29 +71,128 @@ _Available for Agent versions >6.0_
 3. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-#### Containerized
+#### Docker
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                         |
-| -------------------- | ------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `apache`                                                      |
-| `<INIT_CONFIG>`      | blank or `{}`                                                 |
-| `<INSTANCE_CONFIG>`  | `{"apache_status_url": "http://%%host%%/server-status?auto"}` |
+Set [Autodiscovery Integrations Templates][15] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["apache"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/server-status?auto"}
+]'
+```
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][16].
 
-| Parameter      | Value                                               |
-| -------------- | --------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "apache", "service": "<SERVICE_NAME>"}` |
+Then, set [Log Integrations][17] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source": "apache", "service": "<SERVICE_NAME>"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][18] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][19].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apache
+  annotations:
+    ad.datadoghq.com/apache.check_names: '["apache"]'
+    ad.datadoghq.com/apache.init_configs: '[{}]'
+    ad.datadoghq.com/apache.instances: |
+      [
+        {
+          "apache_status_url": "http://%%host%%/server-status?auto"
+        }
+      ]
+  labels:
+    name: apache
+```
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][20].
+
+Then, set [Log Integrations][21] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][22].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apache
+  annotations:
+    ad.datadoghq.com/apache.logs: '[{"source":"apache","service":"<YOUR_APP_NAME>"}]'
+  labels:
+    name: apache
+```
+
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][23] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "apache",
+    "image": "apache:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"apache\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"apache_status_url\": \"http://%%host%%/server-status?auto\"}]"
+    }
+  }]
+}
+```
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
+
+Then, set [Log Integrations][25] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "apache",
+    "image": "apache:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"apache\",\"service\":\"<YOUR_APP_NAME>\"}]"
+    }
+  }]
+}
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -148,3 +247,14 @@ Additional helpful documentation, links, and articles:
 [12]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
 [13]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
 [14]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog
+[15]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[16]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[17]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[18]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[19]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[20]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[21]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[22]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[23]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[25]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
