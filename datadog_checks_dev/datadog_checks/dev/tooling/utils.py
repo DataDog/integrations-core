@@ -23,7 +23,6 @@ VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DOGWEB_JSON_DASHBOARDS = (
     'hdfs_datanode',
     'hdfs_namenode',
-    'immunio',  # Is this a core integration??
     'mesos',
 )
 
