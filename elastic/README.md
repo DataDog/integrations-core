@@ -140,6 +140,178 @@ _Available for Agent versions >6.0_
 4. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+
+#### Docker
+
+To configure this check for an Agent running on a container:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][22] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["elastic"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%:9200"}]'
+```
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][23].
+
+Then, set [Log Integrations][24] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"elasticsearch","service":"<SERVICE_NAME>"}]'
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][25] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][26].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: elasticsearch
+  annotations:
+    ad.datadoghq.com/elasticsearch.check_names: '["elasticsearch"]'
+    ad.datadoghq.com/elasticsearch.init_configs: '[{}]'
+    ad.datadoghq.com/elasticsearch.instances: |
+      [
+        {
+          "url": "https://%%host%%:9200"
+        }
+      ]
+  labels:
+    name: elasticsearch
+```
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
+
+Then, set [Log Integrations][28] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][29].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: elasticsearch
+  annotations:
+    ad.datadoghq.com/elasticsearch.logs: '[{"source":"elasticsearch","service":"<SERVICE_NAME"}]'
+  labels:
+    name: elasticsearch
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][30] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "elasticsearch",
+    "image": "elasticsearch:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"elastic\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"url\": \"https://%%host%%:9200\"}]"
+    }
+  }]
+}
+```
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].
+
+Then, set [Log Integrations][32] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "elasticsearch",
+    "image": "elasticsearch:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"elasticsearch\",\"service\":\"<SERVICE_NAME>\"}]"
+    }
+  }]
+}
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][33].
+
+
+<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -243,3 +415,15 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [19]: https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html#es-managedomains-signing-service-requests
 [20]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
 [21]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location
+[22]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[23]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[24]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[25]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[26]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[27]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[28]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[29]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[30]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
