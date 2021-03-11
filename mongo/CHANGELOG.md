@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 2.3.0 / 2021-03-11
+
+* [Added] Cache API client connection. See [#8808](https://github.com/DataDog/integrations-core/pull/8808).
+
 ## 2.2.1 / 2021-03-07
 
 * [Fixed] Support Alibaba ApsaraDB. See [#8316](https://github.com/DataDog/integrations-core/pull/8316).
