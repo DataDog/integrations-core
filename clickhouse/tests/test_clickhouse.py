@@ -9,7 +9,6 @@ from datadog_checks.clickhouse import ClickhouseCheck
 
 from .common import CLICKHOUSE_VERSION
 from .metrics import get_metrics
-import time
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 

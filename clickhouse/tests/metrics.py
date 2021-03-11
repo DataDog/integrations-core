@@ -87,7 +87,7 @@ V_20_METRICS = [
     'clickhouse.query.time',
     'clickhouse.query.select.time',
     'clickhouse.selected.rows.total',
-    'clickhouse.selected.bytes.total'
+    'clickhouse.selected.bytes.total',
 ]
 
 # This is not tested by our current envs.
