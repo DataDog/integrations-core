@@ -380,7 +380,12 @@ class RequestsWrapper(object):
                 raise e
             # retry the connection via session object
             certadapter = CertAdapter(certs=certs)
-            session = requests.Session() if not persist else self.session
+            if not persist:
+                session = requests.Session()
+                for option, value in iteritems(self.options):
+                    setattr(session, option, value)
+            else:
+                session = self.session
             request_method = getattr(session, method)
             session.mount(url, certadapter)
             response = request_method(url, **new_options)
