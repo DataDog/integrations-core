@@ -16,6 +16,8 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 
 Be sure to replace the `<DATADOG_API_KEY>` placeholders with your own API key and run the notebook once to save the init script as a global configuration. Read more about the Databricks Datadog Init scripts [here][2].
 
+When configuring the cluster, add `DD_ENVIRONMENT` environment variable to add a global environment tag.
+
 #### Standard cluster
 
 <!-- xxx tabs xxx -->
@@ -68,7 +70,7 @@ instances:
       streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.yaml
 
   # INCLUDE GLOBAL TAGS (environment, cluster_id, cluster_name)
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - databricks_cluster:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
@@ -121,9 +123,9 @@ instances:
       streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.d/conf.yaml
 
   # INCLUDE GLOBAL TAGS (environment, cluster_id, cluster_name)
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 else
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:worker\\n/'  /etc/datadog-agent/datadog.yaml
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n   - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:worker\\n/'  /etc/datadog-agent/datadog.yaml
 fi
 
   # RESTARTING AGENT
