@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.6.1 / 2021-03-12
+
+* [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
+
 ## 16.6.0 / 2021-03-05
 
 * [Added] Upgrade PyJWT to 2.0.1 on Python 3. See [#8762](https://github.com/DataDog/integrations-core/pull/8762).
