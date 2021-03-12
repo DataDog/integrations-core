@@ -11,6 +11,8 @@ This check monitors [Hazelcast][1].
 The Hazelcast check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+Hazelcast version supported 4.0+
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
