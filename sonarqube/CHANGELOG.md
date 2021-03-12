@@ -1,5 +1,9 @@
 # CHANGELOG - SonarQube
 
+## 1.1.2 / 2021-03-12
+
+* [Fixed] Fix collection of PendingTime. See [#8817](https://github.com/DataDog/integrations-core/pull/8817).
+
 ## 1.1.1 / 2021-02-16
 
 * [Fixed] Fix automatic discovery of metrics from web API and improve example config documentation. See [#8552](https://github.com/DataDog/integrations-core/pull/8552).
