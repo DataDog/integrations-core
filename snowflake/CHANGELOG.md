@@ -1,6 +1,10 @@
 # CHANGELOG - Snowflake
 
-## 3.0.1 / 2021-01-14
+## 3.0.2 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
+## 3.0.1 / 2021-01-14 / Agent 7.26.0
 
 * [Fixed] Do not throw configuration error for missing password when using OAuth. See [#8363](https://github.com/DataDog/integrations-core/pull/8363).
 

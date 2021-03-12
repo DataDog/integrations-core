@@ -217,10 +217,15 @@ class SnmpCheck(AgentCheck):
         )
         for oid in config.oid_config.bulk_oids:
             try:
-                self.log.debug('[%s] Running SNMP command getBulk on OID %s', fetch_id, oid)
+                oid_object_type = oid.as_object_type()
+                self.log.debug(
+                    '[%s] Running SNMP command getBulk on OID %s',
+                    fetch_id,
+                    OIDPrinter((oid_object_type,), with_values=False),
+                )
                 binds = snmp_bulk(
                     config,
-                    oid.as_object_type(),
+                    oid_object_type,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
@@ -697,8 +702,8 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             msg = (
                 'Unable to submit metric `{}` with '
-                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`: {}'.format(
-                    name, snmp_value, type(snmp_value), forced_type, tags, options, e
+                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`, extract_value_pattern=`{}`: {}'.format(
+                    name, snmp_value, type(snmp_value), forced_type, tags, options, extract_value_pattern, e
                 )
             )
             self.log.warning(msg)

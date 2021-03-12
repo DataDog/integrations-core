@@ -1,5 +1,9 @@
 # CHANGELOG - btrfs
 
+## 1.11.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.11.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).

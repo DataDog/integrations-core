@@ -5,9 +5,11 @@ from datadog_checks.base import AgentCheck
 # Paths
 COUCHBASE_STATS_PATH = '/pools/default'
 COUCHBASE_VITALS_PATH = '/admin/vitals'
+SG_METRICS_PATH = '/_expvar'
 
 # Service Checks
 SERVICE_CHECK_NAME = 'couchbase.can_connect'
+SG_SERVICE_CHECK_NAME = 'couchbase.sync_gateway.can_connect'
 NODE_CLUSTER_SERVICE_CHECK_NAME = 'couchbase.by_node.cluster_membership'
 NODE_HEALTH_SERVICE_CHECK_NAME = 'couchbase.by_node.health'
 
@@ -229,3 +231,95 @@ QUERY_STATS = {
 TO_SECONDS = {'ns': 1e9, 'us': 1e6, 'ms': 1e3, 's': 1}
 
 SECONDS_VALUE_PATTERN = re.compile(r'(\d+(\.\d+)?)(\D+)')
+
+SYNC_GATEWAY_COUNT_METRICS = [
+    # Global metrics
+    'admin_net_bytes_recv',
+    'admin_net_bytes_sent',
+    'error_count',
+    'num_goroutines',
+    'pub_net_bytes_recv',
+    'pub_net_bytes_sent',
+    'system_memory_total',
+    'warn_count',
+    # Per DB cache metrics
+    'abandoned_seqs',
+    'chan_cache_active_revs',
+    'chan_cache_bypass_count',
+    'chan_cache_channels_added',
+    'chan_cache_channels_evicted_inactive',
+    'chan_cache_channels_evicted_nru',
+    'chan_cache_compact_count',
+    'chan_cache_compact_time',
+    'chan_cache_hits',
+    'chan_cache_max_entries',
+    'chan_cache_misses',
+    'chan_cache_num_channels',
+    'chan_cache_pending_queries',
+    'chan_cache_removal_revs',
+    'chan_cache_tombstone_revs',
+    'num_active_channels',
+    'num_skipped_seqs',
+    'pending_seq_len',
+    'rev_cache_bypass',
+    'rev_cache_hits',
+    'rev_cache_misses',
+    # Per DB cbl_replication_pull metrics
+    "attachment_pull_bytes",
+    "attachment_pull_count",
+    "num_pull_repl_active_continuous",
+    "num_pull_repl_active_one_shot",
+    "num_pull_repl_caught_up",
+    "num_pull_repl_since_zero",
+    "num_pull_repl_total_continuous",
+    "num_pull_repl_total_one_shot",
+    "request_changes_count",
+    "request_changes_time",
+    "rev_processing_time",
+    "rev_send_count",
+    "rev_send_latency",
+    # Per DB cbl_replication_push metrics
+    "attachment_push_bytes",
+    "attachment_push_count",
+    "conflict_write_count",
+    "doc_push_count",
+    "propose_change_count",
+    "propose_change_time",
+    "sync_function_count",
+    "sync_function_time",
+    "write_processing_time",
+    # Per DB database metrics
+    "crc32c_match_count",
+    "dcp_caching_count",
+    "dcp_caching_time",
+    "dcp_received_count",
+    "doc_reads_bytes_blip",
+    "doc_writes_bytes",
+    "doc_writes_bytes_blip",
+    "doc_writes_xattr_bytes",
+    "num_doc_reads_blip",
+    "num_doc_reads_rest",
+    "num_doc_writes",
+    "num_replications_active",
+    "num_replications_total",
+    "num_replications_total",
+    "num_replications_total",
+    "sequence_incr_count",
+    "sequence_released_count",
+    "sequence_reserved_count",
+    "warn_channels_per_doc_count",
+    "warn_grants_per_doc_count",
+    "warn_xattr_size_count",
+    # Security metrics
+    "auth_failed_count",
+    "auth_success_count",
+    "num_access_errors",
+    "num_docs_rejected",
+    "total_auth_time",
+    # Shared Bucket import metrics
+    "import_cancel_cas",
+    "import_count",
+    "import_error_count",
+    "import_partitions",
+    "import_processing_time",
+]

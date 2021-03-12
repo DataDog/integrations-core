@@ -21,6 +21,13 @@ files:
       value:
         example: http://localhost:8093
         type: string
+    - name: sync_gateway_url
+      description: |
+        Url to get Sync Gateway stats.
+        See https://docs.couchbase.com/sync-gateway/current/stats-monitoring.html
+      value:
+        example: http://localhost:4986
+        type: string
     - template: instances/http
     - template: instances/default
   - template: logs

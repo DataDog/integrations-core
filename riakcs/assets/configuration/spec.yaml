@@ -1,4 +1,4 @@
-name: Riak CS
+name: RiakCS
 files:
 - name: riakcs.yaml
   options:

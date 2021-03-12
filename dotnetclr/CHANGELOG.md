@@ -1,5 +1,9 @@
 # CHANGELOG - Dotnetclr
 
+## 1.7.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.7.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

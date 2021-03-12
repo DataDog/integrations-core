@@ -1,0 +1,26 @@
+{
+  "name": "[Tomcat] % of busy threads is high for host: {{host.name}}",
+  "type": "query alert",
+  "query": "avg(last_5m):( avg:tomcat.threads.busy{*} by {host} / max:tomcat.threads.max{*} by {host} ) * 100 > 70",
+  "message": "{{#is_alert}}\n\nALERT: The current amount of busy threads represents {{value}} % of the maximum number of allowed worker threads for host: {{host.name}}\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The current amount of busy threads represents {{value}} % of the maximum number of allowed worker threads for host: {{host.name}}\n\n{{/is_warning}} \n\n",
+  "tags": ["integration:tomcat"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": true,
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "escalation_message": "",
+    "no_data_timeframe": null,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 70,
+      "warning": 50
+    }
+  },
+  "recommended_monitor_metadata": {
+    "description": "Notifies when Tomcat current amount of busy threads represents a high percentage of the maximum number of allowed worker threads for a specific host."
+  }
+}

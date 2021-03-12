@@ -40,7 +40,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "php-fpm": "assets/dashboards/php-fpm_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv",

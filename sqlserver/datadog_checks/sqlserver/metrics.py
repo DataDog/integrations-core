@@ -666,12 +666,14 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         replica_server_name_index = columns.index('replica_server_name')
         is_local_index = columns.index('is_local')
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
 
             if self.cfg_instance.get('only_emit_local') and not is_local:
@@ -688,6 +690,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -717,10 +720,12 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         sync_health_desc_index = columns.index('synchronization_health_desc')
 
         for row in rows:
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
 
             if selected_ag and selected_ag != resource_group_id:
@@ -730,6 +735,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             sync_health_desc = row[sync_health_desc_index]
             metric_tags = [
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
             ]
             metric_tags.extend(self.tags)
@@ -770,12 +776,14 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
         failover_mode_desc_index = columns.index('failover_mode_desc')
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         is_local_index = columns.index('is_local')
         database_name_index = columns.index('database_name')
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             database_name = row[database_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
             selected_database = self.cfg_instance.get('ao_database')
@@ -797,6 +805,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             metric_tags = [
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
                 'is_primary_replica:{}'.format(str(is_primary_replica)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
             ]

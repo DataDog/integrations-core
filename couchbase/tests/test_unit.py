@@ -8,11 +8,9 @@ import pytest
 
 from datadog_checks.couchbase import Couchbase
 
-from .common import DEFAULT_INSTANCE
 
-
-def test_camel_case_to_joined_lower():
-    couchbase = Couchbase('couchbase', {}, [{}])
+def test_camel_case_to_joined_lower(instance):
+    couchbase = Couchbase('couchbase', {}, [instance])
 
     CAMEL_CASE_TEST_PAIRS = {
         'camelCase': 'camel_case',
@@ -34,8 +32,8 @@ def test_camel_case_to_joined_lower():
         )
 
 
-def test_extract_seconds_value():
-    couchbase = Couchbase('couchbase', {}, [{}])
+def test_extract_seconds_value(instance):
+    couchbase = Couchbase('couchbase', {}, [instance])
 
     EXTRACT_SECONDS_TEST_PAIRS = {
         '3.45s': 3.45,
@@ -52,13 +50,13 @@ def test_extract_seconds_value():
         )
 
 
-def test__get_query_monitoring_data():
+def test__get_query_monitoring_data(instance_query):
     """
     `query_monitoring_url` can potentially fail, be sure we don't raise when the
     endpoint is not reachable
     """
-    couchbase = Couchbase('couchbase', {}, [{}])
-    couchbase._get_query_monitoring_data({'query_monitoring_url': 'http://foo/bar'})
+    couchbase = Couchbase('couchbase', {}, [instance_query])
+    couchbase._get_query_monitoring_data()
 
 
 @pytest.mark.parametrize(
@@ -72,8 +70,8 @@ def test__get_query_monitoring_data():
         ("legacy config", {'user': 'new_foo', 'ssl_verify': False}, {'auth': ('new_foo', 'password'), 'verify': False}),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
-    instance = deepcopy(DEFAULT_INSTANCE)
+def test_config(test_case, extra_config, expected_http_kwargs, instance):
+    instance = deepcopy(instance)
     instance.update(extra_config)
     check = Couchbase('couchbase', {}, [instance])
 

@@ -66,6 +66,12 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         def warn(self, msg, *args, **kwargs):
             self.log(logging.WARNING, msg, *args, **kwargs)
 
+        def getEffectiveLevel(self):
+            """
+            Get the effective level for the underlying logger.
+            """
+            return self.logger.getEffectiveLevel()
+
 
 class CheckLogFormatter(logging.Formatter):
     def format(self, record):

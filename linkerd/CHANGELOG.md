@@ -1,6 +1,11 @@
 # CHANGELOG - Linkerd
 
-## 2.7.0 / 2021-01-25
+## 2.8.0 / 2021-03-07
+
+* [Added] Add support for legacy config to OpenMetricsCompatibilityScraper. See [#8507](https://github.com/DataDog/integrations-core/pull/8507).
+* [Fixed] Bump base package requirement. See [#8572](https://github.com/DataDog/integrations-core/pull/8572).
+
+## 2.7.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Allow the use of the new OpenMetrics implementation. See [#8438](https://github.com/DataDog/integrations-core/pull/8438).
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).

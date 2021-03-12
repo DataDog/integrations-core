@@ -106,7 +106,7 @@ ddev release make all --exclude datadog_checks_dev
     There is a known GitHub limitation where if an issue has too many labels (100), its state cannot be modified.
     If you cannot merge the pull request:
 
-    1. Run the [remove-labels](../ddev/cli.md#remove-labels) command
+    1. Run the [remove-labels](../ddev/cli.md#ddev-meta-scripts-remove-labels) command
     1. After merging, manually add back the `changelog/no-changelog` label
 
 ## Betas

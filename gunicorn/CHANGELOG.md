@@ -1,6 +1,11 @@
 # CHANGELOG - gunicorn
 
-## 1.14.1 / 2021-01-15
+## 1.14.2 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Improve readability a bit. See [#8454](https://github.com/DataDog/integrations-core/pull/8454).
+
+## 1.14.1 / 2021-01-15 / Agent 7.26.0
 
 * [Fixed] Prevent raising an error if the master process no longer exists. See [#8314](https://github.com/DataDog/integrations-core/pull/8314).
 
