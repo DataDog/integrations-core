@@ -74,20 +74,25 @@ jmx_metrics:
           alias: activemq.artemis.connection_count
           metric_type: counter
         TotalConnectionCount:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.total_connection_count
-          metric_type: monotonic_count
+          metric_type: rate
         TotalMessageCount:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.total_message_count
-          metric_type: monotonic_count
+          metric_type: rate
         TotalMessagesAdded:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.total_messages_added
-          metric_type: monotonic_count
+          metric_type: rate
         TotalMessagesAcknowledged:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.total_messages_acknowledged
-          metric_type: monotonic_count
+          metric_type: rate
         TotalConsumerCount:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.total_consumer_count
-          metric_type: monotonic_count
+          metric_type: rate
 
   - include:
       domain: org.apache.activemq.artemis
@@ -98,27 +103,31 @@ jmx_metrics:
           metric_type: gauge
         NumberOfPages:
           alias: activemq.artemis.address.pages_count
-          metric_type: counter
+          metric_type: gauge
         NumberOfMessages:
+          # implied as monotonic count, reports as gauge
           alias: activemq.artemis.address.number_of_messages
-          metric_type: monotonic_count
+          metric_type: gauge
         NumberOfBytesPerPage:
           alias: activemq.artemis.address.bytes_per_page
           metric_type: gauge
         RoutedMessageCount:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.address.routed_messages
-          metric_type: monotonic_count
+          metric_type: rate
         UnRoutedMessageCount:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.address.unrouted_messages
-          metric_type: monotonic_count
+          metric_type: rate
 
   - include:
       domain: org.apache.activemq.artemis
       subcomponent: queues
       attribute:
         MessageCount:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.queue.message_count
-          metric_type: monotonic_count
+          metric_type: rate
         ConsumerCount:
           alias: activemq.artemis.queue.consumer_count
           metric_type: gauge
@@ -126,15 +135,18 @@ jmx_metrics:
           alias: activemq.artemis.queue.max_consumers
           metric_type: gauge
         MessagesAdded:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.queue.messages_added
-          metric_type: monotonic_count
+          metric_type: rate
         MessagesExpired:
           # implied as monotonic count, reports as gauge
           alias: activemq.artemis.queue.messages_expired
           metric_type: gauge
         MessagesAcknowledged:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.queue.messages_acknowledged
-          metric_type: monotonic_count
+          metric_type: rate
         MessagesKilled:
+          # implied as monotonic count, reports as rate
           alias: activemq.artemis.queue.messages_killed
-          metric_type: monotonic_count
+          metric_type: rate
