@@ -1,6 +1,11 @@
 # CHANGELOG - oracle
 
-## 3.1.1 / 2021-01-25
+## 3.2.0 / 2021-03-07
+
+* [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 3.1.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Make more explicit which connection was established. See [#8416](https://github.com/DataDog/integrations-core/pull/8416).
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).

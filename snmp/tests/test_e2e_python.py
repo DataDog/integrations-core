@@ -34,8 +34,9 @@ def _build_device_ip(container_ip, last_digit='1'):
 @common.python_autodiscovery_only
 def test_e2e_python(dd_agent_check):
     metrics = common.SUPPORTED_METRIC_TYPES
-    instance = common.generate_container_instance_config(metrics)
-    aggregator = dd_agent_check(instance, rate=True)
+    config = common.generate_container_instance_config(metrics)
+    instance = config['instances'][0]
+    aggregator = dd_agent_check(config, rate=True)
     tags = ['snmp_device:{}'.format(instance['ip_address'])]
 
     # Test metrics

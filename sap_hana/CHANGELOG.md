@@ -1,6 +1,12 @@
 # CHANGELOG - SAP HANA
 
-## 1.4.0 / 2021-01-25
+## 1.4.1 / 2021-03-07
+
+* [Fixed] Catch exception when closing lost connection. See [#8630](https://github.com/DataDog/integrations-core/pull/8630).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.4.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add SSL support for connection. See [#8098](https://github.com/DataDog/integrations-core/pull/8098).
 

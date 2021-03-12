@@ -354,6 +354,12 @@ eks_fargate does not include any events.
 
 Need help? Contact [Datadog support][20].
 
+## Further Reading
+
+- Blog post: [Key metrics for monitoring AWS Fargate][22]
+- Blog post: [How to collect metrics and logs from AWS Fargate workloads][23]
+- Blog post: [AWS Fargate monitoring with Datadog][24]
+
 [1]: http://docs.datadoghq.com/integrations/amazon_eks/
 [2]: http://docs.datadoghq.com/integrations/system
 [3]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/
@@ -375,3 +381,6 @@ Need help? Contact [Datadog support][20].
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
 [20]: https://docs.datadoghq.com/help/
 [21]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
+[22]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[23]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
+[24]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/

@@ -38,7 +38,6 @@ files:
           type: string
         example:
           - cluster\.(in|out)\..*
-        default: None
     - name: excluded_metrics
       description: |
         Excludes metrics using regular expressions.
@@ -58,7 +57,6 @@ files:
           type: string
         example:
           - ^http\..*
-        default: None
     - name: cache_metrics
       description: |
         Results are cached by default to decrease CPU utilization, at

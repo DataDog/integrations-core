@@ -18,7 +18,6 @@ files:
           - name: master_port
             description: Port of your Mesos Master instance.
             value:
-              default: 5050
               example: 5050
               type: integer
           - name: tasks
