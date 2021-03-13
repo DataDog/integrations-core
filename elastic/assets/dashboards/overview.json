@@ -631,6 +631,7 @@
     },
     {
       "id": 6,
+      "layout": { "is_column_break": true },
       "definition": {
         "title": "Shards",
         "title_align": "center",
