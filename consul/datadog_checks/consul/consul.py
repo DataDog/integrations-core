@@ -276,7 +276,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         if self.services_include:
             if len(self.services_include) > self.max_services:
-                self.warning('More than %d services in services_include. Service list will be truncated.', self.max_services)
+                self.warning(
+                    'More than %d services in services_include. Service list will be truncated.', self.max_services
+                )
 
             included_services = [s for s in services if s in self.services_include]
             services = {s: services[s] for s in included_services[: self.max_services]}
