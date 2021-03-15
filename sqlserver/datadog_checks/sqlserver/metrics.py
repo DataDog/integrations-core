@@ -422,7 +422,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         rows = []
         columns = []
 
-        cursor.execute('select DB_NAME()')
+        cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
         data = cursor.fetchall()
         current_db = data[0][0]
         logger.debug("%s: current db is %s", cls.__name__, current_db)
