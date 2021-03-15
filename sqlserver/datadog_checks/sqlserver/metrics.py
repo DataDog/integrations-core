@@ -9,6 +9,8 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from .utils import construct_use_statement
+
 # Queries
 ALL_INSTANCES = 'ALL'
 
@@ -429,7 +431,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         for db in cls._DATABASES:
             # use statements need to be executed separate from select queries
-            ctx = 'use {}'.format(db)
+            ctx = construct_use_statement(db)
             logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
             cursor.execute(ctx)
             logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
@@ -455,7 +457,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         # reset back to previous db
         logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute('use {}'.format(str(current_db)))
+        cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 
