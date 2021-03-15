@@ -22,17 +22,17 @@ To collect Docker metrics about all your containers, run **one** Datadog Agent o
 
 For either option, your hosts need cgroup memory management enabled for the Docker check to succeed. See the [docker-dd-agent repository][3] for how to enable it.
 
-#### Host Installation
+#### Host installation
 
 1. Ensure Docker is running on the host.
 2. Install the Agent as described in [the Agent installation instructions][4] for your host OS.
 3. Enable [the Docker integration tile in the application][5].
 4. Add the Agent user to the Docker group: `usermod -a -G docker dd-agent`
-5. Create a `docker_daemon.yaml` file by copying [the example file in the agent conf.d directory][6]. If you have a standard install of Docker on your host, there shouldn't be anything you need to change to get the integration to work.
+5. Create a `docker_daemon.yaml` file by copying [the example file in the Agent conf.d directory][6]. If you have a standard install of Docker on your host, there shouldn't be anything you need to change to get the integration to work.
 6. To enable other integrations, use `docker ps` to identify the ports used by the corresponding applications.
     ![Docker ps command][7]
 
-#### Container Installation
+#### Container installation
 
 1. Ensure Docker is running on the host.
 2. As per [the Docker container installation instructions][8], run:
@@ -53,14 +53,14 @@ In the command above, you are able to pass your API key to the Datadog Agent usi
 | DD_URL                                                                                            | Sets the Datadog intake server URL where the Agent sends data. This is useful when [using the Agent as a proxy][9].                                                                                                              |
 | LOG_LEVEL                                                                                         | Sets logging verbosity (CRITICAL, ERROR, WARNING, INFO, DEBUG). For example, `-e LOG_LEVEL=DEBUG` sets logging to debug mode.                                                                                                    |
 | TAGS                                                                                              | Sets host tags as a comma delimited string. Both simple tags and key-value tags are available, for example: `-e TAGS="simple-tag, tag-key:tag-value"`.                                                                           |
-| EC2_TAGS                                                                                          | Enabling this feature allows the agent to query and capture custom tags set using the EC2 API during startup. To enable, use `-e EC2_TAGS=yes`. Note that this feature requires an IAM role associated with the instance.        |
+| EC2_TAGS                                                                                          | Enabling this feature allows the Agent to query and capture custom tags set using the EC2 API during startup. To enable, use `-e EC2_TAGS=yes`. Note that this feature requires an IAM role associated with the instance.        |
 | NON_LOCAL_TRAFFIC                                                                                 | Enabling this feature allows StatsD reporting from any external IP. To enable, use `-e NON_LOCAL_TRAFFIC=yes`. This is used to report metrics from other containers or systems. See [network configuration][10] for more details. |
 | PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD                                                | Sets proxy configuration details. **Note**: `PROXY_PASSWORD` is required for passing in an authentication password and cannot be renamed. For more information, see the [Agent proxy documentation][11].                                                                                                                                  |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, see the [Autodiscovery guide][12].                                                                                                                                   |
 
 **Note**: Add `--restart=unless-stopped` if you want your agent to be resistant to restarts.
 
-#### Running the agent container on Amazon Linux
+#### Running the Agent container on Amazon Linux
 
 To run the Datadog Agent container on Amazon Linux, make this change to the `cgroup` volume mount location:
 
@@ -89,9 +89,9 @@ docker run -d --name dd-agent \
 ```
 
 #### Image versioning
-Starting with version 5.5.0 of the Datadog Agent, the Docker image follows a new versioning pattern. This allows us to release changes to the Docker image of the Datadog Agent but with the same version of the Agent.
+Starting with version 5.5.0 of the Datadog Agent, the Docker image follows a new versioning pattern. This allows Datadog to release changes to the Docker image of the Datadog Agent but with the same version of the Agent.
 
-The Docker image version has the following pattern: **X.Y.Z** where **X** is the major version of the Docker Image, **Y** is the minor version, **Z** represents the Agent version.
+The Docker image version has the following pattern: **X.Y.Z** where **X** is the major version of the Docker image, **Y** is the minor version, **Z** represents the Agent version.
 
 For example, the first version of the Docker image that bundles the Datadog Agent 5.5.0 is: `10.0.550`
 
@@ -107,15 +107,15 @@ For more information about building custom Docker containers with the Datadog Ag
 
 The latest Docker check is named `docker` and written in Go to take advantage of the new internal architecture. Starting from version 6.0, the Agent won't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent v5. All features are ported on version >6.0 , except the following deprecations:
 
-  * The `url`, `api_version` and `tags*` options are deprecated, direct use of the [standard Docker environment variables][15] is encouraged.
+  * The `url`, `api_version` and `tags*` options are deprecated. Direct use of the [standard Docker environment variables][15] is encouraged.
   * The `ecs_tags`, `performance_tags` and `container_tags` options are deprecated. Every relevant tag is now collected by default.
   * The `collect_container_count` option to enable the `docker.container.count` metric is not supported. `docker.containers.running` and `.stopped` should be used.
 
 Some options have moved from `docker_daemon.yaml` to the main `datadog.yaml`:
 
-  * `collect_labels_as_tags` has been renamed `docker_labels_as_tags` and now supports high cardinality tags, see the details in `datadog.yaml.example`.
+  * `collect_labels_as_tags` has been renamed `docker_labels_as_tags` and supports high cardinality tags. See the details in `datadog.yaml.example`.
   * `exclude` and `include` lists have been renamed `ac_include` and `ac_exclude`. To make filtering consistent across all components of the Agent, filtering on arbitrary tags has been dropped. The only supported filtering tags are `image` (image name) and `name` (container name). Regexp filtering is still available, see `datadog.yaml.example` for examples.
-  * The `docker_root` option has been split in two options `container_cgroup_root` and `container_proc_root`.
+  * The `docker_root` option has been split in two options: `container_cgroup_root` and `container_proc_root`.
   * `exclude_pause_container` has been added to exclude paused containers on Kubernetes and Openshift (defaults to true). This avoids removing them from the exclude list by error.
 
 Additional changes:
@@ -160,17 +160,9 @@ Returns `CRITICAL` if a container exited with a non-zero exit code, otherwise re
 Need help? Contact [Datadog support][21].
 
 ## Further Reading
-### Knowledge Base
-
 * [Compose and the Datadog Agent][22]
 * [DogStatsD and Docker][23]
-
-### Datadog Blog
-
-Learn more about how to monitor Docker performance metrics with [our series of posts][24]. We detail the challenges when monitoring Docker, its key performance metrics, how to collect them, and lastly how the largest TV and radio outlet in the U.S. monitors Docker using Datadog.
-
-We've also written several other in-depth blog posts to help you get the most out of Datadog and Docker:
-
+* [The Docker Monitoring Problem][24] (series)
 * [How to Monitor Docker Resource Metrics][25]
 * [How to Collect Docker Metrics][26]
 * [8 Surprising Facts about Real Docker Adoption][27]
