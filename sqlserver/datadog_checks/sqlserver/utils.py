@@ -17,4 +17,4 @@ def set_default_driver_conf():
 
 
 def construct_use_statement(database):
-    return 'use "{}"'.format(database)
+    return 'use [{}]'.format(database)
