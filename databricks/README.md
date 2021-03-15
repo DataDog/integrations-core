@@ -14,19 +14,25 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][2]. I
 
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
 
-Be sure to replace the `<DATADOG_API_KEY>` placeholders with your own API key and run the notebook once to save the init script as a global configuration. Read more about the Databricks Datadog Init scripts [here][2].
+1. Determine the best init script below for your Databricks cluster environment. 
 
-When configuring the cluster, add `DD_ENVIRONMENT` environment variable to add a global environment tag.
+2. Copy and run the contents into a notebook. The notebook will create an init script that will install a Datadog Agent on your clusters.
+    The notebook only needs to be run once to save the script as a global configuration. Read more about the Databricks Datadog Init scripts [here][2].
+    
+    Be sure to replace the `<DATADOG_API_KEY>`placeholders with your own API key and `<init-script-folder>` path in the first line.
+        
+3. Configure a new Databricks cluster with the `datadog-install-driver-only.sh` cluster-scoped init script using the UI, Databricks CLI, or invoking the Clusters API.
+    - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
+
 
 #### Standard cluster
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Driver only" xxx -->
 ##### Install the Datadog Agent on Driver
-Create a notebook with the following script to install the Datadog Agent on the driver node of the cluster.
-to install the Datadog Agent and collect system and Spark metrics.
+Install the Datadog Agent on the driver node of the cluster.
 
-This is a updated version of the [Datadog Init Script][4] Databricks notebook
+This is a updated version of the [Datadog Init Script][4] Databricks notebook example.
 
 ```shell script
 %python 
@@ -70,7 +76,7 @@ instances:
       streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.yaml
 
   # INCLUDE GLOBAL TAGS (environment, cluster_id, cluster_name)
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
@@ -123,9 +129,9 @@ instances:
       streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.d/conf.yaml
 
   # INCLUDE GLOBAL TAGS (environment, cluster_id, cluster_name)
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 else
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENVIRONMENT}\\n   - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:worker\\n/'  /etc/datadog-agent/datadog.yaml
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:worker\\n/'  /etc/datadog-agent/datadog.yaml
 fi
 
   # RESTARTING AGENT
@@ -178,6 +184,8 @@ instances:
     - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
       spark_cluster_mode: spark_driver_mode
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
+
+  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
