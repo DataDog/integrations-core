@@ -18,10 +18,10 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 
 2. Copy and run the contents into a notebook. The notebook will create an init script that will install a Datadog Agent on your clusters.
     The notebook only needs to be run once to save the script as a global configuration. Read more about the Databricks Datadog Init scripts [here][2].
-    
-    Be sure to replace the `<DATADOG_API_KEY>`placeholders with your own API key and `<init-script-folder>` path in the first line.
+    - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
         
-3. Configure a new Databricks cluster with the `datadog-install-driver-only.sh` cluster-scoped init script using the UI, Databricks CLI, or invoking the Clusters API.
+3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
+    - Set the `DD_API_KEY` environment variable in the cluster's Advanced Options with your Datadog API key.
     - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
 
 
@@ -49,11 +49,14 @@ cat <<EOF >> /tmp/start_datadog.sh
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "On the driver. Installing Datadog ..."
   
+  # CONFIGURE HOST TAGS FOR CLUSTER
+  DD_TAGS="environment:\${DD_ENV}","cluster_id:\${DB_CLUSTER_ID}","cluster_name:\${DB_CLUSTER_NAME}","host_ip:${SPARK_LOCAL_IP}","spark_host:driver"
+
   # INSTALL THE LATEST DATADOG AGENT 7
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=<DATADOG_API_KEY> bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
   
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
-  while [ -z \$gotparams ]; do
+  while [ -z \$gotparams = "TRUE" ]; do
     if [ -e "/tmp/master-params" ]; then
       DB_DRIVER_PORT=\$(cat /tmp/master-params | cut -d' ' -f2)
       gotparams=TRUE
@@ -61,9 +64,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     sleep 2
   done
 
-  sudo sed -i 's/^# env: <environment name>\$/env: ${DD_ENV}/g' /etc/datadog-agent/datadog.yaml
-  ddline=\$(sudo sed -n  '\|^# tags:\$|=' /etc/datadog-agent/datadog.yaml)
-  ddnum=\$((ddline + 3))
   hostip=\$(hostname -I | xargs)  
   
   # WRITING CONFIG FILE FOR SPARK INTEGRATION WITH STRUCTURED STREAMING METRICS ENABLED
@@ -74,9 +74,6 @@ instances:
       spark_cluster_mode: spark_standalone_mode
       cluster_name: \${hostip}
       streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.yaml
-
-  # INCLUDE GLOBAL TAGS (environment, cluster_id, cluster_name)
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
@@ -99,7 +96,7 @@ fi
 ```shell script
 %python 
 
-dbutils.fs.put("dbfs:/tmp/datadog-install-driver-workers.sh","""
+dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-driver-workers.sh","""
 #!/bin/bash
 cat <<EOF >> /tmp/start_datadog.sh
 
@@ -107,12 +104,8 @@ cat <<EOF >> /tmp/start_datadog.sh
   
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=<DATADOG_API_KEY> bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY  bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
   
-  sudo sed -i 's/^# env: <environment name>\$/env: ${DD_ENV}/g' /etc/datadog-agent/datadog.yaml
-  ddline=\$(sudo sed -n  '\|^# tags:\$|=' /etc/datadog-agent/datadog.yaml)
-  ddnum=\$((ddline + 3))
-
   hostip=$(hostname -I | xargs)
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
@@ -154,6 +147,9 @@ For job clusters, use the following script to configure the Spark integration.
 
 
 ```shell script
+%python 
+
+dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-job-driver-mode.sh","""
 #!/bin/bash
 
 echo "Running on the driver? $DB_IS_DRIVER"
@@ -166,7 +162,7 @@ if [ \$DB_IS_DRIVER ]; then
   echo "On the driver. Installing Datadog ..."
 
   # INSTALL THE LATEST DATADOG AGENT 7
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=<DATADOG_API_KEY> bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
@@ -198,6 +194,7 @@ if [ \$DB_IS_DRIVER ]; then
   chmod a+x /tmp/start_datadog.sh
   /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 fi
+""", True)
 
 ```
 
