@@ -50,13 +50,13 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "On the driver. Installing Datadog ..."
   
   # CONFIGURE HOST TAGS FOR CLUSTER
-  DD_TAGS="environment:\${DD_ENV}","cluster_id:\${DB_CLUSTER_ID}","cluster_name:\${DB_CLUSTER_NAME}","host_ip:${SPARK_LOCAL_IP}","spark_host:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_host:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
-  
+
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
-  while [ -z \$gotparams = "TRUE" ]; do
+  while [ -z \$gotparams ]; do
     if [ -e "/tmp/master-params" ]; then
       DB_DRIVER_PORT=\$(cat /tmp/master-params | cut -d' ' -f2)
       gotparams=TRUE
@@ -102,29 +102,41 @@ cat <<EOF >> /tmp/start_datadog.sh
 
 #!/bin/bash
   
-
-  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY  bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
-  
   hostip=$(hostname -I | xargs)
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
+  # CONFIGURE HOST TAGS FOR DRIVER
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_host:driver"
+
+  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  
   echo "Installing Datadog agent in the driver (master node) ..."
+  while [ -z \$gotparams ]; do
+    if [ -e "/tmp/driver-env.sh" ]; then
+      DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
+      gotparams=TRUE
+    fi
+    sleep 2
+  done
 
   # WRITING CONFIG FILE FOR SPARK INTEGRATION WITH STRUCTURED STREAMING METRICS ENABLED
   # MODIFY TO INCLUDE OTHER OPTIONS IN spark.d/conf.yaml.example
   echo "init_config:
 instances:
-    - spark_url: http://\${DB_DRIVER_IP}:\${SPARK_UI_PORT}
+    - spark_url: http://\${DB_DRIVER_IP}:\${DB_DRIVER_PORT}
       spark_cluster_mode: spark_driver_mode
       cluster_name: \${hostip}
-      streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.d/conf.yaml
-
-  # INCLUDE GLOBAL TAGS (environment, cluster_id, cluster_name)
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
+      streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 else
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:worker\\n/'  /etc/datadog-agent/datadog.yaml
+
+  # CONFIGURE HOST TAGS FOR WORKERS
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_host:worker"
+
+  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  
 fi
 
   # RESTARTING AGENT
@@ -161,9 +173,12 @@ cat <<EOF >> /tmp/start_datadog.sh
 if [ \$DB_IS_DRIVER ]; then
   echo "On the driver. Installing Datadog ..."
 
-  # INSTALL THE LATEST DATADOG AGENT 7
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  # CONFIGURE HOST TAGS FOR DRIVER
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_host:driver"
 
+  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
       DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
@@ -180,8 +195,6 @@ instances:
     - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
       spark_cluster_mode: spark_driver_mode
       cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
-
-  sudo sed -i '/# tags:/ s/^/tags:\\n  - environment:${DD_ENV}\\n  - cluster_id:${DB_CLUSTER_ID}\\n  - cluster_name:${DB_CLUSTER_NAME}\\n  - host_ip:${SPARK_LOCAL_IP}\\n  - spark_host:driver\\n/'  /etc/datadog-agent/datadog.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
