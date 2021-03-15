@@ -14,7 +14,7 @@
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 3235326953878060,
+                    "id": 8,
                     "definition": {
                         "type": "note",
                         "content": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets.\n\nDifferent MongoDB metrics are fetched from each member depending on its role in the cluster. For exemple the replication lag is fetched from the primary for all members of the replica set.\n\nFor this reason you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment you need one additional integration instance pointed to a mongos proxy.\n\nRefer to [Datadog's documentation](https://docs.datadoghq.com/integrations/mongo/?tab=host) for more information.",
@@ -33,7 +33,7 @@
                     }
                 },
                 {
-                    "id": 7,
+                    "id": 9,
                     "definition": {
                         "title": "Healthy members",
                         "title_size": "13",
@@ -55,7 +55,7 @@
                     }
                 },
                 {
-                    "id": 8,
+                    "id": 10,
                     "definition": {
                         "title": "Averaged uptime",
                         "title_size": "16",
@@ -78,7 +78,7 @@
                     }
                 },
                 {
-                    "id": 9,
+                    "id": 11,
                     "definition": {
                         "title": "Shards count",
                         "title_size": "16",
@@ -101,7 +101,7 @@
                     }
                 },
                 {
-                    "id": 10,
+                    "id": 12,
                     "definition": {
                         "title": "Nodes per shard",
                         "title_size": "16",
@@ -124,7 +124,7 @@
                     }
                 },
                 {
-                    "id": 11,
+                    "id": 13,
                     "definition": {
                         "title": "Configsvr count",
                         "title_size": "16",
@@ -156,11 +156,11 @@
             "title_align": "center",
             "reflow_type": "fixed",
             "type": "group",
-            "background_color": "white",
+            "background_color": "vivid_purple",
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 3456090313841814,
+                    "id": 14,
                     "definition": {
                         "title": "Maximum lag per replica set",
                         "title_size": "16",
@@ -180,7 +180,7 @@
                     }
                 },
                 {
-                    "id": 13,
+                    "id": 15,
                     "definition": {
                         "title": "Maximum lag per replica set",
                         "title_size": "16",
@@ -232,7 +232,7 @@
                     }
                 },
                 {
-                    "id": 12,
+                    "id": 16,
                     "definition": {
                         "title": "Oplog usage",
                         "title_size": "16",
@@ -299,7 +299,7 @@
                     }
                 },
                 {
-                    "id": 14,
+                    "id": 17,
                     "definition": {
                         "type": "note",
                         "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure to use Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions that is fetched from secondaries.",
@@ -329,11 +329,11 @@
             "title_align": "left",
             "reflow_type": "fixed",
             "type": "group",
-            "background_color": "vivid_purple",
+            "background_color": "purple",
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 15,
+                    "id": 18,
                     "definition": {
                         "title": "Read requests per second",
                         "title_size": "16",
@@ -399,7 +399,7 @@
                     }
                 },
                 {
-                    "id": 17,
+                    "id": 19,
                     "definition": {
                         "title": "Network I/O",
                         "title_size": "16",
@@ -480,7 +480,7 @@
                     }
                 },
                 {
-                    "id": 18,
+                    "id": 20,
                     "definition": {
                         "title": "Write requests per second",
                         "title_size": "16",
@@ -555,7 +555,7 @@
                     }
                 },
                 {
-                    "id": 20,
+                    "id": 21,
                     "definition": {
                         "title": "Query operations per second",
                         "title_size": "16",
@@ -667,7 +667,7 @@
         }
     },
     {
-        "id": 3500044118609068,
+        "id": 4,
         "definition": {
             "title": "Most Used Replica Sets",
             "title_align": "left",
@@ -677,7 +677,7 @@
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 16,
+                    "id": 22,
                     "definition": {
                         "title": "For reads",
                         "title_size": "16",
@@ -697,7 +697,7 @@
                     }
                 },
                 {
-                    "id": 19,
+                    "id": 23,
                     "definition": {
                         "title": "For writes",
                         "title_size": "16",
@@ -726,17 +726,17 @@
         }
     },
     {
-        "id": 4,
+        "id": 5,
         "definition": {
             "title": "Resource Utilization",
             "title_align": "center",
             "reflow_type": "fixed",
             "type": "group",
-            "background_color": "white",
+            "background_color": "vivid_yellow",
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 21,
+                    "id": 24,
                     "definition": {
                         "type": "note",
                         "content": "This metric reports the percentage of used client connection for each replica set. Use these values to understand the load and capacity requirements of your cluster.",
@@ -755,7 +755,7 @@
                     }
                 },
                 {
-                    "id": 22,
+                    "id": 25,
                     "definition": {
                         "title": "Percentage of client connections used (%)",
                         "title_size": "16",
@@ -816,7 +816,7 @@
                     }
                 },
                 {
-                    "id": 27,
+                    "id": 26,
                     "definition": {
                         "title": "Data size per replica set",
                         "title_size": "16",
@@ -867,7 +867,7 @@
                     }
                 },
                 {
-                    "id": 25,
+                    "id": 27,
                     "definition": {
                         "type": "note",
                         "content": "\n\nPage faults increase significantly when your server is experiencing poor performance. It can be caused by limited memory or data sets getting larger. In containerized environment you may want to change to query to group by {pod_name} instead.",
@@ -886,7 +886,7 @@
                     }
                 },
                 {
-                    "id": 26,
+                    "id": 28,
                     "definition": {
                         "title": "Number of page faults per host",
                         "title_size": "16",
@@ -940,7 +940,7 @@
                     }
                 },
                 {
-                    "id": 23,
+                    "id": 29,
                     "definition": {
                         "title": "Average memory usage",
                         "title_size": "16",
@@ -977,7 +977,7 @@
                     }
                 },
                 {
-                    "id": 24,
+                    "id": 30,
                     "definition": {
                         "type": "note",
                         "content": "Amount of RAM used by the mongo process. During normal use, this value tends to grow. In dedicated database servers, this number tends to approach the total amount of system memory.",
@@ -996,10 +996,11 @@
                     }
                 }
             ]
-        }
+        },
+        "layout":{"is_column_break": true}
     },
     {
-        "id": 5,
+        "id": 6,
         "definition": {
             "title": "Sharding Stats",
             "title_align": "left",
@@ -1008,7 +1009,7 @@
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 28,
+                    "id": 31,
                     "definition": {
                         "title": "Count of current sessions opened to the sharded cluster.",
                         "title_size": "16",
@@ -1065,7 +1066,7 @@
                     }
                 },
                 {
-                    "id": 29,
+                    "id": 32,
                     "definition": {
                         "title": "Total chunks count",
                         "title_size": "16",
@@ -1089,7 +1090,7 @@
                     }
                 },
                 {
-                    "id": 30,
+                    "id": 33,
                     "definition": {
                         "title": "Jumbo chunks count",
                         "title_size": "16",
@@ -1112,7 +1113,7 @@
                     }
                 },
                 {
-                    "id": 31,
+                    "id": 34,
                     "definition": {
                         "type": "note",
                         "content": "Count of chunks requires Agent 7.24+/6.24+ and 'jumbo_chunks' set in the integration configuration directed to your 'mongos' proxy.",
@@ -1132,7 +1133,7 @@
                     }
                 },
                 {
-                    "id": 32,
+                    "id": 35,
                     "definition": {
                         "type": "note",
                         "content": "If MongoDB cannot split a chunk that exceeds the specified chunk size, MongoDB labels the chunk as jumbo.\n\nThese jumbo chunks can become a performance bottleneck as they continue to grow, especially if the shard key value occurs with high frequency.",
@@ -1161,7 +1162,7 @@
         }
     },
     {
-        "id": 7064550751624452,
+        "id": 7,
         "definition": {
             "title": "Events",
             "title_align": "left",
@@ -1170,7 +1171,7 @@
             "layout_type": "ordered",
             "widgets": [
                 {
-                    "id": 6,
+                    "id": 36,
                     "definition": {
                         "title": "MongoDB events",
                         "title_size": "16",
