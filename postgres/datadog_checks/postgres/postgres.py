@@ -56,6 +56,9 @@ class PostgreSql(AgentCheck):
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self._clean_state()
 
+    def cancel(self):
+        self.statement_samples.cancel()
+
     def _clean_state(self):
         self._version = None
         self._is_aurora = None

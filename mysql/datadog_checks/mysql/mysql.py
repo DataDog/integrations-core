@@ -45,6 +45,7 @@ from .queries import (
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
+from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
 from .version_utils import get_version
 
@@ -76,10 +77,11 @@ class MySql(AgentCheck):
         self._conn = None
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._config.tags)
-        self._statement_metrics = MySQLStatementMetrics(self._config)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self._statement_metrics = MySQLStatementMetrics(self._config)
+        self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -111,6 +113,7 @@ class MySql(AgentCheck):
                 self._collect_system_metrics(self._config.host, db, self._config.tags)
                 if self._config.deep_database_monitoring:
                     self._collect_statement_metrics(db, self._config.tags)
+                    self._statement_samples.run_sampler(self.service_check_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -123,6 +126,9 @@ class MySql(AgentCheck):
                 raise e
             finally:
                 self._conn = None
+
+    def cancel(self):
+        self._statement_samples.cancel()
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()

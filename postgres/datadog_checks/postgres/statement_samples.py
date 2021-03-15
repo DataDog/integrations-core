@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
@@ -63,6 +64,7 @@ class PostgresStatementSamples(object):
         self._activity_last_query_start = None
         self._last_check_run = 0
         self._collection_loop_future = None
+        self._cancel_event = threading.Event()
         self._tags = None
         self._tags_str = None
         self._service = "postgres"
@@ -89,6 +91,9 @@ class PostgresStatementSamples(object):
             maxsize=int(self._config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
             ttl=60 * 60 / int(self._config.statement_samples_config.get('samples_per_hour_per_query', 15)),
         )
+
+    def cancel(self):
+        self._cancel_event.set()
 
     def run_sampler(self, tags):
         """
@@ -175,6 +180,10 @@ class PostgresStatementSamples(object):
         try:
             self._log.info("Starting statement sampler collection loop")
             while True:
+                if self._cancel_event.isSet():
+                    self._log.info("Collection loop cancelled")
+                    self._check.count("dd.postgres.statement_samples.collection_loop_cancel", 1, tags=self._tags)
+                    break
                 if time.time() - self._last_check_run > self._config.min_collection_interval * 2:
                     self._log.info("Sampler collection loop stopping due to check inactivity")
                     self._check.count("dd.postgres.statement_samples.collection_loop_inactive_stop", 1, tags=self._tags)
@@ -198,9 +207,9 @@ class PostgresStatementSamples(object):
             )
         finally:
             self._log.info("Shutting down statement sampler collection loop")
-            self.close()
+            self._close_db_conn()
 
-    def close(self):
+    def _close_db_conn(self):
         if self._db and not self._db.closed:
             try:
                 self._db.close()
@@ -301,6 +310,8 @@ class PostgresStatementSamples(object):
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
+            # if we're using the orjson implementation then json.dumps returns bytes
+            plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)

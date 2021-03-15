@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 2.8.3 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.8.2 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Make 'Context limit reached' message a warning. See [#8254](https://github.com/DataDog/integrations-core/pull/8254).

@@ -1,5 +1,25 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.6.1 / 2021-03-12
+
+* [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
+
+## 16.6.0 / 2021-03-05
+
+* [Added] Upgrade PyJWT to 2.0.1 on Python 3. See [#8762](https://github.com/DataDog/integrations-core/pull/8762).
+* [Fixed] Improve orjson compatibility. See [#8767](https://github.com/DataDog/integrations-core/pull/8767).
+
+## 16.5.0 / 2021-03-04
+
+* [Added] Add ability to look for wildcards in Prometheus metric transformers. See [#8750](https://github.com/DataDog/integrations-core/pull/8750).
+* [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).
+* [Added] Collect postgres statement samples & execution plans for deep database monitoring. See [#8627](https://github.com/DataDog/integrations-core/pull/8627).
+* [Added] Add cancel method to the AgentCheck base class, allowing cleanup of resources when checks are unscheduled.. See [#8463](https://github.com/DataDog/integrations-core/pull/8463).
+* [Added] Add logical utility functions. See [#8590](https://github.com/DataDog/integrations-core/pull/8590).
+* [Fixed] Remove unused AgentCheck attribute. See [#8619](https://github.com/DataDog/integrations-core/pull/8619).
+* [Security] Upgrade pyyaml python package. See [#8707](https://github.com/DataDog/integrations-core/pull/8707).
+* [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).
+
 ## 16.4.0 / 2021-02-09
 
 * [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).

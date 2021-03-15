@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_slave
 
+## 2.7.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.7.0 / 2020-11-06 / Agent 7.24.0
 
 * [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).

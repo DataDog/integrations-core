@@ -1,5 +1,10 @@
 # CHANGELOG - Nfsstat
 
+## 1.6.2 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).

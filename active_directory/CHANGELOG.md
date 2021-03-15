@@ -1,5 +1,9 @@
 # CHANGELOG - active_directory
 
+## 1.10.2 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.10.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).

@@ -119,6 +119,8 @@ def render_dashboard_progress():
     ]
 
     for integration in valid_integrations:
+        if 'snmp' in integration:
+            continue
         if has_dashboard(integration):
             integrations_with_dashboard += 1
             status = 'X'
