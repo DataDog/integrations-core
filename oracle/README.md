@@ -69,7 +69,7 @@ These installation steps are a guideline referenced from the [official installat
 This method only works on linux.
 Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver.
 
-Once it is installed, follow the following steps: 
+Once it is installed, complete the following steps: 
 
 1. [Download the JDBC Driver][2] jar file.
 2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
