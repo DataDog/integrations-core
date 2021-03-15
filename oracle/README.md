@@ -67,7 +67,7 @@ These installation steps are a guideline referenced from the [official installat
 ##### JDBC Driver
 
 This method only works on linux.
-Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver
+Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver.
 
 Once it is installed, follow the following steps: 
 
