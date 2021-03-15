@@ -772,13 +772,17 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
 
-        is_primary_replica_index = columns.index('is_primary_replica')
         failover_mode_desc_index = columns.index('failover_mode_desc')
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
         resource_group_name_index = columns.index('name')
         is_local_index = columns.index('is_local')
         database_name_index = columns.index('database_name')
+        try:
+            is_primary_replica_index = columns.index('is_primary_replica')
+        except ValueError:
+            # This column only supported in SQL Server 2014 and later
+            is_primary_replica_index = None
 
         for row in rows:
             is_local = row[is_local_index]
@@ -798,7 +802,6 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
-            is_primary_replica = row[is_primary_replica_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
 
@@ -806,9 +809,14 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
                 'availability_group_name:{}'.format(str(resource_group_name)),
-                'is_primary_replica:{}'.format(str(is_primary_replica)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
             ]
+            if is_primary_replica_index is not None:
+                is_primary_replica = row[is_primary_replica_index]
+                metric_tags.append('is_primary_replica:{}'.format(str(is_primary_replica)))
+            else:
+                metric_tags.append('is_primary_replica:unknown')
+
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
 
