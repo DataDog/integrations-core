@@ -138,7 +138,7 @@ It also respects a few extra fields under the `value` attribute of each option:
 
 ### Usage
 
-Use the `--sync` flag of the [config validation command](../ddev/cli.md#config_1) to render the example configuration files.
+Use the `--sync` flag of the [config validation command](../ddev/cli.md#ddev-validate-config) to render the example configuration files.
 
 ## API
 

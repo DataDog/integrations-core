@@ -11,9 +11,10 @@ from datadog_checks.couchbase.couchbase_consts import (
     NODE_HEALTH_SERVICE_CHECK_NAME,
     QUERY_STATS,
     SERVICE_CHECK_NAME,
+    SG_SERVICE_CHECK_NAME,
 )
 
-from .common import BUCKET_NAME, CHECK_TAGS, PORT
+from .common import BUCKET_NAME, CHECK_TAGS, PORT, SYNC_GATEWAY_METRICS
 
 NODE_STATS = [
     'cmd_get',
@@ -127,13 +128,30 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
+def test_sync_gateway_metrics(aggregator, instance_sg, couchbase_container_ip):
+    """
+    Test Sync Gateway metrics (prefixed "couchbase.sync_gateway.")
+    """
+    couchbase = Couchbase('couchbase', {}, instances=[instance_sg])
+    couchbase.check(instance_sg)
+    db_tags = ['db:sync_gateway'] + CHECK_TAGS
+    for mname in SYNC_GATEWAY_METRICS:
+        if mname.count('.') > 2:
+            # metrics tagged by database have an additional namespace
+            aggregator.assert_metric(mname, tags=db_tags, count=1)
+        else:
+            aggregator.assert_metric(mname, tags=CHECK_TAGS, count=1)
+    aggregator.assert_service_check(SG_SERVICE_CHECK_NAME, status=Couchbase.OK, tags=CHECK_TAGS)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_metadata(instance_query, datadog_agent):
     check = Couchbase('couchbase', {}, instances=[instance_query])
     check.check_id = 'test:123'
     check.check(instance_query)
-    server = instance_query['server']
 
-    data = check.get_data(server, instance_query)
+    data = check.get_data()
 
     nodes = data['stats']['nodes']
 

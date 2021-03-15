@@ -1,0 +1,202 @@
+{
+    "title": "Varnish - Metrics",
+    "description": "This dashboard provides an overview of your Varnish caches, so you can monitor cache performance and resource utilization, as well as the health of connections to backend servers. Further reading on Varnish monitoring:\n\n- [Top Varnish performance metrics](https://www.datadoghq.com/blog/top-varnish-performance-metrics/)\n\n- [How to collect Varnish metrics](https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/)\n\n- [Monitor Varnish using Datadog](https://www.datadoghq.com/blog/monitor-varnish-using-datadog/)\n\n- [Visit our Varnish integration docs](https://docs.datadoghq.com/integrations/varnish/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.sess_conn{$scope},avg:varnish.client_conn{$scope},avg:varnish.backend_conn{$scope}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Client and backend connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.client_req{$scope},avg:varnish.backend_req{$scope}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Client and backend requests"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.sess_dropped{$scope}",
+                        "style": {
+                            "palette": "warm"
+                        },
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "avg:varnish.client_drop{$scope}",
+                        "style": {
+                            "palette": "warm"
+                        },
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Client connections dropped"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.threads{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:varnish.n_wrk{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Threads in use"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.threads_created{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:varnish.n_wrk_create{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Threads created"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.thread_queue_len{$scope},avg:varnish.sess_queued{$scope}",
+                        "style": {
+                            "palette": "orange"
+                        },
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "avg:varnish.n_wrk_lqueue{$scope},avg:varnish.n_wrk_queue{$scope}",
+                        "style": {
+                            "palette": "orange"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Threads enqueued"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.threads_failed{$scope},avg:varnish.threads_limited{$scope}",
+                        "style": {
+                            "palette": "warm"
+                        },
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "avg:varnish.n_wrk_failed{$scope},avg:varnish.n_wrk_max{$scope}",
+                        "style": {
+                            "palette": "warm"
+                        },
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Threads creation issues"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.cache_hit{$scope},avg:varnish.cache_miss{$scope},avg:varnish.cache_hitpass{$scope}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Hits and misses"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "100 * ( avg:varnish.cache_hit{$scope} / ( avg:varnish.cache_hit{$scope} + avg:varnish.cache_miss{$scope} ) )",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Cache hit rate"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.backend_recycle{$scope},avg:varnish.backend_reuse{$scope}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Reused and recycled backend connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:varnish.backend_toolate{$scope},avg:varnish.backend_fail{$scope},avg:varnish.backend_unhealthy{$scope},avg:varnish.backend_busy{$scope}",
+                        "style": {
+                            "palette": "warm"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Backend connections issues"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "rate(avg:varnish.n_expired{$scope}),rate(avg:varnish.n_lru_nuked{$scope})",
+                        "style": {
+                            "palette": "warm"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Expired and LRU evicted objects"
+            }
+        }
+    ]
+}

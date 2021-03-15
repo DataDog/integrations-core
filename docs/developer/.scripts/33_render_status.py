@@ -14,7 +14,7 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only,
+    is_tile_only, is_logs_only,
 )
 
 MARKER = '<docs-insert-status>'
@@ -119,6 +119,8 @@ def render_dashboard_progress():
     ]
 
     for integration in valid_integrations:
+        if 'snmp' in integration:
+            continue
         if has_dashboard(integration):
             integrations_with_dashboard += 1
             status = 'X'
@@ -135,7 +137,7 @@ def render_dashboard_progress():
 
 
 def render_metadata_progress():
-    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x) and not is_logs_only(x)]
     total_checks = len(valid_checks)
     checks_with_metadata = 0
 
@@ -191,7 +193,7 @@ def render_logs_progress():
 
 
 def render_e2e_progress():
-    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x) and not is_logs_only(x)]
     total_checks = len(valid_checks)
     checks_with_e2e = 0
 

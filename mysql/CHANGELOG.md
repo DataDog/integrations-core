@@ -1,6 +1,15 @@
 # CHANGELOG - mysql
 
-## 2.2.1 / 2021-01-29
+## 2.3.0 / 2021-03-07
+
+* [Added] Collect mysql statement samples & execution plans . See [#8629](https://github.com/DataDog/integrations-core/pull/8629).
+* [Added] Apply default limits to MySQL statement summaries. See [#8646](https://github.com/DataDog/integrations-core/pull/8646).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Support newer queries. See [#8402](https://github.com/DataDog/integrations-core/pull/8402).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).
+
+## 2.2.1 / 2021-01-29 / Agent 7.26.0
 
 * [Fixed] Fix condition for replication status. See [#8475](https://github.com/DataDog/integrations-core/pull/8475).
 

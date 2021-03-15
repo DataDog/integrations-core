@@ -256,7 +256,7 @@ def testable(
     if repo == 'integrations-core':
         options = {
             '1': 'Integrations',
-            '2': 'Infra Integrations',
+            '2': 'Infra-Integrations',
             '3': 'Containers',
             '4': 'Core',
             '5': 'Platform',
@@ -274,7 +274,7 @@ def testable(
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
-            '9': 'Infra Integrations',
+            '9': 'Infra-Integrations',
             '10': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
@@ -381,8 +381,7 @@ def testable(
         if not (trello_config['key'] and trello_config['token']):
             abort('Error: You are not authenticated for Trello. Please set your trello ddev config')
 
-        if fixed_cards_mover:
-            fixed_cards_mover.on_new_pr(pr_url)
+        if fixed_cards_mover and fixed_cards_mover.try_move_card(pr_url):
             continue
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
@@ -475,11 +474,7 @@ def testable(
     if rc_build_cards_updater and not dry_run:
         rc_build_cards_updater.update_cards()
 
-    if fixed_cards_mover:
-        message = fixed_cards_mover.get_message()
-        echo_info('\n')
-        echo_info(message)
-    elif dry_run:
+    if dry_run:
         show_card_assigments(testerSelector)
 
 

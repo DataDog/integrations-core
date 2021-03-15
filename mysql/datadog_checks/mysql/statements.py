@@ -40,7 +40,41 @@ STATEMENT_METRICS = {
     'rows_examined': 'mysql.queries.rows_examined',
 }
 
-DEFAULT_STATEMENT_METRIC_LIMITS = {k: (10000, 10000) for k in STATEMENT_METRICS.keys()}
+# These limits define the top K and bottom K unique query rows for each metric. For each check run the
+# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
+DEFAULT_STATEMENT_METRICS_LIMITS = {
+    'count': (400, 0),
+    'errors': (100, 0),
+    'time': (400, 0),
+    'select_scan': (50, 0),
+    'select_full_join': (50, 0),
+    'no_index_used': (50, 0),
+    'no_good_index_used': (50, 0),
+    'lock_time': (50, 0),
+    'rows_affected': (100, 0),
+    'rows_sent': (100, 0),
+    'rows_examined': (100, 0),
+    # Synthetic column limits
+    'avg_time': (400, 0),
+    'rows_sent_ratio': (0, 50),
+}
+
+
+def generate_synthetic_rows(rows):
+    # type: (List[PyMysqlRow]) -> List[PyMysqlRow]
+    """
+    Given a list of rows, generate a new list of rows with "synthetic" column values derived from
+    the existing row values.
+    """
+    synthetic_rows = []
+    for row in rows:
+        new = copy.copy(row)
+        new['avg_time'] = float(new['time']) / new['count'] if new['count'] > 0 else 0
+        new['rows_sent_ratio'] = float(new['rows_sent']) / new['rows_examined'] if new['rows_examined'] > 0 else 0
+
+        synthetic_rows.append(new)
+
+    return synthetic_rows
 
 
 class MySQLStatementMetrics(object):
@@ -64,7 +98,7 @@ class MySQLStatementMetrics(object):
 
     def _collect_per_statement_metrics(self, db):
         # type: (pymysql.connections.Connection) -> List[Metric]
-        metrics = []
+        metrics = []  # type: List[Metric]
 
         def keyfunc(row):
             return (row['schema'], row['digest'])
@@ -72,13 +106,17 @@ class MySQLStatementMetrics(object):
         monotonic_rows = self._query_summary_per_statement(db)
         monotonic_rows = self._merge_duplicate_rows(monotonic_rows, key=keyfunc)
         rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
+        metrics.append(('dd.mysql.queries.query_rows_raw', len(rows), []))
+
+        rows = generate_synthetic_rows(rows)
         rows = apply_row_limits(
             rows,
-            DEFAULT_STATEMENT_METRIC_LIMITS,
+            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRICS_LIMITS,
             tiebreaker_metric='count',
             tiebreaker_reverse=True,
             key=keyfunc,
         )
+        metrics.append(('dd.mysql.queries.query_rows_limited', len(rows), []))
 
         for row in rows:
             tags = []

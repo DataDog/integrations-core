@@ -30,8 +30,8 @@ class MarklogicCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(MarklogicCheck, self).__init__(*args, **kwargs)
 
-        self.config = Config(self.instance)
-        self.api = MarkLogicApi(self.http, self.config.url)
+        self._config = Config(self.instance)
+        self.api = MarkLogicApi(self.http, self._config.url)
 
         self.collectors = [
             self.collect_summary_status_base_metrics,
@@ -56,13 +56,13 @@ class MarklogicCheck(AgentCheck):
         except (HTTPError, ConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
-                self.config.url,
+                self._config.url,
                 e,
             )
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self._config.tags)
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self._config.tags)
 
         self.resources = parse_resources(raw_resources)
         self.resources_to_monitor = self.get_resources_to_monitor()
@@ -73,7 +73,7 @@ class MarklogicCheck(AgentCheck):
             except Exception:
                 self.log.exception("Collector %s failed while collecting metrics", collector.__name__)
 
-        if self.config.enable_health_service_checks:
+        if self._config.enable_health_service_checks:
             self.submit_health_service_checks()
 
     def collect_summary_status_resource_metrics(self):
@@ -87,7 +87,7 @@ class MarklogicCheck(AgentCheck):
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
             data = self.api.get_status_data(res_meta['plural'])
-            metrics = parse_summary_status_resource_metrics(resource_type, data, self.config.tags)
+            metrics = parse_summary_status_resource_metrics(resource_type, data, self._config.tags)
             self.submit_metrics(metrics)
 
     def collect_summary_status_base_metrics(self):
@@ -103,7 +103,7 @@ class MarklogicCheck(AgentCheck):
         """
         data = self.api.get_status_data()
         self.submit_version_metadata(data)
-        metrics = parse_summary_status_base_metrics(data, self.config.tags)
+        metrics = parse_summary_status_base_metrics(data, self._config.tags)
         self.submit_metrics(metrics)
 
     def collect_summary_storage_base_metrics(self):
@@ -112,7 +112,7 @@ class MarklogicCheck(AgentCheck):
         Collect Base Storage Metrics
         """
         data = self.api.get_storage_data()
-        metrics = parse_summary_storage_base_metrics(data, self.config.tags)
+        metrics = parse_summary_storage_base_metrics(data, self._config.tags)
         self.submit_metrics(metrics)
 
     def get_resources_to_monitor(self):
@@ -125,7 +125,7 @@ class MarklogicCheck(AgentCheck):
         }  # type: Dict[str, List[Any]]
 
         for res in self.resources:
-            if is_resource_included(res, self.config):
+            if is_resource_included(res, self._config):
                 filtered_resources[res['type']].append(res)
 
         self.log.debug('Filtered resources to monitor: %s', filtered_resources)
@@ -139,7 +139,7 @@ class MarklogicCheck(AgentCheck):
         """
         for res_type in self.resources_to_monitor.keys():
             for res in self.resources_to_monitor[res_type]:
-                tags = ['{}:{}'.format(RESOURCE_TYPES[res_type]['tag_name'], res['name'])] + self.config.tags
+                tags = ['{}:{}'.format(RESOURCE_TYPES[res_type]['tag_name'], res['name'])] + self._config.tags
                 if res.get('group'):
                     tags.append('{}:{}'.format(RESOURCE_TYPES['group']['tag_name'], res['group']))
 
@@ -214,7 +214,7 @@ class MarklogicCheck(AgentCheck):
             for res in self.resources:
                 if res['type'] in SERVICE_CHECK_RESOURCES:
                     service_check_name = '{}.health'.format(res['type'])
-                    res_tags = self.config.tags + ['{}_name:{}'.format(res['type'], res['name'])]
+                    res_tags = self._config.tags + ['{}_name:{}'.format(res['type'], res['name'])]
                     res_detailed = health_report[res['type']].get(res['name'])
                     if res_detailed:
                         self.service_check(

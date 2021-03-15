@@ -1,6 +1,6 @@
 # CHANGELOG - Amazon MSK
 
-## 1.4.1 / 2021-01-25
+## 1.4.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Hide auto-populated prometheus_url from config spec. See [#8330](https://github.com/DataDog/integrations-core/pull/8330).
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).

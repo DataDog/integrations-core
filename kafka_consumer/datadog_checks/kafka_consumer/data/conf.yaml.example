@@ -231,7 +231,8 @@ instances:
     ## @param kafka_consumer_offsets - boolean - optional - default: false
     ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
     ## from Zookeeper and is deprecated.
-    ## This setting only applies if zk_connect_str is set
+    ## This setting only applies if `zk_connect_str` is set and cannot work with
+    ## `monitor_unlisted_consumer_groups` since the generated list comes from Zookeeper.
     ## Set to true to fetch consumer offsets from both Zookeeper and Kafka
     ## Set to false to fetch consumer offsets only from Zookeeper.
     #

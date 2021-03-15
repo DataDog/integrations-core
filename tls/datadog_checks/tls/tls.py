@@ -226,11 +226,13 @@ class TLSCheck(AgentCheck):
             cert = self.local_cert_loader(cert)
             self.log.debug('Deserialized certificate: %s', cert)
         except Exception as e:
+            message = 'Unable to parse the certificate: {}'.format(e)
+            self.log.debug(message)
             self.service_check(
                 self.SERVICE_CHECK_VALIDATION,
                 self.CRITICAL,
                 tags=self._tags,
-                message='Unable to parse the certificate: {}'.format(e),
+                message=message,
             )
             return
 
@@ -258,19 +260,23 @@ class TLSCheck(AgentCheck):
             try:
                 validator(cert, text_type(self._server_hostname))
             except service_identity.VerificationError:
+                message = 'The {} on the certificate does not match the given host'.format(host_type)
+                self.log.debug(message)
                 self.service_check(
                     self.SERVICE_CHECK_VALIDATION,
                     self.CRITICAL,
                     tags=self._tags,
-                    message='The {} on the certificate does not match the given host'.format(host_type),
+                    message=message,
                 )
                 return
             except service_identity.CertificateError as e:  # no cov
+                message = 'The certificate contains invalid/unexpected data: {}'.format(e)
+                self.log.debug(message)
                 self.service_check(
                     self.SERVICE_CHECK_VALIDATION,
                     self.CRITICAL,
                     tags=self._tags,
-                    message='The certificate contains invalid/unexpected data: {}'.format(e),
+                    message=message,
                 )
                 return
         self.log.debug('Certificate is valid')

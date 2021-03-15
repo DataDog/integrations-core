@@ -21,46 +21,9 @@ from .git import get_latest_tag
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DOGWEB_JSON_DASHBOARDS = (
-    'activemq',
-    'btrfs',
-    'ceph',
-    'cisco_aci',
-    'consul',
-    'couchbase',
-    'couchdb',
-    'etcd',
-    'fluentd',
-    'gearmand',
-    'gunicorn',
     'hdfs_datanode',
     'hdfs_namenode',
-    'immunio',  # Is this a core integration??
-    'kafka',
-    'kong',
-    'kyoto_tycoon',
-    'kubernetes',
-    'lighttpd',
-    'mapreduce',
-    'marathon',
     'mesos',
-    'nginx',
-    'openstack',
-    'pgbouncer',
-    'php_fpm',
-    'postfix',
-    'powerdns_recursor',
-    'rabbitmq',
-    'riak',
-    'riakcs',
-    'solr',
-    'spark',
-    'sqlserver',
-    'tokumx',
-    'varnish',
-    'vsphere',
-    'wmi_check',
-    'yarn',
-    'zk',
 )
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
@@ -611,6 +574,17 @@ def _has_asset_in_manifest(check, asset):
 def is_tile_only(check):
     config_file = get_config_file(check)
     return not os.path.exists(config_file)
+
+
+def is_logs_only(check):
+    config_file = get_config_file(check)
+    if not file_exists(config_file):
+        return False
+    with open(config_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        if 'init_config:' not in content and '# logs:' in content:
+            return True
+    return False
 
 
 def is_jmx_integration(check_name):

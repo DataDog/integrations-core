@@ -187,7 +187,7 @@ def test_stats_metrics(aggregator, instance):
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
     # make sure time is before fixture messages start time
-    check.config.instance_creation_datetime = ensure_aware_datetime(dt.datetime(year=2000, month=1, day=1))
+    check._config.instance_creation_datetime = ensure_aware_datetime(dt.datetime(year=2000, month=1, day=1))
 
     with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as channel_file, open(
         os.path.join(common.HERE, 'fixtures', 'statistics_queue.data'), 'rb'
