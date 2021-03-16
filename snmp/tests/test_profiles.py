@@ -716,7 +716,7 @@ def test_idrac(aggregator):
     indexes = ['26', '29']
     for index in indexes:
         tags = ['chassis_index:{}'.format(index)] + common_tags
-        for gauge in (IDRAC_SYSTEM_STATUS_GAUGES,):
+        for gauge in IDRAC_SYSTEM_STATUS_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
