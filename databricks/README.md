@@ -48,7 +48,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "On the driver. Installing Datadog ..."
   
   # CONFIGURE HOST TAGS FOR CLUSTER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
@@ -128,7 +128,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
   echo "Installing Datadog agent in the driver (master node) ..."
   # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
@@ -173,7 +173,7 @@ logs:
 else
 
   # CONFIGURE HOST TAGS FOR WORKERS
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_node:worker"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
@@ -215,7 +215,7 @@ if [ \$DB_IS_DRIVER ]; then
   echo "On the driver. Installing Datadog ..."
 
   # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"

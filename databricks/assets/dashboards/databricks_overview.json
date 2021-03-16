@@ -84,7 +84,7 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 20,
+                "x": 22,
                 "y": 106
             }
         },
@@ -111,7 +111,7 @@
             "layout": {
                 "height": 11,
                 "width": 15,
-                "x": 36,
+                "x": 38,
                 "y": 19
             }
         },
@@ -137,7 +137,7 @@
             "layout": {
                 "height": 11,
                 "width": 15,
-                "x": 36,
+                "x": 38,
                 "y": 7
             }
         },
@@ -163,7 +163,7 @@
             "layout": {
                 "height": 11,
                 "width": 15,
-                "x": 20,
+                "x": 22,
                 "y": 7
             }
         },
@@ -189,7 +189,7 @@
             "layout": {
                 "height": 11,
                 "width": 15,
-                "x": 20,
+                "x": 22,
                 "y": 19
             }
         },
@@ -266,7 +266,7 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 59,
+                "x": 61,
                 "y": 106
             }
         },
@@ -297,7 +297,7 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 59,
+                "x": 61,
                 "y": 68
             }
         },
@@ -328,7 +328,7 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 20,
+                "x": 22,
                 "y": 68
             }
         },
@@ -363,7 +363,7 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 59,
+                "x": 61,
                 "y": 84
             }
         },
@@ -394,7 +394,7 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 20,
+                "x": 22,
                 "y": 84
             }
         },
@@ -414,7 +414,7 @@
             "layout": {
                 "height": 9,
                 "width": 53,
-                "x": 98,
+                "x": 100,
                 "y": 62
             }
         },
@@ -427,8 +427,8 @@
             "id": 6923169892567062,
             "layout": {
                 "height": 12,
-                "width": 18,
-                "x": 1,
+                "width": 21,
+                "x": 0,
                 "y": 1
             }
         },
@@ -459,13 +459,13 @@
             "layout": {
                 "height": 23,
                 "width": 31,
-                "x": 20,
+                "x": 22,
                 "y": 31
             }
         },
         {
             "definition": {
-                "background_color": "blue",
+                "background_color": "orange",
                 "content": "## Driver",
                 "font_size": "14",
                 "has_padding": true,
@@ -480,14 +480,14 @@
             "layout": {
                 "height": 5,
                 "width": 53,
-                "x": 98,
+                "x": 100,
                 "y": 7
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
-                "content": "## Spark Utilization",
+                "background_color": "vivid_orange",
+                "content": "## Spark Job Status",
                 "font_size": "14",
                 "has_padding": true,
                 "show_tick": false,
@@ -501,13 +501,13 @@
             "layout": {
                 "height": 5,
                 "width": 77,
-                "x": 20,
+                "x": 22,
                 "y": 56
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_orange",
                 "content": "## Resource Overview",
                 "font_size": "14",
                 "has_padding": true,
@@ -522,13 +522,13 @@
             "layout": {
                 "height": 5,
                 "width": 77,
-                "x": 20,
+                "x": 22,
                 "y": 1
             }
         },
         {
             "definition": {
-                "background_color": "blue",
+                "background_color": "orange",
                 "content": "## Stages",
                 "font_size": "14",
                 "has_padding": true,
@@ -543,13 +543,13 @@
             "layout": {
                 "height": 5,
                 "width": 77,
-                "x": 20,
+                "x": 22,
                 "y": 62
             }
         },
         {
             "definition": {
-                "background_color": "blue",
+                "background_color": "orange",
                 "content": "## Jobs",
                 "font_size": "14",
                 "has_padding": true,
@@ -564,14 +564,14 @@
             "layout": {
                 "height": 5,
                 "width": 77,
-                "x": 20,
+                "x": 22,
                 "y": 100
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
-                "content": "## Logs",
+                "background_color": "vivid_orange",
+                "content": "## Events and Logs",
                 "font_size": "14",
                 "has_padding": true,
                 "show_tick": false,
@@ -585,7 +585,7 @@
             "layout": {
                 "height": 5,
                 "width": 53,
-                "x": 98,
+                "x": 100,
                 "y": 56
             }
         },
@@ -613,13 +613,13 @@
             "layout": {
                 "height": 35,
                 "width": 53,
-                "x": 98,
+                "x": 100,
                 "y": 74
             }
         },
         {
             "definition": {
-                "background_color": "blue",
+                "background_color": "orange",
                 "content": "## Executor",
                 "font_size": "14",
                 "has_padding": true,
@@ -634,7 +634,7 @@
             "layout": {
                 "height": 5,
                 "width": 53,
-                "x": 98,
+                "x": 100,
                 "y": 31
             }
         },
@@ -681,7 +681,7 @@
             "layout": {
                 "height": 16,
                 "width": 26,
-                "x": 125,
+                "x": 127,
                 "y": 13
             }
         },
@@ -728,7 +728,7 @@
             "layout": {
                 "height": 16,
                 "width": 26,
-                "x": 98,
+                "x": 100,
                 "y": 13
             }
         },
@@ -775,7 +775,7 @@
             "layout": {
                 "height": 17,
                 "width": 26,
-                "x": 125,
+                "x": 127,
                 "y": 37
             }
         },
@@ -842,13 +842,13 @@
             "layout": {
                 "height": 15,
                 "width": 38,
-                "x": 20,
+                "x": 22,
                 "y": 122
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_orange",
                 "content": "## Spark Resources",
                 "font_size": "14",
                 "has_padding": true,
@@ -863,7 +863,7 @@
             "layout": {
                 "height": 5,
                 "width": 53,
-                "x": 98,
+                "x": 100,
                 "y": 1
             }
         },
@@ -921,7 +921,7 @@
             "layout": {
                 "height": 15,
                 "width": 44,
-                "x": 53,
+                "x": 55,
                 "y": 7
             }
         },
@@ -968,7 +968,7 @@
             "layout": {
                 "height": 17,
                 "width": 26,
-                "x": 98,
+                "x": 100,
                 "y": 37
             }
         },
@@ -1015,7 +1015,7 @@
             "layout": {
                 "height": 15,
                 "width": 44,
-                "x": 53,
+                "x": 55,
                 "y": 23
             }
         },
@@ -1080,14 +1080,35 @@
             "layout": {
                 "height": 15,
                 "width": 44,
-                "x": 53,
+                "x": 55,
                 "y": 39
             }
         },
         {
             "definition": {
                 "background_color": "white",
-                "content": "This dashboard tracks the current status of your Spark jobs, tasks, and stages in your Databricks clusters. It also allows you to track the resource utilization of your nodes, which point to possible areas for optimization. Further reading on Databricks and Spark monitoring:\n\n[Docs for Datadog's Databricks integration](https://docs.datadoghq.com/integrations/databricks/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "content": "This dashboard tracks the current status of your Spark jobs, tasks, and stages in your Databricks clusters. It also allows you to track the resource utilization of your nodes, which point to possible areas for optimization. \n\nSee the [Datadog Databricks integration documentation](https://docs.datadoghq.com/integrations/databricks/) to find the suitable init script for your Databricks cluster environment.\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 7665647046384524,
+            "layout": {
+                "height": 33,
+                "width": 21,
+                "x": 0,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitor the resource consumption on your Spark driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
                 "font_size": "14",
                 "has_padding": true,
                 "show_tick": false,
@@ -1097,12 +1118,54 @@
                 "type": "note",
                 "vertical_align": "top"
             },
-            "id": 7665647046384524,
+            "id": 2699895617290038,
             "layout": {
-                "height": 35,
+                "height": 24,
                 "width": 18,
+                "x": 154,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "The Datadog init scripts support logs configuration to collect and monitor your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 7563107946559838,
+            "layout": {
+                "height": 24,
+                "width": 18,
+                "x": 154,
+                "y": 74
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitor your Spark jobs, stages, and tasks by status. \n\nIncrease in stage failures may signify there is a problem with processing a Spark task like incorrect Spark configuration or code errors. Correlate the failures with your driver logs to observe for an exception.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 2025887844092124,
+            "layout": {
+                "height": 24,
+                "width": 19,
                 "x": 1,
-                "y": 14
+                "y": 77
             }
         }
     ]
