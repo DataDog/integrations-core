@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.7.0 / 2021-03-16
+
+* [Added] Add new precision time function. See [#8838](https://github.com/DataDog/integrations-core/pull/8838).
+
 ## 16.6.1 / 2021-03-12
 
 * [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
