@@ -30,9 +30,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Driver only" xxx -->
 ##### Install the Datadog Agent on Driver
-Install the Datadog Agent on the driver node of the cluster.
-
-This is a updated version of the [Datadog Init Script][4] Databricks notebook example.
+Install the Datadog Agent on the driver node of the cluster. This is a updated version of the [Datadog Init Script][4] Databricks notebook example.
 
 ```shell script
 %python 
@@ -55,6 +53,19 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   # INSTALL THE LATEST DATADOG AGENT 7
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 
+  # WAIT FOR DATADOG AGENT TO BE INSTALLED
+  while [ -z \$datadoginstalled ]; do
+    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
+      datadoginstalled=TRUE
+    fi
+    sleep 2
+  done
+
+  echo "Datadog Agent is installed"
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  echo "logs_enabled: true" >> /etc/datadog-agent/datadog.yaml
+
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/master-params" ]; then
@@ -65,15 +76,24 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   done
 
   hostip=\$(hostname -I | xargs)  
-  
-  # WRITING CONFIG FILE FOR SPARK INTEGRATION WITH STRUCTURED STREAMING METRICS ENABLED
+
+  # WRITING CONFIG FILE FOR SPARK INTEGRATION WITH STRUCTURED STREAMING METRICS ENABLED AND LOGS CONFIGURATION
   # MODIFY TO INCLUDE OTHER OPTIONS IN spark.d/conf.yaml.example
   echo "init_config:
 instances:
     - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
       spark_cluster_mode: spark_standalone_mode
       cluster_name: \${hostip}
-      streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.yaml
+      streaming_metrics: true
+logs:
+    - type: file
+      path: /databricks/driver/logs/*.log
+      source: databricks
+      service: databricks
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
@@ -106,13 +126,25 @@ cat <<EOF >> /tmp/start_datadog.sh
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
+  echo "Installing Datadog agent in the driver (master node) ..."
   # CONFIGURE HOST TAGS FOR DRIVER
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
   
-  echo "Installing Datadog agent in the driver (master node) ..."
+  # WAIT FOR DATADOG AGENT TO BE INSTALLED
+  while [ -z \$datadoginstalled ]; do
+    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
+      datadoginstalled=TRUE
+    fi
+    sleep 2
+  done
+  echo "Datadog Agent is installed"
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  echo "logs_enabled: true" >> /etc/datadog-agent/datadog.yaml
+
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
       DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
@@ -128,7 +160,16 @@ instances:
     - spark_url: http://\${DB_DRIVER_IP}:\${DB_DRIVER_PORT}
       spark_cluster_mode: spark_driver_mode
       cluster_name: \${hostip}
-      streaming_metrics: true" > /etc/datadog-agent/conf.d/spark.yaml
+      streaming_metrics: true
+logs:
+    - type: file
+      path: /databricks/driver/logs/*.log
+      source: databricks
+      service: databricks
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.yaml
 else
 
   # CONFIGURE HOST TAGS FOR WORKERS
@@ -136,7 +177,7 @@ else
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
-  
+
 fi
 
   # RESTARTING AGENT
@@ -178,7 +219,19 @@ if [ \$DB_IS_DRIVER ]; then
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
-  
+
+  # WAIT FOR DATADOG AGENT TO BE INSTALLED
+  while [ -z \$datadoginstalled ]; do
+    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
+      datadoginstalled=TRUE
+    fi
+    sleep 2
+  done
+  echo "Datadog Agent is installed"  
+
+  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
+  echo "logs_enabled: true" >> /etc/datadog-agent/datadog.yaml
+
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
       DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
@@ -194,7 +247,16 @@ if [ \$DB_IS_DRIVER ]; then
 instances:
     - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
       spark_cluster_mode: spark_driver_mode
-      cluster_name: \$current" > /etc/datadog-agent/conf.d/spark.yaml
+      cluster_name: \$current
+logs:
+    - type: file
+      path: /databricks/driver/logs/*.log
+      source: databricks
+      service: databricks
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.yaml
 
   # RESTARTING AGENT
   sudo service datadog-agent restart
