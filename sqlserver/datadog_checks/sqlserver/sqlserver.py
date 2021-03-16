@@ -457,7 +457,7 @@ class SQLServer(AgentCheck):
                             rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
-                            continue
+                            rows, cols = None, None
 
                         instance_results[cls] = rows, cols
 
@@ -466,10 +466,12 @@ class SQLServer(AgentCheck):
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
                         rows, cols = instance_results['SqlFractionMetric']
-                        metric.fetch_metric(rows, cols)
+                        if rows is not None:
+                            metric.fetch_metric(rows, cols)
                     else:
                         rows, cols = instance_results[metric.__class__.__name__]
-                        metric.fetch_metric(rows, cols)
+                        if rows is not None:
+                            metric.fetch_metric(rows, cols)
 
             # reuse connection for any custom queries
             self._query_manager.execute()
