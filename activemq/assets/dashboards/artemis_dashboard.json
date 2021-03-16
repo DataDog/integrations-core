@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "Tailored for the Artemis version of ActiveMQ, this dashboard shows trends in the number of messages enqueued, dequeued, and dispatched so you can understand the status and throughput of your message brokers. \n\nFor more information about ActiveMQ:\n\n- [ActiveMQ architecture and key metrics](https://www.datadoghq.com/blog/activemq-architecture-and-metrics/)\n\n- [Built-in and open source tools for collecting ActiveMQ metrics](https://www.datadoghq.com/blog/collecting-activemq-metrics/)\n\n- [Monitoring ActiveMQ with Datadog](https://www.datadoghq.com/blog/monitoring-activemq-with-datadog/)\n\n- [ActiveMQ integration documentation](https://docs.datadoghq.com/integrations/activemq/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "Tailored for the Artemis version of ActiveMQ, this dashboard shows trends in the number of messages enqueued, dequeued, and dispatched so you can understand the status and throughput of your message brokers. \n\nFor more information about ActiveMQ (not Artemis specific):\n\n- [ActiveMQ architecture and key metrics](https://www.datadoghq.com/blog/activemq-architecture-and-metrics/)\n\n- [Built-in and open source tools for collecting ActiveMQ metrics](https://www.datadoghq.com/blog/collecting-activemq-metrics/)\n\n- [Monitoring ActiveMQ with Datadog](https://www.datadoghq.com/blog/monitoring-activemq-with-datadog/)\n\n- [ActiveMQ integration documentation](https://docs.datadoghq.com/integrations/activemq/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
     "layout_type": "free",
     "template_variables": [],
     "title": "ActiveMQ Artemis - Overview",
@@ -21,7 +21,7 @@
         },
         {
             "definition": {
-                "background_color": "gray",
+                "background_color": "pink",
                 "content": "Broker",
                 "font_size": "18",
                 "show_tick": true,
@@ -32,16 +32,16 @@
             },
             "id": 1,
             "layout": {
-                "height": 25,
-                "width": 12,
+                "height": 5,
+                "width": 75,
                 "x": 22,
                 "y": 0
             }
         },
         {
             "definition": {
-                "background_color": "gray",
-                "content": "Queue",
+                "background_color": "blue",
+                "content": "Queue Statistics",
                 "font_size": "18",
                 "show_tick": true,
                 "text_align": "center",
@@ -51,35 +51,10 @@
             },
             "id": 2,
             "layout": {
-                "height": 44,
-                "width": 12,
-                "x": 0,
-                "y": 27
-            }
-        },
-        {
-            "definition": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "sum",
-                        "q": "sum:activemq.artemis.total_connection_count{*}.as_count()"
-                    }
-                ],
-                "time": {
-                    "live_span": "15m"
-                },
-                "title": "Connections (past 1 hour)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 3,
-            "layout": {
-                "height": 11,
-                "width": 20,
-                "x": 35,
-                "y": 0
+                "height": 5,
+                "width": 75,
+                "x": 22,
+                "y": 31
             }
         },
         {
@@ -94,7 +69,7 @@
                 "time": {
                     "live_span": "5m"
                 },
-                "title": "Consumers (last 5 mins)",
+                "title": "Consumers",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -102,9 +77,9 @@
             "id": 4,
             "layout": {
                 "height": 11,
-                "width": 20,
-                "x": 78,
-                "y": 0
+                "width": 15,
+                "x": 22,
+                "y": 18
             }
         },
         {
@@ -146,10 +121,10 @@
             },
             "id": 5,
             "layout": {
-                "height": 13,
-                "width": 31,
-                "x": 35,
-                "y": 12
+                "height": 11,
+                "width": 29,
+                "x": 68,
+                "y": 6
             }
         },
         {
@@ -177,9 +152,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {
-                    "live_span": "1h"
-                },
                 "title": "Messages expired",
                 "title_align": "left",
                 "title_size": "16",
@@ -195,9 +167,9 @@
             "id": 6,
             "layout": {
                 "height": 14,
-                "width": 42,
-                "x": 13,
-                "y": 57
+                "width": 37,
+                "x": 22,
+                "y": 67
             }
         },
         {
@@ -225,7 +197,7 @@
                 "time": {
                     "live_span": "1h"
                 },
-                "title": "Messages acked",
+                "title": "Messages acknowledged",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries",
@@ -240,9 +212,9 @@
             "id": 7,
             "layout": {
                 "height": 14,
-                "width": 42,
-                "x": 56,
-                "y": 42
+                "width": 37,
+                "x": 60,
+                "y": 52
             }
         },
         {
@@ -285,9 +257,9 @@
             "id": 8,
             "layout": {
                 "height": 14,
-                "width": 42,
-                "x": 56,
-                "y": 57
+                "width": 37,
+                "x": 60,
+                "y": 67
             }
         },
         {
@@ -330,9 +302,9 @@
             "id": 9,
             "layout": {
                 "height": 14,
-                "width": 42,
-                "x": 13,
-                "y": 42
+                "width": 37,
+                "x": 22,
+                "y": 52
             }
         },
         {
@@ -350,7 +322,7 @@
                 "requests": [
                     {
                         "display_type": "bars",
-                        "q": "sum:activemq.artemis.queue.message_count{*}.as_count()",
+                        "q": "sum:activemq.artemis.queue.message_count{*} by {queue}.as_count()",
                         "style": {
                             "palette": "orange"
                         }
@@ -375,9 +347,9 @@
             "id": 11,
             "layout": {
                 "height": 14,
-                "width": 42,
-                "x": 13,
-                "y": 27
+                "width": 37,
+                "x": 22,
+                "y": 37
             }
         },
         {
@@ -420,9 +392,9 @@
             "id": 12,
             "layout": {
                 "height": 14,
-                "width": 42,
-                "x": 56,
-                "y": 27
+                "width": 37,
+                "x": 60,
+                "y": 37
             }
         },
         {
@@ -438,15 +410,15 @@
                 },
                 "title": "Broker Status",
                 "title_align": "center",
-                "title_size": "13",
+                "title_size": "16",
                 "type": "check_status"
             },
             "id": 14,
             "layout": {
-                "height": 9,
+                "height": 13,
                 "width": 20,
                 "x": 0,
-                "y": 14
+                "y": 13
             }
         },
         {
@@ -469,7 +441,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 156,
-                "y": 12
+                "y": 6
             }
         },
         {
@@ -514,7 +486,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 156,
-                "y": 27
+                "y": 21
             }
         },
         {
@@ -559,7 +531,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 113,
-                "y": 27
+                "y": 21
             }
         },
         {
@@ -584,7 +556,7 @@
                 "height": 14,
                 "width": 20,
                 "x": 113,
-                "y": 12
+                "y": 6
             }
         },
         {
@@ -609,15 +581,15 @@
                 "height": 14,
                 "width": 20,
                 "x": 135,
-                "y": 12
+                "y": 6
             }
         },
         {
             "definition": {
-                "background_color": "gray",
+                "background_color": "blue",
                 "content": "Addresses",
                 "font_size": "18",
-                "show_tick": true,
+                "show_tick": false,
                 "text_align": "center",
                 "tick_edge": "right",
                 "tick_pos": "50%",
@@ -625,10 +597,10 @@
             },
             "id": 20,
             "layout": {
-                "height": 59,
-                "width": 12,
-                "x": 100,
-                "y": 12
+                "height": 5,
+                "width": 85,
+                "x": 113,
+                "y": 0
             }
         },
         {
@@ -673,7 +645,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 113,
-                "y": 42
+                "y": 36
             }
         },
         {
@@ -718,7 +690,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 156,
-                "y": 42
+                "y": 36
             }
         },
         {
@@ -763,7 +735,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 156,
-                "y": 57
+                "y": 51
             }
         },
         {
@@ -808,7 +780,7 @@
                 "height": 14,
                 "width": 42,
                 "x": 113,
-                "y": 57
+                "y": 51
             }
         },
         {
@@ -854,10 +826,10 @@
             },
             "id": 1643811229147629,
             "layout": {
-                "height": 13,
-                "width": 31,
-                "x": 67,
-                "y": 12
+                "height": 11,
+                "width": 29,
+                "x": 68,
+                "y": 18
             }
         },
         {
@@ -872,7 +844,7 @@
                 "time": {
                     "live_span": "5m"
                 },
-                "title": "Connections (Past 5 min)",
+                "title": "Connections",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_value"
@@ -880,9 +852,9 @@
             "id": 2630834927363725,
             "layout": {
                 "height": 11,
-                "width": 20,
-                "x": 56,
-                "y": 0
+                "width": 15,
+                "x": 22,
+                "y": 6
             }
         },
         {
@@ -926,9 +898,9 @@
             "id": 3716876411802853,
             "layout": {
                 "height": 11,
-                "width": 48,
-                "x": 100,
-                "y": 0
+                "width": 29,
+                "x": 38,
+                "y": 6
             }
         },
         {
@@ -972,9 +944,93 @@
             "id": 4642501605003484,
             "layout": {
                 "height": 11,
-                "width": 49,
-                "x": 149,
+                "width": 29,
+                "x": 38,
+                "y": 18
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Tailored for the Artemis version of ActiveMQ, this dashboard shows trends in the number of messages enqueued, dequeued, and dispatched so you can understand the status and throughput of your message brokers.\n\nFor more information about ActiveMQ:\n\n- [ActiveMQ integration documentation](https://docs.datadoghq.com/integrations/activemq/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "has_padding": false,
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 6371811986409654,
+            "layout": {
+                "height": 28,
+                "width": 20,
+                "x": 0,
+                "y": 27
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Overall status of the brokers and relevant health metrics.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "center"
+            },
+            "id": 1719842348403299,
+            "layout": {
+                "height": 29,
+                "width": 14,
+                "x": 98,
                 "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Track the performance of all queues across address spaces.  Monitor the graphs for unexpected jumps for specific queues to help identify newly arising issues.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "center"
+            },
+            "id": 776777203009002,
+            "layout": {
+                "height": 50,
+                "width": 14,
+                "x": 98,
+                "y": 31
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Monitor the active Addresses, tracking key performance metrics like message routing and address size.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "top",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "center"
+            },
+            "id": 3793693169467719,
+            "layout": {
+                "height": 10,
+                "width": 43,
+                "x": 135,
+                "y": 66
             }
         }
     ]
