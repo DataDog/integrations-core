@@ -32,6 +32,8 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 ##### Install the Datadog Agent on Driver
 Install the Datadog Agent on the driver node of the cluster. This is a updated version of the [Datadog Init Script][4] Databricks notebook example.
 
+After creating the `datadog-install-driver-only.sh` script, add the init script path in the [cluster configuration page](https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui).
+
 ```shell script
 %python 
 
@@ -113,6 +115,8 @@ fi
 <!-- xxx tab "All nodes" xxx -->
 ##### Install the Datadog Agent on Driver and Worker Nodes
 
+After creating the `datadog-install-driver-workers.sh` script, add the init script path in the [cluster configuration page](https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui).
+
 ```shell script
 %python 
 
@@ -193,8 +197,7 @@ chmod a+x /tmp/start_datadog.sh
 <!-- xxz tabs xxx -->
 
 #### Job cluster
-
-For job clusters, use the following script to configure the Spark integration.
+After creating the `datadog-install-job-driver-mode.sh` script, add the init script path in the [cluster configuration page](https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui).
 
 **Note**: Job clusters are monitored in `spark_driver_mode` with the Spark UI port.
 
