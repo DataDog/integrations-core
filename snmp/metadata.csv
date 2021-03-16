@@ -791,3 +791,5 @@ snmp.temperatureProbeStatus,gauge,,,,[Dell Poweredge] The status of the Dell tem
 datadog.snmp.check_duration,gauge,,second,,The duration of a check run in seconds.,0,snmp,
 datadog.snmp.check_interval,count,,second,,The interval between check runs in seconds.,0,snmp,
 datadog.snmp.submitted_metrics,gauge,,,,The number of submitted metrics for a check run.,0,snmp,
+snmp.batteryStatus,gauge,,,,[Dell Poweredge] The status of the battery.,0,snmp,
+snmp.batteryReading,gauge,,,,[Dell Poweredge] The reading of the battery.,0,snmp,
