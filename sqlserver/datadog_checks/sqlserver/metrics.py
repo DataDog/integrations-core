@@ -9,6 +9,7 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from datadog_checks.base.errors import CheckException
 from .utils import construct_use_statement, time_func
 
 # Queries
@@ -444,7 +445,8 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
             query_columns = ['database'] + [i[0] for i in cursor.description]
             if columns:
-                assert columns == query_columns
+                if columns != query_columns:
+                    raise CheckException('Assertion error: %s != %s'.format(columns, query_columns))
             else:
                 columns = query_columns
 
@@ -651,7 +653,8 @@ class SqlDbFragmentation(BaseSqlServerMetric):
 
             query_columns = [i[0] for i in cursor.description]
             if columns:
-                assert columns == query_columns
+                if columns != query_columns:
+                    raise CheckException('Assertion error: %s != %s'.format(columns, query_columns))
             else:
                 columns = query_columns
 
