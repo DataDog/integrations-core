@@ -17,7 +17,14 @@ from .utils import file_exists
 
 
 class WaitFor(LazyFunction):
-    def __init__(self, func: Callable, attempts: int = 60, wait: int = 1, args: Tuple = (), kwargs: Dict = None):
+    def __init__(
+        self,
+        func,  # type: Callable
+        attempts=60,  # type: int
+        wait=1,  # type: int
+        args=(),  # type: Tuple
+        kwargs=None,  # type: Dict
+    ):
         if kwargs is None:
             kwargs = {}
 
@@ -54,7 +61,13 @@ class WaitFor(LazyFunction):
 
 
 class CheckEndpoints(LazyFunction):
-    def __init__(self, endpoints: Union[str, List[str]], timeout: int = 1, attempts: int = 60, wait: int = 1):
+    def __init__(
+        self,
+        endpoints,  # type: Union[str, List[str]]
+        timeout=1,  # type: int,
+        attempts=60,  # type: int
+        wait=1,  # type: int
+    ):
         self.endpoints = [endpoints] if isinstance(endpoints, string_types) else endpoints
         self.timeout = timeout
         self.attempts = attempts
@@ -88,13 +101,13 @@ class CheckEndpoints(LazyFunction):
 class CheckCommandOutput(LazyFunction):
     def __init__(
         self,
-        command: str,
-        patterns: Union[str, List[str]],
-        matches: Union[str, int] = 1,  # Either 'all' or a number
-        stdout: bool = True,
-        stderr: bool = True,
-        attempts: int = 60,
-        wait: int = 1,
+        command,  # type: Union[str, List[str]]
+        patterns,  # type: Union[str, List[str]]
+        matches=1,  # type: Union[str, int]  #Either 'all' or a number
+        stdout=True,  # type: bool
+        stderr=True,  # type: bool
+        attempts=60,  # type: int
+        wait=1,  # type: int
     ):
         self.command = command
         self.stdout = stdout
@@ -154,13 +167,13 @@ class CheckCommandOutput(LazyFunction):
 class CheckDockerLogs(CheckCommandOutput):
     def __init__(
         self,
-        identifier: str,
-        patterns: Union[str, List[str]],
-        matches: Union[str, int] = 1,
-        stdout: bool = True,
-        stderr: bool = True,
-        attempts: int = 60,
-        wait: int = 1,
+        identifier,  # type: str
+        patterns,  # type: Union[str, List[str]]
+        matches=1,  # type: Union[str, int]
+        stdout=True,  # type: bool
+        stderr=True,  # type: bool
+        attempts=60,  # type: int,
+        wait=1,  # type: int
     ):
         if file_exists(identifier):
             command = ['docker-compose', '-f', identifier, 'logs']
@@ -176,7 +189,13 @@ class CheckDockerLogs(CheckCommandOutput):
 class WaitForPortListening(WaitFor):
     """Wait until a server is available on `host:port`."""
 
-    def __init__(self, host: str, port: int, attempts: int = 60, wait: int = 1):
+    def __init__(
+        self,
+        host,  # type: str
+        port,  # type: int
+        attempts=60,  # type: int
+        wait=1,  # type: int
+    ):
         super(WaitForPortListening, self).__init__(self.connect, attempts, wait, args=(host, port))
 
     def connect(self, host, port):
