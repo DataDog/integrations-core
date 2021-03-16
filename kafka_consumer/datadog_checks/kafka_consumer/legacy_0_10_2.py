@@ -93,11 +93,20 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
+                self.log.debug('Collecting consumer offsets')
                 self._get_kafka_consumer_offsets(contexts_limit)
                 contexts_limit -= len(self._kafka_consumer_offsets)
             except Exception:
                 self.log.exception("There was a problem collecting consumer offsets from Kafka.")
                 # don't raise because we might get valid broker offsets
+        else:
+            self.log.debug(
+                'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
+                ' Skipping consumer offset collection',
+                str(self._kafka_client.config.get('api_version') >= (0, 8, 2)),
+                str(instance.get('kafka_consumer_offsets')),
+                str(self._zk_hosts_ports),
+            )
 
         # Fetch the broker highwater offsets
         try:

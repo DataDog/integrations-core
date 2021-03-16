@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.9.2 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.9.1 / 2020-11-04 / Agent 7.24.0
 
 * [Fixed] Add tags to the new `system.disk.directory.exists` service check. See [#7929](https://github.com/DataDog/integrations-core/pull/7929).

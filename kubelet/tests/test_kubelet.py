@@ -91,6 +91,14 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.rest.client.latency.sum',
     'kubernetes.kubelet.runtime.operations',
     'kubernetes.kubelet.runtime.errors',
+    'kubernetes.kubelet.runtime.operations.duration.sum',
+    'kubernetes.kubelet.runtime.operations.duration.count',
+    'kubernetes.kubelet.runtime.operations.duration.quantile',
+    'kubernetes.kubelet.docker.operations',
+    'kubernetes.kubelet.docker.errors',
+    'kubernetes.kubelet.docker.operations.duration.sum',
+    'kubernetes.kubelet.docker.operations.duration.count',
+    'kubernetes.kubelet.docker.operations.duration.quantile',
     'kubernetes.kubelet.network_plugin.latency.sum',
     'kubernetes.kubelet.network_plugin.latency.count',
     'kubernetes.kubelet.volume.stats.available_bytes',
@@ -100,14 +108,26 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.volume.stats.inodes_free',
     'kubernetes.kubelet.volume.stats.inodes_used',
     'kubernetes.kubelet.evictions',
+    'kubernetes.kubelet.pod.start.duration.sum',
+    'kubernetes.kubelet.pod.start.duration.count',
+    'kubernetes.kubelet.pod.worker.start.duration.sum',
+    'kubernetes.kubelet.pod.worker.start.duration.count',
+    'kubernetes.storage.operation.duration.sum',
+    'kubernetes.storage.operation.duration.count',
+    'kubernetes.go_threads',
+    'kubernetes.go_goroutines',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [
-    'kubernetes.kubelet.container.log_filesystem.used_bytes'
+    'kubernetes.kubelet.container.log_filesystem.used_bytes',
+    'kubernetes.kubelet.pod.worker.duration.sum',
+    'kubernetes.kubelet.pod.worker.duration.count',
 ]
 
 EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
-    'kubernetes.kubelet.network_plugin.latency.quantile'
+    'kubernetes.kubelet.network_plugin.latency.quantile',
+    'kubernetes.kubelet.pod.start.duration.quantile',
+    'kubernetes.kubelet.pod.worker.start.duration.quantile',
 ]
 
 COMMON_TAGS = {

@@ -230,3 +230,5 @@ PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.d
 SCHEMA_VARS = ['mysql.info.schema.size']
 
 SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qcache.utilization.instant']
+
+STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_rows_limited']

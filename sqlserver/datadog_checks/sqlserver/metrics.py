@@ -9,6 +9,8 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from .utils import construct_use_statement
+
 # Queries
 ALL_INSTANCES = 'ALL'
 
@@ -422,14 +424,14 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         rows = []
         columns = []
 
-        cursor.execute('select DB_NAME()')
+        cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
         data = cursor.fetchall()
         current_db = data[0][0]
         logger.debug("%s: current db is %s", cls.__name__, current_db)
 
         for db in cls._DATABASES:
             # use statements need to be executed separate from select queries
-            ctx = 'use {}'.format(db)
+            ctx = construct_use_statement(db)
             logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
             cursor.execute(ctx)
             logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
@@ -455,7 +457,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         # reset back to previous db
         logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute('use {}'.format(str(current_db)))
+        cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 
@@ -666,12 +668,14 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         replica_server_name_index = columns.index('replica_server_name')
         is_local_index = columns.index('is_local')
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
 
             if self.cfg_instance.get('only_emit_local') and not is_local:
@@ -688,6 +692,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -717,10 +722,12 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         sync_health_desc_index = columns.index('synchronization_health_desc')
 
         for row in rows:
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
 
             if selected_ag and selected_ag != resource_group_id:
@@ -730,6 +737,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             sync_health_desc = row[sync_health_desc_index]
             metric_tags = [
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
             ]
             metric_tags.extend(self.tags)
@@ -766,16 +774,22 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
 
-        is_primary_replica_index = columns.index('is_primary_replica')
         failover_mode_desc_index = columns.index('failover_mode_desc')
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         is_local_index = columns.index('is_local')
         database_name_index = columns.index('database_name')
+        try:
+            is_primary_replica_index = columns.index('is_primary_replica')
+        except ValueError:
+            # This column only supported in SQL Server 2014 and later
+            is_primary_replica_index = None
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             database_name = row[database_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
             selected_database = self.cfg_instance.get('ao_database')
@@ -790,16 +804,21 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
-            is_primary_replica = row[is_primary_replica_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
 
             metric_tags = [
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
-                'is_primary_replica:{}'.format(str(is_primary_replica)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
             ]
+            if is_primary_replica_index is not None:
+                is_primary_replica = row[is_primary_replica_index]
+                metric_tags.append('is_primary_replica:{}'.format(str(is_primary_replica)))
+            else:
+                metric_tags.append('is_primary_replica:unknown')
+
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
 

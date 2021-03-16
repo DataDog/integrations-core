@@ -113,7 +113,6 @@ markdown_extensions:
   - markdown.extensions.tables:
   - markdown.extensions.toc:
       permalink: true
-      toc_depth: "2-6"
   - markdown.extensions.attr_list:  # https://github.com/DataDog/mkdocs-click#full-command-path-headers
   # Extra
   - mkdocs-click:

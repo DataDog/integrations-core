@@ -1,5 +1,10 @@
 # CHANGELOG - Aerospike
 
+## 1.10.1 / 2021-03-07
+
+* [Fixed] Return empty array instead of None. See [#8532](https://github.com/DataDog/integrations-core/pull/8532).
+* [Fixed] Fix logging. See [#8515](https://github.com/DataDog/integrations-core/pull/8515).
+
 ## 1.10.0 / 2021-02-01
 
 * [Added] Support Aerospike 5.3. See [#8430](https://github.com/DataDog/integrations-core/pull/8430).

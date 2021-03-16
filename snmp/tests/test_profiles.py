@@ -1331,12 +1331,24 @@ def test_generic_host_resources(aggregator):
     for metric in sys_metrics:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
-    aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=2)
-    aggregator.assert_metric('snmp.hrStorageSize', count=2)
-    aggregator.assert_metric('snmp.hrStorageUsed', count=2)
-    aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=2)
+    storages = [
+        ('1.3.6.1.2.1.25.2.1.3', 'oxen their driving forward quaintly'),
+        ('1.3.6.1.2.1.25.2.1.4', 'quaintly driving Jaded forward their quaintly zombies'),
+    ]
+    for storage_type, storage_desc in storages:
+        tags = common_tags + ['storagetype:{}'.format(storage_type), 'storagedesc:{}'.format(storage_desc)]
+        aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageSize', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageUsed', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=1, tags=tags)
 
-    aggregator.assert_metric('snmp.hrProcessorLoad', count=2)
+    processors = [
+        '1.3.6.1.3.81.16',
+        '1.3.6.1.3.95.73.140.186.121.144.199',
+    ]
+    for proc in processors:
+        tags = common_tags + ['processorid:{}'.format(proc)]
+        aggregator.assert_metric('snmp.hrProcessorLoad', count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -1556,15 +1568,10 @@ def test_cisco_csr(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    tags = ['neighbor:244.12.239.177'] + common_tags
-    for metric in PEER_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
-
-    for metric in PEER_RATES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
+    _check_bgp4(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2225,9 +2232,10 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.parametrize("file", ["juniper-ex", "juniper-ex-variation"])
 @pytest.mark.usefixtures("dd_environment")
-def test_juniper_ex(aggregator):
-    run_profile_check('juniper-ex')
+def test_juniper_ex(aggregator, file):
+    run_profile_check(file, 'juniper-ex')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-ex',
         'device_vendor:juniper-networks',
@@ -2236,28 +2244,32 @@ def test_juniper_ex(aggregator):
     _check_juniper_dcu(aggregator, common_tags)
     _check_juniper_cos(aggregator, common_tags)
     _check_juniper_firewall(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@pytest.mark.parametrize("file", ["juniper-mx", "juniper-mx-variation"])
 @pytest.mark.usefixtures("dd_environment")
-def test_juniper_mx(aggregator):
-    run_profile_check('juniper-mx')
+def test_juniper_mx(aggregator, file):
+    run_profile_check(file, 'juniper-mx')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-mx',
         'device_vendor:juniper-networks',
     ]
     _check_juniper_virtual_chassis(aggregator, common_tags)
     _check_juniper_firewall(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
+@pytest.mark.parametrize("file", ["juniper-srx", "juniper-srx-variation"])
 @pytest.mark.usefixtures("dd_environment")
-def test_juniper_srx(aggregator):
-    run_profile_check('juniper-srx')
+def test_juniper_srx(aggregator, file):
+    run_profile_check(file, 'juniper-srx')
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:juniper-srx',
         'device_vendor:juniper-networks',
@@ -2265,6 +2277,7 @@ def test_juniper_srx(aggregator):
     _check_juniper_userfirewall(aggregator, common_tags)
     _check_juniper_dcu(aggregator, common_tags)
     _check_juniper_scu(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -2399,3 +2412,15 @@ def _check_juniper_cos(aggregator, common_tags):
             aggregator.assert_metric(
                 'snmp.{}'.format(cos_metric), metric_type=aggregator.GAUGE, tags=common_tags + tags, count=1
             )
+
+
+def _check_bgp4(aggregator, common_tags):
+    """
+    Shared testing function for profiles supporting BGP4 metrics.
+    """
+    tags = ['neighbor:244.12.239.177'] + common_tags
+    for metric in PEER_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in PEER_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)

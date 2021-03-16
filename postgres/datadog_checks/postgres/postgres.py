@@ -9,6 +9,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
@@ -52,7 +53,11 @@ class PostgreSql(AgentCheck):
         self._config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self._config)
+        self.statement_samples = PostgresStatementSamples(self, self._config)
         self._clean_state()
+
+    def cancel(self):
+        self.statement_samples.cancel()
 
     def _clean_state(self):
         self._version = None
@@ -286,6 +291,32 @@ class PostgreSql(AgentCheck):
 
         cursor.close()
 
+    def _new_connection(self):
+        if self._config.host == 'localhost' and self._config.password == '':
+            # Use ident method
+            connection_string = "user=%s dbname=%s application_name=%s" % (
+                self._config.user,
+                self._config.dbname,
+                self._config.application_name,
+            )
+            if self._config.query_timeout:
+                connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
+            return psycopg2.connect(connection_string)
+        else:
+            args = {
+                'host': self._config.host,
+                'user': self._config.user,
+                'password': self._config.password,
+                'database': self._config.dbname,
+                'sslmode': self._config.ssl_mode,
+                'application_name': self._config.application_name,
+            }
+            if self._config.port:
+                args['port'] = self._config.port
+            if self._config.query_timeout:
+                args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            return psycopg2.connect(**args)
+
     def _connect(self):
         """Get and memoize connections to instances"""
         if self.db and self.db.closed:
@@ -297,30 +328,7 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            if self._config.host == 'localhost' and self._config.password == '':
-                # Use ident method
-                connection_string = "user=%s dbname=%s application_name=%s" % (
-                    self._config.user,
-                    self._config.dbname,
-                    self._config.application_name,
-                )
-                if self._config.query_timeout:
-                    connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-                self.db = psycopg2.connect(connection_string)
-            else:
-                args = {
-                    'host': self._config.host,
-                    'user': self._config.user,
-                    'password': self._config.password,
-                    'database': self._config.dbname,
-                    'sslmode': self._config.ssl_mode,
-                    'application_name': self._config.application_name,
-                }
-                if self._config.port:
-                    args['port'] = self._config.port
-                if self._config.query_timeout:
-                    args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
-                self.db = psycopg2.connect(**args)
+            self.db = self._new_connection()
 
     def _collect_custom_queries(self, tags):
         """
@@ -436,6 +444,8 @@ class PostgreSql(AgentCheck):
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:
                 self._collect_per_statement_metrics(tags)
+                self.statement_samples.run_sampler(tags)
+
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()

@@ -61,12 +61,16 @@ We test all changes to integrations that were introduced since the last release.
 ### Create items
 
 Create an item for every change in [our board](https://trello.com/b/ICjijxr4/agent-release-sprint) using
-the Trello subcommand called [testable](../../ddev/cli.md#testable).
+the Trello subcommand called [testable](../../ddev/cli.md#ddev-release-trello-testable).
 
 For example:
 
 ```
 ddev release trello testable 7.17.1 7.18.0-rc.1
+```
+or if the tag is not ready yet:
+```
+ddev release trello testable 7.17.1 origin/master
 ```
 
 would select all commits that were merged between the Git references.
@@ -96,7 +100,7 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle. 
+The Agent Release Manager will post a [daily status](../../ddev/cli.md#ddev-release-trello-status) for the entire release cycle.
 Reply in the thread with any pending PRs meant for the next RC and update the spreadsheet `PRs included in Agent RCs`.
 
 ### Logs
@@ -104,8 +108,8 @@ Reply in the thread with any pending PRs meant for the next RC and update the sp
 Each release candidate is deployed in a staging environment. We observe the `WARN` or `ERROR` level logs filtered with the facets
  `Service:datadog-agent` and `index:main` and `LogMessage` to see if any unexpected or frequent errors start occurring that was not caught
  during QA.
- 
- 
+
+
 ## Release week
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
