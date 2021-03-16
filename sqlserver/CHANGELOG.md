@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## 2.3.8 / 2021-03-16
+
+* [Fixed] Improve exception handling for database queries. See [#8837](https://github.com/DataDog/integrations-core/pull/8837).
+* [Fixed] Ensure delimited identifiers in USE statements. See [#8832](https://github.com/DataDog/integrations-core/pull/8832).
+* [Fixed] Handle availability replica metrics on earlier versions. See [#8830](https://github.com/DataDog/integrations-core/pull/8830).
+
 ## 2.3.7 / 2021-03-01
 
 * [Fixed] Add availability group name tag. See [#8658](https://github.com/DataDog/integrations-core/pull/8658).
