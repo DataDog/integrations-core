@@ -1292,10 +1292,10 @@ def test_dell_poweredge(aggregator):
         aggregator.assert_metric('snmp.coolingUnitStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
-        ('8', '11', '9', 'acted', 'acted'),
-        ('19', '3', '10', 'acted oxen but zombies driving acted Jaded', 'quaintly kept'),
+        ('8', '11', '9', 'acted'),
+        ('19', '3', '10', 'acted oxen but zombies driving acted Jaded'),
     ]
-    for chassis_index, device_name, device_type, location_name, cooling_device_fqdd in tag_mappings:
+    for chassis_index, device_name, device_type, location_name in tag_mappings:
         tags = [
             'chassis_index:{}'.format(chassis_index),
             'cooling_device_name:{}'.format(device_name),
@@ -1324,14 +1324,13 @@ def test_dell_poweredge(aggregator):
         aggregator.assert_metric('snmp.processorDeviceStatusReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
-        ('2', '11', 'but kept Jaded'),
+        ('2', '11'),
         (
             '8',
             '3',
-            'quaintly quaintly oxen oxen kept kept their acted forward',
         ),
     ]
-    for chassis_index, fru_index, fru_fqdd in tag_mappings:
+    for chassis_index, fru_index in tag_mappings:
         tags = [
             'chassis_index:{}'.format(chassis_index),
             'fru_index:{}'.format(fru_index),
@@ -1339,14 +1338,13 @@ def test_dell_poweredge(aggregator):
         aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
-        ('2', '11', 'but kept Jaded'),
+        ('2', '11'),
         (
             '8',
             '3',
-            'quaintly quaintly oxen oxen kept kept their acted forward',
         ),
     ]
-    for chassis_index, fru_index, fru_fqdd in tag_mappings:
+    for chassis_index, fru_index in tag_mappings:
         tags = [
             'chassis_index:{}'.format(chassis_index),
             'fru_index:{}'.format(fru_index),
