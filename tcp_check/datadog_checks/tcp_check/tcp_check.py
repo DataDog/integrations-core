@@ -2,24 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
-import time
 from contextlib import closing
 
-from six import PY3
-
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.platform import Platform
-
-if PY3:
-    # use higher precision clock available in Python3
-    time_func = time.perf_counter
-elif Platform.is_win32():
-    # for tiny time deltas, time.time on Windows reports the same value
-    # of the clock more than once, causing the computation of response_time
-    # to be often 0; let's use time.clock that is more precise.
-    time_func = time.clock
-else:
-    time_func = time.time
+from datadog_checks.base.utils.time import get_precise_time
 
 
 class TCPCheck(AgentCheck):
@@ -81,13 +67,13 @@ class TCPCheck(AgentCheck):
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
             sock.settimeout(self.timeout)
-            start = time_func()
+            start = get_precise_time()
             sock.connect((self.addr, self.port))
-            response_time = time_func() - start
+            response_time = get_precise_time() - start
             return response_time
 
     def check(self, instance):
-        start = time_func()  # Avoid initialisation warning
+        start = get_precise_time()  # Avoid initialisation warning
         self.log.debug("Connecting to %s %d", self.addr, self.port)
         try:
             response_time = self.connect()
@@ -100,7 +86,7 @@ class TCPCheck(AgentCheck):
                     tags=self.tags,
                 )
         except Exception as e:
-            length = int((time_func() - start) * 1000)
+            length = int((get_precise_time() - start) * 1000)
             if isinstance(e, socket.error) and "timed out" in str(e):
                 # The connection timed out because it took more time than the system tcp stack allows
                 self.log.warning(
