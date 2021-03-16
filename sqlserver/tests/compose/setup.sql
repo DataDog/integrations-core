@@ -4,3 +4,6 @@ RESTORE DATABASE [AdventureWorks2017] FROM  DISK = N'/var/opt/mssql/backup/Adven
 FILE = 1,  MOVE N'AdventureWorks2017' TO N'/var/opt/mssql/data/AdventureWorks2017.mdf',
 MOVE N'AdventureWorks2017_log' TO N'/var/opt/mssql/data/AdventureWorks2017_log.ldf',
 REPLACE, NOUNLOAD,  STATS = 2;
+-- Add example databases with non-standard names
+CREATE DATABASE [1234_TEST];
+CREATE DATABASE [TEST WITH SPACES];
