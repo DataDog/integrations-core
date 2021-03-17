@@ -849,7 +849,7 @@ class AgentCheck(object):
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
         return to_native_string(tag)
 
-    def check(self, _):
+    def check(self, instance):
         # type: (InstanceType) -> None
         raise NotImplementedError
 
