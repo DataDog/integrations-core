@@ -22,45 +22,45 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Linux" xxx -->
 ###### Linux
-1. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
 
-    If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
+1. Follow the [Oracle Instant Client installation for Linux][14].
 
-   ```shell
-   # Put the library location in an ld configuration file.
+2. Verify the following:
+    - Both the *Instant Client Basic* and *SDK* packages are installed; they can be found on the [download page][4] .
 
-   sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
-       /etc/ld.so.conf.d/oracle-instantclient.conf"
+        After the Instant Client libraries are installed, ensure the runtime linker can find the libraries. For example, using `ldconfig`:
+    
+       ```shell
+       # Put the library location in an ld configuration file.
+    
+       sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
+           /etc/ld.so.conf.d/oracle-instantclient.conf"
+    
+       # Update the bindings.
+    
+       sudo ldconfig
+       ```
 
-   # Update the bindings.
-
-   sudo ldconfig
-   ```
-
-2. Decompress both packages into a single directory that is available to all users on the given machine (for example, `/opt/oracle`):
-
-   ```shell
-   mkdir -p /opt/oracle/ && cd /opt/oracle/
-   unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
-   unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
-   ```
+    - Both packages are decompressed into a single directory that is available to all users on the given machine (for example, `/opt/oracle`):
+       ```shell
+       mkdir -p /opt/oracle/ && cd /opt/oracle/
+       unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
+       unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+       ```
 
 <!-- xxz tabs xxx -->
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
-These installation steps are a guideline referenced from the [official installation][17].
+1. Follow the [Oracle Windows installation guide][17] to configure your Oracle Instant Client.
 
-1. Install the [Microsoft Visual Studio 2017 Redistributable][16] or the appropriate version for the Oracle Instant Client installation.
+2. Verify the following:
+    - The [Microsoft Visual Studio 2017 Redistributable][16] or the appropriate version is installed for the Oracle Instant Client.
 
-2. Go to the [download page][4] and install both the *Instant Client Basic* and *SDK* packages.
+    - Both the *Instant Client Basic* and *SDK* packages from this [download page][4] are installed.
 
-3. Extract both packages into a single directory that is available to all users on the given machine (for example, `C:\oracle`):
+    - Both packages are extracted into a single directory that is available to all users on the given machine (for example, `C:\oracle`):
 
-4. Modify the `PATH` environment variable to contain the path of the Oracle Instant Client.
-
-    Navigate to Control Panel -> Settings -> Advanced System Settings -> Environment Variables and
-    append `;C:\oracle\` to the `PATH` variable.
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -382,15 +382,14 @@ The structure of the directory should look similar:
 ```
 
 ##### Linux
-- See further installation documentation on [Oracle][14].
+- See further Linux installation documentation on [Oracle][14].
 
 ##### Windows
 - Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version, see [Windows downloads page][15] for more details.
-- Ensure the `PATH` environment variable contains the path of your directory (for example, `C:\oracle\`). 
-  Also verify that the environment variable `OCI_LIB64=C:\oracle` exists.
+- See further Windows installation documentation on [Oracle][17].
 
 
-#### JDBC Driver
+#### JDBC Driver (Linux Only)
 - If you encounter a `JVMNotFoundException`:
 
     ```text
@@ -406,24 +405,10 @@ The structure of the directory should look similar:
 
 - Verify your environment variables are set correctly by running the following command from the Agent.
 Ensure the displayed output matches the correct value.
-    
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Linux" xxx -->
-#### Linux
 
     ```shell script
       sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
     ```
-
-<!-- xxz tabs xxx -->
-<!-- xxx tab "Windows" xxx -->
-#### Windows
-
-     ```shell script
-       sudo -u dd-agent -- %PROGRAMFILES%\Datadog\"Datadog Agent"\embedded\python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
-     ```
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 Need help? Contact [Datadog support][12].
 
