@@ -37,6 +37,8 @@ class TLSLocalCheck(TLSCheck):
             cert = self.local_cert_loader(cert)
             self.log.debug('Deserialized certificate: %s', cert)
         except Exception as e:
+            message = 'Unable to parse the certificate: {}'.format(e)
+            self.log.debug(message)
             self.service_check(
                 SERVICE_CHECK_VALIDATION,
                 self.CRITICAL,

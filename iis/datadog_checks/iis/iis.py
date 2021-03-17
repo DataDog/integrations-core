@@ -56,6 +56,7 @@ class IIS(PDHBaseCheck):
 
     def check(self, _):
         if self.refresh_counters:
+            self.log.debug('Refreshing counters')
             for counter, values in list(iteritems(self._missing_counters)):
                 self._make_counters(self.instance_hash, ([counter], values))
 
@@ -63,6 +64,8 @@ class IIS(PDHBaseCheck):
 
         for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
+                if self.refresh_counters:
+                    counter.collect_counters()
                 counter_values = counter.get_all_values()
             except Exception as e:
                 self.log.error("Failed to get_all_values %s %s: %s", inst_name, dd_name, e)

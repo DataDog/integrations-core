@@ -5,8 +5,6 @@
 import json
 from datetime import datetime
 
-from kubernetes.client.models.v1_lease_spec import V1LeaseSpec
-
 
 class ElectionRecord(object):
     def __init__(self):
@@ -107,6 +105,8 @@ class ElectionRecordLease(ElectionRecord):
         self._lease = lease.spec
 
     def validate(self):
+        from kubernetes.client.models.v1_lease_spec import V1LeaseSpec  # noqa F401
+
         return isinstance(self._lease, V1LeaseSpec), None
 
     @property

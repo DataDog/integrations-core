@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 haproxy.backend.active.servers,gauge,,,,Current number of active servers.,0,haproxy,
 haproxy.backend.backup.servers,gauge,,,,Current number of backup servers.,0,haproxy,
-haproxy.backend.bytes.in.total,gauge,,byte,,Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,
-haproxy.backend.bytes.out.total,gauge,,byte,,Current total of outgoing bytes. By default submitted as count if using prometheus,0,haproxy,
+haproxy.backend.bytes.in.total,count,,byte,,Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,
+haproxy.backend.bytes.out.total,count,,byte,,Current total of outgoing bytes. By default submitted as count if using prometheus,0,haproxy,
 haproxy.backend.check.last.change.seconds,gauge,,,,Number of seconds since the last UP<->DOWN transition.,0,haproxy,
 haproxy.backend.check.up.down.total,count,,,,Total number of UP->DOWN transitions.,0,haproxy,
 haproxy.backend.client.aborts.total,count,,,,Total number of data transfers aborted by the client.,0,haproxy,
@@ -73,8 +73,8 @@ haproxy.backend.uptime,gauge,,second,,Number of seconds since the last UP<->DOWN
 haproxy.backend.warnings.redis_rate,gauge,,error,second,Number of times a request was redispatched to another server (legacy check only).,-1,haproxy,backend warn redis rate
 haproxy.backend.warnings.retr_rate,gauge,,error,second,Number of times a connection to a server was retried (legacy check only).,-1,haproxy,backend warn retry rate
 haproxy.count_per_status,gauge,,host,,Number of hosts by status (UP/DOWN/NOLB/MAINT) (legacy check only).,0,haproxy,hosts status
-haproxy.frontend.bytes.in.total,gauge,,byte,,Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,
-haproxy.frontend.bytes.out.total,gauge,,byte,,Current total of outgoing bytes. By default submitted as count if using prometheus,0,haproxy,
+haproxy.frontend.bytes.in.total,count,,byte,,Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,
+haproxy.frontend.bytes.out.total,count,,byte,,Current total of outgoing bytes. By default submitted as count if using prometheus,0,haproxy,
 haproxy.frontend.connections.rate.max,gauge,,,,Maximum observed number of connections per second.,0,haproxy,
 haproxy.frontend.connections.total,count,,,,Total number of connections.,0,haproxy,
 haproxy.frontend.current.sessions,gauge,,,,Current number of active sessions.,0,haproxy,
