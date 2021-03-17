@@ -12,7 +12,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver (linux only).
+To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver (Linux only).
 Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
 ##### Oracle Instant Client
