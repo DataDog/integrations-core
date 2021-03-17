@@ -1986,3 +1986,9 @@ class TestIntegration:
         http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
         with pytest.raises(requests.exceptions.Timeout):
             http.get('https://httpbin.org/delay/0.10')
+
+
+class TestAIAChasing:
+    def test_incomplete_chain(self):
+        http = RequestsWrapper({}, {})
+        http.get("https://incomplete-chain.badssl.com/")
