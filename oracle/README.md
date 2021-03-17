@@ -17,8 +17,6 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 
 ##### Oracle Instant Client
 
-The Oracle check requires either access to the `cx_Oracle` Python module, or the Oracle JDBC Driver:
-
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Linux" xxx -->
 ###### Linux
