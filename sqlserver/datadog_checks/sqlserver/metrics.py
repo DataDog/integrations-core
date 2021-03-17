@@ -10,8 +10,9 @@ from collections import defaultdict
 from functools import partial
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.time import get_precise_time
 
-from .utils import construct_use_statement, time_func
+from .utils import construct_use_statement
 
 # Queries
 ALL_INSTANCES = 'ALL'
@@ -643,14 +644,14 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         for db in cls._DATABASES:
             query = cls.QUERY_BASE.format(db=db)
             logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
-            start = time_func()
+            start = get_precise_time()
             try:
                 cursor.execute(query)
                 data = cursor.fetchall()
             except Exception as e:
                 logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
                 continue
-            elapsed = time_func() - start
+            elapsed = get_precise_time() - start
 
             query_columns = [i[0] for i in cursor.description]
             if columns:
