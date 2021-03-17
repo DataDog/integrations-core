@@ -1,7 +1,7 @@
 {
   "title": "MongoDB - Overview",
   "author_name": "Datadog",
-  "description": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "description": "This dashboard provides a high-level overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations.\n\n The metrics that are fetched from each member depend on its role in the cluster. For example, replication lag is fetched from the primary for all members of the replica set. This means you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment, you need one additional integration instance pointed to a mongos proxy.\n\nRefer to the following resources for more information:\n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)",
   "widgets": [
     {
       "id": 0,
@@ -17,7 +17,7 @@
             "id": 7,
             "definition": {
               "type": "note",
-              "content": "This default dashboard provides an overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations. For further reading on monitoring MongoDB: \n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)\n\nClone this template dashboard to make changes and add your own graph widgets.\n\nDifferent MongoDB metrics are fetched from each member depending on its role in the cluster. For exemple the replication lag is fetched from the primary for all members of the replica set.\n\nFor this reason you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment you need one additional integration instance pointed to a mongos proxy.\n\nRefer to [Datadog's documentation](https://docs.datadoghq.com/integrations/mongo/?tab=host) for more information.",
+              "content": "This dashboard provides a high-level overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations.\n\n The metrics that are fetched from each member depend on its role in the cluster. For example, replication lag is fetched from the primary for all members of the replica set. This means you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment, you need one additional integration instance pointed to a mongos proxy.\n\nRefer to the following resources for more information:\n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
@@ -200,7 +200,7 @@
             "id": 14,
             "definition": {
               "type": "note",
-              "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure to use Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions that is fetched from secondaries.",
+              "content": "The replication lag metric is fetched from the primary for all members of the replica set. If the graph is empty, make sure you're using Agent 7.24+/6.24+ and that every member of your cluster is monitored.\n\nYou can also use `mongodb.optime.replicationlag` on older Agent versions. This metric is fetched from secondaries.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -282,21 +282,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_size": "0",
-              "legend_layout": "auto",
+              "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "query3", "alias": "Received Network traffic" }
+                    { "formula": "query1", "alias": "Received network traffic" }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:mongodb.network.bytesinps{$scope,$replset_name}.fill(zero)",
+                      "query": "avg:mongodb.network.bytesinps{*,*}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query1"
                     }
                   ],
                   "style": {
@@ -304,19 +304,19 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 },
                 {
                   "formulas": [
-                    { "formula": "-query3", "alias": "Sent Network Traffic" }
+                    { "formula": "query1", "alias": "Sent network traffic" }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:mongodb.network.bytesoutps{$scope,$replset_name}.fill(zero)",
+                      "query": "avg:mongodb.network.bytesoutps{*,*}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query1"
                     }
                   ],
                   "style": {
@@ -324,7 +324,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 }
               ],
               "yaxis": {
@@ -529,7 +529,7 @@
             "id": 21,
             "definition": {
               "type": "note",
-              "content": "This metric reports the percentage of used client connection for each replica set. Use these values to understand the load and capacity requirements of your cluster.",
+              "content": "This metric can help you understand the load and capacity requirements of your cluster.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -633,7 +633,7 @@
             "id": 24,
             "definition": {
               "type": "note",
-              "content": "\n\nPage faults increase significantly when your server is experiencing poor performance. It can be caused by limited memory or data sets getting larger. In containerized environment you may want to change to query to group by {pod_name} instead.",
+              "content": "This metric can spike due to poor server performance, which can be caused by limited memory or growing data sets. In containerized environments, you may want to group `by {pod_name}` instead.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -725,7 +725,7 @@
             "id": 27,
             "definition": {
               "type": "note",
-              "content": "Amount of RAM used by the mongo process. During normal use, this value tends to grow. In dedicated database servers, this number tends to approach the total amount of system memory.",
+              "content": "Amount of RAM used by the mongo process. This value tends to grow during normal use. In dedicated database servers, it tends to approach the total amount of system memory.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -886,7 +886,7 @@
             "id": 34,
             "definition": {
               "type": "note",
-              "content": "Count of chunks requires Agent 7.24+/6.24+ and 'jumbo_chunks' set in the integration configuration directed to your 'mongos' proxy.",
+              "content": "Chunk count requires Agent 7.24+/6.24+ and `jumbo_chunks` set in the integration configuration directed to your 'mongos' proxy.",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
@@ -901,7 +901,7 @@
             "id": 35,
             "definition": {
               "type": "note",
-              "content": "If MongoDB cannot split a chunk that exceeds the specified chunk size, MongoDB labels the chunk as jumbo.\n\nThese jumbo chunks can become a performance bottleneck as they continue to grow, especially if the shard key value occurs with high frequency.",
+              "content": "MongoDB labels a chunk as jumbo if it exceeds the specified chunk size and cannot be split. These jumbo chunks can cause performance bottlenecks as they grow, especially if the shard key value occurs with high frequency.",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
