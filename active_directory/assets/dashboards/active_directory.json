@@ -584,7 +584,7 @@
                     "service"
                 ],
                 "indexes": [],
-                "message_display": "expanded-md",
+                "message_display": "expanded-lg",
                 "query": "source:(ruby OR active_directory)",
                 "show_date_column": true,
                 "show_message_column": true,
@@ -592,17 +592,17 @@
                     "column": "time",
                     "order": "desc"
                 },
-                "title": "",
+                "title": "Log Events",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "log_stream"
             },
             "id": 6251269563993414,
             "layout": {
-                "height": 36,
-                "width": 47,
-                "x": 149,
-                "y": 9
+                "height": 48,
+                "width": 97,
+                "x": 27,
+                "y": 121
             }
         },
         {
@@ -618,10 +618,10 @@
             },
             "id": 3175991996395978,
             "layout": {
-                "height": 7,
-                "width": 47,
-                "x": 149,
-                "y": 1
+                "height": 5,
+                "width": 97,
+                "x": 27,
+                "y": 115
             }
         }
     ]
