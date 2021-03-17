@@ -670,7 +670,7 @@
             "id": 24,
             "definition": {
               "type": "note",
-              "content": "Memory usage a crucial performance factor. If `used_memory > total available system memory`, the OS will begin swapping old/unused sections of memory and writing them to disk. Writing or reading from disk is up to 100,000 times slower than writing or reading from memory (0.1 µs for memory vs. 10 ms for disk).",
+              "content": "Memory usage is a crucial performance factor. If `used_memory > total available system memory`, the OS will begin swapping old/unused sections of memory and writing them to disk. Writing or reading from disk is up to 100,000 times slower than writing or reading from memory (0.1 µs for memory vs. 10 ms for disk).",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
