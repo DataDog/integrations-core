@@ -24,7 +24,7 @@ elasticsearch.docs.deleted,gauge,,document,,The total number of documents delete
 elasticsearch.disk.avail,gauge,,byte,,The free disk space available to Elasticsearch.,0,elasticsearch,disk avail
 elasticsearch.disk.indices,gauge,,byte,,The disk space used by the node’s shards.,0,elasticsearch,disk indices
 elasticsearch.disk.percent,gauge,,byte,,The total percentage of disk space in use. Calculated as disk.used / disk.total.,0,elasticsearch,disk percent
-elasticsearch.disk.total,gauge,,byte,,Total disk space for the node including in-use and available space.,0,elasticsearch,disk total
+elasticsearch.disk.total,gauge,,byte,,The total disk space for the node including in-use and available space.,0,elasticsearch,disk total
 elasticsearch.disk.used,gauge,,byte,,Total disk space in use.,0,elasticsearch,disk used
 elasticsearch.fielddata.evictions,gauge,,eviction,,The total  number of evictions from the fielddata cache.,0,elasticsearch,fielddata cache evictions
 elasticsearch.fielddata.size,gauge,,byte,,The size of the fielddata cache.,0,elasticsearch,fielddata cache size
