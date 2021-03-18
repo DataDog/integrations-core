@@ -411,7 +411,7 @@ class ESCheck(AgentCheck):
             for key, value in list(iteritems(dic)):
                 if value is None:
                     del dic[key]
-                    self.log.warning("The cat allocation node_name %s has no metric data for %s", dic.get(u'node'), key)
+                    self.log.debug("The cat allocation node_name %s has no metric data for %s", dic.get(u'node'), key)
 
             tags = base_tags + ['node_name:' + dic.get(u'node').lower()]
             for metric in cat_allocation_metrics:
