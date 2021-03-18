@@ -662,14 +662,3 @@ def node_system_stats_for_version(version):
         node_system_stats.update(NODE_SYSTEM_METRICS_POST_5)
 
     return node_system_stats
-
-
-def cat_allocation_stats_for_version(version):
-    """
-    Get the proper set of Cat Allocations metrics for the specified ES version
-    """
-    cat_allocation_metrics = {}
-    if version >= [7, 2, 0]:
-        cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
-
-    return cat_allocation_metrics

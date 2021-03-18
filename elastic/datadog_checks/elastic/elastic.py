@@ -12,8 +12,8 @@ from datadog_checks.base import AgentCheck, is_affirmative, to_string
 
 from .config import from_instance
 from .metrics import (
+    CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
-    cat_allocation_stats_for_version,
     health_stats_for_version,
     index_stats_for_version,
     node_system_stats_for_version,
@@ -393,7 +393,8 @@ class ESCheck(AgentCheck):
         CAT_ALLOC_PATH = '/_cat/allocation?v=true&format=json&bytes=b'
         cat_allocation_url = self._join_url(CAT_ALLOC_PATH, admin_forwarder)
         cat_allocation_data = self._get_data(cat_allocation_url)
-        cat_allocation_metrics = cat_allocation_stats_for_version(version)
+        cat_allocation_metrics = {}
+        cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
 
         # we need to remap metric names because the ones from elastic
         # contain dots and that would confuse `_process_metric()` (sic)
