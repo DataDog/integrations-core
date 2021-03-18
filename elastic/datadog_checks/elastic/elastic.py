@@ -390,8 +390,7 @@ class ESCheck(AgentCheck):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
-        cat_allocation_url = '/_cat/allocation?v=true&format=json&bytes=b'
-        cat_allocation_url = self._join_url(cat_allocation_url, admin_forwarder)
+        cat_allocation_url = self._join_url(CAT_ALLOC_PATH, admin_forwarder)
         cat_allocation_data = self._get_data(cat_allocation_url)
         cat_allocation_metrics = cat_allocation_stats_for_version(version)
 
