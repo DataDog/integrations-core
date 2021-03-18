@@ -6,7 +6,7 @@
   "metric_prefix": "gke.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "Google Kubernetes Engine is a hosted platform for running and orchestrating containerized applications.",
+  "short_description": "GKE is a platform for running and orchestrating containerized applications.",
   "guid": "ba0ef5a7-4507-4c99-bfa6-ab8cdaed9b91",
   "support": "core",
   "supported_os": [
