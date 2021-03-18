@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
+import sys
 import time
 from collections import defaultdict
 
@@ -399,12 +401,13 @@ class ESCheck(AgentCheck):
         # we need to remap metric names because the ones from elastic
         # contain dots and that would confuse `_process_metric()` (sic)
         for dic in cat_allocation_data:
+            json.dump(dic, sys.stdout)
             cat_allocation_dic = {
-                'disk_indices': dic.get(u'disk.indices'),
-                'disk_used': dic.get(u'disk.used'),
-                'disk_avail': dic.get(u'disk.avail'),
-                'disk_total': dic.get(u'disk.total'),
-                'disk_percent': dic.get(u'disk.percent'),
+                'disk_indices': dic.get('disk.indices'),
+                'disk_used': dic.get('disk.used'),
+                'disk_avail': dic.get('disk.avail'),
+                'disk_total': dic.get('disk.total'),
+                'disk_percent': dic.get('disk.percent'),
                 'shards': dic.get(u'shards'),
             }
 
@@ -412,9 +415,9 @@ class ESCheck(AgentCheck):
             for key, value in list(iteritems(dic)):
                 if value is None:
                     del dic[key]
-                    self.log.debug("The cat allocation node_name %s has no metric data for %s", dic.get(u'node'), key)
+                    self.log.debug("The cat allocation node_name %s has no metric data for %s", dic.get('node'), key)
 
-            tags = base_tags + ['node_name:' + dic.get(u'node').lower()]
+            tags = base_tags + ['node_name:' + dic.get('node').lower()]
             for metric in cat_allocation_metrics:
                 desc = cat_allocation_metrics[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
