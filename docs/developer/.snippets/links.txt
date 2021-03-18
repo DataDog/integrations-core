@@ -116,6 +116,8 @@
 [python-pdb]: https://docs.python.org/3/library/pdb.html
 [requests-github]: https://github.com/psf/requests
 [requests-unixsocket-pypi]: https://pypi.org/project/requests-unixsocket/
+[release-base.yml]: https://github.com/DataDog/integrations-core/blob/master/.github/workflows/release-base.yml
+[release-dev.yml]: https://github.com/DataDog/integrations-core/blob/master/.github/workflows/release-dev.yml
 [root-tox-config]: https://github.com/DataDog/integrations-core/blob/master/tox.ini
 [rtloader]: https://github.com/DataDog/datadog-agent/tree/master/rtloader
 [semver-home]: https://semver.org
