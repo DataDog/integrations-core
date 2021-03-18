@@ -4,7 +4,7 @@
 
 Connect to Prometheus to:
 - Extract custom metrics from Prometheus endpoints
-- See Prometheus Alertmanager alerts in your event stream
+- See Prometheus Alertmanager alerts in your Datadog event stream
 
 **Note**: Datadog recommends using the [OpenMetrics check][10] since it is more efficient and fully supports Prometheus text format. Use the Prometheus check only when the metrics endpoint does not support a text format.
 
