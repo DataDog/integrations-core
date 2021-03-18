@@ -75,8 +75,7 @@ files:
         example: true
     - name: cat_allocation_stats
       description: |
-        If you enable the "cat_allocation_stats" flag, statistics over cat allocation metrics
-        are collected by the check and sent to the backend. 
+        Enable to collect Elastic Cat Allocation metrics.
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
       value:
         type: boolean
