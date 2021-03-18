@@ -24,7 +24,7 @@
                 "background_color": "pink",
                 "content": "Broker",
                 "font_size": "18",
-                "show_tick": true,
+                "show_tick": false,
                 "text_align": "center",
                 "tick_edge": "right",
                 "tick_pos": "50%",
@@ -43,7 +43,7 @@
                 "background_color": "blue",
                 "content": "Queue Statistics",
                 "font_size": "18",
-                "show_tick": true,
+                "show_tick": false,
                 "text_align": "center",
                 "tick_edge": "right",
                 "tick_pos": "50%",
@@ -1027,9 +1027,9 @@
             },
             "id": 3793693169467719,
             "layout": {
-                "height": 10,
-                "width": 43,
-                "x": 135,
+                "height": 6,
+                "width": 85,
+                "x": 113,
                 "y": 66
             }
         }
