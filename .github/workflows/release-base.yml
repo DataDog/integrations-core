@@ -29,4 +29,7 @@ jobs:
         ddev config set repo core
 
     - name: Release ddev
-      run: ddev release upload datadog_checks_base
+      run: ddev release upload -n datadog_checks_base
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN_BASE }}
