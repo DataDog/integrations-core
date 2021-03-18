@@ -126,6 +126,7 @@ class ESCheck(AgentCheck):
 
         # Load the cat allocation data.
         if version >= [7, 2, 0] and self._config.cat_allocation_stats:
+            self.log.debug("Collecting cat allocation metrics")
             try:
                 self._process_cat_allocation_data(admin_forwarder, version, base_tags)
             except requests.ReadTimeout as e:
