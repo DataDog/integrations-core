@@ -51,7 +51,7 @@ receivers:
   - send_resolved: true
     url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
 ```
-2. Restart Prometheus and Alertmanager services
+2. Restart the Prometheus and Alertmanager services.
 ```
 sudo systemctl restart prometheus.service alertmanager.service
 ```
