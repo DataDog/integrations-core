@@ -70,7 +70,7 @@ Note: Bucket data for a given `<HISTOGRAM_METRIC_NAME>` Prometheus histogram met
 
 ### Events
 
-Prometheus Alertmanager alerts will be automatically sent into Datadog event stream following webhook configuration
+Prometheus Alertmanager alerts are automatically sent to your Datadog event stream following the webhook configuration.
 
 ### Service Checks
 
