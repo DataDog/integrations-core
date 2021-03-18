@@ -12,6 +12,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
+    CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
     STATS_METRICS,
     ADDITIONAL_METRICS_1_x,
@@ -204,14 +205,19 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
 
 @pytest.mark.integration
 def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_tags):
+    instance['cat_allocation_stats'] = True
+    # print(instance['cat_allocation_stats'], 'instance[cat_allocation_stats]')
     elastic_check = ESCheck('elastic', {}, instances=[instance])
+    cat_allocation_metrics = {}
+    cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
+    print(cat_allocation_metrics)
     es_version = elastic_check._get_es_version()
     if es_version < [7, 2, 0]:
         pytest.skip("Cat Allocation metrics are only tested in version 7.2.0+")
 
     elastic_check.check(None)
-
-    elastic_check._process_cat_allocation_data(aggregator, es_version, cluster_tags)
+    for m_name in cat_allocation_metrics:
+        aggregator.assert_metric(m_name)
 
 
 @pytest.mark.integration
