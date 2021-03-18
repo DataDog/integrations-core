@@ -206,11 +206,9 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
 @pytest.mark.integration
 def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['cat_allocation_stats'] = True
-    # print(instance['cat_allocation_stats'], 'instance[cat_allocation_stats]')
     elastic_check = ESCheck('elastic', {}, instances=[instance])
     cat_allocation_metrics = {}
     cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
-    print(cat_allocation_metrics)
     es_version = elastic_check._get_es_version()
     if es_version < [7, 2, 0]:
         pytest.skip("Cat Allocation metrics are only tested in version 7.2.0+")
