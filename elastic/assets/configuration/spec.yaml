@@ -73,6 +73,14 @@ files:
       value:
         type: boolean
         example: true
+    - name: cat_allocation_stats
+      description: |
+        If you enable the "cat_allocation_stats" flag, statistics over cat allocation metrics
+        are collected by the check and sent to the backend. 
+        Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
+      value:
+        type: boolean
+        example: false
     - name: admin_forwarder
       description: |
         It is used to signify a URL that includes a context root

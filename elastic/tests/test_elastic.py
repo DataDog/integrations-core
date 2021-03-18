@@ -203,6 +203,18 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
 
 
 @pytest.mark.integration
+def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_tags):
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
+    if es_version < [6, 4, 2]:
+        pytest.skip("Cat Allocation metrics are only tested in version 6.4.2+")
+
+    elastic_check.check(None)
+
+    elastic_check._process_cat_allocation_data(aggregator, es_version, cluster_tags)
+
+
+@pytest.mark.integration
 def test_health_event(dd_environment, aggregator):
     dummy_tags = ['elastique:recherche']
     instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}

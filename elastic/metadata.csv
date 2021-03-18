@@ -21,6 +21,11 @@ elasticsearch.cache.filter.size,gauge,,byte,,The size of the filter cache.,0,ela
 elasticsearch.cluster_status,gauge,,,,"The elasticsearch cluster health as a number: red = 0, yellow = 1, green = 2",0,elasticsearch,cluster status
 elasticsearch.docs.count,gauge,,document,,The total number of documents in the cluster across all shards.,0,elasticsearch,docs count
 elasticsearch.docs.deleted,gauge,,document,,The total number of documents deleted from the cluster across all shards.,0,elasticsearch,docs deleted
+elasticsearch.disk.avail,gauge,,byte,,Free disk space available to Elasticsearch.,0,elasticsearch,disk avail
+elasticsearch.disk.indices,gauge,,byte,,Disk space used by the node’s shards.,0,elasticsearch,disk indices
+elasticsearch.disk.percent,gauge,,byte,,Total percentage of disk space in use. Calculated as disk.used / disk.total.,0,elasticsearch,disk percent
+elasticsearch.disk.total,gauge,,byte,,Total disk space for the node including in-use and available space.,0,elasticsearch,disk total
+elasticsearch.disk.used,gauge,,byte,,Total disk space in use.,0,elasticsearch,disk used
 elasticsearch.fielddata.evictions,gauge,,eviction,,The total  number of evictions from the fielddata cache.,0,elasticsearch,fielddata cache evictions
 elasticsearch.fielddata.size,gauge,,byte,,The size of the fielddata cache.,0,elasticsearch,fielddata cache size
 elasticsearch.flush.total,gauge,,flush,,The total number of index flushes to disk since start.,0,elasticsearch,total index flushes
@@ -132,7 +137,8 @@ elasticsearch.refresh.total.time,gauge,,second,,The total time spent on index re
 elasticsearch.refresh.external_total,gauge,,refresh,,The total number of external index refreshes.,0,elasticsearch,total refreshes
 elasticsearch.refresh.external_total.time,gauge,,second,,The total time spent on external index refreshes.,0,elasticsearch,total refresh time
 elasticsearch.relocating_shards,gauge,,shard,,The number of shards that are relocating from one node to another.,0,elasticsearch,relocating shards
-elasticsearch.search.fetch.current,gauge,,fetch,,The number of search fetches currently running.,0,elasticsearch,current fetches
+elasticsearch.shards,gauge,,fetch,,Number of primary and replica shards assigned to the node.,0,elasticsearch,current fetches
+elasticsearch.search.fetch.current,gauge,,shard,,The number of search fetches currently running.,0,elasticsearch,shards
 elasticsearch.search.fetch.open_contexts,gauge,,query,,The number of active searches.,0,elasticsearch,active searches
 elasticsearch.search.fetch.time,gauge,,second,,The total time spent on the search fetch.,0,elasticsearch,total fetch time
 elasticsearch.search.fetch.total,gauge,,fetch,,The total number of search fetches.,0,elasticsearch,total fetches

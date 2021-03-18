@@ -13,6 +13,7 @@ from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from .config import from_instance
 from .metrics import (
     CLUSTER_PENDING_TASKS,
+    cat_allocation_stats_for_version,
     health_stats_for_version,
     index_stats_for_version,
     node_system_stats_for_version,
@@ -122,6 +123,13 @@ class ESCheck(AgentCheck):
                 self._get_index_metrics(admin_forwarder, version, base_tags)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
+
+        # Load the cat allocation data.
+        if version >= [7, 2, 0] and self._config.cat_allocation_stats:
+            try:
+                self._process_cat_allocation_data(admin_forwarder, version, base_tags)
+            except requests.ReadTimeout as e:
+                self.log.warning("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
 
         # If we're here we did not have any ES conn issues
         self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
@@ -379,6 +387,35 @@ class ESCheck(AgentCheck):
             slm_stats = slm_stats_for_version(version)
             for metric, desc in iteritems(slm_stats):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
+
+    def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
+        cat_allocation_url = '/_cat/allocation?v=true&format=json&bytes=b'
+        cat_allocation_url = self._join_url(cat_allocation_url, admin_forwarder)
+        cat_allocation_data = self._get_data(cat_allocation_url)
+        cat_allocation_metrics = cat_allocation_stats_for_version(version)
+
+        # we need to remap metric names because the ones from elastic
+        # contain dots and that would confuse `_process_metric()` (sic)
+        for dic in cat_allocation_data:
+            cat_allocation_dic = {
+                'disk_indices': dic.get(u'disk.indices'),
+                'disk_used': dic.get(u'disk.used'),
+                'disk_avail': dic.get(u'disk.avail'),
+                'disk_total': dic.get(u'disk.total'),
+                'disk_percent': dic.get(u'disk.percent'),
+                'shards': dic.get(u'shards'),
+            }
+
+            # Ensure that dic does not contain None values
+            for key, value in list(iteritems(dic)):
+                if value is None:
+                    del dic[key]
+                    self.log.warning("The cat allocation node_name %s has no metric data for %s", dic.get(u'node'), key)
+
+            tags = base_tags + ['node_name:' + dic.get(u'node').lower()]
+            for metric in cat_allocation_metrics:
+                desc = cat_allocation_metrics[metric]
+                self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

@@ -103,6 +103,13 @@ instances:
     #
     # pending_task_stats: true
 
+    ## @param cat_allocation_stats - boolean - optional - default: false
+    ## If you enable the "cat_allocation_stats" flag, statistics over cat allocation metrics
+    ## are collected by the check and sent to the backend. 
+    ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
+    #
+    # cat_allocation_stats: false
+
     ## @param admin_forwarder - boolean - optional - default: false
     ## It is used to signify a URL that includes a context root
     ## needed for a forwarder application to access Elasticsearch REST services for example

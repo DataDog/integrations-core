@@ -524,6 +524,15 @@ NODE_SYSTEM_METRICS_POST_5 = {
     'elasticsearch.process.cpu.percent': ('gauge', 'process.cpu.percent'),
 }
 
+CAT_ALLOCATION_METRICS = {
+    'elasticsearch.shards': ('gauge', 'shards'),
+    'elasticsearch.disk.indices': ('gauge', 'disk_indices'),
+    'elasticsearch.disk.used': ('gauge', 'disk_used'),
+    'elasticsearch.disk.avail': ('gauge', 'disk_avail'),
+    'elasticsearch.disk.total': ('gauge', 'disk_total'),
+    'elasticsearch.disk.percent': ('gauge', 'disk_percent'),
+}
+
 
 def stats_for_version(version, jvm_rate=False):
     """
@@ -653,3 +662,14 @@ def node_system_stats_for_version(version):
         node_system_stats.update(NODE_SYSTEM_METRICS_POST_5)
 
     return node_system_stats
+
+
+def cat_allocation_stats_for_version(version):
+    """
+    Get the proper set of Cat Allocations metrics for the specified ES version
+    """
+    cat_allocation_metrics = {}
+    if version >= [7, 2, 0]:
+        cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
+
+    return cat_allocation_metrics
