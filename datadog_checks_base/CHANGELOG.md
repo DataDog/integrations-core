@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.8.0 / 2021-03-18
+
+* [Added] AIA chasing for HTTP. See [#8725](https://github.com/DataDog/integrations-core/pull/8725).
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
 ## 16.7.0 / 2021-03-16
 
 * [Added] Add new precision time function. See [#8838](https://github.com/DataDog/integrations-core/pull/8838).
