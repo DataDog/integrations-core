@@ -96,4 +96,3 @@ Need help? Contact [Datadog support][4].
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [9]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
 [10]: https://docs.datadoghq.com/integrations/openmetrics/
-[11]: https://prometheus.io/docs/alerting/latest/alertmanager/
