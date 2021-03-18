@@ -78,7 +78,7 @@ To see all checks that need to be released, run `ddev release show ready`.
 If you released `datadog_checks_base` or `datadog_checks_dev` then these must be uploaded to [PyPI][]
 for use by [integrations-extras][].
 
-Since 2021-03-19 this is automatically handled by two GitHub Action jobs: [release-base.yml][] and [release-dev.yml][].
+This is automatically handled by two GitHub Action jobs: [release-base.yml][] and [release-dev.yml][].
 
 In case you need to do it manually:
 
