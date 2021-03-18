@@ -43,7 +43,7 @@ Due to the nature of this integration, it's possible to submit a high number of 
 If `send_monotonic_counter: True`, the Agent sends the deltas of the values in question, and the in-app type is set to count (this is the default behaviour). If `send_monotonic_counter: False`, the Agent sends the raw, monotonically increasing value, and the in-app type is set to gauge.
 
 #### Send Prometheus Alertmanager alerts in the event stream
-1. Edit Alertmanager configuration file, `alertmanager.yml`, to include the following:
+1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
 ```
 receivers:
 - name: datadog
