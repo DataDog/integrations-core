@@ -127,12 +127,8 @@ class ESCheck(AgentCheck):
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
         # Load the cat allocation data.
-        if version >= [7, 2, 0] and self._config.cat_allocation_stats:
-            self.log.debug("Collecting cat allocation metrics")
-            try:
-                self._process_cat_allocation_data(admin_forwarder, version, base_tags)
-            except requests.ReadTimeout as e:
-                self.log.warning("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
+        if self._config.cat_allocation_stats:
+            self._process_cat_allocation_data(admin_forwarder, version, base_tags)
 
         # If we're here we did not have any ES conn issues
         self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
