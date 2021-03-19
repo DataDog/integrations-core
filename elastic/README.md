@@ -312,47 +312,6 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
-
-##### Metric collection
-
-| Parameter            | Value                              |
-| -------------------- | ---------------------------------- |
-| `<INTEGRATION_NAME>` | `elastic`                          |
-| `<INIT_CONFIG>`      | blank or `{}`                      |
-| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:9200"}` |
-
-##### Trace collection
-
-APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
-
-Required environment variables on the Agent container:
-
-| Parameter            | Value                                                                      |
-| -------------------- | -------------------------------------------------------------------------- |
-| `<DD_API_KEY>` | `api_key`                                                                  |
-| `<DD_APM_ENABLED>`      | true                                                              |
-| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
-
-See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
-
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
-
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
-
-| Parameter      | Value                                                      |
-| -------------- | ---------------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "elasticsearch", "service": "<SERVICE_NAME>"}` |
-
-<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
