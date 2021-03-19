@@ -388,31 +388,27 @@ class ESCheck(AgentCheck):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
+        if version < [7, 2, 0]:
+            self.log.warning("Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version))
+            return
+
+        self.log.debug("Collecting cat allocation metrics")
         CAT_ALLOC_PATH = '/_cat/allocation?v=true&format=json&bytes=b'
         cat_allocation_url = self._join_url(CAT_ALLOC_PATH, admin_forwarder)
-        cat_allocation_data = self._get_data(cat_allocation_url)
+        try:
+            cat_allocation_data = self._get_data(cat_allocation_url)
+         except requests.ReadTimeout as e:
+             self.log.error("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
+             return
+                   
         cat_allocation_metrics = {}
         cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
-
+        
         # we need to remap metric names because the ones from elastic
         # contain dots and that would confuse `_process_metric()` (sic)
+        data_to_collect = {'disk.indices', ''disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
         for dic in cat_allocation_data:
-            json.dump(dic, sys.stdout)
-            cat_allocation_dic = {
-                'disk_indices': dic.get('disk.indices'),
-                'disk_used': dic.get('disk.used'),
-                'disk_avail': dic.get('disk.avail'),
-                'disk_total': dic.get('disk.total'),
-                'disk_percent': dic.get('disk.percent'),
-                'shards': dic.get(u'shards'),
-            }
-
-            # Ensure that dic does not contain None values
-            for key, value in list(iteritems(dic)):
-                if value is None:
-                    del dic[key]
-                    self.log.debug("The cat allocation node_name %s has no metric data for %s", dic.get('node'), key)
-
+            cat_allocation_dic = {k.replace('.', '_'): v for k, v in dic.items() if k in data_to_collect and v is not None}
             tags = base_tags + ['node_name:' + dic.get('node').lower()]
             for metric in cat_allocation_metrics:
                 desc = cat_allocation_metrics[metric]
