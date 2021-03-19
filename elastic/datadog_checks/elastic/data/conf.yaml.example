@@ -104,7 +104,7 @@ instances:
     # pending_task_stats: true
 
     ## @param cat_allocation_stats - boolean - optional - default: false
-    ## Enable to collect Elastic Cat Allocation metrics.
+    ## Enable to collect Elastic Cat Allocation metrics. Available only for v >= 7.2
     ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
     #
     # cat_allocation_stats: false
