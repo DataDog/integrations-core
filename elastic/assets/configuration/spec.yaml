@@ -75,7 +75,7 @@ files:
         example: true
     - name: cat_allocation_stats
       description: |
-        Enable to collect Elastic Cat Allocation metrics. Available only for v >= 7.2
+        Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 7.2 or higher.
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
       value:
         type: boolean
