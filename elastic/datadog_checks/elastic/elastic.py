@@ -401,9 +401,6 @@ class ESCheck(AgentCheck):
             self.log.error("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
             return
 
-        cat_allocation_metrics = {}
-        cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
-
         # we need to remap metric names because the ones from elastic
         # contain dots and that would confuse `_process_metric()` (sic)
         data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
@@ -412,7 +409,7 @@ class ESCheck(AgentCheck):
                 k.replace('.', '_'): v for k, v in dic.items() if k in data_to_collect and v is not None
             }
             tags = base_tags + ['node_name:' + dic.get('node').lower()]
-            for metric in cat_allocation_metrics:
+            for metric in CAT_ALLOCATION_METRICS:
                 desc = cat_allocation_metrics[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
