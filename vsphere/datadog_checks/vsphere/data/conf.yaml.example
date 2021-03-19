@@ -214,6 +214,8 @@ instances:
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
+    ## Note: Tag collection works only for vSphere 6.5 and above.
+    ##       Tag collection needs vSphere REST API that is only available since this version.
     #
     # collect_tags: false
 
