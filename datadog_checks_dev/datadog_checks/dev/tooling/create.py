@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from datetime import datetime
 from uuid import uuid4
 
 from ..utils import (
@@ -15,7 +14,7 @@ from ..utils import (
     write_file,
     write_file_binary,
 )
-from .utils import kebab_case_name, normalize_package_name
+from .utils import get_license_header, kebab_case_name, normalize_package_name
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
@@ -58,11 +57,7 @@ To install the {integration_name} check on your host:
             'The {integration_name} check is included in the [Datadog Agent][2] package.\n'
             'No additional installation is needed on your server.'.format(integration_name=integration_name)
         )
-        license_header = (
-            '# (C) Datadog, Inc. {year}-present\n'
-            '# All rights reserved\n'
-            '# Licensed under a 3-clause BSD style license (see LICENSE)'.format(year=str(datetime.utcnow().year))
-        )
+        license_header = get_license_header()
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
         tox_base_dep = '-e../datadog_checks_base[deps]'
