@@ -1012,7 +1012,7 @@
             "id": 36,
             "definition": {
               "type": "note",
-              "content": "An `unassigned shard` value that is `<>  0` could be caused by:\n- **Purposeful delay** of shard allocation. If this is the case, a log with the message `delaying allocation for [54] unassigned shards, next check in [1m]` should appear.\n- **Too many shards** for not enough **nodes**. Make sure that every index in your cluster is initialised with **fewer** replicas per primary shard than the number of nodes in your cluster.\n",
+              "content": "An `unassigned shard` value that is `> 0` could be caused by:\n- **Purposeful delay** of shard allocation. If this is the case, a log with the message `delaying allocation for [54] unassigned shards, next check in [1m]` should appear.\n- **Too many shards** for not enough **nodes**. Make sure that every index in your cluster is initialised with **fewer** replicas per primary shard than the number of nodes in your cluster.\n",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
