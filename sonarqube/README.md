@@ -22,8 +22,9 @@ collects all relevant SonarQube performance metrics exposed through SonarQube's 
 default metrics is available in the [sonarqube.d/metrics.yaml][12] file. Documentation on these beans is available on
 [SonarQube's website][13].
 
-SonarQube's JMX server is not enabled by default. More information on how to enable and configure JMX within SonarQube
-in available within the [SonarQube documentation][14].
+SonarQube's JMX server is not enabled by default, this means that unless it is enabled, `sonarqube.server.*` metrics 
+will not be collected. More information on how to enable and configure JMX within SonarQube is available within the 
+[SonarQube documentation][14]. 
 
 This is a basic `sonarqube.d/conf.yaml` example based on SonarQube and JMX defaults. You can use it as a starting point
 when configuring for both the host-based or container-based agent installation.
