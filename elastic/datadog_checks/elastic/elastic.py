@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import json
-import sys
 import time
 from collections import defaultdict
 
@@ -406,7 +404,7 @@ class ESCheck(AgentCheck):
         
         # we need to remap metric names because the ones from elastic
         # contain dots and that would confuse `_process_metric()` (sic)
-        data_to_collect = {'disk.indices', ''disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
+        data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
         for dic in cat_allocation_data:
             cat_allocation_dic = {k.replace('.', '_'): v for k, v in dic.items() if k in data_to_collect and v is not None}
             tags = base_tags + ['node_name:' + dic.get('node').lower()]
