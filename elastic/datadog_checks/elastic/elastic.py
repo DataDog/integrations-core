@@ -387,7 +387,7 @@ class ESCheck(AgentCheck):
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
         if version < [7, 2, 0]:
-            self.log.warning(
+            self.log.debug(
                 "Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version)
             )
             return
