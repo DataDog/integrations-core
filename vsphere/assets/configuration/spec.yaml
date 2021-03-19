@@ -278,7 +278,7 @@ files:
           - os_type:windows
           - application_name:my_app
           Note: Tag collection works only for vSphere 6.5 and above.
-                Tag collection needs vSphere REST API Tagging features and an endpoint (tagging.tag_association.object_to_tags)
+                Tag collection needs vSphere REST API Tagging and an endpoint (tagging.tag_association.object_to_tags)
                 only available from vSphere 6.5.
         value:
           type: boolean
