@@ -207,14 +207,9 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
 def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['cat_allocation_stats'] = True
     elastic_check = ESCheck('elastic', {}, instances=[instance])
-    cat_allocation_metrics = {}
-    cat_allocation_metrics.update(CAT_ALLOCATION_METRICS)
-    es_version = elastic_check._get_es_version()
-    if es_version < [7, 2, 0]:
-        pytest.skip("Cat Allocation metrics are only tested in version 7.2.0+")
 
     elastic_check.check(None)
-    for m_name in cat_allocation_metrics:
+    for m_name in CAT_ALLOCATION_METRICS:
         aggregator.assert_metric(m_name)
 
 

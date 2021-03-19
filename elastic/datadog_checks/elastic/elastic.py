@@ -37,6 +37,7 @@ class ESCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT_NAME = 'elasticsearch.can_connect'
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
+    CAT_ALLOC_PATH = '/_cat/allocation?v=true&format=json&bytes=b'
     SOURCE_TYPE_NAME = 'elasticsearch'
 
     def __init__(self, name, init_config, instances):
@@ -393,8 +394,7 @@ class ESCheck(AgentCheck):
             return
 
         self.log.debug("Collecting cat allocation metrics")
-        CAT_ALLOC_PATH = '/_cat/allocation?v=true&format=json&bytes=b'
-        cat_allocation_url = self._join_url(CAT_ALLOC_PATH, admin_forwarder)
+        cat_allocation_url = self._join_url(self.CAT_ALLOC_PATH, admin_forwarder)
         try:
             cat_allocation_data = self._get_data(cat_allocation_url)
         except requests.ReadTimeout as e:
@@ -410,7 +410,7 @@ class ESCheck(AgentCheck):
             }
             tags = base_tags + ['node_name:' + dic.get('node').lower()]
             for metric in CAT_ALLOCATION_METRICS:
-                desc = cat_allocation_metrics[metric]
+                desc = CAT_ALLOCATION_METRICS[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
     def _create_event(self, status, tags=None):
