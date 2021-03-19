@@ -415,3 +415,6 @@ Additional helpful documentation, links, and articles:
 [28]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [29]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [30]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
