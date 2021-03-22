@@ -12,6 +12,7 @@ extends:
   - _generic-bgp4.yaml
   - _generic-ospf.yaml
   - _generic-host-resources.yaml
+  - _juniper-generic.yaml
   - _juniper-virtualchassis.yaml
   - _juniper-firewall.yaml
 

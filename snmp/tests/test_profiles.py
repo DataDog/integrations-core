@@ -2039,6 +2039,7 @@ def test_aruba(aggregator):
     run_profile_check('aruba')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:aruba', 'device_vendor:aruba']
+    common_tags = common_tags + ['device_model:Aruba7205', 'device_type:controller', 'os_version:8.999.999.7', 'os_rev:70587']
 
     common.assert_common_metrics(aggregator, common_tags)
 
