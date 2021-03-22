@@ -24,6 +24,7 @@ FLAKE8_DEP = 'flake8==3.8.3'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
 MYPY_DEP = 'mypy==0.770'
+PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
 @tox.hookimpl
@@ -116,6 +117,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         FLAKE8_LOGGING_FORMAT_DEP,
         BLACK_DEP,
         ISORT_DEP,
+        PYDANTIC_DEP,
     ]
 
     commands = [

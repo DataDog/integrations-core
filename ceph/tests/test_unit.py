@@ -11,7 +11,23 @@ from datadog_checks.ceph import Ceph
 
 from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_SERVICE_TAGS, mock_data
 
-EXPECTED_METRICS = ['ceph.num_mons', 'ceph.total_objects', 'ceph.pgstate.active_clean']
+EXPECTED_METRICS = [
+    'ceph.num_mons',
+    'ceph.total_objects',
+    'ceph.pgstate.active_clean',
+]
+
+EXPECTED_METRICS_POOL_TAGS = [
+    'ceph.read_bytes',
+    'ceph.write_bytes',
+    'ceph.pct_used',
+    'ceph.num_objects',
+    'ceph.misplaced_objects',
+    'ceph.misplaced_total',
+    'ceph.recovering_objects_per_sec',
+    'ceph.recovering_bytes_per_sec',
+    'ceph.recovering_keys_per_sec',
+]
 
 EXPECTED_TAGS = ['ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a', 'ceph_mon_state:peon', 'optional:tag1']
 
@@ -90,7 +106,7 @@ def test_tagged_metrics(_, aggregator):
     for pool in ['pool0', 'rbd']:
         expected_tags = EXPECTED_TAGS + ['ceph_pool:%s' % pool]
 
-        for metric in ['ceph.read_bytes', 'ceph.write_bytes', 'ceph.pct_used', 'ceph.num_objects']:
+        for metric in EXPECTED_METRICS_POOL_TAGS:
             aggregator.assert_metric(metric, count=1, tags=expected_tags)
 
 

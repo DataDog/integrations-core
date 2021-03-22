@@ -1,0 +1,872 @@
+{
+  "title": "Palo Alto Networks Firewall Overview",
+  "description": "## Title\n\nThis dashboard displays an overview of the logs forwarded by panos server profile.  The dashboard displays data points captured in each log type. ",
+  "widgets": [
+    {
+      "id": 2258586113552824,
+      "layout": {
+        "x": 1,
+        "y": 75,
+        "width": 47,
+        "height": 20
+      },
+      "definition": {
+        "title": "Threats by Severity",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:THREAT $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@severity",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 6318382163800138,
+      "layout": {
+        "x": 67,
+        "y": 25,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Users",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "cell_display_mode": [
+              "bar"
+            ],
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall $type $deviceName $severity $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@usr.id",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "has_search_bar": "auto"
+      }
+    },
+    {
+      "id": 635332614361456,
+      "layout": {
+        "x": 1,
+        "y": 2,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "type": "image",
+        "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXUAAACHCAMAAADeDjlcAAAAw1BMVEX///8AAAD6WC0uLi6ysrKWlpbn5+f6VioLCwvV1dWkpKRAQED8/Pzf39/6VCfq6ur09PTCwsJvb2/6Thqurq7h4eE2Njbw8PBpaWnOzs6cnJz8l4C3t7d9fX1bW1tISEiJiYn+2tEaGholJSVSUlJcXFwnJyd7e3tDQ0P/9/T6YDj6ThUVFRXIyMhNTU3+3NP90cf8oo38i3H9zMH6XzX8uKj8lHz6ZT/9xLb7fF39taT8oIz7bEj6cE77g2b+7Oj8q5idmK81AAAKFklEQVR4nO2bD3eiOBfGQZQWAQEVASuCin86VdtOOzOdd+ad9vt/qk1CEkLA2u3aytm9v3PmjCQkgYeHS3KhigIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHCQa3nb+oBBJm3M0Hhve3uYd3DKYzons5+3pe3rq/sPkH2uEjrvbT/M26unPKYz8vBl8CjKbn0dDH6dfhjtH6re/lepPnvstXq/C9mvfw1arcHLycc5uequrZ/kwM7BAxK91eq1ZnT7+g8SHcn+69RB5pSqe5N0f6mq49Md3ecya2HRW9zt11dEdCT7/YlHOqXq9Gf3dEf3qTxQ0ZHsj9jt1Okf4fZTqn7591TXbfe9o34Es0cmeu5264qLfnK3n011Z92Pl+33Dnt6Cqfnbn/4KoiOZL867nbLN4waJ7m+jcodsahOdRe1Nvw6Izq2XPNG1QM8sC4cuD61g0BJGxONZl9E0VsXN9/+X1b9p7x8ytmFfUToI9W6y9FirmVpSV9lEi/N1XyuJWEn4IVV1aM1br0YTeOoPIDf6e81VGNmsccLa1RP+jlrNpmxJv0MN9wsOz5rN/ai0WZs9Rsy4Xm6KIveehDDOhL9+wGr0/P3uBCImNnS3U1VkSXTXVLdam+FveYTPpbdESvUebs8qqg63ydf8LqpWJjRSxkqk7VhBmPpyp6JO8npgydU+Fy4ffCn3un8/Dtd8eSnuezeUpXY0BxAWXWrL+3Wz8v1VJM7GJdGrVN9YeNCOyuXbvOgElreSBsrzVD9qVUW/fGBFF//6bGgfkh0dv6r8kma2K1uRXRE7vaS6npS2SsjUWpS074jjnpQ9ajaMMaH1PF2XSO2wiZEmLtHyekPtOIqLx98paLfvlTatqvnh0lxXbemIiatSqrva3ab4gpnVFPji6Pi3zWq1zbEbteXkYVuoSZkzQ44XVHue2Wnzx5vKqYXVdeEgIDvYYttmNMp0+GSxBhR9Q5vMx/N+e+xWLXaLzMW4NfiqPg3VX0xImiJLV7HhcYvyhYfkh6v4/7koxV9Aw/y7IWJ/jKQnP6716qkwgrV+zvb3q3ZVogrY/wrGUa+ZemTrSCnoLrOrseibdjRkOlu4iBg4zbb1DMCy41o8DddpVb1VLcJvqV47CCSHeqSP1bJIaFV0kekrv8uD5LTv1DRrfuB5HRydeQQz1VP8+0x28aR2VBXfZ5Dp9lZE/8WVGd+NslTUPFNuk0ef3s1G/J5Oq3wlCPzdStkPsj15ReBTyDPzsPjMadTa9z+YPGm1J6dP522FKeMY6fbFd5bpIJSgurM6mxasWNXgWwUmis6rWgrR1S3F3mJxhYOcdkY5+ew0+WYzuNQ2e3s/PkKxpNP0dXtXbvT5w84XFaozmJ/xntMhP3IoTh+5HVTHti7yhHV2QSGH4GtyWOcF1n0mztaccjppPC70AM7fx4sHa10exudaWmhk+9ZqO4LWuawkJM7NWivpQnJUdXZiyZ+n7H7b9OMvNcTWoSWZi9U9EpML6+iRLdX3+ps8oIpnpn7mTSvq6jOAsqk0iMOOW53VWl/VHUWyorMBA0xo3Ku4kw8/z7g9HvZ6YeCPz//y6LXrFC9Ldn8FdWLHAsLUUj1YFrT/qjqLIwHckkzVC+nvPg8ncX03nfm9B/SKupb0UXV6wlXvbRCnLNAcczrbEUaKW4pUyBObt7k9aaqLkaOiwFz+q8jTu/9T+ihonpA1Q0tl+dCVtm6azA1y6obtLRYLrIVrc8DNFI87HjsuXtUddaBzUvEqX4T4G4XnD543em9b2IHYhQmRDSqpNzqoR24VuHhsuou24n3yLI3fFK5aJP24qu6V1XfqVKJTm+TpsxhuNt7F8zp9A3SgIl+e/GK04vzX7OClJ8zXTCZ9JZhFiyrrrDQzxJSbFKzUlyqJ0vvvlV1dvts2LyKjcyP8fzMsJV7zOnXzOlXb3K6sDalgZkvBA2mP03bWmweLqnOrlKY3/48UZkqfq7nNiqPdED1lA6DumDPYJpIZssrtRH5XQrStfcoOZ1nuWa9V50u5mG6yK06T7ObXM8FeYZZPB0iqW6wzMsSi8JfgywMpjrNqUfsaSyrviguuxWNNaOYsKspCu3ukOXkkiYkYDizHyy8VJw+O+L0Us5xVGQWyUyQ3dhJx/PGxVsGSXU+0VPn2bKY3qdIQ7ox77d37ZinI2XVWQpim02TOUklWzz3qaEyPnATUo0Ct5LTez+pKypOr4h+KL8eoh6M6gqpTnVrXrOThvfKaiqqqnvlag35O6obOf4EJd8Bc3rr4ssTKTju9EOqb/GzsfJirl51ZVd5T6dqJATvKuV1qsuvMHBAGlZaqVlTpo1lhO9fLm6wvneD46Lz8y+9HB7RrG1pOT/eH1BdsTeSQps8J2uV3zh36lWXzU4K23ImYR1UDr0JcKcThVtPVafLD1ICz34Vr4RUkyWyI8GGQzYRx6qvSqorTkleNWUKWXFRGDq7A6qXnT3POy2/rt52G/UkLbi/KWl88yLF9Fad08XzN9bEwYtQfGp18udjgj+S6YxMxAif/9QkP4s5tt6Z5nOR1bIjrtujPu0UTdrthDTCq1iPdGWu6F5+nK+DtklcrHGNdJ+vBbR+c788ldKKP2+/i18hHXB62XW+4U0i6eOvwNhNdgYR0tUJ+KeT/xR3dW3Uelf5dszyjcnEIG/dLIc3ol0Vr/p1I5p40gdmSmBHuEu/oT4nPAsRpYe/f3kpZL+4eDrQ6t/1/f4ZKD7QGPx8VsjfaTDRBwecDqr/c55pkOFfelG3H3Y6qH4C8tieO51AYvsrTgfVTwGO7fz7Fwxy+2tO/1TVfUNXLMNH/zBu/p9t6ehZHaCqAFUputf10LzTxVVo00L1lm24ihsNJ+/+O8sP5+7HTeF0zNVN7eKI84mqh2oW6GqoOGTAiHyipI6CIVrrx+pSGaPpf4QXAksnXzhpO8We711PNQOXfB3VzNUp5lb+pu7lNad/supq6CN5HVUbdieuOxmvRt2JZasZWusunFC13UQd27HaR6r3o1RdK/Yq2anbQDFU0/PSBs8g5UM7cqi6l/Nhx1MQqiM1nmPVL0caXmA5Jk6uOGjhNNcuh3stMC6XluKqC6R66KXoHiBfwqBVm7NRL7Mmq95cQnWSqCTCrLrjnYLfzGU4d5BemquhlsxTxV5sdOTrUR5hVgZSXQvVPbKOPUw37/8zqP8yoWoYKokw8zRdR/jD1D1WfYjfoSQkQdNXp+kI/UBeb29HOroM+yBEahtaPA5B9feQmrbS3aRKkGRJYiKzO+EaPyDtLOko4yRDcxR3bWqbrqVESVdpbzqWv1y7TpgYQd/UzDVEmI/Cdeq1PVQOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB/m78ABOK+yRlIFZ0AAAAASUVORK5CYII=",
+        "sizing": "fit",
+        "margin": "small"
+      }
+    },
+    {
+      "id": 5902232448987996,
+      "layout": {
+        "x": 1,
+        "y": 48,
+        "width": 63,
+        "height": 18
+      },
+      "definition": {
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "log_stream",
+        "indexes": [],
+        "query": "source:pan.firewall $type $deviceName $severity $destinationIp $userId $eventName $subType $countryName $clientIp",
+        "sort": {
+          "column": "time",
+          "order": "desc"
+        },
+        "columns": [
+          "@type",
+          "@evt.name",
+          "@network.client.ip"
+        ],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "inline"
+      }
+    },
+    {
+      "id": 8810526851950426,
+      "layout": {
+        "x": 34,
+        "y": 2,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Events Received",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "aggregator": "avg",
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall $type $deviceName $severity $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "precision": 0
+      }
+    },
+    {
+      "id": 7394509681226048,
+      "layout": {
+        "x": 67,
+        "y": 2,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Event Count by Event Names",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "cell_display_mode": [
+              "bar"
+            ],
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall $evt.name $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@evt.name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 7733449681222254,
+      "layout": {
+        "x": 34,
+        "y": 25,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Client IPs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall $network.client.ip $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@network.client.ip",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 4137633505374790,
+      "layout": {
+        "x": 67,
+        "y": 48,
+        "width": 30,
+        "height": 18
+      },
+      "definition": {
+        "title": "Top Devices Logging Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall $deviceName $severity $type $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@device_name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 4099139286156066,
+      "layout": {
+        "x": 1,
+        "y": 25,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Countries",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "cell_display_mode": [
+              "bar"
+            ],
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@network.client.geoip.country.name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 6838790413476208,
+      "layout": {
+        "x": 1,
+        "y": 181,
+        "width": 24,
+        "height": 3
+      },
+      "definition": {
+        "type": "free_text",
+        "text": "Authentication Log",
+        "color": "#4d4d4d",
+        "font_size": "36",
+        "text_align": "left"
+      }
+    },
+    {
+      "id": 1056864126671032,
+      "layout": {
+        "x": 1,
+        "y": 187,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Authentication Protocols and Outcomes",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "cell_display_mode": [
+              "bar"
+            ],
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:AUTHENTICATION $authpolicy $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@evt.name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 30
+                },
+                {
+                  "facet": "@evt.outcome",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 30
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 2911881343100250,
+      "layout": {
+        "x": 67,
+        "y": 187,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Clients Authenticating",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:AUTHENTICATION $clienttype $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@clienttype",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 8818998291693376,
+      "layout": {
+        "x": 1,
+        "y": 121,
+        "width": 24,
+        "height": 3
+      },
+      "definition": {
+        "type": "free_text",
+        "text": "Traffic Logs",
+        "color": "#4d4d4d",
+        "font_size": "36",
+        "text_align": "left"
+      }
+    },
+    {
+      "id": 2240768652529992,
+      "layout": {
+        "x": 51,
+        "y": 127,
+        "width": 47,
+        "height": 18
+      },
+      "definition": {
+        "title": "Bytes Received grouped by Devices",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:TRAFFIC $type $deviceName $destinationIp $userId $severity $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@device_name",
+                  "sort": {
+                    "facet": "@network.bytes_read",
+                    "order": "desc",
+                    "aggregation": "avg"
+                  },
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "facet": "@network.bytes_read",
+                "aggregation": "avg"
+              }
+            },
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 1325966497963376,
+      "layout": {
+        "x": 1,
+        "y": 127,
+        "width": 47,
+        "height": 18
+      },
+      "definition": {
+        "title": "Bytes Sent grouped by Devices",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:TRAFFIC $type $deviceName $destinationIp $userId $severity $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@device_name",
+                  "sort": {
+                    "facet": "@network.bytes_written",
+                    "order": "desc",
+                    "aggregation": "avg"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "facet": "@network.bytes_written",
+                "aggregation": "avg"
+              }
+            },
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "scale": "linear",
+          "label": "",
+          "include_zero": true,
+          "min": "auto",
+          "max": "auto"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 959100886772332,
+      "layout": {
+        "x": 1,
+        "y": 69,
+        "width": 24,
+        "height": 3
+      },
+      "definition": {
+        "type": "free_text",
+        "text": "Threat Logs",
+        "color": "#4d4d4d",
+        "font_size": "36",
+        "text_align": "left"
+      }
+    },
+    {
+      "id": 7504429782130422,
+      "layout": {
+        "x": 51,
+        "y": 75,
+        "width": 47,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top threats",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:THREAT $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@subtype",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 6659681923601834,
+      "layout": {
+        "x": 51,
+        "y": 98,
+        "width": 47,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Flagged Countries",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:THREAT $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@network.client.geoip.country.name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 7616667040111438,
+      "layout": {
+        "x": 1,
+        "y": 98,
+        "width": 47,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Flagged IPs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:THREAT $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@network.client.ip",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 50
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 6610690836162160,
+      "layout": {
+        "x": 1,
+        "y": 148,
+        "width": 47,
+        "height": 30
+      },
+      "definition": {
+        "title": "Count of Sessions by Countries and Actions",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:TRAFFIC $type $deviceName $destinationIp $userId $severity $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@network.client.geoip.country.name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 30
+                },
+                {
+                  "facet": "@evt.name",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 30
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 3841490891419320,
+      "layout": {
+        "x": 51,
+        "y": 148,
+        "width": 47,
+        "height": 28
+      },
+      "definition": {
+        "title": "Client Traffic Geomap",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "geomap",
+        "requests": [
+          {
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:TRAFFIC $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@network.client.geoip.country.iso_code",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "style": {
+          "palette": "hostmap_blues",
+          "palette_flip": false
+        },
+        "view": {
+          "focus": "WORLD"
+        }
+      }
+    },
+    {
+      "id": 3630464331397040,
+      "layout": {
+        "x": 34,
+        "y": 187,
+        "width": 30,
+        "height": 20
+      },
+      "definition": {
+        "title": "Top Users Authenticating",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "cell_display_mode": [
+              "bar"
+            ],
+            "log_query": {
+              "index": "*",
+              "search": {
+                "query": "source:pan.firewall @type:AUTHENTICATION $authpolicy $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+              },
+              "group_by": [
+                {
+                  "facet": "@usr.id",
+                  "sort": {
+                    "order": "desc",
+                    "aggregation": "count"
+                  },
+                  "limit": 100
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "type",
+      "default": "*",
+      "prefix": "@type"
+    },
+    {
+      "name": "severity",
+      "default": "*",
+      "prefix": "@severity"
+    },
+    {
+      "name": "deviceName",
+      "default": "*",
+      "prefix": "@device_name"
+    },
+    {
+      "name": "eventName",
+      "default": "*",
+      "prefix": "@evt.name"
+    },
+    {
+      "name": "subType",
+      "default": "*",
+      "prefix": "@subtype"
+    },
+    {
+      "name": "countryName",
+      "default": "*",
+      "prefix": "@network.client.geoip.country.name"
+    },
+    {
+      "name": "destinationIp",
+      "default": "*",
+      "prefix": "@network.destination.ip"
+    },
+    {
+      "name": "userId",
+      "default": "*",
+      "prefix": "@usr.id"
+    },
+    {
+      "name": "clientIp",
+      "default": "*",
+      "prefix": "@network.client.ip"
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": false,
+  "notify_list": [],
+  "template_variable_presets": [
+    {
+      "name": "High Severity Issues",
+      "template_variables": [
+        {
+          "name": "severity",
+          "value": "\"high\""
+        }
+      ]
+    }
+  ],
+  "id": "cbu-krf-84s"
+}

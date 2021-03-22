@@ -7,13 +7,11 @@ from __future__ import division
 
 import re
 import time
-from collections import defaultdict
 
 import requests
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
@@ -41,10 +39,6 @@ class Couchbase(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}, 'ssl_verify': {'name': 'tls_verify'}}
 
-    class CouchbaseInstanceState(object):
-        def __init__(self):
-            self.previous_status = None
-
     def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
@@ -55,8 +49,7 @@ class Couchbase(AgentCheck):
         self._tags = list(set(self.instance.get('tags', [])))
         self._tags.append('instance:{}'.format(self._server))
 
-        # Keep track of all instances
-        self._instance_states = defaultdict(lambda: self.CouchbaseInstanceState())
+        self._previous_status = None
 
     def _create_metrics(self, data):
         # Get storage metrics
@@ -106,7 +99,7 @@ class Couchbase(AgentCheck):
         rebalance_status, rebalance_msg = data['tasks'].get('rebalance', (None, None))
 
         # Only fire an event when the state has changed
-        if rebalance_status is not None and self._instance_state.previous_status != rebalance_status:
+        if rebalance_status is not None and self._previous_status != rebalance_status:
             rebalance_event = None
 
             # If we get an error, we create an error event with the msg we receive
@@ -117,7 +110,7 @@ class Couchbase(AgentCheck):
                 rebalance_event = self._create_event('error', msg_title, msg)
 
             # We only want to fire a 'completion' of a rebalance so make sure we're not firing an event on first run
-            elif rebalance_status == 'notRunning' and self._instance_state.previous_status is not None:
+            elif rebalance_status == 'notRunning' and self._previous_status is not None:
                 msg_title = 'Stopped rebalancing'
                 msg = 'stopped rebalancing.'
                 rebalance_event = self._create_event('info', msg_title, msg)
@@ -138,7 +131,7 @@ class Couchbase(AgentCheck):
                 self.event(rebalance_event)
 
             # Update the status of this instance
-            self._instance_state.previous_status = rebalance_status
+            self._previous_status = rebalance_status
 
     def _process_cluster_health_data(self, node_name, node_stats):
         """
@@ -185,7 +178,6 @@ class Couchbase(AgentCheck):
         return r.json()
 
     def check(self, _):
-        self._instance_state = self._instance_states[hash_mutable(self.instance)]
         data = self.get_data()
         self._collect_version(data)
         self._create_metrics(data)

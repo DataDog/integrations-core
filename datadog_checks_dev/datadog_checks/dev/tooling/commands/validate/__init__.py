@@ -17,6 +17,7 @@ from .imports import imports
 from .jmx_metrics import jmx_metrics
 from .manifest import manifest
 from .metadata import metadata
+from .models import models
 from .package import package
 from .readmes import readmes
 from .recommended_monitors import recommended_monitors
@@ -37,6 +38,7 @@ ALL_COMMANDS = (
     imports,
     manifest,
     metadata,
+    models,
     package,
     readmes,
     recommended_monitors,

@@ -99,18 +99,18 @@ instances:
     #
     # new_leader_checks: false
 
-    ## @param service_whitelist - list of strings - optional
+    ## @param services_include - list of strings - optional
     ## Services to restrict catalog querying to
     ## the default settings query up to 50 services. If you have more than
-    ## services in your Consul service catalog, use this whitelist.
+    ## services in your Consul service catalog, use this include list.
     #
-    # service_whitelist:
+    # services_include:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
     ## @param services_exclude - list of strings - optional
     ## List services to exclude from the Consul service catalog.
-    ## Note: The excluded services will take precedence over service_whitelist.
+    ## Note: The excluded services will take precedence over services_include.
     ## The default settings will still query up to 50 services.
     #
     # services_exclude:
