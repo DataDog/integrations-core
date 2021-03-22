@@ -1,5 +1,27 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.9.0 / 2021-03-22
+
+* [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).
+
+## 16.8.0 / 2021-03-18
+
+* [Added] AIA chasing for HTTP. See [#8725](https://github.com/DataDog/integrations-core/pull/8725).
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
+## 16.7.0 / 2021-03-16
+
+* [Added] Add new precision time function. See [#8838](https://github.com/DataDog/integrations-core/pull/8838).
+
+## 16.6.1 / 2021-03-12
+
+* [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
+
+## 16.6.0 / 2021-03-05
+
+* [Added] Upgrade PyJWT to 2.0.1 on Python 3. See [#8762](https://github.com/DataDog/integrations-core/pull/8762).
+* [Fixed] Improve orjson compatibility. See [#8767](https://github.com/DataDog/integrations-core/pull/8767).
+
 ## 16.5.0 / 2021-03-04
 
 * [Added] Add ability to look for wildcards in Prometheus metric transformers. See [#8750](https://github.com/DataDog/integrations-core/pull/8750).

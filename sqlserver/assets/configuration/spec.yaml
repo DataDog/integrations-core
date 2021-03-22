@@ -137,7 +137,9 @@ files:
         type: boolean
         example: false
     - name: include_db_fragmentation_metrics
-      description: Include database fragmentation metrics.
+      description: |
+        Include database fragmentation metrics. Note these queries can be resource intensive on large datasets.
+        Recommend to limit these via autodiscovery or specific database instances.
       value:
         type: boolean
         example: false

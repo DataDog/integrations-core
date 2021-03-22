@@ -1,5 +1,9 @@
 # CHANGELOG - kyototycoon
 
+## 1.12.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add logs support. See [#7791](https://github.com/DataDog/integrations-core/pull/7791).

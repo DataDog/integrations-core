@@ -1,976 +1,1104 @@
 {
+    "author_name": "Datadog",
+    "description": "This dashboard visualizes key Kafka metrics so you can monitor the flow of data through your infrastructure and spot potential issues like excessive leader changes. Also included are Zookeeper and JVM metrics to ensure your Kafka service has sufficient resources. For further reading on Kafka monitoring: \n\n- [Datadog's guide to monitoring Kafka performance](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics)\n\n- [How to collect Kafka performance metrics](https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/)\n\n- [How to monitor Kafka with Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)- [Tools for scaling Kafka](https://www.datadoghq.com/blog/engineering/introducing-kafka-kit-tools-for-scaling-kafka/)\n\n- [Datadog\u2019s Kafka integration docs](https://docs.datadoghq.com/integrations/kafka/).\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "kafka_node",
+            "prefix": "kafka"
+        },
+        {
+            "default": "*",
+            "name": "consumer_group",
+            "prefix": "consumer_group"
+        },
+        {
+            "default": "*",
+            "name": "clientID-0.8",
+            "prefix": "clientid"
+        },
+        {
+            "default": "*",
+            "name": "client-id-0.9",
+            "prefix": "client-id"
+        }
+    ],
     "title": "Kafka - Overview",
-    "description": "This dashboard visualizes key Kafka metrics so you can monitor the flow of data through your infrastructure and spot potential issues like excessive leader changes. Also included are Zookeeper and JVM metrics to ensure your Kafka service has sufficient resources. For further reading on Kafka monitoring: \n\n- [Datadog's guide to monitoring Kafka performance](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics)\n\n- [How to collect Kafka performance metrics](https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/)\n\n- [How to monitor Kafka with Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)- [Tools for scaling Kafka](https://www.datadoghq.com/blog/engineering/introducing-kafka-kit-tools-for-scaling-kafka/)\n\n- [Datadog’s Kafka integration docs](https://docs.datadoghq.com/integrations/kafka/).\n\nClone this template dashboard to make changes and add your own graph widgets. ",
     "widgets": [
         {
-            "id": 0,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.consumer_lag{$consumer_group} by {host,consumer_group}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.consumer_lag{$consumer_group} by {host,consumer_group}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Consumer lag by group",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Consumer lag by group",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 0,
             "layout": {
-                "x": 113,
-                "y": 12,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 113,
+                "y": 12
             }
         },
         {
-            "id": 1,
             "definition": {
-                "type": "query_value",
+                "custom_links": [],
+                "precision": 0,
                 "requests": [
                     {
-                        "q": "sum:kafka.replication.under_replicated_partitions{*}",
                         "aggregator": "sum",
                         "conditional_formats": [
                             {
                                 "comparator": "<=",
-                                "value": 0,
-                                "palette": "white_on_green"
+                                "palette": "white_on_green",
+                                "value": 0
                             },
                             {
                                 "comparator": ">=",
-                                "value": 10,
-                                "palette": "white_on_red"
+                                "palette": "white_on_red",
+                                "value": 10
                             },
                             {
                                 "comparator": ">=",
-                                "value": 10,
-                                "palette": "white_on_yellow"
+                                "palette": "white_on_yellow",
+                                "value": 10
                             }
-                        ]
+                        ],
+                        "q": "sum:kafka.replication.under_replicated_partitions{*}"
                     }
                 ],
-                "custom_links": [],
+                "time": {
+                    "live_span": "5m"
+                },
                 "title": "Under replicated",
-                "title_size": "16",
                 "title_align": "center",
-                "time": {
-                    "live_span": "5m"
-                },
-                "precision": 0
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 1,
             "layout": {
-                "x": 0,
-                "y": 29,
+                "height": 16,
                 "width": 15,
-                "height": 16
+                "x": 0,
+                "y": 29
             }
         },
         {
-            "id": 2,
             "definition": {
-                "type": "query_value",
+                "custom_links": [],
+                "precision": 0,
                 "requests": [
                     {
-                        "q": "max:kafka.replication.isr_expands.rate{*} - max:kafka.replication.isr_shrinks.rate{*}",
                         "aggregator": "sum",
                         "conditional_formats": [
                             {
                                 "comparator": "<=",
-                                "value": -1,
-                                "palette": "white_on_red"
+                                "palette": "white_on_red",
+                                "value": -1
                             },
                             {
                                 "comparator": "<=",
-                                "value": 0,
-                                "palette": "white_on_green"
+                                "palette": "white_on_green",
+                                "value": 0
                             },
                             {
                                 "comparator": ">=",
-                                "value": 1,
-                                "palette": "white_on_red"
+                                "palette": "white_on_red",
+                                "value": 1
                             }
-                        ]
+                        ],
+                        "q": "max:kafka.replication.isr_expands.rate{*} - max:kafka.replication.isr_shrinks.rate{*}"
                     }
                 ],
-                "custom_links": [],
-                "title": "ISR delta",
-                "title_size": "16",
-                "title_align": "center",
                 "time": {
                     "live_span": "5m"
                 },
-                "precision": 0
+                "title": "ISR delta",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 2,
             "layout": {
-                "x": 0,
-                "y": 12,
+                "height": 16,
                 "width": 15,
-                "height": 16
+                "x": 0,
+                "y": 12
             }
         },
         {
-            "id": 3,
             "definition": {
+                "sizing": "fit",
                 "type": "image",
-                "url": "/static/images/logos/kafka_large.svg",
-                "sizing": "fit"
+                "url": "/static/images/logos/kafka_large.svg"
             },
+            "id": 3,
             "layout": {
-                "x": 0,
-                "y": 0,
+                "height": 10,
                 "width": 15,
-                "height": 10
+                "x": 0,
+                "y": 0
             }
         },
         {
-            "id": 4,
             "definition": {
-                "type": "note",
+                "background_color": "blue",
                 "content": "#\n[Broker metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#broker-metrics)",
-                "background_color": "blue",
                 "font_size": "24",
-                "text_align": "center",
                 "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "bottom",
                 "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "type": "note"
             },
+            "id": 4,
             "layout": {
+                "height": 10,
+                "width": 46,
                 "x": 17,
-                "y": 0,
-                "width": 46,
-                "height": 10
+                "y": 0
             }
         },
         {
-            "id": 5,
             "definition": {
-                "type": "note",
-                "content": "#\n[Consumer metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#consumer-metrics)",
                 "background_color": "blue",
+                "content": "#\n[Consumer metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#consumer-metrics)",
                 "font_size": "24",
-                "text_align": "center",
                 "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "bottom",
                 "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "type": "note"
             },
+            "id": 5,
             "layout": {
-                "x": 113,
-                "y": 0,
+                "height": 10,
                 "width": 46,
-                "height": 10
+                "x": 113,
+                "y": 0
             }
         },
         {
-            "id": 6,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.replication.leader_elections.rate{*}",
-                        "display_type": "bars"
+                        "display_type": "bars",
+                        "q": "sum:kafka.replication.leader_elections.rate{*}"
                     },
                     {
-                        "q": "sum:kafka.replication.unclean_leader_elections.rate{*}",
                         "display_type": "bars",
+                        "q": "sum:kafka.replication.unclean_leader_elections.rate{*}",
                         "style": {
                             "palette": "warm"
                         }
                     }
                 ],
-                "custom_links": [],
-                "title": "Clean/unclean leader elections",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "1d"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Clean/unclean leader elections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 6,
             "layout": {
-                "x": 17,
-                "y": 12,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 17,
+                "y": 12
             }
         },
         {
-            "id": 7,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "per_minute(sum:jvm.gc.cms.count{$kafka_node} by {host})",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "per_minute(sum:jvm.gc.cms.count{$kafka_node} by {host})"
                     }
                 ],
-                "custom_links": [],
-                "title": "JVM GC per min",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "JVM GC per min",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 7,
             "layout": {
-                "x": 161,
-                "y": 12,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 161,
+                "y": 12
             }
         },
         {
-            "id": 8,
             "definition": {
-                "type": "note",
-                "content": "#\n#\n[ZooKeeper metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#zookeeper-metrics)",
                 "background_color": "pink",
+                "content": "#\n#\n[ZooKeeper metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#zookeeper-metrics)",
                 "font_size": "24",
-                "text_align": "center",
                 "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "right",
                 "tick_pos": "50%",
-                "tick_edge": "right"
+                "type": "note"
             },
+            "id": 8,
             "layout": {
-                "x": 0,
-                "y": 82,
+                "height": 32,
                 "width": 15,
-                "height": 32
+                "x": 0,
+                "y": 82
             }
         },
         {
-            "id": 9,
             "definition": {
-                "type": "heatmap",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
                         "q": "per_minute(max:jvm.gc.parnew.time{$kafka_node} by {host})"
                     }
                 ],
-                "custom_links": [],
-                "title": "ParNew time by broker",
-                "title_size": "16",
-                "title_align": "left",
                 "show_legend": false,
-                "legend_size": "0",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 161,
-                "y": 29,
-                "width": 46,
-                "height": 16
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "note",
-                "content": "#\n[Broker JVM metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#jvm-gc-metrics)",
-                "background_color": "pink",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 161,
-                "y": 0,
-                "width": 46,
-                "height": 10
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "per_minute(sum:jvm.gc.collectors.old.collection_time{$kafka_node} by {host})",
-                        "display_type": "bars"
-                    }
-                ],
-                "custom_links": [],
-                "title": "CMS time by broker",
-                "title_size": "16",
-                "title_align": "left",
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "ParNew time by broker",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "heatmap"
             },
+            "id": 9,
             "layout": {
-                "x": 161,
-                "y": 46,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 161,
+                "y": 29
             }
         },
         {
-            "id": 12,
             "definition": {
-                "type": "query_value",
+                "background_color": "pink",
+                "content": "#\n[Broker JVM metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#jvm-gc-metrics)",
+                "font_size": "24",
+                "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 10,
+            "layout": {
+                "height": 10,
+                "width": 46,
+                "x": 161,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.replication.offline_partitions_count{*}",
+                        "display_type": "bars",
+                        "q": "per_minute(sum:jvm.gc.collectors.old.collection_time{$kafka_node} by {host})"
+                    }
+                ],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
+                "title": "CMS time by broker",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
+            },
+            "id": 11,
+            "layout": {
+                "height": 16,
+                "width": 46,
+                "x": 161,
+                "y": 46
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
                         "aggregator": "sum",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
-                                "value": 0,
-                                "palette": "white_on_red"
+                                "palette": "white_on_red",
+                                "value": 0
                             },
                             {
                                 "comparator": "<=",
-                                "value": 0,
-                                "palette": "white_on_green"
+                                "palette": "white_on_green",
+                                "value": 0
                             }
-                        ]
+                        ],
+                        "q": "sum:kafka.replication.offline_partitions_count{*}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Offline partitions",
-                "title_size": "16",
-                "title_align": "center",
                 "time": {
                     "live_span": "1h"
                 },
-                "precision": 0
+                "title": "Offline partitions",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 12,
             "layout": {
-                "x": 0,
-                "y": 46,
+                "height": 7,
                 "width": 15,
-                "height": 7
+                "x": 0,
+                "y": 46
             }
         },
         {
-            "id": 13,
             "definition": {
-                "type": "heatmap",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
                         "q": "sum:zookeeper.connections{*} by {host}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Active connections",
-                "title_size": "16",
-                "title_align": "left",
                 "show_legend": false,
-                "legend_size": "0",
                 "time": {
                     "live_span": "4h"
-                }
+                },
+                "title": "Active connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "heatmap"
             },
+            "id": 13,
             "layout": {
-                "x": 65,
-                "y": 81,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 65,
+                "y": 81
             }
         },
         {
-            "id": 14,
             "definition": {
-                "type": "heatmap",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
                         "q": "sum:zookeeper.outstanding_requests{*} by {host}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Outstanding requests",
-                "title_size": "16",
                 "title_align": "left",
-                "show_legend": false,
+                "title_size": "16",
+                "type": "heatmap"
+            },
+            "id": 14,
+            "layout": {
+                "height": 16,
+                "width": 46,
+                "x": 65,
+                "y": 98
+            }
+        },
+        {
+            "definition": {
+                "custom_links": [],
                 "legend_size": "0",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 65,
-                "y": 98,
-                "width": 46,
-                "height": 16
-            }
-        },
-        {
-            "id": 15,
-            "definition": {
-                "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:zookeeper.avg_latency{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:zookeeper.avg_latency{*}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Average request latency",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 15,
             "layout": {
-                "x": 17,
-                "y": 98,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 17,
+                "y": 98
             }
         },
         {
-            "id": 16,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "abs(sum:kafka.consumer.messages_in{$consumer_group,$client-id-0.9,$clientID-0.8} by {clientid,client-id})",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "abs(sum:kafka.consumer.messages_in{$consumer_group,$client-id-0.9,$clientID-0.8} by {clientid,client-id})"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Messages consumed",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 16,
             "layout": {
-                "x": 113,
-                "y": 46,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 113,
+                "y": 46
             }
         },
         {
-            "id": 17,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.consumer.zookeeper_commits{$consumer_group} by {clientid}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.consumer.zookeeper_commits{$consumer_group} by {clientid}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "ZooKeeper commits/sec by consumer",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 17,
             "layout": {
-                "x": 113,
-                "y": 98,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 113,
+                "y": 98
             }
         },
         {
-            "id": 18,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.consumer.bytes_in{$consumer_group,$clientID-0.8,$client-id-0.9} by {clientid,client-id}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.consumer.bytes_in{$consumer_group,$clientID-0.8,$client-id-0.9} by {clientid,client-id}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Bytes consumed",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 18,
             "layout": {
-                "x": 113,
-                "y": 29,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 113,
+                "y": 29
             }
         },
         {
-            "id": 19,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "avg:zookeeper.max_file_descriptor_count{*} by {host} - avg:zookeeper.open_file_descriptor_count{*} by {host}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "avg:zookeeper.max_file_descriptor_count{*} by {host} - avg:zookeeper.open_file_descriptor_count{*} by {host}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Available file descriptors",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 19,
             "layout": {
+                "height": 16,
+                "width": 46,
                 "x": 17,
-                "y": 81,
-                "width": 46,
-                "height": 16
+                "y": 81
             }
         },
         {
-            "id": 20,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:zookeeper.pending_syncs{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:zookeeper.pending_syncs{*}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Pending syncs (leader)",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 20,
             "layout": {
-                "x": 113,
-                "y": 81,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 113,
+                "y": 81
             }
         },
         {
-            "id": 21,
             "definition": {
-                "type": "note",
-                "content": "#\n[Producer metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#producer-metrics)",
                 "background_color": "blue",
+                "content": "#\n[Producer metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/#producer-metrics)",
                 "font_size": "24",
-                "text_align": "center",
                 "show_tick": true,
+                "text_align": "center",
+                "tick_edge": "bottom",
                 "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "type": "note"
             },
+            "id": 21,
             "layout": {
-                "x": 65,
-                "y": 0,
+                "height": 10,
                 "width": 46,
-                "height": 10
+                "x": 65,
+                "y": 0
             }
         },
         {
-            "id": 22,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.producer.io_wait{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.producer.io_wait{*}"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "I/O wait",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 22,
             "layout": {
-                "x": 65,
-                "y": 63,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 65,
+                "y": 63
             }
         },
         {
-            "id": 23,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.consumer.fetch_rate{$consumer_group,$clientID-0.8} by {clientid}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.consumer.fetch_rate{$consumer_group,$clientID-0.8} by {clientid}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Min fetch rate",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Min fetch rate",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 23,
             "layout": {
-                "x": 113,
-                "y": 63,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 113,
+                "y": 63
             }
         },
         {
-            "id": 24,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
                         "q": "-sum:kafka.net.bytes_in.rate{$kafka_node}.fill(linear)"
                     },
                     {
-                        "q": "sum:kafka.net.bytes_out.rate{$kafka_node}.fill(linear)",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.net.bytes_out.rate{$kafka_node}.fill(linear)"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Broker network throughput",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 24,
             "layout": {
-                "x": 17,
-                "y": 29,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 17,
+                "y": 29
             }
         },
         {
-            "id": 25,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "abs(sum:kafka.producer.bytes_out{*} by {topic})",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "abs(sum:kafka.producer.bytes_out{*} by {topic})"
                     }
                 ],
-                "custom_links": [],
-                "title": "Bytes out by topic",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Bytes out by topic",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 25,
             "layout": {
-                "x": 65,
-                "y": 12,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 65,
+                "y": 12
             }
         },
         {
-            "id": 26,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.producer.request_rate{*} by {host}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.producer.request_rate{*} by {host}"
                     },
                     {
-                        "q": "sum:kafka.producer.response_rate{*} by {host}",
                         "display_type": "line",
+                        "q": "sum:kafka.producer.response_rate{*} by {host}",
                         "style": {
                             "palette": "purple"
                         }
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Request/response rate",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 26,
             "layout": {
-                "x": 65,
-                "y": 29,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 65,
+                "y": 29
             }
         },
         {
-            "id": 27,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "abs(sum:kafka.producer.request_latency_avg{*})",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "abs(sum:kafka.producer.request_latency_avg{*})"
                     }
                 ],
-                "custom_links": [],
+                "show_legend": false,
+                "time": {
+                    "live_span": "4h"
+                },
                 "title": "Request average latency",
-                "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 27,
             "layout": {
-                "x": 65,
-                "y": 46,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 65,
+                "y": 46
             }
         },
         {
-            "id": 28,
             "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "avg:kafka.request.fetch_consumer.time.avg{*}",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 300,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": "<",
-                                "value": 300,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Consumer fetch",
-                "title_size": "16",
-                "title_align": "center",
-                "time": {
-                    "live_span": "1h"
-                },
                 "autoscale": true,
+                "custom_links": [],
                 "custom_unit": "ms",
-                "precision": 2
-            },
-            "layout": {
-                "x": 0,
-                "y": 72,
-                "width": 15,
-                "height": 7
-            }
-        },
-        {
-            "id": 29,
-            "definition": {
-                "type": "query_value",
+                "precision": 2,
                 "requests": [
                     {
-                        "q": "avg:kafka.request.fetch_follower.time.avg{*}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
                                 "comparator": ">=",
-                                "value": 300,
-                                "palette": "white_on_red"
+                                "palette": "white_on_red",
+                                "value": 300
                             },
                             {
                                 "comparator": "<",
-                                "value": 300,
-                                "palette": "white_on_green"
+                                "palette": "white_on_green",
+                                "value": 300
                             }
-                        ]
+                        ],
+                        "q": "avg:kafka.request.fetch_consumer.time.avg{*}"
                     }
                 ],
+                "time": {
+                    "live_span": "1h"
+                },
+                "title": "Consumer fetch",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 28,
+            "layout": {
+                "height": 7,
+                "width": 15,
+                "x": 0,
+                "y": 72
+            }
+        },
+        {
+            "definition": {
                 "custom_links": [],
+                "custom_unit": "ms",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_red",
+                                "value": 300
+                            },
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_green",
+                                "value": 300
+                            }
+                        ],
+                        "q": "avg:kafka.request.fetch_follower.time.avg{*}"
+                    }
+                ],
+                "time": {
+                    "live_span": "1h"
+                },
                 "title": "Follower fetch",
-                "title_size": "16",
                 "title_align": "center",
-                "time": {
-                    "live_span": "1h"
-                },
-                "custom_unit": "ms",
-                "precision": 2
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 29,
             "layout": {
-                "x": 0,
-                "y": 55,
+                "height": 7,
                 "width": 15,
-                "height": 7
+                "x": 0,
+                "y": 55
             }
         },
         {
-            "id": 30,
             "definition": {
-                "type": "query_value",
+                "custom_links": [],
+                "custom_unit": "ms",
+                "precision": 2,
                 "requests": [
                     {
-                        "q": "avg:kafka.request.produce.time.avg{*}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
                                 "comparator": ">=",
-                                "value": 1000,
-                                "palette": "white_on_red"
+                                "palette": "white_on_red",
+                                "value": 1000
                             },
                             {
                                 "comparator": "<",
-                                "value": 1000,
-                                "palette": "white_on_green"
+                                "palette": "white_on_green",
+                                "value": 1000
                             }
-                        ]
+                        ],
+                        "q": "avg:kafka.request.produce.time.avg{*}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Produce request",
-                "title_size": "16",
-                "title_align": "center",
                 "time": {
                     "live_span": "1h"
                 },
-                "custom_unit": "ms",
-                "precision": 2
+                "title": "Produce request",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "query_value"
             },
+            "id": 30,
             "layout": {
-                "x": 0,
-                "y": 63,
+                "height": 7,
                 "width": 15,
-                "height": 7
+                "x": 0,
+                "y": 63
             }
         },
         {
-            "id": 31,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "avg:kafka.request.produce.time.avg{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "avg:kafka.request.produce.time.avg{*}"
                     },
                     {
-                        "q": "avg:kafka.request.fetch_consumer.time.avg{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "avg:kafka.request.fetch_consumer.time.avg{*}"
                     },
                     {
-                        "q": "avg:kafka.request.fetch_follower.time.avg{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "avg:kafka.request.fetch_follower.time.avg{*}"
                     }
                 ],
-                "custom_links": [],
-                "title": "TotalTimeMs",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "2d"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "TotalTimeMs",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 31,
             "layout": {
-                "x": 17,
-                "y": 63,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 17,
+                "y": 63
             }
         },
         {
-            "id": 32,
             "definition": {
-                "type": "timeseries",
+                "custom_links": [],
+                "legend_size": "0",
                 "requests": [
                     {
-                        "q": "sum:kafka.request.producer_request_purgatory.size{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.request.producer_request_purgatory.size{*}"
                     },
                     {
-                        "q": "sum:kafka.request.fetch_request_purgatory.size{*}",
-                        "display_type": "line"
+                        "display_type": "line",
+                        "q": "sum:kafka.request.fetch_request_purgatory.size{*}"
                     }
                 ],
-                "custom_links": [],
-                "title": "Fetch/request purgatory",
-                "title_size": "16",
-                "title_align": "left",
+                "show_legend": false,
                 "time": {
                     "live_span": "4h"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                "title": "Fetch/request purgatory",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries"
             },
+            "id": 32,
             "layout": {
-                "x": 17,
-                "y": 46,
+                "height": 16,
                 "width": 46,
-                "height": 16
+                "x": 17,
+                "y": 46
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "Message Offsets",
+                "font_size": "18",
+                "has_padding": true,
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "center"
+            },
+            "id": 8943927636838186,
+            "layout": {
+                "height": 5,
+                "width": 46,
+                "x": 161,
+                "y": 63
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "auto",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:kafka.broker_offset{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": true,
+                "time": {},
+                "title": "Broker offset",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8895923247155742,
+            "layout": {
+                "height": 16,
+                "width": 46,
+                "x": 161,
+                "y": 69
+            }
+        },
+        {
+            "definition": {
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "auto",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:kafka.consumer_offset{*}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": true,
+                "time": {},
+                "title": "Consumer offset",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5766659542174058,
+            "layout": {
+                "height": 16,
+                "width": 46,
+                "x": 161,
+                "y": 86
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "These metrics are collected by the `kafka_consumer` integration. To view these metrics, follow the [setup instructions](https://docs.datadoghq.com/integrations/kafka/?tab=host#agent-check-kafka-consumer) to install `kafka_consumer`.",
+                "font_size": "14",
+                "has_padding": true,
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note",
+                "vertical_align": "top"
+            },
+            "id": 7453710195502586,
+            "layout": {
+                "height": 12,
+                "width": 24,
+                "x": 209,
+                "y": 80
             }
         }
-    ],
-    "template_variables": [
-        {
-            "name": "kafka_node",
-            "default": "*",
-            "prefix": "kafka"
-        },
-        {
-            "name": "consumer_group",
-            "default": "*",
-            "prefix": "consumer_group"
-        },
-        {
-            "name": "clientID-0.8",
-            "default": "*",
-            "prefix": "clientid"
-        },
-        {
-            "name": "client-id-0.9",
-            "default": "*",
-            "prefix": "client-id"
-        }
-    ],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 50
+    ]
 }

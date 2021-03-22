@@ -1,5 +1,12 @@
 # CHANGELOG - postgres
 
+## 5.4.0 / 2021-03-07
+
+* [Added] Collect postgres statement samples & execution plans for deep database monitoring. See [#8627](https://github.com/DataDog/integrations-core/pull/8627).
+* [Added] Apply default limits to Postres statement metrics. See [#8647](https://github.com/DataDog/integrations-core/pull/8647).
+* [Fixed] Shutdown statement sampler thread on cancel. See [#8766](https://github.com/DataDog/integrations-core/pull/8766).
+* [Fixed] Improve orjson compatibility. See [#8767](https://github.com/DataDog/integrations-core/pull/8767).
+
 ## 5.3.4 / 2021-02-19
 
 * [Fixed] Fix query syntax. See [#8661](https://github.com/DataDog/integrations-core/pull/8661).

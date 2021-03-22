@@ -2,7 +2,11 @@
 
 ## Overview
 
-Extract custom metrics from any Prometheus endpoints. **Note**: Datadog recommends using the [OpenMetrics check][10] since it is more efficient and fully supports Prometheus text format. Use the Prometheus check only when the metrics endpoint does not support a text format.
+Connect to Prometheus to:
+- Extract custom metrics from Prometheus endpoints
+- See Prometheus Alertmanager alerts in your Datadog event stream
+
+**Note**: Datadog recommends using the [OpenMetrics check][10] since it is more efficient and fully supports Prometheus text format. Use the Prometheus check only when the metrics endpoint does not support a text format.
 
 <div class="alert alert-warning">
 All the metrics retrieved by this integration are considered <a href="https://docs.datadoghq.com/developers/metrics/custom_metrics">custom metrics</a>.
@@ -38,6 +42,20 @@ Due to the nature of this integration, it's possible to submit a high number of 
 
 If `send_monotonic_counter: True`, the Agent sends the deltas of the values in question, and the in-app type is set to count (this is the default behaviour). If `send_monotonic_counter: False`, the Agent sends the raw, monotonically increasing value, and the in-app type is set to gauge.
 
+#### Send Prometheus Alertmanager alerts in the event stream
+1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
+```
+receivers:
+- name: datadog
+  webhook_configs: 
+  - send_resolved: true
+    url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
+```
+2. Restart the Prometheus and Alertmanager services.
+```
+sudo systemctl restart prometheus.service alertmanager.service
+```
+
 ### Validation
 
 [Run the Agent's `status` subcommand][3] and look for `prometheus` under the Checks section.
@@ -52,7 +70,7 @@ Note: Bucket data for a given `<HISTOGRAM_METRIC_NAME>` Prometheus histogram met
 
 ### Events
 
-The Prometheus check does not include any events.
+Prometheus Alertmanager alerts are automatically sent to your Datadog event stream following the webhook configuration.
 
 ### Service Checks
 
@@ -67,6 +85,7 @@ Need help? Contact [Datadog support][4].
 - [Introducing Prometheus support for Datadog Agent 6][5]
 - [Configuring a Prometheus Check][6]
 - [Writing a custom Prometheus Check][7]
+- [Prometheus Alertmanager Documentation] [11]
 
 [2]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
@@ -77,3 +96,4 @@ Need help? Contact [Datadog support][4].
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [9]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
 [10]: https://docs.datadoghq.com/integrations/openmetrics/
+[11]: https://prometheus.io/docs/alerting/latest/alertmanager/

@@ -11,9 +11,9 @@
                 "type": "image",
                 "url": "/static/images/logos/active-directory_large.svg"
             },
-            "id": 1379095520488678,
+            "id": 0,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 25,
                 "x": 1,
                 "y": 1
@@ -30,7 +30,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 1596261819686344,
+            "id": 1,
             "layout": {
                 "height": 7,
                 "width": 97,
@@ -49,7 +49,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 7416390373673270,
+            "id": 2,
             "layout": {
                 "height": 5,
                 "width": 48,
@@ -68,7 +68,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 5434948742553552,
+            "id": 3,
             "layout": {
                 "height": 5,
                 "width": 48,
@@ -106,13 +106,12 @@
                         "q": "avg:active_directory.dra.inbound.bytes.not_compressed{*} by {host}"
                     }
                 ],
-                "time": {},
                 "title": "Size of inbound replication data from DSAs",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_table"
             },
-            "id": 789789804077942,
+            "id": 4,
             "layout": {
                 "height": 21,
                 "width": 48,
@@ -150,13 +149,12 @@
                         "q": "avg:active_directory.dra.outbound.bytes.not_compressed{*} by {host}"
                     }
                 ],
-                "time": {},
                 "title": "Size of outbound replication data to DSAs",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_table"
             },
-            "id": 5698439822469100,
+            "id": 5,
             "layout": {
                 "height": 21,
                 "width": 48,
@@ -175,7 +173,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 5308427432228820,
+            "id": 6,
             "layout": {
                 "height": 7,
                 "width": 97,
@@ -198,7 +196,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Number of sessions of connected LDAP clients",
                 "title_align": "left",
                 "title_size": "16",
@@ -211,7 +208,7 @@
                     "scale": "linear"
                 }
             },
-            "id": 7377683565317882,
+            "id": 7,
             "layout": {
                 "height": 15,
                 "width": 48,
@@ -235,7 +232,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "LDAP binding duration",
                 "title_align": "left",
                 "title_size": "16",
@@ -248,7 +244,7 @@
                     "scale": "linear"
                 }
             },
-            "id": 3674840905379074,
+            "id": 8,
             "layout": {
                 "height": 15,
                 "width": 48,
@@ -272,7 +268,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Number of successful LDAP bindings",
                 "title_align": "left",
                 "title_size": "16",
@@ -285,7 +280,7 @@
                     "scale": "linear"
                 }
             },
-            "id": 4718456891816570,
+            "id": 9,
             "layout": {
                 "height": 15,
                 "width": 48,
@@ -309,7 +304,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Search operations per second performed by LDAP clients",
                 "title_align": "left",
                 "title_size": "16",
@@ -322,7 +316,7 @@
                     "scale": "linear"
                 }
             },
-            "id": 7263309226646508,
+            "id": 10,
             "layout": {
                 "height": 15,
                 "width": 48,
@@ -358,7 +352,7 @@
                     "scale": "linear"
                 }
             },
-            "id": 2410845274803236,
+            "id": 11,
             "layout": {
                 "height": 15,
                 "width": 48,
@@ -382,7 +376,6 @@
                     }
                 ],
                 "show_legend": false,
-                "time": {},
                 "title": "Number of synchronizations queued",
                 "title_align": "left",
                 "title_size": "16",
@@ -395,7 +388,7 @@
                     "scale": "linear"
                 }
             },
-            "id": 8171822497203140,
+            "id": 12,
             "layout": {
                 "height": 15,
                 "width": 48,
@@ -414,7 +407,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 4946842324034090,
+            "id": 13,
             "layout": {
                 "height": 31,
                 "width": 25,
@@ -433,7 +426,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 714357545962952,
+            "id": 14,
             "layout": {
                 "height": 24,
                 "width": 21,
@@ -471,13 +464,12 @@
                         "q": "avg:active_directory.dra.inbound.objects.remaining_in_packet{*} by {host}"
                     }
                 ],
-                "time": {},
                 "title": "Objects received from replication partners",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_table"
             },
-            "id": 5555048165728726,
+            "id": 15,
             "layout": {
                 "height": 21,
                 "width": 48,
@@ -515,13 +507,12 @@
                         "q": "avg:active_directory.dra.outbound.properties.persec{*} by {host}"
                     }
                 ],
-                "time": {},
                 "title": "Object and properties sent to replication partners",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "query_table"
             },
-            "id": 464020198544978,
+            "id": 16,
             "layout": {
                 "height": 21,
                 "width": 48,
@@ -540,7 +531,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 1995720414004692,
+            "id": 17,
             "layout": {
                 "height": 20,
                 "width": 21,
@@ -559,7 +550,7 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 7344411764221438,
+            "id": 18,
             "layout": {
                 "height": 32,
                 "width": 24,
@@ -578,12 +569,59 @@
                 "tick_pos": "50%",
                 "type": "note"
             },
-            "id": 6415563587270692,
+            "id": 19,
             "layout": {
                 "height": 21,
                 "width": 20,
                 "x": 126,
                 "y": 93
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-lg",
+                "query": "source:(ruby OR active_directory)",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "Log Events",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 6251269563993414,
+            "layout": {
+                "height": 48,
+                "width": 97,
+                "x": 27,
+                "y": 121
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Logs",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 3175991996395978,
+            "layout": {
+                "height": 5,
+                "width": 97,
+                "x": 27,
+                "y": 115
             }
         }
     ]

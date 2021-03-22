@@ -38,7 +38,10 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "percent_usage_connections": "assets/monitors/percent_usage_connections.json",
+      "replication_delay": "assets/monitors/replication_delay.json"
+    },
     "dashboards": {
       "postgresql": "assets/dashboards/postgresql_dashboard.json",
       "postgresql_screenboard": "assets/dashboards/postgresql_screenboard_dashboard.json"
