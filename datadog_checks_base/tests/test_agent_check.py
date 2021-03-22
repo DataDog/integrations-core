@@ -9,14 +9,13 @@ from typing import Any
 
 import mock
 import pytest
+from datadog_test_libs.requirements import requires_py3
 from six import PY3
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base import __version__ as base_package_version
 from datadog_checks.base import to_native_string
 from datadog_checks.base.checks.base import datadog_agent
-
-from .utils import requires_py3
 
 
 def test_instance():

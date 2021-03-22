@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from datadog_test_libs.requirements import requires_py3
 from six import PY3
 
 from datadog_checks.base import AgentCheck
-
-from ..utils import requires_py3
 
 if PY3:
     from .config_models import ConfigMixin
