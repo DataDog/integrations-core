@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 9.2.0 / 2021-03-22
+
+* [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).
+
+## 9.1.1 / 2021-03-18
+
+* [Fixed] Improve error message. See [#8788](https://github.com/DataDog/integrations-core/pull/8788).
+* [Fixed] Fix infra-integrations team for testable. See [#8784](https://github.com/DataDog/integrations-core/pull/8784).
+
 ## 9.1.0 / 2021-03-07
 
 * [Added] Check if integrations are logs only. See [#8699](https://github.com/DataDog/integrations-core/pull/8699).

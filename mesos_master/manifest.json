@@ -37,7 +37,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "mesos"
+    },
     "metrics_metadata": "metadata.csv",
     "saved_views": {
       "mesos-master_processes": "assets/saved_views/mesos-master_processes.json"

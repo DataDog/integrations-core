@@ -28,6 +28,19 @@ def test__get_postqueue_stats(aggregator):
         aggregator.assert_metric('postfix.queue.size', 2, tags=common_tags + ['queue:deferred'])
 
 
+def test__get_postqueue_stats_empty(aggregator):
+    check = PostfixCheck('postfix', {}, [])
+    common_tags = ['instance:/etc/postfix']
+
+    with mock.patch('datadog_checks.postfix.postfix.get_subprocess_output') as s:
+        s.side_effect = [(False, None, None), ('Mail queue is empty', None, None)]
+        check._get_postqueue_stats('/etc/postfix', [])
+
+        aggregator.assert_metric('postfix.queue.size', 0, tags=common_tags + ['queue:active'])
+        aggregator.assert_metric('postfix.queue.size', 0, tags=common_tags + ['queue:active'])
+        aggregator.assert_metric('postfix.queue.size', 0, tags=common_tags + ['queue:deferred'])
+
+
 @mock.patch(
     'datadog_checks.postfix.postfix.get_subprocess_output',
     return_value=('mail_version = {}'.format(MOCK_VERSION), None, None),

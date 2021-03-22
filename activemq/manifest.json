@@ -31,7 +31,10 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[ActiveMQ Artemis] High unrouted messages": "assets/recommended_monitors/activemq_artemis_unrouted_messages.json",
+      "[ActiveMQ Artemis] High disk store usage": "assets/recommended_monitors/activemq_artemis_high_disk_store.json"
+    },
     "dashboards": {
       "activemq": "assets/dashboards/activemq_dashboard.json"
     },
