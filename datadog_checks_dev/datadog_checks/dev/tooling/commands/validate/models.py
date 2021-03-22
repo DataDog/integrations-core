@@ -39,7 +39,11 @@ def models(ctx, check, sync, verbose):
     if check:
         checks = [check]
     else:
-        checks = sorted(get_valid_checks())
+        checks = list(get_valid_checks())
+        # For tests
+        if ctx.obj['repo_choice'] == 'core':
+            checks.append('datadog_checks_base')
+        checks = sorted(checks)
 
     specs_failed = {}
     files_failed = {}
