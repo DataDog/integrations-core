@@ -11,10 +11,12 @@ from xml.etree import ElementTree as ET
 import psutil
 from six import iteritems, string_types
 
+import datadog_checks.base.utils.process_timeout as process_timeout
+import datadog_checks.base.utils.timeout as thread_timeout
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
-from datadog_checks.base.utils.timeout import TimeoutException, timeout
+from datadog_checks.base.utils.timeout import TimeoutException
 
 if platform.system() == 'Windows':
     import win32wnet
@@ -62,10 +64,18 @@ class Disk(AgentCheck):
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
         self._blkid_cache_file = instance.get('blkid_cache_file')
-        self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        self._timeout = instance.get('timeout', 5)
+        if platform.system() == "Linux":
+            self._timeout_func = process_timeout.timeout(self._timeout)
+        else:
+            # Use thread-based timeout on Windows and macOS since
+            # these spawn a separate process which doesn't work
+            # well with the Agent.
+            self._timeout_func = thread_timeout.timeout(self._timeout)
 
         if platform.system() == 'Windows':
             self._manual_mounts = instance.get('create_mounts', [])
@@ -120,7 +130,7 @@ class Disk(AgentCheck):
 
             # Get disk metrics here to be able to exclude on total usage
             try:
-                disk_usage = timeout(self._timeout)(psutil.disk_usage)(part.mountpoint)
+                disk_usage = self._timeout_func(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
                     u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
@@ -281,7 +291,7 @@ class Disk(AgentCheck):
         metrics = {}
         # we need to timeout this, too.
         try:
-            inodes = timeout(self._timeout)(os.statvfs)(mountpoint)
+            inodes = self._timeout_func(os.statvfs)(mountpoint)
         except TimeoutException:
             self.log.warning(
                 u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '

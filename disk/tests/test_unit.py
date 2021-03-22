@@ -44,7 +44,7 @@ def test_bad_config():
         Disk('disk', {}, [{}, {}])
 
 
-@pytest.mark.usefixtures('psutil_mocks')
+@pytest.mark.usefixtures('psutil_mocks', 'timeout_mock')
 def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics):
     """
     Mock psutil and run the check
@@ -89,7 +89,7 @@ def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics):
         aggregator.reset()
 
 
-@pytest.mark.usefixtures('psutil_mocks')
+@pytest.mark.usefixtures('psutil_mocks', 'timeout_mock')
 def test_rw(aggregator):
     """
     Check for 'ro' option in the mounts
@@ -101,7 +101,7 @@ def test_rw(aggregator):
     aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
 
 
-@pytest.mark.usefixtures('psutil_mocks')
+@pytest.mark.usefixtures('psutil_mocks', 'timeout_mock')
 def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics, count_metrics):
     """
     Same as above, using mount to tag
@@ -126,7 +126,7 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('psutil_mocks')
+@pytest.mark.usefixtures('psutil_mocks', 'timeout_mock')
 def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics):
     instance = {
         'use_mount': 'no',

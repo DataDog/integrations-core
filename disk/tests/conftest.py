@@ -32,6 +32,15 @@ def psutil_mocks():
         yield
 
 
+@pytest.fixture
+def timeout_mock():
+    def no_timeout(fun):
+        return lambda *args: fun(args)
+
+    with mock.patch('datadog_checks.disk.disk.timeout', return_value=no_timeout):
+        yield
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance_basic_volume):
     yield instance_basic_volume, E2E_METADATA
