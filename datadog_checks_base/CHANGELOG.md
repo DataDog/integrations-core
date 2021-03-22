@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 16.9.0 / 2021-03-22
+
+* [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).
+
 ## 16.8.0 / 2021-03-18
 
 * [Added] AIA chasing for HTTP. See [#8725](https://github.com/DataDog/integrations-core/pull/8725).
