@@ -1,6 +1,6 @@
 name: Kubernetes API server metrics
 files:
-- name: kube-apiserver-metrics.yaml
+- name: kube_apiserver_metrics.yaml
   options:
   - template: init_config
     options:
