@@ -39,9 +39,7 @@ def models(ctx, check, sync, verbose):
     if check:
         checks = [check]
     else:
-        checks = {'datadog_checks_base'}
-        checks.update(get_valid_checks())
-        checks = sorted(checks)
+        checks = sorted(get_valid_checks())
 
     specs_failed = {}
     files_failed = {}
