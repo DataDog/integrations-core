@@ -61,8 +61,21 @@ notify-slack:
           MESSAGE="Logs pipelines passed validation steps, good job :+1:"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
-  when: always
   tags: [ "runner:main", "size:large" ]
+
+
+notify-failed-pipeline:
+  stage: notify
+  image: $NOTIFIER_IMAGE
+  only:
+  - schedules
+  when: on_failure
+  script:
+    - |
+      MESSAGE="The pipeline uncountered an unexpected error."
+      postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+  tags: [ "runner:main", "size:large" ]
+
 
 release-auto:
   stage: release
