@@ -532,6 +532,9 @@ def test_cisco_3850(aggregator):
         'snmp_host:Cat-3850-4th-Floor.companyname.local',
         'snmp_profile:' + profile,
         'device_vendor:cisco',
+        'ios_family:CAT3K_CAA',
+        'ios_feature:IP|SLA|IPv6|IS-IS|FIREWALL|PLUS|QoS|HA|NAT|MPLS|VPN|LEGACY PROTOCOLS|3DES|SSH|APPN|IPSEC',
+        'ios_version:03.06.06E',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)

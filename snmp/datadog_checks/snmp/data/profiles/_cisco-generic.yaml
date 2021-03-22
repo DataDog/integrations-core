@@ -8,6 +8,23 @@ extends:
   - _generic-bgp4.yaml
   - _generic-ip.yaml
 
+metric_tags:
+  - OID: 1.3.6.1.4.1.9.9.25.1.1.1.2.3
+    symbol: ciscoImageEntry.3
+    match: CW_FAMILY\$(.*)\$
+    tags:
+      ios_family: \1
+  - OID: 1.3.6.1.4.1.9.9.25.1.1.1.2.4
+    symbol: ciscoImageEntry.4
+    match: CW_FEATURE\$(.*)\$
+    tags:
+      ios_feature: \1
+  - OID: 1.3.6.1.4.1.9.9.25.1.1.1.2.5
+    symbol: ciscoImageEntry.5
+    match: CW_VERSION\$(.*)\$
+    tags:
+      ios_version: \1
+
 metrics:
   - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
     table:
