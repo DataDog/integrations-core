@@ -68,8 +68,6 @@ notify-slack:
 notify-failed-pipeline:
   stage: notify
   image: $NOTIFIER_IMAGE
-  only:
-  - schedules
   when: on_failure
   script:
     - |
