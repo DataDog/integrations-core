@@ -13,8 +13,8 @@ metric_tags:
     symbol: sysDescr
     match: 'ArubaOS \(MODEL: (.*)\), Version(.*) \((.*)\)' # ArubaOS (MODEL: Aruba7205), Version8.999.999.7 (70587)
     tags:
-      device_type: controller
-      device_model: \1
+      type: controller
+      model: \1
       os_version: \2
       os_rev: \3
 
