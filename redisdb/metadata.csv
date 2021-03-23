@@ -19,6 +19,8 @@ redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys
 redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children
 redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user
 redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children
+redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread.,-1,redis,cpu sys main thread
+redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread.,-1,redis,cpu sys main thread
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency
