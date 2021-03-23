@@ -36,7 +36,8 @@
       "[ActiveMQ Artemis] High disk store usage": "assets/recommended_monitors/activemq_artemis_high_disk_store.json"
     },
     "dashboards": {
-      "activemq": "assets/dashboards/activemq_dashboard.json"
+      "activemq": "assets/dashboards/activemq_dashboard.json",
+      "artemis": "assets/dashboards/artemis_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
