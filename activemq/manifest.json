@@ -12,7 +12,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "activemq.",
-  "metric_to_check": "activemq.queue.size",
+  "metric_to_check": [
+      "activemq.queue.size",
+      "activemq.artemis.queue.message_count"
+  ],
   "name": "activemq",
   "process_signatures": [
     "activemq"
