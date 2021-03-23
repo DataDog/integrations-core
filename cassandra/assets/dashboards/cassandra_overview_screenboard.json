@@ -19,7 +19,7 @@
             "prefix": "host"
         }
     ],
-    "title": "Cassandra - Overview",
+    "title": "Cassandra Overview",
     "widgets": [
         {
             "definition": {
