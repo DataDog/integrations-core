@@ -4,7 +4,7 @@
 import os
 
 import pytest
-from datadog_test_libs.requirements import requires_py3
+from datadog_checks.dev.requirements import requires_py3
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.dev import get_here

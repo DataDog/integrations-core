@@ -9,7 +9,7 @@ from typing import Any
 
 import mock
 import pytest
-from datadog_test_libs.requirements import requires_py3
+from datadog_checks.dev.requirements import requires_py3
 from six import PY3
 
 from datadog_checks.base import AgentCheck

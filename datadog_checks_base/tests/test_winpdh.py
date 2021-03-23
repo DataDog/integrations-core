@@ -5,7 +5,7 @@ import logging
 from collections import defaultdict
 
 import pytest
-from datadog_test_libs.requirements import requires_windows
+from datadog_checks.dev.requirements import requires_windows
 
 try:
     from datadog_test_libs.win.pdh_mocks import (  # noqa: F401
