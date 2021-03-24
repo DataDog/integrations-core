@@ -1,7 +1,7 @@
 {
   "title": "Elasticsearch - Overview",
   "author_name": "Datadog",
-  "description": " This dashboard provides a **high-level** overview of your Elasticsearch clusters, so you can track the health, performance, and resource utilization of all your nodes. \n\nFurther reading on Elasticsearch monitoring:\n\n- [Datadog's guide to key Elasticsearch metrics](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n- [How to collect Elasticsearch metrics with native and open source tools](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n- [How to monitor Elasticsearch with Datadog](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n- [How to solve 5 Elasticsearch performance and scaling problems](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n- [How to resolve unassigned shards in Elasticsearch](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)\n\n- [Datadog's Elasticsearch integration docs](https://docs.datadoghq.com/integrations/elastic/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned) (cloned) (cloned)",
+  "description": "This dashboard provides a **high-level** overview of your Elasticsearch clusters, so you can track the health, performance, and resource utilization of all your nodes. \n\nFurther reading on Elasticsearch monitoring:\n\n- [Datadog's guide to key Elasticsearch metrics](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n- [How to collect Elasticsearch metrics with native and open source tools](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n- [How to monitor Elasticsearch with Datadog](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n- [How to solve 5 Elasticsearch performance and scaling problems](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n- [How to resolve unassigned shards in Elasticsearch](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)\n\n- [Datadog's Elasticsearch integration docs](https://docs.datadoghq.com/integrations/elastic/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
       "id": 0,
@@ -9,7 +9,7 @@
         "title": "Overview",
         "title_align": "center",
         "type": "group",
-        "background_color": "white",
+        "background_color": "vivid_yellow",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -73,7 +73,7 @@
         "title": "Disk utilization",
         "title_align": "left",
         "type": "group",
-        "background_color": "white",
+        "background_color": "vivid_yellow",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -201,7 +201,7 @@
         "title": "Node status",
         "title_align": "left",
         "type": "group",
-        "background_color": "white",
+        "background_color": "vivid_yellow",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -258,7 +258,7 @@
         "title": "Cluster Performance",
         "title_align": "center",
         "type": "group",
-        "background_color": "vivid_yellow",
+        "background_color": "vivid_green",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -451,7 +451,7 @@
         "title": "Nodes with highest activity ",
         "title_align": "center",
         "type": "group",
-        "background_color": "yellow",
+        "background_color": "vivid_green",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -467,7 +467,7 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 23,
@@ -476,7 +476,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "vertical",
+              "legend_layout": "horizontal",
               "legend_columns": ["max", "avg"],
               "type": "timeseries",
               "requests": [
@@ -536,7 +536,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 4, "y": 0, "width": 8, "height": 3 }
+            "layout": { "x": 4, "y": 0, "width": 8, "height": 2 }
           },
           {
             "id": 24,
@@ -551,7 +551,7 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 3 }
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
           },
           {
             "id": 25,
@@ -560,7 +560,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "vertical",
+              "legend_layout": "horizontal",
               "legend_columns": ["max", "avg"],
               "type": "timeseries",
               "requests": [
@@ -614,7 +614,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 4, "y": 3, "width": 8, "height": 3 }
+            "layout": { "x": 4, "y": 2, "width": 8, "height": 2 }
           }
         ]
       }
@@ -625,7 +625,7 @@
         "title": "Network Summary",
         "title_align": "center",
         "type": "group",
-        "background_color": "vivid_purple",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -788,7 +788,7 @@
         "title": "HTTP Traffic",
         "title_align": "center",
         "type": "group",
-        "background_color": "purple",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -945,37 +945,7 @@
               "autoscale": true,
               "precision": 0
             },
-            "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
-          },
-          {
-            "id": 34,
-            "definition": {
-              "title": "Unassigned shards",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "q": "max:elasticsearch.unassigned_shards{$cluster_name}",
-                  "aggregator": "max",
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_red",
-                      "value": 0
-                    },
-                    {
-                      "comparator": ">=",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 0
-            },
-            "layout": { "x": 2, "y": 0, "width": 2, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 35,
@@ -1006,13 +976,13 @@
               "custom_unit": "",
               "precision": 0
             },
-            "layout": { "x": 4, "y": 0, "width": 2, "height": 1 }
+            "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
           },
           {
             "id": 36,
             "definition": {
               "type": "note",
-              "content": "An `unassigned shard` value that is `> 0` could be caused by:\n- **Purposeful delay** of shard allocation. If this is the case, a log with the message `delaying allocation for [54] unassigned shards, next check in [1m]` should appear.\n- **Too many shards** for not enough **nodes**. Make sure that every index in your cluster is initialised with **fewer** replicas per primary shard than the number of nodes in your cluster.\n",
+              "content": "An `unassigned shard` value that is `>  0` could be caused by:\n- **Purposeful delay** of shard allocation. If this is the case, a log with the message `delaying allocation for [54] unassigned shards, next check in [1m]` should appear.\n- **Too many shards** for not enough **nodes**. Make sure that every index in your cluster is initialised with **fewer** replicas per primary shard than the number of nodes in your cluster.\n",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
@@ -1022,7 +992,37 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 4 }
+          },
+          {
+            "id": 34,
+            "definition": {
+              "title": "Unassigned shards",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "max:elasticsearch.unassigned_shards{$cluster_name}",
+                  "aggregator": "max",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
           },
           {
             "id": 37,
@@ -1052,7 +1052,7 @@
               "autoscale": true,
               "precision": 0
             },
-            "layout": { "x": 4, "y": 1, "width": 2, "height": 1 }
+            "layout": { "x": 4, "y": 2, "width": 2, "height": 2 }
           },
           {
             "id": 38,
@@ -1116,7 +1116,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 2, "width": 6, "height": 3 }
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 3 }
           },
           {
             "id": 39,
@@ -1200,7 +1200,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 2, "width": 6, "height": 3 }
+            "layout": { "x": 6, "y": 4, "width": 6, "height": 3 }
           }
         ]
       }
@@ -1214,5 +1214,5 @@
   "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
-  "id": "ysp-jfz-ce6"
+  "id": "s8v-99w-rk6"
 }
