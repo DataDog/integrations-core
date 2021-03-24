@@ -3,7 +3,7 @@ datadog-activemq-xml==1.10.1
 datadog-activemq==2.0.0
 datadog-aerospike==1.10.1; sys_platform == 'linux2'
 datadog-airflow==1.7.2
-datadog-amazon-msk==1.4.1
+datadog-amazon-msk==1.5.0
 datadog-ambari==1.6.2; sys_platform != 'win32'
 datadog-apache==1.15.1
 datadog-aspdotnet==1.6.1; sys_platform == 'win32'
