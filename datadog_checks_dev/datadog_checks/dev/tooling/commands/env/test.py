@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
+from datadog_checks.dev.testing.e2e import get_configured_envs, create_interface
+from datadog_checks.dev.testing.e2e.agent import DEFAULT_PYTHON_VERSION
+from datadog_checks.dev.testing.environment.structures import EnvVars
+from datadog_checks.dev.testing.environment.utils import get_tox_envs
 
-from .... import EnvVars
-from ...e2e import create_interface, get_configured_envs
-from ...e2e.agent import DEFAULT_PYTHON_VERSION
-from ...testing import complete_active_checks, get_tox_envs
 from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start

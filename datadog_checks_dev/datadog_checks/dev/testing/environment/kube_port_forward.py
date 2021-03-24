@@ -6,7 +6,8 @@ from __future__ import absolute_import
 import os
 from contextlib import contextmanager
 
-from .env import environment_run
+from datadog_checks.dev.tooling.testing.env import environment_run
+
 from .ssh_tunnel import KillProcess, run_background_command
 from .structures import LazyFunction, TempDir
 from .utils import chdir, find_free_port, get_ip

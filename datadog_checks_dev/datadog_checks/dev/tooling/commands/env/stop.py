@@ -4,11 +4,10 @@
 import time
 
 import click
+from datadog_checks.dev.testing.e2e import get_configured_checks, get_configured_envs, create_interface
+from datadog_checks.dev.testing.e2e.agent import DEFAULT_SAMPLING_WAIT_TIME
+from datadog_checks.dev.tooling.ci import running_on_ci
 
-from ....utils import running_on_ci
-from ...e2e import create_interface, get_configured_checks, get_configured_envs, stop_environment
-from ...e2e.agent import DEFAULT_SAMPLING_WAIT_TIME
-from ...testing import complete_active_checks, complete_configured_envs
 from ..console import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, echo_info, echo_success, echo_waiting
 
 

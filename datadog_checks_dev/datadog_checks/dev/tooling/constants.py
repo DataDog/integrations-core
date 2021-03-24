@@ -84,8 +84,6 @@ NOT_TILES = [
 ]
 
 
-REQUIREMENTS_IN = 'requirements.in'
-
 ROOT = ''
 
 

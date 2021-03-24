@@ -4,11 +4,12 @@
 import re
 from contextlib import contextmanager
 
-from datadog_checks.dev.tooling.commands.console import echo_debug
+from datadog_checks.dev.fileutils import file_exists, path_join
+from datadog_checks.dev.testing.constants import REQUIREMENTS_IN
+from datadog_checks.dev.testing.utils import find_free_port, get_ip, ON_WINDOWS
+from datadog_checks.dev.tooling.constants import get_root
 
 from ...subprocess import run_command
-from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
-from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_DOGSTATSD_PORT,
@@ -67,7 +68,6 @@ class DockerInterface(object):
             # Agent 6 image no longer supports -pyX
             if self.agent_build != 'datadog/agent:6' and self.agent_build != 'datadog/agent:7':
                 self.agent_build = f'{self.agent_build}-py{self.python_version}'
-            echo_debug("Using default agent. Agent build: {}".format(self.agent_build))
 
         if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = f'{self.agent_build}-jmx'

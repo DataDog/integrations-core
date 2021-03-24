@@ -5,10 +5,9 @@ import json
 import os
 
 import yaml
-
-from ..._env import format_config
-from ...utils import dir_exists, ensure_dir_exists, file_exists, path_join, read_file, remove_path, write_file
-from ..config import APP_DIR
+from datadog_checks.dev.fileutils import dir_exists, ensure_dir_exists, write_file, path_join, remove_path, file_exists, \
+    read_file
+from datadog_checks.dev.tooling.config import APP_DIR
 
 ENV_DIR = path_join(APP_DIR, 'envs')
 

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.utils import read_file_binary, write_file_binary
+from datadog_checks.dev.fileutils import write_file_binary, read_file_binary
 
 
 def coverage_sources(check):

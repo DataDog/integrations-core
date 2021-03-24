@@ -7,12 +7,14 @@ import time
 
 import click
 import pyperclip
+from datadog_checks.dev.fileutils import file_exists, dir_exists, path_join
+from datadog_checks.dev.testing.e2e import start_environment, stop_environment, derive_interface, E2E_SUPPORTED_TYPES
+from datadog_checks.dev.testing.e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
+from datadog_checks.dev.testing.environment.utils import get_available_tox_envs
+from datadog_checks.dev.tooling.ci import running_on_ci
+from datadog_checks.dev.tooling.test_utils import get_tox_env_python_version
 
-from ....utils import dir_exists, file_exists, path_join, running_on_ci
-from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
-from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
-from ...testing import complete_envs, get_available_tox_envs, get_tox_env_python_version
 from ...utils import complete_testable_checks, get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 

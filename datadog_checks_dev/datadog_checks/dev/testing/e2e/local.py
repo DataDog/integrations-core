@@ -6,10 +6,13 @@ import re
 from contextlib import contextmanager
 from shutil import copyfile, move
 
-from ...structures import EnvVars
-from ...subprocess import run_command
-from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
-from ..constants import REQUIREMENTS_IN, get_root
+from datadog_checks.dev import run_command
+from datadog_checks.dev.fileutils import file_exists, path_join
+from datadog_checks.dev.testing.environment.structures import EnvVars
+from datadog_checks.dev.testing.utils import ON_LINUX, ON_MACOS, ON_WINDOWS
+from datadog_checks.dev.tooling.constants import get_root
+
+from ..constants import REQUIREMENTS_IN,
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_PYTHON_VERSION,

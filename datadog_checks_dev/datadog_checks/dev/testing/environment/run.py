@@ -4,18 +4,10 @@
 import time
 from contextlib import contextmanager
 
-from ._env import (
-    deserialize_data,
-    get_env_vars,
-    get_state,
-    save_state,
-    serialize_data,
-    set_env_vars,
-    set_up_env,
-    tear_down_env,
-)
-from .conditions import CheckEndpoints
-from .structures import EnvVars
+from datadog_checks.dev.testing._env import set_up_env, set_env_vars, serialize_data, get_env_vars, deserialize_data, \
+    tear_down_env
+from datadog_checks.dev.testing.conditions import CheckEndpoints
+from datadog_checks.dev.testing.structures import EnvVars
 
 try:
     from contextlib import ExitStack
@@ -93,8 +85,6 @@ __all__ = [
     'environment_run',
     'deserialize_data',
     'get_env_vars',
-    'get_state',
-    'save_state',
     'serialize_data',
     'set_env_vars',
 ]

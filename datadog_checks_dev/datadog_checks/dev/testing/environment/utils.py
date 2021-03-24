@@ -4,17 +4,89 @@
 import os
 import re
 
-from datadog_checks.dev.testing.utils import get_changed_checks
-from datadog_checks.dev.tooling.commands.console import echo_debug, abort
+from datadog_checks.dev import run_command
+from datadog_checks.dev.fileutils import path_join
+from datadog_checks.dev.testing.environment.fileutils import chdir
+from datadog_checks.dev.tooling.commands.console import abort, echo_debug
 from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing.utils import get_changed_checks
 from datadog_checks.dev.tooling.utils import get_testable_checks
+import json
+import os
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
-from ..subprocess import run_command
-from ..utils import chdir, path_join
+from six import iteritems
 
-
+E2E_PREFIX = 'DDEV_E2E'
+E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
+E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
+E2E_TEAR_DOWN = '{}_DOWN'.format(E2E_PREFIX)
+E2E_PARENT_PYTHON = '{}_PYTHON_PATH'.format(E2E_PREFIX)
+E2E_FIXTURE_NAME = 'dd_environment'
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
+AGENT_COLLECTOR_SEPARATOR = '=== JSON ==='
+
+TESTING_PLUGIN = 'DDEV_TESTING_PLUGIN'
+SKIP_ENVIRONMENT = 'DDEV_SKIP_ENV'
+
+
+def e2e_active():
+    return any(ev.startswith(E2E_PREFIX) for ev in os.environ)
+
+
+def e2e_testing():
+    return E2E_PARENT_PYTHON in os.environ
+
+
+def set_env_vars(env_vars):
+    for key, value in iteritems(env_vars):
+        key = '{}{}'.format(E2E_ENV_VAR_PREFIX, key)
+        os.environ[key] = value
+
+
+def remove_env_vars(env_vars):
+    for ev in env_vars:
+        os.environ.pop('{}{}'.format(E2E_ENV_VAR_PREFIX, ev), None)
+
+
+def get_env_vars(raw=False):
+    if raw:
+        return {key: value for key, value in iteritems(os.environ) if key.startswith(E2E_ENV_VAR_PREFIX)}
+    else:
+        env_vars = {}
+
+        for key, value in iteritems(os.environ):
+            _, found, ev = key.partition(E2E_ENV_VAR_PREFIX)
+            if found:
+                # Normalize casing for Windows
+                env_vars[ev.lower()] = value
+
+        return env_vars
+
+
+def get_tox_env():
+    return os.environ['TOX_ENV_NAME']
+
+
+def set_up_env():
+    return os.getenv(E2E_SET_UP, 'true') != 'false'
+
+
+def tear_down_env():
+    return os.getenv(E2E_TEAR_DOWN, 'true') != 'false'
+
+
+def get_state(key, default=None):
+    value = get_env_vars().get(key.lower())
+    if value is None:
+        return default
+
+    return deserialize_data(value)
+
+
+def save_state(key, value):
+    set_env_vars({key.lower(): serialize_data(value)})
 
 
 def get_tox_envs(
@@ -155,3 +227,17 @@ def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=Fal
 
     return env_list
 
+
+def serialize_data(data):
+    data = json.dumps(data, separators=(',', ':'))
+    # Using base64 ensures:
+    # 1. Printing to stdout won't fail
+    # 2. Easy parsing since there are no spaces
+    #
+    # TODO: Remove str() when we drop Python 2
+    return str(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
+
+
+def deserialize_data(data):
+    decoded = urlsafe_b64decode(data.encode('utf-8'))
+    return json.loads(decoded.decode('utf-8'))

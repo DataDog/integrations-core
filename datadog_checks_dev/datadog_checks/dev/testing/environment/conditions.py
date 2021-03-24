@@ -7,13 +7,11 @@ import time
 from contextlib import closing
 from typing import Callable, Dict, List, Tuple, Union
 
+from datadog_checks.dev import RetryError, run_command
+from datadog_checks.dev.fileutils import file_exists
+from datadog_checks.dev.testing.environment.structures import LazyFunction
 from six import string_types
 from six.moves.urllib.request import urlopen
-
-from .errors import RetryError
-from .structures import LazyFunction
-from .subprocess import run_command
-from .utils import file_exists
 
 
 class WaitFor(LazyFunction):

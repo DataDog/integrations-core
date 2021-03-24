@@ -7,9 +7,9 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 import six
+from datadog_checks.dev.testing._env import e2e_active, get_env_vars, set_env_vars, tear_down_env, remove_env_vars
 
-from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
-from .warn import warning
+from datadog_checks.dev.warn import warning
 
 
 @six.add_metaclass(abc.ABCMeta)

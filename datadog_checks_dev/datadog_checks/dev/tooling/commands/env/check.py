@@ -4,9 +4,9 @@
 import json
 
 import click
+from datadog_checks.dev.fileutils import read_file
+from datadog_checks.dev.testing.e2e import create_interface, get_configured_envs
 
-from ....utils import read_file
-from ...e2e import create_interface, get_configured_envs
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 

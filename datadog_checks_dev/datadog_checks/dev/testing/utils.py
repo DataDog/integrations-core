@@ -1,90 +1,117 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
+"""
+Utilities functions abstracting common operations, specially designed to be used
+by Integrations within tests.
+"""
+import csv
+import inspect
+import os
+import platform
+import socket
+from contextlib import closing, contextmanager
 from fnmatch import fnmatch
+from io import open
 
+import yaml
+from datadog_checks.dev.fileutils import get_parent_dir, read_file, basepath, path_join
+from datadog_checks.dev.testing.constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS
+from datadog_checks.dev.testing.fileutils import find_check_root
 from datadog_checks.dev.tooling.git import files_changed
 
-from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS
+__platform = platform.system()
+ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
+ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
+ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
 
-PYTHON_MAJOR_PATTERN = r'py(\d)'
+def format_config(config):
+    if 'instances' not in config:
+        config = {'instances': [config]}
+
+    # Agent 5 requires init_config
+    if 'init_config' not in config:
+        config = dict(init_config={}, **config)
+
+    return config
 
 
-def construct_pytest_options(
-    check,
-    verbose=0,
-    color=None,
-    enter_pdb=False,
-    debug=False,
-    bench=False,
-    latest_metrics=False,
-    coverage=False,
-    junit=False,
-    marker='',
-    test_filter='',
-    pytest_args='',
-    e2e=False,
-):
-    # Prevent no verbosity
-    pytest_options = f'--verbosity={verbose or 1}'
+def ensure_bytes(s):
+    if not isinstance(s, bytes):
+        s = s.encode('utf-8')
+    return s
 
-    if not verbose:
-        pytest_options += ' --tb=short'
 
-    if color is not None:
-        pytest_options += ' --color=yes' if color else ' --color=no'
+def ensure_unicode(s):
+    if isinstance(s, bytes):
+        s = s.decode('utf-8')
+    return s
 
-    if enter_pdb:
-        # Drop to PDB on first failure, then end test session
-        pytest_options += ' --pdb -x'
 
-    if debug:
-        pytest_options += ' --log-level=debug -s'
+def get_next(obj):
+    return next(iter(obj))
 
-    if bench:
-        pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
-    else:
-        pytest_options += ' --benchmark-skip'
 
-    if latest_metrics:
-        pytest_options += ' --run-latest-metrics'
-        marker = 'latest_metrics'
+def get_here():
+    return get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
 
-    if junit:
-        test_group = 'e2e' if e2e else 'unit'
-        pytest_options += (
-            # junit report file must contain the env name to handle multiple envs
-            # $TOX_ENV_NAME is a tox injected variable
-            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            f' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
-            # Junit test results class prefix
-            f' --junit-prefix={check}'
-        )
 
-    if coverage:
-        pytest_options += (
-            # Located at the root of each repo
-            ' --cov-config=../.coveragerc'
-            # Use the same .coverage file to aggregate results
-            ' --cov-append'
-            # Show no coverage report until the end
-            ' --cov-report='
-            # This will be formatted to the appropriate coverage paths for each package
-            ' {}'
-        )
+def load_jmx_config():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
 
-    if marker:
-        pytest_options += f' -m "{marker}"'
+    check = basepath(root)
+    example_config_path = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
+    metrics_config_path = path_join(root, 'datadog_checks', check, 'data', 'metrics.yaml')
 
-    if test_filter:
-        pytest_options += f' -k "{test_filter}"'
+    example_config = yaml.safe_load(read_file(example_config_path))
+    metrics_config = yaml.safe_load(read_file(metrics_config_path))
 
-    if pytest_args:
-        pytest_options += f' {pytest_args}'
+    # Avoid having to potentially mount multiple files by putting the default metrics
+    # in the user-defined metric location.
+    example_config['init_config']['conf'] = metrics_config['jmx_metrics']
 
-    return pytest_options
+    return example_config
+
+
+def get_current_check_name(depth=0):
+    # Account for this call
+    depth += 1
+
+    return os.path.basename(find_check_root(depth))
+
+
+@contextmanager
+def mock_context_manager(obj=None):
+    yield obj
+
+
+def find_free_port(ip):
+    """Return a port available for listening on the given `ip`."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind((ip, 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
+
+def get_ip():
+    """Return the IP address used to connect to external networks."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        return s.getsockname()[0]
+
+
+def get_metadata_metrics():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+    metadata_path = os.path.join(root, 'metadata.csv')
+    metrics = {}
+    with open(metadata_path) as f:
+        for row in csv.DictReader(f):
+            metrics[row['metric_name']] = row
+    return metrics
 
 
 def testable_files(files):
@@ -113,9 +140,3 @@ def get_changed_checks():
     changed_files[:] = testable_files(changed_files)
 
     return {line.split('/')[0] for line in changed_files}
-
-
-def get_tox_env_python_version(env):
-    match = re.match(PYTHON_MAJOR_PATTERN, env)
-    if match:
-        return int(match.group(1))

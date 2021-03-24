@@ -7,10 +7,10 @@ import os
 from contextlib import contextmanager
 
 import psutil
+from datadog_checks.dev.tooling.testing.env import environment_run
 from six import PY3
 
 from .conditions import WaitForPortListening
-from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .utils import ON_WINDOWS, find_free_port, get_ip
 
