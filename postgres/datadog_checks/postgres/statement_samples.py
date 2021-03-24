@@ -349,7 +349,11 @@ class PostgresStatementSamples(object):
                 if row['state_change'] and row['query_start']:
                     event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
                     # If the transaction is idle then we have a more specific "end time" than the current time at
-                    # which we're collecting this event. Can only be done if the datetime has a timezone.
+                    # which we're collecting this event. According to the postgres docs, all of the timestamps in
+                    # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
+                    # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
+                    # of the event else we risk the timestamp being significantly off and the event getting dropped
+                    # during ingestion.
                     if row['state_change'].tzinfo:
                         event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
