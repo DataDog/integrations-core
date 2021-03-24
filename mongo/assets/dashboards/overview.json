@@ -8,13 +8,12 @@
       "definition": {
         "title": "Overview",
         "title_align": "center",
-        "reflow_type": "fixed",
         "type": "group",
-        "background_color": "white",
+        "background_color": "vivid_green",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 7,
+            "id": 7601198205415224,
             "definition": {
               "type": "note",
               "content": "This dashboard provides a high-level overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations.\n\n The metrics that are fetched from each member depend on its role in the cluster. For example, replication lag is fetched from the primary for all members of the replica set. This means you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment, you need one additional integration instance pointed to a mongos proxy.\n\nRefer to the following resources for more information:\n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)",
@@ -28,7 +27,7 @@
             "layout": { "x": 0, "y": 0, "width": 6, "height": 4 }
           },
           {
-            "id": 8,
+            "id": 8541262705113204,
             "definition": {
               "title": "Healthy members",
               "title_size": "13",
@@ -43,7 +42,7 @@
             "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
           },
           {
-            "id": 9,
+            "id": 8526692107156452,
             "definition": {
               "title": "Averaged uptime",
               "title_size": "16",
@@ -61,7 +60,7 @@
             "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
           },
           {
-            "id": 10,
+            "id": 1757312919865738,
             "definition": {
               "title": "MongoDB Hosts",
               "title_size": "16",
@@ -85,9 +84,8 @@
       "definition": {
         "title": "Replication",
         "title_align": "center",
-        "reflow_type": "fixed",
         "type": "group",
-        "background_color": "vivid_purple",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -220,9 +218,8 @@
       "definition": {
         "title": "Throughput",
         "title_align": "left",
-        "reflow_type": "fixed",
         "type": "group",
-        "background_color": "purple",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -272,7 +269,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 16,
@@ -336,7 +333,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 4, "y": 0, "width": 4, "height": 3 }
+            "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 17,
@@ -391,7 +388,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 3 }
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
           },
           {
             "id": 18,
@@ -465,20 +462,19 @@
               },
               "markers": []
             },
-            "layout": { "x": 4, "y": 3, "width": 4, "height": 3 }
+            "layout": { "x": 4, "y": 2, "width": 4, "height": 2 }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 8, "height": 7 }
+      "layout": { "x": 0, "y": 0, "width": 8, "height": 5 }
     },
     {
       "id": 3,
       "definition": {
         "title": "Most Used Replica Sets",
         "title_align": "left",
-        "reflow_type": "fixed",
         "type": "group",
-        "background_color": "purple",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -494,7 +490,7 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 20,
@@ -509,20 +505,19 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 3 }
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
           }
         ]
       },
-      "layout": { "x": 8, "y": 0, "width": 4, "height": 7 }
+      "layout": { "x": 8, "y": 0, "width": 4, "height": 5 }
     },
     {
       "id": 4,
       "definition": {
         "title": "Resource Utilization",
         "title_align": "center",
-        "reflow_type": "fixed",
         "type": "group",
-        "background_color": "vivid_yellow",
+        "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -537,7 +532,7 @@
               "tick_pos": "50%",
               "tick_edge": "right"
             },
-            "layout": { "x": 0, "y": 0, "width": 2, "height": 3 }
+            "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
           },
           {
             "id": 22,
@@ -587,7 +582,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 2, "y": 0, "width": 4, "height": 3 }
+            "layout": { "x": 2, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 23,
@@ -627,7 +622,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
           },
           {
             "id": 24,
@@ -641,7 +636,7 @@
               "tick_pos": "50%",
               "tick_edge": "right"
             },
-            "layout": { "x": 0, "y": 3, "width": 2, "height": 2 }
+            "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
           },
           {
             "id": 25,
@@ -678,7 +673,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 2, "y": 3, "width": 4, "height": 2 }
+            "layout": { "x": 2, "y": 2, "width": 4, "height": 2 }
           },
           {
             "id": 26,
@@ -719,7 +714,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 3, "width": 4, "height": 2 }
+            "layout": { "x": 6, "y": 2, "width": 4, "height": 2 }
           },
           {
             "id": 27,
@@ -733,19 +728,19 @@
               "tick_pos": "50%",
               "tick_edge": "left"
             },
-            "layout": { "x": 10, "y": 3, "width": 2, "height": 2 }
+            "layout": { "x": 10, "y": 2, "width": 2, "height": 2 }
           }
         ]
       },
-      "layout": {"is_column_break": true}
+      "layout": { "is_column_break": true }
     },
     {
       "id": 5,
       "definition": {
         "title": "Sharding Stats",
         "title_align": "left",
-        "reflow_type": "fixed",
         "type": "group",
+        "background_color": "vivid_green",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -895,7 +890,7 @@
               "tick_edge": "top",
               "has_padding": false
             },
-            "layout": { "x": 0, "y": 6, "width": 3, "height": 2 }
+            "layout": { "x": 0, "y": 6, "width": 3, "height": 3 }
           },
           {
             "id": 35,
@@ -910,19 +905,19 @@
               "tick_edge": "top",
               "has_padding": false
             },
-            "layout": { "x": 3, "y": 6, "width": 3, "height": 2 }
+            "layout": { "x": 3, "y": 6, "width": 3, "height": 3 }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 9 }
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 10 }
     },
     {
       "id": 6,
       "definition": {
         "title": "Events",
         "title_align": "left",
-        "reflow_type": "fixed",
         "type": "group",
+        "background_color": "vivid_green",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -936,20 +931,20 @@
               "tags_execution": "and",
               "event_size": "l"
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 9 }
           }
         ]
       },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 9 }
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
     }
   ],
   "template_variables": [
-    { "name": "scope", "default": "*", "prefix": "" },
+    { "name": "scope", "default": "*" },
     { "name": "replset_name", "default": "*", "prefix": "replset_name" }
   ],
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
-  "id": "ux8-qaq-ths"
+  "id": "yhk-bfx-kd7"
 }
