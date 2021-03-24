@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.dev.tooling.commands.console import echo_debug
+from datadog_checks.dev.tooling.constants import get_root
+
 from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
 from ...subprocess import run_command
 from ...utils import chdir, get_ci_env_vars, path_join
-from ..commands.console import echo_debug
-from ..constants import get_root
 from .format import parse_config_from_result
 
 
