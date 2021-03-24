@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from datadog_checks.dev.requirements import requires_py3
+from datadog_checks.dev.testing.requirements import requires_py3
 
 from .utils import get_legacy_check
 

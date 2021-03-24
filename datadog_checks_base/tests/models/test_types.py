@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.requirements import requires_py3
+from datadog_checks.dev.testing.requirements import requires_py3
 
 pytestmark = [requires_py3]
 
