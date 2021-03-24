@@ -35,6 +35,8 @@ class Redis(AgentCheck):
     }
 
     GAUGE_KEYS = {
+        # Server
+        'io_threads_active': 'redis.server.io_threads_active',
         # Active defrag metrics
         'active_defrag_running': 'redis.active_defrag.running',
         'active_defrag_hits': 'redis.active_defrag.hits',
@@ -101,6 +103,8 @@ class Redis(AgentCheck):
         # stats
         'keyspace_hits': 'redis.stats.keyspace_hits',
         'keyspace_misses': 'redis.stats.keyspace_misses',
+        'io_threaded_reads_processed': 'redis.stats.io_threaded_reads_processed',
+        'io_threaded_writes_processed': 'redis.stats.io_threaded_writes_processed',
     }
 
     def __init__(self, name, init_config, instances):

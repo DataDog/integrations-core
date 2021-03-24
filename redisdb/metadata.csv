@@ -64,5 +64,8 @@ redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries rep
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median
 redis.stats.keyspace_hits,gauge,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits
 redis.stats.keyspace_misses,gauge,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses
+redis.stats.io_threaded_reads_processed,gauge,,,,Number of read events processed by the main and I/O threads.,0,redis,io threaded reads processed
+redis.stats.io_threaded_writes_processed,gauge,,,,Number of write events processed by the main and I/O threads.,0,redis,io threaded writes processed
+redis.server.io_threads_active,gauge,,,,Flag indicating if I/O threads are active.,0,redis,server io threads active
 redis.command.calls,gauge,,,,"The number of times a redis command has been called, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,cmd calls
 redis.command.usec_per_call,gauge,,,,"The CPU time consumed per redis command call, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,usec per cmd
