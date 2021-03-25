@@ -24,6 +24,7 @@ REQUEST_LIBRARY_FUNCTIONS = {
 
 TEMPLATES = ['http', 'openmetrics', 'openmetrics_legacy']
 
+
 def validate_config_http(file, check):
     """Determines if integration with http wrapper class
     uses the http template in its spec.yaml file.
