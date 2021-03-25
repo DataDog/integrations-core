@@ -16,6 +16,21 @@
     {
         "agent_version": "7.29.0",
         "integration": "Kong",
+        "check": "kong.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health status",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.29.0",
+        "integration": "Kong",
         "check": "kong.datastore.reachable",
         "statuses": [
             "ok",
