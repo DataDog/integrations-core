@@ -22,6 +22,7 @@ REQUEST_LIBRARY_FUNCTIONS = {
     'requests.options',
 }
 
+TEMPLATES = ['http', 'openmetrics', 'openmetrics_legacy']
 
 def validate_config_http(file, check):
     """Determines if integration with http wrapper class
@@ -39,9 +40,10 @@ def validate_config_http(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for _, line in enumerate(f):
-            if 'instances/http' in line or 'instances/openmetrics_legacy' in line:
+            if any('instances/{}'.format(temp) in line for temp in TEMPLATES):
                 has_instance_http = True
-            if 'init_config/http' in line or 'init_config/openmetrics_legacy' in line:
+
+            if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
                 has_init_config_http = True
 
     if not has_instance_http:
