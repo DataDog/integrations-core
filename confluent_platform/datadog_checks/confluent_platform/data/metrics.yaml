@@ -106,6 +106,9 @@ jmx_metrics:
         # Average fraction of time the request handler threads are idle. Values are between 0 (all resources are used) and 1 (all resources are available)
         - kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent
       attribute:
+        OneMinuteRate:
+          alias: confluent.$domain.request_handler_pool.avg_idle_percent
+          metric_type: gauge
         Count:
           alias: confluent.$domain.request_handler_pool.avg_idle_percent.rate
           metric_type: rate
