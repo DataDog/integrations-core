@@ -67,6 +67,14 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2
           name: enclosurePowerSupplyName
         tag: supply_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.1
+          name: enclosurePowerSupplyNumber
+        tag: enclosure_power_supply_number
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.15
+          name: enclosurePowerSupplyFQDD
+        tag: enclosure_power_supply_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15
@@ -75,6 +83,10 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.4
         name: batteryState
     metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.20
+          name: batteryFQDD
+        tag: battery_fqdd
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.21
           name: batteryDisplayName
@@ -88,9 +100,21 @@ metrics:
         name: controllerRollUpStatus
     metric_tags:
       - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.1
+          name: controllerNumber
+        tag: controller_number
+      - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.2
           name: controllerName
         tag: controller_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.42
+          name: controllerPCISlot
+        tag: controller_pci_slot
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.78
+          name: controllerFQDD
+        tag: controller_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.1100.80
@@ -155,6 +179,32 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.300.50.1.1
           name: systemBIOSchassisIndex
         tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.300.50.1.2
+          name: systemBIOSIndex
+        tag: system_bios_index
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.300.70
+      name: intrusionTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.300.70.1.5
+        name: intrusionStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.300.70.1.6
+        name: intrusionReading
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.300.70.1.1
+          name: intrusionchassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.300.70.1.2
+          name: intrusionIndex
+        tag: intrusion_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.300.70.1.8
+          name: intrusionLocationName
+        tag: intrusion_location_name
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.600.30
@@ -173,6 +223,30 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.30.1.1
           name: amperageProbechassisIndex
         tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.30.1.2
+          name: amperageProbeIndex
+        tag: amperage_probe_index
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.600.60
+      name: powerUsageTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.600.60.1.5
+        name: powerUsageStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.60.1.1
+          name: powerUsageChassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.60.1.2
+          name: powerUsageIndex
+        tag: power_usage_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.60.1.6
+          name: powerUsageEntityName
+        tag: power_usage_entity_name
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.600.20
@@ -188,9 +262,169 @@ metrics:
           name: voltageProbechassisIndex
         tag: chassis_index
       - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.20.1.2
+          name: voltageProbeIndex
+        tag: voltage_probe_index
+      - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.20.1.7
           name: voltageProbeType
         tag: probe_type
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.600.50
+      name: systemBatteryTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.600.50.1.5
+        name: systemBatteryStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.600.50.1.6
+        name: systemBatteryReading
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.50.1.1
+          name: systemBatteryChassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.50.1.2
+          name: systemBatteryIndex
+        tag: system_battery_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.600.50.1.7
+          name: systemBatteryLocationName
+        tag: system_battery_location_name
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.700.10
+      name: coolingUnitTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.10.1.5
+        name: coolingUnitRedundancyStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.10.1.8
+        name: coolingUnitStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.10.1.1
+          name: coolingUnitchassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.10.1.2
+          name: coolingUnitIndex
+        tag: cooling_unit_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.10.1.7
+          name: coolingUnitName
+        tag: cooling_unit_name
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.700.12
+      name: coolingDeviceTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.5
+        name: coolingDeviceStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.6
+        name: coolingDeviceReading
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.18
+        name: coolingDeviceDiscreteReading
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.1
+          name: coolingDevicechassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.2
+          name: coolingDeviceIndex
+        tag: cooling_device_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.7
+          name: coolingDeviceType
+        tag: cooling_device_type
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.8
+          name: coolingDeviceLocationName
+        tag: cooling_device_location_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.12.1.19
+          name: coolingDeviceFQDD
+        tag: cooling_device_fqdd
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.700.20
+      name: temperatureProbeTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.5
+        name: temperatureProbeStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.6
+        name: temperatureProbeReading
+      - OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.16
+        name: temperatureProbeDiscreteReading
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.1
+          name: temperatureProbechassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.2
+          name: temperatureProbeIndex
+        tag: temperature_probe_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.7
+          name: temperatureProbeType
+        tag: temperature_probe_type
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.700.20.1.8
+          name: temperatureProbeLocationName
+        tag: temperature_probe_location_name
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.1100.30
+      name: processorDeviceTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.5
+        name: processorDeviceStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.11
+        name: processorDeviceMaximumSpeed
+      - OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.12
+        name: processorDeviceCurrentSpeed
+      - OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.14
+        name: processorDeviceVoltage
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.1
+          name: processorDevicechassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.2
+          name: processorDeviceIndex
+        tag: processor_device_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.23
+          name: processorDeviceBrandName
+        tag: processor_device_brand_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.26
+          name: processorDeviceFQDD
+        tag: processor_device_fqdd
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.1100.32
+      name: processorDeviceStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.1100.32.1.5
+        name: processorDeviceStatusStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.4.1100.32.1.6
+        name: processorDeviceStatusReading
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.32.1.1
+          name: processorDeviceStatusChassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.32.1.2
+          name: processorDeviceStatusIndex
+        tag: processor_device_status_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.1100.32.1.7
+          name: processorDeviceStatusLocationName
+        tag: processor_device_status_location_name
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.1100.50
@@ -211,6 +445,52 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.1
           name: memoryDevicechassisIndex
         tag: chassis_index
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.2000.10
+      name: fruTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.4.2000.10.1.3
+        name: fruInformationStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.2000.10.1.1
+          name: fruChassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.2000.10.1.2
+          name: fruIndex
+        tag: fru_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.2000.10.1.12
+          name: fruFQDD
+        tag: fru_fqdd
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1
+      name: virtualDiskTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.4
+        name: virtualDiskState
+      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.6
+        name: virtualDiskSizeInMB
+      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.20
+        name: virtualDiskComponentStatus
+      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.37
+        name: virtualDiskT10PIStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.1
+          name: virtualDiskNumber
+        tag: virtual_disk_number
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.2
+          name: virtualDiskName
+        tag: virtual_disk_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.140.1.1.35
+          name: virtualDiskFQDD
+        tag: virtual_disk_fqdd
   - MIB: DELL-RAC-MIB
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.3.1.9.0
@@ -231,3 +511,38 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.2.1.0
       name: drsGlobalSystemStatus
+  - MIB: DELL-RAC-MIB
+    table:
+      OID: 1.3.6.1.4.1.674.10892.2.4.1
+      name: drsCMCPowerTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.2.4.1.1.13
+        name: drsWattsReading
+      - OID: 1.3.6.1.4.1.674.10892.2.4.1.1.14
+        name: drsAmpsReading
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
+          name: drsChassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.2.4.2.1.2
+          name: drsPSUIndex
+        tag: drs_psu_index
+  - MIB: DELL-RAC-MIB
+    forced_type: monotonic_count
+    table:
+      OID: 1.3.6.1.4.1.674.10892.2.4.1
+      name: drsCMCPowerTable
+    symbols:
+      - OID: 1.3.6.1.4.1.674.10892.2.4.1.1.6
+        name: drsKWhCumulative
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
+          name: drsChassisIndex
+        tag: chassis_index
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.2.4.2.1.2
+          name: drsPSUIndex
+        tag: drs_psu_index
