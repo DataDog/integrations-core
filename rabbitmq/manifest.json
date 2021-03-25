@@ -30,7 +30,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "disk_usage": "assets/monitors/disk_usage.json"
+    },
     "dashboards": {
       "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
       "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
