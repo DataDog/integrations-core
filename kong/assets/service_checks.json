@@ -26,7 +26,7 @@
             "endpoint"
         ],
         "name": "Datastore reachable",
-        "description": "Returns `CRITICAL` if Kong is unable to connect to the datastore. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if Kong is unable to connect to the datastore, otherwise returns `OK`."
     },
     {
         "agent_version": "7.29.0",
@@ -44,6 +44,6 @@
             "upstream"
         ],
         "name": "Upstream target health status",
-        "description": "Returns `CRITICAL` if the target is unhealthy. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the target is unhealthy, otherwise returns `OK`."
     }
 ]
