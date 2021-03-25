@@ -30,7 +30,7 @@ To configure this check for an Agent running on a host:
      ## @param kong_status_url - string - required
      ## URL where Kong exposes its status.
      #
-     - kong_status_url: http://localhost:8001/status/
+     - kong_status_url: http://localhost:8100/status/
    ```
 
 2. [Restart the Agent][4].
@@ -79,7 +79,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | -------------------- | ----------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `kong`                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                         |
-| `<INSTANCE_CONFIG>`  | `{"kong_status_url": "http://%%host%%:8001/status/"}` |
+| `<INSTANCE_CONFIG>`  | `{"kong_status_url": "http://%%host%%:8100/status/"}` |
 
 ##### Log collection
 
