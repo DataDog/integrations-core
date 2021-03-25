@@ -21,6 +21,8 @@ jmx_metrics:
         - kafka.server:type=ReplicaManager,name=UnderMinIsrPartitionCount
         # Number of under-replicated partitions (| ISR | < | all replicas |). Alert if value is greater than 0.
         - kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions
+        # Number of producer clients currently being throttled. The value can be any number greater than or equal to 0.
+        - kafka.server:type=Produce,name=DelayQueueSize
       attribute:
         Value:
           alias: confluent.$domain.$type.$name
