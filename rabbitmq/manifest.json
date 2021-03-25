@@ -31,7 +31,8 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {
-      "disk_usage": "assets/monitors/disk_usage.json"
+      "disk_usage": "assets/monitors/disk_usage.json",
+      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
     },
     "dashboards": {
       "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
