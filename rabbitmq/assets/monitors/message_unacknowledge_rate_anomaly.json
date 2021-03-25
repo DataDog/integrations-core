@@ -1,7 +1,7 @@
 {
   "id": 0,
   "name": "[RabbitMQ] Messages unacknowledged rate is higher than usual on: {{rabbitmq_node.name}}",
-  "type": "metric alert",
+  "type": "query alert",
   "query": "avg(last_4h):anomalies(avg:rabbitmq.queue.messages_unacknowledged.rate{*} by {rabbitmq_queue}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
   "message": "The rate at which messages are being delivered without receiving acknowledgement is higher than usual.  It may block connections and won't be able to perform many internal operations. There may be errors or performance issues downstream.\n\nHost: {{host.name}}\nRabbitMQ Queue: {{rabbitmq_queue.name}} ",
   "tags": [
