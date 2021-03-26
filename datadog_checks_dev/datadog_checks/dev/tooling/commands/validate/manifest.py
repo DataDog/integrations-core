@@ -487,7 +487,7 @@ def manifest(ctx, fix):
                         # there are cases of metadata.csv files with just a header but no metrics
                         if row:
                             file_failures += 1
-                            display_queue.append((echo_failure, f'  metric_to_check not included in manifest.json'))
+                            display_queue.append((echo_failure, '  metric_to_check not included in manifest.json'))
                             break
 
             # support
