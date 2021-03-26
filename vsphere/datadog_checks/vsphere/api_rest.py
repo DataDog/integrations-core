@@ -193,6 +193,8 @@ class VSphereRestClient(object):
         Get all tags identifiers for a given set of objects
         Doc:
         https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/tag_association.list_attached_tags_on_objects-operation.html
+
+        This operation was added in vSphere API 6.5
         """
         payload = {"object_ids": [{"id": mor._moId, "type": MOR_TYPE_MAPPING_TO_STRING[type(mor)]} for mor in mors]}
         tag_associations = self._request_json(

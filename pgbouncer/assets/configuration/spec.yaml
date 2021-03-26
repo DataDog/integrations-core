@@ -38,7 +38,6 @@ files:
       - name: use_cached
         description: Cache and re-use PostgreSQL connection or create a new one at each check run.
         value:
-          default: true
           example: true
           type: boolean
       - template: instances/default

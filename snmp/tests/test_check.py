@@ -558,7 +558,9 @@ def test_table_v3_SHA_AES(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_bulk_table(aggregator):
+def test_bulk_table(aggregator, caplog):
+    caplog.set_level(logging.DEBUG)  # Needed to test that debug logs won't raise exceptions
+
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 5
     check = common.create_check(instance)

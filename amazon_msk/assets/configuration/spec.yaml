@@ -36,6 +36,12 @@ files:
       value:
         type: integer
         example: 11002
+    - name: prometheus_metrics_path
+      description: |
+        The path where Prometheus serves metrics.
+      value:
+        type: string
+        example: /metrics
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.hidden: true

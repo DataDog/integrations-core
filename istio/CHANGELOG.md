@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 3.10.0 / 2021-03-07
+
+* [Added] Add sidecar injection failed and skipped metrics. See [#8751](https://github.com/DataDog/integrations-core/pull/8751).
+
 ## 3.9.1 / 2021-02-26
 
 * [Fixed] Allow custom metrics for legacy istio. See [#8700](https://github.com/DataDog/integrations-core/pull/8700).

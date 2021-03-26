@@ -73,6 +73,7 @@ setup(
             'atomicwrites',
             'click>7',
             'colorama',
+            'datamodel-code-generator~=0.9.2; python_version > "3.0"',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'jsonschema',

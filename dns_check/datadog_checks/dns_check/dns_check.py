@@ -4,24 +4,10 @@
 
 from __future__ import unicode_literals
 
-import time
-
 import dns.resolver
-from six import PY3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.platform import Platform
-
-if PY3:
-    # use higher precision clock available in Python3
-    time_func = time.perf_counter
-elif Platform.is_win32():
-    # for tiny time deltas, time.time on Windows reports the same value
-    # of the clock more than once, causing the computation of response_time
-    # to be often 0; let's use time.clock that is more precise.
-    time_func = time.clock
-else:
-    time_func = time.time
+from datadog_checks.base.utils.time import get_precise_time
 
 
 class BadConfException(Exception):
@@ -69,7 +55,7 @@ class DNSCheck(AgentCheck):
         hostname, timeout, nameserver, record_type, resolver, resolves_as = self._load_conf(instance)
 
         # Perform the DNS query, and report its duration as a gauge
-        t0 = time_func()
+        t0 = get_precise_time()
 
         try:
             self.log.debug('Querying "%s" record for hostname "%s"...', record_type, hostname)
@@ -86,7 +72,7 @@ class DNSCheck(AgentCheck):
                 if resolves_as:
                     self._check_answer(answer, resolves_as)
 
-            response_time = time_func() - t0
+            response_time = get_precise_time() - t0
 
         except dns.exception.Timeout:
             self.log.error('DNS resolution of %s timed out', hostname)

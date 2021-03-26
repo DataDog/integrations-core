@@ -41,7 +41,7 @@ instances:
     port: 5433
 
     ## @param metric_groups - list of strings - optional
-    ## Enable metric groups for metric collection. Metric groups are based on Vertica tables. 
+    ## Enable metric groups for metric collection. Metric groups are based on Vertica tables.
     ## By default all metric groups are collected.
     #
     # metric_groups:
@@ -221,22 +221,22 @@ instances:
     #
     # client_lib_log_level: <CLIENT_LIB_LOG_LEVEL>
 
-    ## Log Section
-    ##
-    ## type - required - Type of log input source (tcp / udp / file / windows_event)
-    ## port / path / channel_path - required - Set port if type is tcp or udp.
-    ##                                         Set path if type is file.
-    ##                                         Set channel_path if type is windows_event.
-    ## source  - required - Attribute that defines which Integration sent the logs.
-    ## encoding - optional - For file specifies the file encoding, default is utf-8, other
-    ##                       possible values are utf-16-le and utf-16-be.
-    ## service - optional - The name of the service that generates the log.
-    ##                      Overrides any `service` defined in the `init_config` section.
-    ## tags - optional - Add tags to the collected logs.
-    ##
-    ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-    #
-    # logs:
-    #   - source: vertica
-    #     type: file
-    #     path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - source: vertica
+#     type: file
+#     path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log

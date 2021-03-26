@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
@@ -18,6 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.statement_samples import statement_samples_client
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter, resolve_db_host
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import get_timestamp
 
 VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
@@ -63,6 +65,7 @@ class PostgresStatementSamples(object):
         self._activity_last_query_start = None
         self._last_check_run = 0
         self._collection_loop_future = None
+        self._cancel_event = threading.Event()
         self._tags = None
         self._tags_str = None
         self._service = "postgres"
@@ -89,6 +92,9 @@ class PostgresStatementSamples(object):
             maxsize=int(self._config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
             ttl=60 * 60 / int(self._config.statement_samples_config.get('samples_per_hour_per_query', 15)),
         )
+
+    def cancel(self):
+        self._cancel_event.set()
 
     def run_sampler(self, tags):
         """
@@ -175,6 +181,10 @@ class PostgresStatementSamples(object):
         try:
             self._log.info("Starting statement sampler collection loop")
             while True:
+                if self._cancel_event.isSet():
+                    self._log.info("Collection loop cancelled")
+                    self._check.count("dd.postgres.statement_samples.collection_loop_cancel", 1, tags=self._tags)
+                    break
                 if time.time() - self._last_check_run > self._config.min_collection_interval * 2:
                     self._log.info("Sampler collection loop stopping due to check inactivity")
                     self._check.count("dd.postgres.statement_samples.collection_loop_inactive_stop", 1, tags=self._tags)
@@ -198,9 +208,9 @@ class PostgresStatementSamples(object):
             )
         finally:
             self._log.info("Shutting down statement sampler collection loop")
-            self.close()
+            self._close_db_conn()
 
-    def close(self):
+    def _close_db_conn(self):
         if self._db and not self._db.closed:
             try:
                 self._db.close()
@@ -301,6 +311,8 @@ class PostgresStatementSamples(object):
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
+            # if we're using the orjson implementation then json.dumps returns bytes
+            plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
@@ -332,12 +344,18 @@ class PostgresStatementSamples(object):
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
             }
+            event['timestamp'] = time.time() * 1000
             if row['state'] in {'idle', 'idle in transaction'}:
                 if row['state_change'] and row['query_start']:
                     event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
-                    event['timestamp'] = time.mktime(row['state_change'].timetuple()) * 1000
-            else:
-                event['timestamp'] = time.time() * 1000
+                    # If the transaction is idle then we have a more specific "end time" than the current time at
+                    # which we're collecting this event. According to the postgres docs, all of the timestamps in
+                    # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
+                    # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
+                    # of the event else we risk the timestamp being significantly off and the event getting dropped
+                    # during ingestion.
+                    if row['state_change'].tzinfo:
+                        event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
 
     def _explain_pg_stat_activity(self, rows):

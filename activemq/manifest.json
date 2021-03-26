@@ -12,7 +12,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "activemq.",
-  "metric_to_check": "activemq.queue.size",
+  "metric_to_check": [
+      "activemq.queue.size",
+      "activemq.artemis.queue.message_count"
+  ],
   "name": "activemq",
   "process_signatures": [
     "activemq"
@@ -31,9 +34,13 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[ActiveMQ Artemis] High unrouted messages": "assets/recommended_monitors/activemq_artemis_unrouted_messages.json",
+      "[ActiveMQ Artemis] High disk store usage": "assets/recommended_monitors/activemq_artemis_high_disk_store.json"
+    },
     "dashboards": {
-      "activemq": "assets/dashboards/activemq_dashboard.json"
+      "activemq": "assets/dashboards/activemq_dashboard.json",
+      "artemis": "assets/dashboards/artemis_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {

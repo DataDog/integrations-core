@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 2.1.2 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
 ## 2.1.1 / 2021-01-26 / Agent 7.26.0
 
 * [Fixed] Ensure network check doesn't fail on importing fcntl on Windows. See [#8459](https://github.com/DataDog/integrations-core/pull/8459).

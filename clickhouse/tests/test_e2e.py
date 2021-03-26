@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .metrics import ALL_METRICS
+from .common import CLICKHOUSE_VERSION
+from .metrics import get_metrics
 
 pytestmark = pytest.mark.e2e
 
@@ -14,7 +15,8 @@ def test_check(dd_agent_check, instance):
 
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
-    for metric in ALL_METRICS:
+    metrics = get_metrics(CLICKHOUSE_VERSION)
+    for metric in metrics:
         aggregator.assert_metric_has_tag(metric, server_tag)
         aggregator.assert_metric_has_tag(metric, port_tag)
         aggregator.assert_metric_has_tag(metric, 'db:default')

@@ -143,14 +143,17 @@ class PostfixCheck(AgentCheck):
 
         -- 1 Kbytes in 2 Requests.
         '''
-        for line in output.splitlines():
-            if '*' in line:
-                active_count += 1
-            elif '!' in line:
-                hold_count += 1
-            # Check the line starts with an ID
-            elif line[0:1].isalnum():
-                deferred_count += 1
+        lines = output.splitlines()
+        # Check output
+        if len(lines) > 1 and not output.startswith('Mail queue is empty'):
+            for line in lines:
+                if '*' in line:
+                    active_count += 1
+                elif '!' in line:
+                    hold_count += 1
+                # Check the line starts with an ID
+                elif line[0:1].isalnum():
+                    deferred_count += 1
 
         self.gauge(
             'postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)]

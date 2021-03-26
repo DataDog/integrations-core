@@ -1,5 +1,9 @@
 # CHANGELOG - Scylla
 
+## 1.3.2 / 2021-03-07
+
+* [Fixed] Fix logs section placement in example config. See [#8605](https://github.com/DataDog/integrations-core/pull/8605).
+
 ## 1.3.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
