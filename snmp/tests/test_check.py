@@ -251,6 +251,8 @@ def test_submitted_metrics_count(aggregator):
     check = common.create_check(instance)
     check.check(instance)
 
+    telemetry_tags = common.CHECK_TAGS + ['loader:python']
+
     for metric in common.SCALAR_OBJECTS:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
@@ -263,13 +265,11 @@ def test_submitted_metrics_count(aggregator):
         value=total_snmp_submitted_metrics,
         metric_type=aggregator.GAUGE,
         count=1,
-        tags=common.CHECK_TAGS,
+        tags=telemetry_tags,
     )
+    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=telemetry_tags)
     aggregator.assert_metric(
-        'datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
-    )
-    aggregator.assert_metric(
-        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=common.CHECK_TAGS
+        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=telemetry_tags
     )
     common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()

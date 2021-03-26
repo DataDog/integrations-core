@@ -257,10 +257,14 @@ def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False):
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT
+    if tags is not None:
+        tags = tags + ['loader:python']
     aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags)
     aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=tags)
     aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
 
 
 def assert_common_device_metrics(aggregator, tags=None, is_e2e=False):
+    if tags is not None:
+        tags = tags + ['loader:python']
     aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)
