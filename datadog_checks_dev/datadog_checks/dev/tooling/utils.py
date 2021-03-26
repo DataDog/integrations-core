@@ -26,6 +26,10 @@ DOGWEB_JSON_DASHBOARDS = (
     'hdfs_namenode',
     'mesos',
 )
+SECONDARY_DASHBOARDS = (
+    'cassandra_nodetool',  # included in cassandra
+    'kafka_consumer',  # included in kafka
+)
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
 INTEGRATION_LOGS_NOT_POSSIBLE = (
@@ -614,7 +618,7 @@ def is_jmx_integration(check_name):
 
 
 def has_dashboard(check):
-    if check in DOGWEB_JSON_DASHBOARDS:
+    if check in DOGWEB_JSON_DASHBOARDS or check in SECONDARY_DASHBOARDS:
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
