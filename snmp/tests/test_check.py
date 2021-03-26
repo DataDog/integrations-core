@@ -776,7 +776,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
         aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
-        common.assert_common_device_metrics('snmp.devices_monitored', tags=tags + ['loader:python'], count=1, value=1)
+        common.assert_common_device_metrics(aggregator, tags=tags, count=1, devices_monitored_value=1)
         common.assert_common_metrics(aggregator, tags)
         aggregator.assert_all_metrics_covered()
 
@@ -794,7 +794,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
         common.assert_common_device_metrics(
-            'snmp.devices_monitored', tags=common.CHECK_TAGS + ['loader:python'], count=1, value=1
+            tags=common.CHECK_TAGS + ['loader:python'], count=1, devices_monitored_value=1
         )
         common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
@@ -978,7 +978,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
 
     for device_ip in ['192.168.0.1', '192.168.0.2']:
         tags = check_tags + ['snmp_device:{}'.format(device_ip)]
-        common.assert_common_device_metrics(aggregator, value=1, count=1, tags=tags)
+        common.assert_common_device_metrics(aggregator, devices_monitored_value=1, count=1, tags=tags)
 
     common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
