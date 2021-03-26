@@ -18,8 +18,8 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ### Set up Palo Alto Networks Firewall log collection 
 
- 1. [Install the Datadog Agent](https://app.datadoghq.com/account/settings#agent) on a machine that is reachable by the firewall and can connect to the internet.
- 2. In PanOS, Select Device >> Server Profiles >> Syslog , add a name for the server profile. Follow the Syslog log forwarding [configuration steps](https://www.youtube.com/watch?v=LOPXg0oCMPs). Same steps listed below.
+ 1. [Install the Datadog Agent][1] on a machine that is reachable by the firewall and can connect to the internet.
+ 2. In PanOS, Select Device >> Server Profiles >> Syslog , add a name for the server profile. Follow the Syslog log forwarding [configuration steps][2]. Same steps listed below.
  3. Click Add and provide the following details of the server:
  	* Name of the server
  	* IP address of the machine with datadog agent 
@@ -44,7 +44,7 @@ Firewall authentication logs provide detailed information on users as they authe
  5. Click OK, this will create syslog server profile.
  6. Click on the Objects tab, this will open the log forwarding profile screen.
  7. Create log forwarding profile by providing the name, log type and syslog profile 
- 8. Create a pan.firewall.d/conf.yaml file at the root of the [Agent’s configuration directory](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7) with the below content.
+ 8. Create a pan.firewall.d/conf.yaml file at the root of the [Agent’s configuration directory][3] with the below content.
  
      ```yaml
      logs:
@@ -53,7 +53,7 @@ Firewall authentication logs provide detailed information on users as they authe
        service: "firewall"
        source: "pan.firewall"
      ```
- 9. [Restart Agent](https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent)
+ 9. [Restart Agent][4].
  
 ## Data Collected
 
@@ -79,3 +79,8 @@ Additional helpful documentation, links, and articles:
 
 - [Log types and fields](https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions)
 - [Logs Collection documentation](https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent)
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://www.youtube.com/watch?v=LOPXg0oCMPs
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
