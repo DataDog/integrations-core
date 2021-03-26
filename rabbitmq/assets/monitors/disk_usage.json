@@ -1,9 +1,8 @@
 {
-  "id": 0,
   "name": "[RabbitMQ] Level of disk usage is too high for host: {{host.name}} ",
   "type": "query alert",
   "query": "avg(last_5m):avg:rabbitmq.node.mem_used{*} by {host} / avg:system.mem.total{*} by {host} * 100 > 35",
-  "message": "RabbitMQ is using too many resources on host: {{host.name}}.  It may block connections and won't be able to perform many internal operations. ",
+  "message": "RabbitMQ is using too many resources on host: {{host.name}}.  It may block connections and won't be able to perform many internal operations.",
   "tags": [
     "integration:rabbitmq"
   ],
