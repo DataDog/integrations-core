@@ -265,7 +265,9 @@ def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=
     aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
 
 
-def assert_common_device_metrics(aggregator, tags=None, is_e2e=False, count=None, devices_monitored_value=None, loader=None):
+def assert_common_device_metrics(
+    aggregator, tags=None, is_e2e=False, count=None, devices_monitored_value=None, loader=None
+):
     loader = loader or 'python'
     if tags is not None:
         tags = tags + ['loader:' + loader]
