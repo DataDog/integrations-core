@@ -793,9 +793,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         check.check(instance)
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
-        common.assert_common_device_metrics(
-            tags=common.CHECK_TAGS + ['loader:python'], count=1, devices_monitored_value=1
-        )
+        common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS, count=1, devices_monitored_value=1)
         common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
 
