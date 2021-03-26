@@ -53,7 +53,7 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run all CI validations for a repo')
 @click.pass_context
-def all(ctx, check, sync, verbose):
+def all(ctx):
     """Run all CI validations for a repo."""
     repo_choice = ctx.obj['repo_choice']
     echo_info(f'Running validations for {repo_choice} repo ...')
