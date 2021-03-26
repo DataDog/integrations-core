@@ -26,7 +26,7 @@ steps:
       displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
-  - script: ddev env test --base --new-env --junit ${{ parameters.check }}
+  - script: ddev env test --base --new-env --junit ${{ parameters.check }} -a datadog/agent-dev:alex-snmp-loader-tag-py3
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
