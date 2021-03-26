@@ -11,6 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "nagios.",
+  "metric_to_check": "nagios.host.rta",
   "name": "nagios",
   "process_signatures": [
     "nagios"
