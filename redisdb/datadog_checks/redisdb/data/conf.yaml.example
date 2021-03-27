@@ -77,14 +77,14 @@ instances:
     #
     # ssl_ca_certs: <CERT_PATH>
 
-    ## @param ssl_cert_reqs - integer - optional - default: 0
+    ## @param ssl_cert_reqs - integer - optional - default: 2
     ## Specifies whether a certificate is required from the
     ## other side of the connection, and whether it's validated if provided.
     ##   * 0 for ssl.CERT_NONE (certificates ignored)
     ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
     ##   * 2 for ssl.CERT_REQUIRED (required and validated)
     #
-    # ssl_cert_reqs: 0
+    # ssl_cert_reqs: 2
 
     ## @param keys - list of strings - optional
     ## Enter the list of keys to collect the lengths from.
