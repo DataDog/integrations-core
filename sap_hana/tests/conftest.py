@@ -48,6 +48,7 @@ class DbManager(object):
                 cursor.execute("BACKUP DATA USING FILE ('/tmp/backup')")
 
     def connect(self):
+        import logging; logging.warning("Attempt connection")
         self.conn = pyhdb.connect(**self.connection_args)
 
 
@@ -58,7 +59,7 @@ def dd_environment():
     with docker_run(
         COMPOSE_FILE,
         conditions=[
-            CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
+            # CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
             WaitFor(db.connect),
             db.initialize,
         ],

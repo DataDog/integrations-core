@@ -11,38 +11,38 @@ parameters:
 
 steps:
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
-  - script: ddev test --cov --junit ${{ parameters.check }}
+  - script: ddev -d test --cov --junit ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
-    - script: ddev test --junit ${{ parameters.check }}
+    - script: ddev -d test --junit ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (no coverage)'
 
 # Nightly base package check
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
-    - script: ddev test --force-base-min --force-env-rebuild --junit ${{ parameters.check }}
+    - script: ddev -d test --force-base-min --force-env-rebuild --junit ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
-  - script: ddev env test --base --new-env --junit ${{ parameters.check }}
+  - script: ddev -d env test --base --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), ne(parameters.repo, 'core'))}}:
-  - script: ddev env test --new-env --junit ${{ parameters.check }}
+  - script: ddev -d env test --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
-  - script: ddev test --bench --junit ${{ parameters.check }}
+  - script: ddev -d test --bench --junit ${{ parameters.check }}
     displayName: 'Run benchmarks'
 
 - ${{ if eq(parameters.latest_metrics, 'true') }}:
-    - script: ddev test --latest-metrics --junit ${{ parameters.check }}
+    - script: ddev -d test --latest-metrics --junit ${{ parameters.check }}
       displayName: 'Verify latest metrics supported'
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
