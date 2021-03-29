@@ -50,7 +50,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'tag2:val2',
     ]
 
-    common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
     interfaces = [
         ('eth0', 'kept'),
         ('eth1', 'their forward oxen'),
