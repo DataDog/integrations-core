@@ -34,6 +34,11 @@ steps:
   displayName: 'Validate default configuration files'
 
 - script: |
+    echo "ddev validate models"
+    ddev validate models
+  displayName: 'Validate configuration data models'
+
+- script: |
     echo "ddev validate dashboards"
     ddev validate dashboards
   displayName: 'Validate dashboard definition files'

@@ -12,10 +12,10 @@ MOCK_CONFIG_DISABLE_SERVICE_TAG = {
     'disable_legacy_service_tag': True,
 }
 
-MOCK_CONFIG_SERVICE_WHITELIST = {
+MOCK_CONFIG_SERVICE_INCLUDE_LIST = {
     'url': 'http://localhost:8500',
     'catalog_checks': True,
-    'service_whitelist': ['service_{}'.format(k) for k in range(70)],
+    'services_include': ['service_{}'.format(k) for k in range(70)],
 }
 
 MOCK_CONFIG_LEADER_CHECK = {'url': 'http://localhost:8500', 'catalog_checks': True, 'new_leader_checks': True}

@@ -104,6 +104,4 @@ If not:
 
 ### Card Assignment
 
-To automatically assign [QA cards](../process/agent-release/pre-release.md#create-items), add a `trello_users_$team` table, with keys being
-GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member
-information in [this document](https://github.com/DataDog/mars-jenkins-scripts/blob/master/release_documentation/users_github_trello.toml).
+When automatically assigning [QA cards](../process/agent-release/pre-release.md#create-items), the Trello users which are members of the `Agent Release Sprint` Trello board will be fetched and cards will be assigned at random to them. Make sure people in your team are all members of the `Agent Release Sprint` board.

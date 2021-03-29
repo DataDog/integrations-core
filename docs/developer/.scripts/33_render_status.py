@@ -9,6 +9,7 @@ from datadog_checks.dev.tooling.utils import (
     get_valid_integrations,
     has_logs,
     has_agent_8_check_signature,
+    has_config_models,
     has_dashboard,
     has_e2e,
     has_process_signature,
@@ -35,6 +36,7 @@ def patch(lines):
         render_config_spec_progress,
         render_docs_spec_progress,
         render_e2e_progress,
+        render_config_validation_progress,
         render_metadata_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
@@ -301,4 +303,27 @@ def render_recommended_monitors_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_rm}/{total_checks}"'
+    return lines
+
+
+def render_config_validation_progress():
+    valid_checks = sorted(c for c in get_valid_checks() if os.path.isfile(get_default_config_spec(c)))
+    total_checks = len(valid_checks)
+    checks_with_config_validation = 0
+
+    lines = ['## Config validation', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if has_config_models(check):
+            status = 'X'
+            checks_with_config_validation += 1
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_config_validation / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_config_validation}/{total_checks}"'
     return lines
