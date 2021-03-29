@@ -46,7 +46,7 @@ def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
         'upsAdvTestDiagnosticsResults',
     ]
 
-    common.assert_common_metrics(aggregator, tags, is_e2e=True)
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
     for metric in metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
