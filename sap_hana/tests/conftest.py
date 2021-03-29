@@ -59,7 +59,7 @@ def dd_environment():
     with docker_run(
         COMPOSE_FILE,
         conditions=[
-            # CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
+            CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
             WaitFor(db.connect),
             db.initialize,
         ],
