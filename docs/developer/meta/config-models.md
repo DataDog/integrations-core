@@ -29,7 +29,7 @@ There are 2 possible models:
 - `SharedConfig` (ID: `shared`) that corresponds to the `init_config` section
 - `InstanceConfig` (ID: `instance`) that corresponds to a check's entry in the `instances` section
 
-All models are be defined in `<ID>.py` and are available for import directly under `config_models`.
+All models are defined in `<ID>.py` and are available for import directly under `config_models`.
 
 ## Default values
 
