@@ -2,23 +2,34 @@ import os
 
 import pytest
 
-from datadog_checks.base import to_string
-from datadog_checks.dev.kube_port_forward import port_forward
-from datadog_checks.dev.terraform import terraform_run
-from datadog_checks.dev.utils import get_here
+from datadog_checks.dev import run_command
+from datadog_checks.dev.kind import kind_run
 
-from .common import LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
+from .common import E2E_METADATA, LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
+
+
+def setup_linkerd():
+    result = run_command(
+        ["kind", "get", "kubeconfig", "--internal", "--name", "cluster-linkerd-py38"],
+        capture='out',
+        check=True,
+    )
+    with open('/tmp/kubeconfig.yaml', 'w') as f:
+        f.write(result.stdout)
+    run_command(['cat', '/tmp/kubeconfig.yaml'], check=True, shell=True)
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
-        kubeconfig = to_string(outputs['kubeconfig']['value'])
-
-        with port_forward(kubeconfig, 'linkerd', 'linkerd-controller', 4191) as (ip, port):
-            instance = {
-                'prometheus_url': 'http://{}:{}/metrics'.format(ip, port),
-                'metrics': [LINKERD_FIXTURE_METRICS],
-                'type_overrides': LINKERD_FIXTURE_TYPES,
-            }
-            yield instance
+    with kind_run(conditions=[setup_linkerd]) as kubeconfig:
+        instance = {
+            'prometheus_url': 'http://localhost:9990/metrics',
+            'metrics': [LINKERD_FIXTURE_METRICS],
+            'type_overrides': LINKERD_FIXTURE_TYPES,
+        }
+        yield instance, E2E_METADATA

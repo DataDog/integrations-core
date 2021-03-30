@@ -61,6 +61,7 @@ class DockerInterface(object):
         self.config_dir = locate_config_dir(check, env)
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
+        self.network = self.metadata.get('network', 'host')
 
         # If we use a default non-RC build, and it's missing the py suffix, adds it
         if default_agent and self.agent_build and 'rc' not in self.agent_build and 'py' not in self.agent_build:
@@ -267,9 +268,9 @@ class DockerInterface(object):
             # Ensure consistent naming
             '--name',
             self.container_name,
-            # Ensure access to host network
+            # Ensure access to host network by default
             '--network',
-            'host',
+            f'{self.network}',
         ]
         for volume in volumes:
             command.extend(['-v', volume])
