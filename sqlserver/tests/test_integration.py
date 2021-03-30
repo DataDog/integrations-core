@@ -235,7 +235,7 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
         'sqlserver.database.log_flush_wait',
         'sqlserver.database.transactions',
         'sqlserver.database.write_transactions',
-        'sqlserver.database.active_transactions'
+        'sqlserver.database.active_transactions',
     ]
     master_tags = [
         'database:master',
@@ -245,9 +245,7 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
         'database:msdb',
         'optional:tag1',
     ]
-    base_tags = [
-        'optional:tag1'
-    ]
+    base_tags = ['optional:tag1']
     for metric in expected_metrics:
         aggregator.assert_metric(metric, tags=master_tags)
         aggregator.assert_metric(metric, tags=msdb_tags)
