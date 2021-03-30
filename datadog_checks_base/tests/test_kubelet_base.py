@@ -9,47 +9,26 @@ import mock
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
 from datadog_checks.base.utils.date import UTC
+from datadog_checks.dev import get_here
 
-HERE = os.path.abspath(os.path.dirname(__file__))
+HERE = get_here()
 
 
-def mock_from_file(fname):
-    with open(os.path.join(HERE, 'fixtures', fname)) as f:
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)
+
+
+def mock_from_file(filename):
+    with open(get_fixture_path(filename)) as f:
         return f.read()
 
 
-class MockStreamResponse:
-    """
-    Mocks raw contents of a stream request for the podlist get
-    """
-
-    def __init__(self, filename):
-        self.filename = filename
-
-    @property
-    def raw(self):
-        return open(os.path.join(HERE, 'fixtures', self.filename))
-
-    def json(self):
-        with open(os.path.join(HERE, 'fixtures', self.filename)) as f:
-            return json.load(f)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        pass
-
-
-def test_retrieve_pod_list_success(monkeypatch):
+def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
     check = KubeletBase('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(
-        check,
-        'perform_kubelet_query',
-        mock.Mock(return_value=MockStreamResponse('kubelet_base/pod_list_raw.dat')),
+        check, 'perform_kubelet_query', mock_http_response(file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
     )
-    monkeypatch.setattr(check, 'compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))
