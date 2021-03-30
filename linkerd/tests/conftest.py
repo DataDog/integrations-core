@@ -1,16 +1,9 @@
-import os
-
 import pytest
 
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 
 from .common import E2E_METADATA, LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
 
 
 def setup_linkerd():
@@ -26,7 +19,7 @@ def setup_linkerd():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_linkerd]) as kubeconfig:
+    with kind_run(conditions=[setup_linkerd]):
         instance = {
             'prometheus_url': 'http://localhost:9990/metrics',
             'metrics': [LINKERD_FIXTURE_METRICS],

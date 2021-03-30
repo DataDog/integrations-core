@@ -557,11 +557,9 @@ E2E_METADATA = {
     'docker_volumes': [
         '{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
         '{}/agent_scripts/port-forward:/etc/services.d/port-forward'.format(HERE),
-        '/tmp/kubeconfig.yaml:/root/.kube/config'
+        '/tmp/kubeconfig.yaml:/root/.kube/config',
     ],
-    'start_commands': [
-        'bash /tmp/start_commands.sh'
-    ],
+    'start_commands': ['bash /tmp/start_commands.sh'],
     'network': 'kind',
 }
 
