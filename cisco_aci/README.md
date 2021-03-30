@@ -58,7 +58,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 | Parameter            | Value                                                                  |
 | -------------------- | ---------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `teamcity`                                                             |
+| `<INTEGRATION_NAME>` | `cisco_aci`                                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
 | `<INSTANCE_CONFIG>`  | `{"aci_url":"%%host%%", "username":"<USERNAME>", "pwd": "<PASSWORD>"}` |
 
