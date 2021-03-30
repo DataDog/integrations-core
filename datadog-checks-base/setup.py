@@ -52,5 +52,5 @@ setup(
     install_requires=get_requirements('requirements.in'),
 
     setup_requires=['pytest-runner<=5.2', ],
-    tests_require=['pytest<4', ],
+    tests_require=['pytest<4','setuptools_scm<6.0.0', ],
 )
