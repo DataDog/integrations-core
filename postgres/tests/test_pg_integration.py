@@ -345,8 +345,6 @@ def test_statement_samples_collection_loop_inactive_stop(aggregator, integration
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    while check.statement_samples._collection_loop_future.running():
-        time.sleep(0.1)
     # make sure there were no unhandled exceptions
     check.statement_samples._collection_loop_future.result()
     aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_inactive_stop")
@@ -357,7 +355,6 @@ def test_statement_samples_collection_loop_cancel(aggregator, integration_check,
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    assert check.statement_samples._collection_loop_future.running(), "thread should be running"
     check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     check.statement_samples._collection_loop_future.result()
@@ -381,8 +378,6 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    while check.statement_samples._collection_loop_future.running():
-        time.sleep(0.1)
     # make sure there were no unhandled exceptions
     check.statement_samples._collection_loop_future.result()
     aggregator.assert_metric_has_tag_prefix("dd.postgres.statement_samples.error", "error:database-")

@@ -79,7 +79,9 @@ def test_e2e(dd_agent_check, instance_complex):
 def _assert_complex_config(aggregator):
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
-    aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS, at_least=1)
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS + ['replication_mode:source'], at_least=1
+    )
     testable_metrics = (
         variables.STATUS_VARS
         + variables.VARIABLES_VARS
@@ -169,7 +171,10 @@ def test_complex_config_replica(aggregator, instance_complex):
 
     # Travis MySQL not running replication - FIX in flavored test.
     aggregator.assert_service_check(
-        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, at_least=1
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=tags.SC_TAGS_REPLICA + ['replication_mode:replica'],
+        at_least=1,
     )
 
     testable_metrics = (
@@ -427,8 +432,6 @@ def test_statement_samples_loop_inactive_stop(aggregator, dbm_instance):
     # confirm that the collection loop stops on its own after the check has not been run for a while
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
-    while mysql_check._statement_samples._collection_loop_future.running():
-        time.sleep(0.1)
     # make sure there were no unhandled exceptions
     mysql_check._statement_samples._collection_loop_future.result()
     aggregator.assert_metric("dd.mysql.statement_samples.collection_loop_inactive_stop")
@@ -440,7 +443,6 @@ def test_statement_samples_check_cancel(aggregator, dbm_instance):
     # confirm that the collection loop stops on its own after the check has not been run for a while
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
-    assert mysql_check._statement_samples._collection_loop_future.running(), "thread should be running"
     mysql_check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     mysql_check._statement_samples._collection_loop_future.result()
@@ -581,35 +583,99 @@ def test_parse_get_version():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'replica_io_running, replica_sql_running, check_status',
+    'replica_io_running, replica_sql_running, source_host, slaves_connected, check_status_repl, check_status_source',
     [
-        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), MySql.CRITICAL),
-        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), MySql.CRITICAL),
-        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), MySql.OK),
-        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {}), MySql.WARNING),
-        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {}), MySql.WARNING),
-        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
-        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
-        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.OK),
-        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.OK),
+        # Replica host only
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), 'source', 0, MySql.CRITICAL, None),
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), 'source', 0, MySql.CRITICAL, None),
+        pytest.param(('Slave_IO_Running', {'a': 'yes'}), ('Slave_SQL_Running', {}), 'source', 0, MySql.WARNING, None),
+        pytest.param(
+            ('Replica_IO_Running', {'a': 'yes'}), ('Replica_SQL_Running', {}), 'source', 0, MySql.WARNING, None
+        ),
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {'a': 'yes'}), 'source', 0, MySql.WARNING, None),
+        pytest.param(
+            ('Replica_IO_Running', {}), ('Replica_SQL_Running', {'a': 'yes'}), 'source', 0, MySql.WARNING, None
+        ),
+        pytest.param(
+            ('Slave_IO_Running', {'a': 'yes'}), ('Slave_SQL_Running', {'a': 'yes'}), 'source', 0, MySql.OK, None
+        ),
+        pytest.param(
+            ('Replica_IO_Running', {'a': 'yes'}),
+            ('Replica_SQL_Running', {'a': 'yes'}),
+            'source',
+            0,
+            MySql.OK,
+            None,
+        ),
+        # Source host only
+        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), None, 1, None, MySql.OK),
+        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), None, 0, None, MySql.WARNING),
+        # Source and replica host
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), 'source', 1, MySql.CRITICAL, MySql.OK),
+        pytest.param(
+            ('Replica_IO_Running', {'a': 'yes'}), ('Replica_SQL_Running', {}), 'source', 1, MySql.WARNING, MySql.OK
+        ),
+        pytest.param(
+            ('Slave_IO_Running', {'a': 'yes'}),
+            ('Slave_SQL_Running', {'a': 'yes'}),
+            'source',
+            1,
+            MySql.OK,
+            MySql.OK,
+        ),
     ],
 )
-def test_replication_check_status(replica_io_running, replica_sql_running, check_status, instance_basic, aggregator):
+def test_replication_check_status(
+    replica_io_running,
+    replica_sql_running,
+    source_host,
+    slaves_connected,
+    check_status_repl,
+    check_status_source,
+    instance_basic,
+    aggregator,
+):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
     mocked_results = {
-        'Slaves_connected': 1,
+        'Slaves_connected': slaves_connected,
         'Binlog_enabled': True,
     }
     if replica_io_running[1] is not None:
         mocked_results[replica_io_running[0]] = replica_io_running[1]
     if replica_sql_running[1] is not None:
         mocked_results[replica_sql_running[0]] = replica_sql_running[1]
+    if source_host:
+        mocked_results['Master_Host'] = source_host
 
     mysql_check._check_replication_status(mocked_results)
+    expected_service_check_len = 0
 
-    aggregator.assert_service_check('mysql.replication.slave_running', check_status, tags=['foo:bar'], count=1)
-    aggregator.assert_service_check('mysql.replication.replica_running', check_status, tags=['foo:bar'], count=1)
+    if check_status_repl is not None:
+        aggregator.assert_service_check(
+            'mysql.replication.slave_running', check_status_repl, tags=['foo:bar', 'replication_mode:replica'], count=1
+        )
+        aggregator.assert_service_check(
+            'mysql.replication.replica_running',
+            check_status_repl,
+            tags=['foo:bar', 'replication_mode:replica'],
+            count=1,
+        )
+        expected_service_check_len += 1
+
+    if check_status_source is not None:
+        aggregator.assert_service_check(
+            'mysql.replication.slave_running', check_status_source, tags=['foo:bar', 'replication_mode:source'], count=1
+        )
+        aggregator.assert_service_check(
+            'mysql.replication.replica_running',
+            check_status_source,
+            tags=['foo:bar', 'replication_mode:source'],
+            count=1,
+        )
+        expected_service_check_len += 1
+
+    assert len(aggregator.service_checks('mysql.replication.slave_running')) == expected_service_check_len
 
 
 @pytest.mark.integration

@@ -1,5 +1,9 @@
 # CHANGELOG - postfix
 
+## 1.8.3 / 2021-03-18
+
+* [Fixed] Fix empty queue parsing. See [#8852](https://github.com/DataDog/integrations-core/pull/8852).
+
 ## 1.8.2 / 2021-03-07
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

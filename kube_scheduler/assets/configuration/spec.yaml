@@ -57,11 +57,9 @@ files:
       description: Used to specify the path where the service account token is located.
       value:
         type: string
-        default: /var/run/secrets/kubernetes.io/serviceaccount/token
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.
       value:
         type: boolean
-        default: false
         example: false

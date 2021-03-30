@@ -95,6 +95,7 @@ snmp_listener:
       community: public
     - network: 10.0.1.0/30
       version: 3
+      user: my-snmp-user
       authentication_protocol: SHA
       authentication_key: "*****"
       privacy_protocol: AES

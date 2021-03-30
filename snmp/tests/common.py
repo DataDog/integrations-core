@@ -248,19 +248,29 @@ def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
 
 
-def assert_common_metrics(aggregator, tags=None, is_e2e=False):
-    assert_common_check_run_metrics(aggregator, tags, is_e2e)
-    assert_common_device_metrics(aggregator, tags, is_e2e)
+def assert_common_metrics(aggregator, tags=None, is_e2e=False, loader=None):
+    assert_common_check_run_metrics(aggregator, tags, is_e2e, loader=loader)
+    assert_common_device_metrics(aggregator, tags, is_e2e, loader=loader)
 
 
-def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False):
+def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=None):
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT
+    loader = loader or 'python'
+    if tags is not None:
+        tags = tags + ['loader:' + loader]
     aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags)
     aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=tags)
     aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
 
 
-def assert_common_device_metrics(aggregator, tags=None, is_e2e=False):
-    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)
+def assert_common_device_metrics(
+    aggregator, tags=None, is_e2e=False, count=None, devices_monitored_value=None, loader=None
+):
+    loader = loader or 'python'
+    if tags is not None:
+        tags = tags + ['loader:' + loader]
+    aggregator.assert_metric(
+        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags, count=count, value=devices_monitored_value
+    )

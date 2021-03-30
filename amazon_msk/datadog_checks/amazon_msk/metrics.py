@@ -60,6 +60,7 @@ JMX_METRICS_MAP = {
     'jmx_scrape_duration_seconds': 'jmx.scrape.duration.seconds',
     'jmx_scrape_error': 'jmx.scrape.error',
     'kafka_cluster_Partition_Value': 'kafka.cluster.Partition.Value',
+    'kafka_consumer_group_ConsumerLagMetrics_Value': 'kafka.consumer.group.ConsumerLagMetrics.Value',
     'kafka_controller_ControllerChannelManager_50thPercentile': (
         'kafka.controller.ControllerChannelManager.50thPercentile'
     ),
@@ -532,6 +533,7 @@ JMX_METRICS_MAP = {
 }
 JMX_METRICS_OVERRIDES = {
     'kafka_cluster_Partition_Value': 'gauge',
+    'kafka_consumer_group_ConsumerLagMetrics_Value': 'gauge',
     'kafka_controller_ControllerChannelManager_50thPercentile': 'gauge',
     'kafka_controller_ControllerChannelManager_75thPercentile': 'gauge',
     'kafka_controller_ControllerChannelManager_95thPercentile': 'gauge',

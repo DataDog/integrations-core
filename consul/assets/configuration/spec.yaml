@@ -23,7 +23,6 @@ files:
         The Prometheus endpoint is available for Consul versions v1.1.0 or higher.
       value:
         type: boolean
-        default: false
         example: false
     - name: catalog_checks
       description: Set to true to perform checks against the Consul service catalog.
@@ -74,11 +73,11 @@ files:
         type: boolean
         example: false
 
-    - name: service_whitelist
+    - name: services_include
       description: |
         Services to restrict catalog querying to
         the default settings query up to 50 services. If you have more than
-        services in your Consul service catalog, use this whitelist.
+        services in your Consul service catalog, use this include list.
       value:
         type: array
         items:
@@ -90,7 +89,7 @@ files:
     - name: services_exclude
       description: |
         List services to exclude from the Consul service catalog.
-        Note: The excluded services will take precedence over service_whitelist.
+        Note: The excluded services will take precedence over services_include.
         The default settings will still query up to 50 services.
       value:
         type: array

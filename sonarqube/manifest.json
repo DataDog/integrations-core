@@ -39,5 +39,11 @@
       "source": "sonarqube"
     },
     "metrics_metadata": "metadata.csv"
-  }
+  },
+  "further_reading": [
+    {"link": "https://www.datadoghq.com/blog/datadog-sonarqube-integration/",
+      "tag": "Blog",
+      "text": "Monitor code quality in Datadog with SonarQube"
+    }
+  ]
 }

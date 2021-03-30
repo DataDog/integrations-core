@@ -77,6 +77,20 @@ class MongoDb(AgentCheck):
         self.collectors = []
         self.last_states_by_server = {}
 
+        self._api_client = None
+
+    @property
+    def api_client(self):
+        if self._api_client is None:
+            try:
+                self._api_client = MongoApi(self._config, self.log)
+                self.log.debug("Connected!")
+            except Exception:
+                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+                raise
+
+        return self._api_client
+
     @classmethod
     def get_library_versions(cls):
         return {'pymongo': pymongo.version}
@@ -163,11 +177,13 @@ class MongoDb(AgentCheck):
 
     def check(self, _):
         try:
-            api = MongoApi(self._config, self.log)
-            self.log.debug("Connected!")
-        except Exception:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+            self._check()
+        except pymongo.errors.ConnectionFailure:
+            self._api_client = None
             raise
+
+    def _check(self):
+        api = self.api_client
 
         try:
             mongo_version = api.server_info().get('version', '0.0')

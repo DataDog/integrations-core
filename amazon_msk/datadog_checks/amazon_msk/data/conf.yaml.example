@@ -74,6 +74,11 @@ instances:
     #
     # node_exporter_port: 11002
 
+    ## @param prometheus_metrics_path - string - optional - default: /metrics
+    ## The path where Prometheus serves metrics.
+    #
+    # prometheus_metrics_path: /metrics
+
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
