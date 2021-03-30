@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 2.4.0-rc.1 / 2021-03-30
+
+* [Fixed] Fix autodiscovery tagging. See [#9055](https://github.com/DataDog/integrations-core/pull/9055).
+
 ## 2.3.8 / 2021-03-16
 
 * [Fixed] Improve exception handling for database queries. See [#8837](https://github.com/DataDog/integrations-core/pull/8837).
