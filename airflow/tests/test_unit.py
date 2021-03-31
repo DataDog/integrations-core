@@ -45,9 +45,15 @@ def test_service_checks_healthy_exp(aggregator, json_resp, expected_healthy_stat
 
 @pytest.mark.parametrize(
     'metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value',
-    [('healthy', 'healthy', AgentCheck.OK, 1), ('unhealthy', 'healthy', AgentCheck.CRITICAL, 0), ('healthy', 'unhealthy', AgentCheck.CRITICAL, 0)], 
+    [
+        ('healthy', 'healthy', AgentCheck.OK, 1),
+        ('unhealthy', 'healthy', AgentCheck.CRITICAL, 0),
+        ('healthy', 'unhealthy', AgentCheck.CRITICAL, 0),
+    ],
 )
-def test_service_checks_healthy_stable(aggregator, metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value):
+def test_service_checks_healthy_stable(
+    aggregator, metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value
+):
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
@@ -55,9 +61,7 @@ def test_service_checks_healthy_stable(aggregator, metadb_status, scheduler_stat
         'metadatabase': {
             'status': metadb_status,
         },
-        'scheduler': {
-            'status': scheduler_status
-        }
+        'scheduler': {'status': scheduler_status},
     }
 
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
